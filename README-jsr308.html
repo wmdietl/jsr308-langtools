@@ -132,7 +132,7 @@ similar to the standard <code>-processor</code> option:  either option is
 followed by a list of the (fully-qualified) class names of the annotation
 processors to run.  An example (using the
 <!-- TODO: update this link to point into the manual once it's ready -->
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#nullness-checker">Nullness checker</a>) is:
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manualf.html#nullness-checker">Nullness checker</a>) is:
 </p>
 <pre><code>  javac -typeprocessor checkers.nonnull.NonnullChecker MyFile.java
 </code></pre>
@@ -342,7 +342,7 @@ you want a newer version of the JDK.
 
 <p>
 The following commands, provided for the <em>extremely</em> impatient user,
-perform all the steps listed above.
+perform all the steps listed above, for a Linux computer.
 After each of the <code>javac -version</code> commands, verify that the
 output is as desired.
 </p>
@@ -351,9 +351,9 @@ output is as desired.
 rm -rf ~/jsr308
 mkdir ~/jsr308
 cd ~/jsr308
-wget http://www.java.net/download/jdk7/binaries/jdk-7-ea-bin-b27-linux-i586-22_may_2008.bin
-chmod +x jdk-7-ea-bin-b27-linux-i586-22_may_2008.bin
-./jdk-7-ea-bin-b27-linux-i586-22_may_2008.bin
+wget http://www.java.net/download/jdk7/binaries/jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
+chmod +x jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
+./jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
 export JAVA_HOME=$HOME/jsr308/jdk1.7.0
 export PATH=$JAVA_HOME/bin:$PATH
 javac -version
