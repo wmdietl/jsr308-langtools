@@ -168,6 +168,22 @@ public class TreeMaker implements JCTree.Factory {
                                List<JCVariableDecl> params,
                                List<JCExpression> thrown,
                                JCBlock body,
+                               JCExpression defaultValue) {
+        JCMethodDecl tree = MethodDef(
+                mods, name, restype, typarams, params,
+                null, thrown, body, defaultValue);
+        tree.pos = pos;
+        return tree;
+    }
+
+    public JCMethodDecl MethodDef(JCModifiers mods,
+                               Name name,
+                               JCExpression restype,
+                               List<JCTypeParameter> typarams,
+                               List<JCVariableDecl> params,
+                               JCAnnotatedType receiver,
+                               List<JCExpression> thrown,
+                               JCBlock body,
                                JCExpression defaultValue)
     {
         JCMethodDecl tree = new JCMethodDecl(mods,
@@ -175,6 +191,7 @@ public class TreeMaker implements JCTree.Factory {
                                        restype,
                                        typarams,
                                        params,
+                                       receiver,
                                        thrown,
                                        body,
                                        defaultValue,
@@ -462,6 +479,12 @@ public class TreeMaker implements JCTree.Factory {
 
     public JCModifiers Modifiers(long flags) {
         return Modifiers(flags, List.<JCAnnotation>nil());
+    }
+
+    public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType) {
+        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType);
+        tree.pos = pos;
+        return tree;
     }
 
     public JCErroneous Erroneous() {
@@ -772,6 +795,7 @@ public class TreeMaker implements JCTree.Factory {
                 Type(mtype.getReturnType()),
                 TypeParams(mtype.getTypeArguments()),
                 Params(mtype.getParameterTypes(), m),
+                null, // ?
                 Types(mtype.getThrownTypes()),
                 body,
                 null,
@@ -853,7 +877,7 @@ public class TreeMaker implements JCTree.Factory {
      */
     boolean isUnqualifiable(Symbol sym) {
         if (sym.name == names.empty ||
-            sym.owner == null ||
+            sym.owner == null || sym.owner.name == names.empty ||
             sym.owner.kind == MTH || sym.owner.kind == VAR) {
             return true;
         } else if (sym.kind == TYP && toplevel != null) {

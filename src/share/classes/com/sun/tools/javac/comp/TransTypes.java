@@ -54,10 +54,14 @@ public class TransTypes extends TreeTranslator {
     /** Get the instance for this context. */
     public static TransTypes instance(Context context) {
         TransTypes instance = context.get(transTypesKey);
+        Options options = Options.instance(context);
         if (instance == null)
             instance = new TransTypes(context);
+        instance.debugJSR308 = options.get("-X308:trans") != null;
         return instance;
     }
+
+    private boolean debugJSR308;
 
     private Name.Table names;
     private Log log;
@@ -435,12 +439,17 @@ public class TransTypes extends TreeTranslator {
     }
 
     public void visitClassDef(JCClassDecl tree) {
+        new TypeAnnotationPositions().scan(tree);
+        List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
+        tree.sym.typeAnnotations = ta;
         translateClass(tree.sym);
         result = tree;
     }
 
     JCMethodDecl currentMethod = null;
     public void visitMethodDef(JCMethodDecl tree) {
+        List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
+        tree.sym.typeAnnotations = ta;
         JCMethodDecl previousMethod = currentMethod;
         try {
             currentMethod = tree;
@@ -726,8 +735,15 @@ public class TransTypes extends TreeTranslator {
     /** Visitor method for parameterized types.
      */
     public void visitTypeApply(JCTypeApply tree) {
+        List<TypeAnnotations> ta = collectErasedAnnotations(tree.arguments);
         // Delete all type parameters.
-        result = translate(tree.clazz, null);
+        JCTree clazz = translate(tree.clazz, null);
+        JCAnnotatedType annotatedType =
+            make.at(tree.pos).AnnotatedType(List.<JCAnnotation>nil(),
+                    (JCExpression)clazz);
+        annotatedType.typeAnnotations.erased = ta;
+        result = annotatedType;
+        result.type = clazz.type;
     }
 
 /**************************************************************************
@@ -792,5 +808,162 @@ public class TransTypes extends TreeTranslator {
         this.make = make;
         pt = null;
         return translate(cdef, null);
+    }
+
+    public List<TypeAnnotations> collectErasedAnnotations(List<? extends
+            JCTree> trees) {
+        final ListBuffer<TypeAnnotations> ta = ListBuffer.lb();
+        new TreeScanner() {
+            public void visitAnnotatedType(JCAnnotatedType tree) {
+                if (tree.typeAnnotations != null)
+                    ta.append(tree.typeAnnotations);
+                super.visitAnnotatedType(tree);
+            }
+        }.scan(trees);
+//        if (!ta.isEmpty())
+//            System.out.println("collect: " + ta.toList());
+        return ta.toList();
+    }
+
+    private class TypeAnnotationPositions extends TreeScanner {
+
+        private ListBuffer<JCTree> contexts = ListBuffer.lb();
+        private void push(JCTree t) { contexts = contexts.prepend(t); }
+        private JCTree pop() { return contexts.next(); }
+        private JCTree peek() { return contexts.first(); }
+        private JCTree peek2() { return contexts.toList().tail.head; }
+
+        @Override
+        public void scan(JCTree tree) {
+            push(tree);
+            super.scan(tree);
+            pop();
+        }
+
+        private TypeAnnotations.Position resolveContext(JCTree tree, JCTree context,
+                List<JCTree> path, TypeAnnotations.Position p) {
+            switch (context.getKind()) {
+
+                case TYPE_CAST:
+                    p.type = TargetType.TYPECAST;
+                    p.pos = context.pos;
+                    return p;
+
+                case INSTANCE_OF:
+                    p.type = TargetType.INSTANCEOF;
+                    p.pos = context.pos;
+                    return p;
+
+                case NEW_CLASS:
+                    p.type = TargetType.NEW;
+                    p.pos = context.pos;
+                    return p;
+
+                case NEW_ARRAY:
+                    p.type = TargetType.NEW;
+                    p.pos = context.pos;
+                    return p;
+
+                case CLASS:
+                    if (((JCClassDecl)context).extending == tree)
+                        p.type = TargetType.CLASS_EXTENDS;
+                    else if (((JCClassDecl)context).implementing.contains(tree))
+                        p.type = TargetType.CLASS_EXTENDS;
+                        // TODO: finish me
+                    else throw new AssertionError();
+                    return p;
+
+                case METHOD:
+                    if (((JCMethodDecl)context).receiver == tree)
+                        p.type = TargetType.METHOD_RECEIVER;
+                    else if (((JCMethodDecl)context).thrown.contains(tree))
+                        p.type = TargetType.THROWS;
+                    else if (((JCMethodDecl)context).restype == tree)
+                        p.type = TargetType.METHOD_RETURN;
+                    else throw new AssertionError();
+                    return p;
+
+                case MEMBER_SELECT:
+                    if (((JCFieldAccess)context).name == names._class)
+                        p.type = TargetType.CLASS_LITERAL;
+                    else throw new AssertionError();
+                    return p;
+
+                case PARAMETERIZED_TYPE: {
+                    TypeAnnotations.Position nextP;
+                    if (((JCTypeApply)context).clazz == tree)
+                        nextP = p; // generic: RAW; noop
+                    else if (((JCTypeApply)context).arguments.contains(tree))
+                        p.location = p.location.prepend(
+                                ((JCTypeApply)context).arguments.indexOf(tree));
+                    else throw new AssertionError();
+
+                    List<JCTree> newPath = path.tail;
+                    return resolveContext(newPath.head, newPath.tail.head, newPath, p);
+                }
+
+                case ARRAY_TYPE: {
+                    p.location = p.location.prepend(0);
+                    List<JCTree> newPath = path.tail;
+                    return resolveContext(newPath.head, newPath.tail.head, newPath, p);
+                }
+
+                case TYPE_PARAMETER:
+//                    System.out.print("type parameter: " +
+//                            ((JCTypeParameter)context).bounds.indexOf(tree) + " ");
+                    if (path.tail.tail.head.getTag() == JCTree.CLASSDEF)
+                        p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
+                    else if (path.tail.tail.head.getTag() == JCTree.METHODDEF)
+                        p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
+                    else throw new AssertionError();
+                    return p;
+
+                case VARIABLE:
+                    VarSymbol v = ((JCVariableDecl)context).sym;
+                    switch (v.getKind()) {
+                        case LOCAL_VARIABLE:
+                            p.type = TargetType.LOCAL_VARIABLE; break;
+                        case FIELD:
+                            p.type = TargetType.FIELD; break;
+                        case PARAMETER:
+                            p.type = TargetType.METHOD_PARAMETER; break;
+                        default: throw new AssertionError();
+                    }
+                    return p;
+
+                case ANNOTATED_TYPE: {
+                    List<JCTree> newPath = path.tail;
+                    return resolveContext(newPath.head, newPath.tail.head,
+                            newPath, p);
+                }
+            }
+            return p;
+        }
+
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            if (!tree.annotations.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                if (debugJSR308) sb.append("trans: " + tree + "\n");
+//                System.out.print("  context: ");
+//                if (tree.underlyingType != null)
+//                    System.out.print("(" + tree.underlyingType.getKind() + ") ");
+//                for (JCTree t : contexts)
+//                    System.out.print(t.getKind() + " ");
+//                System.out.println();
+                JCTree context = peek2();
+                TypeAnnotations.Position p =
+                        resolveContext(tree, context, contexts.toList(),
+                                new TypeAnnotations.Position());
+                if (!p.location.isEmpty())
+                    p.type = TargetType.values()[p.type.ordinal() + 1];
+                tree.typeAnnotations.position = p;
+                if (debugJSR308) {
+                    sb.append("  target: " + p + "\n");
+                    System.out.println(sb.toString());
+                }
+            }
+            super.visitAnnotatedType(tree);
+        }
     }
 }

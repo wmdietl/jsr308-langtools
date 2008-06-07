@@ -124,15 +124,16 @@ public class TreePath implements Iterable<Tree> {
             }
 
             public Tree next() {
+                TreePath t = curr;
                 curr = curr.parent;
-                return curr.leaf;
+                return t.leaf;
             }
 
             public void remove() {
                 throw new UnsupportedOperationException();
             }
 
-            private TreePath curr;
+            private TreePath curr = TreePath.this;
         };
     }
 

@@ -1,0 +1,48 @@
+<project name="JSR 308 binary patch script" default="help" basedir=".">
+
+    <property file="build.properties"/>
+
+    <target name="help">
+        <echo message="Please run &quot;ant -p&quot; to see the available targets."/>
+    </target>
+
+    <target name="install"
+        description="updates your system's JDK with the modified JSR 308 compiler">
+        <available property="tools.present" file="${tools.jar}"/>
+        <fail unless="tools.present" message="couldn't find tools.jar"/>
+
+        <!-- Prompt the user before continuing. -->
+        <input message="About to patch the installation at ${java.home}. Continue? "
+               validargs="y,n"
+               addproperty="do.continue"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.continue}"/>
+        </condition>
+        <fail if="do.abort">Aborted by user.</fail>
+
+        <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false"/>
+        <tempfile property="temp.dir" prefix="temp-"/>
+        <mkdir dir="${temp.dir}"/>
+        <unzip src="javac.jar" dest="${temp.dir}"/>
+        <unzip src="javap.jar" dest="${temp.dir}"/>
+        <jar destfile="${tools.jar}" update="yes" 
+            basedir="${temp.dir}" includes="**/*.class"/>
+        <delete dir="${temp.dir}"/>
+    </target>
+
+    <target name="uninstall"
+        description="reverts your system's JDK to the unmodified Java compiler">
+        
+        <!-- Prompt the user before continuing. -->
+        <input message="About to revert the installation at ${java.home}. Continue? "
+               validargs="y,n"
+               addproperty="do.continue"/>
+        <condition property="do.abort">
+            <equals arg1="n" arg2="${do.continue}"/>
+        </condition>
+        <fail if="do.abort">Aborted by user.</fail>
+
+        <move file="${tools.backup}" tofile="${tools.jar}"/>
+    </target>
+
+</project>

@@ -850,21 +850,46 @@ public class Pretty extends JCTree.Visitor {
         try {
             if (tree.elemtype != null) {
                 print("new ");
+                printExprs(tree.annotations);
+                if (!tree.annotations.isEmpty()) print(" ");
                 JCTree elem = tree.elemtype;
                 if (elem instanceof JCArrayTypeTree)
                     printBaseElementType((JCArrayTypeTree) elem);
-                else
+                else if (elem instanceof JCAnnotatedType) {
+                    JCAnnotatedType atype = (JCAnnotatedType) elem;
+                    if (atype.underlyingType instanceof JCArrayTypeTree)
+                        printBaseElementType((JCArrayTypeTree) atype.underlyingType);
+                    else printExpr(atype.underlyingType);
+                } else
                     printExpr(elem);
+                int i = 0;
+                List<List<JCAnnotation>> da = tree.dimAnnotations;
                 for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                     print("[");
+                    if (da.size() > i) {
+                        printExprs(da.get(i));
+                        if (!da.get(i).isEmpty()) print(" ");
+                    }
+                    i++;
                     printExpr(l.head);
                     print("]");
                 }
+                if (tree.elems != null && tree.elemtype instanceof JCAnnotatedType) {
+                    print("[");
+                    print(((JCAnnotatedType)tree.elemtype).annotations);
+                    print("]");
+                } else if (tree.elems != null) {
+                    print("[]");
+                }
                 if (elem instanceof JCArrayTypeTree)
                     printBrackets((JCArrayTypeTree) elem);
+                else if (elem instanceof JCAnnotatedType) {
+                    JCAnnotatedType atype = (JCAnnotatedType) elem;
+                    if (atype.underlyingType instanceof JCArrayTypeTree)
+                        printBrackets((JCArrayTypeTree) atype.underlyingType);
+                }
             }
             if (tree.elems != null) {
-                if (tree.elemtype != null) print("[]");
                 print("{");
                 printExprs(tree.elems);
                 print("}");
@@ -1118,7 +1143,12 @@ public class Pretty extends JCTree.Visitor {
             elem = ((JCWildcard) elem).inner;
         if (elem instanceof JCArrayTypeTree)
             printBaseElementType((JCArrayTypeTree) elem);
-        else
+        else if (elem instanceof JCAnnotatedType) {
+            JCAnnotatedType atype = (JCAnnotatedType) elem;
+            if (atype.underlyingType instanceof JCArrayTypeTree)
+                printBaseElementType((JCArrayTypeTree) atype.underlyingType);
+            else printExpr(atype.underlyingType);
+        } else
             printExpr(elem);
     }
 
@@ -1127,6 +1157,15 @@ public class Pretty extends JCTree.Visitor {
         JCTree elem;
         while (true) {
             elem = tree.elemtype;
+            if (elem instanceof JCAnnotatedType) {
+                JCAnnotatedType atype = (JCAnnotatedType) elem;
+                print("[");
+                printExprs(atype.annotations);
+                print("]");
+                if (!(atype.underlyingType instanceof JCArrayTypeTree)) break;
+                tree = (JCArrayTypeTree) atype.underlyingType;
+                continue;
+            }
             print("[]");
             if (!(elem instanceof JCArrayTypeTree)) break;
             tree = (JCArrayTypeTree) elem;
@@ -1208,6 +1247,18 @@ public class Pretty extends JCTree.Visitor {
             print("(");
             printExprs(tree.args);
             print(")");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        try {
+
+            printExprs(tree.annotations);
+            if (!tree.annotations.isEmpty())
+                print(" ");
+            printExpr(tree.underlyingType);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

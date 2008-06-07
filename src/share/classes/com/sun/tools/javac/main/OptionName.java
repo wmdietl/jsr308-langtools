@@ -56,6 +56,7 @@ public enum OptionName {
     DJAVA_ENDORSED_DIRS("-Djava.endorsed.dirs="),
     PROC("-proc:"),
     PROCESSOR("-processor"),
+    TYPEPROCESSOR("-typeprocessor"),
     PROCESSORPATH("-processorpath"),
     D("-d"),
     S("-s"),
@@ -86,6 +87,7 @@ public enum OptionName {
     O("-O"),
     XJCOV("-Xjcov"),
     XD("-XD"),
+    X308("-X308:{parser,attr,trans,gen,writer}"),
     SOURCEFILE("sourcefile");
 
     public final String optionName;

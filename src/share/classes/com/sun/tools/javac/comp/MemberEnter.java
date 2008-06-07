@@ -99,7 +99,12 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         target = Target.instance(context);
         skipAnnotations =
             Options.instance(context).get("skipAnnotations") != null;
+        debugJSR308 = Options.instance(context).get("-X308:attr") != null;
     }
+
+    /** Switch: debug output for JSR 308-related operations.
+     */
+    boolean debugJSR308;
 
     /** A queue for classes whose members still need to be entered into the
      *  symbol table.
@@ -900,6 +905,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             if (hasDeprecatedAnnotation(tree.mods.annotations))
                 c.flags_field |= DEPRECATED;
             annotateLater(tree.mods.annotations, baseEnv, c);
+            tree.accept(new TypeAnnotate(env));
 
             chk.checkNonCyclic(tree.pos(), c.type);
 
@@ -981,6 +987,52 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             annotate.flush();
         }
     }
+
+    // A sub-phase that "compiles" annotations in annotated types.
+    private class TypeAnnotate extends TreeScanner {
+        private Env<AttrContext> env;
+        public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
+        private List<Attribute.Compound> enterAnnotations(List<JCAnnotation> annos) {
+            ListBuffer<Attribute.Compound> lb = ListBuffer.lb();
+            for (JCAnnotation a : annos) {
+                Attribute.Compound ac = annotate.enterAnnotation(a, syms.annotationType, this.env);
+                lb = lb.append(ac);
+                if (debugJSR308)
+                    System.out.println("attr: " + ac);
+            }
+            return lb.toList();
+        }
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            tree.typeAnnotations.annotations = enterAnnotations(tree.annotations);
+            super.visitAnnotatedType(tree);
+        }
+        @Override
+        public void visitNewArray(JCNewArray tree) {
+            ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
+            if (tree.typeAnnotations == null) { // only enter annotations once
+                // Enter top-level annotations.
+                TypeAnnotations extra = new TypeAnnotations();
+                extra.annotations = enterAnnotations(tree.annotations);
+                tree.typeAnnotations = extra;
+
+                // Enter dimension annotations.
+                for (List<JCAnnotation> annos : tree.dimAnnotations) {
+                    TypeAnnotations ta = new TypeAnnotations();
+                    ta.annotations = enterAnnotations(annos);
+                    lb.append(ta);
+                }
+                tree.dimTypeAnnotations = lb.toList();
+            }
+            super.visitNewArray(tree);
+        }
+        @Override
+        public void visitApply(JCMethodInvocation tree) {
+            super.visitApply(tree);
+            scan(tree.typeargs);
+        }
+    }
+
 
     private Env<AttrContext> baseEnv(JCClassDecl tree, Env<AttrContext> env) {
         Scope typaramScope = new Scope(tree.sym);

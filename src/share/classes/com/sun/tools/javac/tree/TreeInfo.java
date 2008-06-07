@@ -299,6 +299,8 @@ public class TreeInfo {
         case(JCTree.POSTINC):
         case(JCTree.POSTDEC):
             return getStartPos(((JCUnary) tree).arg);
+        case(JCTree.ANNOTATED_TYPE):
+            return getStartPos(((JCAnnotatedType) tree).underlyingType);
         case(JCTree.VARDEF): {
             JCVariableDecl node = (JCVariableDecl)tree;
             if (node.mods.pos != Position.NOPOS) {

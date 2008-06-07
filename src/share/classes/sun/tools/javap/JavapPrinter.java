@@ -29,6 +29,9 @@ package sun.tools.javap;
 import java.util.*;
 import java.io.*;
 
+import sun.tools.javap.AnnotationData.*;
+import com.sun.tools.javac.comp.TargetType;
+
 import static sun.tools.javap.RuntimeConstants.*;
 
 /**
@@ -45,7 +48,7 @@ public class JavapPrinter {
 
     public JavapPrinter(InputStream cname, PrintWriter out, JavapEnvironment env){
         this.out = out;
-        this.cls =  new ClassData(cname);
+        this.cls =  new ClassData(cname, env);
         this.env = env;
     }
 
@@ -136,6 +139,12 @@ public class JavapPrinter {
                 out.println("  SourceFile: "+ cls.getSourceName());
             }else if(clsattrname.equals("InnerClasses")){
                 printInnerClasses();
+            } else if (env.showAnnotations &&
+                       AnnotationData.isAnyAnnotationsAttribute(clsattrname)) {
+                if (clsattrname.equals("RuntimeInvisibleAnnotations"))
+                    printAnnotationsAttribute(clsattrname, cls.getRuntimeInvisibleAnnotations());
+                else if (clsattrname.equals("RuntimeVisibleAnnotations"))
+                    printAnnotationsAttribute(clsattrname, cls.getRuntimeVisibleAnnotations());
             }else {
                 printAttrData(clsattrs[i]);
             }
@@ -184,6 +193,15 @@ public class JavapPrinter {
                 out.println("Deprecated: "+ field.isDeprecated());
             }else if (fieldattrname.equals("Synthetic")){
                 out.println("  Synthetic: "+ field.isSynthetic());
+            } else if (env.showAnnotations) {
+                if (fieldattrname.equals("RuntimeVisibleAnnotations"))
+                    printAnnotationsAttribute(fieldattrname, field.getRuntimeVisibleAnnotations());
+                else if (fieldattrname.equals("RuntimeInvisibleAnnotations"))
+                    printAnnotationsAttribute(fieldattrname, field.getRuntimeInvisibleAnnotations());
+                else if (fieldattrname.equals("RuntimeVisibleExtendedAnnotations"))
+                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeVisibleExtendedAnnotations());
+                else if (fieldattrname.equals("RuntimeInvisibleExtendedAnnotations"))
+                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeInvisibleExtendedAnnotations());
             }else {
                 printAttrData((AttrData)fieldattrs.elementAt(j));
             }
@@ -286,7 +304,35 @@ public class JavapPrinter {
                 out.println("  Deprecated: "+ method.isDeprecated());
             }else if (methodattrname.equals("Synthetic")){
                 out.println("  Synthetic: "+ method.isSynthetic());
-            }else {
+            } else if (env.showAnnotations
+                       && methodattrname.equals("RuntimeVisibleAnnotations"))
+                printAnnotationsAttribute(methodattrname, method
+                                          .getRuntimeVisibleAnnotations());
+            else if (env.showAnnotations
+                     && methodattrname.equals("RuntimeInvisibleAnnotations"))
+                printAnnotationsAttribute(methodattrname, method
+                                          .getRuntimeInvisibleAnnotations());
+            else if (env.showAnnotations
+                     && methodattrname
+                     .equals("RuntimeVisibleParameterAnnotations"))
+                printParameterAnnotationsAttribute(methodattrname, method
+                                                   .getRuntimeVisibleParameterAnnotations());
+            else if (env.showAnnotations
+                     && methodattrname
+                     .equals("RuntimeInvisibleParameterAnnotations"))
+                printParameterAnnotationsAttribute(methodattrname, method
+                                                   .getRuntimeInvisibleParameterAnnotations());
+            else if (env.showAnnotations
+                     && methodattrname
+                     .equals("RuntimeVisibleExtendedAnnotations"))
+                printExtendedAnnotationsAttribute(methodattrname, method
+                                                  .getRuntimeVisibleExtendedAnnotations());
+            else if (env.showAnnotations
+                     && methodattrname
+                     .equals("RuntimeInvisibleExtendedAnnotations"))
+                printExtendedAnnotationsAttribute(methodattrname, method
+                                                  .getRuntimeInvisibleExtendedAnnotations());
+            else {
                 printAttrData((AttrData)methodattrs.elementAt(k));
             }
         }
@@ -411,8 +457,8 @@ public class JavapPrinter {
             out.print("{ //"+npairs);
             for (int i = 1; i <= npairs; i++)
                 out.print("\n\t\t"+getInt(tb+i*8)
-                                 +": "+lP+(pc+getInt(tb+4+i*8))+";"
-                                 );
+                          +": "+lP+(pc+getInt(tb+4+i*8))+";"
+                          );
             out.print("\n\t\tdefault: "+lP+(default_skip + pc) + " }");
             return tb-pc+(npairs+1)*8;
         }
@@ -509,8 +555,8 @@ public class JavapPrinter {
             ++argCount;  // for 'this'
 
         out.println("   Stack=" + method.getMaxStack()
-                           + ", Locals=" + method.getMaxLocals()
-                           + ", Args_size=" + argCount);
+                    + ", Locals=" + method.getMaxLocals()
+                    + ", Args_size=" + argCount);
 
     }
 
@@ -552,7 +598,7 @@ public class JavapPrinter {
             for (int i=0; i<numlines; i++) {
                 LineNumData linnumtb_entry=(LineNumData)lin_num_tb.elementAt(i);
                 out.println("   line " + linnumtb_entry.line_number + ": "
-                               + linnumtb_entry.start_pc);
+                            + linnumtb_entry.start_pc);
             }
         }
         out.println();
@@ -574,8 +620,8 @@ public class JavapPrinter {
             LocVarData entry=(LocVarData)loc_var_tb.elementAt(i);
 
             out.println("   "+entry.start_pc+"      "+entry.length+"      "+
-                               entry.slot+"    "+cls.StringValue(entry.name_cpx)  +
-                               "       "+cls.StringValue(entry.sig_cpx));
+                        entry.slot+"    "+cls.StringValue(entry.name_cpx)  +
+                        "       "+cls.StringValue(entry.sig_cpx));
         }
         out.println();
     }
@@ -593,7 +639,7 @@ public class JavapPrinter {
                 frame.print(this);
             }
         }
-       out.println();
+        out.println();
     }
 
     /**
@@ -619,16 +665,16 @@ public class JavapPrinter {
             int type = fulltype & 0xFF;
             int argument = fulltype >> 8;
             switch (type) {
-                case ITEM_Object:
-                    out.print(" ");
-                    PrintConstant(argument);
-                    break;
-                case ITEM_NewObject:
-                    out.print(" " + Tables.mapTypeName(type));
-                    out.print(" " + argument);
-                    break;
-                default:
-                    out.print(" " + Tables.mapTypeName(type));
+            case ITEM_Object:
+                out.print(" ");
+                PrintConstant(argument);
+                break;
+            case ITEM_NewObject:
+                out.print(" " + Tables.mapTypeName(type));
+                out.print(" " + argument);
+                break;
+            default:
+                out.print(" " + Tables.mapTypeName(type));
             }
             out.print( (i==(map.length-1)? ' ' : ','));
         }
@@ -700,6 +746,215 @@ public class JavapPrinter {
                 }
 
             }
+        }
+    }
+
+    /** Used to "cache" identations. */
+    protected StringBuilder sb = new StringBuilder();
+
+    /**
+     * Creates (or retrieves) an identation with the given length consisting
+     * entirely of spaces.
+     *
+     * @param n the length of the indentiaton
+     * @return a <code>String</code> of <code>n</code> spaces
+     */
+    protected String spaces(int n) {
+
+        if (n <= 0)
+            return "";
+
+        // If there aren't that many in the buffer yet, add them.
+        while (sb.length() < n)
+            sb.append(' ');
+
+        // Return an appropriately-sized substring of the buffer.
+        return sb.substring(sb.length() - n);
+    }
+
+    /**
+     * Prints an attribute containing the given annotations with the given name.
+     *
+     * @param name the name of the attribute
+     * @param annotations the annotations that attribute contains
+     */
+    public void printAnnotationsAttribute(String name, AnnotationData[] annotations) {
+
+        // Print with a 2-space indent.
+        printAnnotationsAttribute(name, annotations, 2);
+    }
+
+    protected void printAnnotationsAttribute(String name, AnnotationData[] annotations, int indent) {
+
+        if (annotations == null)
+            return;
+
+        out.println();
+        out.println(spaces(indent) + name + ":");
+
+        for (AnnotationData ad : annotations)
+            printAnnotation(ad, indent + 1);
+    }
+
+    /**
+     * Prints an attribute containing annotations on a method's parameters.
+     */
+    public void printParameterAnnotationsAttribute(String name, AnnotationData[][] annotations) {
+        printParameterAnnotationsAttribute(name, annotations, 2);
+    }
+
+    protected void printParameterAnnotationsAttribute(String name, AnnotationData[][] annotations, int indent) {
+        out.println();
+        out.println(spaces(indent) + name + ":");
+        for (int i = 0; i < annotations.length; i++) {
+
+            if (annotations[i] == null)
+                continue;
+
+            for (AnnotationData ad : annotations[i]) {
+                printAnnotation(ad, indent + 1);
+                out.println(spaces(indent + 2) + "parameter = " + i);
+            }
+        }
+    }
+
+    /**
+     * Prints an attribute containing extended annotations.
+     */
+    public void printExtendedAnnotationsAttribute(String name, ExtendedAnnotationData[] annotations) {
+        printExtendedAnnotationsAttribute(name, annotations, 2);
+    }
+
+    protected void printExtendedAnnotationsAttribute(String name, ExtendedAnnotationData[] annotations, int indent) {
+
+        if (annotations == null)
+            return;
+
+        out.println();
+        out.println(spaces(indent) + name + ":");
+
+        for (ExtendedAnnotationData ad : annotations)
+            printExtendedAnnotation(ad, indent + 1);
+    }
+
+    /**
+     * Prints individual annotations.
+     */
+    protected void printAnnotation(AnnotationData a, int indent) {
+        String sp = spaces(indent + 2);
+        out.println(spaces(indent) + "#" + a.type_index +
+                    " //Annotation " + cls.StringValue(a.type_index));
+        for (ElementValuePair p : a.element_value_pairs) {
+
+            // Print the field name.
+            out.println(spaces(indent + 1) + "name = #" + p.element_name_index +
+                        " //" + cls.StringValue(p.element_name_index));
+
+            // Print the field's type tag.
+            out.print(sp + "type = "
+                      + (char) p.element_value.tag);
+
+            // Expand the type name for enum field types.
+            if (p.element_value.tag == 'e')
+                out.println(" // "
+                            + cls.StringValue(p.element_value.type_name_index));
+            else
+                out.println();
+
+            // Print the value itself.
+            out.print(sp + "value = ");
+            printElementValue(p.element_value, indent + 2);
+        }
+    }
+
+    /**
+     * Prints extended annotations.
+     * XTODO finish me
+     */
+    protected void printExtendedAnnotation(ExtendedAnnotationData a, int indent) {
+        String sp = spaces(indent + 1);
+        printAnnotation(a, indent);
+
+        TargetType type = TargetType.values()[a.target_type];
+
+        out.println(sp + "target = 0x" + Integer.toHexString(a.target_type).toUpperCase() +
+                    " //" + type);
+
+        switch (type) {
+        case TYPECAST:
+        case INSTANCEOF:
+        case NEW:
+        case TYPECAST_GENERIC_OR_ARRAY:
+        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case NEW_GENERIC_OR_ARRAY:
+            out.println(sp + "offset = " + a.offset);
+            break;
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            out.print(sp + "start_pc = " + a.start_pc);
+            out.print(", length = " + a.length);
+            out.println(", index = " + a.index);
+            break;
+        }
+
+        if (type.hasParameter())
+            out.println(sp + "parameter = " + a.parameter);
+
+        if (type.isGeneric() && a.location_length > 0) { // XFIXME loc length > 0 (assert)
+            out.print(sp + "location = " + a.location[0]);
+            for (int i = 1; i < a.location_length; i++)
+                out.print(", " + a.location[i]);
+            out.println();
+        }
+    }
+
+    /**
+     * Prints element values of annotations.
+     */
+    protected void printElementValue(ElementValue e, int indent) {
+        String sp = spaces(indent);
+        switch (e.tag) {
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'F':
+        case 'I':
+        case 'J':
+        case 'S':
+        case 'Z':
+        case 's':
+            out.println(" #" + e.const_value_index + " //Constant "
+                        + cls.StringValue(e.const_value_index));
+            break;
+
+        case 'e':
+            out.print(" #" + e.type_name_index + ".#" + e.const_name_index);
+            out.println(" //Enum " + cls.StringValue(e.type_name_index)
+                        + cls.StringValue(e.const_name_index));
+            break;
+
+        case 'c':
+            out.println(" #" + e.class_info_index + " //Class "
+                        + cls.StringValue(e.class_info_index));
+            break;
+
+        case '@':
+            out.println("//Annotation");
+            printAnnotation(e.annotation_value, indent + 1);
+            break;
+
+        case '[':
+            out.println("//Array");
+            for (ElementValue f : e.values) {
+                out.print(sp);
+                // Tweak indent for annotations nested in arrays.
+                if (f.tag == '@') {
+                    out.print(spaces(indent - 4));
+                    printElementValue(f, indent);
+                } else
+                    printElementValue(f, indent + 1);
+            }
+            break;
         }
     }
 
@@ -896,7 +1151,7 @@ public class JavapPrinter {
                 out.print(databytestring.substring(2));
             }
 
-             j++;
+            j++;
             if(j == 16) {
                 out.println();
                 out.print("   ");

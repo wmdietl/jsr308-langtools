@@ -400,6 +400,12 @@ public class TreeTranslator extends JCTree.Visitor {
         result = tree;
     }
 
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        tree.annotations = translate(tree.annotations);
+        tree.underlyingType = translate(tree.underlyingType);
+        result = tree;
+    }
+
     public void visitTree(JCTree tree) {
         throw new AssertionError(tree);
     }

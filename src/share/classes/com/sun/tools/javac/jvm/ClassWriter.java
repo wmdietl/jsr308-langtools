@@ -63,6 +63,10 @@ public class ClassWriter extends ClassFile {
 
     private final Options options;
 
+    /** Switch: debugging output for JSR 308-related operations.
+     */
+    private boolean debugJSR308;
+
     /** Switch: verbose output.
      */
     private boolean verbose;
@@ -174,6 +178,7 @@ public class ClassWriter extends ClassFile {
         types = Types.instance(context);
         fileManager = context.get(JavaFileManager.class);
 
+        debugJSR308    = options.get("-X308:writer") != null;
         verbose        = options.get("-verbose")     != null;
         scramble       = options.get("-scramble")    != null;
         scrambleAll    = options.get("-scrambleAll") != null;
@@ -671,6 +676,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getAnnotationMirrors());
+        acount += writeTypeAnnotations(sym.typeAnnotations);
         return acount;
     }
 
@@ -762,6 +768,33 @@ public class ClassWriter extends ClassFile {
             endAttr(attrIndex);
             attrCount++;
         }
+        return attrCount;
+    }
+
+    int writeTypeAnnotations(List<TypeAnnotations> typeAnnos) {
+        if (typeAnnos.isEmpty()) return 0;
+
+        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> visibles
+            = ListBuffer.lb();
+        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>>
+            invisibles = ListBuffer.lb();
+
+        for (TypeAnnotations ta : typeAnnos) {
+            if (ta.annotations.isEmpty()) continue;
+            for (Attribute.Compound a : ta.annotations)
+                visibles.append(Pair.of(a, ta.position));
+        }
+
+        int attrCount = 0;
+        if (visibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeVisibleExtendedAnnotations);
+            databuf.appendChar(visibles.length());
+            for (Pair<Attribute.Compound, TypeAnnotations.Position> p : visibles)
+                writeTypeAnnotation(p.fst, p.snd);
+            endAttr(attrIndex);
+            attrCount++;
+        }
+
         return attrCount;
     }
 
@@ -862,6 +895,41 @@ public class ClassWriter extends ClassFile {
         for (Pair<Symbol.MethodSymbol,Attribute> p : c.values) {
             databuf.appendChar(pool.put(p.fst.name));
             p.snd.accept(awriter);
+        }
+    }
+
+    void writeTypeAnnotation(Attribute.Compound c, TypeAnnotations.Position p) {
+        if (debugJSR308)
+            System.out.println("writing " + c + " at " + p);
+        writeCompoundAttribute(c);
+        databuf.appendByte(p.type.ordinal());
+        switch (p.type) {
+            case TYPECAST:
+            case TYPECAST_GENERIC_OR_ARRAY:
+            case NEW:
+            case NEW_GENERIC_OR_ARRAY:
+            case INSTANCEOF:
+            case INSTANCEOF_GENERIC_OR_ARRAY:
+                databuf.appendChar(p.offset);
+                break;
+            case LOCAL_VARIABLE:
+            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+                databuf.appendChar(p.offset);
+                databuf.appendChar(p.length);
+                databuf.appendChar(p.index);
+                break;
+        }
+
+        if (p.type.hasParameter())
+            databuf.appendByte(p.parameter);
+        if (p.type.hasBound())
+            databuf.appendByte(p.bound);
+
+        // Append location data for generics/arrays.
+        if (p.type.hasLocation()) {
+            databuf.appendChar(p.location.size());
+            for (int i : p.location)
+                databuf.appendByte((byte)i);
         }
     }
 
@@ -1572,6 +1640,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getAnnotationMirrors());
+        acount += writeTypeAnnotations(c.typeAnnotations);
         acount += writeEnclosingMethodAttribute(c);
 
         poolbuf.appendInt(JAVA_MAGIC);

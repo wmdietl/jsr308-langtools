@@ -25,6 +25,7 @@
 
 package com.sun.tools.javac.parser;
 
+import java.io.File;
 import java.util.*;
 
 import com.sun.tools.javac.tree.*;
@@ -121,6 +122,9 @@ public class Parser {
     /** The name table. */
     private Name.Table names;
 
+    /** JSR 308: A stack for parsing out-of-order type annotations. */
+    private ListBuffer<List<JCAnnotation>> typeAnnotations = ListBuffer.lb();
+
     /** Construct a parser from a given scanner, tree factory and log.
      */
     protected Parser(Factory fac,
@@ -144,7 +148,34 @@ public class Parser {
         this.keepDocComments = keepDocComments;
         if (keepDocComments) docComments = new HashMap<JCTree,String>();
         this.errorTree = F.Erroneous();
+        this.debugJSR308 = options.get("-X308:parser") != null;
     }
+
+    /** JSR 308: should we use the ELTS array convention?
+     */
+    private static final boolean JSR308_ELTS_ARRAY_CONVENTION;
+
+    /** JSR 308: default array convention */
+    private static final String JSR308_DEFAULT_ARRAY_CONVENTION = "elts";
+
+    static {
+        // Determine the convention ("elts" or "arrays") to use for JSR 308
+        // annotations on array types
+        String arrayConv = System.getProperty("jsr308.arrays");
+        if (arrayConv == null)
+            arrayConv = System.getProperty("jsr308_arrays");
+        if (arrayConv == null)
+            arrayConv = System.getenv("jsr308.arrays");
+        if (arrayConv == null)
+            arrayConv = System.getenv("jsr308_arrays");
+        if (arrayConv == null)
+            arrayConv = JSR308_DEFAULT_ARRAY_CONVENTION;
+        JSR308_ELTS_ARRAY_CONVENTION = arrayConv.toLowerCase().equals("elts");
+    }
+
+    /** JSR 308: switch: debug output for JSR 308-related operations.
+     */
+    boolean debugJSR308;
 
     /** Switch: Should generics be recognized?
      */
@@ -598,8 +629,69 @@ public class Parser {
         return term(EXPR);
     }
 
+    /**
+     * JSR 308: parses (optional) annotations followed by a type. If the
+     * annotations are present before the type and are not consumed during array
+     * parsing, this method returns a {@link JCAnnotatedType} consisting of
+     * these annotations and the underlying type. Otherwise, it returns the
+     * underlying type.
+     *
+     * <p>
+     *
+     * Note that this method sets {@code mode} to {@code TYPE} first, before
+     * parsing annotations.
+     */
     public JCExpression type() {
+        int prevmode = mode;
+        mode = TYPE;
+
+        // JSR 308: Parse type annotations, and push the (possibly empty)
+        // annotation list to typeAnnotations, where it may be consumed during
+        // parsing of array types
+        final List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+        typeAnnotations.prepend(typeAnnos);
+
+        JCExpression result = unannotatedType();
+
+        // JSR 308: If type annotations before the type were not consumed (e.g.
+        // by an array type, under the ARRAYS convention), wrap the underlying
+        // type in a JCAnnotatedType with those annotations.
+        if (!typeAnnotations.isEmpty()) {
+            result = F.AnnotatedType(typeAnnotations.next(), result);
+        }
+
+        lastmode = mode;
+        mode = prevmode;
+        return result;
+    }
+
+    /**
+     * JSR 308: behaves exactly as type() did before JSR 308 modifications (that
+     * is, it parses a type without any prefix annotations).
+     */
+    public JCExpression unannotatedType() {
         return term(TYPE);
+    }
+
+    /**
+     * JSR 308: parses optional type annotations. This method should be used to
+     * distinguish parsing JSR 175 annotations from parsing JSR 308 annotations.
+     * Saves {@code mode} and restores it after parsing annotations.
+     */
+    public List<JCAnnotation> typeAnnotationsOpt() {
+        int prevmode = mode;
+
+        // JSR 308: Parse using modifiers (to get positions correct) then verify
+        // that no modifiers other than annotations were parsed.
+        JCModifiers m = modifiersOpt();
+        checkNoMods(m.flags);
+        lastmode = mode;
+        mode = prevmode;
+
+        if (debugJSR308 && !m.annotations.isEmpty())
+            System.out.println("parsing: " + m.annotations);
+
+        return m.annotations;
     }
 
     JCExpression term(int newmode) {
@@ -975,6 +1067,44 @@ public class Parser {
                 typeArgs = null;
             } else return illegal();
             break;
+        case MONKEYS_AT:
+
+            /// JSR 308: handle annotated class literals/cast types
+            List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+            assert !typeAnnos.isEmpty(); // else there would be no "@"
+            typeAnnotations.prepend(typeAnnos);
+
+            JCExpression expr = term3();
+
+            // JSR 308: If term3 just parsed a non-type, expect a class literal
+            // (and issue a syntax error if there is no class literal).
+            // Otherwise, create a JCAnnotatedType.
+            if ((mode & TYPE) == 0) {
+                assert expr.getTag() == JCTree.SELECT;
+                JCFieldAccess sel = (JCFieldAccess)expr;
+                if (sel.name != names._class)
+                    return illegal();
+                else {
+                    if (!typeAnnotations.isEmpty()) {
+                        if (typeAnnotations.first().isEmpty())
+                            typeAnnotations.remove();
+                        else
+                            sel.selected = F.AnnotatedType(typeAnnotations.next(), sel.selected);
+                    }
+                    t = expr;
+                }
+            } else {
+                // JSR 308: parse an annotated type (probably part of a cast).
+                if (!typeAnnotations.isEmpty()) {
+                    if (typeAnnotations.first().isEmpty()) {
+                        typeAnnotations.remove();
+                        t = expr;
+                    } else
+                        t = toP(F.at(S.pos()).AnnotatedType(typeAnnotations.next(), expr));
+                } else
+                    t = expr;
+            }
+            break;
         case IDENTIFIER: case ASSERT: case ENUM:
             if (typeArgs != null) return illegal();
             t = toP(F.at(S.pos()).Ident(ident()));
@@ -983,10 +1113,28 @@ public class Parser {
                 switch (S.token()) {
                 case LBRACKET:
                     S.nextToken();
-                    if (S.token() == RBRACKET) {
+
+                    /// JSR 308: handle annotated array levels in an array type
+                    if (S.token() == MONKEYS_AT || S.token() == RBRACKET) {
+                        ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
+                        stack.prepend(typeAnnotationsOpt());
+                        if (!JSR308_ELTS_ARRAY_CONVENTION)
+                            stack.prepend(List.<JCAnnotation>nil());
+
                         S.nextToken();
-                        t = bracketsOpt(t);
+
+                        t = bracketsOpt(t, stack);
                         t = toP(F.at(pos).TypeArray(t));
+
+                        if (!stack.isEmpty() && !stack.first().isEmpty()) {
+                            List<JCAnnotation> annos = stack.next();
+                            if (JSR308_ELTS_ARRAY_CONVENTION) {
+                                assert t.getTag() == JCTree.TYPEARRAY;
+                                JCArrayTypeTree arr = (JCArrayTypeTree)t;
+                                arr.elemtype = toP(F.at(pos).AnnotatedType(annos, arr.elemtype));
+                            } else
+                                t = toP(F.at(pos).AnnotatedType(annos, t));
+                        }
                         t = bracketsSuffix(t);
                     } else {
                         if ((mode & EXPR) != 0) {
@@ -1078,13 +1226,27 @@ public class Parser {
             int pos1 = S.pos();
             if (S.token() == LBRACKET) {
                 S.nextToken();
+
+                // JSR 308: handle array type annotations after an "[" has
+                // already been lexed
+                ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
+                if (S.token() == MONKEYS_AT) {
+                    stack.prepend(typeAnnotationsOpt());
+                    if (!JSR308_ELTS_ARRAY_CONVENTION)
+                        stack.prepend(List.<JCAnnotation>nil());
+                }
+
                 if ((mode & TYPE) != 0) {
                     int oldmode = mode;
                     mode = TYPE;
                     if (S.token() == RBRACKET) {
                         S.nextToken();
-                        t = bracketsOpt(t);
+                        t = bracketsOpt(t, stack);
                         t = toP(F.at(pos1).TypeArray(t));
+                        // JSR 308: wrap t in a JCAnnotatedType if there are
+                        // array type annotations
+                        if (!stack.isEmpty() && !stack.first().isEmpty())
+                            t = F.at(pos1).AnnotatedType(stack.next(), t);
                         return t;
                     }
                     mode = oldmode;
@@ -1297,21 +1459,54 @@ public class Parser {
         return toP(F.at(pos).TypeApply(t, args));
     }
 
-    /** BracketsOpt = {"[" "]"}
+    /**
+     * BracketsOpt = {"[" TypeAnnotations "]"}
+     *
+     * <p>
+     *
+     * The stack should contain the annotations found after a "[" when parsing
+     * of brackets has already begun at the call site.
+     * {@link #bracketsOpt(JCExpression)} is used for optional brackets when we
+     * haven't already consumed a bracket pair.
      */
-    private JCExpression bracketsOpt(JCExpression t) {
+    private JCExpression bracketsOpt(JCExpression t,
+            ListBuffer<List<JCAnnotation>> stack) {
         if (S.token() == LBRACKET) {
             int pos = S.pos();
             S.nextToken();
-            t = bracketsOptCont(t, pos);
-            F.at(pos);
+            JCExpression orig = t;
+            // JSR 308: Put annotations (possibly an empty list) on the stack.
+            List<JCAnnotation> annos = typeAnnotationsOpt();
+            if (JSR308_ELTS_ARRAY_CONVENTION)
+                stack.prepend(annos);
+            else
+                stack.append(annos);
+            t = bracketsOptCont(t, pos, stack);
+        }
+
+        int apos = S.pos();
+        List<JCAnnotation> deferred = stack.next();
+        if (deferred != null)
+            t = F.at(apos).AnnotatedType(deferred, t);
+        else if (!typeAnnotations.isEmpty()) {
+            if (typeAnnotations.first().isEmpty())
+                typeAnnotations.remove();
+            else
+                t = F.at(apos).AnnotatedType(typeAnnotations.next(), t);
         }
         return t;
     }
 
-    private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos) {
+    /** BracketsOpt = {"[" TypeAnnotations "]"}
+     */
+    private JCExpression bracketsOpt(JCExpression t) {
+        return bracketsOpt(t, ListBuffer.<List<JCAnnotation>>lb());
+    }
+
+    private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos,
+            ListBuffer<List<JCAnnotation>> stack) {
         accept(RBRACKET);
-        t = bracketsOpt(t);
+        t = bracketsOpt(t, stack);
         return toP(F.at(pos).TypeArray(t));
     }
 
@@ -1348,15 +1543,36 @@ public class Parser {
     /** Creator = Qualident [TypeArguments] ( ArrayCreatorRest | ClassCreatorRest )
      */
     JCExpression creator(int newpos, List<JCExpression> typeArgs) {
+
+        // JSR 308: handle annotated "new" expressions
+        typeAnnotations.prepend(typeAnnotationsOpt());
+
         switch (S.token()) {
         case BYTE: case SHORT: case CHAR: case INT: case LONG: case FLOAT:
         case DOUBLE: case BOOLEAN:
-            if (typeArgs == null)
+            if (typeArgs == null) {
+                // JSR 308: annotate primitive array
+                if (!typeAnnotations.isEmpty()) {
+                    if (typeAnnotations.first().isEmpty())
+                        typeAnnotations.remove();
+                    else
+                        return arrayCreatorRest(
+                                newpos,
+                                F.AnnotatedType(typeAnnotations.next(), basicType()));
+                }
                 return arrayCreatorRest(newpos, basicType());
+            }
             break;
         default:
         }
         JCExpression t = qualident();
+        // JSR 308: annotate the "new" type
+        if (!typeAnnotations.isEmpty()) {
+            if (typeAnnotations.first().isEmpty())
+                typeAnnotations.remove();
+            else
+                t = F.AnnotatedType(typeAnnotations.next(), t);
+        }
         int oldmode = mode;
         mode = TYPE;
         if (S.token() == LT) {
@@ -1414,30 +1630,94 @@ public class Parser {
      *                         | Expression "]" {"[" Expression "]"} BracketsOpt )
      */
     JCExpression arrayCreatorRest(int newpos, JCExpression elemtype) {
+
+        // JSR 308: For the ELTS convention, "new @A Object[]" should result in
+        // a parse tree where @A is on the array, not one where the @A is on
+        // Object.
+        List<JCAnnotation> topAnnos = List.nil();
+        if (elemtype.getTag() == JCTree.ANNOTATED_TYPE
+                && JSR308_ELTS_ARRAY_CONVENTION) {
+            JCAnnotatedType atype = (JCAnnotatedType) elemtype;
+            topAnnos = atype.annotations;
+            elemtype = atype.underlyingType;
+        }
+
         accept(LBRACKET);
+
+        // JSR 308: Get the annotations after the "[", which might be followed
+        // by a dimension expression.
+        List<JCAnnotation> annos = typeAnnotationsOpt();
+
+        // JSR 308: If there is a dimension expression after the optional
+        // annotations, continue parsing brackets, and possibly an initializer.
+        // Otherwise, parse annotations with dimension expressions.
         if (S.token() == RBRACKET) {
             accept(RBRACKET);
-            elemtype = bracketsOpt(elemtype);
+
+            // JSR 308: Get the rest of the brackets.
+            ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
+            stack.prepend(annos);
+            if (!JSR308_ELTS_ARRAY_CONVENTION)
+                stack.prepend(List.<JCAnnotation>nil());
+
+            elemtype = bracketsOpt(elemtype, stack);
+
             if (S.token() == LBRACE) {
-                return arrayInitializer(newpos, elemtype);
+                JCNewArray na = (JCNewArray)arrayInitializer(newpos, elemtype);
+
+                if (!stack.isEmpty()) {
+                    if (JSR308_ELTS_ARRAY_CONVENTION)
+                        // JSR 308: ELTS convention: annotate the elements.
+                        na.elemtype = F.at(S.pos()).AnnotatedType(stack.next(), na.elemtype);
+
+                    // (JSR 308: ARRAYS convention: do nothing here, get
+                    // annotations from the stack below)
+                }
+
+                if (JSR308_ELTS_ARRAY_CONVENTION)
+                    na.annotations = topAnnos;
+                else
+                    na.annotations = stack.next();
+
+                return na;
             } else {
                 return syntaxError(S.pos(), "array.dimension.missing");
             }
         } else {
             ListBuffer<JCExpression> dims = new ListBuffer<JCExpression>();
+
+            // JSR 308: maintain dimension annotations list
+            ListBuffer<List<JCAnnotation>> dimAnnotations = ListBuffer.lb();
+            dimAnnotations.append(annos);
+
             dims.append(expression());
             accept(RBRACKET);
             while (S.token() == LBRACKET) {
                 int pos = S.pos();
                 S.nextToken();
                 if (S.token() == RBRACKET) {
-                    elemtype = bracketsOptCont(elemtype, pos);
+                    elemtype = bracketsOptCont(elemtype, pos,
+                            ListBuffer.<List<JCAnnotation>>lb());
                 } else {
-                    dims.append(expression());
-                    accept(RBRACKET);
+                    // JSR 308: We might have any combination of annotations and
+                    // dimension at this point.
+                    List<JCAnnotation> maybeDimAnnos = typeAnnotationsOpt();
+                    if (S.token() == RBRACKET) { // no dimension
+                        elemtype = bracketsOptCont(elemtype, pos,
+                                ListBuffer.<List<JCAnnotation>>lb().append(maybeDimAnnos));
+                    } else {
+                        dimAnnotations.append(maybeDimAnnos);
+                        dims.append(expression());
+                        accept(RBRACKET);
+                    }
                 }
             }
-            return toP(F.at(newpos).NewArray(elemtype, dims.toList(), null));
+
+            // JSR 308: construct a JCNewArray including dimension annotations
+            JCNewArray na = toP(F.at(newpos).NewArray(elemtype, dims.toList(), null));
+            na.annotations = topAnnos;
+            na.dimAnnotations = dimAnnotations.toList();
+            return na;
         }
     }
 
@@ -2150,7 +2430,11 @@ public class Parser {
         }
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
        boolean checkForImports = true;
-        while (S.token() != EOF) {
+       // JSR 308: Add imports
+       Collection<JCTree> commandImports = commandLineImports();
+       for (JCTree commendImport : commandImports)
+           defs.append(commendImport);
+       while (S.token() != EOF) {
             if (S.pos() <= errorEndPos) {
                 // error recovery
                 skip(checkForImports, false, false, false);
@@ -2175,6 +2459,40 @@ public class Parser {
             storeEnd(toplevel, S.prevEndPos());
         if (keepDocComments) toplevel.docComments = docComments;
         return toplevel;
+    }
+
+    private final static String JSR308_IMPORTS = "jsr308.imports";
+    private final static String JSR308_IMPORTS_ALT = "jsr308_imports";
+
+    Collection<JCTree> commandLineImports() {
+        int pos = S.pos();
+        String commandImports = System.getProperty(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getProperty(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            return new ListBuffer<JCTree>();
+        String[] importClasses = commandImports.split(File.pathSeparator);
+        ListBuffer<JCTree> imports = new ListBuffer<JCTree>();
+        for (String importClass : importClasses) {
+            if (importClass == null || importClass.length() == 0)
+                continue;
+            String[] idents = importClass.split("\\.");
+            JCExpression pid = toP(F.at(S.pos()).Ident(names.fromString(idents[0])));
+            for (int i = 1; i < idents.length; ++i) {
+                Name selector;
+                if (idents[i] == "*")
+                    selector = names.asterisk;
+                else
+                    selector = names.fromString(idents[i]);
+                pid = toP(F.at(S.pos()).Select(pid, selector));
+            }
+            imports.append(toP(F.at(pos).Import(pid, false)));
+        }
+        return imports;
     }
 
     /** ImportDeclaration = IMPORT [ STATIC ] Ident { "." Ident } [ "." "*" ] ";"
@@ -2503,7 +2821,9 @@ public class Parser {
                     type = to(F.at(pos).TypeIdent(TypeTags.VOID));
                     S.nextToken();
                 } else {
-                    type = type();
+                    // JSR 308: use a type without annotations, since we have
+                    // already parsed JSR 175 annotations with modifiersOpt()
+                    type = unannotatedType();
                 }
                 if (S.token() == LPAREN && !isInterface && type.getTag() == JCTree.IDENT) {
                     if (isInterface || name != className)
@@ -2558,6 +2878,8 @@ public class Parser {
                               String dc) {
         List<JCVariableDecl> params = formalParameters();
         if (!isVoid) type = bracketsOpt(type);
+        // JSR 308: handle receiver annotations with no underlying type
+        JCAnnotatedType receiver = F.at(pos).AnnotatedType(typeAnnotationsOpt(), null);
         List<JCExpression> thrown = List.nil();
         if (S.token() == THROWS) {
             S.nextToken();
@@ -2586,7 +2908,7 @@ public class Parser {
         }
         JCMethodDecl result =
             toP(F.at(pos).MethodDef(mods, name, type, typarams,
-                                    params, thrown,
+                                    params, receiver, thrown,
                                     body, defaultValue));
         attach(result, dc);
         return result;
@@ -2596,10 +2918,22 @@ public class Parser {
      */
     List<JCExpression> qualidentList() {
         ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
-        ts.append(qualident());
+        // JSR 308: handle annotations on a qualified identifier list (for
+        // annotations on exception types in method "thrown" clauses)
+        List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+        if (!typeAnnos.isEmpty())
+            ts.append(F.AnnotatedType(typeAnnos, qualident()));
+        else
+            ts.append(qualident());
         while (S.token() == COMMA) {
             S.nextToken();
-            ts.append(qualident());
+            // JSR 308: get the annotations on subsequent qualified identifier
+            // list items
+            typeAnnos = typeAnnotationsOpt();
+            if (!typeAnnos.isEmpty())
+                ts.append(F.AnnotatedType(typeAnnos, qualident()));
+            else
+                ts.append(qualident());
         }
         return ts.toList();
     }
@@ -2674,10 +3008,17 @@ public class Parser {
     JCVariableDecl formalParameter() {
         JCModifiers mods = optFinal(Flags.PARAMETER);
         JCExpression type = type();
+        // JSR 308: handle annotations on a varargs element type
+        List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
         if (S.token() == ELLIPSIS) {
             checkVarargs();
             mods.flags |= Flags.VARARGS;
+            // JSR 308: annotate the varargs elements
+            if (JSR308_ELTS_ARRAY_CONVENTION && !varargsAnnos.isEmpty())
+                type = F.at(S.pos()).AnnotatedType(varargsAnnos, type);
             type = to(F.at(S.pos()).TypeArray(type));
+            if (!JSR308_ELTS_ARRAY_CONVENTION && !varargsAnnos.isEmpty())
+                type = F.AnnotatedType(varargsAnnos, type);
             S.nextToken();
         }
         return variableDeclaratorId(mods, type);

@@ -138,6 +138,7 @@ public class RecognizedOptions {
         DJAVA_ENDORSED_DIRS,
         PROC,
         PROCESSOR,
+        TYPEPROCESSOR,
         PROCESSORPATH,
         D,
         S,
@@ -168,6 +169,7 @@ public class RecognizedOptions {
         O,
         XJCOV,
         XD,
+        X308,
         SOURCEFILE);
 
     static Set<OptionName> javacFileManagerOptions = EnumSet.of(
@@ -199,6 +201,7 @@ public class RecognizedOptions {
         DEPRECATION,
         PROC,
         PROCESSOR,
+        TYPEPROCESSOR,
         IMPLICIT,
         SOURCE,
         TARGET,
@@ -224,7 +227,8 @@ public class RecognizedOptions {
         XPREFER,
         O,
         XJCOV,
-        XD);
+        XD,
+        X308);
 
     static Option[] getJavaCompilerOptions(OptionHelper helper) {
         return getOptions(helper, javacOptions);
@@ -332,6 +336,11 @@ public class RecognizedOptions {
         new Option(PROC,                                 "opt.proc.none.only",
                 Option.ChoiceKind.ONEOF, "none", "only"),
         new Option(PROCESSOR,           "opt.arg.class.list",   "opt.processor"),
+        new HiddenOption(TYPEPROCESSOR, "opt.arg.class.list") {
+            public boolean process(Options options, String option, String arg) {
+                return super.process(options, "-processor", arg);
+            }
+        },
         new Option(PROCESSORPATH,       "opt.arg.path",         "opt.processorpath"),
         new Option(D,                   "opt.arg.directory",    "opt.d"),
         new Option(S,                   "opt.arg.directory",    "opt.sourceDest"),
@@ -542,6 +551,23 @@ public class RecognizedOptions {
                 String key = (eq < 0) ? s : s.substring(0, eq);
                 String value = (eq < 0) ? s : s.substring(eq+1);
                 options.put(key, value);
+                return false;
+            }
+        },
+
+        new HiddenOption(X308) {
+            public boolean matches(String s) {
+                return s.startsWith("-X308:");
+            }
+            public boolean process(Options options, String option) {
+                String suboptions = option.substring(6);
+                options.put("-X308:", suboptions);
+                for (StringTokenizer t = new StringTokenizer(suboptions, ",");
+                     t.hasMoreTokens(); ) {
+                    String tok = t.nextToken();
+                    String opt = "-X308:" + tok;
+                    options.put(opt, opt);
+                }
                 return false;
             }
         },

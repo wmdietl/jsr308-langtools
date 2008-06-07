@@ -1224,6 +1224,11 @@ public class Flow extends TreeScanner {
         }
     }
 
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        // FIXME: crashes if annotations are scanned
+        tree.underlyingType.accept(this);
+    }
+
     public void visitIdent(JCIdent tree) {
         if (tree.sym.kind == VAR)
             checkInit(tree.pos(), (VarSymbol)tree.sym);

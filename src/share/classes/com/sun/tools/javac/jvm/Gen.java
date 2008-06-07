@@ -110,6 +110,7 @@ public class Gen extends JCTree.Visitor {
             fromString("access" + target.syntheticNameChar());
 
         Options options = Options.instance(context);
+        this.debugJSR308 = options.get("-X308:gen") != null;
         lineDebugInfo =
             options.get("-g:") == null ||
             options.get("-g:lines") != null;
@@ -151,6 +152,7 @@ public class Gen extends JCTree.Visitor {
 
     /** Switches
      */
+    private final boolean debugJSR308;
     private final boolean lineDebugInfo;
     private final boolean varDebugInfo;
     private final boolean genCrt;
@@ -956,6 +958,18 @@ public class Gen extends JCTree.Visitor {
                     code.frameBeforeLast = null;
                 }
             }
+
+            if (code == null || code.varBuffer == null) return;
+            for (LocalVar lv : code.varBuffer) {
+                if (lv == null || lv.sym == null
+                    || lv.sym.typeAnnotations == null)
+                    continue;
+                for (TypeAnnotations ta : lv.sym.typeAnnotations) {
+                    ta.position.offset = (int)lv.start_pc;
+                    ta.position.length = (int)lv.length;
+                    ta.position.index = (int)lv.reg;
+                }
+            }
         }
 
         private int initCode(JCMethodDecl tree, Env<GenContext> env, boolean fatcode) {
@@ -1709,6 +1723,10 @@ public class Gen extends JCTree.Visitor {
         // Enclosing instances or anonymous classes should have been eliminated
         // by now.
         assert tree.encl == null && tree.def == null;
+        for (TypeAnnotations ta : code.meth.typeAnnotations) {
+            if (ta.position.pos == tree.pos)
+                ta.position.offset = code.cp;
+        }
 
         code.emitop2(new_, makeRef(tree.pos(), tree.type));
         code.emitop0(dup);
@@ -1723,6 +1741,11 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        for (TypeAnnotations ta : code.meth.typeAnnotations) {
+            if (ta.position.pos == tree.pos)
+                ta.position.offset = code.cp;
+        }
+
         if (tree.elems != null) {
             Type elemtype = types.elemtype(tree.type);
             loadIntConst(tree.elems.length());
@@ -2051,6 +2074,10 @@ public class Gen extends JCTree.Visitor {
         }
 
     public void visitTypeCast(JCTypeCast tree) {
+        for (TypeAnnotations ta : code.meth.typeAnnotations) {
+            if (ta.position.pos == tree.pos)
+                ta.position.offset = code.cp;
+        }
         result = genExpr(tree.expr, tree.clazz.type).load();
         // Additional code is only needed if we cast to a reference type
         // which is not statically a supertype of the expression's type.
@@ -2067,6 +2094,11 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitTypeTest(JCInstanceOf tree) {
+        for (TypeAnnotations ta : code.meth.typeAnnotations) {
+            if (ta.position.pos == tree.pos)
+                ta.position.offset = code.cp;
+        }
+
         genExpr(tree.expr, tree.expr.type).load();
         code.emitop2(instanceof_, makeRef(tree.pos(), tree.clazz.type));
         result = items.makeStackItem(syms.booleanType);
@@ -2196,6 +2228,8 @@ public class Gen extends JCTree.Visitor {
      *  @return      True if code is generated with no errors.
      */
     public boolean genClass(Env<AttrContext> env, JCClassDecl cdef) {
+        // raise type annotations onto symbols
+        /* 3 */ new TypeAnnotationLift().scan(cdef);
         try {
             attrEnv = env;
             ClassSymbol c = cdef.sym;
@@ -2238,6 +2272,59 @@ public class Gen extends JCTree.Visitor {
             toplevel = null;
             endPositions = null;
             nerrs = 0;
+        }
+    }
+
+    private class TypeAnnotationLift extends TreeScanner {
+        JCClassDecl clazz = null;
+        JCMethodDecl lastMethod = null;
+        JCVariableDecl lastVar = null;
+
+        @Override
+        public void visitClassDef(JCClassDecl tree) {
+            clazz = tree;
+            super.visitClassDef(tree);
+        }
+
+        @Override
+        public void visitMethodDef(JCMethodDecl tree) {
+            lastMethod = tree;
+            super.visitMethodDef(tree);
+            lastMethod = null;
+        }
+
+        @Override
+        public void visitVarDef(JCVariableDecl tree) {
+            lastVar = tree;
+            super.visitVarDef(tree);
+            lastVar = null;
+        }
+
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
+            if (tree.typeAnnotations != null
+                    && tree.typeAnnotations.erased != null)
+                ta = ta.appendList(tree.typeAnnotations.erased);
+            if (!ta.isEmpty()) {
+                if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                    lastVar.sym.typeAnnotations =
+                        lastVar.sym.typeAnnotations.appendList(ta);
+                } else if (lastMethod != null) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + lastMethod.sym);
+                    lastMethod.sym.typeAnnotations =
+                        lastMethod.sym.typeAnnotations.appendList(ta);
+                } else if (clazz != null) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + clazz.sym);
+                    clazz.sym.typeAnnotations =
+                        clazz.sym.typeAnnotations.appendList(ta);
+                } else throw new AssertionError();
+            }
+            super.visitAnnotatedType(tree);
         }
     }
 

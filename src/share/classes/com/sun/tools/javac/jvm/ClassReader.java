@@ -38,6 +38,7 @@ import javax.tools.JavaFileManager;
 import javax.tools.StandardJavaFileManager;
 
 import com.sun.tools.javac.comp.Annotate;
+import com.sun.tools.javac.comp.TargetType;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.code.Symbol.*;
@@ -179,6 +180,10 @@ public class ClassReader extends ClassFile implements Completer {
      */
     int[] poolIdx;
 
+    /** Switch: debug output for JSR 308-related operations.
+     */
+    boolean debugJSR308;
+
     /** Get the ClassReader instance for this invocation. */
     public static ClassReader instance(Context context) {
         ClassReader instance = context.get(classReaderKey);
@@ -248,6 +253,7 @@ public class ClassReader extends ClassFile implements Completer {
             : null;
 
         typevars = new Scope(syms.noSymbol);
+        debugJSR308 = options.get("-X308:reader") != null;
     }
 
     /** Add member to class unless it is synthetic.
@@ -291,6 +297,12 @@ public class ClassReader extends ClassFile implements Completer {
      */
     char nextChar() {
         return (char)(((buf[bp++] & 0xFF) << 8) + (buf[bp++] & 0xFF));
+    }
+
+    /** Read a byte.
+     */
+    byte nextByte() {
+        return (byte)buf[bp++];
     }
 
     /** Read an integer.
@@ -893,6 +905,10 @@ public class ClassReader extends ClassFile implements Completer {
             attachParameterAnnotations(sym);
         } else if (attrName == names.RuntimeInvisibleParameterAnnotations) {
             attachParameterAnnotations(sym);
+        } else if (attrName == names.RuntimeVisibleExtendedAnnotations) {
+            attachTypeAnnotations(sym);
+        } else if (attrName == names.RuntimeInvisibleExtendedAnnotations) {
+            attachTypeAnnotations(sym);
         } else if (attrName == names.LocalVariableTable) {
             int newbp = bp + attrLen;
             if (saveParameterNames) {
@@ -1142,6 +1158,17 @@ public class ClassReader extends ClassFile implements Completer {
         }
     }
 
+    void attachTypeAnnotations(final Symbol sym) {
+        int numAttributes = nextChar();
+        if (numAttributes != 0) {
+            ListBuffer<TypeAnnotationProxy> proxies =
+                ListBuffer.lb();
+            for (int i = 0; i < numAttributes; i++)
+                proxies.append(readTypeAnnotation());
+            annotate.later(new TypeAnnotationCompleter(sym, proxies.toList()));
+        }
+    }
+
     /** Attach the default value for an annotation element.
      */
     void attachAnnotationDefault(final Symbol sym) {
@@ -1176,6 +1203,52 @@ public class ClassReader extends ClassFile implements Completer {
             pairs.append(new Pair<Name,Attribute>(name, value));
         }
         return new CompoundAnnotationProxy(t, pairs.toList());
+    }
+
+    TypeAnnotationProxy readTypeAnnotation() {
+        CompoundAnnotationProxy proxy = readCompoundAnnotation();
+
+        byte tag = nextByte();
+
+        TypeAnnotations.Position position = new TypeAnnotations.Position();
+        TargetType type = TargetType.values()[tag];
+
+        position.type = type;
+
+        switch (type) {
+            case TYPECAST:
+            case TYPECAST_GENERIC_OR_ARRAY:
+            case NEW:
+            case NEW_GENERIC_OR_ARRAY:
+            case INSTANCEOF:
+            case INSTANCEOF_GENERIC_OR_ARRAY:
+                position.offset = nextChar();
+                break;
+            case LOCAL_VARIABLE:
+            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+                position.offset = nextChar();
+                position.length = nextChar();
+                position.index = nextChar();
+                break;
+        }
+
+        if (type.hasParameter())
+            position.parameter = nextByte();
+        if (type.hasBound())
+            position.parameter = nextByte();
+
+        if (type.hasLocation()) {
+            int len = nextChar();
+            ListBuffer<Integer> loc = ListBuffer.lb();
+            for (int i = 0; i < len; i++)
+                loc = loc.append((int)nextByte());
+            position.location = loc.toList();
+        }
+
+        if (debugJSR308)
+            System.out.println("reading: " + proxy + " @ " + position);
+
+        return new TypeAnnotationProxy(proxy, position);
     }
 
     Attribute readAttributeValue() {
@@ -1276,6 +1349,16 @@ public class ClassReader extends ClassFile implements Completer {
             }
             buf.append("}");
             return buf.toString();
+        }
+    }
+
+    /** A temporary proxy representing a type annotation.
+     */
+    static class TypeAnnotationProxy extends
+            Pair<CompoundAnnotationProxy, TypeAnnotations.Position> {
+        TypeAnnotationProxy(CompoundAnnotationProxy fst,
+                TypeAnnotations.Position snd) {
+            super(fst, snd);
         }
     }
 
@@ -1467,6 +1550,61 @@ public class ClassReader extends ClassFile implements Completer {
                 sym.attributes_field = ((sym.attributes_field == null)
                                         ? newList
                                         : newList.prependList(sym.attributes_field));
+            } finally {
+                currentClassFile = previousClassFile;
+            }
+        }
+    }
+
+    class TypeAnnotationCompleter extends AnnotationCompleter {
+
+        List<TypeAnnotationProxy> proxies;
+
+        TypeAnnotationCompleter(Symbol sym,
+                List<TypeAnnotationProxy> proxies) {
+            super(sym, List.<CompoundAnnotationProxy>nil());
+            this.proxies = proxies;
+        }
+
+        @Override
+        public void enterAnnotation() {
+            JavaFileObject previousClassFile = currentClassFile;
+            try {
+                currentClassFile = classFile;
+
+                Map<TypeAnnotations.Position,
+                        ListBuffer<CompoundAnnotationProxy>>
+                    typeAnnos = new HashMap<TypeAnnotations.Position,
+                                        ListBuffer<CompoundAnnotationProxy>>();
+
+                // Convert list of (position, annotation) to a map from
+                // positions to lists of annotation.
+
+                for (TypeAnnotationProxy proxy : proxies) {
+                    if (!typeAnnos.containsKey(proxy.snd))
+                        typeAnnos.put(proxy.snd,
+                                ListBuffer.<CompoundAnnotationProxy>lb());
+                    typeAnnos.get(proxy.snd).append(proxy.fst);
+                }
+
+                // Convert each position -> list of annotations mapping into a
+                // TypeAnnotations and associate them with the symbol.
+
+                ListBuffer<TypeAnnotations> forSym = ListBuffer.lb();
+
+                for (TypeAnnotations.Position pos : typeAnnos.keySet()) {
+                    TypeAnnotations ta = new TypeAnnotations();
+                    ta.position = pos;
+                    ta.annotations
+                        = deproxyCompoundList(typeAnnos.get(pos).toList());
+                    forSym = forSym.append(ta);
+                }
+
+                if (debugJSR308)
+                    System.out.println("reading: adding " + forSym.toList()
+                            + " to symbol " + sym);
+
+                sym.typeAnnotations = forSym.toList();
             } finally {
                 currentClassFile = previousClassFile;
             }

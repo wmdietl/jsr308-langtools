@@ -59,6 +59,7 @@ public class JavapEnvironment {
 
 
     // JavapEnvironment flag settings
+    boolean showAnnotations = false;
     boolean showLineAndLocal = false;
     int showAccess = PACKAGE;
     boolean showDisassembled = false;

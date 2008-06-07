@@ -2472,9 +2472,6 @@ public class Attr extends JCTree.Visitor {
                 Type clazzOuter = clazztype.getEnclosingType();
                 if (clazzOuter.tag == CLASS) {
                     Type site;
-                    if (tree.clazz.getTag() == JCTree.ANNOTATED_TYPE)
-                        tree.clazz =
-                            ((JCAnnotatedType)tree.clazz).underlyingType;
                     if (tree.clazz.getTag() == JCTree.IDENT) {
                         site = env.enclClass.sym.type;
                     } else if (tree.clazz.getTag() == JCTree.SELECT) {
@@ -2580,10 +2577,6 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotation(JCAnnotation tree) {
         log.error(tree.pos(), "annotation.not.valid.for.type", pt);
         result = tree.type = syms.errType;
-    }
-
-    public void visitAnnotatedType(JCAnnotatedType tree) {
-        result = tree.type = attribType(tree.getUnderlyingType(), env);
     }
 
     public void visitErroneous(JCErroneous tree) {

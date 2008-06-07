@@ -133,6 +133,11 @@ public class Scanner implements Lexer {
      */
     protected boolean deprecatedFlag = false;
 
+    // Flags for extracting annotations from comments.
+    protected boolean magicAt = false;
+    protected boolean magicID = false;
+    protected boolean magic = false;
+
     /** A character buffer for literals.
      */
     private char[] sbuf = new char[128];
@@ -747,6 +752,22 @@ public class Scanner implements Lexer {
      */
     public void nextToken() {
 
+        if (magicAt) {
+            magicAt = false;
+            magicID = true;
+        }
+        if (magicID && ch == ' ') {
+            while (ch == ' ')
+                scanChar();
+        }
+        if (magicID && ch == '*') {
+            magicID = false;
+            magic = true;
+            scanChar();
+            if (ch != '/') lexError("invalid.anno.comment.char");
+            scanChar();
+        }
+
         try {
             prevEndPos = endPos;
             sp = 0;
@@ -863,14 +884,32 @@ public class Scanner implements Lexer {
                         if (ch == '*') {
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
+                            if (magicAt) return;
+                        } else if (bp < buflen && ch == '@') {
+                            scanChar();
+                            if (!Character.isJavaIdentifierStart(ch)) break;
+                            token = Token.MONKEYS_AT;
+                            magicAt = true;
+                            return;
                         } else {
                             style = CommentStyle.BLOCK;
                             while (bp < buflen) {
                                 if (ch == '*') {
                                     scanChar();
                                     if (ch == '/') break;
+                                } else if (magic && ch == '@') {
+                                    scanChar();
+                                    if (Character.isJavaIdentifierStart(ch)) {
+                                        token = Token.MONKEYS_AT;
+                                        magicAt = true;
+                                        return;
+                                    }
+                                    scanChar();
+                                    if (ch == '/') break;
                                 } else {
                                     scanCommentChar();
+                                    if (!Character.isWhitespace(ch) || ch == '\n')
+                                        magic = false;
                                 }
                             }
                         }

@@ -100,6 +100,8 @@ public abstract class Symbol implements Element {
      */
     public Type type;
 
+    public List<TypeAnnotations> typeAnnotations;
+
     /** The owner of this symbol.
      */
     public Symbol owner;
@@ -122,6 +124,7 @@ public abstract class Symbol implements Element {
         this.completer = null;
         this.erasure_field = null;
         this.attributes_field = List.nil();
+        this.typeAnnotations = List.nil();
         this.name = name;
     }
 

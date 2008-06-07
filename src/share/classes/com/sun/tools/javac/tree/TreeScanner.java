@@ -85,6 +85,7 @@ public class TreeScanner extends Visitor {
         scan(tree.restype);
         scan(tree.typarams);
         scan(tree.params);
+        scan(tree.receiver);
         scan(tree.thrown);
         scan(tree.body);
     }
@@ -290,6 +291,11 @@ public class TreeScanner extends Visitor {
     public void visitAnnotation(JCAnnotation tree) {
         scan(tree.annotationType);
         scan(tree.args);
+    }
+
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        scan(tree.annotations);
+        scan(tree.underlyingType);
     }
 
     public void visitErroneous(JCErroneous tree) {

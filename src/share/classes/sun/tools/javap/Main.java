@@ -95,6 +95,7 @@ public class Main{
         out.println("Usage: " + progname + " <options> <classes>...");
         out.println();
         out.println("where options include:");
+        out.println("   -annotations              Disassemble annotations attributes (with -verbose)");
         out.println("   -c                        Disassemble the code");
         out.println("   -classpath <pathlist>     Specify where to find user class files");
         out.println("   -extdirs <dirs>           Override location of installed extensions");
@@ -122,7 +123,18 @@ public class Main{
         for (int i = 0 ; i < argv.length ; i++) {
             String arg = argv[i];
             if (arg.startsWith("-")) {
-                if (arg.equals("-l")) {
+                if (arg.equals("-Xold")) {
+                    String[] oldjpargs = new String[(argv.length)-1];
+                    int l = 0;
+                    for(int k = 0; k < argv.length; k++){
+                        if(!(argv[k].equals("-Xold"))){
+                            oldjpargs[l] = argv[k];
+                            l++;
+                        }
+                    }
+                    //sun.tools.javap.oldjavap.JavaP.main(oldjpargs);
+                    error("modifications do not currently support -Xold");
+                } else if (arg.equals("-l")) {
                     env.showLineAndLocal = true;
                 } else if (arg.equals("-private") || arg.equals("-p")) {
                     env.showAccess = env.PRIVATE;
@@ -176,6 +188,8 @@ public class Main{
                         usage();
                         return false;
                     }
+                } else if (arg.equals("-annotations")) {
+                    env.showAnnotations = true;
                 } else if (arg.equals("-all")) {
                     env.showallAttr = true;
                 } else {

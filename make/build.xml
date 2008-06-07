@@ -99,6 +99,9 @@
   
     <!-- clean -->
 
+    <!-- Sometimes it takes 2 tries for this to work; the first "ant clean"
+    says "Unable to delete directory .../langtools/dist", and the second
+    succeeds.  -MDE -->
     <target name="clean" description="Delete all generated files">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>

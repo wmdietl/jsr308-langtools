@@ -462,6 +462,8 @@ public class Name implements javax.lang.model.element.Name {
             Annotation = fromString("Annotation");
             RuntimeVisibleAnnotations = fromString("RuntimeVisibleAnnotations");
             RuntimeInvisibleAnnotations = fromString("RuntimeInvisibleAnnotations");
+            RuntimeVisibleExtendedAnnotations = fromString("RuntimeVisibleExtendedAnnotations");
+            RuntimeInvisibleExtendedAnnotations = fromString("RuntimeInvisibleExtendedAnnotations");
             RuntimeVisibleParameterAnnotations = fromString("RuntimeVisibleParameterAnnotations");
             RuntimeInvisibleParameterAnnotations = fromString("RuntimeInvisibleParameterAnnotations");
             Value = fromString("Value");
@@ -595,6 +597,8 @@ public class Name implements javax.lang.model.element.Name {
         public final Name Annotation;
         public final Name RuntimeVisibleAnnotations;
         public final Name RuntimeInvisibleAnnotations;
+        public final Name RuntimeVisibleExtendedAnnotations;
+        public final Name RuntimeInvisibleExtendedAnnotations;
         public final Name RuntimeVisibleParameterAnnotations;
         public final Name RuntimeInvisibleParameterAnnotations;
 
