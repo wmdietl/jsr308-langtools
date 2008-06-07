@@ -474,14 +474,6 @@ you will need to edit
 
 <h3 id="diffs">Determining a diff against the OpenJDK distribution</h3>
 
-<p><b>Note:</b> The OpenJDK project no longer provides source releases via
-Subversion, and their Mercurial repositories do not include in their history
-the OpenJDK version on which the JSR 308 tools are based. Therefore, it is
-currently not possible to obtain an exact diff against the OpenJDK
-distribution. You may obtain the latest version of the OpenJDK sources and use
-those in the instructions below, but the resulting diff may contain non-JSR
-308-related changes.</p>
-
 <p>The JSR 308 distribution is a modification of the 
 <code>langtools</code> portion of Sun's
 <a href="http://openjdk.java.net/">OpenJDK</a>
@@ -489,7 +481,7 @@ those in the instructions below, but the resulting diff may contain non-JSR
 JSR 308 distribution is based is:
 </p>
 <blockquote>
-<!-- version -->251 (13 Sep 2007)<!-- /version -->
+<!-- version -->34 (22 May 2008)<!-- /version -->
 </blockquote>
 
 <p>The following commands determine the differences between the JSR
@@ -501,11 +493,11 @@ extracted JSR 308 compiler distribution.
 </p>
 <ol>
   <li>If you do not have a checkout of the OpenJDK
-  compiler, obtain one (use an empty password for username <code>guest</code>):
+  compiler, obtain one:
 
   <pre><code>
   export VENDOR=vendor-langtools
-  svn co https://openjdk.dev.java.net/svn/openjdk/jdk/trunk/langtools $VENDOR -r<!-- revision -->251<!-- /revision --> --username guest
+  hg clone -r<!-- revision -->34<!-- /revision --> http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
   </code></pre>
 
   <p>If you already have a checkout of the OpenJDK compiler, ensure
@@ -514,7 +506,7 @@ extracted JSR 308 compiler distribution.
   </p>
 
   <pre><code>
-  svn update -r<!-- revision -->251<!-- /revision -->
+  hg pull -r<!-- revision -->34<!-- /revision -->
   </code></pre>
 
   </li>
@@ -523,8 +515,8 @@ extracted JSR 308 compiler distribution.
   whereas the first only reports that the new file exists.
 
   <pre><code>
-  diff -ur -x .svn -x dist -x build $VENDOR/src $JSR308/j2se/src
-  diff -urN -x .svn -x dist -x build $VENDOR/src $JSR308/j2se/src
+  diff -ur -x .hg -x dist -x build $VENDOR/src $JSR308/j2se/src
+  diff -urN -x .hg -x dist -x build $VENDOR/src $JSR308/j2se/src
   </code></pre>
 </ol>
 
