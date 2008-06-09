@@ -88,6 +88,7 @@ public enum OptionName {
     XJCOV("-Xjcov"),
     XD("-XD"),
     X308("-X308:{parser,attr,trans,gen,writer}"),
+    XSPACESINCOMMENTS("-Xspacesincomments"),
     SOURCEFILE("sourcefile");
 
     public final String optionName;
