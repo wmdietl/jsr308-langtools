@@ -699,7 +699,7 @@ public class JavapPrinter {
         case CONSTANT_METHOD:
         case CONSTANT_INTERFACEMETHOD:
         case CONSTANT_FIELD: {
-            CPX2 x = (CPX2)(cls.getCpoolEntry(cpx));
+            CPX2 x = cls.getCpoolEntry(cpx);
             if (x.cpx1 == cls.getthis_cpx()) {
                 // don't print class part for local references
                 cpx=x.cpx2;
@@ -1106,7 +1106,7 @@ public class JavapPrinter {
         case CONSTANT_INTERFACEMETHOD:
         case CONSTANT_FIELD: {
             // CPX2 x=(CPX2)(cpool[cpx]);
-            CPX2 x = (CPX2)(cls.getCpoolEntry(cpx));
+            CPX2 x = cls.getCpoolEntry(cpx);
             if (x.cpx1 == cls.getthis_cpx()) {
                 // don't print class part for local references
                 cpx=x.cpx2;
