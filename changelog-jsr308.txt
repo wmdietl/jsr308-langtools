@@ -1,3 +1,9 @@
+Version 0.7, 13 June 2008
+
+Base build
+  Updated the jsr308 to the OpenJDK langtools build b28
+
+----------------------------------------------------------------------
 Version 0.6.4, 9 June 2008
 
 New features
@@ -6,7 +12,7 @@ New features
 ----------------------------------------------------------------------
 Version 0.6.3, 6 June 2008
 
-Updated the jsr308 to the latest openjdk langtools build (b28)
+Updated the jsr308 to the latest openjdk langtools build (b27)
 
 New features
   Added support for parsing using the 'arrays' convention
@@ -60,7 +66,7 @@ Bug fixes
 
 Miscellaneous
   Platform-independent binary versions of the JSR 308 javac and javap tools,
-    as well as a script to patch a user's Java 7 installation, are now 
+    as well as a script to patch a user's Java 7 installation, are now
     included in this release
 
 ----------------------------------------------------------------------
@@ -163,8 +169,8 @@ Miscellaneous
 Documentation Changes
 
 * openjdk/README-jsr308.html
-    added note about using IDEs with the JSR 308 compiler 
-    added section about building compiler separately from OpenJDK suite 
+    added note about using IDEs with the JSR 308 compiler
+    added section about building compiler separately from OpenJDK suite
     added section on differences from the JSR 308 proposal
 
 
