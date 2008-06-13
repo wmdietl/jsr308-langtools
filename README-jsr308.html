@@ -33,7 +33,8 @@ pre, blockquote {
         </ul></li>
       <li><a href="#installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</a>
         <ul>
-          <li><a href="#install-commands">Installation commands for Linux</a></li>
+          <li><a href="#installing-short">The short instructions</a></li>
+          <li><a href="#installing-long">The longer instructions</a></li>
           <li><a href="#building">Building the JSR 308 compiler from source</a></li>
         </ul></li>
       <li><a href="#differences">Differences from the OpenJDK distribution</a>
@@ -235,6 +236,46 @@ proposal</a> in the following ways, which will be corrected in the future:
 Use the following instructions to install the JSR 308 compiler.
 </p>
 
+
+<h3 id="installing-short">The short instructions</h3>
+
+<!--
+ This text is identically reproduced at ../checkers/manual/introduction.tex
+ so if you change either one, change the other also!
+-->
+
+<p>
+The following is an experimental, but easy, technique for installing
+the JSR 308 \code{javac} compiler and Checker
+Framework, and running tests.
+It currently works only on Linux.
+For more details, see the comments in the 
+\code{Makefile-jsr308-install} file.
+</p>
+
+<ol>
+<li>
+  Execute the following commands:
+<pre>
+  cd
+  wget -nv -N http://groups.csail.mit.edu/pag/jsr308/current/Makefile-jsr308-install
+  make -f Makefile-jsr308-install
+</pre>
+
+</li>
+<li>
+Search file <tt>Makefile-jsr308-install</tt> for the word "export", and
+add all of those lines (which are in bash syntax) to your shell startup
+file, such as <tt>~/.bashrc</tt>.  
+</li>
+
+</ol>
+
+
+
+<h3 id="installing-long">The longer instructions</h3>
+
+
 <p>
 <b>Requirements:</b> These instructions assume that <a
 href="http://ant.apache.org/">Ant</a> is installed.
@@ -336,38 +377,6 @@ When updating to a newer version of the JSR 308 compiler, you only have to
 follow steps 2, 3, and 4.  In other words, you only have to redo step 1 if
 you want a newer version of the JDK.
 </p>
-
-
-<h3 id="install-commands">Installation commands for Linux</h3>
-
-<p>
-The following commands, provided for the <em>extremely</em> impatient user,
-perform all the steps listed above, for a Linux computer.
-After each of the <code>javac -version</code> commands, verify that the
-output is as desired.
-</p>
-
-<pre>
-rm -rf ~/jsr308
-mkdir ~/jsr308
-cd ~/jsr308
-wget http://www.java.net/download/jdk7/binaries/jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
-chmod +x jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
-./jdk-7-ea-bin-b28-linux-i586-05_jun_2008.bin
-export JAVA_HOME=$HOME/jsr308/jdk1.7.0
-export PATH=$JAVA_HOME/bin:$PATH
-javac -version
-
-cd ~/jsr308
-wget http://groups.csail.mit.edu/pag/jsr308/current/jsr308-langtools.zip
-unzip jsr308-langtools.zip
-
-cd langtools/binary
-ant install
-
-javac -version
-</pre>
-
 
 
 <h3 id="building">Building the JSR 308 compiler from source</h3>
