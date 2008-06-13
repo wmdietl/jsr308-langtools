@@ -7,7 +7,7 @@
     </target>
 
     <target name="install"
-        description="updates your system's JDK with the modified JSR 308 compiler">
+        description="updates a copy of OpenJDK by installing a tools.jar containing the JSR 308 compiler">
         <available property="tools.present" file="${tools.jar}"/>
         <fail unless="tools.present" message="couldn't find tools.jar"/>
 
@@ -31,7 +31,7 @@
     </target>
 
     <target name="uninstall"
-        description="reverts your system's JDK to the unmodified Java compiler">
+        description="reverts your system's JDK to the unmodified Java compiler by reverting tools.jar">
         
         <!-- Prompt the user before continuing. -->
         <input message="About to revert the installation at ${java.home}. Continue? "
