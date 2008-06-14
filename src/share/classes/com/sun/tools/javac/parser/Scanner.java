@@ -69,6 +69,7 @@ public class Scanner implements Lexer {
         final Name.Table names;
         final Source source;
         final Keywords keywords;
+        final boolean spacesincomments;
 
         /** Create a new scanner factory. */
         protected Factory(Context context) {
@@ -77,6 +78,7 @@ public class Scanner implements Lexer {
             this.names = Name.Table.instance(context);
             this.source = Source.instance(context);
             this.keywords = Keywords.instance(context);
+            this.spacesincomments = Options.instance(context).get("-Xspacesincomments") != null;
         }
 
         public Scanner newScanner(CharSequence input) {
@@ -137,6 +139,7 @@ public class Scanner implements Lexer {
     protected boolean magicAt = false;
     protected boolean magicID = false;
     protected boolean magic = false;
+    protected boolean spacesincomments;
 
     /** A character buffer for literals.
      */
@@ -175,6 +178,7 @@ public class Scanner implements Lexer {
         this.names = fac.names;
         this.keywords = fac.keywords;
         this.allowHexFloats = fac.source.allowHexFloats();
+        this.spacesincomments = fac.spacesincomments;
     }
 
     private static final boolean hexFloatsWork = hexFloatsWork();
@@ -880,6 +884,10 @@ public class Scanner implements Lexer {
                         break;
                     } else if (ch == '*') {
                         scanChar();
+                        if (spacesincomments) {
+                            while (ch == ' ')
+                                scanChar();
+                        }
                         CommentStyle style;
                         if (ch == '*') {
                             style = CommentStyle.JAVADOC;

@@ -17,7 +17,7 @@ pre, blockquote {
 </head>
 <body>
 <h1>JSR 308 Prototype Implementation README</h1> <!-- omit from toc -->
-<h4 id="version">Version 0.6.3 (6 Jun 2008)</h4> <!-- omit from toc -->
+<h4 id="version">Version 0.6.4 (9 Jun 2008)</h4> <!-- omit from toc -->
 <p>For the latest version, see the <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>.</p>
 
 <p>Contents:</p>
@@ -283,9 +283,10 @@ href="http://ant.apache.org/">Ant</a> is installed.
 
 <ol>
   <li>
-    Install OpenJDK.  This installation will be modified later.  You can
-    put it anywhere you want; a common place is in a new directory
-    <code>~/jsr308</code>.
+    Install a new copy of OpenJDK.  This new installation will be modified
+    later (but no other copy of OpenJDK will be modified).  You can
+    put the new installation anywhere you want; a common place is in a new
+    directory <code>~/jsr308</code>.
     <ol type="a">
       <li>
 	Download a JDK 7 <a
@@ -341,16 +342,13 @@ unzip jsr308-langtools.zip
     JDK you wish to patch, then patch your JDK 7 installation by running:
 <pre>cd langtools/binary
 ant install</pre>
-    <ul>
-      <li>
-	This step makes a backup copy of a jar file and then
-	modifies the original.  You shouldn't need to undo this step, but you
-	can do so by running
-<pre>ant uninstall</pre>
-	which puts back the original version of the jar file.  Alternately, you
-	can do so by hand, or you can re-install JDK 7.
-      </li>
-    </ul>
+    This step makes a backup copy of <tt>tools.jar</tt> and then
+    modifies the original.
+
+    <p>(You shouldn't need to undo this step, but you
+    can do so by running <tt>ant uninstall</tt>
+    which puts back the original version of the <tt>tools.jar</tt> file.)
+    </p>
   </li>
   <li>
     Run
@@ -576,7 +574,7 @@ modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
 </p>
 <ol>
-  <li>Obtain a copy of version <!-- revision -->251<!-- /revision --> of
+  <li>Obtain a copy of Mercurial reversion <!-- revision -->34<!-- /revision --> of
   the OpenJDK compiler, using the commands in the <a href="#diffs">diff
   section</a> of this document.</li>
   <li>Try your test case using the

@@ -169,6 +169,7 @@ public class RecognizedOptions {
         O,
         XJCOV,
         XD,
+        XSPACESINCOMMENTS,
         X308,
         SOURCEFILE);
 
@@ -228,6 +229,7 @@ public class RecognizedOptions {
         O,
         XJCOV,
         XD,
+        XSPACESINCOMMENTS,
         X308);
 
     static Option[] getJavaCompilerOptions(OptionHelper helper) {
@@ -554,6 +556,8 @@ public class RecognizedOptions {
                 return false;
             }
         },
+
+        new HiddenOption(XSPACESINCOMMENTS),
 
         new HiddenOption(X308) {
             public boolean matches(String s) {
