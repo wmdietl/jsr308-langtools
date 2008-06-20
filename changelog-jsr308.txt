@@ -5,7 +5,7 @@ Installation
     operating systems, continue to use the old instructions.
 
 Base build
-  Updated the jsr308 to OpenJDK langtools build b28
+  Updated to OpenJDK langtools build b28
 
 ----------------------------------------------------------------------
 Version 0.6.4, 9 June 2008
