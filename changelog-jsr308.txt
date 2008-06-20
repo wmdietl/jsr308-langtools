@@ -1,3 +1,8 @@
+Version 0.7.1, 20 June 2008
+
+No changes in this release
+
+----------------------------------------------------------------------
 Version 0.7, 14 June 2008
 
 Installation
