@@ -381,14 +381,14 @@ javac -version
 <p>
 When updating to a newer version of the JSR 308 compiler, you only have to
 follow steps 2, 3, and 4.  In other words, you only have to redo step 1 if
-you want a newer version of the JDK.
+you want a newer version of OpenJDK.
 </p>
 
 
 <h3 id="building">Building the JSR 308 compiler from source</h3>
 
 <p>
-To build the JSR 308 compiler from source, replace steps 3 above by
+To build the JSR 308 compiler from source, replace <a href="#installing-long">step 3 from above</a> by
 the following.  Building from source is useful mainly for people who are
 developing compiler plug-ins or modifying the compiler itself.  If you only
 want to <em>use</em> the compiler and plug-ins, it is sufficient to install
@@ -401,7 +401,10 @@ the pre-compiled version.
   inside a <fail> directive.   Version 1.6 (Feb 2004) does not work. -->
 <a href="http://ant.apache.org/">Ant</a> (version 1.7 or later)
 and
-JDK 6 (from Sun or elsewhere) are installed.
+JDK 6 (from <a
+href="http://java.sun.com/javase/downloads/index.jsp">Sun</a> or elsewhere)
+are installed.  You will use JDK 6 to compile OpenJDK, but will not use it
+thereafter.
 </p>
 
 <ol>
