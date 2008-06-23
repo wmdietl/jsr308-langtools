@@ -33,7 +33,7 @@ pre, blockquote {
         </ul></li>
       <li><a href="#installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</a>
         <ul>
-          <li><a href="#installing-short">The short instructions</a></li>
+          <li><a href="#installing-short">The short instructions (for Linux only)</a></li>
           <li><a href="#installing-long">The longer instructions</a></li>
           <li><a href="#building">Building the JSR 308 compiler from source</a></li>
         </ul></li>
@@ -84,7 +84,7 @@ annotations.
 </p>
 
 <p>
-JSR 308 makes it possible to create of compiler plug-ins that check
+JSR 308 makes it possible to create compiler plug-ins that check
 user-defined type qualifiers.  The <a
 href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html">Checkers
 Framework</a> makes such plug-ins easy to create, and it includes several
@@ -243,10 +243,15 @@ could use the JSR 308 compiler only for running pluggable type-checkers.
 Also, you can use javac's <tt>-target</tt> argument to generate bytecodes
 that are compatible with earlier JVMs, so that you can work seamlessly with
 colleagues who are using an earlier version of Java.
+</p>
+
 <p>
+If you use an Apple <b>Macintosh</b> computer, you must <a href="#building">build
+the compiler from source</a>.
+</p>
 
 
-<h3 id="installing-short">The short instructions</h3>
+<h3 id="installing-short">The short instructions (for Linux only)</h3>
 
 <!--
  This text is identically reproduced at ../checkers/manual/introduction.tex
@@ -257,7 +262,7 @@ colleagues who are using an earlier version of Java.
 The following commands install
 the JSR 308 <tt>javac</tt> compiler and the Checker
 Framework, or update an existing installation.
-It currently works only on Linux, and is experimental.
+It currently works only on <b>Linux</b>, and is experimental.
 For more details, or if anything goes wrong, see the comments in the 
 <tt>Makefile-jsr308-install</tt> file.
 </p>
@@ -287,6 +292,8 @@ Set some environment variables according to the instructions at the top of file
 <p>
 <b>Requirements:</b> These instructions assume that <a
 href="http://ant.apache.org/">Ant</a> is installed.
+If you use an Apple <b>Macintosh</b> computer, you must <a href="#building">build
+the compiler from source</a>.
 </p>
 
 <ol>
@@ -401,10 +408,14 @@ the pre-compiled version.
   inside a <fail> directive.   Version 1.6 (Feb 2004) does not work. -->
 <a href="http://ant.apache.org/">Ant</a> (version 1.7 or later)
 and
-JDK 6 (from <a
-href="http://java.sun.com/javase/downloads/index.jsp">Sun</a> or elsewhere)
-are installed.  You will use JDK 6 to compile OpenJDK, but will not use it
-thereafter.
+JDK 6 are installed.  You will use JDK 6 to compile OpenJDK, but will not use it
+thereafter.  You can get JDK 6 from
+<a href="http://java.sun.com/javase/downloads/index.jsp">Sun</a> or
+elsewhere.  If you use an Apple Macintosh, then depending on your hardware
+and operating
+system, you can either use <a
+href="http://developer.apple.com/java/">Apple's implementation</a> or <a
+href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
 </p>
 
 <ol>
@@ -460,17 +471,18 @@ in the following ways:
     command-line option</a>, which runs an annotation processor
     after types have been resolved, has been added to the compiler.</li>
   <li>
-    The compiler parses both JSR 175 and JSR 308 annotations written in <a
+    In addition to ordinary JSR 175 annotations, the compiler parrses JSR
+    308 annotations, and also any annotation written in <a
     href="#annotations-in-comment">specifically-formatted comments for
     backward compatibility</a>.
   </li>
   <li>Six <code>javac</code> test cases are skipped by
     the test runner due to failures caused by JSR 308
-    modifications. These test cases will be corrected and
-    re-enabled in a future release.<br />
-	Note that not all tests remaining pass &mdash; but all failing
-    tests also fail for the OpenJDK compiler.  The JSR 308
-    changes do not introduce any test failures.</li>
+    modifications.  We will correct these failures and re-enable the test cases in a future release.<br />
+    If you run the test suite, you will find that some of its test cases 
+    fail.  These tests also fail for the OpenJDK compiler.  The JSR 308
+    changes do not introduce any new test failures (except in test cases
+    that are skipped).</li>
   <li>
     The <code>javap</code> tool has been modified to display the properties of
     both JSR 175 and JSR 308 annotations via the <a
