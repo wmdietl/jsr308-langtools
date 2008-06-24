@@ -44,7 +44,6 @@ pre, blockquote {
       <li><a href="#Contributing">Contributing</a>
         <ul>
           <li><a href="#reporting-bugs">How to report bugs</a></li>
-          <li><a href="#known-bugs">Known problems</a></li>
           <li><a href="#credits">Credits and changelog</a></li>
         </ul></li>
     </ul>
@@ -220,13 +219,27 @@ href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-desig
 proposal</a> in the following ways, which will be corrected in the future:
 </p>
 <ul>
+  <!-- I have no idea when this was last updated/checked. -->
   <li>support for generic type arguments in a generic method invocation
       is limited</li>
+  <!-- I have no idea when this was last updated/checked. -->
   <li>support for annotations on class literals is limited to the parser
       (i.e., annotations are not added to the AST or compiled into class
       files)</li>
+  <li>
+    <!-- As of 6/24/2008. -->
+    The <tt>ElementType.Type_USE</tt> literal does not yet exist (our
+    installation instructions make this a bit tricky, as ElementType is not
+    part of the compilers <tt>langtools</tt> source code base).
+    The compiler does not yet enforce the <tt>@Target</tt> meta-annotation on
+    the new annotation locations.
+    You can work around this by omitting the <tt>@Target</tt> annotation.
+    Then, your annotation will be permitted to appear anywhere.
+  </li>
 </ul>
 
+<!-- As of 6/24/2008. -->
+<p>
 
 
 <h2 id="installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</h2>
@@ -647,20 +660,7 @@ to write a helpful bug report</a>.  Here are some crucial points:
 </ul>
 
 
-<h3 id="known-bugs">Known problems</h3>
-
-<p>
-A few users have reported that, after installing the
-JSR 308 tools, running javac yields the exception:
-</p>
-<pre>
-java.lang.NoSuchMethodError: javax.annotation.processing.Messager.printMessage
-</pre>
-<p>
-Christian Haack reports that the problem occurred for him after installing
-the binary distribution, but that javac worked properly after installing
-from source.  We welcome more information about this problem.
-</p>
+<!-- <h3 id="known-bugs">Known problems</h3> -->
 
 
 <h3 id="credits">Credits and changelog</h3>
