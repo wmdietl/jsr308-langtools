@@ -1,5 +1,5 @@
 CHECKERS_JAR=../../checkers/checkers.jar
-TREEDEBUG=javac -cp $(CHECKERS_JAR) -proc:only -processor checkers.debug.TreeDebug
+TREEDEBUG=javac -cp $(CHECKERS_JAR) -proc:only -processor checkers.util.debug.TreeDebug
 
 .PHONY: all-tests basic array-elts array-arrays
 
