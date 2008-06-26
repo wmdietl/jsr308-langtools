@@ -1,3 +1,12 @@
+Version 0.7.2, 26 June 2008
+
+Intallation
+  Improved installation instruction for Mac.
+
+Base build
+  Updated to OpenJDK langtools build b29
+
+----------------------------------------------------------------------
 Version 0.7.1, 20 June 2008
 
 No changes in this release
