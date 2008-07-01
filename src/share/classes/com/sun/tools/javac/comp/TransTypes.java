@@ -442,6 +442,7 @@ public class TransTypes extends TreeTranslator {
         new TypeAnnotationPositions().scan(tree);
         List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
         tree.sym.typeAnnotations = ta;
+        new TypeAnnotationLift().scan(tree);
         translateClass(tree.sym);
         result = tree;
     }
@@ -449,6 +450,9 @@ public class TransTypes extends TreeTranslator {
     JCMethodDecl currentMethod = null;
     public void visitMethodDef(JCMethodDecl tree) {
         List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
+        if (tree.sym.typeAnnotations != null)
+            ta = ta.appendList(tree.sym.typeAnnotations);
+
         tree.sym.typeAnnotations = ta;
         JCMethodDecl previousMethod = currentMethod;
         try {
@@ -966,4 +970,58 @@ public class TransTypes extends TreeTranslator {
             super.visitAnnotatedType(tree);
         }
     }
+
+    private class TypeAnnotationLift extends TreeScanner {
+        JCClassDecl clazz = null;
+        JCMethodDecl lastMethod = null;
+        JCVariableDecl lastVar = null;
+
+        @Override
+        public void visitClassDef(JCClassDecl tree) {
+            clazz = tree;
+            super.visitClassDef(tree);
+        }
+
+        @Override
+        public void visitMethodDef(JCMethodDecl tree) {
+            lastMethod = tree;
+            super.visitMethodDef(tree);
+            lastMethod = null;
+        }
+
+        @Override
+        public void visitVarDef(JCVariableDecl tree) {
+            lastVar = tree;
+            super.visitVarDef(tree);
+            lastVar = null;
+        }
+
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
+            if (tree.typeAnnotations != null
+                    && tree.typeAnnotations.erased != null)
+                ta = ta.appendList(tree.typeAnnotations.erased);
+            if (!ta.isEmpty()) {
+                if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                    lastVar.sym.typeAnnotations =
+                        lastVar.sym.typeAnnotations.appendList(ta);
+                } else if (lastMethod != null) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + lastMethod.sym);
+                    lastMethod.sym.typeAnnotations =
+                        lastMethod.sym.typeAnnotations.appendList(ta);
+                } else if (clazz != null) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + clazz.sym);
+                    clazz.sym.typeAnnotations =
+                        clazz.sym.typeAnnotations.appendList(ta);
+                } else throw new AssertionError();
+            }
+            super.visitAnnotatedType(tree);
+        }
+    }
+
 }

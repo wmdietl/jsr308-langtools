@@ -2229,7 +2229,6 @@ public class Gen extends JCTree.Visitor {
      */
     public boolean genClass(Env<AttrContext> env, JCClassDecl cdef) {
         // raise type annotations onto symbols
-        /* 3 */ new TypeAnnotationLift().scan(cdef);
         try {
             attrEnv = env;
             ClassSymbol c = cdef.sym;
