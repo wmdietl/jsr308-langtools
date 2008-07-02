@@ -225,9 +225,10 @@ proposal</a> in the following ways, which will be corrected in the future:
       files)</li>
   <li>
     <!-- As of 6/24/2008. -->
-    The <tt>ElementType.Type_USE</tt> literal does not yet exist (our
-    installation instructions make this a bit tricky, as ElementType is not
-    part of the compilers <tt>langtools</tt> source code base).
+    The <tt>ElementType.TYPE_USE</tt> enum element does not yet exist
+    (including this change in our distribution would be a bit tricky, as <a
+    href="http://java.sun.com/javase/6/docs/api/java/lang/annotation/ElementType.html">ElementType</a>
+    is not part of the compilers <tt>langtools</tt> source code base).
     The compiler does not yet enforce the <tt>@Target</tt> meta-annotation on
     the new annotation locations.
     You can work around this by omitting the <tt>@Target</tt> annotation.
