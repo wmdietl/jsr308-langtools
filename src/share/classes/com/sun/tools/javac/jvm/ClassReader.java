@@ -1289,7 +1289,9 @@ public class ClassReader extends ClassFile implements Completer {
         case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
         case FIELD:
         case THROWS_GENERIC_OR_ARRAY:
-            throw new AssertionError("target unusable: " + position);
+            // method_return sometimes shows up
+            // throw new AssertionError("target unusable: " + position);
+            break;
         default:
             throw new AssertionError("unknown type: " + position);
         }

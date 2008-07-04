@@ -976,9 +976,11 @@ public class ClassWriter extends ClassFile {
         case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
         case FIELD:
         case THROWS_GENERIC_OR_ARRAY:
-            throw new AssertionError("target unusable: " + p);
+            // method_return sometimes shows up
+            // throw new AssertionError("target unusable: " + p + " " + c);
+            break;
         default:
-            throw new AssertionError("unknown type: " + p);
+            throw new AssertionError("unknown type: " + p + " " + c);
         }
 
         // Append location data for generics/arrays.

@@ -123,6 +123,7 @@ public class TypeAnnotations {
             case FIELD:
             case THROWS_GENERIC_OR_ARRAY:
                 sb.append(", *unusable*");
+                break;
             default:
                 throw new AssertionError("unknown type: " + type);
             }
