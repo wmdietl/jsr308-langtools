@@ -27,6 +27,8 @@ package com.sun.tools.javac.comp;
 
 import java.util.*;
 
+import javax.lang.model.element.ElementKind;
+
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.*;
@@ -869,30 +871,38 @@ public class TransTypes extends TreeTranslator {
                     return p;
 
                 case CLASS:
-                    if (((JCClassDecl)context).extending == tree)
+                    if (((JCClassDecl)context).extending == tree) {
                         p.type = TargetType.CLASS_EXTENDS;
-                    else if (((JCClassDecl)context).implementing.contains(tree))
+                        p.type_index = -1;
+                    } else if (((JCClassDecl)context).implementing.contains(tree)) {
                         p.type = TargetType.CLASS_EXTENDS;
-                        // TODO: finish me
-                    else throw new AssertionError();
+                        p.type_index = ((JCClassDecl)context).implementing.indexOf(tree);
+                    } else throw new AssertionError();
                     return p;
 
-                case METHOD:
-                    if (((JCMethodDecl)context).receiver == tree)
+                case METHOD: {
+                    JCMethodDecl contextMethod = (JCMethodDecl)context;
+                    if (contextMethod.receiver == tree)
                         p.type = TargetType.METHOD_RECEIVER;
-                    else if (((JCMethodDecl)context).thrown.contains(tree))
+                    else if (contextMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
-                    else if (((JCMethodDecl)context).restype == tree)
+                        p.type_index = contextMethod.thrown.indexOf(tree);
+                    } else if (((JCMethodDecl)context).restype == tree)
                         p.type = TargetType.METHOD_RETURN;
                     else throw new AssertionError();
                     return p;
-
-                case MEMBER_SELECT:
-                    if (((JCFieldAccess)context).name == names._class)
+                }
+                case MEMBER_SELECT: {
+                    JCFieldAccess fieldContext = (JCFieldAccess)context;
+                    if (fieldContext.name == names._class) {
                         p.type = TargetType.CLASS_LITERAL;
-                    else throw new AssertionError();
+                        assert fieldContext.selected instanceof JCAnnotatedType;
+                        JCAnnotatedType fieldType = (JCAnnotatedType)fieldContext.selected;
+                        p.pos = fieldType.underlyingType.pos;
+                        System.out.println(((JCFieldAccess)context).selected);
+                    } else throw new AssertionError();
                     return p;
-
+                }
                 case PARAMETERIZED_TYPE: {
                     TypeAnnotations.Position nextP;
                     if (((JCTypeApply)context).clazz == tree)
@@ -917,20 +927,26 @@ public class TransTypes extends TreeTranslator {
 //                            ((JCTypeParameter)context).bounds.indexOf(tree) + " ");
                     if (path.tail.tail.head.getTag() == JCTree.CLASSDEF)
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
-                    else if (path.tail.tail.head.getTag() == JCTree.METHODDEF)
+                    else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
+                        JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
-                    else throw new AssertionError();
+                        p.parameter_index = method.typarams.indexOf(path.tail.head);
+                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
+                    } else throw new AssertionError();
                     return p;
 
                 case VARIABLE:
                     VarSymbol v = ((JCVariableDecl)context).sym;
+                    p.pos = context.pos;
                     switch (v.getKind()) {
                         case LOCAL_VARIABLE:
                             p.type = TargetType.LOCAL_VARIABLE; break;
                         case FIELD:
                             p.type = TargetType.FIELD; break;
                         case PARAMETER:
-                            p.type = TargetType.METHOD_PARAMETER; break;
+                            p.type = TargetType.METHOD_PARAMETER;
+                            p.parameter_index = methodParamIndex(path, context);
+                            break;
                         default: throw new AssertionError();
                     }
                     return p;
@@ -940,8 +956,24 @@ public class TransTypes extends TreeTranslator {
                     return resolveContext(newPath.head, newPath.tail.head,
                             newPath, p);
                 }
+
+                case METHOD_INVOCATION: {
+                    JCMethodInvocation invocation = (JCMethodInvocation)context;
+                    assert invocation.typeargs.contains(tree);
+                    p.type = TargetType.METHOD_TYPE_ARGUMENT;
+                    p.pos = invocation.pos;
+                    p.type_index = invocation.typeargs.indexOf(tree);
+                    return p;
+                }
             }
             return p;
+        }
+
+        @Override
+        public void visitApply(JCMethodInvocation tree) {
+            scan(tree.meth);
+            scan(tree.typeargs);
+            scan(tree.args);
         }
 
         @Override
@@ -968,6 +1000,15 @@ public class TransTypes extends TreeTranslator {
                 }
             }
             super.visitAnnotatedType(tree);
+        }
+
+        private int methodParamIndex(List<JCTree> path, JCTree param) {
+//            assert param.sym.getKind() == ElementKind.PARAMETER;
+            List<JCTree> curr = path;
+            if (curr.head != param)
+                curr = path.tail;
+            JCMethodDecl method = (JCMethodDecl)curr.tail.head;
+            return method.params.indexOf(param);
         }
     }
 
@@ -997,6 +1038,13 @@ public class TransTypes extends TreeTranslator {
         }
 
         @Override
+        public void visitApply(JCMethodInvocation tree) {
+            scan(tree.meth);
+            scan(tree.typeargs);
+            scan(tree.args);
+        }
+
+        @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
             List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
             if (tree.typeAnnotations != null
@@ -1019,6 +1067,14 @@ public class TransTypes extends TreeTranslator {
                     clazz.sym.typeAnnotations =
                         clazz.sym.typeAnnotations.appendList(ta);
                 } else throw new AssertionError();
+                // We also add typeannotations to local variables to ease
+                // finding them later in Gen
+                if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {
+                    if (debugJSR308)
+                        System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                    lastVar.sym.typeAnnotations =
+                        lastVar.sym.typeAnnotations.appendList(ta);
+                }
             }
             super.visitAnnotatedType(tree);
         }

@@ -904,26 +904,82 @@ public class ClassWriter extends ClassFile {
         writeCompoundAttribute(c);
         databuf.appendByte(p.type.ordinal());
         switch (p.type) {
-            case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
-            case NEW:
-            case NEW_GENERIC_OR_ARRAY:
-            case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
-                databuf.appendChar(p.offset);
-                break;
-            case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                databuf.appendChar(p.offset);
-                databuf.appendChar(p.length);
-                databuf.appendChar(p.index);
-                break;
+        // type case
+        case TYPECAST:
+        case TYPECAST_GENERIC_OR_ARRAY:
+        // object creation
+        case INSTANCEOF:
+        case INSTANCEOF_GENERIC_OR_ARRAY:
+        // new expression
+        case NEW:
+        case NEW_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.offset);
+            break;
+         // local variable
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            // FIXME: check for table length
+            databuf.appendChar(1);  // for table length
+            databuf.appendChar(p.offset);
+            databuf.appendChar(p.length);
+            databuf.appendChar(p.index);
+            break;
+         // method receiver
+        case METHOD_RECEIVER:
+            // Do nothing
+            break;
+        // type parameters
+        case CLASS_TYPE_PARAMETER_BOUND:
+        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER_BOUND:
+        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            databuf.appendByte(p.parameter_index);
+            databuf.appendByte(p.bound_index);
+            break;
+         // Class extends and implements clauses
+        case CLASS_EXTENDS:
+        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            databuf.appendByte(p.type_index);
+            break;
+        // throws
+        case THROWS:
+            databuf.appendByte(p.type_index);
+            break;
+        case CLASS_LITERAL:
+            databuf.appendChar(p.offset);
+            break;
+        // method parameter: not specified
+        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            databuf.appendByte(p.parameter_index);
+            break;
+        // method type argument: wasn't specified
+        case METHOD_TYPE_ARGUMENT:
+        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.offset);
+            databuf.appendByte(p.type_index);
+            break;
+        // We don't need to worry abut these
+        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD_GENERIC_OR_ARRAY:
+            break;
+        case UNKNOWN:
+            break;
+        case METHOD_PARAMETER:
+        case METHOD_RETURN:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
+        case FIELD:
+        case THROWS_GENERIC_OR_ARRAY:
+            throw new AssertionError("target unusable: " + p);
+        default:
+            throw new AssertionError("unknown type: " + p);
         }
-
-        if (p.type.hasParameter())
-            databuf.appendByte(p.parameter);
-        if (p.type.hasBound())
-            databuf.appendByte(p.bound);
 
         // Append location data for generics/arrays.
         if (p.type.hasLocation()) {

@@ -219,10 +219,10 @@ href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-desig
 proposal</a> in the following ways, which will be corrected in the future:
 </p>
 <ul>
-  <!-- I have no idea when this was last updated/checked. -->
-  <li>support for annotations on class literals is limited to the parser
-      (i.e., annotations are not added to the AST or compiled into class
-      files)</li>
+  <!-- As of 07/04/2008 -->
+  <li>support for annotations on primitive class literals (e.g.
+  <tt>@Foo int.class</tt>) is limited to the parser and the AST
+  (i.e. annotations are not compiled into class files)</li>
   <li>
     <!-- As of 6/24/2008. -->
     The <tt>ElementType.TYPE_USE</tt> enum element does not yet exist
@@ -235,8 +235,6 @@ proposal</a> in the following ways, which will be corrected in the future:
     Then, your annotation will be permitted to appear anywhere.
   </li>
 </ul>
-
-<!-- As of 6/24/2008. -->
 <p>
 
 
