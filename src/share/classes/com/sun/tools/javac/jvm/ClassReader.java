@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 1999-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,7 +45,6 @@ import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.file.BaseFileObject;
 import com.sun.tools.javac.util.*;
-import com.sun.tools.javac.util.List;
 
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
@@ -1217,26 +1216,85 @@ public class ClassReader extends ClassFile implements Completer {
         position.type = type;
 
         switch (type) {
-            case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
-            case NEW:
-            case NEW_GENERIC_OR_ARRAY:
-            case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
-                position.offset = nextChar();
-                break;
-            case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                position.offset = nextChar();
-                position.length = nextChar();
-                position.index = nextChar();
-                break;
+        // type case
+        case TYPECAST:
+        case TYPECAST_GENERIC_OR_ARRAY:
+        // object creation
+        case INSTANCEOF:
+        case INSTANCEOF_GENERIC_OR_ARRAY:
+        // new expression
+        case NEW:
+        case NEW_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            position.offset = nextChar();
+            break;
+         // local variable
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            // FIXME: check for table length
+            int table_length = nextChar();
+            assert table_length == 1;
+            position.offset = nextChar();
+            position.length = nextChar();
+            position.index = nextChar();
+            break;
+         // method receiver
+        case METHOD_RECEIVER:
+            // Do nothing
+            break;
+        // type parameters
+        case CLASS_TYPE_PARAMETER_BOUND:
+        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER_BOUND:
+        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            position.parameter_index = nextByte();
+            position.bound_index = nextByte();
+            break;
+         // Class extends and implements clauses
+        case CLASS_EXTENDS:
+        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            position.type_index = nextByte();
+            break;
+        // throws
+        case THROWS:
+            position.type_index = nextByte();
+            break;
+        case CLASS_LITERAL:
+            position.offset = nextChar();
+            break;
+        // method parameter: not specified
+        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            position.parameter_index = nextByte();
+            break;
+        // method type argument: wasn't specified
+        case METHOD_TYPE_ARGUMENT:
+        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            position.offset = nextChar();
+            position.type_index = nextByte();
+            break;
+        // We don't need to worry abut these
+        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD_GENERIC_OR_ARRAY:
+            break;
+        case UNKNOWN:
+            break;
+        case METHOD_PARAMETER:
+        case METHOD_RETURN:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
+        case FIELD:
+        case THROWS_GENERIC_OR_ARRAY:
+            // method_return sometimes shows up
+            // throw new AssertionError("target unusable: " + position);
+            break;
+        default:
+            throw new AssertionError("unknown type: " + position);
         }
-
-        if (type.hasParameter())
-            position.parameter = nextByte();
-        if (type.hasBound())
-            position.parameter = nextByte();
 
         if (type.hasLocation()) {
             int len = nextChar();

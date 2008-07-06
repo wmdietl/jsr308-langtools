@@ -26,7 +26,7 @@ public enum TargetType {
     INSTANCEOF,
 
     /** For annotations on a type argument or nested array of a type test. */
-    @Deprecated INSTANCEOF_GENERIC_OR_ARRAY,
+    INSTANCEOF_GENERIC_OR_ARRAY,
 
     /** For annotations on object creation expressions. */
     NEW,
@@ -159,8 +159,7 @@ public enum TargetType {
      *         type, false otherwise
      */
     public boolean hasLocation() {
-        return this.name().contains("GENERIC_OR_ARRAY")
-             || this.name().contains("INNER_TYPE") || (this == METHOD_TYPE_PARAMETER);
+        return this.name().contains("GENERIC_OR_ARRAY");
     }
 
     /**
@@ -171,8 +170,7 @@ public enum TargetType {
      *         false otherwise
      */
     public boolean hasParameter() {
-        return this.name().contains("TYPE_PARAMETER") ||
-            this == METHOD_PARAMETER_GENERIC_OR_ARRAY;
+        return this.name().contains("TYPE_PARAMETER");
     }
 
     /**
