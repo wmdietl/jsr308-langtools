@@ -1,3 +1,9 @@
+Version 0.7.4, 11 July 2008
+
+Removed support for ARRAY-IN convention 
+  Moved to the Checker Framework
+
+----------------------------------------------------------------------
 Version 0.7.3, 4 July 2008
 
 New features
