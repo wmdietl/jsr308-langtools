@@ -153,25 +153,25 @@ public class Parser {
 
     /** JSR 308: should we use the ELTS array convention?
      */
-    private static final boolean JSR308_ELTS_ARRAY_CONVENTION;
+    private static final boolean JSR308_ELTS_ARRAY_CONVENTION = true;
 
-    /** JSR 308: default array convention */
-    private static final String JSR308_DEFAULT_ARRAY_CONVENTION = "elts";
+//    /** JSR 308: default array convention */
+//    private static final String JSR308_DEFAULT_ARRAY_CONVENTION = "elts";
 
-    static {
-        // Determine the convention ("elts" or "arrays") to use for JSR 308
-        // annotations on array types
-        String arrayConv = System.getProperty("jsr308.arrays");
-        if (arrayConv == null)
-            arrayConv = System.getProperty("jsr308_arrays");
-        if (arrayConv == null)
-            arrayConv = System.getenv("jsr308.arrays");
-        if (arrayConv == null)
-            arrayConv = System.getenv("jsr308_arrays");
-        if (arrayConv == null)
-            arrayConv = JSR308_DEFAULT_ARRAY_CONVENTION;
-        JSR308_ELTS_ARRAY_CONVENTION = arrayConv.toLowerCase().equals("elts");
-    }
+//    static {
+//        // Determine the convention ("elts" or "arrays") to use for JSR 308
+//        // annotations on array types
+//        String arrayConv = System.getProperty("jsr308.arrays");
+//        if (arrayConv == null)
+//            arrayConv = System.getProperty("jsr308_arrays");
+//        if (arrayConv == null)
+//            arrayConv = System.getenv("jsr308.arrays");
+//        if (arrayConv == null)
+//            arrayConv = System.getenv("jsr308_arrays");
+//        if (arrayConv == null)
+//            arrayConv = JSR308_DEFAULT_ARRAY_CONVENTION;
+//        JSR308_ELTS_ARRAY_CONVENTION = arrayConv.toLowerCase().equals("elts");
+//    }
 
     /** JSR 308: switch: debug output for JSR 308-related operations.
      */
