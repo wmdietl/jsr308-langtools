@@ -322,10 +322,15 @@ the compiler from source</a>.
         Follow the installation instructions &mdash; essentially,
 	just run the <code>.exe</code>, <code>.sh</code>, or <code>.bin</code>
 	file that you downloaded and follow the directions.
-	<ul>
+      </li>
+      <li>
+        Set the default version of Java.  (At any time, you can run either the
+        default or the non-default version of Java.)
+      	<ul>
 	  <li>
-	Note for <b>Linux</b> users:  
-	After installing, 
+	For <b>Linux</b>:  
+	After installing, your old version of Java remains the default.
+        If you wish to make OpenJDK Java 7 the default, then
 	set your <code>JAVA_HOME</code> environment variable to the top-level
 	directory of the JDK 7 installation <code>/path/to/jdk1.7.0</code>, and
 	augment your <code>PATH</code> with
@@ -337,6 +342,28 @@ export PATH=$JAVA_HOME/bin:$PATH
 	The shell uses the <code>PATH</code> variable to locate <code>java</code>,
 	while Ant uses <code>JAVA_HOME</code>.
 	  </li>
+	  <li>
+        For <b>Windows</b>:
+	After installing, the OpenJDK Java 7 (at <code>c:\Program
+	Files\Java\jdk1.7.0\</code>) becomes the default.
+	If you wish to retain an older version of Java as the default, then
+	do 2 things:
+	  <ul>
+	    <li><code>cp c:\Program Files\Java\jre1.5.0_12 c:\windows\system32\java.exe</code></li>
+	    <li>Modify these registry keys:
+<pre>
+HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\CurrentVersion = 1.5
+HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\BrowserJavaVersion 1.5.0_12
+HKEY_CLASSES_ROOT\jarfile\shell\open\command = "C:\Program Files\Java\jre1.5.0_12\bin\javaw.exe" -jar "%1" %*
+</pre>
+	    </li>
+	    </ul>
+	    The process is more fully described on Sun's Java forums:
+	    <a
+	    href="http://forum.java.sun.com/thread.jspa?messageID=3480628">thread
+	    1</a>, <a
+	    href="http://forum.java.sun.com/thread.jspa?messageID=1931404">thread
+	    2</a>.
 	</ul>
       </li>
       <li>
@@ -345,6 +372,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 	1.7.0-ea</code>.
       </li>
     </ol>
+
 
   </li>
   <li>
@@ -372,6 +400,17 @@ ant install</pre>
     can do so by running <tt>ant uninstall</tt>
     which puts back the original version of the <tt>tools.jar</tt> file.)
     </p>
+
+    <p>If you get an error message like</p>
+<pre>
+  c:\jsr308\langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar) to temporary file
+</pre>
+    <p>
+    then you are probably running Windows, and some other process is
+    probably accessing the given file.  This might be an anti-virus
+    program, for example.
+    </p>
+
   </li>
   <li>
     Run
@@ -479,7 +518,7 @@ in the following ways:
     command-line option</a>, which runs an annotation processor
     after types have been resolved, has been added to the compiler.</li>
   <li>
-    In addition to ordinary JSR 175 annotations, the compiler parrses JSR
+    In addition to ordinary JSR 175 annotations, the compiler parses JSR
     308 annotations, and also any annotation written in <a
     href="#annotations-in-comment">specifically-formatted comments for
     backward compatibility</a>.
@@ -687,5 +726,9 @@ in the <a href="changelog-jsr308.txt">changelog</a>.
  -->
 <!--  LocalWords:  README PDF HTML javac quals classpath cd tmp wget jsr Sep nv
  -->
-<!--  LocalWords:  uninstall username Haack webpage Nullness bashrc Papi
+<!--  LocalWords:  uninstall username Haack webpage Nullness bashrc Papi int
+ -->
+<!--  LocalWords:  ElementType enum HKEY JavaSoft CurrentVersion jarfile javaw
+ -->
+<!--  LocalWords:  BrowserJavaVersion exe SoyLatte
  -->
