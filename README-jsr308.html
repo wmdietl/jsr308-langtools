@@ -324,7 +324,7 @@ the compiler from source</a>.
 	file that you downloaded and follow the directions.
       </li>
       <li>
-        Set the default version of Java.  (At any time, you can run either the
+        Optionally set the default version of Java.  (At any time, you can run either the
         default or the non-default version of Java.)
       	<ul>
 	  <li>
@@ -347,23 +347,13 @@ export PATH=$JAVA_HOME/bin:$PATH
 	After installing, the OpenJDK Java 7 (at <code>c:\Program
 	Files\Java\jdk1.7.0\</code>) becomes the default.
 	If you wish to retain an older version of Java as the default, then
-	do 2 things:
-	  <ul>
-	    <li><code>cp c:\Program Files\Java\jre1.5.0_12 c:\windows\system32\java.exe</code></li>
-	    <li>Modify these registry keys:
-<pre>
-HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\CurrentVersion = 1.5
-HKEY_LOCAL_MACHINE\SOFTWARE\JavaSoft\Java Runtime Environment\BrowserJavaVersion 1.5.0_12
-HKEY_CLASSES_ROOT\jarfile\shell\open\command = "C:\Program Files\Java\jre1.5.0_12\bin\javaw.exe" -jar "%1" %*
-</pre>
-	    </li>
-	    </ul>
-	    The process is more fully described on Sun's Java forums:
-	    <a
-	    href="http://forum.java.sun.com/thread.jspa?messageID=3480628">thread
-	    1</a>, <a
-	    href="http://forum.java.sun.com/thread.jspa?messageID=1931404">thread
-	    2</a>.
+	do the following:
+          <ol>
+	    <li>Install Java 7</li>
+	    <li>Copy the <tt>jdk/jre</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
+            <li>Uninstall Java 7</li>
+	    <li>Move the <tt>jdk/jre</tt> directories back to <tt>Program Files\Java\</tt></li>
+          </ol>
 	</ul>
       </li>
       <li>
