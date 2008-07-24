@@ -384,21 +384,21 @@ unzip jsr308-langtools.zip
 <pre>cd langtools/binary
 ant install</pre>
     This step makes a backup copy of <tt>tools.jar</tt> and then
-    modifies the original.
+    modifies the original by copying some new <tt>.class</tt> files into it.
 
     <p>(You shouldn't need to undo this step, but you
     can do so by running <tt>ant uninstall</tt>
     which puts back the original version of the <tt>tools.jar</tt> file.)
     </p>
 
-    <p>If you get an error message like</p>
+    <!-- This is only applicable to Windows users. -->
+    <p>If you get this error message:</p>
+    <!-- This is a made-up error message; this document needs to be updated. -->
 <pre>
-  c:\jsr308\langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar) to temporary file
+  c:\jsr308\langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar.patched) to new file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar)
 </pre>
     <p>
-    then you are probably running Windows, and some other process is
-    probably accessing the given file.  This might be an anti-virus
-    program, for example.
+    then rename the file manually using the shell.
     </p>
 
   </li>

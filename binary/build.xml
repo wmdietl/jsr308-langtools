@@ -21,13 +21,18 @@
         <fail if="do.abort">Aborted by user.</fail>
 
         <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false"/>
+        <copy file="${tools.jar}" tofile="${tools.patched}"/>
         <tempfile property="temp.dir" prefix="temp-"/>
         <mkdir dir="${temp.dir}"/>
         <unzip src="javac.jar" dest="${temp.dir}"/>
         <unzip src="javap.jar" dest="${temp.dir}"/>
-        <jar destfile="${tools.jar}" update="yes" 
+        <jar destfile="${tools.jar.patched}" update="yes" 
             basedir="${temp.dir}" includes="**/*.class"/>
         <delete dir="${temp.dir}"/>
+        <!-- If this fails on Windows, run
+           mv tools.jar.patched tools.jar
+        -->
+	<move file="${tools.patched}" tofile="${tools.jar}"/>
     </target>
 
     <target name="uninstall"
