@@ -1071,7 +1071,7 @@ public class ClassReader extends ClassFile implements Completer {
     void readClassAttr(ClassSymbol c, Name attrName, int attrLen) {
         if (attrName == names.SourceFile) {
             Name n = readName(nextChar());
-            c.sourcefile = new SourceFileObject(n);
+            c.sourcefile = new SourceFileObject(n, c.flatname);
         } else if (attrName == names.InnerClasses) {
             readInnerClasses(c);
         } else if (allowGenerics && attrName == names.Signature) {
@@ -2417,9 +2417,12 @@ public class ClassReader extends ClassFile implements Completer {
         /** The file's name.
          */
         private Name name;
+        private Name flatname;
 
-        public SourceFileObject(Name name) {
+        public SourceFileObject(Name name, Name flatname) {
+            super(null); // no file manager; never referenced for this file object
             this.name = name;
+            this.flatname = flatname;
         }
 
         public InputStream openInputStream() {
@@ -2481,5 +2484,9 @@ public class ClassReader extends ClassFile implements Completer {
             throw new UnsupportedOperationException();
         }
 
+        @Override
+        protected String inferBinaryName(Iterable<? extends File> path) {
+            return flatname.toString();
+        }
     }
 }
