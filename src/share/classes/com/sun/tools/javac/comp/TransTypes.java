@@ -899,7 +899,6 @@ public class TransTypes extends TreeTranslator {
                         assert fieldContext.selected instanceof JCAnnotatedType;
                         JCAnnotatedType fieldType = (JCAnnotatedType)fieldContext.selected;
                         p.pos = fieldType.underlyingType.pos;
-                        System.out.println(((JCFieldAccess)context).selected);
                     } else throw new AssertionError();
                     return p;
                 }
