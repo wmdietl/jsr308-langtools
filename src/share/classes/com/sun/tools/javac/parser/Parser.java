@@ -125,6 +125,8 @@ public class Parser {
     /** JSR 308: A stack for parsing out-of-order type annotations. */
     private ListBuffer<List<JCAnnotation>> typeAnnotations = ListBuffer.lb();
 
+    private List<JCAnnotation> varArgsTypeAnnotationsHack = null;
+
     /** Construct a parser from a given scanner, tree factory and log.
      */
     protected Parser(Factory fac,
@@ -1088,22 +1090,14 @@ public class Parser {
             t = toP(F.at(S.pos()).Ident(ident()));
             loop: while (true) {
                 pos = S.pos();
-                List<JCAnnotation> typeAnno = List.nil();
                 switch (S.token()) {
-                case MONKEYS_AT:
-                    if (ArrayConvention.USED_CONVENTION.isPre())
-                        typeAnno = typeAnnotationsOpt();
-                    assert S.token() == LBRACKET;
-                    // fall through
                 case LBRACKET:
                     S.nextToken();
 
                     /// JSR 308: handle annotated array levels in an array type
                     if (S.token() == MONKEYS_AT || S.token() == RBRACKET) {
                         ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
-                        if (ArrayConvention.USED_CONVENTION.isIn())
-                            typeAnno = typeAnnotationsOpt();
-                        stack.prepend(typeAnno);
+                        stack.prepend(typeAnnotationsOpt());
 
                         S.nextToken();
 
@@ -1206,14 +1200,13 @@ public class Parser {
         while (true) {
             int pos1 = S.pos();
 
-            if (S.token() == LBRACKET
-                    || (S.token() == MONKEYS_AT && ArrayConvention.USED_CONVENTION.isPre())) {
-                List<JCAnnotation> annos = List.nil();
-                if (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)
-                    annos = typeAnnotationsOpt();
+            List<JCAnnotation> annos = null;
+            if (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)
+                annos = typeAnnotationsOpt();
 
-                // S.nextToken();
-                accept(LBRACKET);
+            if (S.token() == LBRACKET) {
+                S.nextToken();
+
                 // JSR 308: handle array type annotations after an "[" has
                 // already been lexed
                 ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
@@ -1222,6 +1215,7 @@ public class Parser {
                 }
 
                 stack.prepend(annos);
+                annos = null;
 
                 if ((mode & TYPE) != 0) {
                     int oldmode = mode;
@@ -1267,6 +1261,8 @@ public class Parser {
                     typeArgs = null;
                 }
             } else {
+                if (annos != null && !annos.isEmpty())
+                    varArgsTypeAnnotationsHack = annos;
                 break;
             }
         }
@@ -1276,6 +1272,7 @@ public class Parser {
                   S.token() == PLUSPLUS ? JCTree.POSTINC : JCTree.POSTDEC, t));
             S.nextToken();
         }
+
         return toP(t);
     }
 
@@ -1458,23 +1455,26 @@ public class Parser {
      */
     private JCExpression bracketsOpt(JCExpression t,
             ListBuffer<List<JCAnnotation>> stack) {
-        if (S.token() == LBRACKET
-                || (S.token() == MONKEYS_AT && ArrayConvention.USED_CONVENTION.isPre())) {
-            List<JCAnnotation> annos = List.nil();
-            if (ArrayConvention.USED_CONVENTION.isPre()
-                    && S.token() == MONKEYS_AT)
-                annos = typeAnnotationsOpt();
+        List<JCAnnotation> annos = List.nil();
+        if (ArrayConvention.USED_CONVENTION.isPre()
+                && S.token() == MONKEYS_AT)
+            annos = typeAnnotationsOpt();
 
+        if (S.token() == LBRACKET) {
             int pos = S.pos();
-            // S.nextToken();
-            accept(LBRACKET);
+            S.nextToken();
+
             JCExpression orig = t;
             // JSR 308: Put annotations (possibly an empty list) on the stack.
             if (ArrayConvention.USED_CONVENTION.isIn())
                 annos = typeAnnotationsOpt();
             stack.prepend(annos);
+            annos = null;
             t = bracketsOptCont(t, pos, stack);
         }
+
+        if (annos != null && !annos.isEmpty())
+            this.varArgsTypeAnnotationsHack = annos;
 
         int apos = S.pos();
         List<JCAnnotation> deferred = stack.next();
@@ -3007,6 +3007,9 @@ public class Parser {
         JCExpression type = type();
         // JSR 308: handle annotations on a varargs element type
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
+        if (varArgsTypeAnnotationsHack != null) {
+            varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
+        }
         if (S.token() == ELLIPSIS) {
             checkVarargs();
             mods.flags |= Flags.VARARGS;
