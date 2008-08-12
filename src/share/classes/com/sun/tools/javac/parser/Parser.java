@@ -1060,7 +1060,8 @@ public class Parser {
             // (and issue a syntax error if there is no class literal).
             // Otherwise, create a JCAnnotatedType.
             if ((mode & TYPE) == 0) {
-                assert expr.getTag() == JCTree.SELECT;
+                if (expr.getTag() != JCTree.SELECT)
+                    return illegal(typeAnnos.head.pos);
                 JCFieldAccess sel = (JCFieldAccess)expr;
                 if (sel.name != names._class)
                     return illegal();
