@@ -1693,7 +1693,7 @@ public class Parser {
                 S.nextToken();
                 if (S.token() == RBRACKET) {
                     elemtype = bracketsOptCont(elemtype, pos,
-                            ListBuffer.<List<JCAnnotation>>lb());
+                            ListBuffer.<List<JCAnnotation>>lb().append(maybeDimAnnos));
                 } else {
                     // JSR 308: We might have any combination of annotations and
                     // dimension at this point.
@@ -2876,7 +2876,12 @@ public class Parser {
         List<JCVariableDecl> params = formalParameters();
         if (!isVoid) type = bracketsOpt(type);
         // JSR 308: handle receiver annotations with no underlying type
-        JCAnnotatedType receiver = F.at(pos).AnnotatedType(typeAnnotationsOpt(), null);
+        List<JCAnnotation> receiverAnnotations = typeAnnotationsOpt();
+        if (varArgsTypeAnnotationsHack != null) {
+            receiverAnnotations = receiverAnnotations.prependList(varArgsTypeAnnotationsHack);
+            varArgsTypeAnnotationsHack = null;
+        }
+        JCAnnotatedType receiver = F.at(pos).AnnotatedType(receiverAnnotations, null);
         List<JCExpression> thrown = List.nil();
         if (S.token() == THROWS) {
             S.nextToken();
@@ -3009,6 +3014,7 @@ public class Parser {
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
         if (varArgsTypeAnnotationsHack != null) {
             varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
+            varArgsTypeAnnotationsHack = null;
         }
         if (S.token() == ELLIPSIS) {
             checkVarargs();
@@ -3223,7 +3229,7 @@ public class Parser {
         public static final ArrayConvention USED_CONVENTION;
 
         /** JSR 308: default array convention */
-        private static final ArrayConvention JSR308_DEFAULT_ARRAY_CONVENTION = ELTS_IN;
+        private static final ArrayConvention JSR308_DEFAULT_ARRAY_CONVENTION = ARRAYS_PRE;
 
         static {
             // Determine the convention ("elts" or "arrays") to use for JSR 308
