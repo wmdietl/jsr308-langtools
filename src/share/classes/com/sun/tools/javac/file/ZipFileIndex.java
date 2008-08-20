@@ -32,6 +32,7 @@ import java.io.RandomAccessFile;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -81,11 +82,12 @@ public class ZipFileIndex {
     private File zipFile;
     private long zipFileLastModified = NOT_MODIFIED;
     private RandomAccessFile zipRandomFile;
-    private ZipFileIndexEntry[] entries;
+    private Entry[] entries;
 
     private boolean readFromIndex = false;
     private File zipIndexFile = null;
     private boolean triedToReadIndex = false;
+    final String symbolFilePrefix;
     private int symbolFilePrefixLength = 0;
     private boolean hasPopulatedData = false;
     private long lastReferenceTimeStamp = NOT_MODIFIED;
@@ -141,14 +143,14 @@ public class ZipFileIndex {
         }
     }
 
-    public static ZipFileIndex getZipFileIndex(File zipFile, int symbolFilePrefixLen, boolean useCache, String cacheLocation, boolean writeIndex) throws IOException {
+    public static ZipFileIndex getZipFileIndex(File zipFile, String symbolFilePrefix, boolean useCache, String cacheLocation, boolean writeIndex) throws IOException {
         ZipFileIndex zi = null;
         lock.lock();
         try {
             zi = getExistingZipIndex(zipFile);
 
             if (zi == null || (zi != null && zipFile.lastModified() != zi.zipFileLastModified)) {
-                zi = new ZipFileIndex(zipFile, symbolFilePrefixLen, writeIndex,
+                zi = new ZipFileIndex(zipFile, symbolFilePrefix, writeIndex,
                         useCache, cacheLocation);
                 zipFileIndexCache.put(zipFile, zi);
             }
@@ -229,10 +231,12 @@ public class ZipFileIndex {
         }
     }
 
-    private ZipFileIndex(File zipFile, int symbolFilePrefixLen, boolean writeIndex,
+    private ZipFileIndex(File zipFile, String symbolFilePrefix, boolean writeIndex,
             boolean useCache, String cacheLocation) throws IOException {
         this.zipFile = zipFile;
-        this.symbolFilePrefixLength = symbolFilePrefixLen;
+        this.symbolFilePrefix = symbolFilePrefix;
+        this.symbolFilePrefixLength = (symbolFilePrefix == null ? 0 :
+            symbolFilePrefix.getBytes("UTF-8").length);
         this.writeIndex = writeIndex;
         this.usePreindexedCache = useCache;
         this.preindexedCacheLocation = cacheLocation;
@@ -312,7 +316,7 @@ public class ZipFileIndex {
 
     private void cleanupState() {
         // Make sure there is a valid but empty index if the file doesn't exist
-        entries = ZipFileIndexEntry.EMPTY_ARRAY;
+        entries = Entry.EMPTY_ARRAY;
         directories = Collections.<String, DirectoryEntry>emptyMap();
         zipFileLastModified = NOT_MODIFIED;
         allDirs = Collections.<String>emptySet();
@@ -342,7 +346,7 @@ public class ZipFileIndex {
     /**
      * Returns the ZipFileIndexEntry for an absolute path, if there is one.
      */
-    public ZipFileIndexEntry getZipIndexEntry(String path) {
+    Entry getZipIndexEntry(String path) {
         if (File.separatorChar != '/') {
             path = path.replace('/', File.separatorChar);
         }
@@ -493,7 +497,7 @@ public class ZipFileIndex {
     public long getLastModified(String path) throws IOException {
         lock.lock();
         try {
-            ZipFileIndexEntry entry = getZipIndexEntry(path);
+            Entry entry = getZipIndexEntry(path);
             if (entry == null)
                 throw new FileNotFoundException();
             return entry.getLastModified();
@@ -506,7 +510,7 @@ public class ZipFileIndex {
     public int length(String path) throws IOException {
         lock.lock();
         try {
-            ZipFileIndexEntry entry = getZipIndexEntry(path);
+            Entry entry = getZipIndexEntry(path);
             if (entry == null)
                 throw new FileNotFoundException();
 
@@ -530,7 +534,7 @@ public class ZipFileIndex {
     public byte[] read(String path) throws IOException {
         lock.lock();
         try {
-            ZipFileIndexEntry entry = getZipIndexEntry(path);
+            Entry entry = getZipIndexEntry(path);
             if (entry == null)
                 throw new FileNotFoundException(MessageFormat.format("Path not found in ZIP: {0}", path));
             return read(entry);
@@ -540,7 +544,7 @@ public class ZipFileIndex {
         }
     }
 
-    public byte[] read(ZipFileIndexEntry entry) throws IOException {
+    byte[] read(Entry entry) throws IOException {
         lock.lock();
         try {
             openFile();
@@ -556,7 +560,7 @@ public class ZipFileIndex {
     public int read(String path, byte[] buffer) throws IOException {
         lock.lock();
         try {
-            ZipFileIndexEntry entry = getZipIndexEntry(path);
+            Entry entry = getZipIndexEntry(path);
             if (entry == null)
                 throw new FileNotFoundException();
             return read(entry, buffer);
@@ -566,7 +570,7 @@ public class ZipFileIndex {
         }
     }
 
-    public int read(ZipFileIndexEntry entry, byte[] buffer)
+    int read(Entry entry, byte[] buffer)
             throws IOException {
         lock.lock();
         try {
@@ -578,7 +582,7 @@ public class ZipFileIndex {
         }
     }
 
-    private byte[] readBytes(ZipFileIndexEntry entry) throws IOException {
+    private byte[] readBytes(Entry entry) throws IOException {
         byte[] header = getHeader(entry);
         int csize = entry.compressedSize;
         byte[] cbuf = new byte[csize];
@@ -600,7 +604,7 @@ public class ZipFileIndex {
     /**
      *
      */
-    private int readBytes(ZipFileIndexEntry entry, byte[] buffer) throws IOException {
+    private int readBytes(Entry entry, byte[] buffer) throws IOException {
         byte[] header = getHeader(entry);
 
         // entry is not compressed?
@@ -633,7 +637,7 @@ public class ZipFileIndex {
     // Zip utilities
     //----------------------------------------------------------------------------
 
-    private byte[] getHeader(ZipFileIndexEntry entry) throws IOException {
+    private byte[] getHeader(Entry entry) throws IOException {
         zipRandomFile.seek(entry.offset);
         byte[] header = new byte[30];
         zipRandomFile.readFully(header);
@@ -746,11 +750,11 @@ public class ZipFileIndex {
         private void buildIndex() throws IOException {
             int entryCount = get2ByteLittleEndian(zipDir, 0);
 
-            entries = new ZipFileIndexEntry[entryCount];
+            entries = new Entry[entryCount];
             // Add each of the files
             if (entryCount > 0) {
                 directories = new HashMap<String, DirectoryEntry>();
-                ArrayList<ZipFileIndexEntry> entryList = new ArrayList<ZipFileIndexEntry>();
+                ArrayList<Entry> entryList = new ArrayList<Entry>();
                 int pos = 2;
                 for (int i = 0; i < entryCount; i++) {
                     pos = readEntry(pos, entryList, directories);
@@ -759,19 +763,19 @@ public class ZipFileIndex {
                 // Add the accumulated dirs into the same list
                 Iterator i = directories.keySet().iterator();
                 while (i.hasNext()) {
-                    ZipFileIndexEntry zipFileIndexEntry = new ZipFileIndexEntry( (String) i.next());
+                    Entry zipFileIndexEntry = new Entry( (String) i.next());
                     zipFileIndexEntry.isDir = true;
                     entryList.add(zipFileIndexEntry);
                 }
 
-                entries = entryList.toArray(new ZipFileIndexEntry[entryList.size()]);
+                entries = entryList.toArray(new Entry[entryList.size()]);
                 Arrays.sort(entries);
             } else {
                 cleanupState();
             }
         }
 
-        private int readEntry(int pos, List<ZipFileIndexEntry> entryList,
+        private int readEntry(int pos, List<Entry> entryList,
                 Map<String, DirectoryEntry> directories) throws IOException {
             if (get4ByteLittleEndian(zipDir, pos) != 0x02014b50) {
                 throw new ZipException("cannot read zip file entry");
@@ -838,7 +842,7 @@ public class ZipFileIndex {
 
             // For each dir create also a file
             if (fileStart != fileEnd) {
-                ZipFileIndexEntry entry = new ZipFileIndexEntry(directory,
+                Entry entry = new Entry(directory,
                         new String(zipDir, fileStart, fileEnd - fileStart, "UTF-8"));
 
                 entry.setNativeTime(get4ByteLittleEndian(zipDir, pos + 12));
@@ -873,6 +877,7 @@ public class ZipFileIndex {
     /** ------------------------------------------------------------------------
      *  DirectoryEntry class
      * -------------------------------------------------------------------------*/
+
     static class DirectoryEntry {
         private boolean filesInited;
         private boolean directoriesInited;
@@ -885,9 +890,9 @@ public class ZipFileIndex {
 
         private com.sun.tools.javac.util.List<String> zipFileEntriesFiles = com.sun.tools.javac.util.List.<String>nil();
         private com.sun.tools.javac.util.List<String> zipFileEntriesDirectories = com.sun.tools.javac.util.List.<String>nil();
-        private com.sun.tools.javac.util.List<ZipFileIndexEntry>  zipFileEntries = com.sun.tools.javac.util.List.<ZipFileIndexEntry>nil();
+        private com.sun.tools.javac.util.List<Entry>  zipFileEntries = com.sun.tools.javac.util.List.<Entry>nil();
 
-        private List<ZipFileIndexEntry> entries = new ArrayList<ZipFileIndexEntry>();
+        private List<Entry> entries = new ArrayList<Entry>();
 
         private ZipFileIndex zipFileIndex;
 
@@ -916,7 +921,7 @@ public class ZipFileIndex {
 
             initEntries();
 
-            for (ZipFileIndexEntry e : entries) {
+            for (Entry e : entries) {
                 if (!e.isDir) {
                     zipFileEntriesFiles = zipFileEntriesFiles.append(e.name);
                 }
@@ -932,7 +937,7 @@ public class ZipFileIndex {
 
             initEntries();
 
-            for (ZipFileIndexEntry e : entries) {
+            for (Entry e : entries) {
                 if (e.isDir) {
                     zipFileEntriesDirectories = zipFileEntriesDirectories.append(e.name);
                 }
@@ -943,7 +948,7 @@ public class ZipFileIndex {
             return zipFileEntriesDirectories;
         }
 
-        private com.sun.tools.javac.util.List<ZipFileIndexEntry> getEntries() {
+        private com.sun.tools.javac.util.List<Entry> getEntries() {
             if (zipFileEntriesInited) {
                 return zipFileEntries;
             }
@@ -951,7 +956,7 @@ public class ZipFileIndex {
             initEntries();
 
             zipFileEntries = com.sun.tools.javac.util.List.nil();
-            for (ZipFileIndexEntry zfie : entries) {
+            for (Entry zfie : entries) {
                 zipFileEntries = zipFileEntries.append(zfie);
             }
 
@@ -960,9 +965,9 @@ public class ZipFileIndex {
             return zipFileEntries;
         }
 
-        private ZipFileIndexEntry getEntry(String rootName) {
+        private Entry getEntry(String rootName) {
             initEntries();
-            int index = Collections.binarySearch(entries, new ZipFileIndexEntry(dirName, rootName));
+            int index = Collections.binarySearch(entries, new Entry(dirName, rootName));
             if (index < 0) {
                 return null;
             }
@@ -977,9 +982,9 @@ public class ZipFileIndex {
 
             if (!zipFileIndex.readFromIndex) {
                 int from = -Arrays.binarySearch(zipFileIndex.entries,
-                        new ZipFileIndexEntry(dirName, ZipFileIndex.MIN_CHAR)) - 1;
+                        new Entry(dirName, ZipFileIndex.MIN_CHAR)) - 1;
                 int to = -Arrays.binarySearch(zipFileIndex.entries,
-                        new ZipFileIndexEntry(dirName, MAX_CHAR)) - 1;
+                        new Entry(dirName, MAX_CHAR)) - 1;
 
                 boolean emptyList = false;
 
@@ -1016,7 +1021,7 @@ public class ZipFileIndex {
                             // Read java time stamp of the file in the real Jar/Zip file
                             long eJavaTimestamp = raf.readLong();
 
-                            ZipFileIndexEntry rfie = new ZipFileIndexEntry(dirName, eName);
+                            Entry rfie = new Entry(dirName, eName);
                             rfie.isDir = eIsDir;
                             rfie.offset = eOffset;
                             rfie.size = eSize;
@@ -1041,7 +1046,7 @@ public class ZipFileIndex {
             entriesInited = true;
         }
 
-        List<ZipFileIndexEntry> getEntriesAsCollection() {
+        List<Entry> getEntriesAsCollection() {
             initEntries();
 
             return entries;
@@ -1173,8 +1178,8 @@ public class ZipFileIndex {
                 raf.seek(currFP);
 
                 // Now write each of the files in the DirectoryEntry
-                List<ZipFileIndexEntry> entries = de.getEntriesAsCollection();
-                for (ZipFileIndexEntry zfie : entries) {
+                List<Entry> entries = de.getEntriesAsCollection();
+                for (Entry zfie : entries) {
                     // Write the name bytes
                     byte [] zfieNameBytes = zfie.name.getBytes("UTF-8");
                     int zfieNameBytesLen = zfieNameBytes.length;
@@ -1245,4 +1250,101 @@ public class ZipFileIndex {
     public File getZipFile() {
         return zipFile;
     }
+
+
+    static class Entry implements Comparable<Entry> {
+        public static final Entry[] EMPTY_ARRAY = {};
+
+        // Directory related
+        String dir;
+        boolean isDir;
+
+        // File related
+        String name;
+
+        int offset;
+        int size;
+        int compressedSize;
+        long javatime;
+
+        private int nativetime;
+
+        public Entry(String path) {
+            int separator = path.lastIndexOf(File.separatorChar);
+            if (separator == -1) {
+                dir = "".intern();
+                name = path;
+            } else {
+                dir = path.substring(0, separator).intern();
+                name = path.substring(separator + 1);
+            }
+        }
+
+        public Entry(String directory, String name) {
+            this.dir = directory.intern();
+            this.name = name;
+        }
+
+        public String getName() {
+            if (dir == null || dir.length() == 0) {
+                return name;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(dir);
+            sb.append(File.separatorChar);
+            sb.append(name);
+            return sb.toString();
+        }
+
+        public String getFileName() {
+            return name;
+        }
+
+        public long getLastModified() {
+            if (javatime == 0) {
+                    javatime = dosToJavaTime(nativetime);
+            }
+            return javatime;
+        }
+
+        // based on dosToJavaTime in java.util.Zip, but avoiding the
+        // use of deprecated Date constructor
+        private static long dosToJavaTime(int dtime) {
+            Calendar c = Calendar.getInstance();
+            c.set(Calendar.YEAR,        ((dtime >> 25) & 0x7f) + 1980);
+            c.set(Calendar.MONTH,       ((dtime >> 21) & 0x0f) - 1);
+            c.set(Calendar.DATE,        ((dtime >> 16) & 0x1f));
+            c.set(Calendar.HOUR_OF_DAY, ((dtime >> 11) & 0x1f));
+            c.set(Calendar.MINUTE,      ((dtime >>  5) & 0x3f));
+            c.set(Calendar.SECOND,      ((dtime <<  1) & 0x3e));
+            c.set(Calendar.MILLISECOND, 0);
+            return c.getTimeInMillis();
+        }
+
+        void setNativeTime(int natTime) {
+            nativetime = natTime;
+        }
+
+        public boolean isDirectory() {
+            return isDir;
+        }
+
+        public int compareTo(Entry other) {
+            String otherD = other.dir;
+            if (dir != otherD) {
+                int c = dir.compareTo(otherD);
+                if (c != 0)
+                    return c;
+            }
+            return name.compareTo(other.name);
+        }
+
+
+        public String toString() {
+            return isDir ? ("Dir:" + dir + " : " + name) :
+                (dir + ":" + name);
+        }
+    }
+
 }

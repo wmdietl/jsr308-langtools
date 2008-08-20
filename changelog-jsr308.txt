@@ -1,3 +1,21 @@
+Version 0.7.6, 12 Aug 2008
+
+New features
+  Changed default array syntax to ARRAYS-PRE
+
+Bug fixes
+  several bug fixes related to ARRAYS-PRE parsing
+
+----------------------------------------------------------------------
+Version 0.7.5, 2 Aug 2008
+
+New features
+  Added support for ARRAYS-PRE and ELTS-PRE array syntax
+
+Base build
+  Updated to OpenJDK langtools build b31
+
+----------------------------------------------------------------------
 Version 0.7.4, 11 July 2008
 
 Removed support for ARRAY-IN convention 
