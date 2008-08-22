@@ -20,14 +20,27 @@
         </condition>
         <fail if="do.abort">Aborted by user.</fail>
 
-        <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false"/>
+        <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false" preservelastmodified="true"/>
+        <copy file="${tools.backup}" tofile="${tools.jsr308}" overwrite="true" preservelastmodified="true"/>
+        <!-- ${tools.jsr308} is now a completely unmodified tools.jar file -->
         <tempfile property="temp.dir" prefix="temp-"/>
         <mkdir dir="${temp.dir}"/>
         <unzip src="javac.jar" dest="${temp.dir}"/>
         <unzip src="javap.jar" dest="${temp.dir}"/>
-        <jar destfile="${tools.jar}" update="yes" 
+        <jar destfile="${tools.jsr308}" update="yes" 
             basedir="${temp.dir}" includes="**/*.class"/>
         <delete dir="${temp.dir}"/>
+        <!-- This copy is likely to fail on Windows, because the Ant task 
+        is locking tools.jar. -->
+        <!-- If this copy fails, the user needs to perform the copy by
+        hand.  I would like the Ant script to print instructions
+        (essentially just "Run cp ${tools.jsr308} ${tools.jar}" and then
+        fail.  (The same goes for the "uninstall" task below.) -->
+        <!-- How would one implement that behavior?  The trycatch task is
+        able to perform another action if one action fails.  But the
+        trycatch task is not built into Ant, so it requires configuration
+        work by the user, which I don't want. -->
+        <copy file="${tools.jsr308}" tofile="${tools.jar}" overwrite="true" preservelastmodified="true"/>
     </target>
 
     <target name="uninstall"
