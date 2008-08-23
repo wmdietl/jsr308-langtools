@@ -43,13 +43,14 @@
         hand.  I would like the Ant script to print instructions
         (essentially just "Run cp ${tools.jsr308} ${tools.jar}" and then
         fail.  (The same goes for the "uninstall" task below.) -->
-        <trycatch>
+        <trycatch property="fail.msg">
           <try>
             <copy file="${tools.jsr308}" tofile="${tools.jar}" overwrite="true" preservelastmodified="true"/>
           </try>
 
           <catch>
             <fail>Could not modify tools.jar.
+Reason: ${fail.msg}
 Please copy the files manually:
     copy ${tools.jsr308} ${tools.jar}        (on Windows)
     cp   ${tools.jsr308} ${tools.jar}        (on Linux)
@@ -70,13 +71,14 @@ Please copy the files manually:
         </condition>
         <fail if="do.abort">Aborted by user.</fail>
 
-        <trycatch>
+        <trycatch property="fail.msg">
           <try>
             <move file="${tools.backup}" tofile="${tools.jar}"/>
           </try>
           
           <catch>
             <fail>Could not revert tools.jar.
+Reason: ${fail.msg}
 Please revert it manually via:
     move ${tools.backup} ${tools.jar}        (on Windows)
     mv   ${tools.backup} ${tools.jar}        (on Linux)
