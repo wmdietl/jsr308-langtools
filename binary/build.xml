@@ -2,6 +2,13 @@
 
     <property file="build.properties"/>
 
+    <!-- import trycatch tast -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath>
+        <pathelement location="ant-contrib-trycatch.jar"/>
+      </classpath>
+    </taskdef>
+
     <target name="help">
         <echo message="Please run &quot;ant -p&quot; to see the available targets."/>
     </target>
@@ -36,11 +43,19 @@
         hand.  I would like the Ant script to print instructions
         (essentially just "Run cp ${tools.jsr308} ${tools.jar}" and then
         fail.  (The same goes for the "uninstall" task below.) -->
-        <!-- How would one implement that behavior?  The trycatch task is
-        able to perform another action if one action fails.  But the
-        trycatch task is not built into Ant, so it requires configuration
-        work by the user, which I don't want. -->
-        <copy file="${tools.jsr308}" tofile="${tools.jar}" overwrite="true" preservelastmodified="true"/>
+        <trycatch>
+          <try>
+            <copy file="${tools.jsr308}" tofile="${tools.jar}" overwrite="true" preservelastmodified="true"/>
+          </try>
+
+          <catch>
+            <fail>Could not modify tools.jar.
+Please copy the files manually:
+    copy ${tools.jsr308} ${tools.jar}        (on Windows)
+    cp   ${tools.jsr308} ${tools.jar}        (on Linux)
+            </fail>
+          </catch>
+        </trycatch>
     </target>
 
     <target name="uninstall"
@@ -55,7 +70,19 @@
         </condition>
         <fail if="do.abort">Aborted by user.</fail>
 
-        <move file="${tools.backup}" tofile="${tools.jar}"/>
+        <trycatch>
+          <try>
+            <move file="${tools.backup}" tofile="${tools.jar}"/>
+          </try>
+          
+          <catch>
+            <fail>Could not revert tools.jar.
+Please revert it manually via:
+    move ${tools.backup} ${tools.jar}        (on Windows)
+    mv   ${tools.backup} ${tools.jar}        (on Linux)
+            </fail>
+          </catch>
+        </trycatch>
     </target>
 
 </project>
