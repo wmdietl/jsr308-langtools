@@ -2,6 +2,13 @@
 
     <property file="build.properties"/>
 
+    <!-- import trycatch tast -->
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+      <classpath>
+        <pathelement location="ant-contrib-trycatch.jar"/>
+      </classpath>
+    </taskdef>
+
     <target name="help">
         <echo message="Please run &quot;ant -p&quot; to see the available targets."/>
     </target>
@@ -20,19 +27,36 @@
         </condition>
         <fail if="do.abort">Aborted by user.</fail>
 
-        <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false"/>
-        <copy file="${tools.jar}" tofile="${tools.patched}"/>
+        <copy file="${tools.jar}" tofile="${tools.backup}" overwrite="false" preservelastmodified="true"/>
+        <copy file="${tools.backup}" tofile="${tools.jsr308}" overwrite="true" preservelastmodified="true"/>
+        <!-- ${tools.jsr308} is now a completely unmodified tools.jar file -->
         <tempfile property="temp.dir" prefix="temp-"/>
         <mkdir dir="${temp.dir}"/>
         <unzip src="javac.jar" dest="${temp.dir}"/>
         <unzip src="javap.jar" dest="${temp.dir}"/>
-        <jar destfile="${tools.jar.patched}" update="yes" 
+        <jar destfile="${tools.jsr308}" update="yes" 
             basedir="${temp.dir}" includes="**/*.class"/>
         <delete dir="${temp.dir}"/>
-        <!-- If this fails on Windows, run
-           mv tools.jar.patched tools.jar
-        -->
-	<move file="${tools.patched}" tofile="${tools.jar}"/>
+        <!-- This copy is likely to fail on Windows, because the Ant task 
+        is locking tools.jar. -->
+        <!-- If this copy fails, the user needs to perform the copy by
+        hand.  I would like the Ant script to print instructions
+        (essentially just "Run cp ${tools.jsr308} ${tools.jar}" and then
+        fail.  (The same goes for the "uninstall" task below.) -->
+        <trycatch property="fail.msg">
+          <try>
+            <copy file="${tools.jsr308}" tofile="${tools.jar}" overwrite="true" preservelastmodified="true"/>
+          </try>
+
+          <catch>
+            <fail>Could not modify tools.jar.
+Reason: ${fail.msg}
+Please copy the files manually:
+    copy ${tools.jsr308} ${tools.jar}        (on Windows)
+    cp   ${tools.jsr308} ${tools.jar}        (on Linux)
+            </fail>
+          </catch>
+        </trycatch>
     </target>
 
     <target name="uninstall"
@@ -47,7 +71,20 @@
         </condition>
         <fail if="do.abort">Aborted by user.</fail>
 
-        <move file="${tools.backup}" tofile="${tools.jar}"/>
+        <trycatch property="fail.msg">
+          <try>
+            <move file="${tools.backup}" tofile="${tools.jar}"/>
+          </try>
+          
+          <catch>
+            <fail>Could not revert tools.jar.
+Reason: ${fail.msg}
+Please revert it manually via:
+    move ${tools.backup} ${tools.jar}        (on Windows)
+    mv   ${tools.backup} ${tools.jar}        (on Linux)
+            </fail>
+          </catch>
+        </trycatch>
     </target>
 
 </project>
