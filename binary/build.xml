@@ -51,9 +51,9 @@
           <catch>
             <fail>Could not modify tools.jar.
 Reason: ${fail.msg}
-Please copy the files manually:
-    copy ${tools.jsr308} ${tools.jar}        (on Windows)
-    cp   ${tools.jsr308} ${tools.jar}        (on Linux)
+Please copy the files manually.
+  On Windows:    copy ${tools.jsr308} ${tools.jar}
+  On Linux:      cp   ${tools.jsr308} ${tools.jar}
             </fail>
           </catch>
         </trycatch>
