@@ -42,6 +42,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.StringTokenizer;
 import javax.lang.model.SourceVersion;
 
 import static com.sun.tools.javac.main.OptionName.*;
