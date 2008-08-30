@@ -283,13 +283,13 @@ public class Parser {
         }
     }
 
-    private JCErroneous syntaxError(int pos, String key, Object... arg) {
-        return syntaxError(pos, null, key, arg);
+    private JCErroneous syntaxError(int pos, String key, Token... args) {
+        return syntaxError(pos, null, key, args);
     }
 
-    private JCErroneous syntaxError(int pos, List<JCTree> errs, String key, Object... arg) {
+    private JCErroneous syntaxError(int pos, List<JCTree> errs, String key, Token... args) {
         setErrorEndPos(pos);
-        reportSyntaxError(pos, key, arg);
+        reportSyntaxError(pos, key, (Object[])args);
         return toP(F.at(pos).Erroneous(errs));
     }
 
@@ -298,12 +298,12 @@ public class Parser {
      * Report a syntax error at given position using the given
      * argument unless one was already reported at the same position.
      */
-    private void reportSyntaxError(int pos, String key, Object... arg) {
+    private void reportSyntaxError(int pos, String key, Object... args) {
         if (pos > S.errPos() || pos == Position.NOPOS) {
             if (S.token() == EOF)
                 log.error(pos, "premature.eof");
             else
-                log.error(pos, key, arg);
+                log.error(pos, key, args);
         }
         S.errPos(pos);
         if (S.pos() == errorPos)
@@ -322,7 +322,7 @@ public class Parser {
     /** Generate a syntax error at current position unless one was
      *  already reported at the same position.
      */
-    private JCErroneous syntaxError(String key, String arg) {
+    private JCErroneous syntaxError(String key, Token arg) {
         return syntaxError(S.pos(), key, arg);
     }
 
@@ -334,7 +334,7 @@ public class Parser {
             S.nextToken();
         } else {
             setErrorEndPos(S.pos());
-            reportSyntaxError(S.prevEndPos(), "expected", keywords.token2string(token));
+            reportSyntaxError(S.prevEndPos(), "expected", token);
         }
     }
 
@@ -360,7 +360,7 @@ public class Parser {
         if (mods != 0) {
             long lowestMod = mods & -mods;
             log.error(S.pos(), "mod.not.allowed.here",
-                      Flags.toString(lowestMod).trim());
+                      Flags.asFlagSet(lowestMod));
         }
     }
 
@@ -1327,7 +1327,7 @@ public class Parser {
             }
             accept(RPAREN);
         } else {
-            syntaxError(S.pos(), "expected", keywords.token2string(LPAREN));
+            syntaxError(S.pos(), "expected", LPAREN);
         }
         return args.toList();
     }
@@ -1400,7 +1400,7 @@ public class Parser {
                 break;
             }
         } else {
-            syntaxError(S.pos(), "expected", keywords.token2string(LT));
+            syntaxError(S.pos(), "expected", LT);
         }
         return args.toList();
     }
@@ -1425,9 +1425,7 @@ public class Parser {
         } else if (S.token() == IDENTIFIER) {
             //error recovery
             reportSyntaxError(S.prevEndPos(), "expected3",
-                    keywords.token2string(GT),
-                    keywords.token2string(EXTENDS),
-                    keywords.token2string(SUPER));
+                    GT, EXTENDS, SUPER);
             TypeBoundKind t = F.at(Position.NOPOS).TypeBoundKind(BoundKind.UNBOUND);
             JCExpression wc = toP(F.at(pos).Wildcard(t, null));
             JCIdent id = toP(F.at(S.pos()).Ident(ident()));
@@ -1602,8 +1600,7 @@ public class Parser {
             return classCreatorRest(newpos, null, typeArgs, t);
         } else {
             reportSyntaxError(S.pos(), "expected2",
-                               keywords.token2string(LPAREN),
-                               keywords.token2string(LBRACKET));
+                               LPAREN, LBRACKET);
             t = toP(F.at(newpos).NewClass(null, typeArgs, t, List.<JCExpression>nil(), null));
             return toP(F.at(newpos).Erroneous(List.<JCTree>of(t)));
         }
@@ -1778,7 +1775,7 @@ public class Parser {
         List<JCStatement> stats = blockStatements();
         JCBlock t = F.at(pos).Block(flags, stats);
         while (S.token() == CASE || S.token() == DEFAULT) {
-            syntaxError("orphaned", keywords.token2string(S.token()));
+            syntaxError("orphaned", S.token());
             switchBlockStatementGroups();
         }
         // the Block node has a field "endpos" for first char of last token, which is
@@ -2120,9 +2117,7 @@ public class Parser {
             default:
                 S.nextToken(); // to ensure progress
                 syntaxError(pos, "expected3",
-                    keywords.token2string(CASE),
-                    keywords.token2string(DEFAULT),
-                    keywords.token2string(RBRACE));
+                    CASE, DEFAULT, RBRACE);
             }
         }
     }
@@ -2388,7 +2383,7 @@ public class Parser {
             S.nextToken();
             init = variableInitializer();
         }
-        else if (reqInit) syntaxError(S.pos(), "expected", keywords.token2string(EQ));
+        else if (reqInit) syntaxError(S.pos(), "expected", EQ);
         JCVariableDecl result =
             toP(F.at(pos).VarDef(mods, name, type, init));
         attach(result, dc);
@@ -2557,9 +2552,7 @@ public class Parser {
                     errs = List.<JCTree>of(mods);
                 }
                 return toP(F.Exec(syntaxError(pos, errs, "expected3",
-                                              keywords.token2string(CLASS),
-                                              keywords.token2string(INTERFACE),
-                                              keywords.token2string(ENUM))));
+                                              CLASS, INTERFACE, ENUM)));
             }
         } else {
             if (S.token() == ENUM) {
@@ -2576,8 +2569,7 @@ public class Parser {
                 errs = List.<JCTree>of(mods);
             }
             return toP(F.Exec(syntaxError(pos, errs, "expected2",
-                                          keywords.token2string(CLASS),
-                                          keywords.token2string(INTERFACE))));
+                                          CLASS, INTERFACE)));
         }
     }
 
@@ -2676,9 +2668,7 @@ public class Parser {
             }
             if (S.token() != SEMI && S.token() != RBRACE) {
                 defs.append(syntaxError(S.pos(), "expected3",
-                                keywords.token2string(COMMA),
-                                keywords.token2string(RBRACE),
-                                keywords.token2string(SEMI)));
+                                COMMA, RBRACE, SEMI));
                 S.nextToken();
             }
         }
@@ -2849,7 +2839,7 @@ public class Parser {
                             ? List.<JCTree>of(toP(F.at(pos).MethodDef(mods, name, type, typarams,
                                 List.<JCVariableDecl>nil(), List.<JCExpression>nil(), null, null)))
                             : null;
-                        return List.<JCTree>of(syntaxError(S.pos(), err, "expected", keywords.token2string(LPAREN)));
+                        return List.<JCTree>of(syntaxError(S.pos(), err, "expected", LPAREN));
                     }
                 }
             }

@@ -31,7 +31,6 @@ import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 
 import com.sun.tools.javac.jvm.ClassReader;
-import com.sun.tools.javac.comp.Infer;
 import com.sun.tools.javac.comp.Check;
 
 import static com.sun.tools.javac.code.Type.*;
@@ -304,6 +303,11 @@ public class Types {
         }
         else if (t.tag == TYPEVAR) {
             return isSubtypeUnchecked(t.getUpperBound(), s, warn);
+        }
+        else if (s.tag == UNDETVAR) {
+            UndetVar uv = (UndetVar)s;
+            if (uv.inst != null)
+                return isSubtypeUnchecked(t, uv.inst, warn);
         }
         else if (!s.isRaw()) {
             Type t2 = asSuper(t, s.tsym);
@@ -835,7 +839,7 @@ public class Types {
         };
 
     public boolean isCaptureOf(Type s, WildcardType t) {
-        if (s.tag != TYPEVAR || !(s instanceof CapturedType))
+        if (s.tag != TYPEVAR || !((TypeVar)s).isCaptured())
             return false;
         return isSameWildcard(t, ((CapturedType)s).wildcard);
     }

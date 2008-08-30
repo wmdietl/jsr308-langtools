@@ -25,11 +25,8 @@
 
 package com.sun.tools.javac.code;
 
-import javax.lang.model.element.Element;
-import javax.lang.model.type.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.code.Symbol.*;
-import javax.lang.model.element.Element;
 
 import javax.lang.model.type.*;
 
@@ -979,6 +976,10 @@ public class Type implements PrimitiveType {
             return TypeKind.TYPEVAR;
         }
 
+        public boolean isCaptured() {
+            return false;
+        }
+
         public <R, P> R accept(TypeVisitor<R, P> v, P p) {
             return v.visitTypeVariable(this, p);
         }
@@ -1012,6 +1013,11 @@ public class Type implements PrimitiveType {
 
         public Type getLowerBound() {
             return lower;
+        }
+
+        @Override
+        public boolean isCaptured() {
+            return true;
         }
 
         @Override

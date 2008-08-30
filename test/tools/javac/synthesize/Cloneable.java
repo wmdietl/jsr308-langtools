@@ -1,5 +1,5 @@
 /*
- * Copyright 2004 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,24 +21,7 @@
  * have any questions.
  */
 
-/*
- * @test
- * @bug 4916650
- * @summary wildcards versus recursive F-bounds
- * @author gafter
- *
- * @compile -source 1.5 Capture4.java
- */
+package java.lang;
 
-package capture4;
-
-class WildcardFBoundCheck {
-    interface I4<T> {}
-
-    static class C4<X extends I4<Y>, Y extends I4<X>> {}
-
-    WildcardFBoundCheck()
-    {
-        C4<I4<?>,?> x2;  // <<pass>>
-    }
+public interface Cloneable {
 }
