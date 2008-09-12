@@ -1536,7 +1536,8 @@ public class Parser {
     JCExpression creator(int newpos, List<JCExpression> typeArgs) {
 
         // JSR 308: handle annotated "new" expressions
-        typeAnnotations.prepend(typeAnnotationsOpt());
+        List<JCAnnotation> newAnnotations = typeAnnotationsOpt();
+        typeAnnotations.prepend(newAnnotations);
 
         switch (S.token()) {
         case BYTE: case SHORT: case CHAR: case INT: case LONG: case FLOAT:
@@ -1597,7 +1598,12 @@ public class Parser {
             }
             return e;
         } else if (S.token() == LPAREN) {
-            return classCreatorRest(newpos, null, typeArgs, t);
+            JCNewClass newClass = (JCNewClass)classCreatorRest(newpos, null, typeArgs, t);
+            if (newClass.def != null) {
+                assert newClass.def.mods.annotations.isEmpty();
+                newClass.def.mods.annotations = newAnnotations;
+            }
+            return newClass;
         } else {
             reportSyntaxError(S.pos(), "expected2",
                                LPAREN, LBRACKET);
