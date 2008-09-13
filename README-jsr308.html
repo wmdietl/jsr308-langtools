@@ -17,7 +17,7 @@ pre, blockquote {
 </head>
 <body>
 <h1>JSR 308 Prototype Implementation README</h1> <!-- omit from toc -->
-<h4 id="version">Version 0.7.7 (29 Aug 2008)</h4> <!-- omit from toc -->
+<h4 id="version">Version 0.7.8 (12 Sep 2008)</h4> <!-- omit from toc -->
 <p>For the latest version, see the <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>.</p>
 
 <p>Contents:</p>
@@ -550,7 +550,7 @@ you will need to edit
 JSR 308 distribution is based is:
 </p>
 <blockquote>
-<!-- version -->74 (22 July 2008)<!-- /version -->
+<!-- version -->35 (11 Sept 2008)<!-- /version -->
 </blockquote>
 
 <p>The following commands determine the differences between the JSR
@@ -566,7 +566,8 @@ extracted JSR 308 compiler distribution.
 
   <pre><code>
   export VENDOR=vendor-langtools
-  hg clone -r<!-- revision -->74<!-- /revision --> http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
+  hg clone http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
+  cd $VENDOR; hg up jdk7-b<!-- revision -->35<!-- /revision -->
   </code></pre>
 
   <p>If you already have a checkout of the OpenJDK compiler, ensure
@@ -575,7 +576,7 @@ extracted JSR 308 compiler distribution.
   </p>
 
   <pre><code>
-  hg pull -r<!-- revision -->74<!-- /revision -->
+  hg pull; hg up jdk7-b<!-- revision -->35<!-- /revision -->
   </code></pre>
 
   </li>
@@ -636,7 +637,7 @@ modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
 </p>
 <ol>
-  <li>Obtain a copy of Mercurial reversion <!-- revision -->74<!-- /revision --> of
+  <li>Obtain a copy of Mercurial reversion <!-- revision -->35<!-- /revision --> of
   the OpenJDK compiler, using the commands in the <a href="#diffs">diff
   section</a> of this document.</li>
   <li>Try your test case using the
