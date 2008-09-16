@@ -309,7 +309,8 @@ the compiler from source</a>.
     Install a new copy of OpenJDK.  This new installation will be modified
     later (but no other copy of OpenJDK will be modified).  You can
     put the new installation anywhere you want; a common place is in a new
-    directory <code>~/jsr308</code>.
+    directory <code>~/jsr308</code>.  We will call that directory
+    <tt>$JSR308</tt>.
     <ol type="a">
       <li>
 	Download a JDK 7 <a
@@ -336,7 +337,8 @@ the compiler from source</a>.
 	augment your <code>PATH</code> with
 	<code>/path/to/jdk1.7.0/bin</code>.  Example:
 <pre>
-export JAVA_HOME=$HOME/jsr308/jdk1.7.0
+export JSR308=$HOME/jsr308
+export JAVA_HOME=$JSR308/jdk1.7.0
 export PATH=$JAVA_HOME/bin:$PATH
 </pre>
 	The shell uses the <code>PATH</code> variable to locate <code>java</code>,
@@ -350,10 +352,12 @@ export PATH=$JAVA_HOME/bin:$PATH
 	do the following:
           <ol>
 	    <li>Install Java 7</li>
-	    <li>Copy the <tt>jdk/jre</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
+	    <li>Copy the <tt>jdk1.7.0</tt> and <tt>jre1.7.0</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
             <li>Uninstall Java 7</li>
 	    <li>Move the <tt>jdk/jre</tt> directories back to <tt>Program Files\Java\</tt></li>
           </ol>
+        If you want to be able to run javac from Cygwin, then set
+	environment variables as for Linux, above.
 	</ul>
       </li>
       <li>
