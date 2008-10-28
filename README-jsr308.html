@@ -177,6 +177,17 @@ when JSR 308 is incorporated into it.  It may or may not continue to be
 supported by the javac compiler.
 </p>
 
+<!--
+javac support for the comment syntax may help to transition users gently to
+the new Java 7 features.  Java programmers delayed adopting Java 5 (e.g.,
+generics), primarily because of backward compatibility issues:  e.g., their
+coworkers/boss/customers didn't want to use Java 5.  But if we could give
+programmers the benefits of type annotations while not affecting backward
+compatibility, that might help more people adopt Java 7 sooner, thus
+increasing its momentum.
+-->
+
+
 <p>
 The JSR 308 compiler does not (yet) read import statements that appear in
 comments, such as

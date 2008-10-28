@@ -774,10 +774,8 @@ public class ClassWriter extends ClassFile {
     int writeTypeAnnotations(List<TypeAnnotations> typeAnnos) {
         if (typeAnnos.isEmpty()) return 0;
 
-        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> visibles
-            = ListBuffer.lb();
-        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>>
-            invisibles = ListBuffer.lb();
+        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> visibles = ListBuffer.lb();
+        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> invisibles = ListBuffer.lb();
 
         for (TypeAnnotations ta : typeAnnos) {
             if (ta.annotations.isEmpty()) continue;
@@ -794,6 +792,8 @@ public class ClassWriter extends ClassFile {
             endAttr(attrIndex);
             attrCount++;
         }
+        // Ignores invisibles, presumably intentionally because they
+        // wouldn't be retained anyway.
 
         return attrCount;
     }
@@ -920,7 +920,7 @@ public class ClassWriter extends ClassFile {
          // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            // FIXME: check for table length
+            // FIXME: check for real table length; currently hard-coded to 1
             databuf.appendChar(1);  // for table length
             databuf.appendChar(p.offset);
             databuf.appendChar(p.length);
