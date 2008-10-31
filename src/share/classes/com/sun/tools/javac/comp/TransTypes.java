@@ -846,6 +846,7 @@ public class TransTypes extends TreeTranslator {
             pop();
         }
 
+        @SuppressWarnings("deprecation")
         private TypeAnnotations.Position resolveContext(JCTree tree, JCTree context,
                 List<JCTree> path, TypeAnnotations.Position p) {
             switch (context.getKind()) {
