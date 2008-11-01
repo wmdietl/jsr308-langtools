@@ -1,5 +1,5 @@
 /*
- * Copyright 1998-2004 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 1998-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -56,8 +56,6 @@ import java.util.*;
  */
 public class Group {
 
-    private static Group instance;
-
     /**
      * Map of regular expressions with the corresponding group name.
      */
@@ -96,15 +94,8 @@ public class Group {
         }
     }
 
-    private Group(Configuration configuration) {
+    public Group(Configuration configuration) {
         this.configuration = configuration;
-    }
-
-    public static Group getInstance(Configuration configuration) {
-        if (instance == null) {
-            instance = new Group(configuration);
-        }
-        return instance;
     }
 
     /**

@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 1999-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,9 +25,10 @@
 
 package com.sun.tools.javac.parser;
 
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 import com.sun.tools.javac.api.Formattable;
+import com.sun.tools.javac.api.Messages;
 
 /** An interface that defines codes for Java source tokens
  *  returned from lexical analysis.
@@ -191,8 +192,7 @@ public enum Token implements Formattable {
         return "Token";
     }
 
-    public String toString(ResourceBundle bundle) {
-        String s = toString();
-        return s.startsWith("token.") ? bundle.getString("compiler.misc." + s) : s;
+    public String toString(Locale locale, Messages messages) {
+        return name != null ? toString() : messages.getLocalizedString(locale, "compiler.misc." + toString());
     }
 }

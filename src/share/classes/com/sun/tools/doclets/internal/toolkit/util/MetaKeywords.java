@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2002-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -43,8 +43,6 @@ import java.util.*;
  */
 public class MetaKeywords {
 
-    private static MetaKeywords instance = null;
-
     /**
      * The global configuration information for this run.
      */
@@ -53,20 +51,8 @@ public class MetaKeywords {
     /**
      * Constructor
      */
-    private MetaKeywords(Configuration configuration) {
+    public MetaKeywords(Configuration configuration) {
         this.configuration = configuration;
-    }
-
-    /**
-     * Return an instance of MetaKeywords.  This class is a singleton.
-     *
-     * @param configuration the current configuration of the doclet.
-     */
-    public static MetaKeywords getInstance(Configuration configuration) {
-        if (instance == null) {
-            instance = new MetaKeywords(configuration);
-        }
-        return instance;
     }
 
     /**

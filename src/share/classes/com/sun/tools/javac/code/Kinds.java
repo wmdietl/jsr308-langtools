@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 1999-2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,9 +26,10 @@
 package com.sun.tools.javac.code;
 
 import java.util.EnumSet;
-import java.util.ResourceBundle;
+import java.util.Locale;
 
 import com.sun.tools.javac.api.Formattable;
+import com.sun.tools.javac.api.Messages;
 
 import static com.sun.tools.javac.code.TypeTags.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -117,9 +118,9 @@ public class Kinds {
             return "Kindname";
         }
 
-        public String toString(ResourceBundle bundle) {
+        public String toString(Locale locale, Messages messages) {
             String s = toString();
-            return bundle.getString("compiler.misc." + s);
+            return messages.getLocalizedString(locale, "compiler.misc." + s);
         }
     }
 

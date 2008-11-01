@@ -64,7 +64,7 @@ public class Lower extends TreeTranslator {
         return instance;
     }
 
-    private Name.Table names;
+    private Names names;
     private Log log;
     private Symtab syms;
     private Resolve rs;
@@ -85,7 +85,7 @@ public class Lower extends TreeTranslator {
 
     protected Lower(Context context) {
         context.put(lowerKey, this);
-        names = Name.Table.instance(context);
+        names = Names.instance(context);
         log = Log.instance(context);
         syms = Symtab.instance(context);
         rs = Resolve.instance(context);
@@ -1830,7 +1830,7 @@ public class Lower extends TreeTranslator {
         }
         VarSymbol var =
             new VarSymbol(FINAL|SYNTHETIC,
-                          Name.fromString(names,
+                          names.fromString(
                                           target.syntheticNameChar()
                                           + "" + rval.hashCode()),
                                       type,
@@ -1883,6 +1883,9 @@ public class Lower extends TreeTranslator {
                             });
                     }
                 });
+        }
+        case JCTree.TYPECAST: {
+            return abstractLval(((JCTypeCast)lval).expr, builder);
         }
         }
         throw new AssertionError(lval);
@@ -2718,10 +2721,7 @@ public class Lower extends TreeTranslator {
             // boxing required; need to rewrite as x = (unbox typeof x)(x op y);
             // or if x == (typeof x)z then z = (unbox typeof x)((typeof x)z op y)
             // (but without recomputing x)
-            JCTree arg = (tree.lhs.getTag() == JCTree.TYPECAST)
-                ? ((JCTypeCast)tree.lhs).expr
-                : tree.lhs;
-            JCTree newTree = abstractLval(arg, new TreeBuilder() {
+            JCTree newTree = abstractLval(tree.lhs, new TreeBuilder() {
                     public JCTree build(final JCTree lhs) {
                         int newTag = tree.getTag() - JCTree.ASGOffset;
                         // Erasure (TransTypes) can change the type of
@@ -2773,9 +2773,8 @@ public class Lower extends TreeTranslator {
         // or
         // translate to tmp1=lval(e); tmp2=tmp1; (typeof tree)tmp1 OP 1; tmp2
         // where OP is += or -=
-        final boolean cast = tree.arg.getTag() == JCTree.TYPECAST;
-        final JCExpression arg = cast ? ((JCTypeCast)tree.arg).expr : tree.arg;
-        return abstractLval(arg, new TreeBuilder() {
+        final boolean cast = TreeInfo.skipParens(tree.arg).getTag() == JCTree.TYPECAST;
+        return abstractLval(tree.arg, new TreeBuilder() {
                 public JCTree build(final JCTree tmp1) {
                     return abstractRval(tmp1, tree.arg.type, new TreeBuilder() {
                             public JCTree build(final JCTree tmp2) {
@@ -3343,7 +3342,7 @@ public class Lower extends TreeTranslator {
         ListBuffer<JCStatement> blockStatements = new ListBuffer<JCStatement>();
 
         JCModifiers mod1 = make.Modifiers(0L);
-        Name oName = Name.fromString(names, "o");
+        Name oName = names.fromString("o");
         JCVariableDecl par1 = make.Param(oName, cdef.type, compareToSym);
 
         JCIdent paramId1 = make.Ident(names.java_lang_Object);
@@ -3357,7 +3356,7 @@ public class Lower extends TreeTranslator {
         JCTypeCast cast = make.TypeCast(castTargetIdent, par1UsageId);
         cast.setType(castTargetIdent.type);
 
-        Name otherName = Name.fromString(names, "other");
+        Name otherName = names.fromString("other");
 
         VarSymbol otherVarSym = new VarSymbol(mod1.flags,
                                               otherName,
