@@ -1,3 +1,9 @@
+Version 0.8.1, 1 Nov 2008
+
+Base build
+  Updated to OpenJDK langtools build b38
+
+----------------------------------------------------------------------
 Version 0.8, 27 Sep 2008
 
 No changes for this release
