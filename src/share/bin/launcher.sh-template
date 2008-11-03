@@ -47,4 +47,18 @@ fi
 # javac currently assumes that assertions are enabled in the launcher
 ea=-ea:com.sun.tools
 
-"#TARGET_JAVA#" ${bcp:+-Xbootclasspath/p:"$bcp"} ${ea} -jar "${mydir}"/../lib/#PROGRAM#.jar "$@"
+# Any parameters starting with -J are passed to the JVM.
+# All other parameters become parameters of #PROGRAM#.
+for param in "$@"
+do
+  if [ `echo -n "$param" | grep "^\-J" | wc -l` -ne 0 ]
+  then
+    # Cutting the -J from the parameter
+    param=`echo -n "$param" | cut -b3-`
+    javaparams="$javaparams $param"
+  else
+    javacparams="$javacparams $param"
+  fi
+done
+
+"#TARGET_JAVA#" ${bcp:+-Xbootclasspath/p:"$bcp"} ${ea} ${javaparams} -jar "${mydir}"/../lib/#PROGRAM#.jar ${javacparams}
