@@ -79,7 +79,11 @@ public class JavacParser implements Parser {
     /** JSR 308: A stack for parsing out-of-order type annotations. */
     private ListBuffer<List<JCAnnotation>> typeAnnotations = ListBuffer.lb();
 
+    // these two fields are hacks that should be removed later
+    // this is in place of rewriting the parser or changing many method
+    // signitures
     private List<JCAnnotation> varArgsTypeAnnotationsHack = null;
+    private boolean isVarargsHackAllowed = false;
 
     /** Construct a parser from a given scanner, tree factory and log.
      */
@@ -1222,8 +1226,12 @@ public class JavacParser implements Parser {
                     typeArgs = null;
                 }
             } else {
-                if (annos != null && !annos.isEmpty())
-                    varArgsTypeAnnotationsHack = annos;
+                if (annos != null && !annos.isEmpty()) {
+                    if (isVarargsHackAllowed == true)
+                        varArgsTypeAnnotationsHack = annos;
+                    else
+                        return illegal(annos.head.pos);
+                }
                 break;
             }
         }
@@ -1432,8 +1440,12 @@ public class JavacParser implements Parser {
             t = bracketsOptCont(t, pos, stack);
         }
 
-        if (annos != null && !annos.isEmpty())
-            this.varArgsTypeAnnotationsHack = annos;
+        if (annos != null && !annos.isEmpty()) {
+            if (isVarargsHackAllowed)
+                this.varArgsTypeAnnotationsHack = annos;
+            else
+                return illegal(annos.head.pos);
+        }
 
         int apos = S.pos();
         List<JCAnnotation> deferred = stack.next();
@@ -2834,7 +2846,9 @@ public class JavacParser implements Parser {
                               boolean isInterface, boolean isVoid,
                               String dc) {
         List<JCVariableDecl> params = formalParameters();
+        this.isVarargsHackAllowed = true;
         if (!isVoid) type = bracketsOpt(type);
+        this.isVarargsHackAllowed = false;
         // JSR 308: handle receiver annotations with no underlying type
         List<JCAnnotation> receiverAnnotations = typeAnnotationsOpt();
         if (varArgsTypeAnnotationsHack != null) {
@@ -2969,6 +2983,7 @@ public class JavacParser implements Parser {
      */
     JCVariableDecl formalParameter() {
         JCModifiers mods = optFinal(Flags.PARAMETER);
+        this.isVarargsHackAllowed = true;
         JCExpression type = parseType();
         // JSR 308: handle annotations on a varargs element type
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
@@ -2976,6 +2991,7 @@ public class JavacParser implements Parser {
             varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
             varArgsTypeAnnotationsHack = null;
         }
+        this.isVarargsHackAllowed = false;
         if (S.token() == ELLIPSIS) {
             checkVarargs();
             mods.flags |= Flags.VARARGS;
