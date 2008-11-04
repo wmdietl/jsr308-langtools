@@ -2793,6 +2793,21 @@ public class JavacParser implements Parser {
                     // JSR 308: use a type without annotations, since we have
                     // already parsed JSR 175 annotations with modifiersOpt()
                     type = unannotatedType();
+
+                    // In case of a method declaration like
+                    //    <T> @A String get() { ... }
+                    // @A is parsed as a type annotation on the method return
+                    // type (illegal) rather than an annotation on the method
+                    // itself
+                    if (type instanceof JCAnnotatedType) {
+                        JCAnnotatedType atype = (JCAnnotatedType)type;
+                        type = atype.underlyingType;
+                        // mods.annotations should never be null I believe
+                        if (mods.annotations == null)
+                            mods.annotations = atype.annotations;
+                        else
+                            mods.annotations = mods.annotations.appendList(atype.annotations);
+                    }
                 }
                 if (S.token() == LPAREN && !isInterface && type.getTag() == JCTree.IDENT) {
                     if (isInterface || name != className)
