@@ -28,13 +28,8 @@ public class ExtendedAnnotationData extends AnnotationData {
 
         super(in);
 
-
-        final TargetType[] targetTypes = TargetType.values();
-
         target_type = in.readByte();
-        assert target_type >= 0 && target_type < targetTypes.length;
-
-        TargetType type = targetTypes[target_type];
+        TargetType type = TargetType.fromInt(target_type);
 
         switch (type) {
         case TYPECAST:

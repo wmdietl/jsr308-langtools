@@ -875,7 +875,7 @@ public class JavapPrinter {
         String sp = spaces(indent + 1);
         printAnnotation(a, indent);
 
-        TargetType type = TargetType.values()[a.target_type];
+        TargetType type = TargetType.fromInt(a.target_type);
 
         out.println(sp + "target = 0x" + Integer.toHexString(a.target_type).toUpperCase() +
                     " //" + type);

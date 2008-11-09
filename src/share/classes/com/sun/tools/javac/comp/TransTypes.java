@@ -992,7 +992,7 @@ public class TransTypes extends TreeTranslator {
                         resolveContext(tree, context, contexts.toList(),
                                 new TypeAnnotations.Position());
                 if (!p.location.isEmpty())
-                    p.type = TargetType.values()[p.type.ordinal() + 1];
+                    p.type = TargetType.fromInt(p.type.toInt()+1);
                 tree.typeAnnotations.position = p;
                 if (debugJSR308) {
                     sb.append("  target: " + p + "\n");

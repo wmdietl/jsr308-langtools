@@ -1197,7 +1197,7 @@ public class ClassReader extends ClassFile implements Completer {
         byte tag = nextByte();
 
         TypeAnnotations.Position position = new TypeAnnotations.Position();
-        TargetType type = TargetType.values()[tag];
+        TargetType type = TargetType.fromInt(tag);
 
         position.type = type;
 
