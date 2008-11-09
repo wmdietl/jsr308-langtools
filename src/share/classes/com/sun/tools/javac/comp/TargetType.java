@@ -146,7 +146,7 @@ public enum TargetType {
      * @return true if this TargetType represents an annotation on an inner
      *         type, false otherwise
      */
-    @Deprecated
+    @Deprecated // misleading name, because it might represent an array
     public boolean isGeneric() {
         return ordinal() % 2 == 1;
     }
