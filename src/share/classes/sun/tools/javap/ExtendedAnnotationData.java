@@ -29,7 +29,7 @@ public class ExtendedAnnotationData extends AnnotationData {
         super(in);
 
         target_type = in.readByte();
-        TargetType type = TargetType.fromInt(target_type);
+        TargetType type = TargetType.values()[target_type];
 
         switch (type) {
         case TYPECAST:
