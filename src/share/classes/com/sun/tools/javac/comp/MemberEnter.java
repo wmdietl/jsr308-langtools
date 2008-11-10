@@ -998,38 +998,73 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
     private class TypeAnnotate extends TreeScanner {
         private Env<AttrContext> env;
         public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
-        private List<Attribute.Compound> enterAnnotations(List<JCAnnotation> annos) {
-            ListBuffer<Attribute.Compound> lb = ListBuffer.lb();
-            for (JCAnnotation a : annos) {
-                Attribute.Compound ac = annotate.enterAnnotation(a, syms.annotationType, this.env);
-                lb = lb.append(ac);
-                if (debugJSR308)
-                    System.out.println("attr: " + ac);
-            }
-            return lb.toList();
+
+        private List<Attribute.Compound> enterAnnotations(List<JCAnnotation> annotations) {
+            ListBuffer<Attribute.Compound> buf =
+                new ListBuffer<Attribute.Compound>();
+            Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
+            if (!skipAnnotations)
+                for (List<JCAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
+                    JCAnnotation a = al.head;
+                    Attribute.Compound c = annotate.enterAnnotation(a,
+                            syms.annotationType,
+                            env);
+                    if (c == null) continue;
+                    buf.append(c);
+                    // Note: @Deprecated has no effect on local variables and parameters
+                    if (!annotated.add(a.type.tsym))
+                        log.error(a.pos, "duplicate.annotation");
+                }
+            return buf.toList();
         }
+
         @Override
-        public void visitAnnotatedType(JCAnnotatedType tree) {
-            tree.typeAnnotations.annotations = enterAnnotations(tree.annotations);
+        public void visitAnnotatedType(final JCAnnotatedType tree) {
+            final List<JCAnnotation> annotations = tree.annotations;
+            annotate.later(new Annotate.Annotator() {
+                public String toString() {
+                    return "annotate " + annotations + " onto " + tree;
+                }
+                public void enterAnnotation() {
+                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                    try {
+                    tree.typeAnnotations.annotations = enterAnnotations(annotations);
+                    } finally {
+                        log.useSource(prev);
+                    }
+                }
+            });
             super.visitAnnotatedType(tree);
         }
         @Override
-        public void visitNewArray(JCNewArray tree) {
-            ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
-            if (tree.typeAnnotations == null) { // only enter annotations once
-                // Enter top-level annotations.
-                TypeAnnotations extra = new TypeAnnotations();
-                extra.annotations = enterAnnotations(tree.annotations);
-                tree.typeAnnotations = extra;
-
-                // Enter dimension annotations.
-                for (List<JCAnnotation> annos : tree.dimAnnotations) {
-                    TypeAnnotations ta = new TypeAnnotations();
-                    ta.annotations = enterAnnotations(annos);
-                    lb.append(ta);
+        public void visitNewArray(final JCNewArray tree) {
+            annotate.later(new Annotate.Annotator() {
+                public String toString() {
+                    return "annotate onto " + tree;
                 }
-                tree.dimTypeAnnotations = lb.toList();
-            }
+                public void enterAnnotation() {
+                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                    try {
+                    ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
+                    if (tree.typeAnnotations == null) { // only enter annotations once
+                        // Enter top-level annotations.
+                        TypeAnnotations extra = new TypeAnnotations();
+                        extra.annotations = enterAnnotations(tree.annotations);
+                        tree.typeAnnotations = extra;
+
+                        // Enter dimension annotations.
+                        for (List<JCAnnotation> annos : tree.dimAnnotations) {
+                            TypeAnnotations ta = new TypeAnnotations();
+                            ta.annotations = enterAnnotations(annos);
+                            lb.append(ta);
+                        }
+                        tree.dimTypeAnnotations = lb.toList();
+                    }
+                    } finally {
+                        log.useSource(prev);
+                    }
+                }
+            });
             super.visitNewArray(tree);
         }
         @Override
