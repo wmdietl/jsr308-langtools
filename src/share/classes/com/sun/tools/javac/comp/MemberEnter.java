@@ -1037,6 +1037,24 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             super.visitAnnotatedType(tree);
         }
         @Override
+        public void visitTypeParameter(final JCTypeParameter tree) {
+            final List<JCAnnotation> annotations = tree.annotations;
+            annotate.later(new Annotate.Annotator() {
+                public String toString() {
+                    return "annotate " + annotations + " onto " + tree;
+                }
+                public void enterAnnotation() {
+                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                    try {
+                    tree.typeAnnotations.annotations = enterAnnotations(annotations);
+                    } finally {
+                        log.useSource(prev);
+                    }
+                }
+            });
+            super.visitTypeParameter(tree);
+        }
+        @Override
         public void visitNewArray(final JCNewArray tree) {
             annotate.later(new Annotate.Annotator() {
                 public String toString() {

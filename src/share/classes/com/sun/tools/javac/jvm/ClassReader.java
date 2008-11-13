@@ -1230,9 +1230,13 @@ public class ClassReader extends ClassFile implements Completer {
             // Do nothing
             break;
         // type parameters
+        case CLASS_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER:
+            position.parameter_index = nextByte();
+            break;
+        // type parameter bounds
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case METHOD_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER_BOUND:
         case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case WILDCARD_BOUND:

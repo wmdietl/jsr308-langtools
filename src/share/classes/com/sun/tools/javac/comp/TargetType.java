@@ -136,6 +136,9 @@ public enum TargetType {
     METHOD_TYPE_PARAMETER,
     @Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY,
 
+    CLASS_TYPE_PARAMETER,
+    @Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY,
+
     /** For annotations with an unknown target. */
     UNKNOWN;
 

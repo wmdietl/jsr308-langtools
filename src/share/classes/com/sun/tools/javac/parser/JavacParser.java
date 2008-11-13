@@ -2954,6 +2954,7 @@ public class JavacParser implements Parser {
      */
     JCTypeParameter typeParameter() {
         int pos = S.pos();
+        List<JCAnnotation> annos = typeAnnotationsOpt();
         Name name = ident();
         ListBuffer<JCExpression> bounds = new ListBuffer<JCExpression>();
         if (S.token() == EXTENDS) {
@@ -2964,7 +2965,7 @@ public class JavacParser implements Parser {
                 bounds.append(parseType());
             }
         }
-        return toP(F.at(pos).TypeParameter(name, bounds.toList()));
+        return toP(F.at(pos).TypeParameter(name, bounds.toList(), annos));
     }
 
     /** FormalParameters = "(" [ FormalParameterList ] ")"

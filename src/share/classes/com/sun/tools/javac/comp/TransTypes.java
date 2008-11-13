@@ -878,6 +878,9 @@ public class TransTypes extends TreeTranslator {
                     } else if (((JCClassDecl)context).implementing.contains(tree)) {
                         p.type = TargetType.CLASS_EXTENDS;
                         p.type_index = ((JCClassDecl)context).implementing.indexOf(tree);
+                    } else if (((JCClassDecl)context).typarams.contains(tree)) {
+                        p.type = TargetType.CLASS_TYPE_PARAMETER;
+                        p.parameter_index = ((JCClassDecl)context).typarams.indexOf(tree);
                     } else throw new AssertionError();
                     return p;
 
@@ -888,9 +891,12 @@ public class TransTypes extends TreeTranslator {
                     else if (contextMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
                         p.type_index = contextMethod.thrown.indexOf(tree);
-                    } else if (((JCMethodDecl)context).restype == tree)
+                    } else if (((JCMethodDecl)context).restype == tree) {
                         p.type = TargetType.METHOD_RETURN;
-                    else throw new AssertionError();
+                    } else if (contextMethod.typarams.contains(tree)) {
+                        p.type = TargetType.METHOD_TYPE_PARAMETER;
+                        p.parameter_index = contextMethod.typarams.indexOf(tree);
+                    } else throw new AssertionError();
                     return p;
                 }
                 case MEMBER_SELECT: {
@@ -1002,6 +1008,25 @@ public class TransTypes extends TreeTranslator {
             super.visitAnnotatedType(tree);
         }
 
+        @Override
+        public void visitTypeParameter(JCTypeParameter tree) {
+            if (!tree.annotations.isEmpty()) {
+                StringBuilder sb = new StringBuilder();
+                if (debugJSR308) sb.append("trans: " + tree + "\n");
+                JCTree context = peek2();
+                TypeAnnotations.Position p =
+                        resolveContext(tree, context, contexts.toList(),
+                                new TypeAnnotations.Position());
+                if (!p.location.isEmpty())
+                    p.type = TargetType.values()[p.type.ordinal() + 1];
+                tree.typeAnnotations.position = p;
+                if (debugJSR308) {
+                    sb.append("  target: " + p + "\n");
+                    System.out.println(sb.toString());
+                }
+            }
+            super.visitTypeParameter(tree);
+        }
         private int methodParamIndex(List<JCTree> path, JCTree param) {
 //            assert param.sym.getKind() == ElementKind.PARAMETER;
             List<JCTree> curr = path;
@@ -1051,32 +1076,46 @@ public class TransTypes extends TreeTranslator {
                     && tree.typeAnnotations.erased != null)
                 ta = ta.appendList(tree.typeAnnotations.erased);
             if (!ta.isEmpty()) {
-                if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
-                    if (debugJSR308)
-                        System.out.println("gen: " + ta + " -> " + lastVar.sym);
-                    lastVar.sym.typeAnnotations =
-                        lastVar.sym.typeAnnotations.appendList(ta);
-                } else if (lastMethod != null) {
-                    if (debugJSR308)
-                        System.out.println("gen: " + ta + " -> " + lastMethod.sym);
-                    lastMethod.sym.typeAnnotations =
-                        lastMethod.sym.typeAnnotations.appendList(ta);
-                } else if (clazz != null) {
-                    if (debugJSR308)
-                        System.out.println("gen: " + ta + " -> " + clazz.sym);
-                    clazz.sym.typeAnnotations =
-                        clazz.sym.typeAnnotations.appendList(ta);
-                } else throw new AssertionError();
-                // We also add typeannotations to local variables to ease
-                // finding them later in Gen
-                if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {
-                    if (debugJSR308)
-                        System.out.println("gen: " + ta + " -> " + lastVar.sym);
-                    lastVar.sym.typeAnnotations =
-                        lastVar.sym.typeAnnotations.appendList(ta);
-                }
+                lift(ta);
             }
             super.visitAnnotatedType(tree);
+        }
+
+        @Override
+        public void visitTypeParameter(JCTypeParameter tree) {
+            List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
+            if (tree.typeAnnotations != null
+                    && tree.typeAnnotations.erased != null)
+                ta = ta.appendList(tree.typeAnnotations.erased);
+            if (!ta.isEmpty())
+                lift(ta);
+            super.visitTypeParameter(tree);
+        }
+        public void lift(List<TypeAnnotations> ta) {
+            if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
+                if (debugJSR308)
+                    System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                lastVar.sym.typeAnnotations =
+                    lastVar.sym.typeAnnotations.appendList(ta);
+            } else if (lastMethod != null) {
+                if (debugJSR308)
+                    System.out.println("gen: " + ta + " -> " + lastMethod.sym);
+                lastMethod.sym.typeAnnotations =
+                    lastMethod.sym.typeAnnotations.appendList(ta);
+            } else if (clazz != null) {
+                if (debugJSR308)
+                    System.out.println("gen: " + ta + " -> " + clazz.sym);
+                clazz.sym.typeAnnotations =
+                    clazz.sym.typeAnnotations.appendList(ta);
+            } else throw new AssertionError();
+            // We also add typeannotations to local variables to ease
+            // finding them later in Gen
+            if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {
+                if (debugJSR308)
+                    System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                lastVar.sym.typeAnnotations =
+                    lastVar.sym.typeAnnotations.appendList(ta);
+            }
         }
     }
 

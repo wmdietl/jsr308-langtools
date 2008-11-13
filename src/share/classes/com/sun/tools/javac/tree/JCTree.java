@@ -1875,9 +1875,13 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     public static class JCTypeParameter extends JCTree implements TypeParameterTree {
         public Name name;
         public List<JCExpression> bounds;
-        protected JCTypeParameter(Name name, List<JCExpression> bounds) {
+        public List<JCAnnotation> annotations;
+        public TypeAnnotations typeAnnotations;
+        protected JCTypeParameter(Name name, List<JCExpression> bounds, List<JCAnnotation> annotations) {
             this.name = name;
             this.bounds = bounds;
+            this.annotations = annotations;
+            this.typeAnnotations = new TypeAnnotations();
         }
         @Override
         public void accept(Visitor v) { v.visitTypeParameter(this); }

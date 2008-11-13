@@ -69,9 +69,14 @@ public class TypeAnnotations {
                 // Do nothing
                 break;
             // type parameters
+            case CLASS_TYPE_PARAMETER:
+            case METHOD_TYPE_PARAMETER:
+                sb.append(", param_index = ");
+                sb.append(parameter_index);
+                break;
+            // type parameters bound
             case CLASS_TYPE_PARAMETER_BOUND:
             case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-            case METHOD_TYPE_PARAMETER:
             case METHOD_TYPE_PARAMETER_BOUND:
             case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
             case WILDCARD_BOUND:
