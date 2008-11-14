@@ -26,16 +26,14 @@ pre, blockquote {
       <li><a href="#intro">Introduction</a></li>
       <li><a href="#features">Features of the JSR 308 prototype implementation</a>
         <ul>
-          <li><a href="#typeprocessor">The <code>-typeprocessor</code> <code>javac</code> command-line option</a></li>
           <li><a href="#annotations-in-comment">Writing annotations in comments for backward compatibility</a></li>
           <li><a href="#javap-annotations">The <code>-annotations</code> <code>javap</code> command-line option</a></li>
           <li><a href="#proposal">Differences from the JSR 308 proposal</a></li>
         </ul></li>
       <li><a href="#installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</a>
         <ul>
-          <li><a href="#installing-short">The short instructions (for Linux only)</a></li>
-          <li><a href="#installing-long">The longer instructions</a></li>
-          <li><a href="#building">Building the JSR 308 compiler from source</a></li>
+          <li><a href="#installing-long">Installing from binary</a></li>
+          <li><a href="#building">Installing from source</a></li>
         </ul></li>
       <li><a href="#differences">Differences from the OpenJDK distribution</a>
         <ul>
@@ -117,39 +115,6 @@ JSR 308 specification
 which permits annotations to appear on any occurrence of a type.
 </p>
 
-<h3 id="typeprocessor">The <code>-typeprocessor</code> <code>javac</code> command-line option</h3>
-
-<p><b>Note:</b> In versions of the JSR 308 compiler 0.4 and following, the
-<code>-typeprocessor</code> option is no longer needed. It has been retained in
-0.4 for backward compatibility, but it will be removed in a future release. For
-versions 0.4 and following, the <code>-processor</code> option may be used for
-all annotation processors, including type-checking plug-ins.</p>
-
-<p>The JSR 308 compiler adds the <code>-typeprocessor</code>
-command-line option for running annotation processors.
-The <code>-typeprocessor</code> option is semantically
-similar to the standard <code>-processor</code> option:  either option is
-followed by a list of the (fully-qualified) class names of the annotation
-processors to run.  An example (using the
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#nullness-checker">Nullness checker</a>) is:
-</p>
-<pre><code>  javac -typeprocessor checkers.nonnull.NonnullChecker MyFile.java
-</code></pre>
-
-<p>
-Annotation processors specified using the <code>-typeprocessor</code>
-option are invoked after the compiler's attribution phase (also known as
-type resolution), giving the processor access to completed symbols.  By
-contrast, processors specified using the <code>-processor</code> option are
-invoked before the compiler's attribution phase.
-</p>
-
-<p><b>Note:</b> In the prototype implementation prior to version 0.4, the
-<code>-typeprocessor</code> and <code>-processor</code>
-options are mutually exclusive and should not be used
-simultaneously.</p>
-
-
 <h3 id="annotations-in-comment">Writing annotations in comments for backward compatibility</h3>
 
 <p>
@@ -160,8 +125,7 @@ be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
   List&lt;/*@NonNull*/ String&gt; strings;
 </pre>
 <p>
-There must be no whitespace
-between the comment delimiters and the annotation name.
+There must be no whitespace within the comment.
 For additional information about this feature, see the
 <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments">Checker
 Framework Manual</a>.
@@ -265,43 +229,7 @@ If you use an Apple <b>Macintosh (Mac OS X)</b> computer, you must <a href="#bui
 the compiler from source</a>.
 </p>
 
-
-<h3 id="installing-short">The short instructions (for Linux only)</h3>
-
-<!--
- This text is identically reproduced at ../checkers/manual/introduction.tex
- so if you change either one, change the other also!
--->
-
-<p>
-The following commands install
-the JSR 308 <tt>javac</tt> compiler and the Checker
-Framework, or update an existing installation.
-It currently works only on <b>Linux</b>.
-For more details, or if anything goes wrong, see the comments in the 
-<tt>Makefile-jsr308-install</tt> file.
-</p>
-
-<ol>
-<li>
-  Execute the following commands:
-<pre>
-  cd
-  wget -nv -N http://groups.csail.mit.edu/pag/jsr308/current/Makefile-jsr308-install
-  make -f Makefile-jsr308-install
-</pre>
-
-</li>
-<li>
-Set some environment variables according to the instructions at the top of file
-<tt>~/Makefile-jsr308-install</tt>.
-</li>
-
-</ol>
-
-
-
-<h3 id="installing-long">The longer instructions</h3>
+<h3 id="installing-long">Installing from binary</h3>
 
 
 <p>
@@ -442,7 +370,7 @@ you want a newer version of OpenJDK.
 </p>
 
 
-<h3 id="building">Building the JSR 308 compiler from source</h3>
+<h3 id="building">Installing from source</h3>
 
 <p>
 To build the JSR 308 compiler from source, replace <a href="#installing-long">step 3 from above</a> by
@@ -469,14 +397,9 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
 
 <ol>
   <li>
-    Create a file <code>~/.openjdk/build.properties</code>
-    containing the following text, but replace
-    <code>/path/to/java/jdk</code> by
-    the location of your JDK 6 installation.
-<pre>
-boot.java.home = <b>/path/to/java/jdk</b>
-target.java.home = ${boot.java.home}
-</pre>
+    Set <code>JAVA_HOME</code> environment file to the location of
+    your JDK 6 or 7 installation.  Most likely it is already set for
+    Ant to work.
   </li>
   <li>
     Compile the JSR 308 javac compiler and the javap tool, from
