@@ -1019,8 +1019,8 @@ public class Scanner implements Lexer {
             if (Character.isWhitespace(lch))
                 return false;
             if (lch == '*'
-                && lbp < buflen
-                && buf[lbp] == '/')
+                && lbp + 1 < buflen
+                && buf[lbp+1] == '/')
                 return true;
         }
         // came to end of file before '*/'
