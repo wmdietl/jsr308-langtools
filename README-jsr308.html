@@ -162,6 +162,9 @@ be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
 <p>
 There must be no whitespace
 between the comment delimiters and the annotation name.
+For additional information about this feature, see the
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments">Checker
+Framework Manual</a>.
 </p>
 
 <p>
@@ -186,21 +189,6 @@ programmers the benefits of type annotations while not affecting backward
 compatibility, that might help more people adopt Java 7 sooner, thus
 increasing its momentum.
 -->
-
-
-<p>
-The JSR 308 compiler does not (yet) read import statements that appear in
-comments, such as
-</p>
-<pre>
-/*import checkers.quals.*;*/
-</pre>
-<p>
-Because any import statement must appear uncommented, you may need to
-include one or more qualifier definitions (<code>@interface</code>
-declarations) on your classpath when compiling your code using a Java 4/5/6
-compiler.
-</p>
 
 
 <h3 id="javap-annotations">The <code>-annotations</code> <code>javap</code> command-line option</h3>
