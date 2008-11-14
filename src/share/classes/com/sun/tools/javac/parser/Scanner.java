@@ -889,8 +889,11 @@ public class Scanner implements Lexer {
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
                             if (magicAt) return;
-                        } else if (bp < buflen && ch == '@') {
+                        } else if (bp < buflen && ch == '@'
+                            && (spacesincomments || isCommentWithoutSpaces())) {
                             scanChar();
+                            while (Character.isWhitespace(ch))
+                                scanChar();
                             if (!Character.isJavaIdentifierStart(ch)) break;
                             token = Token.MONKEYS_AT;
                             magicAt = true;
@@ -1006,6 +1009,22 @@ public class Scanner implements Lexer {
                                    new String(getRawCharacters(pos, endPos))
                                    + "|");
         }
+    }
+
+    private boolean isCommentWithoutSpaces() {
+        assert ch == '@';
+        int lbp = bp;
+        while (lbp < buflen) {
+            char lch = buf[++lbp];
+            if (Character.isWhitespace(lch))
+                return false;
+            if (lch == '*'
+                && lbp < buflen
+                && buf[lbp] == '/')
+                return true;
+        }
+        // came to end of file before '*/'
+        return false;
     }
 
     /** Return the current token, set by nextToken().
