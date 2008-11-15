@@ -1,3 +1,16 @@
+Version 0.8.2, 14 Nov 2008
+
+Functionality
+  Added support for annotations on type parameters
+
+Bug fixes
+  Fixed bug related to parsing type annotation member values
+  Fixed bug related to parsing commented-annotations with spaces
+
+Base build
+  Updated to OpenJDK langtools build b39
+
+----------------------------------------------------------------------
 Version 0.8.1, 1 Nov 2008
 
 Base build

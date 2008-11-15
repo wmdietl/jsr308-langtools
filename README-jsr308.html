@@ -17,7 +17,7 @@ pre, blockquote {
 </head>
 <body>
 <h1>JSR 308 Prototype Implementation README</h1> <!-- omit from toc -->
-<h4 id="version">Version 0.8.1 (1 Nov 2008)</h4> <!-- omit from toc -->
+<h4 id="version">Version 0.8.2 (14 Nov 2008)</h4> <!-- omit from toc -->
 <p>For the latest version, see the <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>.</p>
 
 <p>Contents:</p>
@@ -438,10 +438,6 @@ in the following ways:
   <li>The compiler source code (which is located in
     <code>langtools/src/share/classes</code>) supports the JSR 308; it
     permits annotations to appear on any occurrence of a type.</li>
-  <li>The
-    <a href="#typeprocessor"><code>-typeprocessor</code>
-    command-line option</a>, which runs an annotation processor
-    after types have been resolved, has been added to the compiler.</li>
   <li>
     In addition to ordinary JSR 175 annotations, the compiler parses JSR
     308 annotations, and also any annotation written in <a
@@ -483,7 +479,7 @@ you will need to edit
 JSR 308 distribution is based is:
 </p>
 <blockquote>
-<!-- version -->38 (23 Oct 2008)<!-- /version -->
+<!-- version -->39 (06 Nov 2008)<!-- /version -->
 </blockquote>
 
 <p>The following commands determine the differences between the JSR
@@ -500,7 +496,7 @@ extracted JSR 308 compiler distribution.
   <pre><code>
   export VENDOR=vendor-langtools
   hg clone http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
-  cd $VENDOR; hg up jdk7-b<!-- revision -->38<!-- /revision -->
+  cd $VENDOR; hg up jdk7-b<!-- revision -->39<!-- /revision -->
   </code></pre>
 
   <p>If you already have a checkout of the OpenJDK compiler, ensure
@@ -509,7 +505,7 @@ extracted JSR 308 compiler distribution.
   </p>
 
   <pre><code>
-  hg pull; hg up jdk7-b<!-- revision -->38<!-- /revision -->
+  hg pull; hg up jdk7-b<!-- revision -->39<!-- /revision -->
   </code></pre>
 
   </li>
@@ -570,7 +566,7 @@ modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
 </p>
 <ol>
-  <li>Obtain a copy of Mercurial reversion <!-- revision -->38<!-- /revision --> of
+  <li>Obtain a copy of Mercurial reversion <!-- revision -->39<!-- /revision --> of
   the OpenJDK compiler, using the commands in the <a href="#diffs">diff
   section</a> of this document.</li>
   <li>Try your test case using the
