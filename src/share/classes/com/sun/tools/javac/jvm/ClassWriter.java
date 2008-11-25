@@ -899,7 +899,7 @@ public class ClassWriter extends ClassFile {
         if (debugJSR308)
             System.out.println("writing " + c + " at " + p);
         writeCompoundAttribute(c);
-        databuf.appendByte(p.type.ordinal());
+        databuf.appendByte(p.type.targetTypeValue());
         switch (p.type) {
         // type case
         case TYPECAST:

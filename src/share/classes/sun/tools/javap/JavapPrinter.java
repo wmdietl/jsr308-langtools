@@ -900,7 +900,7 @@ public class JavapPrinter {
         if (type.hasParameter())
             out.println(sp + "parameter = " + a.parameter);
 
-        if (type.isGeneric() && a.location_length > 0) { // XFIXME loc length > 0 (assert)
+        if (type.hasLocation() && a.location_length > 0) { // XFIXME loc length > 0 (assert)
             out.print(sp + "location = " + a.location[0]);
             for (int i = 1; i < a.location_length; i++)
                 out.print(", " + a.location[i]);

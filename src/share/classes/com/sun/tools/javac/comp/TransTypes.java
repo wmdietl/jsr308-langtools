@@ -998,7 +998,7 @@ public class TransTypes extends TreeTranslator {
                         resolveContext(tree, context, contexts.toList(),
                                 new TypeAnnotations.Position());
                 if (!p.location.isEmpty())
-                    p.type = TargetType.values()[p.type.ordinal() + 1];
+                    p.type = p.type.getGenericComplement();
                 tree.typeAnnotations.position = p;
                 if (debugJSR308) {
                     sb.append("  target: " + p + "\n");
@@ -1018,7 +1018,7 @@ public class TransTypes extends TreeTranslator {
                         resolveContext(tree, context, contexts.toList(),
                                 new TypeAnnotations.Position());
                 if (!p.location.isEmpty())
-                    p.type = TargetType.values()[p.type.ordinal() + 1];
+                    p.type = p.type.getGenericComplement();
                 tree.typeAnnotations.position = p;
                 if (debugJSR308) {
                     sb.append("  target: " + p + "\n");
