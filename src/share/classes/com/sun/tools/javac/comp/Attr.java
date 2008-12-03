@@ -2481,13 +2481,13 @@ public class Attr extends JCTree.Visitor {
                 Type clazzOuter = clazztype.getEnclosingType();
                 if (clazzOuter.tag == CLASS) {
                     Type site;
-                    if (tree.clazz.getTag() == JCTree.ANNOTATED_TYPE)
-                        tree.clazz =
-                            ((JCAnnotatedType)tree.clazz).underlyingType;
-                    if (tree.clazz.getTag() == JCTree.IDENT) {
+                    JCExpression clazz = tree.clazz;
+                    if (clazz.getTag() == JCTree.ANNOTATED_TYPE)
+                        clazz = ((JCAnnotatedType)clazz).underlyingType;
+                    if (clazz.getTag() == JCTree.IDENT) {
                         site = env.enclClass.sym.type;
-                    } else if (tree.clazz.getTag() == JCTree.SELECT) {
-                        site = ((JCFieldAccess) tree.clazz).selected.type;
+                    } else if (clazz.getTag() == JCTree.SELECT) {
+                        site = ((JCFieldAccess) clazz).selected.type;
                     } else throw new AssertionError(""+tree);
                     if (clazzOuter.tag == CLASS && site != clazzOuter) {
                         if (site.tag == CLASS)
