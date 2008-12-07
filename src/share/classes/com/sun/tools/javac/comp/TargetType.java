@@ -141,12 +141,14 @@ public enum TargetType {
     @Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, HAS_LOCATION | HAS_PARAMETER),
 
     /** For annotations with an unknown target. */
-    UNKNOWN(0xFF, NO_ATTRIBUTE);
+    UNKNOWN(-1, NO_ATTRIBUTE);
 
-    private final byte targetTypeValue;
+    private final int targetTypeValue;
     private final int flags;
 
     TargetType(int targetTypeValue, int flags) {
+        assert targetTypeValue >= Byte.MIN_VALUE;
+        assert targetTypeValue <= Byte.MAX_VALUE;
         this.targetTypeValue = (byte)targetTypeValue;
         this.flags = flags;
     }
@@ -166,7 +168,7 @@ public enum TargetType {
         if (hasLocation())
             return this;
         else
-            return values()[targetTypeValue() + 1];
+            return fromTargetTypeValue(targetTypeValue() + 1);
     }
 
     /**
@@ -195,9 +197,11 @@ public enum TargetType {
         return this.targetTypeValue;
     }
 
-    public static TargetType fromTargetTypeValue(byte tag) {
+    public static TargetType fromTargetTypeValue(int tag) {
         if (tag == UNKNOWN.targetTypeValue)
             return UNKNOWN;
+        if (tag < 0 || tag >= values().length)
+            throw new IllegalArgumentException("Unknown TargetType: " + tag);
         return values()[tag];
     }
 
