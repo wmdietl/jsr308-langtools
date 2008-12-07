@@ -143,11 +143,11 @@ public enum TargetType {
     /** For annotations with an unknown target. */
     UNKNOWN(0xFF, NO_ATTRIBUTE);
 
-    private final int targetTypeValue;
+    private final byte targetTypeValue;
     private final int flags;
 
     TargetType(int targetTypeValue, int flags) {
-        this.targetTypeValue = targetTypeValue;
+        this.targetTypeValue = (byte)targetTypeValue;
         this.flags = flags;
     }
 
@@ -195,7 +195,7 @@ public enum TargetType {
         return this.targetTypeValue;
     }
 
-    public static TargetType fromTargetTypeValue(int tag) {
+    public static TargetType fromTargetTypeValue(byte tag) {
         if (tag == UNKNOWN.targetTypeValue)
             return UNKNOWN;
         return values()[tag];
