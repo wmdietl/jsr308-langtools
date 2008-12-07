@@ -1,3 +1,12 @@
+Version 0.8.3, 7 Dec 2008
+
+Bug fixes
+  Fixed bug related to annotations on anonymous classes
+
+Base build
+  Updated to OpenJDK langtools build b41
+
+----------------------------------------------------------------------
 Version 0.8.2, 14 Nov 2008
 
 Functionality
