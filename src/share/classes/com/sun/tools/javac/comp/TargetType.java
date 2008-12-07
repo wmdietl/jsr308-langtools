@@ -195,6 +195,12 @@ public enum TargetType {
         return this.targetTypeValue;
     }
 
+    public static TargetType fromTargetTypeValue(int tag) {
+        if (tag == UNKNOWN.targetTypeValue)
+            return UNKNOWN;
+        return values()[tag];
+    }
+
     static class TargetAttribute {
         static final int NO_ATTRIBUTE = 0;
         static final int HAS_LOCATION = 1 << 0;

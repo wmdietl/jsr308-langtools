@@ -1092,6 +1092,8 @@ public class TransTypes extends TreeTranslator {
             super.visitTypeParameter(tree);
         }
         public void lift(List<TypeAnnotations> ta) {
+            if ((ta.tail == null || ta.tail.isEmpty()) && ta.head.annotations.isEmpty())
+                return;
             if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
                 if (debugJSR308)
                     System.out.println("gen: " + ta + " -> " + lastVar.sym);
