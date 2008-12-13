@@ -55,10 +55,10 @@ do
   then
     # Cutting the -J from the parameter
     param=`echo -n "$param" | cut -b3-`
-    javaparams="$javaparams $param"
+    javaparams="$javaparams \"$param\""
   else
-    javacparams="$javacparams $param"
+    javacparams="$javacparams \"$param\""
   fi
 done
 
-"#TARGET_JAVA#" ${bcp:+-Xbootclasspath/p:"$bcp"} ${ea} ${javaparams} -jar "${mydir}"/../lib/#PROGRAM#.jar ${javacparams}
+eval "#TARGET_JAVA#" "${bcp:+-Xbootclasspath/p:"$bcp"}" ${ea} ${javaparams} -jar "${mydir}"/../lib/#PROGRAM#.jar ${javacparams}
