@@ -105,6 +105,7 @@ public class JavacParser implements Parser {
         this.allowForeach = source.allowForeach();
         this.allowStaticImport = source.allowStaticImport();
         this.allowAnnotations = source.allowAnnotations();
+        this.allowTypeAnnotations = source.allowTypeAnnotations();
         this.keepDocComments = keepDocComments;
         if (keepDocComments)
             docComments = new HashMap<JCTree,String>();
@@ -144,6 +145,10 @@ public class JavacParser implements Parser {
     /** Switch: should we recognize annotations?
      */
     boolean allowAnnotations;
+
+    /** Switch: should we recognize type annotations?
+     */
+    boolean allowTypeAnnotations;
 
     /** Switch: should we keep docComments?
      */
@@ -623,19 +628,20 @@ public class JavacParser implements Parser {
      * Saves {@code mode} and restores it after parsing annotations.
      */
     public List<JCAnnotation> typeAnnotationsOpt() {
+        // Code identical to annotationsOpt() with two modification
+        // 1. preserves the mode, and
+        // 2. uses typeAnnotation() instead of annotation()
+        if (S.token() != MONKEYS_AT) return List.nil(); // optimization
+        ListBuffer<JCAnnotation> buf = new ListBuffer<JCAnnotation>();
         int prevmode = mode;
-
-        // JSR 308: Parse using modifiers (to get positions correct) then verify
-        // that no modifiers other than annotations were parsed.
-        JCModifiers m = modifiersOpt();
-        checkNoMods(m.flags);
+        while (S.token() == MONKEYS_AT) {
+            int pos = S.pos();
+            S.nextToken();
+            buf.append(typeAnnotation(pos));
+        }
         lastmode = mode;
         mode = prevmode;
-
-        if (debugJSR308 && !m.annotations.isEmpty())
-            System.out.println("parsing: " + m.annotations);
-
-        return m.annotations;
+        return buf.toList();
     }
 
     JCExpression term(int newmode) {
@@ -1166,7 +1172,7 @@ public class JavacParser implements Parser {
             int pos1 = S.pos();
 
             List<JCAnnotation> annos = null;
-            if (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)
+            if (S.token() == MONKEYS_AT)
                 annos = typeAnnotationsOpt();
 
             if (S.token() == LBRACKET) {
@@ -1175,9 +1181,6 @@ public class JavacParser implements Parser {
                 // JSR 308: handle array type annotations after an "[" has
                 // already been lexed
                 ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
-                if (ArrayConvention.USED_CONVENTION.isIn() && S.token() == MONKEYS_AT) {
-                    annos = typeAnnotationsOpt();
-                }
 
                 stack.prepend(annos);
                 annos = null;
@@ -1423,8 +1426,7 @@ public class JavacParser implements Parser {
     private JCExpression bracketsOpt(JCExpression t,
             ListBuffer<List<JCAnnotation>> stack) {
         List<JCAnnotation> annos = List.nil();
-        if (ArrayConvention.USED_CONVENTION.isPre()
-                && S.token() == MONKEYS_AT)
+        if (S.token() == MONKEYS_AT)
             annos = typeAnnotationsOpt();
 
         if (S.token() == LBRACKET) {
@@ -1432,9 +1434,6 @@ public class JavacParser implements Parser {
             S.nextToken();
 
             JCExpression orig = t;
-            // JSR 308: Put annotations (possibly an empty list) on the stack.
-            if (ArrayConvention.USED_CONVENTION.isIn())
-                annos = typeAnnotationsOpt();
             stack.prepend(annos);
             annos = null;
             t = bracketsOptCont(t, pos, stack);
@@ -1553,8 +1552,7 @@ public class JavacParser implements Parser {
             }
         }
         mode = oldmode;
-        if (S.token() == LBRACKET
-                || (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)) {
+        if (S.token() == LBRACKET || S.token() == MONKEYS_AT) {
             JCExpression e = arrayCreatorRest(newpos, t);
             if (typeArgs != null) {
                 int pos = newpos;
@@ -1612,15 +1610,10 @@ public class JavacParser implements Parser {
 
         List<JCAnnotation> annos = List.nil();
 
-        if (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)
+        if (S.token() == MONKEYS_AT)
             annos = typeAnnotationsOpt();
 
         accept(LBRACKET);
-
-        // JSR 308: Get the annotations after the "[", which might be followed
-        // by a dimension expression.
-        if (ArrayConvention.USED_CONVENTION.isIn())
-            annos = typeAnnotationsOpt();
 
         // JSR 308: If there is a dimension expression after the optional
         // annotations, continue parsing brackets, and possibly an initializer.
@@ -1661,9 +1654,9 @@ public class JavacParser implements Parser {
             dims.append(parseExpression());
             accept(RBRACKET);
             while (S.token() == LBRACKET
-                    || (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)) {
+                    || (S.token() == MONKEYS_AT)) {
                 List<JCAnnotation> maybeDimAnnos = List.nil();
-                if (ArrayConvention.USED_CONVENTION.isPre() && S.token() == MONKEYS_AT)
+                if (S.token() == MONKEYS_AT)
                     maybeDimAnnos = typeAnnotationsOpt();
                 int pos = S.pos();
                 S.nextToken();
@@ -1671,10 +1664,6 @@ public class JavacParser implements Parser {
                     elemtype = bracketsOptCont(elemtype, pos,
                             ListBuffer.<List<JCAnnotation>>lb().append(maybeDimAnnos));
                 } else {
-                    // JSR 308: We might have any combination of annotations and
-                    // dimension at this point.
-                    if (ArrayConvention.USED_CONVENTION.isIn())
-                        maybeDimAnnos = typeAnnotationsOpt();
                     if (S.token() == RBRACKET) { // no dimension
                         elemtype = bracketsOptCont(elemtype, pos,
                                 ListBuffer.<List<JCAnnotation>>lb().append(maybeDimAnnos));
@@ -2224,6 +2213,12 @@ public class JavacParser implements Parser {
         if (pos != Position.NOPOS)
             storeEnd(mods, S.prevEndPos());
         return mods;
+    }
+
+    JCAnnotation typeAnnotation(int pos) {
+        // accept(AT); // AT consumed by caller
+        checkTypeAnnotations();
+        return annotation(pos);
     }
 
     /** Annotation              = "@" Qualident [ "(" AnnotationFieldValues ")" ]
@@ -3201,51 +3196,10 @@ public class JavacParser implements Parser {
             allowAnnotations = true;
         }
     }
-
-    public enum ArrayConvention {
-        ELTS_IN,
-        ELTS_PRE,
-        ARRAYS_IN,
-        ARRAYS_PRE;
-
-        public final boolean isPre() {
-            return (this == ELTS_PRE || this == ARRAYS_PRE);
-        }
-
-        public final boolean isIn() {
-            return (this == ELTS_IN || this == ARRAYS_IN);
-        }
-
-        /** JSR 308: should we use the ELTS array convention?
-         */
-        public static final ArrayConvention USED_CONVENTION;
-
-        /** JSR 308: default array convention */
-        private static final ArrayConvention JSR308_DEFAULT_ARRAY_CONVENTION = ARRAYS_PRE;
-
-        static {
-            // Determine the convention ("elts" or "arrays") to use for JSR 308
-            // annotations on array types
-            String arrayConv = System.getProperty("jsr308.arrays");
-            if (arrayConv == null)
-                arrayConv = System.getProperty("jsr308_arrays");
-            if (arrayConv == null)
-                arrayConv = System.getenv("jsr308.arrays");
-            if (arrayConv == null)
-                arrayConv = System.getenv("jsr308_arrays");
-
-            // Decide on the convention
-            ArrayConvention foundConvention = null;
-            for (ArrayConvention ar : ArrayConvention.values()) {
-                if (ar.toString().equalsIgnoreCase(arrayConv)) {
-                    foundConvention = ar;
-                    break;
-                }
-            }
-            if (foundConvention == null)
-                USED_CONVENTION = JSR308_DEFAULT_ARRAY_CONVENTION;
-            else
-                USED_CONVENTION = foundConvention;
+    void checkTypeAnnotations() {
+        if (!allowTypeAnnotations) {
+            log.error(S.pos(), "type.annotations.not.supported.in.source", source.name);
+            allowTypeAnnotations = true;
         }
     }
 }
