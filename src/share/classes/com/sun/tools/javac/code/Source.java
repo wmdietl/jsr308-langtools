@@ -102,6 +102,10 @@ public enum Source {
     }
 
     public Target requiredTarget() {
+        // TODO: Need to remove this code in the final stage
+        // The following line allows early adopters to use type annotations
+        // and target java 5 or 6... all have similar classfile spec
+        if (this == JDK1_7) return Target.JDK1_5;
         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
         if (this.compareTo(JDK1_6) >= 0) return Target.JDK1_6;
         if (this.compareTo(JDK1_5) >= 0) return Target.JDK1_5;
