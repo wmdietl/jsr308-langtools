@@ -2996,14 +2996,15 @@ public class JavacParser implements Parser {
         JCModifiers mods = optFinal(Flags.PARAMETER);
         this.isVarargsHackAllowed = true;
         JCExpression type = parseType();
+        this.isVarargsHackAllowed = false;
+
         // JSR 308: handle annotations on a varargs element type
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
-        if (varArgsTypeAnnotationsHack != null) {
-            varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
-            varArgsTypeAnnotationsHack = null;
-        }
-        this.isVarargsHackAllowed = false;
         if (S.token() == ELLIPSIS) {
+            if (varArgsTypeAnnotationsHack != null) {
+                varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
+                varArgsTypeAnnotationsHack = null;
+            }
             checkVarargs();
             mods.flags |= Flags.VARARGS;
             // JSR 308: annotate the varargs elements
@@ -3012,6 +3013,14 @@ public class JavacParser implements Parser {
             type = to(F.at(S.pos()).TypeArray(type));
 
             S.nextToken();
+        } else {
+            // if not a var arg, then varArgsTypeAnnotationHack should be null
+            if (varArgsTypeAnnotationsHack != null
+                    && !varArgsTypeAnnotationsHack.isEmpty()) {
+                reportSyntaxError(varArgsTypeAnnotationsHack.head.pos,
+                        "illegal.start.of.type");
+            }
+            varArgsTypeAnnotationsHack = null;
         }
         return variableDeclaratorId(mods, type);
     }
