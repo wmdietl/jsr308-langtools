@@ -30,25 +30,25 @@
 
 class ConstructorTypeArgs {
   void oneArg() {
-    new @A List<@A String>();
-    new List<@A List<@B(0) String>>();
+    new @A MyList<@A String>();
+    new MyList<@A MyList<@B(0) String>>();
   }
 
   void twoArg() {
-    new Map<String, String>();
-    new Map<@A String, @B(0) List<@A String>>();
+    new MyMap<String, String>();
+    new MyMap<@A String, @B(0) MyList<@A String>>();
   }
 
   void withArraysIn() {
-    new List<String[]>();
-    new List<@A String @B(0) [] @A []>();
+    new MyList<String[]>();
+    new MyList<@A String @B(0) [] @A []>();
 
-    new Map<@A String[], @B(0) List<@A String> @A []>();
+    new MyMap<@A String[], @B(0) MyList<@A String> @A []>();
   }
 }
 
-class List<E> { }
-class Map<K, V> { }
+class MyList<E> { }
+class MyMap<K, V> { }
 
 @interface A { }
 @interface B { int value(); }

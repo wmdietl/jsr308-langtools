@@ -31,31 +31,31 @@
 class MethodTypeArgs {
   void oneArg() {
     this.<@A String>newList();
-    this.<@A List<@B(0) String>>newList();
+    this.<@A MyList<@B(0) String>>newList();
 
     MethodTypeArgs.<@A String>newList();
-    MethodTypeArgs.<@A List<@B(0) String>>newList();
+    MethodTypeArgs.<@A MyList<@B(0) String>>newList();
   }
 
   void twoArg() {
     this.<String, String>newMap();
-    this.<@A String, @B(0) List<@A String>>newMap();
+    this.<@A String, @B(0) MyList<@A String>>newMap();
 
     MethodTypeArgs.<String, String>newMap();
-    MethodTypeArgs.<@A String, @B(0) List<@A String>>newMap();
+    MethodTypeArgs.<@A String, @B(0) MyList<@A String>>newMap();
   }
 
   void withArraysIn() {
     this.<String[]>newList();
     this.<@A String @B(0) [] @A []>newList();
 
-    this.<@A String[], @B(0) List<@A String> @A []>newMap();
+    this.<@A String[], @B(0) MyList<@A String> @A []>newMap();
   }
 
   static <E> void newList() { }
   static <K, V> void newMap() { }
 }
 
-class List<E> { }
+class MyList<E> { }
 @interface A { }
 @interface B { int value(); }

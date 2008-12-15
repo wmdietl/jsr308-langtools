@@ -28,24 +28,24 @@
  * @compile Wildcards.java
  */
 class Test {
-  void wcExtends(List<? extends @A String> l) { }
-  void wcSuper(List<? super @A String> l) { }
+  void wcExtends(MyList<? extends @A String> l) { }
+  void wcSuper(MyList<? super @A String> l) { }
 
-  List<? extends @A String> returnWcExtends() { return null; }
-  List<? super @A String> returnWcSuper() { return null; }
-  List<? extends @A List<? super @B("m") String>> complex() { return null; }
+  MyList<? extends @A String> returnWcExtends() { return null; }
+  MyList<? super @A String> returnWcSuper() { return null; }
+  MyList<? extends @A MyList<? super @B("m") String>> complex() { return null; }
 }
 
 class WithValue {
-  void wcExtends(List<? extends @B("m") String> l) { }
-  void wcSuper(List<? super @B(value="m") String> l) { }
+  void wcExtends(MyList<? extends @B("m") String> l) { }
+  void wcSuper(MyList<? super @B(value="m") String> l) { }
 
-  List<? extends @B("m") String> returnWcExtends() { return null; }
-  List<? super @B(value="m") String> returnWcSuper() { return null; }
-  List<? extends @B("m") List<? super @B("m") String>> complex() { return null; }
+  MyList<? extends @B("m") String> returnWcExtends() { return null; }
+  MyList<? super @B(value="m") String> returnWcSuper() { return null; }
+  MyList<? extends @B("m") MyList<? super @B("m") String>> complex() { return null; }
 }
 
-class List<K> { }
+class MyList<K> { }
 
 @interface A { }
 @interface B { String value(); }
