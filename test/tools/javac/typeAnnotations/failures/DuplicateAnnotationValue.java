@@ -23,19 +23,14 @@
 
 /*
  * @test
- * @summary check for duplicate annotations
+ * @summary check for duplicate annotation values
  * @author Mahmood Ali
- * @compile/fail/ref=DuplicateTypeAnnotation.out -XDstdout -XDrawDiagnostics DuplicateTypeAnnotation.java
+ * @compile/fail DuplicateAnnotationValue.java
  */
-
-class DuplicateTypeAnno {
-  void test() @A @A {
-    new @A @A String();
-    Object o = new String @A @A [1] [1];
-    this.<@A @A String>genericMethod();
+class DuplicateAnnotationValue {
+  void test() {
+    new @A(value = 2, value = 1) String();
   }
-
-  <@A @A K> void genericMethod() { }
 }
 
-@interface A { }
+@interface A { int value(); }
