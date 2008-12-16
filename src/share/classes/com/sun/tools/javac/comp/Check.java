@@ -1778,6 +1778,14 @@ public class Check {
             validateAnnotation(a, s);
     }
 
+    /** Check the type annotations
+     */
+    public void validateTypeAnnotations(List<JCAnnotation> annotations) {
+        if (skipAnnotations) return;
+        for (JCAnnotation a : annotations)
+            validateTypeAnnotation(a);
+    }
+
     /** Check an annotation of a symbol.
      */
     public void validateAnnotation(JCAnnotation a, Symbol s) {
@@ -1790,6 +1798,13 @@ public class Check {
             if (!isOverrider(s))
                 log.error(a.pos(), "method.does.not.override.superclass");
         }
+    }
+
+    public void validateTypeAnnotation(JCAnnotation a) {
+        validateAnnotation(a);
+
+        if (!isTypeAnnotation(a))
+            log.error(a.pos(), "annotation.type.not.applicable");
     }
 
     /** Is s a method symbol that overrides a method in a superclass? */
@@ -1806,6 +1821,23 @@ public class Check {
                 if (!e.sym.isStatic() && m.overrides(e.sym, owner, types, true))
                     return true;
             }
+        }
+        return false;
+    }
+
+    /** Is the annotation applicable to type annotations */
+    boolean isTypeAnnotation(JCAnnotation a) {
+        Attribute.Compound atTarget =
+            a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
+        if (atTarget == null) return true;
+        Attribute atValue = atTarget.member(names.value);
+        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
+        Attribute.Array arr = (Attribute.Array) atValue;
+        for (Attribute app : arr.values) {
+            if (!(app instanceof Attribute.Enum)) return true; // recovery
+            Attribute.Enum e = (Attribute.Enum) app;
+            if (e.value.name == names.TYPE_USE)
+                return true;
         }
         return false;
     }

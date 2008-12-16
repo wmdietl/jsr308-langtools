@@ -687,7 +687,6 @@ public class Attr extends JCTree.Visitor {
             localEnv.info.scope.leave();
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
-
         }
         finally {
             chk.setLint(prevLint);
