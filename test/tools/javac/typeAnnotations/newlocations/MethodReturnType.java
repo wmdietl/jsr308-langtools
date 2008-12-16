@@ -37,6 +37,8 @@ class DefaultScope {
   Parameterized<@A Parameterized<@A String, @B String>, @B String>
     nestedParameterized() { return null; }
 
+  public <T> @A String method() { return null; }
+
   @A String [] array1() { return null; }
   @A String @B [] array1Deep() { return null; }
   @A String [] [] array2() { return null; }
