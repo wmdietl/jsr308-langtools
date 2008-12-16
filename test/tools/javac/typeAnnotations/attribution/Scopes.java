@@ -23,25 +23,15 @@
 
 /*
  * @test
- * @summary new type annotation location: method type parameter bounds
+ * @summary test scopes of attribution
  * @author Mahmood Ali
- * @compile MethodTypeParameters.java
+ * @compile Scopes.java
  */
+class Scopes {
 
-class UnscopedUnmodified {
-  <K extends @A String> void methodExtends() {}
-  <K extends @A Parameterized<@B String>> void nestedExtends() {}
-  <K extends @A String, V extends @A Parameterized<@B String>> void dual() {}
-  <K extends String, V extends Parameterized<@B String>> void dualOneAnno() {}
+  void test() @A(VALUE) { }
+  void test1() @A(value=VALUE) { }
+
+  private static final int VALUE = 1;
+  @interface A { int value(); }
 }
-
-class PublicModifiedMethods {
-  public final <K extends @A String> void methodExtends() {}
-  public final <K extends @A Parameterized<@B String>> void nestedExtends() {}
-  public final <K extends @A String, V extends @A Parameterized<@B String>> void dual() {}
-  public final <K extends String, V extends Parameterized<@B String>> void dualOneAnno() {}
-}
-
-class Parameterized<K> { }
-@interface A { }
-@interface B { }

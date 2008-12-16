@@ -36,7 +36,7 @@ class SecondAnnotated<K, @A V extends String> { }
 class TestMethods {
   <K> void unannotated() { }
   <@A K> void oneAnnotated() { }
-  <@A K, @B V> void twoAnnotated() { }
+  <@A K, @B("m") V> void twoAnnotated() { }
   <K, @A V extends @A String> void secondAnnotated() { }
 }
 
