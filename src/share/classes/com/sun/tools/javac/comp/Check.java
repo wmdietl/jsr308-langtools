@@ -1883,6 +1883,13 @@ public class Check {
                 }
             else if (e.value.name == names.PACKAGE)
                 { if (s.kind == PCK) return true; }
+            else if (e.value.name == names.TYPE_USE)
+                { if (s.kind == TYP ||
+                      s.kind == VAR ||
+                      (s.kind == MTH && !s.isConstructor() &&
+                       s.type.getReturnType().tag != VOID))
+                    return true;
+                }
             else
                 return true; // recovery
         }
