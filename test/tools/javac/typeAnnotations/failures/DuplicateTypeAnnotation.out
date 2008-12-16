@@ -1,6 +1,0 @@
-DuplicateTypeAnnotation.java:32:18: compiler.err.duplicate.annotation
-DuplicateTypeAnnotation.java:33:12: compiler.err.duplicate.annotation
-DuplicateTypeAnnotation.java:34:30: compiler.err.duplicate.annotation
-DuplicateTypeAnnotation.java:35:14: compiler.err.duplicate.annotation
-DuplicateTypeAnnotation.java:38:7: compiler.err.duplicate.annotation
-5 errors
