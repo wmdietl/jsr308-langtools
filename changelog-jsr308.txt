@@ -1,6 +1,15 @@
+Version 0.8.4, 17 Dec 2008
+
+Functionality
+  Added support for TYPE_USE annotation target
 
 Bug fixes
+  javac rejects more some invalid type annotations
+    - e.g annotations with missing or repeated member values
   javac and other programs properly handle filenames containing spaces
+
+Testing
+  Added compiler tests for jsr308 implementation
 
 ----------------------------------------------------------------------
 Version 0.8.3, 7 Dec 2008
