@@ -270,6 +270,7 @@ public class TreeScanner extends Visitor {
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {
+        scan(tree.annotations);
         scan(tree.bounds);
     }
 

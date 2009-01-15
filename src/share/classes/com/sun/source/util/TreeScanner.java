@@ -355,7 +355,9 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
     }
 
     public R visitTypeParameter(TypeParameterTree node, P p) {
-        return scan(node.getBounds(), p);
+        R r = scan(node.getAnnotations(), p);
+        r = scanAndReduce(node.getBounds(), p, r);
+        return r;
     }
 
     public R visitWildcard(WildcardTree node, P p) {

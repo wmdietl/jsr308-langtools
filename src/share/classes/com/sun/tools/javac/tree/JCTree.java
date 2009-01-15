@@ -1891,6 +1891,9 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCExpression> getBounds() {
             return bounds;
         }
+        public List<JCAnnotation> getAnnotations() {
+            return annotations;
+        }
         @Override
         public <R,D> R accept(TreeVisitor<R,D> v, D d) {
             return v.visitTypeParameter(this, d);
