@@ -345,7 +345,7 @@ public class MethodData {
     /**
      * Return LineNumberTable
      */
-    public Vector getlin_num_tb(){
+    public Vector<?> getlin_num_tb(){
         return lin_num_tb;
     }
 
@@ -360,7 +360,7 @@ public class MethodData {
     /**
      * Return LocalVariableTable.
      */
-    public Vector getloc_var_tb(){
+    public Vector<?> getloc_var_tb(){
         return loc_var_tb;
     }
 
@@ -421,7 +421,7 @@ public class MethodData {
     /**
      * Return exception table in code attributre.
      */
-    public Vector getexception_table(){
+    public Vector<?> getexception_table(){
         return exception_table;
     }
 
@@ -429,7 +429,7 @@ public class MethodData {
     /**
      * Return method attributes.
      */
-    public Vector getAttributes(){
+    public Vector<?> getAttributes(){
         return attrs;
     }
 
@@ -437,7 +437,7 @@ public class MethodData {
     /**
      * Return code attributes.
      */
-    public Vector getCodeAttributes(){
+    public Vector<?> getCodeAttributes(){
         return code_attrs;
     }
 

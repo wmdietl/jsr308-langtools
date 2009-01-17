@@ -224,7 +224,7 @@ public class FieldData implements RuntimeConstants  {
     /**
      * Returns list of attributes of field.
      */
-    public Vector getAttributes(){
+    public Vector<?> getAttributes(){
         return attrs;
     }
 }
