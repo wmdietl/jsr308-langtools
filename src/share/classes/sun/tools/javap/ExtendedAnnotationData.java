@@ -47,6 +47,8 @@ public class ExtendedAnnotationData extends AnnotationData {
 
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            int num_entries = in.readShort();
+            assert num_entries == 1; // FIXME: hard-coded
             start_pc = in.readShort();
             length = in.readShort();
             index = in.readShort();
