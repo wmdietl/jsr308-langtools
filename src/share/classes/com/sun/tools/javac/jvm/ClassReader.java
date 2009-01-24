@@ -891,9 +891,9 @@ public class ClassReader extends ClassFile implements Completer {
             attachParameterAnnotations(sym);
         } else if (attrName == names.RuntimeInvisibleParameterAnnotations) {
             attachParameterAnnotations(sym);
-        } else if (attrName == names.RuntimeVisibleExtendedAnnotations) {
+        } else if (attrName == names.RuntimeVisibleTypeAnnotations) {
             attachTypeAnnotations(sym);
-        } else if (attrName == names.RuntimeInvisibleExtendedAnnotations) {
+        } else if (attrName == names.RuntimeInvisibleTypeAnnotations) {
             attachTypeAnnotations(sym);
         } else if (attrName == names.LocalVariableTable) {
             int newbp = bp + attrLen;

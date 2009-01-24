@@ -97,8 +97,8 @@ public class Names {
     public final Name Annotation;
     public final Name RuntimeVisibleAnnotations;
     public final Name RuntimeInvisibleAnnotations;
-    public final Name RuntimeVisibleExtendedAnnotations;
-    public final Name RuntimeInvisibleExtendedAnnotations;
+    public final Name RuntimeVisibleTypeAnnotations;
+    public final Name RuntimeInvisibleTypeAnnotations;
     public final Name RuntimeVisibleParameterAnnotations;
     public final Name RuntimeInvisibleParameterAnnotations;
     public final Name Value;
@@ -203,8 +203,8 @@ public class Names {
         Annotation = fromString("Annotation");
         RuntimeVisibleAnnotations = fromString("RuntimeVisibleAnnotations");
         RuntimeInvisibleAnnotations = fromString("RuntimeInvisibleAnnotations");
-        RuntimeVisibleExtendedAnnotations = fromString("RuntimeVisibleExtendedAnnotations");
-        RuntimeInvisibleExtendedAnnotations = fromString("RuntimeInvisibleExtendedAnnotations");
+        RuntimeVisibleTypeAnnotations = fromString("RuntimeVisibleTypeAnnotations");
+        RuntimeInvisibleTypeAnnotations = fromString("RuntimeInvisibleTypeAnnotations");
         RuntimeVisibleParameterAnnotations = fromString("RuntimeVisibleParameterAnnotations");
         RuntimeInvisibleParameterAnnotations = fromString("RuntimeInvisibleParameterAnnotations");
         Value = fromString("Value");

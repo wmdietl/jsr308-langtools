@@ -198,10 +198,10 @@ public class JavapPrinter {
                     printAnnotationsAttribute(fieldattrname, field.getRuntimeVisibleAnnotations());
                 else if (fieldattrname.equals("RuntimeInvisibleAnnotations"))
                     printAnnotationsAttribute(fieldattrname, field.getRuntimeInvisibleAnnotations());
-                else if (fieldattrname.equals("RuntimeVisibleExtendedAnnotations"))
-                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeVisibleExtendedAnnotations());
-                else if (fieldattrname.equals("RuntimeInvisibleExtendedAnnotations"))
-                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeInvisibleExtendedAnnotations());
+                else if (fieldattrname.equals("RuntimeVisibleTypeAnnotations"))
+                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeVisibleTypeAnnotations());
+                else if (fieldattrname.equals("RuntimeInvisibleTypeAnnotations"))
+                    printExtendedAnnotationsAttribute(fieldattrname, field.getRuntimeInvisibleTypeAnnotations());
             }else {
                 printAttrData((AttrData)fieldattrs.elementAt(j));
             }
@@ -324,14 +324,14 @@ public class JavapPrinter {
                                                    .getRuntimeInvisibleParameterAnnotations());
             else if (env.showAnnotations
                      && methodattrname
-                     .equals("RuntimeVisibleExtendedAnnotations"))
+                     .equals("RuntimeVisibleTypeAnnotations"))
                 printExtendedAnnotationsAttribute(methodattrname, method
-                                                  .getRuntimeVisibleExtendedAnnotations());
+                                                  .getRuntimeVisibleTypeAnnotations());
             else if (env.showAnnotations
                      && methodattrname
-                     .equals("RuntimeInvisibleExtendedAnnotations"))
+                     .equals("RuntimeInvisibleTypeAnnotations"))
                 printExtendedAnnotationsAttribute(methodattrname, method
-                                                  .getRuntimeInvisibleExtendedAnnotations());
+                                                  .getRuntimeInvisibleTypeAnnotations());
             else {
                 printAttrData((AttrData)methodattrs.elementAt(k));
             }
