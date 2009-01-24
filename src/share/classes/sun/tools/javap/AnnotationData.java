@@ -9,7 +9,7 @@ public class AnnotationData {
     public static boolean isAnyAnnotationsAttribute(String name) {
         return (isAnnotationsAttribute(name) ||
                 isParameterAnnotationsAttribute(name) ||
-                isExtendedAnnotationsAttribute(name));
+                isTypeAnnotationsAttribute(name));
     }
 
     public static boolean isAnnotationsAttribute(String name) {
@@ -22,9 +22,9 @@ public class AnnotationData {
                 name.equals("RuntimeInvisibleParameterAnnotations"));
     }
 
-    public static boolean isExtendedAnnotationsAttribute(String name) {
-        return (name.equals("RuntimeVisibleExtendedAnnotations") ||
-                name.equals("RuntimeInvisibleExtendedAnnotations"));
+    public static boolean isTypeAnnotationsAttribute(String name) {
+        return (name.equals("RuntimeVisibleTypeAnnotations") ||
+                name.equals("RuntimeInvisibleTypeAnnotations"));
     }
 
     public static AnnotationData[][] readParameterAnnotations(DataInputStream in) throws IOException {

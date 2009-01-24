@@ -782,7 +782,7 @@ public class ClassWriter extends ClassFile {
 
         int attrCount = 0;
         if (visibles.length() != 0) {
-            int attrIndex = writeAttr(names.RuntimeVisibleExtendedAnnotations);
+            int attrIndex = writeAttr(names.RuntimeVisibleTypeAnnotations);
             databuf.appendChar(visibles.length());
             for (Pair<Attribute.Compound, TypeAnnotations.Position> p : visibles)
                 writeTypeAnnotation(p.fst, p.snd);

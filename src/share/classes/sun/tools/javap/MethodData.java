@@ -61,8 +61,8 @@ public class MethodData {
     AnnotationData[] runtimeInvisibleAnnotations;
     AnnotationData[][] runtimeVisibleParameterAnnotations;
     AnnotationData[][] runtimeInvisibleParameterAnnotations;
-    ExtendedAnnotationData[] runtimeVisibleExtendedAnnotations;
-    ExtendedAnnotationData[] runtimeInvisibleExtendedAnnotations;
+    ExtendedAnnotationData[] runtimeVisibleTypeAnnotations;
+    ExtendedAnnotationData[] runtimeInvisibleTypeAnnotations;
 
     public MethodData(ClassData cls, JavapEnvironment env){
         this.cls=cls;
@@ -131,12 +131,12 @@ public class MethodData {
                                 this.runtimeVisibleAnnotations = annotations;
                             else if (attr_name.equals("RuntimeInvisibleAnnotations"))
                                 this.runtimeInvisibleAnnotations = annotations;
-                        } else if (AnnotationData.isExtendedAnnotationsAttribute(attr_name)) {
+                        } else if (AnnotationData.isTypeAnnotationsAttribute(attr_name)) {
                             ExtendedAnnotationData[] annotations = ExtendedAnnotationData.readExtendedAnnotations(in);
-                            if (attr_name.equals("RuntimeVisibleExtendedAnnotations"))
-                                this.runtimeVisibleExtendedAnnotations = annotations;
-                            else if (attr_name.equals("RuntimeInvisibleExtendedAnnotations"))
-                                this.runtimeInvisibleExtendedAnnotations = annotations;
+                            if (attr_name.equals("RuntimeVisibleTypeAnnotations"))
+                                this.runtimeVisibleTypeAnnotations = annotations;
+                            else if (attr_name.equals("RuntimeInvisibleTypeAnnotations"))
+                                this.runtimeInvisibleTypeAnnotations = annotations;
                         } else {
                             assert false;
                         }
@@ -490,14 +490,14 @@ public class MethodData {
     /**
      * @return the runtime visible extended annotations on this field
      */
-    public ExtendedAnnotationData[] getRuntimeVisibleExtendedAnnotations() {
-        return this.runtimeVisibleExtendedAnnotations;
+    public ExtendedAnnotationData[] getRuntimeVisibleTypeAnnotations() {
+        return this.runtimeVisibleTypeAnnotations;
     }
 
     /**
      * @return the runtime invisible extended annotations on this field
      */
-    public ExtendedAnnotationData[] getRuntimeInvisibleExtendedAnnotations() {
-        return this.runtimeInvisibleExtendedAnnotations;
+    public ExtendedAnnotationData[] getRuntimeInvisibleTypeAnnotations() {
+        return this.runtimeInvisibleTypeAnnotations;
     }
 }
