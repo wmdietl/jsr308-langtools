@@ -776,8 +776,14 @@ public class ClassWriter extends ClassFile {
 
         for (TypeAnnotations ta : typeAnnos) {
             if (ta.annotations.isEmpty()) continue;
-            for (Attribute.Compound a : ta.annotations)
-                visibles.append(Pair.of(a, ta.position));
+            for (Attribute.Compound a : ta.annotations) {
+                switch (getRetention(a.type.tsym)) {
+                case SOURCE: break;
+                case CLASS: invisibles.append(Pair.of(a, ta.position)); break;
+                case RUNTIME: visibles.append(Pair.of(a, ta.position)); break;
+                default: ;// /* fail soft */ throw new AssertionError(vis);
+                }
+            }
         }
 
         int attrCount = 0;
@@ -789,8 +795,15 @@ public class ClassWriter extends ClassFile {
             endAttr(attrIndex);
             attrCount++;
         }
-        // Ignores invisibles, presumably intentionally because they
-        // wouldn't be retained anyway.
+
+        if (invisibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeInvisibleTypeAnnotations);
+            databuf.appendChar(invisibles.length());
+            for (Pair<Attribute.Compound, TypeAnnotations.Position> p : invisibles)
+                writeTypeAnnotation(p.fst, p.snd);
+            endAttr(attrIndex);
+            attrCount++;
+        }
 
         return attrCount;
     }
