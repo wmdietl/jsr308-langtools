@@ -2846,7 +2846,7 @@ public class Attr extends JCTree.Visitor {
      * Type parameters are attributed before annotation attribution happens
      * (and before class bodies are attributed too).  Thus we cannot validate
      * type annotations on type parameters or their bounds then.
-     * 
+     *
      * Thus, we revisit these parameters only during regular attribution
      * and we only validate the type annotations.
      */
