@@ -54,6 +54,8 @@ public abstract class Attribute {
     public static final String RuntimeInvisibleAnnotations = "RuntimeInvisibleAnnotations";
     public static final String RuntimeVisibleParameterAnnotations = "RuntimeVisibleParameterAnnotations";
     public static final String RuntimeInvisibleParameterAnnotations = "RuntimeInvisibleParameterAnnotations";
+    public static final String RuntimeVisibleTypeAnnotations = "RuntimeVisibleParameterAnnotations";
+    public static final String RuntimeInvisibleTypeAnnotations = "RuntimeInvisibleParameterAnnotations";
     public static final String Signature                = "Signature";
     public static final String SourceDebugExtension     = "SourceDebugExtension";
     public static final String SourceFile               = "SourceFile";
@@ -184,6 +186,8 @@ public abstract class Attribute {
         R visitRuntimeInvisibleAnnotations(RuntimeInvisibleAnnotations_attribute attr, P p);
         R visitRuntimeVisibleParameterAnnotations(RuntimeVisibleParameterAnnotations_attribute attr, P p);
         R visitRuntimeInvisibleParameterAnnotations(RuntimeInvisibleParameterAnnotations_attribute attr, P p);
+        R visitRuntimeVisibleTypeAnnotations(RuntimeVisibleTypeAnnotations_attribute attr, P p);
+        R visitRuntimeInvisibleTypeAnnotations(RuntimeInvisibleTypeAnnotations_attribute attr, P p);
         R visitSignature(Signature_attribute attr, P p);
         R visitSourceDebugExtension(SourceDebugExtension_attribute attr, P p);
         R visitSourceFile(SourceFile_attribute attr, P p);
