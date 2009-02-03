@@ -302,7 +302,7 @@ public class ClassReader extends ClassFile implements Completer {
     /** Read a byte.
      */
     byte nextByte() {
-        return (byte)buf[bp++];
+        return buf[bp++];
     }
 
     /** Read an integer.

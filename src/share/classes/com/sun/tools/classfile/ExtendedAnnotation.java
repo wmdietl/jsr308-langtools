@@ -161,7 +161,7 @@ public class ExtendedAnnotation {
             int len = cr.readUnsignedShort();
             ListBuffer<Integer> loc = ListBuffer.lb();
             for (int i = 0; i < len; i++)
-                loc = loc.append((int)cr.readUnsignedByte());
+                loc = loc.append(cr.readUnsignedByte());
             position.location = loc.toList();
         }
         return null;
