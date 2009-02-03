@@ -1194,6 +1194,15 @@ public class ClassReader extends ClassFile implements Completer {
     TypeAnnotationProxy readTypeAnnotation() {
         CompoundAnnotationProxy proxy = readCompoundAnnotation();
 
+        TypeAnnotations.Position position = readPosition();
+
+        if (debugJSR308)
+            System.out.println("reading: " + proxy + " @ " + position);
+
+        return new TypeAnnotationProxy(proxy, position);
+    }
+
+    TypeAnnotations.Position readPosition() {
         byte tag = nextByte();
 
         TypeAnnotations.Position position = new TypeAnnotations.Position();
@@ -1239,10 +1248,13 @@ public class ClassReader extends ClassFile implements Completer {
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
         case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
+            break;
+         // wildcard
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            position.wildcard_position = readPosition();
             break;
          // Class extends and implements clauses
         case CLASS_EXTENDS:
@@ -1294,12 +1306,8 @@ public class ClassReader extends ClassFile implements Completer {
             position.location = loc.toList();
         }
 
-        if (debugJSR308)
-            System.out.println("reading: " + proxy + " @ " + position);
-
-        return new TypeAnnotationProxy(proxy, position);
+        return position;
     }
-
     Attribute readAttributeValue() {
         char c = (char) buf[bp++];
         switch (c) {

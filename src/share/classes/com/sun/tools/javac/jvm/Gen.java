@@ -971,9 +971,13 @@ public class Gen extends JCTree.Visitor {
                             || lv.sym.typeAnnotations == null)
                         continue;
                     for (TypeAnnotations ta : lv.sym.typeAnnotations) {
-                        ta.position.offset = (int)lv.start_pc;
-                        ta.position.length = (int)lv.length;
-                        ta.position.index = (int)lv.reg;
+                        TypeAnnotations.Position p = ta.position;
+                        while (p != null) {
+                            p.offset = (int)lv.start_pc;
+                            p.length = (int)lv.length;
+                            p.index = (int)lv.reg;
+                            p = p.wildcard_position;
+                        }
                     }
                 }
             }

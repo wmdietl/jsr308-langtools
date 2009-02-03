@@ -32,6 +32,9 @@ public class TypeAnnotations {
         // For class extends, implements, and throws classes
         public int type_index = -2;
 
+        // For wildcards
+        public Position wildcard_position = null;
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -79,12 +82,16 @@ public class TypeAnnotations {
             case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
             case METHOD_TYPE_PARAMETER_BOUND:
             case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 sb.append(", bound_index = ");
                 sb.append(bound_index);
+                break;
+             // wildcard
+            case WILDCARD_BOUND:
+            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+                sb.append(", wild_card = ");
+                sb.append(wildcard_position);
                 break;
              // Class extends and implements clauses
             case CLASS_EXTENDS:

@@ -850,7 +850,6 @@ public class TransTypes extends TreeTranslator {
         private TypeAnnotations.Position resolveContext(JCTree tree, JCTree context,
                 List<JCTree> path, TypeAnnotations.Position p) {
             switch (context.getKind()) {
-
                 case TYPE_CAST:
                     p.type = TargetType.TYPECAST;
                     p.pos = context.pos;
@@ -872,6 +871,7 @@ public class TransTypes extends TreeTranslator {
                     return p;
 
                 case CLASS:
+                    p.pos = context.pos;
                     if (((JCClassDecl)context).extending == tree) {
                         p.type = TargetType.CLASS_EXTENDS;
                         p.type_index = -1;
@@ -886,6 +886,7 @@ public class TransTypes extends TreeTranslator {
 
                 case METHOD: {
                     JCMethodDecl contextMethod = (JCMethodDecl)context;
+                    p.pos = context.pos;
                     if (contextMethod.receiver == tree)
                         p.type = TargetType.METHOD_RECEIVER;
                     else if (contextMethod.thrown.contains(tree)) {
@@ -939,6 +940,7 @@ public class TransTypes extends TreeTranslator {
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
                         p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
                     } else throw new AssertionError();
+                    p.pos = context.pos;
                     return p;
 
                 case VARIABLE:
@@ -969,6 +971,21 @@ public class TransTypes extends TreeTranslator {
                     p.type = TargetType.METHOD_TYPE_ARGUMENT;
                     p.pos = invocation.pos;
                     p.type_index = invocation.typeargs.indexOf(tree);
+                    return p;
+                }
+
+                case EXTENDS_WILDCARD:
+                case SUPER_WILDCARD: {
+                    p.type = TargetType.WILDCARD_BOUND;
+                    List<JCTree> newPath = path.tail;
+
+                    TypeAnnotations.Position wildcard =
+                        resolveContext(newPath.head, newPath.tail.head, newPath,
+                                new TypeAnnotations.Position());
+                    if (!wildcard.location.isEmpty())
+                        wildcard.type = wildcard.type.getGenericComplement();
+                    p.wildcard_position = wildcard;
+                    p.pos = context.pos;
                     return p;
                 }
             }

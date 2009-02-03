@@ -107,10 +107,13 @@ public class ExtendedAnnotation {
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
         case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
+            break;
+         // wildcards
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            position.wildcard_position = read_position(cr);
             break;
          // Class extends and implements clauses
         case CLASS_EXTENDS:
@@ -166,6 +169,7 @@ public class ExtendedAnnotation {
 
     private static int position_length(TypeAnnotations.Position pos) {
         int n = 0;
+        n += 1; // target_type
         switch (pos.type) {
         // type case
         case TYPECAST:
@@ -203,10 +207,12 @@ public class ExtendedAnnotation {
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
         case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             n += 1; // parameter_index
             n += 1; // bound_index
+            break;
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            n += position_length(pos.wildcard_position);
             break;
          // Class extends and implements clauses
         case CLASS_EXTENDS:

@@ -748,12 +748,15 @@ public class ClassWriter {
             case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
             case METHOD_TYPE_PARAMETER_BOUND:
             case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
-             // Class extends and implements clauses
+             // wildcards
+            case WILDCARD_BOUND:
+            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+                write(p.wildcard_position, out);
+                break;
+            // Class extends and implements clauses
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
                 out.writeByte(p.type_index);

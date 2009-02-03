@@ -912,6 +912,10 @@ public class ClassWriter extends ClassFile {
         if (debugJSR308)
             System.out.println("writing " + c + " at " + p);
         writeCompoundAttribute(c);
+        writePosition(p);
+    }
+
+    void writePosition(TypeAnnotations.Position p) {
         databuf.appendByte(p.type.targetTypeValue());
         switch (p.type) {
         // type case
@@ -950,10 +954,13 @@ public class ClassWriter extends ClassFile {
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
         case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             databuf.appendByte(p.parameter_index);
             databuf.appendByte(p.bound_index);
+            break;
+         // wildcards
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            writePosition(p.wildcard_position);
             break;
          // Class extends and implements clauses
         case CLASS_EXTENDS:
@@ -994,7 +1001,7 @@ public class ClassWriter extends ClassFile {
             // throw new AssertionError("target unusable: " + p + " " + c);
             break;
         default:
-            throw new AssertionError("unknown type: " + p + " " + c);
+            throw new AssertionError("unknown position: " + p);
         }
 
         // Append location data for generics/arrays.
