@@ -1,3 +1,13 @@
+Version 0.8.6, 3 Feb 2009
+
+Functionality
+  javap support type annotations classfiles
+  javac support for wildcard annotations
+
+Base build
+  Updated to OpenJDK langtools build b45
+
+----------------------------------------------------------------------  
 Version 0.8.5, 17 Jan 2009
 
 Base build
