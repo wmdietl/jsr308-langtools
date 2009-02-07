@@ -23,7 +23,7 @@
 
 /*
  * @test Visibility
- * @summary need a method to get an index of an attribute
+ * @summary test that type annotations are recorded in the classfile
  */
 
 import java.io.*;
@@ -74,19 +74,21 @@ public class Visibility {
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+        out.println("import java.lang.annotation.Retention;");
+        out.println("import java.lang.annotation.RetentionPolicy;");
         out.println("abstract class Test { ");
         // visible annotations: RUNTIME
-        out.println("  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.RUNTIME)");
+        out.println("  @Retention(RetentionPolicy.RUNTIME)");
         out.println("  @interface A { }");
         out.println("  void visible() @A { }");
 
         // invisible annotations: CLASS
-        out.println("  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.CLASS)");
+        out.println("  @Retention(RetentionPolicy.CLASS)");
         out.println("  @interface B { }");
         out.println("  void invisible() @B { }");
 
         // source annotations
-        out.println("  @java.lang.annotation.Retention(java.lang.annotation.RetentionPolicy.SOURCE)");
+        out.println("  @Retention(RetentionPolicy.SOURCE)");
         out.println("  @interface C { }");
         out.println("  void source() @C { }");
 
@@ -111,7 +113,8 @@ public class Visibility {
 
         if (expected_all != all) {
             errors++;
-            System.err.println("expected " + expected_all + " annotations but found " + all);
+            System.err.println("expected " + expected_all
+                    + " annotations but found " + all);
         }
 
         if (expected_visibles != visibles) {
