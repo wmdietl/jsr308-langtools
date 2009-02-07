@@ -64,7 +64,7 @@ public class ExtendedAnnotation {
     private static TypeAnnotations.Position read_position(ClassReader cr) throws IOException {
         // Copied from ClassReader
         TypeAnnotations.Position position = new TypeAnnotations.Position();
-        int tag = cr.readUnsignedShort();
+        int tag = cr.readUnsignedByte();
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
         position.type = type;

@@ -54,8 +54,8 @@ public abstract class Attribute {
     public static final String RuntimeInvisibleAnnotations = "RuntimeInvisibleAnnotations";
     public static final String RuntimeVisibleParameterAnnotations = "RuntimeVisibleParameterAnnotations";
     public static final String RuntimeInvisibleParameterAnnotations = "RuntimeInvisibleParameterAnnotations";
-    public static final String RuntimeVisibleTypeAnnotations = "RuntimeVisibleParameterAnnotations";
-    public static final String RuntimeInvisibleTypeAnnotations = "RuntimeInvisibleParameterAnnotations";
+    public static final String RuntimeVisibleTypeAnnotations = "RuntimeVisibleTypeAnnotations";
+    public static final String RuntimeInvisibleTypeAnnotations = "RuntimeInvisibleTypeAnnotations";
     public static final String Signature                = "Signature";
     public static final String SourceDebugExtension     = "SourceDebugExtension";
     public static final String SourceFile               = "SourceFile";
@@ -133,6 +133,8 @@ public abstract class Attribute {
                 standardAttributes.put(RuntimeInvisibleParameterAnnotations, RuntimeInvisibleParameterAnnotations_attribute.class);
                 standardAttributes.put(RuntimeVisibleAnnotations, RuntimeVisibleAnnotations_attribute.class);
                 standardAttributes.put(RuntimeVisibleParameterAnnotations, RuntimeVisibleParameterAnnotations_attribute.class);
+                standardAttributes.put(RuntimeVisibleTypeAnnotations, RuntimeVisibleTypeAnnotations_attribute.class);
+                standardAttributes.put(RuntimeInvisibleTypeAnnotations, RuntimeInvisibleTypeAnnotations_attribute.class);
                 standardAttributes.put(Signature,     Signature_attribute.class);
                 standardAttributes.put(SourceID, SourceID_attribute.class);
             }
