@@ -176,17 +176,11 @@ with the <code>-verbose</code> command-line option, the
 
 <h3 id="proposal">Differences from the JSR 308 proposal</h3>
 
-<p>The JSR 308 prototype compiler implementation differs from the design
-specified in the <a
-href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">JSR 308
-proposal</a> in the following ways, which will be corrected in the future:
+<p>The JSR 308 prototype compiler is a feature-complete implementation of
+the <a
+href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">
+JSR 308 proposal</a>.  There are no unknown differences or bugs at this point.
 </p>
-<ul>
-  <!-- As of 07/04/2008 -->
-  <li>support for annotations on primitive class literals (e.g.
-  <tt>@Foo int.class</tt>) is limited to the parser and the AST
-  (i.e. annotations are not compiled into class files)</li>
-</ul>
 <p>
 
 
