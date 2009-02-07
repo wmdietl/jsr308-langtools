@@ -197,10 +197,15 @@
         <jtreg-tool name="javac" samevm="true" tests="${javac.tests}"/>
     </target>
 
-    <target name="jtreg-jsr308" depends="build-javac,-def-jtreg">
+    <target name="jtreg-jsr308-javac" depends="build-javac,-def-jtreg">
         <jtreg-tool name="javac" samevm="true" tests="${javac.tests}/typeAnnotations"/>
     </target>
 
+    <target name="jtreg-jsr308-javap" depends="build-javap,-def-jtreg">
+      <jtreg-tool name="javap" samevm="true" tests="${javap.tests}/typeAnnotations"/>
+    </target>
+
+    <target name="jtreg-jsr308" depends="jtreg-jsr308-javac,jtreg-jsr308-javap"/>
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">
         <findbugs-tool name="javac"/>
     </target>
