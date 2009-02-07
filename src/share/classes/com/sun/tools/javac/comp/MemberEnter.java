@@ -911,6 +911,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             if (hasDeprecatedAnnotation(tree.mods.annotations))
                 c.flags_field |= DEPRECATED;
             annotateLater(tree.mods.annotations, baseEnv, c);
+            // class type parameters use baseEnv but everything uses env
+            for (JCTypeParameter tp : tree.typarams)
+                tp.accept(new TypeAnnotate(baseEnv));
             tree.accept(new TypeAnnotate(env));
 
             chk.checkNonCyclic(tree.pos(), c.type);
