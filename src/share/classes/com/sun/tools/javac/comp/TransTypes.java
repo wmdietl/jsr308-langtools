@@ -1075,6 +1075,14 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitVarDef(JCVariableDecl tree) {
             lastVar = tree;
+            if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE && !tree.mods.annotations.isEmpty()) {
+                // need to lift the annotations
+                TypeAnnotations typeAnnotations = new TypeAnnotations();
+                typeAnnotations.annotations = tree.sym.attributes_field;
+                typeAnnotations.position.pos = tree.pos;
+                typeAnnotations.position.type = TargetType.LOCAL_VARIABLE;
+                lift(List.of(typeAnnotations));
+            }
             super.visitVarDef(tree);
             lastVar = null;
         }
