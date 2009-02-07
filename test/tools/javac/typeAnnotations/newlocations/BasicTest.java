@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -43,7 +44,7 @@ import java.io.*;
 class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List<T> {
 
     void test() {
-    
+
         // Handle annotated class literals/cast types
         Class<?> c = @A String.class;
         Object o = (@A Object) "foo";
@@ -53,8 +54,8 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
         boolean b = o instanceof @A Object;
 
-    
-        @A Map<@B List<@C String>, @D String> map = 
+
+        @A Map<@B List<@C String>, @D String> map =
             new @A HashMap<@B List<@C String>, @D String>();
 
         Class<? extends @A String> c2 = @A String.class;

@@ -25,13 +25,13 @@ import java.io.*;
 import com.sun.tools.classfile.*;
 
 /*
- * @test Visibility
- * @summary test that type annotations are recorded in the classfile
+ * @test JSR175Annotations
+ * @summary test that only type annotations are recorded as such in classfile
  */
 
-public class Visibility {
+public class JSR175Annotations {
     public static void main(String[] args) throws Exception {
-        new Visibility().run();
+        new JSR175Annotations().run();
     }
 
     public void run() throws Exception {
@@ -39,6 +39,9 @@ public class Visibility {
         File classFile = compileTestFile(javaFile);
 
         ClassFile cf = ClassFile.read(classFile);
+        for (Field f : cf.fields) {
+            test(cf, f);
+        }
         for (Method m: cf.methods) {
             test(cf, m);
         }
@@ -51,6 +54,11 @@ public class Visibility {
     }
 
     void test(ClassFile cf, Method m) {
+        test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
+        test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
+    void test(ClassFile cf, Field m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
     }
@@ -71,30 +79,34 @@ public class Visibility {
         }
     }
 
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void test(ClassFile cf, Field m, String name, boolean visible) {
+        int index = m.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = m.attributes.get(index);
+            assert attr instanceof RuntimeTypeAnnotations_attribute;
+            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
+            all += tAttr.annotations.length;
+            if (visible)
+                visibles += tAttr.annotations.length;
+            else
+                invisibles += tAttr.annotations.length;
+        }
+    }
+
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
         out.println("import java.lang.annotation.Retention;");
         out.println("import java.lang.annotation.RetentionPolicy;");
         out.println("abstract class Test { ");
-        // visible annotations: RUNTIME
         out.println("  @Retention(RetentionPolicy.RUNTIME)");
         out.println("  @interface A { }");
-        out.println("  void visible() @A { }");
-
-        // invisible annotations: CLASS
-        out.println("  @Retention(RetentionPolicy.CLASS)");
-        out.println("  @interface B { }");
-        out.println("  void invisible() @B { }");
-
-        // source annotations
-        out.println("  @Retention(RetentionPolicy.SOURCE)");
-        out.println("  @interface C { }");
-        out.println("  void source() @C { }");
-
-        // default visibility: CLASS
-        out.println("  @interface D { }");
-        out.println("  void def() @D { }");
+        out.println("  @A String m;");
+        out.println("  @A String method(@A String a) {");
+        out.println("    return a;");
+        out.println("  }");
         out.println("}");
         out.close();
         return f;
@@ -109,7 +121,8 @@ public class Visibility {
     }
 
     void countAnnotations() {
-        int expected_all = 3, expected_visibles = 1, expected_invisibles = 2;
+        int expected_visibles = 0, expected_invisibles = 0;
+        int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
             errors++;

@@ -35,7 +35,7 @@ import java.lang.annotation.ElementType;
 class TypeUseTarget<@A K extends @A Object> {
   @A String @A [] field;
 
-  @A String test(@A String param, @A String @A ... vararg) @A { 
+  @A String test(@A String param, @A String @A ... vararg) @A {
     @A Object o = new @A String @A [3];
     TypeUseTarget<@A String> target;
     return (@A String) null;

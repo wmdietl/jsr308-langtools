@@ -25,13 +25,13 @@ import java.io.*;
 import com.sun.tools.classfile.*;
 
 /*
- * @test Visibility
- * @summary test that type annotations are recorded in the classfile
+ * @test Presence
+ * @summary test that all type annotations are present in the classfile
  */
 
-public class Visibility {
+public class Presence {
     public static void main(String[] args) throws Exception {
-        new Visibility().run();
+        new Presence().run();
     }
 
     public void run() throws Exception {
@@ -39,6 +39,10 @@ public class Visibility {
         File classFile = compileTestFile(javaFile);
 
         ClassFile cf = ClassFile.read(classFile);
+        test(cf);
+        for (Field f : cf.fields) {
+            test(cf, f);
+        }
         for (Method m: cf.methods) {
             test(cf, m);
         }
@@ -50,9 +54,35 @@ public class Visibility {
         System.out.println("PASSED");
     }
 
+    void test(ClassFile cf) {
+        test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
+        test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
     void test(ClassFile cf, Method m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
+    void test(ClassFile cf, Field m) {
+        test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
+        test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void test(ClassFile cf, String name, boolean visible) {
+        int index = cf.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = cf.attributes.get(index);
+            assert attr instanceof RuntimeTypeAnnotations_attribute;
+            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
+            all += tAttr.annotations.length;
+            if (visible)
+                visibles += tAttr.annotations.length;
+            else
+                invisibles += tAttr.annotations.length;
+        }
     }
 
     // test the result of Attributes.getIndex according to expectations
@@ -71,30 +101,48 @@ public class Visibility {
         }
     }
 
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void test(ClassFile cf, Field m, String name, boolean visible) {
+        int index = m.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = m.attributes.get(index);
+            assert attr instanceof RuntimeTypeAnnotations_attribute;
+            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
+            all += tAttr.annotations.length;
+            if (visible)
+                visibles += tAttr.annotations.length;
+            else
+                invisibles += tAttr.annotations.length;
+        }
+    }
+
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("import java.lang.annotation.Retention;");
-        out.println("import java.lang.annotation.RetentionPolicy;");
-        out.println("abstract class Test { ");
-        // visible annotations: RUNTIME
-        out.println("  @Retention(RetentionPolicy.RUNTIME)");
+        out.println("import java.util.*;");
+        out.println("class Test<@Test.A T extends @Test.A List<@Test.A String>> { ");
         out.println("  @interface A { }");
-        out.println("  void visible() @A { }");
 
-        // invisible annotations: CLASS
-        out.println("  @Retention(RetentionPolicy.CLASS)");
-        out.println("  @interface B { }");
-        out.println("  void invisible() @B { }");
+        out.println("  Map<@A String, Map<@A String, @A String>> f1;");
 
-        // source annotations
-        out.println("  @Retention(RetentionPolicy.SOURCE)");
-        out.println("  @interface C { }");
-        out.println("  void source() @C { }");
-
-        // default visibility: CLASS
-        out.println("  @interface D { }");
-        out.println("  void def() @D { }");
+        out.println("  <@A T extends @A List<@A String>>");
+        out.println("  Map<@A String, @A List<@A String>>");
+        out.println("  method(List<@A String> @A [] param1, String @A [] @A [] param2) @A");
+        out.println("  throws @A Exception {");
+        out.println("    @A String lc1 = null;");
+        out.println("    @A List<@A String> lc2 = null;");
+        out.println("    @A String @A [] [] @A[] lc3 = null;");
+        out.println("    List<? extends @A List<@A String>> lc4 = null;");
+        out.println("    Object lc5 = (@A List<@A String>) null;");
+        out.println("    boolean lc6 = lc1 instanceof @A String;");
+        out.println("    boolean lc7 = lc5 instanceof @A String @A [] @A [];");
+        out.println("    new @A ArrayList<@A String>();");
+        out.println("    Object lc8 = new @A String @A [4];");
+        out.println("    Object lc9 = @A String.class;");
+        out.println("    Object lc10 = @A int.class;");
+        out.println("    return null;");
+        out.println("  }");
         out.println("}");
         out.close();
         return f;
@@ -109,7 +157,8 @@ public class Visibility {
     }
 
     void countAnnotations() {
-        int expected_all = 3, expected_visibles = 1, expected_invisibles = 2;
+        int expected_visibles = 0, expected_invisibles = 40;
+        int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
             errors++;
