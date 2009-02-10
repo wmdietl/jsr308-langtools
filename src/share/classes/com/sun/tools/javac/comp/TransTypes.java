@@ -893,7 +893,7 @@ public class TransTypes extends TreeTranslator {
                         p.type = TargetType.THROWS;
                         p.type_index = contextMethod.thrown.indexOf(tree);
                     } else if (((JCMethodDecl)context).restype == tree) {
-                        p.type = TargetType.METHOD_RETURN;
+                        p.type = TargetType.METHOD_RETURN_GENERIC_OR_ARRAY;
                     } else if (contextMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
                         p.parameter_index = contextMethod.typarams.indexOf(tree);
@@ -950,9 +950,9 @@ public class TransTypes extends TreeTranslator {
                         case LOCAL_VARIABLE:
                             p.type = TargetType.LOCAL_VARIABLE; break;
                         case FIELD:
-                            p.type = TargetType.FIELD; break;
+                            p.type = TargetType.FIELD_GENERIC_OR_ARRAY; break;
                         case PARAMETER:
-                            p.type = TargetType.METHOD_PARAMETER;
+                            p.type = TargetType.METHOD_PARAMETER_GENERIC_OR_ARRAY;
                             p.parameter_index = methodParamIndex(path, context);
                             break;
                         default: throw new AssertionError();

@@ -41,7 +41,7 @@ public class ExtendedAnnotationData extends AnnotationData {
             offset = in.readShort();
             break;
 
-        case METHOD_PARAMETER:
+//        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             break;
 

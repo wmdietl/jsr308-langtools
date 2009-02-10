@@ -52,7 +52,7 @@ public enum TargetType {
      * Deprecated because such annotations are not allowed (yet), but included
      * so that the numbering works out.
      */
-    @Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, EnumSet.of(HasLocation)),
+    //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, EnumSet.of(HasLocation)),
 
     /** For annotations on local variables. */
     LOCAL_VARIABLE(0x08, EnumSet.noneOf(TargetAttribute.class)),
@@ -66,7 +66,7 @@ public enum TargetType {
      * Deprecated because such annotations are ordinary (not extended), but
      * included so that the numbering works out.
      */
-    @Deprecated METHOD_RETURN(0x0A, EnumSet.noneOf(TargetAttribute.class)),
+    //@Deprecated METHOD_RETURN(0x0A, EnumSet.noneOf(TargetAttribute.class)),
 
     /**
      * For annotations on a type argument or nested array of a method return
@@ -80,7 +80,7 @@ public enum TargetType {
      * Deprecated because such annotations are ordinary (not extended), but
      * included so that the numbering works out.
      */
-    @Deprecated METHOD_PARAMETER(0x0C, EnumSet.noneOf(TargetAttribute.class)),
+    //@Deprecated METHOD_PARAMETER(0x0C, EnumSet.noneOf(TargetAttribute.class)),
 
     /** For annotations on a type argument or nested array of a method parameter. */
     METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, EnumSet.of(HasLocation)),
@@ -91,7 +91,7 @@ public enum TargetType {
      * Deprecated because such annotations are ordinary (not extended), but
      * included so that the numbering works out.
      */
-    @Deprecated FIELD(0x0E, EnumSet.noneOf(TargetAttribute.class)),
+    //@Deprecated FIELD(0x0E, EnumSet.noneOf(TargetAttribute.class)),
 
     /** For annotations on a type argument or nested array of a field. */
     FIELD_GENERIC_OR_ARRAY(0x0F, EnumSet.of(HasLocation)),
@@ -122,7 +122,7 @@ public enum TargetType {
 
     /** For annotations on a throws clause in a method declaration. */
     THROWS(0x16, EnumSet.noneOf(TargetAttribute.class)),
-    @Deprecated THROWS_GENERIC_OR_ARRAY(0x17, EnumSet.of(HasLocation)),
+    //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, EnumSet.of(HasLocation)),
 
     /** For annotations in type arguments of object creation expressions. */
     NEW_TYPE_ARGUMENT(0x18, EnumSet.noneOf(TargetAttribute.class)),
@@ -135,16 +135,18 @@ public enum TargetType {
     WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, EnumSet.of(HasBound, HasLocation)),
 
     CLASS_LITERAL(0x1E, EnumSet.noneOf(TargetAttribute.class)),
-    @Deprecated CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
+    //@Deprecated CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
 
     METHOD_TYPE_PARAMETER(0x20, EnumSet.of(HasParameter)),
-    @Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, EnumSet.of(HasLocation, HasParameter)),
+    //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, EnumSet.of(HasLocation, HasParameter)),
 
     CLASS_TYPE_PARAMETER(0x22, EnumSet.of(HasParameter)),
-    @Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, EnumSet.of(HasLocation, HasParameter)),
+    //@Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, EnumSet.of(HasLocation, HasParameter)),
 
     /** For annotations with an unknown target. */
     UNKNOWN(-1, EnumSet.noneOf(TargetAttribute.class));
+
+    static final int MAXIMUM_TARGET_TYPE_VALUE = 0x22;
 
     private final int targetTypeValue;
     private Set<TargetAttribute> flags;
@@ -200,12 +202,30 @@ public enum TargetType {
         return this.targetTypeValue;
     }
 
+    private static TargetType[] targets = null;
+
+    private static TargetType[] buildTargets() {
+        TargetType[] targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
+        TargetType[] alltargets = values();
+        for (TargetType target : alltargets)
+            if (target.targetTypeValue >= 0)
+                targets[target.targetTypeValue] = target;
+        for (int i = 0; i <= MAXIMUM_TARGET_TYPE_VALUE; ++i)
+            if (targets[i] == null)
+                targets[i] = UNKNOWN;
+        return targets;
+    }
+
     public static TargetType fromTargetTypeValue(int tag) {
+        if (targets == null)
+            targets = buildTargets();
+
         if (tag == UNKNOWN.targetTypeValue)
             return UNKNOWN;
-        if (tag < 0 || tag >= values().length)
+        // we can optimize the algorithm a bit: binary search?
+        if (tag < 0 || tag >= targets.length)
             throw new IllegalArgumentException("Unknown TargetType: " + tag);
-        return values()[tag];
+        return targets[tag];
     }
 
     static enum TargetAttribute {

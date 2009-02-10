@@ -143,18 +143,18 @@ public class ExtendedAnnotation {
             break;
         case UNKNOWN:
             break;
-        case METHOD_PARAMETER:
-        case METHOD_RETURN:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
-        case FIELD:
-        case THROWS_GENERIC_OR_ARRAY:
-            // method_return sometimes shows up
-            // throw new AssertionError("target unusable: " + position);
-            break;
+//        case METHOD_PARAMETER:
+//        case METHOD_RETURN:
+//        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+//        case CLASS_LITERAL_GENERIC_OR_ARRAY:
+//        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
+//        case FIELD:
+//        case THROWS_GENERIC_OR_ARRAY:
+//            // method_return sometimes shows up
+//            // throw new AssertionError("target unusable: " + position);
+//            break;
         default:
-            throw new AssertionError("unknown type: " + position);
+//            throw new AssertionError("unknown type: " + position);
         }
 
         if (type.hasLocation()) {
@@ -242,18 +242,18 @@ public class ExtendedAnnotation {
             break;
         case UNKNOWN:
             break;
-        case METHOD_PARAMETER:
-        case METHOD_RETURN:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
-        case FIELD:
-        case THROWS_GENERIC_OR_ARRAY:
-            // method_return sometimes shows up
-            // throw new AssertionError("target unusable: " + position);
-            break;
+//        case METHOD_PARAMETER:
+//        case METHOD_RETURN:
+//        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+//        case CLASS_LITERAL_GENERIC_OR_ARRAY:
+//        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
+//        case FIELD:
+//        case THROWS_GENERIC_OR_ARRAY:
+//            // method_return sometimes shows up
+//            // throw new AssertionError("target unusable: " + position);
+//            break;
         default:
-            throw new AssertionError("unknown type: " + pos);
+//            throw new AssertionError("unknown type: " + pos);
         }
 
         if (pos.type.hasLocation()) {
