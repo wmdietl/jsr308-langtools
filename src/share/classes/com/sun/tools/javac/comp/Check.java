@@ -892,6 +892,10 @@ public class Check {
             }
         }
 
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            tree.underlyingType.accept(this);
+        }
+
         /** Default visitor method: do nothing.
          */
         public void visitTree(JCTree tree) {

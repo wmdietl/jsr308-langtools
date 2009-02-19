@@ -742,14 +742,17 @@ public class TransTypes extends TreeTranslator {
      */
     public void visitTypeApply(JCTypeApply tree) {
         List<TypeAnnotations> ta = collectErasedAnnotations(tree.arguments);
-        // Delete all type parameters.
-        JCTree clazz = translate(tree.clazz, null);
-        JCAnnotatedType annotatedType =
-            make.at(tree.pos).AnnotatedType(List.<JCAnnotation>nil(),
-                    (JCExpression)clazz);
-        annotatedType.typeAnnotations.erased = ta;
-        result = annotatedType;
-        result.type = clazz.type;
+        if (!ta.isEmpty()) {
+            // Delete all type parameters.
+            JCTree clazz = translate(tree.clazz, null);
+            JCAnnotatedType annotatedType =
+                make.at(tree.pos).AnnotatedType(List.<JCAnnotation>nil(),
+                        (JCExpression)clazz);
+            annotatedType.typeAnnotations.erased = ta;
+            result = annotatedType;
+            result.type = clazz.type;
+        } else
+            result = tree;
     }
 
 /**************************************************************************

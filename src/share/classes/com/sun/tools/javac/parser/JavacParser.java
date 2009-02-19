@@ -606,7 +606,9 @@ public class JavacParser implements Parser {
         // by an array type, under the ARRAYS convention), wrap the underlying
         // type in a JCAnnotatedType with those annotations.
         if (!typeAnnotations.isEmpty()) {
-            result = F.AnnotatedType(typeAnnotations.next(), result);
+            List<JCAnnotation> annos = typeAnnotations.next();
+            if (!annos.isEmpty())
+                result = F.AnnotatedType(annos, result);
         }
 
         lastmode = mode;
