@@ -47,9 +47,9 @@ public class T6392782 {
         check(scanner, 6, scanner.scan(trees, null));
 
         CountNodes nodeCounter = new CountNodes();
-        // 383 nodes with the regular parser; 384 nodes with EndPosParser
+        // 399 nodes with the regular parser; 400 nodes with EndPosParser
         // We automatically swith to EndPosParser when calling JavacTask.parse()
-        check(nodeCounter, 384, nodeCounter.scan(trees, null));
+        check(nodeCounter, 400, nodeCounter.scan(trees, null));
 
         CountIdentifiers idCounter = new CountIdentifiers();
         check(idCounter, 106, idCounter.scan(trees, null));
