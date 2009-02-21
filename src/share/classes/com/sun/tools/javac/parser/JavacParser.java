@@ -591,13 +591,20 @@ public class JavacParser implements Parser {
      * parsing annotations.
      */
     public JCExpression parseType() {
+        return parseType(List.<JCAnnotation>nil());
+    }
+
+    public JCExpression parseType(List<JCAnnotation> annotations) {
         int prevmode = mode;
         mode = TYPE;
 
         // JSR 308: Parse type annotations, and push the (possibly empty)
         // annotation list to typeAnnotations, where it may be consumed during
         // parsing of array types
-        final List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+        List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+        if (annotations != null)
+            typeAnnos = typeAnnos.prependList(annotations);
+
         typeAnnotations.prepend(typeAnnos);
 
         JCExpression result = unannotatedType();
@@ -1391,17 +1398,19 @@ public class JavacParser implements Parser {
      *               | "?" SUPER Type
      */
     JCExpression typeArgument() {
-        if (S.token() != QUES) return parseType();
+        List<JCAnnotation> annotations = typeAnnotationsOpt();
+        if (S.token() != QUES) return parseType(annotations);
         int pos = S.pos();
         S.nextToken();
+        JCExpression result;
         if (S.token() == EXTENDS) {
             TypeBoundKind t = to(F.at(S.pos()).TypeBoundKind(BoundKind.EXTENDS));
             S.nextToken();
-            return F.at(pos).Wildcard(t, parseType());
+            result = F.at(pos).Wildcard(t, parseType());
         } else if (S.token() == SUPER) {
             TypeBoundKind t = to(F.at(S.pos()).TypeBoundKind(BoundKind.SUPER));
             S.nextToken();
-            return F.at(pos).Wildcard(t, parseType());
+            result = F.at(pos).Wildcard(t, parseType());
         } else if (S.token() == IDENTIFIER) {
             //error recovery
             reportSyntaxError(S.prevEndPos(), "expected3",
@@ -1409,11 +1418,14 @@ public class JavacParser implements Parser {
             TypeBoundKind t = F.at(Position.NOPOS).TypeBoundKind(BoundKind.UNBOUND);
             JCExpression wc = toP(F.at(pos).Wildcard(t, null));
             JCIdent id = toP(F.at(S.pos()).Ident(ident()));
-            return F.at(pos).Erroneous(List.<JCTree>of(wc, id));
+            result = F.at(pos).Erroneous(List.<JCTree>of(wc, id));
         } else {
             TypeBoundKind t = F.at(Position.NOPOS).TypeBoundKind(BoundKind.UNBOUND);
-            return toP(F.at(pos).Wildcard(t, null));
+            result = toP(F.at(pos).Wildcard(t, null));
         }
+        if (!annotations.isEmpty())
+            result = toP(F.at(annotations.head.pos).AnnotatedType(annotations,result));
+        return result;
     }
 
     JCTypeApply typeArguments(JCExpression t) {
