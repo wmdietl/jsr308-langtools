@@ -1,8 +1,23 @@
+Version 0.8.7, 27 Feb 2009
+
+Functionality
+  javac: support for ElementKind.TYPE_PARAMETER specification
+  javac: emit annotations on local variables to classfile
+  javac: support for annotations on wildcards
+
+Testing
+  javac: pass all regression tests
+  javac: fix bugs related to invalid type annotations
+
+Base build
+  Updated to OpenJDK langtools build b49
+
+----------------------------------------------------------------------
 Version 0.8.6, 3 Feb 2009
 
 Functionality
   javap support type annotations classfiles
-  javac support for wildcard annotations
+  javac support for wildcard bound annotations
 
 Base build
   Updated to OpenJDK langtools build b45
