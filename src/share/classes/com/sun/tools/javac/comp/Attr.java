@@ -687,8 +687,6 @@ public class Attr extends JCTree.Visitor {
             localEnv.info.scope.leave();
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
-            reAttribTypeParameters(tree.typarams);
-            chk.validateTypeAnnotations(tree.receiver.annotations);
         }
         finally {
             chk.setLint(prevLint);
@@ -2520,7 +2518,7 @@ public class Attr extends JCTree.Visitor {
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {
-        chk.validateTypeAnnotations(tree.annotations);
+        chk.validateTypeAnnotations(tree.annotations, true);
         TypeVar a = (TypeVar)tree.type;
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())
@@ -2607,7 +2605,6 @@ public class Attr extends JCTree.Visitor {
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
         result = tree.type = attribType(tree.getUnderlyingType(), env);
-        chk.validateTypeAnnotations(tree.annotations);
     }
 
     public void visitErroneous(JCErroneous tree) {
@@ -2721,7 +2718,6 @@ public class Attr extends JCTree.Visitor {
 
         // Validate type parameters, supertype and interfaces.
         attribBounds(tree.typarams);
-        reAttribTypeParameters(tree.typarams);
         chk.validate(tree.typarams, env);
         chk.validate(tree.extending, env);
         chk.validate(tree.implementing, env);
@@ -2799,6 +2795,9 @@ public class Attr extends JCTree.Visitor {
             (c.flags() & ABSTRACT) == 0) {
             checkSerialVersionUID(tree, c);
         }
+
+        // Check type annotations applicability rules
+        validateTypeAnnotations(tree);
     }
         // where
         /** check if a class is a subtype of Serializable, if that is available. */
@@ -2842,26 +2841,17 @@ public class Attr extends JCTree.Visitor {
         return types.capture(type);
     }
 
-    /**
-     * Type parameters are attributed before annotation attribution happens
-     * (and before class bodies are attributed too).  Thus we cannot validate
-     * type annotations on type parameters or their bounds then.
-     *
-     * Thus, we revisit these parameters only during regular attribution
-     * and we only validate the type annotations.
-     */
-    private final void reAttribTypeParameters(List<JCTypeParameter> params) {
-        for (JCTypeParameter typeParam : params)
-            typeParam.accept(typeParameterRevisitor);
+    private final void validateTypeAnnotations(JCTree tree) {
+        tree.accept(typeAnnotationsValidator);
     }
-    private final JCTree.Visitor typeParameterRevisitor =
+    private final JCTree.Visitor typeAnnotationsValidator =
         new TreeScanner() {
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            chk.validateTypeAnnotations(tree.annotations);
+            chk.validateTypeAnnotations(tree.annotations, false);
             super.visitAnnotatedType(tree);
         }
         public void visitTypeParameter(JCTypeParameter tree) {
-            chk.validateTypeAnnotations(tree.annotations);
+            chk.validateTypeAnnotations(tree.annotations, true);
             super.visitTypeParameter(tree);
         }
     };

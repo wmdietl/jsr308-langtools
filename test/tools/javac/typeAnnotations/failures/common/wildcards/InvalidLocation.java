@@ -23,32 +23,14 @@
 
 /*
  * @test
- * @summary check that type annotations may appear on all type declarations
+ * @summary check for invalid annotatins given the target
  * @author Mahmood Ali
- * @compile TypeUseTarget.java
+ * @compile/fail InvalidLocation.java
  */
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-
-@A
-class TypeUseTarget<K extends @A Object> {
-  @A String @A [] field;
-
-  @A String test(@A String param, @A String @A ... vararg) @A {
-    @A Object o = new @A String @A [3];
-    TypeUseTarget<@A String> target;
-    return (@A String) null;
-  }
-
-  <K> @A String genericMethod(K k) { return null; }
+class InvalidLocation<K> {
+  InvalidLocation<@A ?> l;
 }
 
-@A
-interface MyInterface { }
-
-@A
-@interface MyAnnotation { }
-
-@Target(ElementType.TYPE_USE)
+@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
 @interface A { }

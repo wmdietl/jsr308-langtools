@@ -32,7 +32,7 @@
 import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
-class TypeUseTarget<@A K extends @A Object> {
+class TypeUseTarget<K extends @A Object> {
   @A void voidMethod() { }
 }
 

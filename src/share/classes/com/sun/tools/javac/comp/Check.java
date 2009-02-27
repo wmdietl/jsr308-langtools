@@ -1784,10 +1784,10 @@ public class Check {
 
     /** Check the type annotations
      */
-    public void validateTypeAnnotations(List<JCAnnotation> annotations) {
+    public void validateTypeAnnotations(List<JCAnnotation> annotations, boolean isTypeParameter) {
         if (skipAnnotations) return;
         for (JCAnnotation a : annotations)
-            validateTypeAnnotation(a);
+            validateTypeAnnotation(a, isTypeParameter);
     }
 
     /** Check an annotation of a symbol.
@@ -1804,7 +1804,7 @@ public class Check {
         }
     }
 
-    public void validateTypeAnnotation(JCAnnotation a) {
+    public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
         if (a.type == null) {
             // annotation hasn't been attributed yet
             // TODO: ensure that we call this method eventually
@@ -1812,7 +1812,7 @@ public class Check {
         }
         validateAnnotation(a);
 
-        if (!isTypeAnnotation(a))
+        if (!isTypeAnnotation(a, isTypeParameter))
             log.error(a.pos(), "annotation.type.not.applicable");
     }
 
@@ -1835,7 +1835,7 @@ public class Check {
     }
 
     /** Is the annotation applicable to type annotations */
-    boolean isTypeAnnotation(JCAnnotation a) {
+    boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) return true;
@@ -1845,7 +1845,9 @@ public class Check {
         for (Attribute app : arr.values) {
             if (!(app instanceof Attribute.Enum)) return true; // recovery
             Attribute.Enum e = (Attribute.Enum) app;
-            if (e.value.name == names.TYPE_USE)
+            if (!isTypeParameter && e.value.name == names.TYPE_USE)
+                return true;
+            else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
                 return true;
         }
         return false;

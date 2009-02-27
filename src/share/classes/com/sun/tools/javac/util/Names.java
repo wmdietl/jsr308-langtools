@@ -115,6 +115,7 @@ public class Names {
     public final Name getClass;
     public final Name TYPE;
     public final Name TYPE_USE;
+    public final Name TYPE_PARAMETER;
     public final Name FIELD;
     public final Name METHOD;
     public final Name PARAMETER;
@@ -224,6 +225,7 @@ public class Names {
 
         TYPE = fromString("TYPE");
         TYPE_USE = fromString("TYPE_USE");
+        TYPE_PARAMETER = fromString("TYPE_PARAMETER");
         FIELD = fromString("FIELD");
         METHOD = fromString("METHOD");
         PARAMETER = fromString("PARAMETER");

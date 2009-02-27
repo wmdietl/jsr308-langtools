@@ -25,6 +25,9 @@ public enum ElementType {
     /** Uses of a type */
     TYPE_USE,
 
+    /** type parameters */
+    TYPE_PARAMETER,
+
     /** Field declaration (includes enum constants) */
     FIELD,
 
