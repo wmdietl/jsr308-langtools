@@ -1440,8 +1440,6 @@ public class Gen extends JCTree.Visitor {
             // Resolve all breaks.
             code.resolve(exitChain);
 
-            // End the scopes of all try-local variables in variable info.
-            fillLocalVarPositions();
             code.endScopes(limit);
         }
 
