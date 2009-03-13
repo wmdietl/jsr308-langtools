@@ -941,8 +941,6 @@ public class Gen extends JCTree.Visitor {
                                  startpcCrt,
                                  code.curPc());
 
-                // End the scope of all local variables in variable info.
-                fillLocalVarPositions();
                 code.endScopes(0);
 
                 // If we exceeded limits, panic
@@ -959,26 +957,6 @@ public class Gen extends JCTree.Visitor {
                 if(stackMap == StackMapFormat.JSR202) {
                     code.lastFrame = null;
                     code.frameBeforeLast = null;
-                }
-            }
-        }
-
-        // Needs to be called before closing any scope
-        void fillLocalVarPositions() {
-            if (code != null && code.lvar != null) {
-                for (LocalVar lv : code.lvar) {
-                    if (lv == null || lv.sym == null
-                            || lv.sym.typeAnnotations == null)
-                        continue;
-                    for (TypeAnnotations ta : lv.sym.typeAnnotations) {
-                        TypeAnnotations.Position p = ta.position;
-                        while (p != null) {
-                            p.offset = (int)lv.start_pc;
-                            p.length = (int)lv.length;
-                            p.index = (int)lv.reg;
-                            p = p.wildcard_position;
-                        }
-                    }
                 }
             }
         }
@@ -1053,7 +1031,6 @@ public class Gen extends JCTree.Visitor {
         // End the scope of all block-local variables in variable info.
         if (env.tree.getTag() != JCTree.METHODDEF) {
             code.statBegin(tree.endpos);
-            fillLocalVarPositions();
             code.endScopes(limit);
             code.pendingStatPos = Position.NOPOS;
         }
@@ -1071,7 +1048,6 @@ public class Gen extends JCTree.Visitor {
         int limit = code.nextreg;
         genStats(tree.init, env);
         genLoop(tree, tree.body, tree.cond, tree.step, true);
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
     //where
@@ -1269,7 +1245,6 @@ public class Gen extends JCTree.Visitor {
                 }
             }
         }
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
 //where
@@ -1327,7 +1302,6 @@ public class Gen extends JCTree.Visitor {
         };
         syncEnv.info.gaps = new ListBuffer<Integer>();
         genTry(tree.body, List.<JCCatch>nil(), syncEnv);
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
 
@@ -1504,7 +1478,6 @@ public class Gen extends JCTree.Visitor {
                 items.makeLocalItem(exparam).store();
                 code.statBegin(TreeInfo.firstStatPos(tree.body));
                 genStat(tree.body, env, CRT_BLOCK);
-                fillLocalVarPositions();
                 code.endScopes(limit);
                 code.statBegin(TreeInfo.endPos(tree.body));
             }
@@ -1640,7 +1613,6 @@ public class Gen extends JCTree.Visitor {
                 genStat(tree.elsepart, env,CRT_STATEMENT | CRT_FLOW_TARGET);
         }
         code.resolve(thenExit);
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
 
@@ -1689,7 +1661,6 @@ public class Gen extends JCTree.Visitor {
             code.emitop0(return_);
         }
         endFinalizerGaps(env, targetEnv);
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
 
@@ -2254,7 +2225,6 @@ public class Gen extends JCTree.Visitor {
         int limit = code.nextreg;
         genStats(tree.defs, env);
         result = genExpr(tree.expr, tree.expr.type).load();
-        fillLocalVarPositions();
         code.endScopes(limit);
     }
 

@@ -1900,9 +1900,25 @@ public class Code {
                     v.length = length;
                     putVar(v);
                 }
+                fillLocalVarPosition(v);
             }
         }
         state.defined.excl(adr);
+    }
+
+    private void fillLocalVarPosition(LocalVar lv) {
+        if (lv == null || lv.sym == null
+                || lv.sym.typeAnnotations == null)
+            return;
+        for (TypeAnnotations ta : lv.sym.typeAnnotations) {
+            TypeAnnotations.Position p = ta.position;
+            while (p != null) {
+                p.offset = (int)lv.start_pc;
+                p.length = (int)lv.length;
+                p.index = (int)lv.reg;
+                p = p.wildcard_position;
+            }
+        }
     }
 
     /** Put a live variable range into the buffer to be output to the
