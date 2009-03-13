@@ -164,7 +164,7 @@ public class ExtendedAnnotation {
                 loc = loc.append(cr.readUnsignedByte());
             position.location = loc.toList();
         }
-        return null;
+        return position;
     }
 
     private static int position_length(TypeAnnotations.Position pos) {

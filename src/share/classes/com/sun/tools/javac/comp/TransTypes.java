@@ -849,7 +849,6 @@ public class TransTypes extends TreeTranslator {
             pop();
         }
 
-        @SuppressWarnings("deprecation")
         private TypeAnnotations.Position resolveContext(JCTree tree, JCTree context,
                 List<JCTree> path, TypeAnnotations.Position p) {
             switch (context.getKind()) {
@@ -935,9 +934,12 @@ public class TransTypes extends TreeTranslator {
                 case TYPE_PARAMETER:
 //                    System.out.print("type parameter: " +
 //                            ((JCTypeParameter)context).bounds.indexOf(tree) + " ");
-                    if (path.tail.tail.head.getTag() == JCTree.CLASSDEF)
+                    if (path.tail.tail.head.getTag() == JCTree.CLASSDEF) {
+                        JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
-                    else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
+                        p.parameter_index = clazz.typarams.indexOf(path.tail.head);
+                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);                        
+                    } else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
                         JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
