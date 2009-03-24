@@ -905,6 +905,7 @@ public class JavacParser implements Parser {
     protected JCExpression term3() {
         int pos = S.pos();
         JCExpression t;
+        List<JCAnnotation> annos = null;
         List<JCExpression> typeArgs = typeArgumentsOpt(EXPR);
         switch (S.token()) {
         case QUES:
@@ -1077,14 +1078,17 @@ public class JavacParser implements Parser {
             t = toP(F.at(S.pos()).Ident(ident()));
             loop: while (true) {
                 pos = S.pos();
+                if (S.token() == Token.MONKEYS_AT)
+                    annos = typeAnnotationsOpt();
                 switch (S.token()) {
                 case LBRACKET:
                     S.nextToken();
 
                     /// JSR 308: handle annotated array levels in an array type
-                    if (S.token() == MONKEYS_AT || S.token() == RBRACKET) {
+                    if (S.token() == RBRACKET) {
                         ListBuffer<List<JCAnnotation>> stack = ListBuffer.lb();
-                        stack.prepend(typeAnnotationsOpt());
+                        stack.prepend(annos);
+                        annos = null;
 
                         S.nextToken();
 
@@ -1092,7 +1096,7 @@ public class JavacParser implements Parser {
                         t = toP(F.at(pos).TypeArray(t));
 
                         if (!stack.isEmpty() && !stack.first().isEmpty()) {
-                            List<JCAnnotation> annos = stack.next();
+                            annos = stack.next();
                             assert t.getTag() == JCTree.TYPEARRAY;
                             JCArrayTypeTree arr = (JCArrayTypeTree)t;
                             arr.elemtype = toP(F.at(pos).AnnotatedType(annos, arr.elemtype));
@@ -1102,12 +1106,14 @@ public class JavacParser implements Parser {
                         if ((mode & EXPR) != 0) {
                             mode = EXPR;
                             JCExpression t1 = term();
+                            if (annos != null && !annos.isEmpty()) t = illegal(annos.head.pos);
                             t = to(F.at(pos).Indexed(t, t1));
                         }
                         accept(RBRACKET);
                     }
                     break loop;
                 case LPAREN:
+                    if (annos != null && !annos.isEmpty()) return illegal(annos.head.pos);
                     if ((mode & EXPR) != 0) {
                         mode = EXPR;
                         t = arguments(typeArgs, t);
@@ -1115,6 +1121,7 @@ public class JavacParser implements Parser {
                     }
                     break loop;
                 case DOT:
+                    if (annos != null && !annos.isEmpty()) return illegal(annos.head.pos);
                     S.nextToken();
                     int oldmode = mode;
                     mode &= ~NOPARAMS;
@@ -1154,7 +1161,10 @@ public class JavacParser implements Parser {
                     // typeArgs saved for next loop iteration.
                     t = toP(F.at(pos).Select(t, ident()));
                     break;
+                case ELLIPSIS:
+                    break loop;
                 default:
+                    if (annos != null && !annos.isEmpty()) return illegal(annos.head.pos);
                     break loop;
                 }
             }
@@ -1187,7 +1197,6 @@ public class JavacParser implements Parser {
         while (true) {
             int pos1 = S.pos();
 
-            List<JCAnnotation> annos = null;
             if (S.token() == MONKEYS_AT)
                 annos = typeAnnotationsOpt();
 
