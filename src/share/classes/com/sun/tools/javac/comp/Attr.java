@@ -2854,6 +2854,12 @@ public class Attr extends JCTree.Visitor {
             chk.validateTypeAnnotations(tree.annotations, true);
             super.visitTypeParameter(tree);
         }
+        public void visitNewArray(JCNewArray tree) {
+            chk.validateTypeAnnotations(tree.annotations, false);
+            for (List<JCAnnotation> annotations : tree.dimAnnotations)
+                chk.validateTypeAnnotations(annotations, false);
+            super.visitNewArray(tree);
+        }
         public void visitMethodDef(JCMethodDecl tree) {
             // need to check static methods
             if ((tree.sym.flags() & Flags.STATIC) != 0) {
