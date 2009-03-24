@@ -23,25 +23,14 @@
 
 /*
  * @test
- * @summary new type annotation location: class literals
+ * @summary check for duplicate annotation values
  * @author Mahmood Ali
- * @compile ClassLiterals.java
+ * @compile/fail DuplicateAnnotationValue.java
  */
-
-class ClassLiterals {
-
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
+class DuplicateAnnotationValue {
+  void test() {
+    Object a = String @A(value = 2, value = 1) [].class;
   }
 }
 
-@interface A {}
-@interface B { int value(); }
+@interface A { int value(); }

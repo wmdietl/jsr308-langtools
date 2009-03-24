@@ -906,9 +906,13 @@ public class TransTypes extends TreeTranslator {
                     JCFieldAccess fieldContext = (JCFieldAccess)context;
                     if (fieldContext.name == names._class) {
                         p.type = TargetType.CLASS_LITERAL;
-                        assert fieldContext.selected instanceof JCAnnotatedType;
-                        JCAnnotatedType fieldType = (JCAnnotatedType)fieldContext.selected;
-                        p.pos = fieldType.underlyingType.pos;
+                        if (fieldContext.selected instanceof JCAnnotatedType) {
+                            assert fieldContext.selected instanceof JCAnnotatedType;
+                            JCAnnotatedType fieldType = (JCAnnotatedType)fieldContext.selected;
+                            p.pos = fieldType.underlyingType.pos;
+                        } else if (fieldContext.selected instanceof JCArrayTypeTree) {
+                            p.pos = fieldContext.selected.pos;
+                        }
                     } else throw new AssertionError();
                     return p;
                 }

@@ -23,25 +23,16 @@
 
 /*
  * @test
- * @summary new type annotation location: class literals
+ * @summary check for invalid annotatins given the target
  * @author Mahmood Ali
- * @compile ClassLiterals.java
+ * @compile/fail InvalidLocation.java
  */
 
-class ClassLiterals {
-
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
+class InvalidLocation {
+  void test() {
+    Object a = String @A [].class;
   }
 }
 
-@interface A {}
-@interface B { int value(); }
+@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
+@interface A { }
