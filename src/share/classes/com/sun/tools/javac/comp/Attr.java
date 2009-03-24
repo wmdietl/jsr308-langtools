@@ -2854,5 +2854,15 @@ public class Attr extends JCTree.Visitor {
             chk.validateTypeAnnotations(tree.annotations, true);
             super.visitTypeParameter(tree);
         }
+        public void visitMethodDef(JCMethodDecl tree) {
+            // need to check static methods
+            if ((tree.sym.flags() & Flags.STATIC) != 0) {
+                for (JCAnnotation a : tree.getReceiver().annotations) {
+                    if (chk.isTypeAnnotation(a, false))
+                        log.error(a.pos(), "annotation.type.not.applicable");
+                }
+            }
+            super.visitMethodDef(tree);
+        }
     };
 }
