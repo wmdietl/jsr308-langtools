@@ -205,8 +205,11 @@ public class TreeScanner extends Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
+        for (List<JCAnnotation> annos : tree.dimAnnotations)
+            scan(annos);
         scan(tree.elems);
     }
 

@@ -25,13 +25,13 @@ import java.io.*;
 import com.sun.tools.classfile.*;
 
 /*
- * @test Presence
+ * @test NewArray
  * @summary test that all type annotations are present in the classfile
  */
 
-public class Presence {
+public class NewArray {
     public static void main(String[] args) throws Exception {
-        new Presence().run();
+        new NewArray().run();
     }
 
     public void run() throws Exception {
@@ -118,32 +118,19 @@ public class Presence {
     }
 
     File writeTestFile() throws IOException {
-        File f = new File("Test.java");
+      File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
         out.println("import java.util.*;");
-        out.println("class Test<@Test.A T extends @Test.A List<@Test.A String>> { ");
+        out.println("class Test { ");
         out.println("  @interface A { }");
 
-        out.println("  Map<@A String, Map<@A String, @A String>> f1;");
-
-        out.println("  <@A T extends @A List<@A String>>");
-        out.println("  Map<@A String, @A List<@A String>>");
-        out.println("  method(List<@A String> @A [] param1, String @A [] @A [] param2) @A");
-        out.println("  throws @A Exception {");
-        out.println("    @A String lc1 = null;");
-        out.println("    @A List<@A String> lc2 = null;");
-        out.println("    @A String @A [] [] @A[] lc3 = null;");
-        out.println("    List<? extends @A List<@A String>> lc4 = null;");
-        out.println("    Object lc5 = (@A List<@A String>) null;");
-        out.println("    boolean lc6 = lc1 instanceof @A String;");
-        out.println("    boolean lc7 = lc5 instanceof @A String @A [] @A [];");
-        out.println("    new @A ArrayList<@A String>();");
-        out.println("    Object lc8 = new @A String @A [4];");
-        out.println("    Object lc9 = @A String.class;");
-        out.println("    Object lc10 = @A int.class;");
-        out.println("    return null;");
-        out.println("  }");
+        out.println(" void test() {");
+        out.println("  Object a = new @A String @A [5] @A  [];");
+        out.println("  Object b = new @A String @A [5] @A [3];");
+        out.println("  Object c = new @A String @A [] @A [] {};");
+        out.println(" }");
         out.println("}");
+
         out.close();
         return f;
     }
@@ -157,7 +144,7 @@ public class Presence {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 38;
+        int expected_visibles = 0, expected_invisibles = 9;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

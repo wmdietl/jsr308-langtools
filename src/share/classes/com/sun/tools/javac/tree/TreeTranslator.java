@@ -282,6 +282,8 @@ public class TreeTranslator extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        tree.annotations = translate(tree.annotations);
+        // TODO: translate dimAnnotations
         tree.elemtype = translate(tree.elemtype);
         tree.dims = translate(tree.dims);
         tree.elems = translate(tree.elems);
@@ -363,6 +365,7 @@ public class TreeTranslator extends JCTree.Visitor {
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {
+        tree.annotations = translate(tree.annotations);
         tree.bounds = translate(tree.bounds);
         result = tree;
     }

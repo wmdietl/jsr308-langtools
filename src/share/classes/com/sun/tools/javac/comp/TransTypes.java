@@ -442,7 +442,7 @@ public class TransTypes extends TreeTranslator {
 
     public void visitClassDef(JCClassDecl tree) {
         new TypeAnnotationPositions().scan(tree);
-        List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
+        List<TypeAnnotations> ta = List.nil(); //collectErasedAnnotations(tree.typarams);
         tree.sym.typeAnnotations = ta;
         new TypeAnnotationLift().scan(tree);
         translateClass(tree.sym);
@@ -451,7 +451,7 @@ public class TransTypes extends TreeTranslator {
 
     JCMethodDecl currentMethod = null;
     public void visitMethodDef(JCMethodDecl tree) {
-        List<TypeAnnotations> ta = collectErasedAnnotations(tree.typarams);
+        List<TypeAnnotations> ta = List.nil(); // collectErasedAnnotations(tree.typarams);
         if (tree.sym.typeAnnotations != null)
             ta = ta.appendList(tree.sym.typeAnnotations);
 
@@ -741,7 +741,7 @@ public class TransTypes extends TreeTranslator {
     /** Visitor method for parameterized types.
      */
     public void visitTypeApply(JCTypeApply tree) {
-        List<TypeAnnotations> ta = collectErasedAnnotations(tree.arguments);
+        List<TypeAnnotations> ta = List.nil(); //collectErasedAnnotations(tree.arguments);
         // Delete all type parameters.
         JCTree clazz = translate(tree.clazz, null);
         if (!ta.isEmpty()) {
@@ -819,7 +819,7 @@ public class TransTypes extends TreeTranslator {
         return translate(cdef, null);
     }
 
-    public List<TypeAnnotations> collectErasedAnnotations(List<? extends
+    private List<TypeAnnotations> collectErasedAnnotations(List<? extends
             JCTree> trees) {
         final ListBuffer<TypeAnnotations> ta = ListBuffer.lb();
         new TreeScanner() {
@@ -1009,6 +1009,25 @@ public class TransTypes extends TreeTranslator {
         }
 
         @Override
+        public void visitNewArray(JCNewArray tree) {
+            for (int i = 0; i < tree.dimAnnotations.size(); ++i) {
+                JCTree context = tree;
+                TypeAnnotations.Position p =
+                    resolveContext(tree, context, contexts.toList(),
+                            new TypeAnnotations.Position());
+                p.location = p.location.append(i);
+                p.type = p.type.getGenericComplement();
+                tree.dimTypeAnnotations.get(i).position = p;
+            }
+            JCTree context = tree;
+            TypeAnnotations.Position p =
+                resolveContext(tree, context, contexts.toList(),
+                        new TypeAnnotations.Position());
+            tree.typeAnnotations.position = p;
+            super.visitNewArray(tree);
+        }
+
+        @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
             if (!tree.annotations.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
@@ -1113,6 +1132,12 @@ public class TransTypes extends TreeTranslator {
                 lift(ta);
             }
             super.visitAnnotatedType(tree);
+        }
+
+        @Override
+        public void visitNewArray(JCNewArray tree) {
+            lift(tree.dimTypeAnnotations.append(tree.typeAnnotations));
+            super.visitNewArray(tree);
         }
 
         @Override
