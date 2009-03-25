@@ -135,7 +135,7 @@ public enum TargetType {
     WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, EnumSet.of(HasBound, HasLocation)),
 
     CLASS_LITERAL(0x1E, EnumSet.noneOf(TargetAttribute.class)),
-    //@Deprecated CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
+    CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
 
     METHOD_TYPE_PARAMETER(0x20, EnumSet.of(HasParameter)),
     //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, EnumSet.of(HasLocation, HasParameter)),

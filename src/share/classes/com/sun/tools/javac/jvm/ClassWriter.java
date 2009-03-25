@@ -36,6 +36,7 @@ import javax.tools.JavaFileObject;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type.*;
+import com.sun.tools.javac.comp.TargetType;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 
@@ -775,7 +776,7 @@ public class ClassWriter extends ClassFile {
         ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> invisibles = ListBuffer.lb();
 
         for (TypeAnnotations ta : typeAnnos) {
-            if (ta.annotations.isEmpty()) continue;
+            if (ta.annotations.isEmpty() || ta.position.type == TargetType.UNKNOWN) continue;
             for (Attribute.Compound a : ta.annotations) {
                 switch (getRetention(a.type.tsym)) {
                 case SOURCE: break;
@@ -909,10 +910,11 @@ public class ClassWriter extends ClassFile {
     }
 
     void writeTypeAnnotation(Attribute.Compound c, TypeAnnotations.Position p) {
-        if (debugJSR308)
-            System.out.println("writing " + c + " at " + p);
-        writeCompoundAttribute(c);
-        writePosition(p);
+        // ignore UNKNOWN attributes - improve testing
+      if (debugJSR308)
+        System.out.println("writing " + c + " at " + p);
+      writeCompoundAttribute(c);
+      writePosition(p);
     }
 
     void writePosition(TypeAnnotations.Position p) {
