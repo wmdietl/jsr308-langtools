@@ -942,7 +942,7 @@ public class TransTypes extends TreeTranslator {
                         JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
                         p.parameter_index = clazz.typarams.indexOf(path.tail.head);
-                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);                        
+                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
                     } else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
                         JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;

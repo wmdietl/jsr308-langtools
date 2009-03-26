@@ -79,8 +79,6 @@ public class ExtendedAnnotation {
         // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();
             break;
          // local variable
@@ -125,6 +123,7 @@ public class ExtendedAnnotation {
             position.type_index = cr.readUnsignedByte();
             break;
         case CLASS_LITERAL:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();
             break;
         // method parameter: not specified
@@ -132,6 +131,8 @@ public class ExtendedAnnotation {
             position.parameter_index = cr.readUnsignedByte();
             break;
         // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();
@@ -180,8 +181,6 @@ public class ExtendedAnnotation {
         // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             n += 2;
             break;
          // local variable
@@ -224,6 +223,7 @@ public class ExtendedAnnotation {
             n += 1; // type_index
             break;
         case CLASS_LITERAL:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
             n += 1; // offset
             break;
         // method parameter: not specified
@@ -231,6 +231,8 @@ public class ExtendedAnnotation {
             n += 1; // parameter_index
             break;
         // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             n += 2; // offset

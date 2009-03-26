@@ -220,7 +220,7 @@ public enum TargetType {
         if (targets == null)
             targets = buildTargets();
 
-        if (tag == UNKNOWN.targetTypeValue)
+        if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
             return UNKNOWN;
         // we can optimize the algorithm a bit: binary search?
         if (tag < 0 || tag >= targets.length)
