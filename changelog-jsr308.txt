@@ -1,3 +1,33 @@
+Version 0.8.9, 28 Mar 2009
+
+Functionality:
+  support array class literals
+  emit array type annotations to classfile
+  validate type annotations on new array expressions
+  reject annotations on static method receivers
+
+Bug fixes:
+  reject annotations on array access levels
+  eliminate duplicate annotations description in classfile output
+  minor issues with target_type and reference_info output
+
+Base build
+  Updated to OpenJDK langtools build b51
+
+----------------------------------------------------------------------
+Version 0.8.8, 13 Mar 2009
+
+Functionality
+  javap: output type annotation locations
+
+Bug fixes
+  javac: fixed errors related to emitting annotation info to classfile
+    affected annotations on class type parameters and local variables
+
+Base build
+  Updated to OpenJDK langtools build b50
+
+----------------------------------------------------------------------
 Version 0.8.7, 27 Feb 2009
 
 Functionality
