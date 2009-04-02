@@ -76,33 +76,41 @@ public class JavacParser implements Parser {
     /** The name table. */
     private Names names;
 
+    // Because of javac's limited lookahead, some contexts are ambiguous in
+    // the presence of type annotations even though they are not ambiguous
+    // in the absence of type annotations.  Consider this code:
+    //   void m(String [] m) { }
+    //   void m(String ... m) { }
+    // After parsing "String", javac calls bracketsOpt which immediately
+    // returns if the next character is not '['.  Similarly, javac can see
+    // if the next token is ... and in that case parse an ellipsis.  But in
+    // the presence of type annotations:
+    //   void m(String @A [] m) { }
+    //   void m(String @A ... m) { }
+    // no finite lookahead is enough to determine whether to read array
+    // levels or an ellipsis.  Furthermore, if you call bracketsOpt, then
+    // bracketsOpt first reads all the leading annotations and only then
+    // discovers that it needs to fail.  bracketsOpt needs a way to push
+    // back the extra annotations that it read.  (But, bracketsOpt should
+    // not *always* be allowed to push back extra annotations that it finds
+    // -- in most contexts, any such extra annotation is an error.
+    // Another similar case occurs with arrays and receiver annotations:
+    //   String b() @Array [] @Receiver { }
+    //   String b() @Receiver { }
     //
-    // To resolve some type annotations ambiguity, the compiler needs a type
-    // annotation push-back mechanism for type annotations when not having a
-    // look ahead. This occurs when parsing array levels in two ways:
-    //
-    // (1) array level annotations vs. method receiver annotations
-    //    String method() @A [] @B { ... }
-    //  When parsing '@A' or '@B', it is ambiguous whether the annotations
-    //  should be as part of array level annotation (handled by backetsOpt()),
-    //  or a method receiver (handled by methodDeclaratorRest()).
-    //
-    //  Here bracketsOpt makes an attempt first, succeeding in parsing '@A'
-    //  as array level annotation, but fails in pasing '@B' as such but only
-    //  after parsing already.  bracketsOpt pushes the annotations back
-    //  so methodDeclaratorRest() identify them as method receivers.
-    //
-    // (2) Formal parameter vararg
-    //    void method(String @A [] @B ... varArg) { ... }
-    //  Similar to the previous case, it is ambiguous whether the annotations
-    //  should be part of array level (handled by backetsOpt()), or
-    //  a vararg annotations (handled by formalParameter()).  Like previous
-    //  case, '@B' is pushed back so formalParameter() handles it properly.
-    //
-    // Everywhere else, annotations, parsed as array level annotations and are
-    // not, are actually errors, such as 'String @A str'.
+    // The following two variables permit type annotations that have
+    // already been read to be stored for later use.  Alternate
+    // implementations are possible but would cause much larger changes to
+    // the parser.
+    /** Type annotations that have already been read but have not yet been used. **/
     private List<JCAnnotation> typeAnnotationsPushedBack = null;
-    private boolean permitTypeAnnotationsPushedBack = false;
+    /**
+     * If the parser notices extra annotations, then it either immediately
+     * issues an error (if this variable is false) or places the extra
+     * annotations in variable typeAnnotationsPushedBack (if this variable
+     * is true).
+     */
+    private boolean permitTypeAnnotationsPushBack = false;
 
     /** Construct a parser from a given scanner, tree factory and log.
      */
@@ -1233,7 +1241,7 @@ public class JavacParser implements Parser {
             } else {
                 if (!annos.isEmpty()) {
                     illegal(0);
-                    if (permitTypeAnnotationsPushedBack)
+                    if (permitTypeAnnotationsPushBack)
                         typeAnnotationsPushedBack = annos;
                     else
                         return illegal(annos.head.pos);
@@ -1440,7 +1448,7 @@ public class JavacParser implements Parser {
             JCExpression orig = t;
             t = bracketsOptCont(t, pos, nextLevelAnnotations);
         } else if (!nextLevelAnnotations.isEmpty()) {
-            if (permitTypeAnnotationsPushedBack) {
+            if (permitTypeAnnotationsPushBack) {
                 this.typeAnnotationsPushedBack = nextLevelAnnotations;
             } else
                 return illegal(nextLevelAnnotations.head.pos);
@@ -2823,9 +2831,9 @@ public class JavacParser implements Parser {
         if (!isVoid) {
             // need to distiush between receiver anno and array anno
             // look at typeAnnotaitonsPushedBack comment
-            this.permitTypeAnnotationsPushedBack = true;
+            this.permitTypeAnnotationsPushBack = true;
             type = bracketsOpt(type);
-            this.permitTypeAnnotationsPushedBack = false;
+            this.permitTypeAnnotationsPushBack = false;
             if (typeAnnotationsPushedBack == null)
                 receiverAnnotations = List.nil();
             else
@@ -2965,9 +2973,9 @@ public class JavacParser implements Parser {
         JCModifiers mods = optFinal(Flags.PARAMETER);
         // need to distiush between vararg annos and array annos
         // look at typeAnnotaitonsPushedBack comment
-        this.permitTypeAnnotationsPushedBack = true;
+        this.permitTypeAnnotationsPushBack = true;
         JCExpression type = parseType();
-        this.permitTypeAnnotationsPushedBack = false;
+        this.permitTypeAnnotationsPushBack = false;
 
         // JSR 308: handle annotations on a varargs element type
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
