@@ -76,11 +76,33 @@ public class JavacParser implements Parser {
     /** The name table. */
     private Names names;
 
-    // these two fields are hacks that should be removed later
-    // this is in place of rewriting the parser or changing many method
-    // signitures
-    private List<JCAnnotation> varArgsTypeAnnotationsHack = null;
-    private boolean isVarargsHackAllowed = false;
+    //
+    // To resolve some type annotations ambiguity, the compiler needs a type
+    // annotation push-back mechanism for type annotations when not having a
+    // look ahead. This occurs when parsing array levels in two ways:
+    //
+    // (1) array level annotations vs. method receiver annotations
+    //    String method() @A [] @B { ... }
+    //  When parsing '@A' or '@B', it is ambiguous whether the annotations
+    //  should be as part of array level annotation (handled by backetsOpt()),
+    //  or a method receiver (handled by methodDeclaratorRest()).
+    //
+    //  Here bracketsOpt makes an attempt first, succeeding in parsing '@A'
+    //  as array level annotation, but fails in pasing '@B' as such but only
+    //  after parsing already.  bracketsOpt pushes the annotations back
+    //  so methodDeclaratorRest() identify them as method receivers.
+    //
+    // (2) Formal parameter vararg
+    //    void method(String @A [] @B ... varArg) { ... }
+    //  Similar to the previous case, it is ambiguous whether the annotations
+    //  should be part of array level (handled by backetsOpt()), or
+    //  a vararg annotations (handled by formalParameter()).  Like previous
+    //  case, '@B' is pushed back so formalParameter() handles it properly.
+    //
+    // Everywhere else, annotations, parsed as array level annotations and are
+    // not, are actually errors, such as 'String @A str'.
+    private List<JCAnnotation> typeAnnotationsPushedBack = null;
+    private boolean permitTypeAnnotationsPushedBack = false;
 
     /** Construct a parser from a given scanner, tree factory and log.
      */
@@ -1210,8 +1232,9 @@ public class JavacParser implements Parser {
                 }
             } else {
                 if (!annos.isEmpty()) {
-                    if (isVarargsHackAllowed)
-                        varArgsTypeAnnotationsHack = annos;
+                    illegal(0);
+                    if (permitTypeAnnotationsPushedBack)
+                        typeAnnotationsPushedBack = annos;
                     else
                         return illegal(annos.head.pos);
                 }
@@ -1399,35 +1422,33 @@ public class JavacParser implements Parser {
     }
 
     /**
-     * BracketsOpt = {"[" TypeAnnotations "]"}
+     * BracketsOpt = { TypeAnnotations "[" "]" }
      *
      * <p>
      *
-     * The stack should contain the annotations found after a "[" when parsing
-     * of brackets has already begun at the call site.
-     * {@link #bracketsOpt(JCExpression)} is used for optional brackets when we
-     * haven't already consumed a bracket pair.
+     * <code>annotations</code> is the list of annotations targeting
+     * the expression <code>t</code>.
      */
     private JCExpression bracketsOpt(JCExpression t,
-            List<JCAnnotation> stack) {
-        List<JCAnnotation> annos = typeAnnotationsOpt();
+            List<JCAnnotation> annotations) {
+        List<JCAnnotation> nextLevelAnnotations = typeAnnotationsOpt();
 
         if (S.token() == LBRACKET) {
             int pos = S.pos();
             S.nextToken();
 
             JCExpression orig = t;
-            t = bracketsOptCont(t, pos, annos);
-        } else if (annos != null && !annos.isEmpty()) {
-            if (isVarargsHackAllowed) {
-                this.varArgsTypeAnnotationsHack = annos;
+            t = bracketsOptCont(t, pos, nextLevelAnnotations);
+        } else if (!nextLevelAnnotations.isEmpty()) {
+            if (permitTypeAnnotationsPushedBack) {
+                this.typeAnnotationsPushedBack = nextLevelAnnotations;
             } else
-                return illegal(annos.head.pos);
+                return illegal(nextLevelAnnotations.head.pos);
         }
 
         int apos = S.pos();
-        if (!stack.isEmpty())
-            t = F.at(apos).AnnotatedType(stack, t);
+        if (!annotations.isEmpty())
+            t = F.at(apos).AnnotatedType(annotations, t);
         return t;
     }
 
@@ -1438,9 +1459,9 @@ public class JavacParser implements Parser {
     }
 
     private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos,
-            List<JCAnnotation> stack) {
+            List<JCAnnotation> annotations) {
         accept(RBRACKET);
-        t = bracketsOpt(t, stack);
+        t = bracketsOpt(t, annotations);
         return toP(F.at(pos).TypeArray(t));
     }
 
@@ -2797,15 +2818,22 @@ public class JavacParser implements Parser {
                               boolean isInterface, boolean isVoid,
                               String dc) {
         List<JCVariableDecl> params = formalParameters();
-        this.isVarargsHackAllowed = true;
-        if (!isVoid) type = bracketsOpt(type);
-        this.isVarargsHackAllowed = false;
-        // JSR 308: handle receiver annotations with no underlying type
-        List<JCAnnotation> receiverAnnotations = typeAnnotationsOpt();
-        if (varArgsTypeAnnotationsHack != null) {
-            receiverAnnotations = receiverAnnotations.prependList(varArgsTypeAnnotationsHack);
-            varArgsTypeAnnotationsHack = null;
-        }
+
+        List<JCAnnotation> receiverAnnotations;
+        if (!isVoid) {
+            // need to distiush between receiver anno and array anno
+            // look at typeAnnotaitonsPushedBack comment
+            this.permitTypeAnnotationsPushedBack = true;
+            type = bracketsOpt(type);
+            this.permitTypeAnnotationsPushedBack = false;
+            if (typeAnnotationsPushedBack == null)
+                receiverAnnotations = List.nil();
+            else
+                receiverAnnotations = typeAnnotationsPushedBack;
+            typeAnnotationsPushedBack = null;
+        } else
+            receiverAnnotations = typeAnnotationsOpt();
+
         JCAnnotatedType receiver = F.at(pos).AnnotatedType(receiverAnnotations, null);
         List<JCExpression> thrown = List.nil();
         if (S.token() == THROWS) {
@@ -2935,16 +2963,18 @@ public class JavacParser implements Parser {
      */
     JCVariableDecl formalParameter() {
         JCModifiers mods = optFinal(Flags.PARAMETER);
-        this.isVarargsHackAllowed = true;
+        // need to distiush between vararg annos and array annos
+        // look at typeAnnotaitonsPushedBack comment
+        this.permitTypeAnnotationsPushedBack = true;
         JCExpression type = parseType();
-        this.isVarargsHackAllowed = false;
+        this.permitTypeAnnotationsPushedBack = false;
 
         // JSR 308: handle annotations on a varargs element type
         List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
         if (S.token() == ELLIPSIS) {
-            if (varArgsTypeAnnotationsHack != null) {
-                varargsAnnos = varargsAnnos.prependList(varArgsTypeAnnotationsHack);
-                varArgsTypeAnnotationsHack = null;
+            if (typeAnnotationsPushedBack != null) {
+                varargsAnnos = varargsAnnos.prependList(typeAnnotationsPushedBack);
+                typeAnnotationsPushedBack = null;
             }
             checkVarargs();
             mods.flags |= Flags.VARARGS;
@@ -2956,12 +2986,12 @@ public class JavacParser implements Parser {
             S.nextToken();
         } else {
             // if not a var arg, then varArgsTypeAnnotationHack should be null
-            if (varArgsTypeAnnotationsHack != null
-                    && !varArgsTypeAnnotationsHack.isEmpty()) {
-                reportSyntaxError(varArgsTypeAnnotationsHack.head.pos,
+            if (typeAnnotationsPushedBack != null
+                    && !typeAnnotationsPushedBack.isEmpty()) {
+                reportSyntaxError(typeAnnotationsPushedBack.head.pos,
                         "illegal.start.of.type");
             }
-            varArgsTypeAnnotationsHack = null;
+            typeAnnotationsPushedBack = null;
         }
         return variableDeclaratorId(mods, type);
     }
