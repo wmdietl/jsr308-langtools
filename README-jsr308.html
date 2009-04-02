@@ -17,7 +17,7 @@ pre, blockquote {
 </head>
 <body>
 <h1>JSR 308 Prototype Implementation README</h1> <!-- omit from toc -->
-<h4 id="version">Version 0.8.9 (28 Mar 2009)</h4> <!-- omit from toc -->
+<h4 id="version">Version 0.8.7 (27 Feb 2009)</h4> <!-- omit from toc -->
 <p>For the latest version, see the <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>.</p>
 
 <p>Contents:</p>
@@ -27,7 +27,6 @@ pre, blockquote {
       <li><a href="#features">Features of the JSR 308 prototype implementation</a>
         <ul>
           <li><a href="#annotations-in-comment">Writing annotations in comments for backward compatibility</a></li>
-          <li><a href="#javap-annotations">The <code>-annotations</code> <code>javap</code> command-line option</a></li>
           <li><a href="#proposal">Differences from the JSR 308 proposal</a></li>
         </ul></li>
       <li><a href="#installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</a>
@@ -153,25 +152,6 @@ programmers the benefits of type annotations while not affecting backward
 compatibility, that might help more people adopt Java 7 sooner, thus
 increasing its momentum.
 -->
-
-
-<h3 id="javap-annotations">The <code>-annotations</code> <code>javap</code> command-line option</h3>
-
-<p>The JSR 308 <code>javap</code> tool adds the <code>-annotations</code>
-command-line option for displaying the properties of both JSR 175 and JSR 308
-annotations. The OpenJDK <code>javap</code> tool normally displays annotations
-as raw hexadecimal strings; the modified tool parses annotations and
-displays their names, arguments, and other properties (including the internal
-fields of JSR 308 annotations as specified in <a
-href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html#htoc10">Section
-4 of the JSR 308 proposal</a>).
-</p>
-
-<p>Since annotation attributes are typically only displayed in conjunction
-with the <code>-verbose</code> command-line option, the
-<code>-annotations</code> option does nothing without the
-<code>-verbose</code> option.
-</p>
 
 
 <h3 id="proposal">Differences from the JSR 308 proposal</h3>
@@ -462,7 +442,7 @@ you will need to edit
 JSR 308 distribution is based is:
 </p>
 <blockquote>
-<!-- version -->51 (09 Mar  2009)<!-- /version -->
+<!-- version -->45 (22 Jan 2009)<!-- /version -->
 </blockquote>
 
 <p>The following commands determine the differences between the JSR
@@ -479,7 +459,7 @@ extracted JSR 308 compiler distribution.
   <pre><code>
   export VENDOR=vendor-langtools
   hg clone http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
-  cd $VENDOR; hg up jdk7-b<!-- revision -->51<!-- /revision -->
+  cd $VENDOR; hg up jdk7-b<!-- revision -->45<!-- /revision -->
   </code></pre>
 
   <p>If you already have a checkout of the OpenJDK compiler, ensure
@@ -488,7 +468,7 @@ extracted JSR 308 compiler distribution.
   </p>
 
   <pre><code>
-  hg pull; hg up jdk7-b<!-- revision -->51<!-- /revision -->
+  hg pull; hg up jdk7-b<!-- revision -->45<!-- /revision -->
   </code></pre>
 
   </li>
@@ -549,7 +529,7 @@ modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
 </p>
 <ol>
-  <li>Obtain a copy of Mercurial reversion <!-- revision -->51<!-- /revision --> of
+  <li>Obtain a copy of Mercurial reversion <!-- revision -->45<!-- /revision --> of
   the OpenJDK compiler, using the commands in the <a href="#diffs">diff
   section</a> of this document.</li>
   <li>Try your test case using the
