@@ -138,7 +138,7 @@ public class JavacParser implements Parser {
             docComments = new HashMap<JCTree,String>();
         this.keepLineMap = keepLineMap;
         this.errorTree = F.Erroneous();
-        this.debugJSR308 = fac.options.get("-X308:parser") != null;
+        this.debugJSR308 = fac.options.get("TA:parser") != null;
     }
 
     /** JSR 308: switch: debug output for JSR 308-related operations.
@@ -663,7 +663,12 @@ public class JavacParser implements Parser {
         }
         lastmode = mode;
         mode = prevmode;
-        return buf.toList();
+
+        List<JCAnnotation> annotations = buf.toList();
+
+        if (debugJSR308)
+            System.out.println(annotations);
+        return annotations;
     }
 
     JCExpression term(int newmode) {

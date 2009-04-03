@@ -19,14 +19,20 @@ The JSR 308 specification does not introduce any required command-line
 change to any of the langtools commands.
 
 The prototype includes some hidden options for debugging:
- -X308:parser    parsing annotations in JavacParser
- -X308:attr      attributing annotations in MemberEnter
- -X308:trans     translating types in TransTypes
- -X308:reader    reading annotations from classfile in ClassReader
- -X308:writer    writing annotations to classfile in ClassWriter
+ -XDTA:parser    parsing annotations in JavacParser
+ -XDTA:attr      attributing annotations in MemberEnter
+ -XDTA:trans     translating types in TransTypes
+ -XDTA:reader    reading annotations from classfile in ClassReader
+ -XDTA:writer    writing annotations to classfile in ClassWriter
 
 It also includes one non-standard option
- -Xspacesincomments which is documented in [1].
+ -XDspacesincomments which is documented in [1].
+
+Additionally the compiler recognize one more environment variable/property:
+  jsr308.import
+The value needs to be a package or a type name.  The parser inserts
+import statements for the package/class to all compiled classes.
+This is discussed in [2].
 
 ===========================================================
 
@@ -112,7 +118,7 @@ direct descendants.
 TransTypes.TypeAnnotationsLift lifts the annotations of the annotated trees
 to the closest enclosing class/method/field symbol.
 
-The type annotations are properly annotation in MemberEnter.TypeAnnotate
+The type annotations are properly attributed in MemberEnter.TypeAnnotate
 (which is called through MemberEnter.complete).  The annotations are
 attributed semi-lazily just like other annotations.
 
@@ -139,10 +145,11 @@ processing phase and once again during normal attribution.  In the first
 round, Attr inserts semantically invalid trees, e.g. super constructor
 invocations in enum constructors.
 
-These cases are documented in [2].
+These cases are documented in [3].
 
 
 ===========================================================
 References
 [1] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments
-[2] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#known-problems
+[2] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#jsr308_imports
+[3] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#known-problems

@@ -253,7 +253,7 @@ public class ClassReader extends ClassFile implements Completer {
             : null;
 
         typevars = new Scope(syms.noSymbol);
-        debugJSR308 = options.get("-X308:reader") != null;
+        debugJSR308 = options.get("TA:reader") != null;
     }
 
     /** Add member to class unless it is synthetic.

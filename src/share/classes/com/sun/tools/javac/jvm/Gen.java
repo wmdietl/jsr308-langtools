@@ -112,7 +112,7 @@ public class Gen extends JCTree.Visitor {
             fromString("access" + target.syntheticNameChar());
 
         Options options = Options.instance(context);
-        this.debugJSR308 = options.get("-X308:gen") != null;
+        this.debugJSR308 = options.get("TA:gen") != null;
         lineDebugInfo =
             options.get("-g:") == null ||
             options.get("-g:lines") != null;

@@ -169,8 +169,6 @@ public class RecognizedOptions {
         O,
         XJCOV,
         XD,
-        XSPACESINCOMMENTS,
-        X308,
         SOURCEFILE);
 
     static Set<OptionName> javacFileManagerOptions = EnumSet.of(
@@ -228,9 +226,7 @@ public class RecognizedOptions {
         XPREFER,
         O,
         XJCOV,
-        XD,
-        XSPACESINCOMMENTS,
-        X308);
+        XD);
 
     static Option[] getJavaCompilerOptions(OptionHelper helper) {
         return getOptions(helper, javacOptions);
@@ -568,25 +564,6 @@ public class RecognizedOptions {
                 String key = (eq < 0) ? s : s.substring(0, eq);
                 String value = (eq < 0) ? s : s.substring(eq+1);
                 options.put(key, value);
-                return false;
-            }
-        },
-
-        new HiddenOption(XSPACESINCOMMENTS),
-
-        new HiddenOption(X308) {
-            public boolean matches(String s) {
-                return s.startsWith("-X308:");
-            }
-            public boolean process(Options options, String option) {
-                String suboptions = option.substring(6);
-                options.put("-X308:", suboptions);
-                for (StringTokenizer t = new StringTokenizer(suboptions, ",");
-                     t.hasMoreTokens(); ) {
-                    String tok = t.nextToken();
-                    String opt = "-X308:" + tok;
-                    options.put(opt, opt);
-                }
                 return false;
             }
         },

@@ -178,7 +178,7 @@ public class ClassWriter extends ClassFile {
         types = Types.instance(context);
         fileManager = context.get(JavaFileManager.class);
 
-        debugJSR308    = options.get("-X308:writer") != null;
+        debugJSR308    = options.get("TA:writer") != null;
         verbose        = options.get("-verbose")     != null;
         scramble       = options.get("-scramble")    != null;
         scrambleAll    = options.get("-scrambleAll") != null;

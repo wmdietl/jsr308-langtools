@@ -74,7 +74,7 @@ public class Scanner implements Lexer {
             this.names = Names.instance(context);
             this.source = Source.instance(context);
             this.keywords = Keywords.instance(context);
-            this.spacesincomments = Options.instance(context).get("-Xspacesincomments") != null;
+            this.spacesincomments = Options.instance(context).get("spacesincomments") != null;
         }
 
         public Scanner newScanner(CharSequence input) {

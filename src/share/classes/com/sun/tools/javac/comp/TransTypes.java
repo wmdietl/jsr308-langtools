@@ -59,7 +59,7 @@ public class TransTypes extends TreeTranslator {
         Options options = Options.instance(context);
         if (instance == null)
             instance = new TransTypes(context);
-        instance.debugJSR308 = options.get("-X308:trans") != null;
+        instance.debugJSR308 = options.get("TA:trans") != null;
         return instance;
     }
 
