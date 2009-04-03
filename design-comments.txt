@@ -1,10 +1,10 @@
 The prototype implementation of langtools for
 JSR 308: Type Annotations in Java
 
-The JSR 308 team <jsr308@lists.csail.mit.edu>
++The JSR 308 team <jsr308-bugs@lists.csail.mit.edu>
 ===========================================================
 
-This document describes the commandline changes and implementation
+This document describes the command-line changes and implementation
 changes introduced in this prototype.
 
 ===========================================================
@@ -54,8 +54,8 @@ It also includes one non-standard option
 
 3. Javap changes
 
-Javap is written in a modular way to handle type annotations.  There are
-few minor changes:
+Javap is written in a modular way to handle type annotations.  Thus, there
+are only a few minor changes:
   - new classes:
     ExtendedAnnotation  - datatype for extended type annotation
     RuntimeTypeAnnotations_attribute   - base class for all type annotations
@@ -86,7 +86,7 @@ TypeAnnotations store a list of the annotation symbols not the annotations
 trees.
 
 Considerations:
-    TargetType is quite large and TypeAnnotations has a complex logic for
+    TargetType is quite large and TypeAnnotations has complex logic for
     its internal state, which adds complication to the class readers
     and writers alike.  How can we simplify it?
 
@@ -105,8 +105,8 @@ when variable offset and length are known.
 ________________________________________
 4.1.2 changes to Symbol
 Each symbol contains a list of TypeAnnotations, but in reality only
-class, method, and fields symbols which have it populated.  The symbol
-contains their type annotations along with the annotations targetting their
+class, method, and fields symbols have it populated.  The symbol
+contains their type annotations along with the annotations targeting their
 direct descendants.
 
 TransTypes.TypeAnnotationsLift lifts the annotations of the annotated trees
@@ -133,8 +133,8 @@ Our current type checkers invoke the attribution phase by calling
 JavacCompiler.attribute().  We found this to be satisfactory for most
 cases.
 
-However, this may lead to many unexpected spurious errors.  The method
-bodies in this case are attributed twice: once during annotation
+However, this may lead to spurious errors when certain method
+bodies are attributed twice: once during annotation
 processing phase and once again during normal attribution.  In the first
 round, Attr inserts semantically invalid trees, e.g. super constructor
 invocations in enum constructors.
@@ -144,5 +144,5 @@ These cases are documented in [2].
 
 ===========================================================
 References
-[1] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#htoc6
-[2] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#htoc53
+[1] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments
+[2] http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#known-problems
