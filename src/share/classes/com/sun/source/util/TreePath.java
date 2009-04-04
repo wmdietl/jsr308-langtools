@@ -124,9 +124,9 @@ public class TreePath implements Iterable<Tree> {
             }
 
             public Tree next() {
-                TreePath t = curr;
+                Tree t = curr.leaf;
                 curr = curr.parent;
-                return t.leaf;
+                return t;
             }
 
             public void remove() {

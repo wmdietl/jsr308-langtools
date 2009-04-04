@@ -297,8 +297,6 @@ public class JavacTaskImpl extends JavacTask {
             // (i.e. in fileObjects) but which have not yet been entered,
             // then we make sure they have been parsed and add them to the
             // list to be entered.
-            if (notYetEntered == null)
-                notYetEntered = new HashMap<JavaFileObject, JCCompilationUnit>();
             if (notYetEntered.size() > 0) {
                 if (!parsed)
                     parse(); // TODO would be nice to specify files needed to be parsed
