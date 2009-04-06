@@ -120,12 +120,12 @@ public class TreePath implements Iterable<Tree> {
     public Iterator<Tree> iterator() {
         return new Iterator<Tree>() {
             public boolean hasNext() {
-                return curr.parent != null;
+                return next != null;
             }
 
             public Tree next() {
-                Tree t = curr.leaf;
-                curr = curr.parent;
+                Tree t = next.leaf;
+                next = next.parent;
                 return t;
             }
 
@@ -133,7 +133,7 @@ public class TreePath implements Iterable<Tree> {
                 throw new UnsupportedOperationException();
             }
 
-            private TreePath curr = TreePath.this;
+            private TreePath next = TreePath.this;
         };
     }
 
