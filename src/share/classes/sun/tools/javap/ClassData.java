@@ -52,8 +52,6 @@ public class ClassData implements RuntimeConstants {
     private int methods_count;
     private MethodData[] methods;
     private InnerClassData[] innerClasses;
-    private AnnotationData[] runtimeVisibleAnnotations; //*
-    private AnnotationData[] runtimeInvisibleAnnotations; //*
     private int attributes_count;
     private AttrData[] attrs;
     private String classname;
@@ -63,13 +61,11 @@ public class ClassData implements RuntimeConstants {
     private Hashtable<Object,Integer> indexHashAscii = new Hashtable<Object,Integer>();
     private String pkgPrefix="";
     private int pkgPrefixLen=0;
-    private JavapEnvironment env;
 
     /**
      * Read classfile to disassemble.
      */
-    public ClassData(InputStream infile, JavapEnvironment env){
-        this.env = env;
+    public ClassData(InputStream infile){
         try{
             this.read(new DataInputStream(infile));
         }catch (FileNotFoundException ee) {
@@ -149,18 +145,6 @@ public class ClassData implements RuntimeConstants {
                        AttrData attr=new AttrData(this);
                        attr.read(name_cpx);
                        attrs[k]=attr;
-            } else if (env.showAnnotations &&
-                       getTag(name_cpx) == CONSTANT_UTF8
-                       && AnnotationData.isAnnotationsAttribute(getString(name_cpx))) { //*
-                in.readInt();
-                AnnotationData[] annotations = AnnotationData.readAnnotations(in);
-                if (getString(name_cpx).equals("RuntimeVisibleAnnotations"))
-                    this.runtimeVisibleAnnotations = annotations;
-                else if (getString(name_cpx).equals("RuntimeInvisibleAnnotations"))
-                    this.runtimeInvisibleAnnotations = annotations;
-                AttrData attr=new AttrData(this);
-                attr.read(name_cpx);
-                attrs[k]=attr;
             } else {
                 AttrData attr=new AttrData(this);
                 attr.read(name_cpx, in);
@@ -223,7 +207,7 @@ public class ClassData implements RuntimeConstants {
         int fields_count = in.readUnsignedShort();
         fields=new FieldData[fields_count];
         for (int k = 0; k < fields_count; k++) {
-            FieldData field=new FieldData(this, env);
+            FieldData field=new FieldData(this);
             field.read(in);
             fields[k]=field;
         }
@@ -236,7 +220,7 @@ public class ClassData implements RuntimeConstants {
         int methods_count = in.readUnsignedShort();
         methods=new MethodData[methods_count];
         for (int k = 0; k < methods_count ; k++) {
-            MethodData method=new MethodData(this, env);
+            MethodData method=new MethodData(this);
             method.read(in);
             methods[k]=method;
         }
@@ -395,20 +379,6 @@ public class ClassData implements RuntimeConstants {
      */
     public InnerClassData[] getInnerClasses(){
         return innerClasses;
-    }
-
-    /**
-     * Returns a list of runtime visible annotations.
-     */
-    public AnnotationData[] getRuntimeVisibleAnnotations() {
-        return this.runtimeVisibleAnnotations;
-    }
-
-    /**
-     * Returns a list of runtime invisible annotations.
-     */
-    public AnnotationData[] getRuntimeInvisibleAnnotations() {
-        return this.runtimeInvisibleAnnotations;
     }
 
     /**

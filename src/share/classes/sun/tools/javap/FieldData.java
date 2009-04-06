@@ -46,17 +46,9 @@ public class FieldData implements RuntimeConstants  {
     boolean isSynthetic=false;
     boolean isDeprecated=false;
     Vector<AttrData> attrs;
-    private JavapEnvironment env;
 
-    // For annotation attributes:
-    AnnotationData[] runtimeVisibleAnnotations;
-    AnnotationData[] runtimeInvisibleAnnotations;
-    ExtendedAnnotationData[] runtimeVisibleTypeAnnotations;
-    ExtendedAnnotationData[] runtimeInvisibleTypeAnnotations;
-
-    public FieldData(ClassData cls, JavapEnvironment env){
+    public FieldData(ClassData cls){
         this.cls=cls;
-        this.env=env;
     }
 
     /**
@@ -91,37 +83,6 @@ public class FieldData implements RuntimeConstants  {
                 if (in.readInt()!=0)
                     throw new ClassFormatError("invalid Synthetic attr length");
                 isDeprecated = true;
-                AttrData attr=new AttrData(cls);
-                attr.read(attr_name_index);
-                attrs.addElement(attr);
-            } else if (env.showAnnotations &&
-                       AnnotationData.isAnnotationsAttribute(attr_name)) { //*
-
-                // Read the annotations in this attribute.
-                in.readInt();
-                AnnotationData[] annotations = AnnotationData.readAnnotations(in);
-
-                // Store them as appropriate.
-                if (attr_name.equals("RuntimeVisibleAnnotations"))
-                    this.runtimeVisibleAnnotations = annotations;
-                else if (attr_name.equals("RuntimeInvisibleAnnotations"))
-                    this.runtimeInvisibleAnnotations = annotations;
-
-                AttrData attr=new AttrData(cls);
-                attr.read(attr_name_index);
-                attrs.addElement(attr);
-
-            } else if (env.showAnnotations &&
-                       AnnotationData.isTypeAnnotationsAttribute(attr_name)) {
-
-                in.readInt();
-                ExtendedAnnotationData[] annotations = ExtendedAnnotationData.readExtendedAnnotations(in);
-
-                if (attr_name.equals("RuntimeVisibleTypeAnnotations"))
-                    this.runtimeVisibleTypeAnnotations = annotations;
-                else if (attr_name.equals("RuntimeInvisibleTypeAnnotations"))
-                    this.runtimeInvisibleTypeAnnotations = annotations;
-
                 AttrData attr=new AttrData(cls);
                 attr.read(attr_name_index);
                 attrs.addElement(attr);
@@ -184,34 +145,6 @@ public class FieldData implements RuntimeConstants  {
      */
     public boolean isDeprecated(){
         return isDeprecated;
-    }
-
-    /**
-     * @return the runtime visible annotations on this field
-     */
-    public AnnotationData[] getRuntimeVisibleAnnotations() {
-        return this.runtimeVisibleAnnotations;
-    }
-
-    /**
-     * @return the runtime invisible annotations on this field
-     */
-    public AnnotationData[] getRuntimeInvisibleAnnotations() {
-        return this.runtimeInvisibleAnnotations;
-    }
-
-    /**
-     * @return the runtime visible extended annotations on this field
-     */
-    public ExtendedAnnotationData[] getRuntimeVisibleTypeAnnotations() {
-        return this.runtimeVisibleTypeAnnotations;
-    }
-
-    /**
-     * @return the runtime invisible extended annotations on this field
-     */
-    public ExtendedAnnotationData[] getRuntimeInvisibleTypeAnnotations() {
-        return this.runtimeInvisibleTypeAnnotations;
     }
 
     /**

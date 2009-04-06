@@ -67,7 +67,6 @@ class InnerClassData  implements RuntimeConstants {
         if ((access & ACC_PUBLIC)   !=0) v.addElement("public");
         if ((access & ACC_FINAL)    !=0) v.addElement("final");
         if ((access & ACC_ABSTRACT) !=0) v.addElement("abstract");
-        if ((access & ACC_STATIC)   !=0) v.addElement("static");
         String[] accflags = new String[v.size()];
         v.copyInto(accflags);
         return accflags;

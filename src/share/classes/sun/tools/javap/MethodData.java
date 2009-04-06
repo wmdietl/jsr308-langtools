@@ -54,19 +54,9 @@ public class MethodData {
     int max_stack,  max_locals;
     boolean isSynthetic=false;
     boolean isDeprecated=false;
-    private JavapEnvironment env; //*
 
-    // For annotation attributes.
-    AnnotationData[] runtimeVisibleAnnotations;
-    AnnotationData[] runtimeInvisibleAnnotations;
-    AnnotationData[][] runtimeVisibleParameterAnnotations;
-    AnnotationData[][] runtimeInvisibleParameterAnnotations;
-    ExtendedAnnotationData[] runtimeVisibleTypeAnnotations;
-    ExtendedAnnotationData[] runtimeInvisibleTypeAnnotations;
-
-    public MethodData(ClassData cls, JavapEnvironment env){
+    public MethodData(ClassData cls){
         this.cls=cls;
-        this.env=env;
     }
 
     /**
@@ -107,39 +97,6 @@ public class MethodData {
                         if (in.readInt()!=0)
                             throw new ClassFormatError("invalid Synthetic attr length");
                         isDeprecated = true;
-                        AttrData attr=new AttrData(cls);
-                        attr.read(attr_name_index);
-                        attrs.addElement(attr);
-                        break readAttr;
-                    }  else if (env.showAnnotations &&
-                                AnnotationData.isAnyAnnotationsAttribute(attr_name)) { //*
-
-                        // XTODO handle generic/array method parameter annotations
-
-                        in.readInt();
-                        if (AnnotationData.isParameterAnnotationsAttribute(attr_name)) {
-                            AnnotationData[][] annotations = AnnotationData.readParameterAnnotations(in);
-                            if (attr_name.equals("RuntimeVisibleParameterAnnotations"))
-                                    this.runtimeVisibleParameterAnnotations = annotations;
-                            else if (attr_name.equals("RuntimeInvisibleParameterAnnotations"))
-                                    this.runtimeInvisibleParameterAnnotations = annotations;
-                        } else if (AnnotationData.isAnnotationsAttribute(attr_name)) {
-                            // Read the annotations in this attribute.
-                            AnnotationData[] annotations = AnnotationData.readAnnotations(in);
-                            // Store them as appropriate.
-                            if (attr_name.equals("RuntimeVisibleAnnotations"))
-                                this.runtimeVisibleAnnotations = annotations;
-                            else if (attr_name.equals("RuntimeInvisibleAnnotations"))
-                                this.runtimeInvisibleAnnotations = annotations;
-                        } else if (AnnotationData.isTypeAnnotationsAttribute(attr_name)) {
-                            ExtendedAnnotationData[] annotations = ExtendedAnnotationData.readExtendedAnnotations(in);
-                            if (attr_name.equals("RuntimeVisibleTypeAnnotations"))
-                                this.runtimeVisibleTypeAnnotations = annotations;
-                            else if (attr_name.equals("RuntimeInvisibleTypeAnnotations"))
-                                this.runtimeInvisibleTypeAnnotations = annotations;
-                        } else {
-                            assert false;
-                        }
                         AttrData attr=new AttrData(cls);
                         attr.read(attr_name_index);
                         attrs.addElement(attr);
@@ -455,49 +412,5 @@ public class MethodData {
      */
     public boolean isDeprecated(){
         return isDeprecated;
-    }
-
-    /**
-     * @return the runtime visible annotations on this method
-     */
-    public AnnotationData[] getRuntimeVisibleAnnotations() {
-        return this.runtimeVisibleAnnotations;
-    }
-
-    /**
-     * @return the runtime invisible annotations on this method
-     */
-    public AnnotationData[] getRuntimeInvisibleAnnotations() {
-        return this.runtimeInvisibleAnnotations;
-    }
-
-    /**
-     * @return the runtime visible annotations on the parameters
-     * of this method
-     */
-    public AnnotationData[][] getRuntimeVisibleParameterAnnotations() {
-        return this.runtimeVisibleParameterAnnotations;
-    }
-
-    /**
-     * @return the runtime invisible annotations on the parameters
-     * of this method
-     */
-    public AnnotationData[][] getRuntimeInvisibleParameterAnnotations() {
-        return this.runtimeInvisibleParameterAnnotations;
-    }
-
-    /**
-     * @return the runtime visible extended annotations on this field
-     */
-    public ExtendedAnnotationData[] getRuntimeVisibleTypeAnnotations() {
-        return this.runtimeVisibleTypeAnnotations;
-    }
-
-    /**
-     * @return the runtime invisible extended annotations on this field
-     */
-    public ExtendedAnnotationData[] getRuntimeInvisibleTypeAnnotations() {
-        return this.runtimeInvisibleTypeAnnotations;
     }
 }
