@@ -1714,6 +1714,7 @@ public class Gen extends JCTree.Visitor {
         for (TypeAnnotations ta : meth.typeAnnotations) {
             if (ta.position.pos == treePos) {
                 ta.position.offset = code.cp;
+                ta.position.lvarOffset[0] = code.cp;
             }
         }
 
@@ -1725,6 +1726,7 @@ public class Gen extends JCTree.Visitor {
         for (TypeAnnotations ta : meth.owner.typeAnnotations) {
             if (ta.position.pos == treePos) {
                 ta.position.offset = code.cp;
+                ta.position.lvarOffset[0] = code.cp;
             }
         }
 
@@ -1735,6 +1737,7 @@ public class Gen extends JCTree.Visitor {
             for (TypeAnnotations ta : s.typeAnnotations) {
                 if (ta.position.pos == treePos) {
                     ta.position.offset = code.cp;
+                    ta.position.lvarOffset[0] = code.cp;
                 }
             }
         }

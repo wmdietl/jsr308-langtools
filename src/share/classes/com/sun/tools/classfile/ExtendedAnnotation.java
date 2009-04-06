@@ -87,10 +87,14 @@ public class ExtendedAnnotation {
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             // FIXME: check for table length
             int table_length = cr.readUnsignedShort();
-            assert table_length == 1;
-            position.offset = cr.readUnsignedShort();
-            position.length = cr.readUnsignedShort();
-            position.index = cr.readUnsignedShort();
+            position.lvarOffset = new int[table_length];
+            position.lvarLength = new int[table_length];
+            position.lvarIndex = new int[table_length];
+            for (int i = 0; i < table_length; ++i) {
+                position.lvarOffset[i] = cr.readUnsignedShort();
+                position.lvarLength[i] = cr.readUnsignedShort();
+                position.lvarIndex[i] = cr.readUnsignedShort();
+            }
             break;
          // method receiver
         case METHOD_RECEIVER:
@@ -187,11 +191,11 @@ public class ExtendedAnnotation {
          // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            // FIXME: check for table length
             n += 2; // table_length;
-            n += 2; // offset
-            n += 2; // length;
-            n += 2; // index
+            int table_length = pos.lvarOffset.length;
+            n += 2 * table_length; // offset
+            n += 2 * table_length; // length;
+            n += 2 * table_length; // index
             break;
          // method receiver
         case METHOD_RECEIVER:
@@ -282,8 +286,9 @@ public class ExtendedAnnotation {
         public int offset = -1;
 
         // For locals.
-        public int length = -1;
-        public int index = -1;
+        public int[] lvarOffset = new int[] { -1 };
+        public int[] lvarLength = new int[] { -1 };
+        public int[] lvarIndex = new int[] { -1 };
 
         // For type parameter bound
         public int bound_index = -1;
@@ -321,13 +326,17 @@ public class ExtendedAnnotation {
              // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                // FIXME: check for table length
-                sb.append(", start_pc = ");
-                sb.append(offset);
-                sb.append(", length = ");
-                sb.append(length);
-                sb.append(", index = ");
-                sb.append(index);
+                sb.append(", {");
+                for (int i = 0; i < lvarOffset.length; ++i) {
+                    if (i != 0) sb.append("; ");
+                    sb.append(", start_pc = ");
+                    sb.append(lvarOffset[i]);
+                    sb.append(", length = ");
+                    sb.append(lvarLength[i]);
+                    sb.append(", index = ");
+                    sb.append(lvarIndex[i]);
+                }
+                sb.append("}");
                 break;
              // method receiver
             case METHOD_RECEIVER:

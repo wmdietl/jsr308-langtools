@@ -1225,13 +1225,16 @@ public class ClassReader extends ClassFile implements Completer {
          // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            // FIXME: check for table length
             int table_length = nextChar();
-            assert table_length == 1;
-            position.offset = nextChar();
-            position.length = nextChar();
-            position.index = nextChar();
-            break;
+            position.lvarOffset = new int[table_length];
+            position.lvarLength = new int[table_length];
+            position.lvarIndex = new int[table_length];
+
+            for (int i = 0; i < table_length; ++i) {
+                position.lvarOffset[i] = nextChar();
+                position.lvarLength[i] = nextChar();
+                position.lvarIndex[i] = nextChar();
+            }
          // method receiver
         case METHOD_RECEIVER:
             // Do nothing

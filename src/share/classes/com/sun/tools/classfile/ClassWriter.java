@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -726,11 +727,14 @@ public class ClassWriter {
              // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                // FIXME: check for real table length; currently hard-coded to 1
-                out.writeShort(1);  // for table length
-                out.writeShort(p.offset);
-                out.writeShort(p.length);
-                out.writeShort(p.index);
+                int table_length = p.lvarOffset.length;
+                out.writeShort(table_length);
+                for (int i = 0; i < table_length; ++i) {
+                    out.writeShort(1);  // for table length
+                    out.writeShort(p.lvarOffset[i]);
+                    out.writeShort(p.lvarLength[i]);
+                    out.writeShort(p.lvarIndex[i]);
+                }
                 break;
              // method receiver
             case METHOD_RECEIVER:

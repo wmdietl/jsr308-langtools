@@ -1378,7 +1378,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     public static class JCNewArray extends JCExpression implements NewArrayTree {
         public JCExpression elemtype;
         public List<JCExpression> dims;
-        // FIXME: this is a quick fix... probably not the ideal way to do it
         public List<JCAnnotation> annotations;
         public TypeAnnotations typeAnnotations;
         public List<List<JCAnnotation>> dimAnnotations;

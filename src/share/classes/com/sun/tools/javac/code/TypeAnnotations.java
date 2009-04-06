@@ -19,9 +19,10 @@ public class TypeAnnotations {
         // For typecasts, type tests, new (and locals, as start_pc).
         public int offset = -1;
 
-        // For locals.
-        public int length = -1;
-        public int index = -1;
+        // For locals. arrays same length
+        public int[] lvarOffset = new int[] { -1 };
+        public int[] lvarLength = new int[] { -1 };
+        public int[] lvarIndex = new int[] { -1 };
 
         // For type parameter bound
         public int bound_index = -1;
@@ -59,13 +60,17 @@ public class TypeAnnotations {
              // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                // FIXME: check for table length
-                sb.append(", start_pc = ");
-                sb.append(offset);
-                sb.append(", length = ");
-                sb.append(length);
-                sb.append(", index = ");
-                sb.append(index);
+                sb.append(", {");
+                for (int i = 0; i < lvarOffset.length; ++i) {
+                    if (i != 0) sb.append("; ");
+                    sb.append(", start_pc = ");
+                    sb.append(lvarOffset[i]);
+                    sb.append(", length = ");
+                    sb.append(lvarLength[i]);
+                    sb.append(", index = ");
+                    sb.append(lvarIndex[i]);
+                }
+                sb.append("}");
                 break;
              // method receiver
             case METHOD_RECEIVER:

@@ -1246,7 +1246,7 @@ public class Flow extends TreeScanner {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
-        // FIXME: crashes if annotations are scanned
+        // annotations don't get scanned
         tree.underlyingType.accept(this);
     }
 

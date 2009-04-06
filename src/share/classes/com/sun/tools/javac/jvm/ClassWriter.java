@@ -934,11 +934,12 @@ public class ClassWriter extends ClassFile {
          // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            // FIXME: check for real table length; currently hard-coded to 1
-            databuf.appendChar(1);  // for table length
-            databuf.appendChar(p.offset);
-            databuf.appendChar(p.length);
-            databuf.appendChar(p.index);
+            databuf.appendChar(p.lvarOffset.length);  // for table length
+            for (int i = 0; i < p.lvarOffset.length; ++i) {
+                databuf.appendChar(p.lvarOffset[i]);
+                databuf.appendChar(p.lvarLength[i]);
+                databuf.appendChar(p.lvarIndex[i]);
+            }
             break;
          // method receiver
         case METHOD_RECEIVER:

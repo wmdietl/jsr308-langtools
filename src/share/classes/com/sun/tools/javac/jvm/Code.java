@@ -1913,9 +1913,9 @@ public class Code {
         for (TypeAnnotations ta : lv.sym.typeAnnotations) {
             TypeAnnotations.Position p = ta.position;
             while (p != null) {
-                p.offset = (int)lv.start_pc;
-                p.length = (int)lv.length;
-                p.index = (int)lv.reg;
+                p.lvarOffset[0] = (int)lv.start_pc;
+                p.lvarLength[0] = (int)lv.length;
+                p.lvarIndex[0] = (int)lv.reg;
                 p = p.wildcard_position;
             }
         }
