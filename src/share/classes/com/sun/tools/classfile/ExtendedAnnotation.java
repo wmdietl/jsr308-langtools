@@ -26,10 +26,12 @@
 package com.sun.tools.classfile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
-import com.sun.tools.javac.code.TypeAnnotations;
-import com.sun.tools.javac.comp.TargetType;
-import com.sun.tools.javac.util.ListBuffer;
+import static com.sun.tools.classfile.ExtendedAnnotation.TargetAttribute.*;
 
 /**
  * See JSR 308 specification, section 4.1
@@ -46,8 +48,7 @@ public class ExtendedAnnotation {
     }
 
     public ExtendedAnnotation(ConstantPool constant_pool,
-            Annotation annotation,
-            TypeAnnotations.Position position) {
+            Annotation annotation, Position position) {
         this.annotation = annotation;
         this.position = position;
     }
@@ -59,11 +60,11 @@ public class ExtendedAnnotation {
     }
 
     public final Annotation annotation;
-    public final TypeAnnotations.Position position;
+    public final Position position;
 
-    private static TypeAnnotations.Position read_position(ClassReader cr) throws IOException {
+    private static Position read_position(ClassReader cr) throws IOException {
         // Copied from ClassReader
-        TypeAnnotations.Position position = new TypeAnnotations.Position();
+        Position position = new Position();
         int tag = (byte)cr.readUnsignedByte();  // cast to introduce signess
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
@@ -160,15 +161,15 @@ public class ExtendedAnnotation {
 
         if (type.hasLocation()) {
             int len = cr.readUnsignedShort();
-            ListBuffer<Integer> loc = ListBuffer.lb();
+            List<Integer> loc = new ArrayList<Integer>(len);
             for (int i = 0; i < len; i++)
-                loc = loc.append(cr.readUnsignedByte());
-            position.location = loc.toList();
+                loc.add(cr.readUnsignedByte());
+            position.location = loc;
         }
         return position;
     }
 
-    private static int position_length(TypeAnnotations.Position pos) {
+    private static int position_length(Position pos) {
         int n = 0;
         n += 1; // target_type
         switch (pos.type) {
@@ -264,5 +265,371 @@ public class ExtendedAnnotation {
         }
 
         return n;
+    }
+
+    // Code duplicated from com.sun.tools.javac.code.TypeAnnotations.Position
+    public static class Position {
+
+        public TargetType type = TargetType.UNKNOWN;
+
+        // For generic/array types.
+        public List<Integer> location = new ArrayList<Integer>();
+
+        // Tree position.
+        public int pos = -1;
+
+        // For typecasts, type tests, new (and locals, as start_pc).
+        public int offset = -1;
+
+        // For locals.
+        public int length = -1;
+        public int index = -1;
+
+        // For type parameter bound
+        public int bound_index = -1;
+
+        // For type parameter and method parameter
+        public int parameter_index = -1;
+
+        // For class extends, implements, and throws classes
+        public int type_index = -2;
+
+        // For wildcards
+        public Position wildcard_position = null;
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append('[');
+            sb.append(type);
+
+            switch (type) {
+            // type case
+            case TYPECAST:
+            case TYPECAST_GENERIC_OR_ARRAY:
+            // object creation
+            case INSTANCEOF:
+            case INSTANCEOF_GENERIC_OR_ARRAY:
+            // new expression
+            case NEW:
+            case NEW_GENERIC_OR_ARRAY:
+            case NEW_TYPE_ARGUMENT:
+            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+                sb.append(", offset = ");
+                sb.append(offset);
+                break;
+             // local variable
+            case LOCAL_VARIABLE:
+            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+                // FIXME: check for table length
+                sb.append(", start_pc = ");
+                sb.append(offset);
+                sb.append(", length = ");
+                sb.append(length);
+                sb.append(", index = ");
+                sb.append(index);
+                break;
+             // method receiver
+            case METHOD_RECEIVER:
+                // Do nothing
+                break;
+            // type parameters
+            case CLASS_TYPE_PARAMETER:
+            case METHOD_TYPE_PARAMETER:
+                sb.append(", param_index = ");
+                sb.append(parameter_index);
+                break;
+            // type parameters bound
+            case CLASS_TYPE_PARAMETER_BOUND:
+            case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_PARAMETER_BOUND:
+            case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+                sb.append(", param_index = ");
+                sb.append(parameter_index);
+                sb.append(", bound_index = ");
+                sb.append(bound_index);
+                break;
+             // wildcard
+            case WILDCARD_BOUND:
+            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+                sb.append(", wild_card = ");
+                sb.append(wildcard_position);
+                break;
+             // Class extends and implements clauses
+            case CLASS_EXTENDS:
+            case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+                sb.append(", type_index = ");
+                sb.append(type_index);
+                break;
+            // throws
+            case THROWS:
+                sb.append(", type_index = ");
+                sb.append(type_index);
+                break;
+            case CLASS_LITERAL:
+                sb.append(", offset = ");
+                sb.append(offset);
+                break;
+            // method parameter: not specified
+            case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+                sb.append(", param_index = ");
+                sb.append(parameter_index);
+                break;
+            // method type argument: wasn't specified
+            case METHOD_TYPE_ARGUMENT:
+            case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+                sb.append(", offset = ");
+                sb.append(offset);
+                sb.append(", type_index = ");
+                sb.append(type_index);
+                break;
+            // We don't need to worry abut these
+            case METHOD_RETURN_GENERIC_OR_ARRAY:
+            case FIELD_GENERIC_OR_ARRAY:
+                break;
+            case UNKNOWN:
+                break;
+//            case METHOD_PARAMETER:
+//            case METHOD_RETURN:
+//            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+//            case CLASS_LITERAL_GENERIC_OR_ARRAY:
+//            case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
+//            case FIELD:
+//            case THROWS_GENERIC_OR_ARRAY:
+//                sb.append(", *unusable*");
+//                break;
+            default:
+//                throw new AssertionError("unknown type: " + type);
+            }
+
+            // Append location data for generics/arrays.
+            if (type.hasLocation()) {
+                sb.append(", location = (");
+                sb.append(location);
+                sb.append(")");
+            }
+
+            sb.append(", pos = ");
+            sb.append(pos);
+
+            sb.append(']');
+            return sb.toString();
+        }
+    }
+
+    // Code duplicated from com.sun.tools.javac.comp.TargetType
+    public enum TargetType {
+
+        /** For annotations on typecasts. */
+        TYPECAST(0x00, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on a type argument or nested array of a typecast. */
+        TYPECAST_GENERIC_OR_ARRAY(0x01, EnumSet.of(HasLocation)),
+
+        /** For annotations on type tests. */
+        INSTANCEOF(0x02, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on a type argument or nested array of a type test. */
+        INSTANCEOF_GENERIC_OR_ARRAY(0x03, EnumSet.of(HasLocation)),
+
+        /** For annotations on object creation expressions. */
+        NEW(0x04, EnumSet.noneOf(TargetAttribute.class)),
+
+        /**
+         * For annotations on a type argument or nested array of an object creation
+         * expression.
+         */
+        NEW_GENERIC_OR_ARRAY(0x05, EnumSet.of(HasLocation)),
+
+
+        /** For annotations on the method receiver. */
+        METHOD_RECEIVER(0x06, EnumSet.noneOf(TargetAttribute.class)),
+
+        /**
+         * For annotations on a type argument or nested array of the method
+         * receiver.
+         *
+         * Deprecated because such annotations are not allowed (yet), but included
+         * so that the numbering works out.
+         */
+        //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, EnumSet.of(HasLocation)),
+
+        /** For annotations on local variables. */
+        LOCAL_VARIABLE(0x08, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on a type argument or nested array of a local. */
+        LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, EnumSet.of(HasLocation)),
+
+        /**
+         * For annotations on a method return type.
+         *
+         * Deprecated because such annotations are ordinary (not extended), but
+         * included so that the numbering works out.
+         */
+        //@Deprecated METHOD_RETURN(0x0A, EnumSet.noneOf(TargetAttribute.class)),
+
+        /**
+         * For annotations on a type argument or nested array of a method return
+         * type.
+         */
+        METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, EnumSet.of(HasLocation)),
+
+        /**
+         * For annotations on a method parameter.
+         *
+         * Deprecated because such annotations are ordinary (not extended), but
+         * included so that the numbering works out.
+         */
+        //@Deprecated METHOD_PARAMETER(0x0C, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on a type argument or nested array of a method parameter. */
+        METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, EnumSet.of(HasLocation)),
+
+        /**
+         * For annotations on a field.
+         *
+         * Deprecated because such annotations are ordinary (not extended), but
+         * included so that the numbering works out.
+         */
+        //@Deprecated FIELD(0x0E, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on a type argument or nested array of a field. */
+        FIELD_GENERIC_OR_ARRAY(0x0F, EnumSet.of(HasLocation)),
+
+        /** For annotations on a bound of a type parameter of a class. */
+        CLASS_TYPE_PARAMETER_BOUND(0x10, EnumSet.of(HasBound, HasParameter)),
+
+        /**
+         * For annotations on a type argument or nested array of a bound of a type
+         * parameter of a class.
+         */
+        CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x11, EnumSet.of(HasBound, HasLocation, HasParameter)),
+
+        /** For annotations on a bound of a type parameter of a method. */
+        METHOD_TYPE_PARAMETER_BOUND(0x12, EnumSet.of(HasBound, HasParameter)),
+
+        /**
+         * For annotations on a type argument or nested array of a bound of a type
+         * parameter of a method.
+         */
+        METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x13, EnumSet.of(HasBound, HasLocation, HasParameter)),
+
+        /** For annotations on the type of an "extends" or "implements" clause. */
+        CLASS_EXTENDS(0x14, EnumSet.noneOf(TargetAttribute.class)),
+
+        /** For annotations on the inner type of an "extends" or "implements" clause. */
+        CLASS_EXTENDS_GENERIC_OR_ARRAY(0x15, EnumSet.of(HasLocation)),
+
+        /** For annotations on a throws clause in a method declaration. */
+        THROWS(0x16, EnumSet.noneOf(TargetAttribute.class)),
+        //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, EnumSet.of(HasLocation)),
+
+        /** For annotations in type arguments of object creation expressions. */
+        NEW_TYPE_ARGUMENT(0x18, EnumSet.noneOf(TargetAttribute.class)),
+        NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, EnumSet.of(HasLocation)),
+
+        METHOD_TYPE_ARGUMENT(0x1A, EnumSet.noneOf(TargetAttribute.class)),
+        METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x1B, EnumSet.of(HasLocation)),
+
+        WILDCARD_BOUND(0x1C, EnumSet.of(HasBound)),
+        WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, EnumSet.of(HasBound, HasLocation)),
+
+        CLASS_LITERAL(0x1E, EnumSet.noneOf(TargetAttribute.class)),
+        CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
+
+        METHOD_TYPE_PARAMETER(0x20, EnumSet.of(HasParameter)),
+        //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, EnumSet.of(HasLocation, HasParameter)),
+
+        CLASS_TYPE_PARAMETER(0x22, EnumSet.of(HasParameter)),
+        //@Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, EnumSet.of(HasLocation, HasParameter)),
+
+        /** For annotations with an unknown target. */
+        UNKNOWN(-1, EnumSet.noneOf(TargetAttribute.class));
+
+        static final int MAXIMUM_TARGET_TYPE_VALUE = 0x22;
+
+        private final int targetTypeValue;
+        private Set<TargetAttribute> flags;
+
+        TargetType(int targetTypeValue, Set<TargetAttribute> flags) {
+            assert targetTypeValue >= Byte.MIN_VALUE;
+            assert targetTypeValue <= Byte.MAX_VALUE;
+            this.targetTypeValue = (byte)targetTypeValue;
+            this.flags = flags;
+        }
+
+        /**
+         * Returns whether or not this TargetType represents an annotation whose
+         * target is an inner type of a generic or array type.
+         *
+         * @return true if this TargetType represents an annotation on an inner
+         *         type, false otherwise
+         */
+        public boolean hasLocation() {
+            return flags.contains(HasLocation);
+        }
+
+        public TargetType getGenericComplement() {
+            if (hasLocation())
+                return this;
+            else
+                return fromTargetTypeValue(targetTypeValue() + 1);
+        }
+
+        /**
+         * Returns whether or not this TargetType represents an annotation whose
+         * target has a parameter index.
+         *
+         * @return true if this TargetType has a parameter index,
+         *         false otherwise
+         */
+        public boolean hasParameter() {
+            return flags.contains(HasParameter);
+        }
+
+        /**
+         * Returns whether or not this TargetType represents an annotation whose
+         * target is a type parameter bound.
+         *
+         * @return true if this TargetType represents an type parameter bound
+         *         annotation, false otherwise
+         */
+        public boolean hasBound() {
+            return flags.contains(HasBound);
+        }
+
+        public int targetTypeValue() {
+            return this.targetTypeValue;
+        }
+
+        private static TargetType[] targets = null;
+
+        private static TargetType[] buildTargets() {
+            TargetType[] targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
+            TargetType[] alltargets = values();
+            for (TargetType target : alltargets)
+                if (target.targetTypeValue >= 0)
+                    targets[target.targetTypeValue] = target;
+            for (int i = 0; i <= MAXIMUM_TARGET_TYPE_VALUE; ++i)
+                if (targets[i] == null)
+                    targets[i] = UNKNOWN;
+            return targets;
+        }
+
+        public static TargetType fromTargetTypeValue(int tag) {
+            if (targets == null)
+                targets = buildTargets();
+
+            if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+                return UNKNOWN;
+            // we can optimize the algorithm a bit: binary search?
+            if (tag < 0 || tag >= targets.length)
+                throw new IllegalArgumentException("Unknown TargetType: " + tag);
+            return targets[tag];
+        }
+    }
+
+    static enum TargetAttribute {
+        HasLocation, HasParameter, HasBound;
     }
 }

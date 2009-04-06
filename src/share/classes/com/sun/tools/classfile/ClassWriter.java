@@ -32,8 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.sun.tools.javac.code.TypeAnnotations;
-
 import static com.sun.tools.classfile.Annotation.*;
 import static com.sun.tools.classfile.ConstantPool.*;
 import static com.sun.tools.classfile.StackMapTable_attribute.*;
@@ -709,7 +707,7 @@ public class ClassWriter {
             return null;
         }
 
-        private void write(TypeAnnotations.Position p, ClassOutputStream out) {
+        private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
             // type case
