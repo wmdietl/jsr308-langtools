@@ -65,6 +65,7 @@ public class Scanner implements Lexer {
         final Names names;
         final Source source;
         final Keywords keywords;
+        final boolean annotationsincomments;
         final boolean spacesincomments;
 
         /** Create a new scanner factory. */
@@ -74,7 +75,8 @@ public class Scanner implements Lexer {
             this.names = Names.instance(context);
             this.source = Source.instance(context);
             this.keywords = Keywords.instance(context);
-            this.spacesincomments = Options.instance(context).get("spacesincomments") != null;
+            this.annotationsincomments = Options.instance(context).get("TAannotationsincomments") != null;
+            this.spacesincomments = Options.instance(context).get("TAspacesincomments") != null;
         }
 
         public Scanner newScanner(CharSequence input) {
@@ -135,6 +137,7 @@ public class Scanner implements Lexer {
     protected boolean magicAt = false;
     protected boolean magicID = false;
     protected boolean magic = false;
+    protected boolean annotationsincomments;
     protected boolean spacesincomments;
 
     /** A character buffer for literals.
@@ -174,6 +177,7 @@ public class Scanner implements Lexer {
         this.names = fac.names;
         this.keywords = fac.keywords;
         this.allowHexFloats = fac.source.allowHexFloats();
+        this.annotationsincomments = fac.annotationsincomments;
         this.spacesincomments = fac.spacesincomments;
     }
 
@@ -889,7 +893,7 @@ public class Scanner implements Lexer {
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
                             if (magicAt) return;
-                        } else if (bp < buflen && ch == '@'
+                        } else if (annotationsincomments && bp < buflen && ch == '@'
                             && (spacesincomments || isCommentWithoutSpaces())) {
                             scanChar();
                             while (Character.isWhitespace(ch))
