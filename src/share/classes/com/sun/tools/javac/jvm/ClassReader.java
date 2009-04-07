@@ -1235,6 +1235,7 @@ public class ClassReader extends ClassFile implements Completer {
                 position.lvarLength[i] = nextChar();
                 position.lvarIndex[i] = nextChar();
             }
+            break;
          // method receiver
         case METHOD_RECEIVER:
             // Do nothing
