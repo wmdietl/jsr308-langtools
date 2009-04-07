@@ -25,7 +25,7 @@
  * @test
  * @summary test incomplete array declaration
  * @author Mahmood Ali
- * @compile/fail IncompleteArray.java
+ * @compile/fail/ref=IncompleteArray.out -XDrawDiagnostics IncompleteArray.java
  */
 class IncompleteArray {
   int @A [] @A var;

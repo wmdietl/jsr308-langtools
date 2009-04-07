@@ -25,7 +25,7 @@
  * @test
  * @summary test old array syntax
  * @author Mahmood Ali
- * @compile/fail OldArray.java
+ * @compile/fail/ref=OldArray.out -XDrawDiagnostics OldArray.java
  */
 class OldArray {
   String [@A]  s() { return null; }

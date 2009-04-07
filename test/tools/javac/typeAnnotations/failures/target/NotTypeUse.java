@@ -25,7 +25,7 @@
  * @test
  * @summary test invalid location of TypeUse
  * @author Mahmood Ali
- * @compile/fail NotTypeUse.java
+ * @compile/fail/ref=NotTypeUse.out -XDrawDiagnostics NotTypeUse.java
  */
 
 import java.lang.annotation.Target;

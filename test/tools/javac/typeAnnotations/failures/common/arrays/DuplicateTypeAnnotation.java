@@ -25,7 +25,7 @@
  * @test
  * @summary check for duplicate annotations
  * @author Mahmood Ali
- * @compile/fail DuplicateTypeAnnotation.java
+ * @compile/fail/ref=DuplicateTypeAnnotation.out -XDrawDiagnostics DuplicateTypeAnnotation.java
  */
 
 class DuplicateTypeAnnotation {

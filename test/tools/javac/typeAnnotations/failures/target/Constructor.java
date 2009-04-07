@@ -25,7 +25,7 @@
  * @test
  * @summary test invalid location of TypeUse
  * @author Mahmood Ali
- * @compile/fail Constructor.java
+ * @compile/fail/ref=Constructor.out -XDrawDiagnostics Constructor.java
  */
 
 import java.lang.annotation.Target;

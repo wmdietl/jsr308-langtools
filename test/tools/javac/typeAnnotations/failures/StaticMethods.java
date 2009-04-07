@@ -25,7 +25,7 @@
  * @test
  * @summary static methods don't have receivers
  * @author Mahmood Ali
- * @compile/fail StaticMethods.java
+ * @compile/fail/ref=StaticMethods.out -XDrawDiagnostics StaticMethods.java
  */
 class StaticMethods {
   static void main() @A { }

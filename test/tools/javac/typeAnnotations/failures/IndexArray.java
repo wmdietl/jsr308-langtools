@@ -25,7 +25,7 @@
  * @test
  * @summary test indexing of an array
  * @author Mahmood Ali
- * @compile/fail IndexArray.java
+ * @compile/fail/ref=IndexArray.out -XDrawDiagnostics IndexArray.java
  */
 class IndexArray {
   int[] var;

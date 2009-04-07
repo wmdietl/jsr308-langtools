@@ -25,7 +25,7 @@
  * @test
  * @summary check for duplicate annotation values
  * @author Mahmood Ali
- * @compile/fail DuplicateAnnotationValue.java
+ * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics DuplicateAnnotationValue.java
  */
 class DuplicateAnnotationValue {
   void test() {

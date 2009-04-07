@@ -25,7 +25,7 @@
  * @test
  * @summary check for duplicate annotation values in receiver
  * @author Mahmood Ali
- * @compile/fail DuplicateAnnotationValue.java
+ * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics DuplicateAnnotationValue.java
  */
 class DuplicateAnnotationValue {
   void test() @A(value = 2, value = 1) { }

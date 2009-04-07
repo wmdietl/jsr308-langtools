@@ -25,7 +25,7 @@
  * @test
  * @summary static field access isn't a valid location
  * @author Mahmood Ali
- * @compile/fail StaticFields.java
+ * @compile/fail/ref=StaticFields.out -XDrawDiagnostics StaticFields.java
  */
 class C {
   int f;

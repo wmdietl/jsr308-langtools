@@ -25,7 +25,7 @@
  * @test
  * @summary check that A is accessible in the class type parameters
  * @author Mahmood Ali
- * @compile/fail Scopes.java
+ * @compile/fail/ref=Scopes.out -XDrawDiagnostics Scopes.java
  */
 class Scopes<T extends @A Object> {
   @interface A { };

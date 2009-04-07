@@ -25,7 +25,7 @@
  * @test
  * @summary check for duplicate annotation values for type parameter
  * @author Mahmood Ali
- * @compile/fail DuplicateAnnotationValue.java
+ * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics DuplicateAnnotationValue.java
  */
 class DuplicateAnnotationValue<@A(value = 2, value = 1) K> {
 }

@@ -25,7 +25,7 @@
  * @test
  * @summary test incomplete vararg declaration
  * @author Mahmood Ali
- * @compile/fail IncompleteVararg.java
+ * @compile/fail/ref=IncompleteVararg.out -XDrawDiagnostics IncompleteVararg.java
  */
 class IncompleteArray {
   // the last variable may be vararg
