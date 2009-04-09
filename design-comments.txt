@@ -118,7 +118,7 @@ direct descendants.
 TransTypes.TypeAnnotationsLift lifts the annotations of the annotated trees
 to the closest enclosing class/method/field symbol.
 
-The type annotations are properly attributed in MemberEnter.TypeAnnotate
+The type annotations are properly attributed/resolved in MemberEnter.TypeAnnotate
 (which is called through MemberEnter.complete).  The annotations are
 attributed semi-lazily just like other annotations.
 
