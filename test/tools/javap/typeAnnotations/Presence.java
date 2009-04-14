@@ -128,7 +128,7 @@ public class Presence {
 
         out.println("  <@A T extends @A List<@A String>>");
         out.println("  Map<@A String, @A List<@A String>>");
-        out.println("  method(List<@A String> @A [] param1, String @A [] @A [] param2) @A");
+        out.println("  method(List<@A String> @A [] param1, String @A [] @A ... param2) @A");
         out.println("  throws @A Exception {");
         out.println("    @A String lc1 = null;");
         out.println("    @A List<@A String> lc2 = null;");
@@ -143,6 +143,7 @@ public class Presence {
         out.println("    Object lc10 = @A int.class;");
         out.println("    return null;");
         out.println("  }");
+        out.println("  void vararg1(String @A ... t) { } ");
         out.println("}");
         out.close();
         return f;
@@ -157,7 +158,7 @@ public class Presence {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 38;
+        int expected_visibles = 0, expected_invisibles = 39;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
