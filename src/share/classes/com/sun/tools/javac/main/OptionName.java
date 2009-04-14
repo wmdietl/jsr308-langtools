@@ -57,7 +57,6 @@ public enum OptionName {
     DJAVA_ENDORSED_DIRS("-Djava.endorsed.dirs="),
     PROC("-proc:"),
     PROCESSOR("-processor"),
-    TYPEPROCESSOR("-typeprocessor"),
     PROCESSORPATH("-processorpath"),
     D("-d"),
     S("-s"),

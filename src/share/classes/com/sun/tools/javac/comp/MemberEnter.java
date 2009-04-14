@@ -99,9 +99,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         types = Types.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         target = Target.instance(context);
-        skipAnnotations =
-            Options.instance(context).get("skipAnnotations") != null;
-        debugJSR308 = Options.instance(context).get("TA:attr") != null;
+        Options options = Options.instance(context);
+        skipAnnotations = options.get("skipAnnotations") != null;
+        debugJSR308 = options.get("TA:attr") != null;
     }
 
     /** Switch: debug output for JSR 308-related operations.
@@ -1031,7 +1031,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                    tree.typeAnnotations.annotations = enterAnnotations(annotations);
+                        tree.typeAnnotations.annotations = enterAnnotations(annotations);
                     } finally {
                         log.useSource(prev);
                     }

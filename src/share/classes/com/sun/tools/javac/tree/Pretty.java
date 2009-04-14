@@ -859,7 +859,8 @@ public class Pretty extends JCTree.Visitor {
                     JCAnnotatedType atype = (JCAnnotatedType) elem;
                     if (atype.underlyingType instanceof JCArrayTypeTree)
                         printBaseElementType((JCArrayTypeTree) atype.underlyingType);
-                    else printExpr(atype.underlyingType);
+                    else
+                        printExpr(atype.underlyingType);
                 } else
                     printExpr(elem);
                 int i = 0;
@@ -1147,7 +1148,8 @@ public class Pretty extends JCTree.Visitor {
             JCAnnotatedType atype = (JCAnnotatedType) elem;
             if (atype.underlyingType instanceof JCArrayTypeTree)
                 printBaseElementType((JCArrayTypeTree) atype.underlyingType);
-            else printExpr(atype.underlyingType);
+            else
+                printExpr(atype.underlyingType);
         } else
             printExpr(elem);
     }

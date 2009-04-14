@@ -169,11 +169,9 @@ public class TreeMaker implements JCTree.Factory {
                                List<JCExpression> thrown,
                                JCBlock body,
                                JCExpression defaultValue) {
-        JCMethodDecl tree = MethodDef(
+        return MethodDef(
                 mods, name, restype, typarams, params,
                 null, thrown, body, defaultValue);
-        tree.pos = pos;
-        return tree;
     }
 
     public JCMethodDecl MethodDef(JCModifiers mods,

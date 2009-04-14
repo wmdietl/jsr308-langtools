@@ -56,10 +56,8 @@ public class TransTypes extends TreeTranslator {
     /** Get the instance for this context. */
     public static TransTypes instance(Context context) {
         TransTypes instance = context.get(transTypesKey);
-        Options options = Options.instance(context);
         if (instance == null)
             instance = new TransTypes(context);
-        instance.debugJSR308 = options.get("TA:trans") != null;
         return instance;
     }
 
@@ -94,6 +92,7 @@ public class TransTypes extends TreeTranslator {
         types = Types.instance(context);
         make = TreeMaker.instance(context);
         resolve = Resolve.instance(context);
+        debugJSR308 = Options.instance(context).get("TA:trans") != null;
     }
 
     /** A hashtable mapping bridge methods to the methods they override after
@@ -822,13 +821,14 @@ public class TransTypes extends TreeTranslator {
     private List<TypeAnnotations> collectErasedAnnotations(List<? extends
             JCTree> trees) {
         final ListBuffer<TypeAnnotations> ta = ListBuffer.lb();
-        new TreeScanner() {
+        TreeScanner scanner = new TreeScanner() {
             public void visitAnnotatedType(JCAnnotatedType tree) {
                 if (tree.typeAnnotations != null)
                     ta.append(tree.typeAnnotations);
                 super.visitAnnotatedType(tree);
             }
-        }.scan(trees);
+        };
+        scanner.scan(trees);
 //        if (!ta.isEmpty())
 //            System.out.println("collect: " + ta.toList());
         return ta.toList();
@@ -883,7 +883,8 @@ public class TransTypes extends TreeTranslator {
                     } else if (((JCClassDecl)context).typarams.contains(tree)) {
                         p.type = TargetType.CLASS_TYPE_PARAMETER;
                         p.parameter_index = ((JCClassDecl)context).typarams.indexOf(tree);
-                    } else throw new AssertionError();
+                    } else
+                        throw new AssertionError();
                     return p;
 
                 case METHOD: {
@@ -899,7 +900,8 @@ public class TransTypes extends TreeTranslator {
                     } else if (contextMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
                         p.parameter_index = contextMethod.typarams.indexOf(tree);
-                    } else throw new AssertionError();
+                    } else
+                        throw new AssertionError();
                     return p;
                 }
                 case MEMBER_SELECT: {
@@ -913,7 +915,8 @@ public class TransTypes extends TreeTranslator {
                         } else if (fieldContext.selected instanceof JCArrayTypeTree) {
                             p.pos = fieldContext.selected.pos;
                         }
-                    } else throw new AssertionError();
+                    } else
+                        throw new AssertionError();
                     return p;
                 }
                 case PARAMETERIZED_TYPE: {
@@ -923,7 +926,8 @@ public class TransTypes extends TreeTranslator {
                     else if (((JCTypeApply)context).arguments.contains(tree))
                         p.location = p.location.prepend(
                                 ((JCTypeApply)context).arguments.indexOf(tree));
-                    else throw new AssertionError();
+                    else
+                        throw new AssertionError();
 
                     List<JCTree> newPath = path.tail;
                     return resolveContext(newPath.head, newPath.tail.head, newPath, p);
@@ -948,7 +952,8 @@ public class TransTypes extends TreeTranslator {
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
                         p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
-                    } else throw new AssertionError();
+                    } else
+                        throw new AssertionError();
                     p.pos = context.pos;
                     return p;
 
@@ -1168,7 +1173,8 @@ public class TransTypes extends TreeTranslator {
                     System.out.println("gen: " + ta + " -> " + clazz.sym);
                 clazz.sym.typeAnnotations =
                     clazz.sym.typeAnnotations.appendList(ta);
-            } else throw new AssertionError();
+            } else
+                throw new AssertionError();
             // We also add typeannotations to local variables to ease
             // finding them later in Gen
             if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {

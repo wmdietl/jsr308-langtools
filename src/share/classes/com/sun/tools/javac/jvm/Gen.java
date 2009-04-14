@@ -1672,7 +1672,7 @@ public class Gen extends JCTree.Visitor {
  *************************************************************************/
 
     public void visitApply(JCMethodInvocation tree) {
-        setCodeCP(tree.pos);
+        setTypeAnnotationPositions(tree.pos);
         // Generate code for method.
         Item m = genExpr(tree.meth, methodType);
         // Generate code for all arguments, where the expected types are
@@ -1708,7 +1708,7 @@ public class Gen extends JCTree.Visitor {
         result = items.makeStackItem(pt);
     }
 
-    private void setCodeCP(int treePos) {
+    private void setTypeAnnotationPositions(int treePos) {
         MethodSymbol meth = code.meth;
 
         for (TypeAnnotations ta : meth.typeAnnotations) {
@@ -1722,7 +1722,6 @@ public class Gen extends JCTree.Visitor {
                 && code.meth.getKind() != ElementKind.STATIC_INIT)
             return;
 
-        // TODO: Optimize this
         for (TypeAnnotations ta : meth.owner.typeAnnotations) {
             if (ta.position.pos == treePos) {
                 ta.position.offset = code.cp;
@@ -1747,7 +1746,7 @@ public class Gen extends JCTree.Visitor {
         // Enclosing instances or anonymous classes should have been eliminated
         // by now.
         assert tree.encl == null && tree.def == null;
-        setCodeCP(tree.pos);
+        setTypeAnnotationPositions(tree.pos);
 
         code.emitop2(new_, makeRef(tree.pos(), tree.type));
         code.emitop0(dup);
@@ -1762,7 +1761,7 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
-        setCodeCP(tree.pos);
+        setTypeAnnotationPositions(tree.pos);
 
         if (tree.elems != null) {
             Type elemtype = types.elemtype(tree.type);
@@ -2092,7 +2091,7 @@ public class Gen extends JCTree.Visitor {
         }
 
     public void visitTypeCast(JCTypeCast tree) {
-        setCodeCP(tree.pos);
+        setTypeAnnotationPositions(tree.pos);
         result = genExpr(tree.expr, tree.clazz.type).load();
         // Additional code is only needed if we cast to a reference type
         // which is not statically a supertype of the expression's type.
@@ -2109,7 +2108,7 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitTypeTest(JCInstanceOf tree) {
-        setCodeCP(tree.pos);
+        setTypeAnnotationPositions(tree.pos);
 
         genExpr(tree.expr, tree.expr.type).load();
         code.emitop2(instanceof_, makeRef(tree.pos(), tree.clazz.type));
@@ -2152,7 +2151,7 @@ public class Gen extends JCTree.Visitor {
 
         if (tree.name == names._class) {
             assert target.hasClassLiterals();
-            setCodeCP(tree.pos);
+            setTypeAnnotationPositions(tree.pos);
             code.emitop2(ldc2, makeRef(tree.pos(), tree.selected.type));
             result = items.makeStackItem(pt);
             return;
@@ -2241,7 +2240,6 @@ public class Gen extends JCTree.Visitor {
      *  @return      True if code is generated with no errors.
      */
     public boolean genClass(Env<AttrContext> env, JCClassDecl cdef) {
-        // raise type annotations onto symbols
         try {
             attrEnv = env;
             ClassSymbol c = cdef.sym;

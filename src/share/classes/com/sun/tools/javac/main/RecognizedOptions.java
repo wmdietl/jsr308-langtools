@@ -137,7 +137,6 @@ public class RecognizedOptions {
         DJAVA_ENDORSED_DIRS,
         PROC,
         PROCESSOR,
-        TYPEPROCESSOR,
         PROCESSORPATH,
         D,
         S,
@@ -200,7 +199,6 @@ public class RecognizedOptions {
         DEPRECATION,
         PROC,
         PROCESSOR,
-        TYPEPROCESSOR,
         IMPLICIT,
         SOURCE,
         TARGET,
@@ -334,11 +332,6 @@ public class RecognizedOptions {
         new Option(PROC,                                 "opt.proc.none.only",
                 Option.ChoiceKind.ONEOF, "none", "only"),
         new Option(PROCESSOR,           "opt.arg.class.list",   "opt.processor"),
-        new HiddenOption(TYPEPROCESSOR, "opt.arg.class.list") {
-            public boolean process(Options options, String option, String arg) {
-                return super.process(options, "-processor", arg);
-            }
-        },
         new Option(PROCESSORPATH,       "opt.arg.path",         "opt.processorpath"),
         new Option(D,                   "opt.arg.directory",    "opt.d"),
         new Option(S,                   "opt.arg.directory",    "opt.sourceDest"),

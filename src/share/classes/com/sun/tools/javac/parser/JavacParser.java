@@ -1100,13 +1100,6 @@ public class JavacParser implements Parser {
 
                         t = bracketsOpt(t, annos);
                         t = toP(F.at(pos).TypeArray(t));
-
-//                        if (!stack.isEmpty() && !stack.first().isEmpty()) {
-//                            annos = stack.next();
-//                            assert t.getTag() == JCTree.TYPEARRAY;
-//                            JCArrayTypeTree arr = (JCArrayTypeTree)t;
-//                            arr.elemtype = toP(F.at(pos).AnnotatedType(annos, arr.elemtype));
-//                        }
                         t = bracketsSuffix(t);
                     } else {
                         if ((mode & EXPR) != 0) {
@@ -2834,8 +2827,8 @@ public class JavacParser implements Parser {
 
         List<JCAnnotation> receiverAnnotations;
         if (!isVoid) {
-            // need to distiush between receiver anno and array anno
-            // look at typeAnnotaitonsPushedBack comment
+            // need to distinguish between receiver anno and array anno
+            // look at typeAnnotationsPushedBack comment
             this.permitTypeAnnotationsPushBack = true;
             type = bracketsOpt(type);
             this.permitTypeAnnotationsPushBack = false;
@@ -2998,7 +2991,7 @@ public class JavacParser implements Parser {
 
             S.nextToken();
         } else {
-            // if not a var arg, then varArgsTypeAnnotationHack should be null
+            // if not a var arg, then typeAnnotationsPushedBack should be null
             if (typeAnnotationsPushedBack != null
                     && !typeAnnotationsPushedBack.isEmpty()) {
                 reportSyntaxError(typeAnnotationsPushedBack.head.pos,
