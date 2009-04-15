@@ -46,6 +46,11 @@ import java.util.Set;
  */
 public enum TargetType {
 
+    //
+    // Some target types are commented out, because Java doesn't permit such
+    // targets.
+    //
+
     /** For annotations on typecasts. */
     TYPECAST(0x00),
 
@@ -71,13 +76,7 @@ public enum TargetType {
     /** For annotations on the method receiver. */
     METHOD_RECEIVER(0x06),
 
-    /**
-     * For annotations on a type argument or nested array of the method
-     * receiver.
-     *
-     * Deprecated because such annotations are not allowed (yet), but included
-     * so that the numbering works out.
-     */
+    // invalid location
     //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
     /** For annotations on local variables. */
@@ -86,12 +85,7 @@ public enum TargetType {
     /** For annotations on a type argument or nested array of a local. */
     LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation),
 
-    /**
-     * For annotations on a method return type.
-     *
-     * Deprecated because such annotations are ordinary (not extended), but
-     * included so that the numbering works out.
-     */
+    // handled by regular annotations
     //@Deprecated METHOD_RETURN(0x0A),
 
     /**
@@ -100,23 +94,13 @@ public enum TargetType {
      */
     METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
 
-    /**
-     * For annotations on a method parameter.
-     *
-     * Deprecated because such annotations are ordinary (not extended), but
-     * included so that the numbering works out.
-     */
+    // handled by regular annotations
     //@Deprecated METHOD_PARAMETER(0x0C),
 
     /** For annotations on a type argument or nested array of a method parameter. */
     METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
 
-    /**
-     * For annotations on a field.
-     *
-     * Deprecated because such annotations are ordinary (not extended), but
-     * included so that the numbering works out.
-     */
+    // handled by regular annotations
     //@Deprecated FIELD(0x0E),
 
     /** For annotations on a type argument or nested array of a field. */
@@ -148,6 +132,8 @@ public enum TargetType {
 
     /** For annotations on a throws clause in a method declaration. */
     THROWS(0x16),
+
+    // invalid location
     //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
 
     /** For annotations in type arguments of object creation expressions. */
@@ -164,9 +150,13 @@ public enum TargetType {
     CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation),
 
     METHOD_TYPE_PARAMETER(0x20, HasParameter),
+
+    // invalid location
     //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, HasLocation, HasParameter),
 
     CLASS_TYPE_PARAMETER(0x22, HasParameter),
+
+    // invalid location
     //@Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, HasLocation, HasParameter),
 
     /** For annotations with an unknown target. */

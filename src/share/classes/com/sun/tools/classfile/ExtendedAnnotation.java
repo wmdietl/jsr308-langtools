@@ -149,16 +149,6 @@ public class ExtendedAnnotation {
             break;
         case UNKNOWN:
             break;
-//        case METHOD_PARAMETER:
-//        case METHOD_RETURN:
-//        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
-//        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-//        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
-//        case FIELD:
-//        case THROWS_GENERIC_OR_ARRAY:
-//            // method_return sometimes shows up
-//            // throw new AssertionError("target unusable: " + position);
-//            break;
         default:
 //            throw new AssertionError("unknown type: " + position);
         }
@@ -249,16 +239,6 @@ public class ExtendedAnnotation {
             break;
         case UNKNOWN:
             break;
-//        case METHOD_PARAMETER:
-//        case METHOD_RETURN:
-//        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
-//        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-//        case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
-//        case FIELD:
-//        case THROWS_GENERIC_OR_ARRAY:
-//            // method_return sometimes shows up
-//            // throw new AssertionError("target unusable: " + position);
-//            break;
         default:
 //            throw new AssertionError("unknown type: " + pos);
         }
@@ -398,15 +378,6 @@ public class ExtendedAnnotation {
                 break;
             case UNKNOWN:
                 break;
-//            case METHOD_PARAMETER:
-//            case METHOD_RETURN:
-//            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
-//            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-//            case METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY:
-//            case FIELD:
-//            case THROWS_GENERIC_OR_ARRAY:
-//                sb.append(", *unusable*");
-//                break;
             default:
 //                throw new AssertionError("unknown type: " + type);
             }
@@ -430,141 +401,128 @@ public class ExtendedAnnotation {
     public enum TargetType {
 
         /** For annotations on typecasts. */
-        TYPECAST(0x00, EnumSet.noneOf(TargetAttribute.class)),
+        TYPECAST(0x00),
 
         /** For annotations on a type argument or nested array of a typecast. */
-        TYPECAST_GENERIC_OR_ARRAY(0x01, EnumSet.of(HasLocation)),
+        TYPECAST_GENERIC_OR_ARRAY(0x01, HasLocation),
 
         /** For annotations on type tests. */
-        INSTANCEOF(0x02, EnumSet.noneOf(TargetAttribute.class)),
+        INSTANCEOF(0x02),
 
         /** For annotations on a type argument or nested array of a type test. */
-        INSTANCEOF_GENERIC_OR_ARRAY(0x03, EnumSet.of(HasLocation)),
+        INSTANCEOF_GENERIC_OR_ARRAY(0x03, HasLocation),
 
         /** For annotations on object creation expressions. */
-        NEW(0x04, EnumSet.noneOf(TargetAttribute.class)),
+        NEW(0x04),
 
         /**
          * For annotations on a type argument or nested array of an object creation
          * expression.
          */
-        NEW_GENERIC_OR_ARRAY(0x05, EnumSet.of(HasLocation)),
+        NEW_GENERIC_OR_ARRAY(0x05, HasLocation),
 
 
         /** For annotations on the method receiver. */
-        METHOD_RECEIVER(0x06, EnumSet.noneOf(TargetAttribute.class)),
+        METHOD_RECEIVER(0x06),
 
-        /**
-         * For annotations on a type argument or nested array of the method
-         * receiver.
-         *
-         * Deprecated because such annotations are not allowed (yet), but included
-         * so that the numbering works out.
-         */
-        //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, EnumSet.of(HasLocation)),
+        // invalid location
+        // METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
         /** For annotations on local variables. */
-        LOCAL_VARIABLE(0x08, EnumSet.noneOf(TargetAttribute.class)),
+        LOCAL_VARIABLE(0x08),
 
         /** For annotations on a type argument or nested array of a local. */
-        LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, EnumSet.of(HasLocation)),
+        LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation),
 
-        /**
-         * For annotations on a method return type.
-         *
-         * Deprecated because such annotations are ordinary (not extended), but
-         * included so that the numbering works out.
-         */
-        //@Deprecated METHOD_RETURN(0x0A, EnumSet.noneOf(TargetAttribute.class)),
+        // already handled by regular annotations
+        // METHOD_RETURN(0x0A),
 
         /**
          * For annotations on a type argument or nested array of a method return
          * type.
          */
-        METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, EnumSet.of(HasLocation)),
+        METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
 
-        /**
-         * For annotations on a method parameter.
-         *
-         * Deprecated because such annotations are ordinary (not extended), but
-         * included so that the numbering works out.
-         */
-        //@Deprecated METHOD_PARAMETER(0x0C, EnumSet.noneOf(TargetAttribute.class)),
+        // already handled by regular annotations
+        // METHOD_PARAMETER(0x0C),
 
         /** For annotations on a type argument or nested array of a method parameter. */
-        METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, EnumSet.of(HasLocation)),
+        METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
 
-        /**
-         * For annotations on a field.
-         *
-         * Deprecated because such annotations are ordinary (not extended), but
-         * included so that the numbering works out.
-         */
-        //@Deprecated FIELD(0x0E, EnumSet.noneOf(TargetAttribute.class)),
+        // already handled by regular annotations
+        // FIELD(0x0E),
 
         /** For annotations on a type argument or nested array of a field. */
-        FIELD_GENERIC_OR_ARRAY(0x0F, EnumSet.of(HasLocation)),
+        FIELD_GENERIC_OR_ARRAY(0x0F, HasLocation),
 
         /** For annotations on a bound of a type parameter of a class. */
-        CLASS_TYPE_PARAMETER_BOUND(0x10, EnumSet.of(HasBound, HasParameter)),
+        CLASS_TYPE_PARAMETER_BOUND(0x10, HasBound, HasParameter),
 
         /**
          * For annotations on a type argument or nested array of a bound of a type
          * parameter of a class.
          */
-        CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x11, EnumSet.of(HasBound, HasLocation, HasParameter)),
+        CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x11, HasBound, HasLocation, HasParameter),
 
         /** For annotations on a bound of a type parameter of a method. */
-        METHOD_TYPE_PARAMETER_BOUND(0x12, EnumSet.of(HasBound, HasParameter)),
+        METHOD_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
 
         /**
          * For annotations on a type argument or nested array of a bound of a type
          * parameter of a method.
          */
-        METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x13, EnumSet.of(HasBound, HasLocation, HasParameter)),
+        METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x13, HasBound, HasLocation, HasParameter),
 
         /** For annotations on the type of an "extends" or "implements" clause. */
-        CLASS_EXTENDS(0x14, EnumSet.noneOf(TargetAttribute.class)),
+        CLASS_EXTENDS(0x14),
 
         /** For annotations on the inner type of an "extends" or "implements" clause. */
-        CLASS_EXTENDS_GENERIC_OR_ARRAY(0x15, EnumSet.of(HasLocation)),
+        CLASS_EXTENDS_GENERIC_OR_ARRAY(0x15, HasLocation),
 
         /** For annotations on a throws clause in a method declaration. */
-        THROWS(0x16, EnumSet.noneOf(TargetAttribute.class)),
-        //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, EnumSet.of(HasLocation)),
+        THROWS(0x16),
+
+        // invalid location
+        // THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
 
         /** For annotations in type arguments of object creation expressions. */
-        NEW_TYPE_ARGUMENT(0x18, EnumSet.noneOf(TargetAttribute.class)),
-        NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, EnumSet.of(HasLocation)),
+        NEW_TYPE_ARGUMENT(0x18),
+        NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation),
 
-        METHOD_TYPE_ARGUMENT(0x1A, EnumSet.noneOf(TargetAttribute.class)),
-        METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x1B, EnumSet.of(HasLocation)),
+        METHOD_TYPE_ARGUMENT(0x1A),
+        METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x1B, HasLocation),
 
-        WILDCARD_BOUND(0x1C, EnumSet.of(HasBound)),
-        WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, EnumSet.of(HasBound, HasLocation)),
+        WILDCARD_BOUND(0x1C, HasBound),
+        WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
 
-        CLASS_LITERAL(0x1E, EnumSet.noneOf(TargetAttribute.class)),
-        CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, EnumSet.of(HasLocation)),
+        CLASS_LITERAL(0x1E),
+        CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation),
 
-        METHOD_TYPE_PARAMETER(0x20, EnumSet.of(HasParameter)),
-        //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, EnumSet.of(HasLocation, HasParameter)),
+        METHOD_TYPE_PARAMETER(0x20, HasParameter),
 
-        CLASS_TYPE_PARAMETER(0x22, EnumSet.of(HasParameter)),
-        //@Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, EnumSet.of(HasLocation, HasParameter)),
+        // invalid location
+        // METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, HasLocation, HasParameter),
+
+        CLASS_TYPE_PARAMETER(0x22, HasParameter),
+
+        // invalid location
+        // CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, HasLocation, HasParameter),
 
         /** For annotations with an unknown target. */
-        UNKNOWN(-1, EnumSet.noneOf(TargetAttribute.class));
+        UNKNOWN(-1);
 
         static final int MAXIMUM_TARGET_TYPE_VALUE = 0x22;
 
         private final int targetTypeValue;
         private Set<TargetAttribute> flags;
 
-        TargetType(int targetTypeValue, Set<TargetAttribute> flags) {
+        TargetType(int targetTypeValue, TargetAttribute... attrs) {
             assert targetTypeValue >= Byte.MIN_VALUE;
             assert targetTypeValue <= Byte.MAX_VALUE;
             this.targetTypeValue = (byte)targetTypeValue;
-            this.flags = flags;
+            this.flags = EnumSet.noneOf(TargetAttribute.class);
+            for (TargetAttribute attr : attrs)
+                this.flags.add(attr);
         }
 
         /**
