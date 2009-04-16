@@ -88,29 +88,28 @@ public class JavacTrees extends Trees {
     private final TreeMaker treeMaker;
     private final JavacElements elements;
     private final JavacTaskImpl javacTaskImpl;
-    private final JavacMessager messager;
+    private int errorCount;
 
     public static JavacTrees instance(JavaCompiler.CompilationTask task) {
         if (!(task instanceof JavacTaskImpl))
             throw new IllegalArgumentException();
-        return instance(((JavacTaskImpl)task).getContext(), null);
+        return instance(((JavacTaskImpl)task).getContext());
     }
 
     public static JavacTrees instance(ProcessingEnvironment env) {
         if (!(env instanceof JavacProcessingEnvironment))
             throw new IllegalArgumentException();
-        return instance(((JavacProcessingEnvironment)env).getContext(),
-                        (JavacMessager)env.getMessager());
+        return instance(((JavacProcessingEnvironment)env).getContext());
     }
 
-    public static JavacTrees instance(Context context, JavacMessager messager) {
+    public static JavacTrees instance(Context context) {
         JavacTrees instance = context.get(JavacTrees.class);
         if (instance == null)
-            instance = new JavacTrees(context, messager);
+            instance = new JavacTrees(context);
         return instance;
     }
 
-    private JavacTrees(Context context, JavacMessager messager) {
+    private JavacTrees(Context context) {
         context.put(JavacTrees.class, this);
         attr = Attr.instance(context);
         enter = Enter.instance(context);
@@ -120,7 +119,6 @@ public class JavacTrees extends Trees {
         treeMaker = TreeMaker.instance(context);
         memberEnter = MemberEnter.instance(context);
         javacTaskImpl = context.get(JavacTaskImpl.class);
-        this.messager = messager;
     }
 
     public SourcePositions getSourcePositions() {
@@ -368,8 +366,7 @@ public class JavacTrees extends Trees {
         try {
             switch (kind) {
             case ERROR:
-                if (messager != null)
-                    messager.errorCount++;
+                errorCount++;
                 boolean prev = log.multipleErrors;
                 try {
                     log.error(pos, "proc.messager", msg.toString());
@@ -393,5 +390,13 @@ public class JavacTrees extends Trees {
             if (oldSource != null)
                 log.useSource(oldSource);
         }
+    }
+
+    public int errorCount() {
+        return errorCount;
+    }
+
+    public boolean errorRaised() {
+        return errorCount > 0;
     }
 }

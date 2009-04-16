@@ -45,8 +45,7 @@ import javax.annotation.processing.*;
 public class JavacMessager implements Messager {
     Log log;
     JavacProcessingEnvironment processingEnv;
-    // made public so javac trees can access it when reporting an error
-    public int errorCount = 0;
+    int errorCount = 0;
 
     JavacMessager(Context context, JavacProcessingEnvironment processingEnv) {
         log = Log.instance(context);
