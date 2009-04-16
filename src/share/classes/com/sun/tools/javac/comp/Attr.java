@@ -2518,7 +2518,6 @@ public class Attr extends JCTree.Visitor {
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {
-        chk.validateTypeAnnotations(tree.annotations, true);
         TypeVar a = (TypeVar)tree.type;
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())

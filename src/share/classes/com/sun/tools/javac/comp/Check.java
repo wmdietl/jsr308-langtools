@@ -1809,11 +1809,7 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
-        if (a.type == null) {
-            // annotation hasn't been attributed yet
-            // TODO: ensure that we call this method eventually
-            return;
-        }
+        assert a.type != null;
         validateAnnotation(a);
 
         if (!isTypeAnnotation(a, isTypeParameter))
