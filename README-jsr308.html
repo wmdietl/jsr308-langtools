@@ -114,7 +114,7 @@ JSR 308 specification
 which permits annotations to appear on any occurrence of a type.
 </p>
 
-<h3 id="annotations-in-comment">Writing annotations in comments for backward compatibility</h3>
+<h3 id="annotations-in-comment">Writing annotations in comments for forward compatibility</h3>
 
 <p>
 The prototype implementation of the JSR 308 compiler allows annotations to
@@ -124,7 +124,9 @@ be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
   List&lt;/*@NonNull*/ String&gt; strings;
 </pre>
 <p>
-There must be no whitespace within the comment.
+There must be no whitespace within the comment.  The prototype parses these
+annotations when the command-line option
+"<code>-XDTAannotationsincomments</code>" is present.
 For additional information about this feature, see the
 <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments">Checker
 Framework Manual</a>.
@@ -407,78 +409,46 @@ in the following ways:
     href="#annotations-in-comment">specifically-formatted comments for
     backward compatibility</a>.
   </li>
-  <li>Six <code>javac</code> test cases are skipped by
-    the test runner due to failures caused by JSR 308
-    modifications.  We will correct these failures and re-enable the test cases in a future release.<br />
-    If you run the test suite, you will find that some of its test cases 
-    fail.  These tests also fail for the OpenJDK compiler.  The JSR 308
-    changes do not introduce any new test failures (except in test cases
-    that are skipped).</li>
-  <li>
-    The <code>javap</code> tool has been modified to display the properties of
-    both JSR 175 and JSR 308 annotations via the <a
-    href="#javap-annotations"><code>-annotations</code> command-line
-    option</a>.
-  </li>
   <li>This documentation file has been included.</li>
 </ul>
-
-<p>
-Additionally, your <code>javac</code> will not properly pass
-<code>-J&lt;flag&gt;</code> flags to the runtime system.  This is a problem
-with the OpenJDK system, not with the JSR 308 changes.  If you wish to
-adjust the arguments to the runtime system (i.e., <code>java</code>), then
-you will need to edit
-<code>langtools/dist/bin/javac</code>.
-</p>
-
 
 <h3 id="diffs">Determining a diff against the OpenJDK distribution</h3>
 
 <p>The JSR 308 distribution is a modification of the 
 <code>langtools</code> portion of Sun's
 <a href="http://openjdk.java.net/">OpenJDK</a>
-<code>javac</code> distribution.  The version of OpenJDK on which the
-JSR 308 distribution is based is:
-</p>
-<blockquote>
-<!-- version -->51 (09 Mar  2009)<!-- /version -->
-</blockquote>
+<code>javac</code> distribution.
 
 <p>The following commands determine the differences between the JSR
 308 compiler and the OpenJDK compiler.
-The shell variable <code>$VENDOR</code> refers
-to the location of the unmodified source code and
-<code>$JSR308</code> refers to the location of the
-extracted JSR 308 compiler distribution.
-</p>
+
 <ol>
-  <li>If you do not have a checkout of the OpenJDK
-  compiler, obtain one:
+  <li>If you do not have a clean checkout of the JSR 308 source,
+  obtain one:
 
   <pre><code>
-  export VENDOR=vendor-langtools
-  hg clone http://hg.openjdk.java.net/jdk7/jdk7/langtools $VENDOR
-  cd $VENDOR; hg up jdk7-b<!-- revision -->51<!-- /revision -->
+  hg clone http://hg.openjdk.java.net/type-annotations/type-annotations/langtools
   </code></pre>
 
-  <p>If you already have a checkout of the OpenJDK compiler, ensure
-  that it is at the same revision as the modifications,
-  using the following command in the $VENDOR directory:
-  </p>
-
+  If you already have one, then just pull all the changes, by running the
+  following command in the directory of JSR 308 source
   <pre><code>
-  hg pull; hg up jdk7-b<!-- revision -->51<!-- /revision -->
+  hg pull; hg up
   </code></pre>
-
   </li>
-  <li>Use one of these <code>diff</code> commands to generate the
-  differences.  The second shows the contents of new files,
-  whereas the first only reports that the new file exists.
-
+  
+  <li>Determine the identifier of the last changeset done by Sun.  Run
+  "<code>hg log | less</code>" to find the last changeset with an author
+  other than <code>mali</code> or <code>mernst</code>.  The changeset
+  identifier would be in format of:
   <pre><code>
-  diff -ur -x .hg -x dist -x build $VENDOR/src $JSR308/j2se/src
-  diff -urN -x .hg -x dist -x build $VENDOR/src $JSR308/j2se/src
+  450:143956db282e
+  </code></pre>
+  </li>
+  
+  <li> Use <code>hg diff</code> to generate the diff.
+  <pre><code>
+    hg diff -r450:tip
   </code></pre>
 </ol>
 

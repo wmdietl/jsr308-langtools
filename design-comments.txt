@@ -26,7 +26,9 @@ The prototype includes some hidden options for debugging:
  -XDTA:writer    writing annotations to classfile in ClassWriter
 
 It also includes one non-standard option
- -XDspacesincomments which is documented in [1].
+ -XDTAannotationsincomments
+ -XDTAspacesincomments
+both are documented in [1]
 
 Additionally the compiler recognize one more environment variable/property:
   jsr308.import
