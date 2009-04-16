@@ -45,7 +45,8 @@ import javax.annotation.processing.*;
 public class JavacMessager implements Messager {
     Log log;
     JavacProcessingEnvironment processingEnv;
-    int errorCount = 0;
+    // made public so javac trees can access it when reporting an error
+    public int errorCount = 0;
 
     JavacMessager(Context context, JavacProcessingEnvironment processingEnv) {
         log = Log.instance(context);
@@ -126,48 +127,6 @@ public class JavacMessager implements Messager {
             default:
                 log.note(pos, "proc.messager", msg.toString());
                 break;
-            }
-        } finally {
-            if (oldSource != null)
-                log.useSource(oldSource);
-        }
-    }
-
-    public void printMessage(Diagnostic.Kind kind, CharSequence msg,
-            com.sun.source.tree.Tree t,
-            com.sun.source.tree.CompilationUnitTree root) {
-        JavaFileObject oldSource = null;
-        JavaFileObject newSource = null;
-        JCDiagnostic.DiagnosticPosition pos = null;
-
-        newSource = root.getSourceFile();
-        if (newSource != null) {
-            oldSource = log.useSource(newSource);
-            pos = ((JCTree) t).pos();
-        }
-
-        try {
-            switch (kind) {
-            case ERROR:
-                errorCount++;
-                boolean prev = log.multipleErrors;
-                try {
-                    log.error(pos, "proc.messager", msg.toString());
-                } finally {
-                    log.multipleErrors = prev;
-                }
-                break;
-
-            case WARNING:
-                log.warning(pos, "proc.messager", msg.toString());
-                break;
-
-            case MANDATORY_WARNING:
-                log.mandatoryWarning(pos, "proc.messager", msg.toString());
-                break;
-
-            default:
-                log.note(pos, "proc.messager", msg.toString());
             }
         } finally {
             if (oldSource != null)
