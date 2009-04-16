@@ -829,8 +829,6 @@ public class TransTypes extends TreeTranslator {
             }
         };
         scanner.scan(trees);
-//        if (!ta.isEmpty())
-//            System.out.println("collect: " + ta.toList());
         return ta.toList();
     }
 

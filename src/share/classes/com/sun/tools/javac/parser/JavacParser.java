@@ -1087,6 +1087,9 @@ public class JavacParser implements Parser {
             loop: while (true) {
                 pos = S.pos();
                 final List<JCAnnotation> annos = typeAnnotationsOpt();
+
+                // need to report an error later if LBRACKET is for array
+                // index access rather than array creation level
                 if (!annos.isEmpty() && S.token() != LBRACKET && S.token() != ELLIPSIS)
                     return illegal(annos.head.pos);
                 switch (S.token()) {
@@ -1561,7 +1564,7 @@ public class JavacParser implements Parser {
             }
             return e;
         } else if (S.token() == LPAREN) {
-            JCNewClass newClass = (JCNewClass)classCreatorRest(newpos, null, typeArgs, t);
+            JCNewClass newClass = classCreatorRest(newpos, null, typeArgs, t);
             if (newClass.def != null) {
                 assert newClass.def.mods.annotations.isEmpty();
                 newClass.def.mods.annotations = newAnnotations;
@@ -1656,7 +1659,7 @@ public class JavacParser implements Parser {
 
     /** ClassCreatorRest = Arguments [ClassBody]
      */
-    JCExpression classCreatorRest(int newpos,
+    JCNewClass classCreatorRest(int newpos,
                                   JCExpression encl,
                                   List<JCExpression> typeArgs,
                                   JCExpression t)
