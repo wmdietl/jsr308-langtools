@@ -1092,6 +1092,12 @@ public class TransTypes extends TreeTranslator {
 
         @Override
         public void visitClassDef(JCClassDecl tree) {
+            if (clazz != null || lastMethod != null) {
+                // tree is an inner class tree.  stop now.
+                // TransTypes.visitClassDef makes an invocation for each class
+                // seperately.
+                return;
+            }
             clazz = tree;
             super.visitClassDef(tree);
         }

@@ -1022,6 +1022,16 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
 
         @Override
+        public void visitClassDef(final JCClassDecl tree) {
+            scan(tree.mods);
+            // type parameter need to be visited with a separate env
+            // scan(tree.typarams);
+            scan(tree.extending);
+            scan(tree.implementing);
+            scan(tree.defs);
+        }
+
+        @Override
         public void visitAnnotatedType(final JCAnnotatedType tree) {
             final List<JCAnnotation> annotations = tree.annotations;
             annotate.later(new Annotate.Annotator() {

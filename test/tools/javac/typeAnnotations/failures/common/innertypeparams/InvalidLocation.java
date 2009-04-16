@@ -23,33 +23,15 @@
 
 /*
  * @test
- * @summary new type annotation location: class type parameter bounds
+ * @summary check for invalid annotatins given the target
  * @author Mahmood Ali
- * @compile -source 1.7 ClassParameters.java
+ * @compile/fail/ref=InvalidLocation.out -XDrawDiagnostics -source 1.7 InvalidLocation.java
  */
-class Unannotated<K> { }
-
-class ExtendsBound<K extends @A String> { }
-class ExtendsGeneric<K extends @A Unannotated<@B String>> { }
-class TwoBounds<K extends @A String, V extends @B String> { }
-
-class Complex1<K extends @A String&Runnable> { }
-class Complex2<K extends String & @B Runnable> { }
-class ComplexBoth<K extends @A String & @A Runnable> { }
-
-class Outer {
-  void inner() {
-    class Unannotated<K> { }
-
-    class ExtendsBound<K extends @A String> { }
-    class ExtendsGeneric<K extends @A Unannotated<@B String>> { }
-    class TwoBounds<K extends @A String, V extends @B String> { }
-
-    class Complex1<K extends @A String&Runnable> { }
-    class Complex2<K extends String & @B Runnable> { }
-    class ComplexBoth<K extends @A String & @A Runnable> { }
+class InvalidLocation {
+  void innermethod() {
+    class Inner<@A K> {}
   }
 }
 
+@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE)
 @interface A { }
-@interface B { }
