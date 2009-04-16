@@ -153,12 +153,10 @@ public class TypeAnnotations {
 
     public Position position;
     public List<Attribute.Compound> annotations;
-    public List<TypeAnnotations> erased;
 
     public TypeAnnotations() {
         this.position = new Position();
         this.annotations = List.nil();
-        this.erased = List.nil();
     }
 
     public String toString() {

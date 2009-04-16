@@ -441,8 +441,6 @@ public class TransTypes extends TreeTranslator {
 
     public void visitClassDef(JCClassDecl tree) {
         new TypeAnnotationPositions().scan(tree);
-        List<TypeAnnotations> ta = List.nil(); //collectErasedAnnotations(tree.typarams);
-        tree.sym.typeAnnotations = ta;
         new TypeAnnotationLift().scan(tree);
         translateClass(tree.sym);
         result = tree;
@@ -450,11 +448,7 @@ public class TransTypes extends TreeTranslator {
 
     JCMethodDecl currentMethod = null;
     public void visitMethodDef(JCMethodDecl tree) {
-        List<TypeAnnotations> ta = List.nil(); // collectErasedAnnotations(tree.typarams);
-        if (tree.sym.typeAnnotations != null)
-            ta = ta.appendList(tree.sym.typeAnnotations);
-
-        tree.sym.typeAnnotations = ta;
+        tree.sym.typeAnnotations = tree.sym.typeAnnotations;
         JCMethodDecl previousMethod = currentMethod;
         try {
             currentMethod = tree;
@@ -740,18 +734,8 @@ public class TransTypes extends TreeTranslator {
     /** Visitor method for parameterized types.
      */
     public void visitTypeApply(JCTypeApply tree) {
-        List<TypeAnnotations> ta = List.nil(); //collectErasedAnnotations(tree.arguments);
-        // Delete all type parameters.
         JCTree clazz = translate(tree.clazz, null);
-        if (!ta.isEmpty()) {
-            JCAnnotatedType annotatedType =
-                make.at(tree.pos).AnnotatedType(List.<JCAnnotation>nil(),
-                        (JCExpression)clazz);
-            annotatedType.typeAnnotations.erased = ta;
-            result = annotatedType;
-            result.type = clazz.type;
-        } else
-            result = clazz;
+        result = clazz;
     }
 
 /**************************************************************************
@@ -816,20 +800,6 @@ public class TransTypes extends TreeTranslator {
         this.make = make;
         pt = null;
         return translate(cdef, null);
-    }
-
-    private List<TypeAnnotations> collectErasedAnnotations(List<? extends
-            JCTree> trees) {
-        final ListBuffer<TypeAnnotations> ta = ListBuffer.lb();
-        TreeScanner scanner = new TreeScanner() {
-            public void visitAnnotatedType(JCAnnotatedType tree) {
-                if (tree.typeAnnotations != null)
-                    ta.append(tree.typeAnnotations);
-                super.visitAnnotatedType(tree);
-            }
-        };
-        scanner.scan(trees);
-        return ta.toList();
     }
 
     private class TypeAnnotationPositions extends TreeScanner {
@@ -1133,13 +1103,7 @@ public class TransTypes extends TreeTranslator {
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
-            if (tree.typeAnnotations != null
-                    && tree.typeAnnotations.erased != null)
-                ta = ta.appendList(tree.typeAnnotations.erased);
-            if (!ta.isEmpty()) {
-                lift(ta);
-            }
+            lift(List.of(tree.typeAnnotations));
             super.visitAnnotatedType(tree);
         }
 
@@ -1151,12 +1115,7 @@ public class TransTypes extends TreeTranslator {
 
         @Override
         public void visitTypeParameter(JCTypeParameter tree) {
-            List<TypeAnnotations> ta = List.of(tree.typeAnnotations);
-            if (tree.typeAnnotations != null
-                    && tree.typeAnnotations.erased != null)
-                ta = ta.appendList(tree.typeAnnotations.erased);
-            if (!ta.isEmpty())
-                lift(ta);
+            lift(List.of(tree.typeAnnotations));
             super.visitTypeParameter(tree);
         }
         public void lift(List<TypeAnnotations> ta) {
