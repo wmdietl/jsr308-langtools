@@ -804,11 +804,11 @@ public class TransTypes extends TreeTranslator {
 
     private class TypeAnnotationPositions extends TreeScanner {
 
-        private ListBuffer<JCTree> contexts = ListBuffer.lb();
-        private void push(JCTree t) { contexts = contexts.prepend(t); }
-        private JCTree pop() { return contexts.next(); }
-        private JCTree peek() { return contexts.first(); }
-        private JCTree peek2() { return contexts.toList().tail.head; }
+        private ListBuffer<JCTree> frames = ListBuffer.lb();
+        private void push(JCTree t) { frames = frames.prepend(t); }
+        private JCTree pop() { return frames.next(); }
+        private JCTree peek() { return frames.first(); }
+        private JCTree peek2() { return frames.toList().tail.head; }
 
         @Override
         public void scan(JCTree tree) {
@@ -817,71 +817,71 @@ public class TransTypes extends TreeTranslator {
             pop();
         }
 
-        private TypeAnnotations.Position resolveContext(JCTree tree, JCTree context,
+        private TypeAnnotations.Position resolveFrame(JCTree tree, JCTree frame,
                 List<JCTree> path, TypeAnnotations.Position p) {
-            switch (context.getKind()) {
+            switch (frame.getKind()) {
                 case TYPE_CAST:
                     p.type = TargetType.TYPECAST;
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
 
                 case INSTANCE_OF:
                     p.type = TargetType.INSTANCEOF;
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
 
                 case NEW_CLASS:
                     p.type = TargetType.NEW;
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
 
                 case NEW_ARRAY:
                     p.type = TargetType.NEW;
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
 
                 case CLASS:
-                    p.pos = context.pos;
-                    if (((JCClassDecl)context).extending == tree) {
+                    p.pos = frame.pos;
+                    if (((JCClassDecl)frame).extending == tree) {
                         p.type = TargetType.CLASS_EXTENDS;
                         p.type_index = -1;
-                    } else if (((JCClassDecl)context).implementing.contains(tree)) {
+                    } else if (((JCClassDecl)frame).implementing.contains(tree)) {
                         p.type = TargetType.CLASS_EXTENDS;
-                        p.type_index = ((JCClassDecl)context).implementing.indexOf(tree);
-                    } else if (((JCClassDecl)context).typarams.contains(tree)) {
+                        p.type_index = ((JCClassDecl)frame).implementing.indexOf(tree);
+                    } else if (((JCClassDecl)frame).typarams.contains(tree)) {
                         p.type = TargetType.CLASS_TYPE_PARAMETER;
-                        p.parameter_index = ((JCClassDecl)context).typarams.indexOf(tree);
+                        p.parameter_index = ((JCClassDecl)frame).typarams.indexOf(tree);
                     } else
                         throw new AssertionError();
                     return p;
 
                 case METHOD: {
-                    JCMethodDecl contextMethod = (JCMethodDecl)context;
-                    p.pos = context.pos;
-                    if (contextMethod.receiver == tree)
+                    JCMethodDecl frameMethod = (JCMethodDecl)frame;
+                    p.pos = frame.pos;
+                    if (frameMethod.receiver == tree)
                         p.type = TargetType.METHOD_RECEIVER;
-                    else if (contextMethod.thrown.contains(tree)) {
+                    else if (frameMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
-                        p.type_index = contextMethod.thrown.indexOf(tree);
-                    } else if (((JCMethodDecl)context).restype == tree) {
+                        p.type_index = frameMethod.thrown.indexOf(tree);
+                    } else if (((JCMethodDecl)frame).restype == tree) {
                         p.type = TargetType.METHOD_RETURN_GENERIC_OR_ARRAY;
-                    } else if (contextMethod.typarams.contains(tree)) {
+                    } else if (frameMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
-                        p.parameter_index = contextMethod.typarams.indexOf(tree);
+                        p.parameter_index = frameMethod.typarams.indexOf(tree);
                     } else
                         throw new AssertionError();
                     return p;
                 }
                 case MEMBER_SELECT: {
-                    JCFieldAccess fieldContext = (JCFieldAccess)context;
-                    if (fieldContext.name == names._class) {
+                    JCFieldAccess fieldFrame = (JCFieldAccess)frame;
+                    if (fieldFrame.name == names._class) {
                         p.type = TargetType.CLASS_LITERAL;
-                        if (fieldContext.selected instanceof JCAnnotatedType) {
-                            assert fieldContext.selected instanceof JCAnnotatedType;
-                            JCAnnotatedType fieldType = (JCAnnotatedType)fieldContext.selected;
+                        if (fieldFrame.selected instanceof JCAnnotatedType) {
+                            assert fieldFrame.selected instanceof JCAnnotatedType;
+                            JCAnnotatedType fieldType = (JCAnnotatedType)fieldFrame.selected;
                             p.pos = fieldType.underlyingType.pos;
-                        } else if (fieldContext.selected instanceof JCArrayTypeTree) {
-                            p.pos = fieldContext.selected.pos;
+                        } else if (fieldFrame.selected instanceof JCArrayTypeTree) {
+                            p.pos = fieldFrame.selected.pos;
                         }
                     } else
                         throw new AssertionError();
@@ -889,45 +889,45 @@ public class TransTypes extends TreeTranslator {
                 }
                 case PARAMETERIZED_TYPE: {
                     TypeAnnotations.Position nextP;
-                    if (((JCTypeApply)context).clazz == tree)
+                    if (((JCTypeApply)frame).clazz == tree)
                         nextP = p; // generic: RAW; noop
-                    else if (((JCTypeApply)context).arguments.contains(tree))
+                    else if (((JCTypeApply)frame).arguments.contains(tree))
                         p.location = p.location.prepend(
-                                ((JCTypeApply)context).arguments.indexOf(tree));
+                                ((JCTypeApply)frame).arguments.indexOf(tree));
                     else
                         throw new AssertionError();
 
                     List<JCTree> newPath = path.tail;
-                    return resolveContext(newPath.head, newPath.tail.head, newPath, p);
+                    return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                 }
 
                 case ARRAY_TYPE: {
                     p.location = p.location.prepend(0);
                     List<JCTree> newPath = path.tail;
-                    return resolveContext(newPath.head, newPath.tail.head, newPath, p);
+                    return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                 }
 
                 case TYPE_PARAMETER:
 //                    System.out.print("type parameter: " +
-//                            ((JCTypeParameter)context).bounds.indexOf(tree) + " ");
+//                            ((JCTypeParameter)frame).bounds.indexOf(tree) + " ");
                     if (path.tail.tail.head.getTag() == JCTree.CLASSDEF) {
                         JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
                         p.parameter_index = clazz.typarams.indexOf(path.tail.head);
-                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
+                        p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
                     } else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
                         JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
-                        p.bound_index = ((JCTypeParameter)context).bounds.indexOf(tree);
+                        p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
                     } else
                         throw new AssertionError();
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
 
                 case VARIABLE:
-                    VarSymbol v = ((JCVariableDecl)context).sym;
-                    p.pos = context.pos;
+                    VarSymbol v = ((JCVariableDecl)frame).sym;
+                    p.pos = frame.pos;
                     switch (v.getKind()) {
                         case LOCAL_VARIABLE:
                             p.type = TargetType.LOCAL_VARIABLE; break;
@@ -935,7 +935,7 @@ public class TransTypes extends TreeTranslator {
                             p.type = TargetType.FIELD_GENERIC_OR_ARRAY; break;
                         case PARAMETER:
                             p.type = TargetType.METHOD_PARAMETER_GENERIC_OR_ARRAY;
-                            p.parameter_index = methodParamIndex(path, context);
+                            p.parameter_index = methodParamIndex(path, frame);
                             break;
                         default: throw new AssertionError();
                     }
@@ -943,12 +943,12 @@ public class TransTypes extends TreeTranslator {
 
                 case ANNOTATED_TYPE: {
                     List<JCTree> newPath = path.tail;
-                    return resolveContext(newPath.head, newPath.tail.head,
+                    return resolveFrame(newPath.head, newPath.tail.head,
                             newPath, p);
                 }
 
                 case METHOD_INVOCATION: {
-                    JCMethodInvocation invocation = (JCMethodInvocation)context;
+                    JCMethodInvocation invocation = (JCMethodInvocation)frame;
                     assert invocation.typeargs.contains(tree);
                     p.type = TargetType.METHOD_TYPE_ARGUMENT;
                     p.pos = invocation.pos;
@@ -962,12 +962,12 @@ public class TransTypes extends TreeTranslator {
                     List<JCTree> newPath = path.tail;
 
                     TypeAnnotations.Position wildcard =
-                        resolveContext(newPath.head, newPath.tail.head, newPath,
+                        resolveFrame(newPath.head, newPath.tail.head, newPath,
                                 new TypeAnnotations.Position());
                     if (!wildcard.location.isEmpty())
                         wildcard.type = wildcard.type.getGenericComplement();
                     p.wildcard_position = wildcard;
-                    p.pos = context.pos;
+                    p.pos = frame.pos;
                     return p;
                 }
             }
@@ -984,17 +984,17 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitNewArray(JCNewArray tree) {
             for (int i = 0; i < tree.dimAnnotations.size(); ++i) {
-                JCTree context = tree;
+                JCTree frame = tree;
                 TypeAnnotations.Position p =
-                    resolveContext(tree, context, contexts.toList(),
+                    resolveFrame(tree, frame, frames.toList(),
                             new TypeAnnotations.Position());
                 p.location = p.location.append(i);
                 p.type = p.type.getGenericComplement();
                 tree.dimTypeAnnotations.get(i).position = p;
             }
-            JCTree context = tree;
+            JCTree frame = tree;
             TypeAnnotations.Position p =
-                resolveContext(tree, context, contexts.toList(),
+                resolveFrame(tree, frame, frames.toList(),
                         new TypeAnnotations.Position());
             tree.typeAnnotations.position = p;
             super.visitNewArray(tree);
@@ -1005,15 +1005,15 @@ public class TransTypes extends TreeTranslator {
             if (!tree.annotations.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 if (debugJSR308) sb.append("trans: " + tree + "\n");
-//                System.out.print("  context: ");
+//                System.out.print("  frame: ");
 //                if (tree.underlyingType != null)
 //                    System.out.print("(" + tree.underlyingType.getKind() + ") ");
-//                for (JCTree t : contexts)
+//                for (JCTree t : frames)
 //                    System.out.print(t.getKind() + " ");
 //                System.out.println();
-                JCTree context = peek2();
+                JCTree frame = peek2();
                 TypeAnnotations.Position p =
-                        resolveContext(tree, context, contexts.toList(),
+                        resolveFrame(tree, frame, frames.toList(),
                                 new TypeAnnotations.Position());
                 if (!p.location.isEmpty())
                     p.type = p.type.getGenericComplement();
@@ -1031,9 +1031,9 @@ public class TransTypes extends TreeTranslator {
             if (!tree.annotations.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 if (debugJSR308) sb.append("trans: " + tree + "\n");
-                JCTree context = peek2();
+                JCTree frame = peek2();
                 TypeAnnotations.Position p =
-                        resolveContext(tree, context, contexts.toList(),
+                        resolveFrame(tree, frame, frames.toList(),
                                 new TypeAnnotations.Position());
                 if (!p.location.isEmpty())
                     p.type = p.type.getGenericComplement();
