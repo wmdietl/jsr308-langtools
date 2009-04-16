@@ -1,3 +1,17 @@
+Version 0.9, 16 Mar 2009
+
+Functionality
+  Renamed compile commandline options:
+    - -XDTAannotationsincomments  to parse annotations in comments
+    - -Xspacesincomments -> -XDTAspacesincomments
+
+Bug fixes
+  Fixed bugs related to vararg annotations
+
+Base build
+  Updated to OpenJDK langtools build b54
+
+----------------------------------------------------------------------
 Version 0.8.9, 28 Mar 2009
 
 Functionality:
