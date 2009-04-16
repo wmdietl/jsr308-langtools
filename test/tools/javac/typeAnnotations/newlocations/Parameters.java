@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: parameter type array/generics
  * @author Mahmood Ali
- * @compile Parameters.java
+ * @compile -source 1.7 Parameters.java
  */
 
 class Parameters {

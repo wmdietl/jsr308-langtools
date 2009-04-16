@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: method type parameter bounds
  * @author Mahmood Ali
- * @compile MethodTypeParameters.java
+ * @compile -source 1.7 MethodTypeParameters.java
  */
 
 class UnscopedUnmodified {

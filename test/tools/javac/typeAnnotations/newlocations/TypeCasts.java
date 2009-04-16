@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: type casts
  * @author Mahmood Ali
- * @compile TypeCasts.java
+ * @compile -source 1.7 TypeCasts.java
  */
 class TypeCasts {
   void methodA() {

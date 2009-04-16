@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: method return type array/generics
  * @author Mahmood Ali
- * @compile MethodReturnType.java
+ * @compile -source 1.7 MethodReturnType.java
  */
 
 class DefaultScope {

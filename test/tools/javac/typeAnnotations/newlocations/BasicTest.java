@@ -26,7 +26,7 @@
  * @test
  * @summary random tests for new locations
  * @author Matt Papi
- * @compile BasicTest.java
+ * @compile -source 1.7 BasicTest.java
  */
 
 import java.util.*;

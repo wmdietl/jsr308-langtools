@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: class extends/implements
  * @author Mahmood Ali
- * @compile ClassExtends.java
+ * @compile -source 1.7 ClassExtends.java
  */
 abstract class MyClass extends @A ParameterizedClass<@B String>
   implements @B CharSequence, @A ParameterizedInterface<@B String> { }

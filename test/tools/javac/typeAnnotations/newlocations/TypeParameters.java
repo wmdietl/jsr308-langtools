@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: class and method type parameters
  * @author Mahmood Ali
- * @compile TypeParameters.java
+ * @compile -source 1.7 TypeParameters.java
  */
 
 class Unannotated<K> { }

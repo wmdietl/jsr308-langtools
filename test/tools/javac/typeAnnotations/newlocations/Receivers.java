@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: receivers
  * @author Mahmood Ali
- * @compile Receivers.java
+ * @compile -source 1.7 Receivers.java
  */
 class DefaultUnmodified {
   void plain() @A { }

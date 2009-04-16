@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: throw clauses
  * @author Mahmood Ali
- * @compile Throws.java
+ * @compile -source 1.7 Throws.java
  */
 class DefaultUnmodified {
   void oneException() throws @A Exception {}

@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: class type parameter bounds
  * @author Mahmood Ali
- * @compile ClassParameters.java
+ * @compile -source 1.7 ClassParameters.java
  */
 class Unannotated<K> { }
 

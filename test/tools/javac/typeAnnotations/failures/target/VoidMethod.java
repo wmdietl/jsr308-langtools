@@ -25,7 +25,7 @@
  * @test
  * @summary test invalid location of TypeUse
  * @author Mahmood Ali
- * @compile/fail/ref=VoidMethod.out -XDrawDiagnostics VoidMethod.java
+ * @compile/fail/ref=VoidMethod.out -XDrawDiagnostics -source 1.7 VoidMethod.java
  */
 
 import java.lang.annotation.Target;

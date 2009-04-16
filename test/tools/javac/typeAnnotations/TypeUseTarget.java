@@ -25,7 +25,7 @@
  * @test
  * @summary check that type annotations may appear on all type declarations
  * @author Mahmood Ali
- * @compile TypeUseTarget.java
+ * @compile -source 1.7 TypeUseTarget.java
  */
 
 import java.lang.annotation.Target;

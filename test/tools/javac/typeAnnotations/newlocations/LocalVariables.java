@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: local variables array/generics
  * @author Mahmood Ali
- * @compile LocalVariables.java
+ * @compile -source 1.7 LocalVariables.java
  */
 
 class DefaultScope {

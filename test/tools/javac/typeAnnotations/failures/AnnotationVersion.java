@@ -23,14 +23,12 @@
 
 /*
  * @test
- * @summary check for duplicate annotation values
+ * @summary test that only java 7 allows type annotations
  * @author Mahmood Ali
- * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics -source 1.7 DuplicateAnnotationValue.java
+ * @compile/fail/ref=AnnotationVersion.out -XDrawDiagnostics -source 1.6 AnnotationVersion.java
  */
-class DuplicateAnnotationValue {
-  void test() {
-    Object a = String @A(value = 2, value = 1) [].class;
-  }
+class AnnotationVersion {
+  public void method() @A { }
 }
 
-@interface A { int value(); }
+@interface A { }

@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: constructor type args
  * @author Mahmood Ali
- * @compile ConstructorTypeArgs.java
+ * @compile -source 1.7 ConstructorTypeArgs.java
  */
 
 class ConstructorTypeArgs {

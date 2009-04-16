@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: class literals
  * @author Mahmood Ali
- * @compile ClassLiterals.java
+ * @compile -source 1.7 ClassLiterals.java
  */
 
 class ClassLiterals {

@@ -25,7 +25,7 @@
  * @test
  * @summary test scopes of attribution
  * @author Mahmood Ali
- * @compile Scopes.java
+ * @compile -source 1.7 Scopes.java
  */
 class Scopes {
 

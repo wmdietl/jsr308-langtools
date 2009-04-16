@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: wildcard bound
  * @author Mahmood Ali
- * @compile Wildcards.java
+ * @compile -source 1.7 Wildcards.java
  */
 class BoundTest {
   void wcExtends(MyList<? extends @A String> l) { }

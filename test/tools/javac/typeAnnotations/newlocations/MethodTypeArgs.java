@@ -25,7 +25,7 @@
  * @test
  * @summary new type annotation location: method type args
  * @author Mahmood Ali
- * @compile MethodTypeArgs.java
+ * @compile -source 1.7 MethodTypeArgs.java
  */
 
 class MethodTypeArgs {
