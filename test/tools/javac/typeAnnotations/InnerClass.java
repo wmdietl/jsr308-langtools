@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @summary compiler crashes when vising inner classes
+ * @summary compiler crashes when visiting inner classes
  * @author Mahmood Ali
  * @compile -source 1.7 InnerClass.java
  */
