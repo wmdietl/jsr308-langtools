@@ -1021,8 +1021,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             return buf.toList();
         }
 
+        // each class (including enclosed inner classes) should be visited
+        // separately through MemberEnter.complete(Symbol)
+        // this flag is used to prevent from visiting inner classes.
+        private boolean isEnclosingClass = true;
         @Override
         public void visitClassDef(final JCClassDecl tree) {
+            if (!isEnclosingClass)
+                return;
+            isEnclosingClass = true;
             scan(tree.mods);
             // type parameter need to be visited with a separate env
             // scan(tree.typarams);
@@ -1060,7 +1067,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
                         tree.typeAnnotations.annotations = enterAnnotations(annotations);
-                        tree.type.tsym.attributes_field = tree.typeAnnotations.annotations;
+                        if (tree.type != null)
+                            tree.type.tsym.attributes_field = tree.typeAnnotations.annotations;
                     } finally {
                         log.useSource(prev);
                     }
