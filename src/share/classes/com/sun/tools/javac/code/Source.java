@@ -95,7 +95,7 @@ public enum Source {
         this.name = name;
     }
 
-    public static final Source DEFAULT = JDK1_6;
+    public static final Source DEFAULT = JDK1_5;
 
     public static Source lookup(String name) {
         return tab.get(name);
