@@ -1024,10 +1024,10 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         // each class (including enclosed inner classes) should be visited
         // separately through MemberEnter.complete(Symbol)
         // this flag is used to prevent from visiting inner classes.
-        private boolean isEnclosingClass = true;
+        private boolean isEnclosingClass = false;
         @Override
         public void visitClassDef(final JCClassDecl tree) {
-            if (!isEnclosingClass)
+            if (isEnclosingClass)
                 return;
             isEnclosingClass = true;
             scan(tree.mods);
