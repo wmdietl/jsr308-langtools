@@ -1067,8 +1067,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
                         tree.typeAnnotations.annotations = enterAnnotations(annotations);
-                        if (tree.type != null)
-                            tree.type.tsym.attributes_field = tree.typeAnnotations.annotations;
+                        tree.type.tsym.attributes_field = tree.typeAnnotations.annotations;
                     } finally {
                         log.useSource(prev);
                     }
