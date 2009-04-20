@@ -1390,7 +1390,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
             this.elemtype = elemtype;
             this.dims = dims;
             this.annotations = List.nil();
-            this.typeAnnotations = null;
+            this.typeAnnotations = new TypeAnnotations();
             this.dimAnnotations = List.nil();
             this.dimTypeAnnotations = List.nil();
             this.elems = elems;

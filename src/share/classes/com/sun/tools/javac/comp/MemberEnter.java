@@ -1084,12 +1084,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                    ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
-                    if (tree.typeAnnotations == null) { // only enter annotations once
+                        ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
                         // Enter top-level annotations.
-                        TypeAnnotations extra = new TypeAnnotations();
-                        extra.annotations = enterAnnotations(tree.annotations);
-                        tree.typeAnnotations = extra;
+                        tree.typeAnnotations.annotations = enterAnnotations(tree.annotations);
 
                         // Enter dimension annotations.
                         for (List<JCAnnotation> annos : tree.dimAnnotations) {
@@ -1098,7 +1095,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                             lb.append(ta);
                         }
                         tree.dimTypeAnnotations = lb.toList();
-                    }
                     } finally {
                         log.useSource(prev);
                     }
