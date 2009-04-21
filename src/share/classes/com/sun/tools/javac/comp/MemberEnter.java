@@ -1002,23 +1002,21 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         private Env<AttrContext> env;
         public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
 
-        private List<Attribute.Compound> enterAnnotations(List<JCAnnotation> annotations) {
-            ListBuffer<Attribute.Compound> buf =
-                new ListBuffer<Attribute.Compound>();
+        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations) {
             Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
             if (!skipAnnotations)
-                for (List<JCAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
-                    JCAnnotation a = al.head;
+                for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
+                    JCTypeAnnotation a = al.head;
                     Attribute.Compound c = annotate.enterAnnotation(a,
                             syms.annotationType,
                             env);
                     if (c == null) continue;
-                    buf.append(c);
+                    Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, a.annoPosition);
+                    a.attribute = tc;
                     // Note: @Deprecated has no effect on local variables and parameters
                     if (!annotated.add(a.type.tsym))
                         log.error(a.pos, "duplicate.annotation");
                 }
-            return buf.toList();
         }
 
         // each class (including enclosed inner classes) should be visited
@@ -1040,7 +1038,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         @Override
         public void visitAnnotatedType(final JCAnnotatedType tree) {
-            final List<JCAnnotation> annotations = tree.annotations;
+            final List<JCTypeAnnotation> annotations = tree.annotations;
             annotate.later(new Annotate.Annotator() {
                 public String toString() {
                     return "annotate " + annotations + " onto " + tree;
@@ -1048,7 +1046,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                        tree.typeAnnotations.annotations = enterAnnotations(annotations);
+                        enterTypeAnnotations(annotations);
                     } finally {
                         log.useSource(prev);
                     }
@@ -1058,7 +1056,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
         @Override
         public void visitTypeParameter(final JCTypeParameter tree) {
-            final List<JCAnnotation> annotations = tree.annotations;
+            final List<JCTypeAnnotation> annotations = tree.annotations;
             annotate.later(new Annotate.Annotator() {
                 public String toString() {
                     return "annotate " + annotations + " onto " + tree;
@@ -1066,8 +1064,11 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                        tree.typeAnnotations.annotations = enterAnnotations(annotations);
-                        tree.type.tsym.attributes_field = tree.typeAnnotations.annotations;
+                        enterTypeAnnotations(annotations);
+                        List<Attribute.Compound> typeAnnotations = List.nil();
+                        for (JCTypeAnnotation anno : annotations)
+                            typeAnnotations.prepend(anno.attribute);
+                        tree.type.tsym.attributes_field = typeAnnotations;
                     } finally {
                         log.useSource(prev);
                     }
@@ -1084,17 +1085,13 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                        ListBuffer<TypeAnnotations> lb = ListBuffer.lb();
                         // Enter top-level annotations.
-                        tree.typeAnnotations.annotations = enterAnnotations(tree.annotations);
+                        enterTypeAnnotations(tree.annotations);
 
                         // Enter dimension annotations.
-                        for (List<JCAnnotation> annos : tree.dimAnnotations) {
-                            TypeAnnotations ta = new TypeAnnotations();
-                            ta.annotations = enterAnnotations(annos);
-                            lb.append(ta);
+                        for (List<JCTypeAnnotation> annos : tree.dimAnnotations) {
+                            enterTypeAnnotations(annos);
                         }
-                        tree.dimTypeAnnotations = lb.toList();
                     } finally {
                         log.useSource(prev);
                     }

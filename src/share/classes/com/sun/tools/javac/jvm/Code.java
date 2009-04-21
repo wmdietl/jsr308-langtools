@@ -1910,8 +1910,8 @@ public class Code {
         if (lv == null || lv.sym == null
                 || lv.sym.typeAnnotations == null)
             return;
-        for (TypeAnnotations ta : lv.sym.typeAnnotations) {
-            TypeAnnotations.Position p = ta.position;
+        for (Attribute.TypeCompound ta : lv.sym.typeAnnotations) {
+            TypeAnnotationPosition p = ta.position;
             while (p != null) {
                 p.lvarOffset[0] = (int)lv.start_pc;
                 p.lvarLength[0] = (int)lv.length;

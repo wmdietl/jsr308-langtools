@@ -1343,8 +1343,7 @@ public class ClassReader implements Completer {
 
     TypeAnnotationProxy readTypeAnnotation() {
         CompoundAnnotationProxy proxy = readCompoundAnnotation();
-
-        TypeAnnotations.Position position = readPosition();
+        TypeAnnotationPosition position = readPosition();
 
         if (debugJSR308)
             System.out.println("reading: " + proxy + " @ " + position);
@@ -1352,10 +1351,10 @@ public class ClassReader implements Completer {
         return new TypeAnnotationProxy(proxy, position);
     }
 
-    TypeAnnotations.Position readPosition() {
+    TypeAnnotationPosition readPosition() {
         byte tag = nextByte();
 
-        TypeAnnotations.Position position = new TypeAnnotations.Position();
+        TypeAnnotationPosition position = new TypeAnnotationPosition();
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
         position.type = type;
@@ -1559,11 +1558,13 @@ public class ClassReader implements Completer {
 
     /** A temporary proxy representing a type annotation.
      */
-    static class TypeAnnotationProxy extends
-            Pair<CompoundAnnotationProxy, TypeAnnotations.Position> {
-        TypeAnnotationProxy(CompoundAnnotationProxy fst,
-                TypeAnnotations.Position snd) {
-            super(fst, snd);
+    static class TypeAnnotationProxy {
+        final CompoundAnnotationProxy compound;
+        final TypeAnnotationPosition position;
+        public TypeAnnotationProxy(CompoundAnnotationProxy compound,
+                TypeAnnotationPosition position) {
+            this.compound = compound;
+            this.position = position;
         }
     }
 
@@ -1773,45 +1774,29 @@ public class ClassReader implements Completer {
             this.proxies = proxies;
         }
 
+        List<Attribute.TypeCompound> deproxyTypeCompoundList(List<TypeAnnotationProxy> proxies) {
+            ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
+            for (TypeAnnotationProxy proxy: proxies) {
+                Attribute.Compound compound = deproxyCompound(proxy.compound);
+                Attribute.TypeCompound typeCompound = new Attribute.TypeCompound(compound, proxy.position);
+                buf.add(typeCompound);
+            }
+            return buf.toList();
+        }
+
         @Override
         public void enterAnnotation() {
             JavaFileObject previousClassFile = currentClassFile;
             try {
                 currentClassFile = classFile;
+                List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
+              if (debugJSR308)
+              System.out.println("reading: adding " + newList
+                      + " to symbol " + sym);
+                sym.typeAnnotations = ((sym.typeAnnotations == null)
+                                        ? newList
+                                        : newList.prependList(sym.typeAnnotations));
 
-                Map<TypeAnnotations.Position,
-                        ListBuffer<CompoundAnnotationProxy>>
-                    typeAnnos = new HashMap<TypeAnnotations.Position,
-                                        ListBuffer<CompoundAnnotationProxy>>();
-
-                // Convert list of (position, annotation) to a map from
-                // positions to lists of annotation.
-
-                for (TypeAnnotationProxy proxy : proxies) {
-                    if (!typeAnnos.containsKey(proxy.snd))
-                        typeAnnos.put(proxy.snd,
-                                ListBuffer.<CompoundAnnotationProxy>lb());
-                    typeAnnos.get(proxy.snd).append(proxy.fst);
-                }
-
-                // Convert each position -> list of annotations mapping into a
-                // TypeAnnotations and associate them with the symbol.
-
-                ListBuffer<TypeAnnotations> forSym = ListBuffer.lb();
-
-                for (TypeAnnotations.Position pos : typeAnnos.keySet()) {
-                    TypeAnnotations ta = new TypeAnnotations();
-                    ta.position = pos;
-                    ta.annotations
-                        = deproxyCompoundList(typeAnnos.get(pos).toList());
-                    forSym = forSym.append(ta);
-                }
-
-                if (debugJSR308)
-                    System.out.println("reading: adding " + forSym.toList()
-                            + " to symbol " + sym);
-
-                sym.typeAnnotations = forSym.toList();
             } finally {
                 currentClassFile = previousClassFile;
             }

@@ -224,10 +224,10 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
-    public void printTypeAnnotations(List<JCAnnotation> trees) throws IOException {
+    public void printTypeAnnotations(List<JCTypeAnnotation> trees) throws IOException {
         if (trees.nonEmpty())
             print(" ");
-        for (List<JCAnnotation> l = trees; l.nonEmpty(); l = l.tail) {
+        for (List<JCTypeAnnotation> l = trees; l.nonEmpty(); l = l.tail) {
             printExpr(l.head);
             print(" ");
         }
@@ -864,7 +864,7 @@ public class Pretty extends JCTree.Visitor {
                 printBaseElementType(elem);
                 boolean isElemAnnoType = elem instanceof JCAnnotatedType;
                 int i = 0;
-                List<List<JCAnnotation>> da = tree.dimAnnotations;
+                List<List<JCTypeAnnotation>> da = tree.dimAnnotations;
                 for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                     if (da.size() > i) {
                         printTypeAnnotations(da.get(i));

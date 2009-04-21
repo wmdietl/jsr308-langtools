@@ -445,10 +445,10 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds) {
-        return TypeParameter(name, bounds, List.<JCAnnotation>nil());
+        return TypeParameter(name, bounds, List.<JCTypeAnnotation>nil());
     }
 
-    public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds, List<JCAnnotation> annos) {
+    public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds, List<JCTypeAnnotation> annos) {
         JCTypeParameter tree = new JCTypeParameter(name, bounds, annos);
         tree.pos = pos;
         return tree;
@@ -472,6 +472,12 @@ public class TreeMaker implements JCTree.Factory {
         return tree;
     }
 
+    public JCTypeAnnotation TypeAnnotation(JCTree annotationType, List<JCExpression> args) {
+        JCTypeAnnotation tree = new JCTypeAnnotation(annotationType, args);
+        tree.pos = pos;
+        return tree;
+    }
+
     public JCModifiers Modifiers(long flags, List<JCAnnotation> annotations) {
         JCModifiers tree = new JCModifiers(flags, annotations);
         boolean noFlags = (flags & Flags.StandardFlags) == 0;
@@ -483,7 +489,7 @@ public class TreeMaker implements JCTree.Factory {
         return Modifiers(flags, List.<JCAnnotation>nil());
     }
 
-    public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType) {
+    public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
         JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType);
         tree.pos = pos;
         return tree;

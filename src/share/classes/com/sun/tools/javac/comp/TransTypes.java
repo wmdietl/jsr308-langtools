@@ -817,8 +817,8 @@ public class TransTypes extends TreeTranslator {
             pop();
         }
 
-        private TypeAnnotations.Position resolveFrame(JCTree tree, JCTree frame,
-                List<JCTree> path, TypeAnnotations.Position p) {
+        private TypeAnnotationPosition resolveFrame(JCTree tree, JCTree frame,
+                List<JCTree> path, TypeAnnotationPosition p) {
             switch (frame.getKind()) {
                 case TYPE_CAST:
                     p.type = TargetType.TYPECAST;
@@ -888,7 +888,7 @@ public class TransTypes extends TreeTranslator {
                     return p;
                 }
                 case PARAMETERIZED_TYPE: {
-                    TypeAnnotations.Position nextP;
+                    TypeAnnotationPosition nextP;
                     if (((JCTypeApply)frame).clazz == tree)
                         nextP = p; // generic: RAW; noop
                     else if (((JCTypeApply)frame).arguments.contains(tree))
@@ -961,9 +961,9 @@ public class TransTypes extends TreeTranslator {
                     p.type = TargetType.WILDCARD_BOUND;
                     List<JCTree> newPath = path.tail;
 
-                    TypeAnnotations.Position wildcard =
+                    TypeAnnotationPosition wildcard =
                         resolveFrame(newPath.head, newPath.tail.head, newPath,
-                                new TypeAnnotations.Position());
+                                new TypeAnnotationPosition());
                     if (!wildcard.location.isEmpty())
                         wildcard.type = wildcard.type.getGenericComplement();
                     p.wildcard_position = wildcard;
@@ -981,70 +981,57 @@ public class TransTypes extends TreeTranslator {
             scan(tree.args);
         }
 
+        private void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
+            for (JCTypeAnnotation anno : annotations) {
+                anno.annoPosition = position;
+                anno.attribute.position = position;
+            }
+        }
+
         @Override
         public void visitNewArray(JCNewArray tree) {
+            findPosition(tree, tree, tree.annotations);
             for (int i = 0; i < tree.dimAnnotations.size(); ++i) {
                 JCTree frame = tree;
-                TypeAnnotations.Position p =
+                TypeAnnotationPosition p =
                     resolveFrame(tree, frame, frames.toList(),
-                            new TypeAnnotations.Position());
+                            new TypeAnnotationPosition());
                 p.location = p.location.append(i);
                 p.type = p.type.getGenericComplement();
-                tree.dimTypeAnnotations.get(i).position = p;
+                setTypeAnnotationPos(tree.dimAnnotations.get(i), p);
             }
-            JCTree frame = tree;
-            TypeAnnotations.Position p =
-                resolveFrame(tree, frame, frames.toList(),
-                        new TypeAnnotations.Position());
-            tree.typeAnnotations.position = p;
             super.visitNewArray(tree);
         }
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            if (!tree.annotations.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                if (debugJSR308) sb.append("trans: " + tree + "\n");
-//                System.out.print("  frame: ");
-//                if (tree.underlyingType != null)
-//                    System.out.print("(" + tree.underlyingType.getKind() + ") ");
-//                for (JCTree t : frames)
-//                    System.out.print(t.getKind() + " ");
-//                System.out.println();
-                JCTree frame = peek2();
-                TypeAnnotations.Position p =
-                        resolveFrame(tree, frame, frames.toList(),
-                                new TypeAnnotations.Position());
-                if (!p.location.isEmpty())
-                    p.type = p.type.getGenericComplement();
-                tree.typeAnnotations.position = p;
-                if (debugJSR308) {
-                    sb.append("  target: " + p + "\n");
-                    System.out.println(sb.toString());
-                }
-            }
+            findPosition(tree, peek2(), tree.annotations);
             super.visitAnnotatedType(tree);
         }
 
         @Override
         public void visitTypeParameter(JCTypeParameter tree) {
-            if (!tree.annotations.isEmpty()) {
+            findPosition(tree, peek2(), tree.annotations);
+            super.visitTypeParameter(tree);
+        }
+
+        void findPosition(JCTree tree, JCTree frame, List<JCTypeAnnotation> annotations) {
+            if (!annotations.isEmpty()) {
                 StringBuilder sb = new StringBuilder();
                 if (debugJSR308) sb.append("trans: " + tree + "\n");
-                JCTree frame = peek2();
-                TypeAnnotations.Position p =
+                TypeAnnotationPosition p =
                         resolveFrame(tree, frame, frames.toList(),
-                                new TypeAnnotations.Position());
+                                new TypeAnnotationPosition());
                 if (!p.location.isEmpty())
                     p.type = p.type.getGenericComplement();
-                tree.typeAnnotations.position = p;
+                setTypeAnnotationPos(annotations, p);
                 if (debugJSR308) {
                     sb.append("  target: " + p + "\n");
                     System.out.println(sb.toString());
                 }
-            }
-            super.visitTypeParameter(tree);
+            }            
         }
+
         private int methodParamIndex(List<JCTree> path, JCTree param) {
 //            assert param.sym.getKind() == ElementKind.PARAMETER;
             List<JCTree> curr = path;
@@ -1084,11 +1071,14 @@ public class TransTypes extends TreeTranslator {
             lastVar = tree;
             if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE && !tree.mods.annotations.isEmpty()) {
                 // need to lift the annotations
-                TypeAnnotations typeAnnotations = new TypeAnnotations();
-                typeAnnotations.annotations = tree.sym.attributes_field;
-                typeAnnotations.position.pos = tree.pos;
-                typeAnnotations.position.type = TargetType.LOCAL_VARIABLE;
-                lift(List.of(typeAnnotations));
+                TypeAnnotationPosition position = new TypeAnnotationPosition();
+                position.pos = tree.pos;
+                position.type = TargetType.LOCAL_VARIABLE;
+                for (Attribute.Compound attribute : tree.sym.attributes_field) {
+                    Attribute.TypeCompound tc =
+                        new Attribute.TypeCompound(attribute.type, attribute.values, position);
+                    lift(tc);
+                }
             }
             super.visitVarDef(tree);
             lastVar = null;
@@ -1103,48 +1093,52 @@ public class TransTypes extends TreeTranslator {
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            lift(List.of(tree.typeAnnotations));
+            lift(tree.annotations);
             super.visitAnnotatedType(tree);
         }
 
         @Override
         public void visitNewArray(JCNewArray tree) {
-            lift(tree.dimTypeAnnotations.append(tree.typeAnnotations));
+            lift(tree.annotations);
+            for (List<JCTypeAnnotation> dimAnno : tree.dimAnnotations)
+                lift(dimAnno);
             super.visitNewArray(tree);
         }
 
         @Override
         public void visitTypeParameter(JCTypeParameter tree) {
-            lift(List.of(tree.typeAnnotations));
+            lift(tree.annotations);
             super.visitTypeParameter(tree);
         }
-        public void lift(List<TypeAnnotations> ta) {
-            if ((ta.tail == null || ta.tail.isEmpty()) && ta.head.annotations.isEmpty())
-                return;
+        public void lift(List<JCTypeAnnotation> annotations) {
+            for (JCTypeAnnotation anno : annotations)
+                lift(anno.attribute);
+        }
+        public void lift(Attribute.TypeCompound tc) {
             if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
                 if (debugJSR308)
-                    System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                    System.out.println("gen: " + tc + " -> " + lastVar.sym);
                 lastVar.sym.typeAnnotations =
-                    lastVar.sym.typeAnnotations.appendList(ta);
+                    lastVar.sym.typeAnnotations.append(tc);
             } else if (lastMethod != null) {
                 if (debugJSR308)
-                    System.out.println("gen: " + ta + " -> " + lastMethod.sym);
+                    System.out.println("gen: " + tc + " -> " + lastMethod.sym);
                 lastMethod.sym.typeAnnotations =
-                    lastMethod.sym.typeAnnotations.appendList(ta);
+                    lastMethod.sym.typeAnnotations.append(tc);
             } else if (clazz != null) {
                 if (debugJSR308)
-                    System.out.println("gen: " + ta + " -> " + clazz.sym);
+                    System.out.println("gen: " + tc + " -> " + clazz.sym);
                 clazz.sym.typeAnnotations =
-                    clazz.sym.typeAnnotations.appendList(ta);
+                    clazz.sym.typeAnnotations.append(tc);
             } else
                 throw new AssertionError();
             // We also add typeannotations to local variables to ease
             // finding them later in Gen
             if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {
                 if (debugJSR308)
-                    System.out.println("gen: " + ta + " -> " + lastVar.sym);
+                    System.out.println("gen: " + tc + " -> " + lastVar.sym);
                 lastVar.sym.typeAnnotations =
-                    lastVar.sym.typeAnnotations.appendList(ta);
+                    lastVar.sym.typeAnnotations.append(tc);
             }
         }
     }

@@ -1788,9 +1788,9 @@ public class Check {
 
     /** Check the type annotations
      */
-    public void validateTypeAnnotations(List<JCAnnotation> annotations, boolean isTypeParameter) {
+    public void validateTypeAnnotations(List<JCTypeAnnotation> annotations, boolean isTypeParameter) {
         if (skipAnnotations) return;
-        for (JCAnnotation a : annotations)
+        for (JCTypeAnnotation a : annotations)
             validateTypeAnnotation(a, isTypeParameter);
     }
 
@@ -1808,7 +1808,7 @@ public class Check {
         }
     }
 
-    public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
+    public void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         assert a.type != null;
         validateAnnotation(a);
 
@@ -1835,7 +1835,7 @@ public class Check {
     }
 
     /** Is the annotation applicable to type annotations */
-    boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
+    boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) return true;

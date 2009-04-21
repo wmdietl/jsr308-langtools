@@ -103,7 +103,7 @@ public class JavacParser implements Parser {
     // implementations are possible but would cause much larger changes to
     // the parser.
     /** Type annotations that have already been read but have not yet been used. **/
-    private List<JCAnnotation> typeAnnotationsPushedBack = null;
+    private List<JCTypeAnnotation> typeAnnotationsPushedBack = null;
     /**
      * If the parser notices extra annotations, then it either immediately
      * issues an error (if this variable is false) or places the extra
@@ -618,11 +618,11 @@ public class JavacParser implements Parser {
      * parsing annotations.
      */
     public JCExpression parseType() {
-        List<JCAnnotation> annotations = typeAnnotationsOpt();
+        List<JCTypeAnnotation> annotations = typeAnnotationsOpt();
         return parseType(annotations);
     }
 
-    public JCExpression parseType(List<JCAnnotation> annotations) {
+    public JCExpression parseType(List<JCTypeAnnotation> annotations) {
         int prevmode = mode;
         mode = TYPE;
 
@@ -649,12 +649,12 @@ public class JavacParser implements Parser {
      * distinguish parsing JSR 175 annotations from parsing JSR 308 annotations.
      * Saves {@code mode} and restores it after parsing annotations.
      */
-    public List<JCAnnotation> typeAnnotationsOpt() {
+    public List<JCTypeAnnotation> typeAnnotationsOpt() {
         // Code identical to annotationsOpt() with two modification
         // 1. preserves the mode, and
         // 2. uses typeAnnotation() instead of annotation()
         if (S.token() != MONKEYS_AT) return List.nil(); // optimization
-        ListBuffer<JCAnnotation> buf = new ListBuffer<JCAnnotation>();
+        ListBuffer<JCTypeAnnotation> buf = new ListBuffer<JCTypeAnnotation>();
         int prevmode = mode;
         while (S.token() == MONKEYS_AT) {
             int pos = S.pos();
@@ -664,7 +664,7 @@ public class JavacParser implements Parser {
         lastmode = mode;
         mode = prevmode;
 
-        List<JCAnnotation> annotations = buf.toList();
+        List<JCTypeAnnotation> annotations = buf.toList();
 
         if (debugJSR308)
             System.out.println(annotations);
@@ -1054,7 +1054,7 @@ public class JavacParser implements Parser {
         case MONKEYS_AT:
 
             /// JSR 308: handle annotated class literals/cast types
-            List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+            List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
             assert !typeAnnos.isEmpty(); // else there would be no "@"
 
             JCExpression expr = term3();
@@ -1086,7 +1086,7 @@ public class JavacParser implements Parser {
             t = toP(F.at(S.pos()).Ident(ident()));
             loop: while (true) {
                 pos = S.pos();
-                final List<JCAnnotation> annos = typeAnnotationsOpt();
+                final List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
                 // need to report an error later if LBRACKET is for array
                 // index access rather than array creation level
@@ -1198,7 +1198,7 @@ public class JavacParser implements Parser {
         while (true) {
             int pos1 = S.pos();
 
-            final List<JCAnnotation> annos = typeAnnotationsOpt();
+            final List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
             if (S.token() == LBRACKET) {
                 S.nextToken();
@@ -1397,7 +1397,7 @@ public class JavacParser implements Parser {
      *               | "?" SUPER Type
      */
     JCExpression typeArgument() {
-        List<JCAnnotation> annotations = typeAnnotationsOpt();
+        List<JCTypeAnnotation> annotations = typeAnnotationsOpt();
         if (S.token() != QUES) return parseType(annotations);
         int pos = S.pos();
         S.nextToken();
@@ -1442,8 +1442,8 @@ public class JavacParser implements Parser {
      * the expression <code>t</code>.
      */
     private JCExpression bracketsOpt(JCExpression t,
-            List<JCAnnotation> annotations) {
-        List<JCAnnotation> nextLevelAnnotations = typeAnnotationsOpt();
+            List<JCTypeAnnotation> annotations) {
+        List<JCTypeAnnotation> nextLevelAnnotations = typeAnnotationsOpt();
 
         if (S.token() == LBRACKET) {
             int pos = S.pos();
@@ -1467,11 +1467,11 @@ public class JavacParser implements Parser {
     /** BracketsOpt = {"[" TypeAnnotations "]"}
      */
     private JCExpression bracketsOpt(JCExpression t) {
-        return bracketsOpt(t, List.<JCAnnotation>nil());
+        return bracketsOpt(t, List.<JCTypeAnnotation>nil());
     }
 
     private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos,
-            List<JCAnnotation> annotations) {
+            List<JCTypeAnnotation> annotations) {
         accept(RBRACKET);
         t = bracketsOpt(t, annotations);
         return toP(F.at(pos).TypeArray(t));
@@ -1512,7 +1512,7 @@ public class JavacParser implements Parser {
     JCExpression creator(int newpos, List<JCExpression> typeArgs) {
 
         // JSR 308: handle annotated "new" expressions
-        List<JCAnnotation> newAnnotations = typeAnnotationsOpt();
+        List<JCTypeAnnotation> newAnnotations = typeAnnotationsOpt();
 
         switch (S.token()) {
         case BYTE: case SHORT: case CHAR: case INT: case LONG: case FLOAT:
@@ -1567,7 +1567,7 @@ public class JavacParser implements Parser {
             JCNewClass newClass = classCreatorRest(newpos, null, typeArgs, t);
             if (newClass.def != null) {
                 assert newClass.def.mods.annotations.isEmpty();
-                newClass.def.mods.annotations = newAnnotations;
+                newClass.def.mods.annotations = List.convert(JCAnnotation.class, newAnnotations);
             }
             return newClass;
         } else {
@@ -1597,14 +1597,14 @@ public class JavacParser implements Parser {
         // JSR 308: For the ELTS convention, "new @A Object[]" should result in
         // a parse tree where @A is on the array, not one where the @A is on
         // Object.
-        List<JCAnnotation> topAnnos = List.nil();
+        List<JCTypeAnnotation> topAnnos = List.nil();
         if (elemtype.getTag() == JCTree.ANNOTATED_TYPE) {
             JCAnnotatedType atype = (JCAnnotatedType) elemtype;
             topAnnos = atype.annotations;
             elemtype = atype.underlyingType;
         }
 
-        List<JCAnnotation> annos = typeAnnotationsOpt();
+        List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
         accept(LBRACKET);
 
@@ -1626,14 +1626,14 @@ public class JavacParser implements Parser {
             ListBuffer<JCExpression> dims = new ListBuffer<JCExpression>();
 
             // JSR 308: maintain dimension annotations list
-            ListBuffer<List<JCAnnotation>> dimAnnotations = ListBuffer.lb();
+            ListBuffer<List<JCTypeAnnotation>> dimAnnotations = ListBuffer.lb();
             dimAnnotations.append(annos);
 
             dims.append(parseExpression());
             accept(RBRACKET);
             while (S.token() == LBRACKET
                     || (S.token() == MONKEYS_AT)) {
-                List<JCAnnotation> maybeDimAnnos = typeAnnotationsOpt();
+                List<JCTypeAnnotation> maybeDimAnnos = typeAnnotationsOpt();
                 int pos = S.pos();
                 S.nextToken();
                 if (S.token() == RBRACKET) {
@@ -2189,10 +2189,16 @@ public class JavacParser implements Parser {
         return mods;
     }
 
-    JCAnnotation typeAnnotation(int pos) {
+    JCTypeAnnotation typeAnnotation(int pos) {
         // accept(AT); // AT consumed by caller
         checkTypeAnnotations();
-        return annotation(pos);
+        // code copied from annotation(int pos)
+        checkAnnotations();
+        JCTree ident = qualident();
+        List<JCExpression> fieldValues = annotationFieldValuesOpt();
+        JCTypeAnnotation ann = F.at(pos).TypeAnnotation(ident, fieldValues);
+        storeEnd(ann, S.prevEndPos());
+        return ann;
     }
 
     /** Annotation              = "@" Qualident [ "(" AnnotationFieldValues ")" ]
@@ -2772,10 +2778,13 @@ public class JavacParser implements Parser {
                         JCAnnotatedType atype = (JCAnnotatedType)type;
                         type = atype.underlyingType;
                         // mods.annotations should never be null I believe
+                        
+                        List<JCAnnotation> annotations = List.convert(JCAnnotation.class, atype.annotations);
+                        // appendList could use some wildcards
                         if (mods.annotations == null)
-                            mods.annotations = atype.annotations;
+                            mods.annotations = annotations;
                         else
-                            mods.annotations = mods.annotations.appendList(atype.annotations);
+                            mods.annotations = mods.annotations.appendList(annotations);
                     }
                 }
                 if (S.token() == LPAREN && !isInterface && type.getTag() == JCTree.IDENT) {
@@ -2831,7 +2840,7 @@ public class JavacParser implements Parser {
                               String dc) {
         List<JCVariableDecl> params = formalParameters();
 
-        List<JCAnnotation> receiverAnnotations;
+        List<JCTypeAnnotation> receiverAnnotations;
         if (!isVoid) {
             // need to distinguish between receiver anno and array anno
             // look at typeAnnotationsPushedBack comment
@@ -2887,7 +2896,7 @@ public class JavacParser implements Parser {
         ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
         // JSR 308: handle annotations on a qualified identifier list (for
         // annotations on exception types in method "thrown" clauses)
-        List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
+        List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
         if (!typeAnnos.isEmpty())
             ts.append(F.AnnotatedType(typeAnnos, qualident()));
         else
@@ -2930,7 +2939,7 @@ public class JavacParser implements Parser {
      */
     JCTypeParameter typeParameter() {
         int pos = S.pos();
-        List<JCAnnotation> annos = typeAnnotationsOpt();
+        List<JCTypeAnnotation> annos = typeAnnotationsOpt();
         Name name = ident();
         ListBuffer<JCExpression> bounds = new ListBuffer<JCExpression>();
         if (S.token() == EXTENDS) {
@@ -2982,7 +2991,7 @@ public class JavacParser implements Parser {
         this.permitTypeAnnotationsPushBack = false;
 
         // JSR 308: handle annotations on a varargs element type
-        List<JCAnnotation> varargsAnnos = typeAnnotationsOpt();
+        List<JCTypeAnnotation> varargsAnnos = typeAnnotationsOpt();
         if (S.token() == ELLIPSIS) {
             if (typeAnnotationsPushedBack != null) {
                 varargsAnnos = varargsAnnos.prependList(typeAnnotationsPushedBack);

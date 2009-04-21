@@ -2855,14 +2855,14 @@ public class Attr extends JCTree.Visitor {
         }
         public void visitNewArray(JCNewArray tree) {
             chk.validateTypeAnnotations(tree.annotations, false);
-            for (List<JCAnnotation> annotations : tree.dimAnnotations)
+            for (List<JCTypeAnnotation> annotations : tree.dimAnnotations)
                 chk.validateTypeAnnotations(annotations, false);
             super.visitNewArray(tree);
         }
         public void visitMethodDef(JCMethodDecl tree) {
             // need to check static methods
             if ((tree.sym.flags() & Flags.STATIC) != 0) {
-                for (JCAnnotation a : tree.getReceiver().annotations) {
+                for (JCTypeAnnotation a : tree.getReceiver().annotations) {
                     if (chk.isTypeAnnotation(a, false))
                         log.error(a.pos(), "annotation.type.not.applicable");
                 }

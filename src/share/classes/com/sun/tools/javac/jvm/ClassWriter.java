@@ -769,21 +769,18 @@ public class ClassWriter extends ClassFile {
         return attrCount;
     }
 
-    int writeTypeAnnotations(List<TypeAnnotations> typeAnnos) {
+    int writeTypeAnnotations(List<Attribute.TypeCompound> typeAnnos) {
         if (typeAnnos.isEmpty()) return 0;
 
-        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> visibles = ListBuffer.lb();
-        ListBuffer<Pair<Attribute.Compound, TypeAnnotations.Position>> invisibles = ListBuffer.lb();
+        ListBuffer<Attribute.TypeCompound> visibles = ListBuffer.lb();
+        ListBuffer<Attribute.TypeCompound> invisibles = ListBuffer.lb();
 
-        for (TypeAnnotations ta : typeAnnos) {
-            if (ta.annotations.isEmpty() || ta.position.type == TargetType.UNKNOWN) continue;
-            for (Attribute.Compound a : ta.annotations) {
-                switch (getRetention(a.type.tsym)) {
+        for (Attribute.TypeCompound tc : typeAnnos) {
+                switch (getRetention(tc.type.tsym)) {
                 case SOURCE: break;
-                case CLASS: invisibles.append(Pair.of(a, ta.position)); break;
-                case RUNTIME: visibles.append(Pair.of(a, ta.position)); break;
+                case CLASS: invisibles.append(tc); break;
+                case RUNTIME: visibles.append(tc); break;
                 default: ;// /* fail soft */ throw new AssertionError(vis);
-                }
             }
         }
 
@@ -791,8 +788,8 @@ public class ClassWriter extends ClassFile {
         if (visibles.length() != 0) {
             int attrIndex = writeAttr(names.RuntimeVisibleTypeAnnotations);
             databuf.appendChar(visibles.length());
-            for (Pair<Attribute.Compound, TypeAnnotations.Position> p : visibles)
-                writeTypeAnnotation(p.fst, p.snd);
+            for (Attribute.TypeCompound p : visibles)
+                writeTypeAnnotation(p);
             endAttr(attrIndex);
             attrCount++;
         }
@@ -800,8 +797,8 @@ public class ClassWriter extends ClassFile {
         if (invisibles.length() != 0) {
             int attrIndex = writeAttr(names.RuntimeInvisibleTypeAnnotations);
             databuf.appendChar(invisibles.length());
-            for (Pair<Attribute.Compound, TypeAnnotations.Position> p : invisibles)
-                writeTypeAnnotation(p.fst, p.snd);
+            for (Attribute.TypeCompound p : invisibles)
+                writeTypeAnnotation(p);
             endAttr(attrIndex);
             attrCount++;
         }
@@ -909,15 +906,15 @@ public class ClassWriter extends ClassFile {
         }
     }
 
-    void writeTypeAnnotation(Attribute.Compound c, TypeAnnotations.Position p) {
+    void writeTypeAnnotation(Attribute.TypeCompound c) {
         // ignore UNKNOWN attributes - improve testing
       if (debugJSR308)
-        System.out.println("writing " + c + " at " + p);
+        System.out.println("writing " + c + " at " + c.position);
       writeCompoundAttribute(c);
-      writePosition(p);
+      writePosition(c.position);
     }
 
-    void writePosition(TypeAnnotations.Position p) {
+    void writePosition(TypeAnnotationPosition p) {
         databuf.appendByte(p.type.targetTypeValue());
         switch (p.type) {
         // type case

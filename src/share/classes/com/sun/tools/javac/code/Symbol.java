@@ -100,7 +100,7 @@ public abstract class Symbol implements Element {
      */
     public Type type;
 
-    public List<TypeAnnotations> typeAnnotations;
+    public List<Attribute.TypeCompound> typeAnnotations;
 
     /** The owner of this symbol.
      */
