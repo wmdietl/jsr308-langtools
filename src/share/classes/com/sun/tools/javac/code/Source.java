@@ -95,13 +95,14 @@ public enum Source {
         this.name = name;
     }
 
-    public static final Source DEFAULT = JDK1_5;
+    public static final Source DEFAULT = JDK1_7;
 
     public static Source lookup(String name) {
         return tab.get(name);
     }
 
     public Target requiredTarget() {
+        if (this == JDK1_7) return Target.JDK1_5;
         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
         if (this.compareTo(JDK1_6) >= 0) return Target.JDK1_6;
         if (this.compareTo(JDK1_5) >= 0) return Target.JDK1_5;
