@@ -1036,7 +1036,7 @@ public class TransTypes extends TreeTranslator {
                     sb.append("  target: " + p + "\n");
                     System.out.println(sb.toString());
                 }
-            }            
+            }
         }
 
         private int methodParamIndex(List<JCTree> path, JCTree param) {

@@ -216,7 +216,7 @@ public abstract class Attribute implements AnnotationValue {
             super(type, values);
             this.position = position;
         }
-        
+
     }
 
     /** The value for an annotation element of an array type.

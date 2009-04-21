@@ -2727,7 +2727,7 @@ public class JavacParser implements Parser {
                     type = to(F.at(pos).TypeIdent(TypeTags.VOID));
                     S.nextToken();
                 } else {
-                    
+
                     // In case of a method declaration like
                     //    <T> @A String get() { ... }
                     // @A is parsed as a type annotation on the method return
