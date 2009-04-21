@@ -624,7 +624,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public JCExpression restype;
         public List<JCTypeParameter> typarams;
         public List<JCVariableDecl> params;
-        public JCAnnotatedType receiver;
+        public List<JCTypeAnnotation> receiverAnnotations;
         public List<JCExpression> thrown;
         public JCBlock body;
         public JCExpression defaultValue; // for annotation types
@@ -634,7 +634,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                             JCExpression restype,
                             List<JCTypeParameter> typarams,
                             List<JCVariableDecl> params,
-                            JCAnnotatedType receiver,
+                            List<JCTypeAnnotation> receiver,
                             List<JCExpression> thrown,
                             JCBlock body,
                             JCExpression defaultValue,
@@ -645,8 +645,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
             this.restype = restype;
             this.typarams = typarams;
             this.params = params;
-            this.receiver = (receiver != null ? receiver : new
-                    JCAnnotatedType(List.<JCTypeAnnotation>nil(), null));
+            this.receiverAnnotations = (receiver != null ? receiver : List.<JCTypeAnnotation>nil());
             this.thrown = thrown;
             this.body = body;
             this.defaultValue = defaultValue;
@@ -665,7 +664,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCVariableDecl> getParameters() {
             return params;
         }
-        public JCAnnotatedType getReceiver() { return receiver; }
+        public List<JCTypeAnnotation> getReceiverAnnotations() { return receiverAnnotations; }
         public List<JCExpression> getThrows() {
             return thrown;
         }
@@ -2111,7 +2110,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                             JCExpression restype,
                             List<JCTypeParameter> typarams,
                             List<JCVariableDecl> params,
-                            JCAnnotatedType receiver,
+                            List<JCTypeAnnotation> receiver,
                             List<JCExpression> thrown,
                             JCBlock body,
                             JCExpression defaultValue);

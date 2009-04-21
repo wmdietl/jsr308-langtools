@@ -2855,7 +2855,6 @@ public class JavacParser implements Parser {
         } else
             receiverAnnotations = typeAnnotationsOpt();
 
-        JCAnnotatedType receiver = F.at(pos).AnnotatedType(receiverAnnotations, null);
         List<JCExpression> thrown = List.nil();
         if (S.token() == THROWS) {
             S.nextToken();
@@ -2884,7 +2883,7 @@ public class JavacParser implements Parser {
         }
         JCMethodDecl result =
             toP(F.at(pos).MethodDef(mods, name, type, typarams,
-                                    params, receiver, thrown,
+                                    params, receiverAnnotations, thrown,
                                     body, defaultValue));
         attach(result, dc);
         return result;

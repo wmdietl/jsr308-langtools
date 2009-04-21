@@ -858,7 +858,7 @@ public class TransTypes extends TreeTranslator {
                 case METHOD: {
                     JCMethodDecl frameMethod = (JCMethodDecl)frame;
                     p.pos = frame.pos;
-                    if (frameMethod.receiver == tree)
+                    if (frameMethod.receiverAnnotations.contains(tree))
                         p.type = TargetType.METHOD_RECEIVER;
                     else if (frameMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
@@ -1010,6 +1010,13 @@ public class TransTypes extends TreeTranslator {
         }
 
         @Override
+        public void visitMethodDef(JCMethodDecl tree) {
+            TypeAnnotationPosition p = new TypeAnnotationPosition();
+            p.type = TargetType.METHOD_RECEIVER;
+            setTypeAnnotationPos(tree.receiverAnnotations, p);
+            super.visitMethodDef(tree);
+        }
+        @Override
         public void visitTypeParameter(JCTypeParameter tree) {
             findPosition(tree, peek2(), tree.annotations);
             super.visitTypeParameter(tree);
@@ -1062,6 +1069,7 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitMethodDef(JCMethodDecl tree) {
             lastMethod = tree;
+            lift(tree.receiverAnnotations);
             super.visitMethodDef(tree);
             lastMethod = null;
         }

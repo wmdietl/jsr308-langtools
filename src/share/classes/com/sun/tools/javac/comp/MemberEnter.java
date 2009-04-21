@@ -1036,9 +1036,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             scan(tree.defs);
         }
 
-        @Override
-        public void visitAnnotatedType(final JCAnnotatedType tree) {
-            final List<JCTypeAnnotation> annotations = tree.annotations;
+        private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
             annotate.later(new Annotate.Annotator() {
                 public String toString() {
                     return "annotate " + annotations + " onto " + tree;
@@ -1052,57 +1050,34 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                     }
                 }
             });
+        }
+
+        @Override
+        public void visitAnnotatedType(final JCAnnotatedType tree) {
+            annotate(tree, tree.annotations);
             super.visitAnnotatedType(tree);
         }
         @Override
         public void visitTypeParameter(final JCTypeParameter tree) {
-            final List<JCTypeAnnotation> annotations = tree.annotations;
-            annotate.later(new Annotate.Annotator() {
-                public String toString() {
-                    return "annotate " + annotations + " onto " + tree;
-                }
-                public void enterAnnotation() {
-                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
-                    try {
-                        enterTypeAnnotations(annotations);
-                        List<Attribute.Compound> typeAnnotations = List.nil();
-                        for (JCTypeAnnotation anno : annotations)
-                            typeAnnotations.prepend(anno.attribute);
-                        tree.type.tsym.attributes_field = typeAnnotations;
-                    } finally {
-                        log.useSource(prev);
-                    }
-                }
-            });
+            annotate(tree, tree.annotations);
             super.visitTypeParameter(tree);
         }
         @Override
         public void visitNewArray(final JCNewArray tree) {
-            annotate.later(new Annotate.Annotator() {
-                public String toString() {
-                    return "annotate onto " + tree;
-                }
-                public void enterAnnotation() {
-                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
-                    try {
-                        // Enter top-level annotations.
-                        enterTypeAnnotations(tree.annotations);
-
-                        // Enter dimension annotations.
-                        for (List<JCTypeAnnotation> annos : tree.dimAnnotations) {
-                            enterTypeAnnotations(annos);
-                        }
-                    } finally {
-                        log.useSource(prev);
-                    }
-                }
-            });
+            annotate(tree, tree.annotations);
+            for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)
+                annotate(tree, dimAnnos);
             super.visitNewArray(tree);
         }
         @Override
         public void visitApply(JCMethodInvocation tree) {
             super.visitApply(tree);
             scan(tree.typeargs);
+        }
+        @Override
+        public void visitMethodDef(JCMethodDecl tree) {
+            annotate(tree, tree.receiverAnnotations);
+            super.visitMethodDef(tree);
         }
     }
 

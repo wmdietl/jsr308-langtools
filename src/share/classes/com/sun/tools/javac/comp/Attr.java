@@ -2862,10 +2862,11 @@ public class Attr extends JCTree.Visitor {
         public void visitMethodDef(JCMethodDecl tree) {
             // need to check static methods
             if ((tree.sym.flags() & Flags.STATIC) != 0) {
-                for (JCTypeAnnotation a : tree.getReceiver().annotations) {
-                    if (chk.isTypeAnnotation(a, false))
-                        log.error(a.pos(), "annotation.type.not.applicable");
+                for (JCTypeAnnotation a : tree.receiverAnnotations) {
+                    log.error(a.pos(), "annotation.type.not.applicable");
                 }
+            } else {
+                chk.validateTypeAnnotations(tree.receiverAnnotations, false);
             }
             super.visitMethodDef(tree);
         }

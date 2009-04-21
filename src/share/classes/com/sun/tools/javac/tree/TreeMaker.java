@@ -179,7 +179,7 @@ public class TreeMaker implements JCTree.Factory {
                                JCExpression restype,
                                List<JCTypeParameter> typarams,
                                List<JCVariableDecl> params,
-                               JCAnnotatedType receiver,
+                               List<JCTypeAnnotation> receiver,
                                List<JCExpression> thrown,
                                JCBlock body,
                                JCExpression defaultValue)
