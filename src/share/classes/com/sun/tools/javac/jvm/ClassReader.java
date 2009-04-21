@@ -1074,14 +1074,13 @@ public class ClassReader implements Completer {
             },
 
             // v51 attributes
-            // TODO: change v49 to v51
-            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
 
-            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
