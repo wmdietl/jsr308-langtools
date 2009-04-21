@@ -2845,28 +2845,24 @@ public class Attr extends JCTree.Visitor {
     }
     private final JCTree.Visitor typeAnnotationsValidator =
         new TreeScanner() {
-        public void visitAnnotatedType(JCAnnotatedType tree) {
-            chk.validateTypeAnnotations(tree.annotations, false);
-            super.visitAnnotatedType(tree);
+        public void visitAnnotation(JCAnnotation tree) {
+            if (tree instanceof JCTypeAnnotation) {
+                chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
+            }
+            super.visitAnnotation(tree);
         }
         public void visitTypeParameter(JCTypeParameter tree) {
             chk.validateTypeAnnotations(tree.annotations, true);
-            super.visitTypeParameter(tree);
-        }
-        public void visitNewArray(JCNewArray tree) {
-            chk.validateTypeAnnotations(tree.annotations, false);
-            for (List<JCTypeAnnotation> annotations : tree.dimAnnotations)
-                chk.validateTypeAnnotations(annotations, false);
-            super.visitNewArray(tree);
+            // don't call super. skip type annotations
+            scan(tree.bounds);
         }
         public void visitMethodDef(JCMethodDecl tree) {
             // need to check static methods
             if ((tree.sym.flags() & Flags.STATIC) != 0) {
                 for (JCTypeAnnotation a : tree.receiverAnnotations) {
-                    log.error(a.pos(), "annotation.type.not.applicable");
+                    if (chk.isTypeAnnotation(a, false))
+                        log.error(a.pos(), "annotation.type.not.applicable");
                 }
-            } else {
-                chk.validateTypeAnnotations(tree.receiverAnnotations, false);
             }
             super.visitMethodDef(tree);
         }

@@ -2765,26 +2765,26 @@ public class JavacParser implements Parser {
                     type = to(F.at(pos).TypeIdent(TypeTags.VOID));
                     S.nextToken();
                 } else {
-                    // JSR 308: use a type without annotations, since we have
-                    // already parsed JSR 175 annotations with modifiersOpt()
-                    type = unannotatedType();
-
+                    
                     // In case of a method declaration like
                     //    <T> @A String get() { ... }
                     // @A is parsed as a type annotation on the method return
                     // type (illegal) rather than an annotation on the method
                     // itself
-                    if (type instanceof JCAnnotatedType) {
-                        JCAnnotatedType atype = (JCAnnotatedType)type;
-                        type = atype.underlyingType;
-                        // mods.annotations should never be null I believe
-                        
-                        List<JCAnnotation> annotations = List.convert(JCAnnotation.class, atype.annotations);
+                    List<JCAnnotation> annosAfterParams = List.nil();
+                    if (S.token() == Token.MONKEYS_AT && typarams.nonEmpty())
+                        annosAfterParams = annotationsOpt();
+
+                    // JSR 308: use a type without annotations, since we have
+                    // already parsed JSR 175 annotations with modifiersOpt()
+                    type = unannotatedType();
+
+                    if (annosAfterParams.nonEmpty()) {
                         // appendList could use some wildcards
                         if (mods.annotations == null)
-                            mods.annotations = annotations;
+                            mods.annotations = annosAfterParams;
                         else
-                            mods.annotations = mods.annotations.appendList(annotations);
+                            mods.annotations = mods.annotations.appendList(annosAfterParams);
                     }
                 }
                 if (S.token() == LPAREN && !isInterface && type.getTag() == JCTree.IDENT) {

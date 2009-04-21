@@ -983,8 +983,8 @@ public class TransTypes extends TreeTranslator {
 
         private void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
             for (JCTypeAnnotation anno : annotations) {
-                anno.annoPosition = position;
-                anno.attribute.position = position;
+                anno.annotation_position = position;
+                anno.attribute_field.position = position;
             }
         }
 
@@ -1069,7 +1069,6 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitMethodDef(JCMethodDecl tree) {
             lastMethod = tree;
-            lift(tree.receiverAnnotations);
             super.visitMethodDef(tree);
             lastMethod = null;
         }
@@ -1077,7 +1076,7 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitVarDef(JCVariableDecl tree) {
             lastVar = tree;
-            if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE && !tree.mods.annotations.isEmpty()) {
+            if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE && tree.mods.annotations.nonEmpty()) {
                 // need to lift the annotations
                 TypeAnnotationPosition position = new TypeAnnotationPosition();
                 position.pos = tree.pos;
@@ -1099,31 +1098,14 @@ public class TransTypes extends TreeTranslator {
             scan(tree.args);
         }
 
-        @Override
-        public void visitAnnotatedType(JCAnnotatedType tree) {
-            lift(tree.annotations);
-            super.visitAnnotatedType(tree);
+        public void visitAnnotation(JCAnnotation tree) {
+            if (tree instanceof JCTypeAnnotation)
+                lift(((JCTypeAnnotation)tree).attribute_field);
+            super.visitAnnotation(tree);
         }
 
-        @Override
-        public void visitNewArray(JCNewArray tree) {
-            lift(tree.annotations);
-            for (List<JCTypeAnnotation> dimAnno : tree.dimAnnotations)
-                lift(dimAnno);
-            super.visitNewArray(tree);
-        }
-
-        @Override
-        public void visitTypeParameter(JCTypeParameter tree) {
-            lift(tree.annotations);
-            super.visitTypeParameter(tree);
-        }
-        public void lift(List<JCTypeAnnotation> annotations) {
-            for (JCTypeAnnotation anno : annotations)
-                lift(anno.attribute);
-        }
-        public void lift(Attribute.TypeCompound tc) {
-            if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.FIELD) {
+        private void lift(Attribute.TypeCompound tc) {
+            if (lastVar != null && lastVar.sym.getKind().isField()) {
                 if (debugJSR308)
                     System.out.println("gen: " + tc + " -> " + lastVar.sym);
                 lastVar.sym.typeAnnotations =
