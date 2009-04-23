@@ -667,7 +667,8 @@ public class JavacParser implements Parser {
         List<JCTypeAnnotation> annotations = buf.toList();
 
         if (debugJSR308)
-            System.out.println(annotations);
+            System.out.println("TA: parsing " + annotations
+                    + " in " + log.currentSourceFile());
         return annotations;
     }
 

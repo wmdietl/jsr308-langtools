@@ -909,7 +909,8 @@ public class ClassWriter extends ClassFile {
     void writeTypeAnnotation(Attribute.TypeCompound c) {
         // ignore UNKNOWN attributes - improve testing
       if (debugJSR308)
-        System.out.println("writing " + c + " at " + c.position);
+        System.out.println("TA: writing " + c + " at " + c.position
+                + " in " + log.currentSourceFile());
       writeCompoundAttribute(c);
       writePosition(c.position);
     }
