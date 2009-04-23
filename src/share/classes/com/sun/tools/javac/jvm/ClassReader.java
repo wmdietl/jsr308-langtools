@@ -1345,7 +1345,8 @@ public class ClassReader implements Completer {
         TypeAnnotationPosition position = readPosition();
 
         if (debugJSR308)
-            System.out.println("reading: " + proxy + " @ " + position);
+            System.out.println("TA: reading: " + proxy + " @ " + position
+                    + " in " + log.currentSourceFile());
 
         return new TypeAnnotationProxy(proxy, position);
     }
@@ -1790,8 +1791,8 @@ public class ClassReader implements Completer {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
               if (debugJSR308)
-              System.out.println("reading: adding " + newList
-                      + " to symbol " + sym);
+              System.out.println("TA: reading: adding " + newList
+                      + " to symbol " + sym + " in " + log.currentSourceFile());
                 sym.typeAnnotations = ((sym.typeAnnotations == null)
                                         ? newList
                                         : newList.prependList(sym.typeAnnotations));

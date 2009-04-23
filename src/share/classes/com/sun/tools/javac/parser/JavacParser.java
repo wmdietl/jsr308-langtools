@@ -667,7 +667,8 @@ public class JavacParser implements Parser {
         List<JCTypeAnnotation> annotations = buf.toList();
 
         if (debugJSR308)
-            System.out.println(annotations);
+            System.out.println("TA: parsing " + annotations
+                    + " in " + log.currentSourceFile());
         return annotations;
     }
 
@@ -2765,7 +2766,7 @@ public class JavacParser implements Parser {
                     type = to(F.at(pos).TypeIdent(TypeTags.VOID));
                     S.nextToken();
                 } else {
-                    
+
                     // In case of a method declaration like
                     //    <T> @A String get() { ... }
                     // @A is parsed as a type annotation on the method return
