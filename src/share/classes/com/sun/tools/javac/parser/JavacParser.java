@@ -25,7 +25,6 @@
 
 package com.sun.tools.javac.parser;
 
-import java.io.File;
 import java.util.*;
 
 import com.sun.tools.javac.tree.*;
@@ -639,34 +638,6 @@ public class JavacParser implements Parser {
         return term(TYPE);
     }
 
-    /**
-     * JSR 308: parses optional type annotations. This method should be used to
-     * distinguish parsing JSR 175 annotations from parsing JSR 308 annotations.
-     * Saves {@code mode} and restores it after parsing annotations.
-     */
-    public List<JCTypeAnnotation> typeAnnotationsOpt() {
-        // Code identical to annotationsOpt() with two modification
-        // 1. preserves the mode, and
-        // 2. uses typeAnnotation() instead of annotation()
-        if (S.token() != MONKEYS_AT) return List.nil(); // optimization
-        ListBuffer<JCTypeAnnotation> buf = new ListBuffer<JCTypeAnnotation>();
-        int prevmode = mode;
-        while (S.token() == MONKEYS_AT) {
-            int pos = S.pos();
-            S.nextToken();
-            buf.append(typeAnnotation(pos));
-        }
-        lastmode = mode;
-        mode = prevmode;
-
-        List<JCTypeAnnotation> annotations = buf.toList();
-
-        if (debugJSR308)
-            System.out.println("TA: parsing " + annotations
-                    + " in " + log.currentSourceFile());
-        return annotations;
-    }
-
     JCExpression term(int newmode) {
         int prevmode = mode;
         mode = newmode;
@@ -897,8 +868,8 @@ public class JavacParser implements Parser {
      *                 | [TypeArguments] THIS [Arguments]
      *                 | [TypeArguments] SUPER SuperSuffix
      *                 | NEW [TypeArguments] Creator
-     *                 | Ident { "." Ident }
-     *                   [ "[" ( "]" BracketsOpt "." CLASS | Expression "]" )
+     *                 | [Annotations] Ident { "." Ident }
+     *                   [ [Annotations] "[" ( "]" BracketsOpt "." CLASS | Expression "]" )
      *                   | Arguments
      *                   | "." ( CLASS | THIS | [TypeArguments] SUPER Arguments | NEW [TypeArguments] InnerCreator )
      *                   ]
@@ -1386,9 +1357,9 @@ public class JavacParser implements Parser {
     }
 
     /** TypeArgument = Type
-     *               | "?"
-     *               | "?" EXTENDS Type {"&" Type}
-     *               | "?" SUPER Type
+     *               | [Annotations] "?"
+     *               | [Annotations] "?" EXTENDS Type {"&" Type}
+     *               | [Annotations] "?" SUPER Type
      */
     JCExpression typeArgument() {
         List<JCTypeAnnotation> annotations = typeAnnotationsOpt();
@@ -1428,7 +1399,7 @@ public class JavacParser implements Parser {
     }
 
     /**
-     * BracketsOpt = { TypeAnnotations "[" "]" }
+     * BracketsOpt = { [Annotations] "[" "]" }
      *
      * <p>
      *
@@ -1501,7 +1472,7 @@ public class JavacParser implements Parser {
         return t;
     }
 
-    /** Creator = Qualident [TypeArguments] ( ArrayCreatorRest | ClassCreatorRest )
+    /** Creator = [Annotations] Qualident [TypeArguments] ( ArrayCreatorRest | ClassCreatorRest )
      */
     JCExpression creator(int newpos, List<JCExpression> typeArgs) {
 
@@ -1583,8 +1554,8 @@ public class JavacParser implements Parser {
         return classCreatorRest(newpos, encl, typeArgs, t);
     }
 
-    /** ArrayCreatorRest = "[" ( "]" BracketsOpt ArrayInitializer
-     *                         | Expression "]" {"[" Expression "]"} BracketsOpt )
+    /** ArrayCreatorRest = [Annotations] "[" ( "]" BracketsOpt ArrayInitializer
+     *                         | Expression "]" {[Annotations]  "[" Expression "]"} BracketsOpt )
      */
     JCExpression arrayCreatorRest(int newpos, JCExpression elemtype) {
 
@@ -2100,17 +2071,32 @@ public class JavacParser implements Parser {
                                         new ListBuffer<JCExpressionStatement>()).toList();
     }
 
+    enum AnnotationKind { DEFAULT_ANNO, TYPE_ANNO };
+
     /** AnnotationsOpt = { '@' Annotation }
      */
-    List<JCAnnotation> annotationsOpt() {
+    List<JCAnnotation> annotationsOpt(AnnotationKind kind) {
         if (S.token() != MONKEYS_AT) return List.nil(); // optimization
         ListBuffer<JCAnnotation> buf = new ListBuffer<JCAnnotation>();
+        int prevmode = mode;
         while (S.token() == MONKEYS_AT) {
             int pos = S.pos();
             S.nextToken();
-            buf.append(annotation(pos));
+            buf.append(annotation(pos, kind));
         }
-        return buf.toList();
+        lastmode = mode;
+        mode = prevmode;
+        List<JCAnnotation> annotations = buf.toList();
+
+        if (debugJSR308)
+            System.out.println("TA: parsing " + annotations
+                    + " in " + log.currentSourceFile());
+        return annotations;
+    }
+
+    List<JCTypeAnnotation> typeAnnotationsOpt() {
+        List<JCAnnotation> annotations = annotationsOpt(AnnotationKind.TYPE_ANNO);
+        return List.convert(JCTypeAnnotation.class, annotations);
     }
 
     /** ModifiersOpt = { Modifier }
@@ -2155,7 +2141,7 @@ public class JavacParser implements Parser {
             if (flag == Flags.ANNOTATION) {
                 checkAnnotations();
                 if (S.token() != INTERFACE) {
-                JCAnnotation ann = annotation(lastPos);
+                JCAnnotation ann = annotation(lastPos, AnnotationKind.DEFAULT_ANNO);
                 // if first modifier is an annotation, set pos to annotation's.
                 if (flags == 0 && annotations.isEmpty())
                     pos = ann.pos;
@@ -2183,27 +2169,21 @@ public class JavacParser implements Parser {
         return mods;
     }
 
-    JCTypeAnnotation typeAnnotation(int pos) {
-        // accept(AT); // AT consumed by caller
-        checkTypeAnnotations();
-        // code copied from annotation(int pos)
-        checkAnnotations();
-        JCTree ident = qualident();
-        List<JCExpression> fieldValues = annotationFieldValuesOpt();
-        JCTypeAnnotation ann = F.at(pos).TypeAnnotation(ident, fieldValues);
-        storeEnd(ann, S.prevEndPos());
-        return ann;
-    }
-
     /** Annotation              = "@" Qualident [ "(" AnnotationFieldValues ")" ]
      * @param pos position of "@" token
      */
-    JCAnnotation annotation(int pos) {
+    JCAnnotation annotation(int pos, AnnotationKind kind) {
         // accept(AT); // AT consumed by caller
         checkAnnotations();
+        if (kind == AnnotationKind.TYPE_ANNO)
+            checkTypeAnnotations();
         JCTree ident = qualident();
         List<JCExpression> fieldValues = annotationFieldValuesOpt();
-        JCAnnotation ann = F.at(pos).Annotation(ident, fieldValues);
+        JCAnnotation ann;
+        if (kind == AnnotationKind.DEFAULT_ANNO)
+            ann = F.at(pos).Annotation(ident, fieldValues);
+        else
+            ann = F.at(pos).TypeAnnotation(ident, fieldValues);
         storeEnd(ann, S.prevEndPos());
         return ann;
     }
@@ -2255,7 +2235,7 @@ public class JavacParser implements Parser {
         case MONKEYS_AT:
             pos = S.pos();
             S.nextToken();
-            return annotation(pos);
+            return annotation(pos, AnnotationKind.DEFAULT_ANNO);
         case LBRACE:
             pos = S.pos();
             accept(LBRACE);
@@ -2609,7 +2589,7 @@ public class JavacParser implements Parser {
             S.resetDeprecatedFlag();
         }
         int pos = S.pos();
-        List<JCAnnotation> annotations = annotationsOpt();
+        List<JCAnnotation> annotations = annotationsOpt(AnnotationKind.DEFAULT_ANNO);
         JCModifiers mods = F.at(annotations.isEmpty() ? Position.NOPOS : pos).Modifiers(flags, annotations);
         List<JCExpression> typeArgs = typeArgumentsOpt();
         int identPos = S.pos();
@@ -2729,7 +2709,7 @@ public class JavacParser implements Parser {
                     // itself
                     List<JCAnnotation> annosAfterParams = List.nil();
                     if (S.token() == Token.MONKEYS_AT && typarams.nonEmpty())
-                        annosAfterParams = annotationsOpt();
+                        annosAfterParams = annotationsOpt(AnnotationKind.DEFAULT_ANNO);
 
                     // JSR 308: use a type without annotations, since we have
                     // already parsed JSR 175 annotations with modifiersOpt()
@@ -2777,15 +2757,15 @@ public class JavacParser implements Parser {
     }
 
     /** MethodDeclaratorRest =
-     *      FormalParameters BracketsOpt [Throws TypeList] ( MethodBody | [DEFAULT AnnotationValue] ";")
+     *      FormalParameters BracketsOpt [Annotations] [Throws TypeList] ( MethodBody | [DEFAULT AnnotationValue] ";")
      *  VoidMethodDeclaratorRest =
-     *      FormalParameters [Throws TypeList] ( MethodBody | ";")
+     *      FormalParameters [Annotations] [Throws TypeList] ( MethodBody | ";")
      *  InterfaceMethodDeclaratorRest =
-     *      FormalParameters BracketsOpt [THROWS TypeList] ";"
+     *      FormalParameters BracketsOpt [Annotations] [THROWS TypeList] ";"
      *  VoidInterfaceMethodDeclaratorRest =
-     *      FormalParameters [THROWS TypeList] ";"
+     *      FormalParameters [Annotations] [THROWS TypeList] ";"
      *  ConstructorDeclaratorRest =
-     *      "(" FormalParameterListOpt ")" [THROWS TypeList] MethodBody
+     *      "(" FormalParameterListOpt ")" [Annotations] [THROWS TypeList] MethodBody
      */
     JCTree methodDeclaratorRest(int pos,
                               JCModifiers mods,
@@ -2845,7 +2825,7 @@ public class JavacParser implements Parser {
         return result;
     }
 
-    /** QualidentList = Qualident {"," Qualident}
+    /** QualidentList = [Annotations] Qualident {"," [Annotations] Qualident}
      */
     List<JCExpression> qualidentList() {
         ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
@@ -2888,7 +2868,7 @@ public class JavacParser implements Parser {
         }
     }
 
-    /** TypeParameter = TypeVariable [TypeParameterBound]
+    /** TypeParameter = [Annotations] TypeVariable [TypeParameterBound]
      *  TypeParameterBound = EXTENDS Type {"&" Type}
      *  TypeVariable = Ident
      */
