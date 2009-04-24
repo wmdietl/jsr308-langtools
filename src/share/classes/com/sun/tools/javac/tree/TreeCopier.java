@@ -365,8 +365,9 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitTypeParameter(TypeParameterTree node, P p) {
         JCTypeParameter t = (JCTypeParameter) node;
+        List<JCTypeAnnotation> annos = copy(t.annotations, p);
         List<JCExpression> bounds = copy(t.bounds, p);
-        return M.at(t.pos).TypeParameter(t.name, t.bounds);
+        return M.at(t.pos).TypeParameter(t.name, bounds, annos);
     }
 
     public JCTree visitInstanceOf(InstanceOfTree node, P p) {
