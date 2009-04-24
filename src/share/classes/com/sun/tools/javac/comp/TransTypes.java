@@ -1061,7 +1061,7 @@ public class TransTypes extends TreeTranslator {
                 // seperately.
                 return;
             }
-            isInner = false;
+            isInner = true;
             List<Attribute.TypeCompound> prevTAs = recordedTypeAnnotations;
             recordedTypeAnnotations = List.nil();
             try {
