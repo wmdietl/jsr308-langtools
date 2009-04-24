@@ -623,16 +623,11 @@ public class JavacParser implements Parser {
     }
 
     public JCExpression parseType(List<JCTypeAnnotation> annotations) {
-        int prevmode = mode;
-        mode = TYPE;
-
         JCExpression result = unannotatedType();
 
         if (!annotations.isEmpty())
             result = F.AnnotatedType(annotations, result);
 
-        lastmode = mode;
-        mode = prevmode;
         return result;
     }
 
@@ -1056,7 +1051,9 @@ public class JavacParser implements Parser {
 
             /// JSR 308: handle annotated class literals/cast types
             List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
-            assert !typeAnnos.isEmpty(); // else there would be no "@"
+            if (typeAnnos.isEmpty())
+                // else there would be no '@'
+                throw new AssertionError("type annos is empty");
 
             JCExpression expr = term3();
 
@@ -1070,16 +1067,12 @@ public class JavacParser implements Parser {
                 if (sel.name != names._class)
                     return illegal();
                 else {
-                    if (!typeAnnos.isEmpty())
-                        sel.selected = F.AnnotatedType(typeAnnos, sel.selected);
+                    sel.selected = F.AnnotatedType(typeAnnos, sel.selected);
                     t = expr;
                 }
             } else {
                 // JSR 308: parse an annotated type (probably part of a cast).
-                if (typeAnnos.isEmpty())
-                    t = expr;
-                else
-                    t = toP(F.at(S.pos()).AnnotatedType(typeAnnos, expr));
+                t = toP(F.at(S.pos()).AnnotatedType(typeAnnos, expr));
             }
             break;
         case IDENTIFIER: case ASSERT: case ENUM:
