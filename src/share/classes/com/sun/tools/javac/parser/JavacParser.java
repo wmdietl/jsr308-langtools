@@ -2953,12 +2953,9 @@ public class JavacParser implements Parser {
         this.permitTypeAnnotationsPushBack = false;
 
         // JSR 308: handle annotations on a varargs element type
-        List<JCTypeAnnotation> varargsAnnos = typeAnnotationsOpt();
         if (S.token() == ELLIPSIS) {
-            if (typeAnnotationsPushedBack != null) {
-                varargsAnnos = varargsAnnos.prependList(typeAnnotationsPushedBack);
-                typeAnnotationsPushedBack = null;
-            }
+            List<JCTypeAnnotation> varargsAnnos = typeAnnotationsPushedBack;
+            typeAnnotationsPushedBack = null;
             checkVarargs();
             mods.flags |= Flags.VARARGS;
             // JSR 308: annotate the varargs elements
