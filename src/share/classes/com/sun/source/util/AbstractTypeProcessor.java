@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.processing.*;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
@@ -62,7 +63,7 @@ import com.sun.tools.javac.util.Log;
  * @since 1.7
  */
 public abstract class AbstractTypeProcessor extends AbstractProcessor {
-    private final Set<TypeElement> elements = new HashSet<TypeElement>();
+    private final Set<Name> elements = new HashSet<Name>();
     private JavacProcessingEnvironment env;
     private final AttributionTaskListener listener = new AttributionTaskListener();
 
@@ -84,7 +85,9 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
     @Override
     public final boolean process(Set<? extends TypeElement> annotations,
             RoundEnvironment roundEnv) {
-        elements.addAll(ElementFilter.typesIn(roundEnv.getRootElements()));
+        for (TypeElement elem : ElementFilter.typesIn(roundEnv.getRootElements())) {
+            elements.add(elem.getQualifiedName());
+        }
         return false;
     }
 
@@ -92,14 +95,19 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
      * Processes a fully analyzed class that contains a supported annotation
      * (look {@link #getSupportedAnnotationTypes()}).
      *
-     * <p>The passed class may contain some type errors.  Processors must
-     * gracefully handle erranous classes.
+     * <p>The passed class is always a valid type-checked Java code.
      *
      * @param element       element of the analyzed class
-     * @param tree  the tree path to the element, with the leaf being a ClassTree
-     * @param errorRaised   {@code true} if the class is a valid type checked code
+     * @param tree  the tree path to the element, with the leaf being a
+     *              {@link ClassTree}
      */
-    public abstract void process(TypeElement element, TreePath tree, boolean errorRaised);
+    public abstract void process(TypeElement element, TreePath tree);
+
+    /**
+     * A listener method to be called once all classes have been processed
+     * and no error is reported.
+     */
+    public void processOver() { }
 
     /**
      * adds a listener for attribution.
@@ -126,24 +134,28 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
 
         @Override
         public void finished(TaskEvent e) {
+            assert e.getTypeElement() != null;
+            assert e.getCompilationUnit() != null;
+
             if (e.getKind() != TaskEvent.Kind.ANALYZE
-                || e.getTypeElement() == null
-                || e.getCompilationUnit() == null
-                || elements.contains(e.getTypeElement()))
+                || !elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
 
-            if (Log.instance(env.getContext()).nerrors > 0)
+            Log log = Log.instance(env.getContext());
+            if (log.nerrors != 0)
                 return;
 
             TypeElement elem = e.getTypeElement();
             TreePath p = Trees.instance(env).getPath(elem);
-            boolean errorRaised = Log.instance(env.getContext()).nerrors > 0;
-            process(elem, p, errorRaised);
+
+            process(elem, p);
+
+            if (elements.isEmpty() && log.nerrors == 0)
+                processOver();
         }
 
         @Override
-        public void started(TaskEvent e) {
-        }
+        public void started(TaskEvent e) { }
 
     }
 
