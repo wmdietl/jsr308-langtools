@@ -41,7 +41,6 @@ import javax.tools.StandardJavaFileManager;
 import static javax.tools.StandardLocation.*;
 
 import com.sun.tools.javac.comp.Annotate;
-import com.sun.tools.javac.comp.TargetType;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.code.Symbol.*;
