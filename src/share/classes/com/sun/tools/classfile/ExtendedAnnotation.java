@@ -85,7 +85,6 @@ public class ExtendedAnnotation {
          // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            // FIXME: check for table length
             int table_length = cr.readUnsignedShort();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
