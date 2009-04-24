@@ -1050,33 +1050,46 @@ public class TransTypes extends TreeTranslator {
     }
 
     private class TypeAnnotationLift extends TreeScanner {
-        JCClassDecl clazz = null;
-        JCMethodDecl lastMethod = null;
-        JCVariableDecl lastVar = null;
+        List<Attribute.TypeCompound> recordedTypeAnnotations = List.nil();
 
+        boolean isInner = false;
         @Override
         public void visitClassDef(JCClassDecl tree) {
-            if (clazz != null || lastMethod != null) {
+            if (isInner) {
                 // tree is an inner class tree.  stop now.
                 // TransTypes.visitClassDef makes an invocation for each class
                 // seperately.
                 return;
             }
-            clazz = tree;
-            super.visitClassDef(tree);
+            isInner = false;
+            List<Attribute.TypeCompound> prevTAs = recordedTypeAnnotations;
+            recordedTypeAnnotations = List.nil();
+            try {
+                super.visitClassDef(tree);
+            } finally {
+                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                recordedTypeAnnotations = prevTAs;
+            }
         }
 
         @Override
         public void visitMethodDef(JCMethodDecl tree) {
-            lastMethod = tree;
-            super.visitMethodDef(tree);
-            lastMethod = null;
+            List<Attribute.TypeCompound> prevTAs = recordedTypeAnnotations;
+            recordedTypeAnnotations = List.nil();
+            try {
+                super.visitMethodDef(tree);
+            } finally {
+                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                recordedTypeAnnotations = prevTAs;
+            }
         }
 
         @Override
         public void visitVarDef(JCVariableDecl tree) {
-            lastVar = tree;
-            if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE && tree.mods.annotations.nonEmpty()) {
+            List<Attribute.TypeCompound> prevTAs = recordedTypeAnnotations;
+            recordedTypeAnnotations = List.nil();
+            ElementKind kind = tree.sym.getKind();
+            if (kind == ElementKind.LOCAL_VARIABLE && tree.mods.annotations.nonEmpty()) {
                 // need to lift the annotations
                 TypeAnnotationPosition position = new TypeAnnotationPosition();
                 position.pos = tree.pos;
@@ -1084,11 +1097,16 @@ public class TransTypes extends TreeTranslator {
                 for (Attribute.Compound attribute : tree.sym.attributes_field) {
                     Attribute.TypeCompound tc =
                         new Attribute.TypeCompound(attribute.type, attribute.values, position);
-                    lift(tc);
+                    recordedTypeAnnotations = recordedTypeAnnotations.append(tc);
                 }
             }
-            super.visitVarDef(tree);
-            lastVar = null;
+            try {
+                super.visitVarDef(tree);
+            } finally {
+                if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE)
+                    tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                recordedTypeAnnotations = kind.isField() ? prevTAs : prevTAs.appendList(recordedTypeAnnotations);
+            }
         }
 
         @Override
@@ -1100,36 +1118,8 @@ public class TransTypes extends TreeTranslator {
 
         public void visitAnnotation(JCAnnotation tree) {
             if (tree instanceof JCTypeAnnotation)
-                lift(((JCTypeAnnotation)tree).attribute_field);
+                recordedTypeAnnotations = recordedTypeAnnotations.append(((JCTypeAnnotation)tree).attribute_field);
             super.visitAnnotation(tree);
-        }
-
-        private void lift(Attribute.TypeCompound tc) {
-            if (lastVar != null && lastVar.sym.getKind().isField()) {
-                if (debugJSR308)
-                    System.out.println("gen: " + tc + " -> " + lastVar.sym);
-                lastVar.sym.typeAnnotations =
-                    lastVar.sym.typeAnnotations.append(tc);
-            } else if (lastMethod != null) {
-                if (debugJSR308)
-                    System.out.println("gen: " + tc + " -> " + lastMethod.sym);
-                lastMethod.sym.typeAnnotations =
-                    lastMethod.sym.typeAnnotations.append(tc);
-            } else if (clazz != null) {
-                if (debugJSR308)
-                    System.out.println("gen: " + tc + " -> " + clazz.sym);
-                clazz.sym.typeAnnotations =
-                    clazz.sym.typeAnnotations.append(tc);
-            } else
-                throw new AssertionError();
-            // We also add typeannotations to local variables to ease
-            // finding them later in Gen
-            if (lastVar != null && lastVar.sym.getKind() == javax.lang.model.element.ElementKind.LOCAL_VARIABLE) {
-                if (debugJSR308)
-                    System.out.println("gen: " + tc + " -> " + lastVar.sym);
-                lastVar.sym.typeAnnotations =
-                    lastVar.sym.typeAnnotations.append(tc);
-            }
         }
     }
 
