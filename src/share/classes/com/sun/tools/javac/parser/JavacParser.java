@@ -26,7 +26,7 @@
 package com.sun.tools.javac.parser;
 
 import java.util.*;
-improt java.io.File;
+import java.io.File;
 
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.code.*;
