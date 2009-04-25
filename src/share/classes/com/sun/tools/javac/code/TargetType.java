@@ -23,9 +23,9 @@
  * have any questions.
  */
 
-package com.sun.tools.javac.comp;
+package com.sun.tools.javac.code;
 
-import static com.sun.tools.javac.comp.TargetType.TargetAttribute.*;
+import static com.sun.tools.javac.code.TargetType.TargetAttribute.*;
 
 import java.util.EnumSet;
 import java.util.Set;
