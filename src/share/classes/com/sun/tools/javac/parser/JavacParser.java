@@ -2782,7 +2782,7 @@ public class JavacParser implements Parser {
             // need to distinguish between receiver anno and array anno
             // look at typeAnnotationsPushedBack comment
             this.permitTypeAnnotationsPushBack = true;
-            type = bracketsOpt(type);
+            type = methodReturnArrayRest(type);
             this.permitTypeAnnotationsPushBack = false;
             if (typeAnnotationsPushedBack == null)
                 receiverAnnotations = List.nil();
@@ -2824,6 +2824,27 @@ public class JavacParser implements Parser {
                                     body, defaultValue));
         attach(result, dc);
         return result;
+    }
+
+    /** Parses the array levels after the format parameters list, and append
+     * them to the return type, while preseving the order of type annotations
+     */
+    private JCExpression methodReturnArrayRest(JCExpression type) {
+        if (type.getTag() != JCTree.TYPEARRAY)
+            return bracketsOpt(type);
+
+        JCArrayTypeTree baseArray = (JCArrayTypeTree)type;
+        while (TreeInfo.typeIn(baseArray.elemtype) instanceof JCArrayTypeTree)
+            baseArray = (JCArrayTypeTree)TreeInfo.typeIn(baseArray.elemtype);
+
+        if (baseArray.elemtype.getTag() == JCTree.ANNOTATED_TYPE) {
+            JCAnnotatedType at = (JCAnnotatedType)baseArray.elemtype;
+            at.underlyingType = bracketsOpt(at.underlyingType);
+        } else {
+            baseArray.elemtype = bracketsOpt(baseArray.elemtype);
+        }
+
+        return type;
     }
 
     /** QualidentList = [Annotations] Qualident {"," [Annotations] Qualident}

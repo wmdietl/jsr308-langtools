@@ -2487,9 +2487,7 @@ public class Attr extends JCTree.Visitor {
                 Type clazzOuter = clazztype.getEnclosingType();
                 if (clazzOuter.tag == CLASS) {
                     Type site;
-                    JCExpression clazz = tree.clazz;
-                    if (clazz.getTag() == JCTree.ANNOTATED_TYPE)
-                        clazz = ((JCAnnotatedType)clazz).underlyingType;
+                    JCExpression clazz = TreeInfo.typeIn(tree.clazz);
                     if (clazz.getTag() == JCTree.IDENT) {
                         site = env.enclClass.sym.type;
                     } else if (clazz.getTag() == JCTree.SELECT) {
