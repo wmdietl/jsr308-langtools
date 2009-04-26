@@ -40,9 +40,9 @@ import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 
 /**
- * An abstract annotation processor designed to be a convenient superclass
- * for concrete "type processors," processors that require the type
- * information in the processed source.
+ * This class is an abstract annotation processor designed to be a
+ * convenient superclass for concrete "type processors", processors that
+ * require the type information in the processed source.
  *
  * <p>Type processing occurs in one round after the tool analyzes
  * the source (all sources taken as input to the tool and sources generated
@@ -52,12 +52,11 @@ import com.sun.tools.javac.util.Log;
  * it is analyzed before the rest of classes are analyzed.  The tool is also
  * permitted to stop type processing if any errors are raised.
  *
- * <p>Subclasses are free to override the implementation and
- * specification of any of the methods in this class, as long as the
+ * <p>A subclass may override any of the methods in this class, as long as the
  * general {@link javax.annotation.processing.Processor Processor}
- * contract for that method is obeyed, with one notable exception.
- * {@link #process(Set, RoundEnvironment)} may not be override, as it
- * is called during regular annotation phase before classes are analyzed.
+ * contract is obeyed, with one notable exception.
+ * {@link #process(Set, RoundEnvironment)} may not be overriden, as it
+ * is called during the regular annotation phase before classes are analyzed.
  *
  * @author Mahmood Ali
  * @since 1.7
