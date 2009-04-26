@@ -861,4 +861,15 @@ public class TreeInfo {
             return null;
         }
     }
+
+    /**
+     * Returns the underlying type of the tree if it is annotated type,
+     * or the tree itself otherwise
+     */
+    public static JCExpression typeIn(JCExpression tree) {
+        if (tree.getTag() == JCTree.ANNOTATED_TYPE)
+            return ((JCAnnotatedType)tree).underlyingType;
+        else
+            return tree;
+    }
 }
