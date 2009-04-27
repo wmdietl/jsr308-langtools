@@ -183,7 +183,7 @@ public abstract class Trees {
     /**
       * Gets the original type from the ErrorType object.
       * @param errorType The errorType for which we want to get the original type.
-      * @returns javax.lang.model.type.TypeMirror corresponding to the original type, replaced by the ErrorType.
+      * @return javax.lang.model.type.TypeMirror corresponding to the original type, replaced by the ErrorType.
       */
     public abstract TypeMirror getOriginalType(ErrorType errorType);
 
