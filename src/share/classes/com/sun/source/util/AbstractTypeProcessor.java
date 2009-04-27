@@ -39,6 +39,8 @@ import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 
+import com.sun.source.tree.ClassTree;
+
 /**
  * This class is an abstract annotation processor designed to be a
  * convenient superclass for concrete "type processors", processors that
