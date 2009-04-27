@@ -877,9 +877,7 @@ public class TransTypes extends TreeTranslator {
                     if (fieldFrame.name == names._class) {
                         p.type = TargetType.CLASS_LITERAL;
                         if (fieldFrame.selected instanceof JCAnnotatedType) {
-                            assert fieldFrame.selected instanceof JCAnnotatedType;
-                            JCAnnotatedType fieldType = (JCAnnotatedType)fieldFrame.selected;
-                            p.pos = fieldType.underlyingType.pos;
+                            p.pos = TreeInfo.typeIn(fieldFrame).pos;
                         } else if (fieldFrame.selected instanceof JCArrayTypeTree) {
                             p.pos = fieldFrame.selected.pos;
                         }
