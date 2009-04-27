@@ -90,7 +90,7 @@ import com.sun.source.tree.ClassTree;
  * <p>A subclass may override any of the methods in this class, as long as the
  * general {@link javax.annotation.processing.Processor Processor}
  * contract is obeyed, with one notable exception.
- * {@link #process(Set, RoundEnvironment)} may not be overriden, as it
+ * {@link #process(Set, RoundEnvironment)} may not be overridden, as it
  * is called during the regular annotation phase before classes are analyzed.
  *
  * @author Mahmood Ali
@@ -147,7 +147,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
      * is reported.
      *
      * <p>Subclasses may override this method to do any aggregate analysis
-     * (e.g. generate report, presistence) or  resource deallocation.
+     * (e.g. generate report, persistence) or resource deallocation.
      *
      * <p>If an error (a Java error or a processor error) is reported, this
      * method is not guaranteed to be invoked.
