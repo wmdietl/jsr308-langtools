@@ -2991,7 +2991,7 @@ public class JavacParser implements Parser {
             checkVarargs();
             mods.flags |= Flags.VARARGS;
             // JSR 308: annotate the varargs elements
-            if (!varargsAnnos.isEmpty())
+            if (varargsAnnos != null && varargsAnnos.nonEmpty())
                 type = F.at(S.pos()).AnnotatedType(varargsAnnos, type);
             type = to(F.at(S.pos()).TypeArray(type));
 

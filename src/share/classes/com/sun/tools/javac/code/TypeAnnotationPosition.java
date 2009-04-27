@@ -25,7 +25,6 @@
 
 package com.sun.tools.javac.code;
 
-import com.sun.tools.javac.comp.*;
 import com.sun.tools.javac.util.*;
 
 /** A type annotation position.
