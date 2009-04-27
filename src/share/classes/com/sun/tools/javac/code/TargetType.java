@@ -167,16 +167,10 @@ public enum TargetType {
     private final int targetTypeValue;
     private Set<TargetAttribute> flags;
 
-    TargetType(int targetTypeValue, Set<TargetAttribute> flags) {
-        assert targetTypeValue >= Byte.MIN_VALUE;
-        assert targetTypeValue <= Byte.MAX_VALUE;
-        this.targetTypeValue = (byte)targetTypeValue;
-        this.flags = flags;
-    }
-
     TargetType(int targetTypeValue, TargetAttribute... attributes) {
-        assert targetTypeValue >= Byte.MIN_VALUE;
-        assert targetTypeValue <= Byte.MAX_VALUE;
+        if (targetTypeValue < Byte.MIN_VALUE
+                || targetTypeValue > Byte.MAX_VALUE)
+                throw new AssertionError("attribute type value needs to be a byte: " + targetTypeValue);
         this.targetTypeValue = (byte)targetTypeValue;
         flags = EnumSet.noneOf(TargetAttribute.class);
         for (TargetAttribute attr : attributes)

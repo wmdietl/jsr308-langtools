@@ -906,8 +906,6 @@ public class TransTypes extends TreeTranslator {
                 }
 
                 case TYPE_PARAMETER:
-//                    System.out.print("type parameter: " +
-//                            ((JCTypeParameter)frame).bounds.indexOf(tree) + " ");
                     if (path.tail.tail.head.getTag() == JCTree.CLASSDEF) {
                         JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
@@ -947,7 +945,8 @@ public class TransTypes extends TreeTranslator {
 
                 case METHOD_INVOCATION: {
                     JCMethodInvocation invocation = (JCMethodInvocation)frame;
-                    assert invocation.typeargs.contains(tree);
+                    if (!invocation.typeargs.contains(tree))
+                        throw new AssertionError("{" + tree + "} is not an argument in the invocation: " + invocation);
                     p.type = TargetType.METHOD_TYPE_ARGUMENT;
                     p.pos = invocation.pos;
                     p.type_index = invocation.typeargs.indexOf(tree);
@@ -1038,7 +1037,6 @@ public class TransTypes extends TreeTranslator {
         }
 
         private int methodParamIndex(List<JCTree> path, JCTree param) {
-//            assert param.sym.getKind() == ElementKind.PARAMETER;
             List<JCTree> curr = path;
             if (curr.head != param)
                 curr = path.tail;

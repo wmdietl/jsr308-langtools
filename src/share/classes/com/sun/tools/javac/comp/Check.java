@@ -1809,7 +1809,8 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
-        assert a.type != null;
+        if (a.type == null)
+            throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
         validateAnnotation(a);
 
         if (!isTypeAnnotation(a, isTypeParameter))

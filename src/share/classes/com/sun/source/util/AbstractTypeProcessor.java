@@ -177,9 +177,6 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
 
         @Override
         public void finished(TaskEvent e) {
-            assert e.getTypeElement() != null;
-            assert e.getCompilationUnit() != null;
-
             Log log = Log.instance(env.getContext());
 
             if (!hasInvokedTypeProcessingOver && elements.isEmpty() && log.nerrors == 0) {
@@ -187,8 +184,15 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
                 hasInvokedTypeProcessingOver = true;
             }
 
-            if (e.getKind() != TaskEvent.Kind.ANALYZE
-                || !elements.remove(e.getTypeElement().getQualifiedName()))
+            if (e.getKind() != TaskEvent.Kind.ANALYZE)
+                return;
+
+            if (e.getTypeElement() == null)
+                throw new AssertionError("event task without a type element");
+            if (e.getCompilationUnit() == null)
+                throw new AssertionError("even task without compilation unit");
+
+            if (!elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
 
             if (log.nerrors != 0)

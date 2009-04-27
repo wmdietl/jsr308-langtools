@@ -149,7 +149,6 @@ public class ExtendedAnnotation {
         case UNKNOWN:
             break;
         default:
-//            throw new AssertionError("unknown type: " + position);
         }
 
         if (type.hasLocation()) {
@@ -239,7 +238,6 @@ public class ExtendedAnnotation {
         case UNKNOWN:
             break;
         default:
-//            throw new AssertionError("unknown type: " + pos);
         }
 
         if (pos.type.hasLocation()) {
@@ -378,7 +376,7 @@ public class ExtendedAnnotation {
             case UNKNOWN:
                 break;
             default:
-//                throw new AssertionError("unknown type: " + type);
+                throw new AssertionError("unknown type: " + type);
             }
 
             // Append location data for generics/arrays.
@@ -516,8 +514,9 @@ public class ExtendedAnnotation {
         private Set<TargetAttribute> flags;
 
         TargetType(int targetTypeValue, TargetAttribute... attrs) {
-            assert targetTypeValue >= Byte.MIN_VALUE;
-            assert targetTypeValue <= Byte.MAX_VALUE;
+            if (targetTypeValue < Byte.MIN_VALUE
+                || targetTypeValue > Byte.MAX_VALUE)
+                throw new AssertionError("attribute type value needs to be a byte: " + targetTypeValue);
             this.targetTypeValue = (byte)targetTypeValue;
             this.flags = EnumSet.noneOf(TargetAttribute.class);
             for (TargetAttribute attr : attrs)
