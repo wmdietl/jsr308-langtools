@@ -787,7 +787,7 @@ public class ClassWriter {
             case UNKNOWN:
                 break;
             default:
-//                throw new AssertionError("unknown type: " + p);
+                throw new AssertionError("unknown type: " + p);
             }
 
             // Append location data for generics/arrays.

@@ -2037,7 +2037,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
         @Override
         public int getTag() {
-//            return underlyingType.getTag(); //ANNOTATED_TYPE;
             return ANNOTATED_TYPE;
         }
     }

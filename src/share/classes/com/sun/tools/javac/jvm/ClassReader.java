@@ -1438,7 +1438,7 @@ public class ClassReader implements Completer {
         case UNKNOWN:
             break;
         default:
-//            throw new AssertionError("unknown type: " + position);
+            throw new AssertionError("unknown type: " + position);
         }
 
         if (type.hasLocation()) {
