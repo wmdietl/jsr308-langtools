@@ -62,12 +62,15 @@ public class ExtendedAnnotation {
     public final Annotation annotation;
     public final Position position;
 
-    private static Position read_position(ClassReader cr) throws IOException {
+    private static Position read_position(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         // Copied from ClassReader
-        Position position = new Position();
-        int tag = (byte)cr.readUnsignedByte();  // cast to introduce signess
+        int tag = (byte)cr.readUnsignedByte();  // cast to introduce signedness
+        if (TargetType.isValidTargetTypeValue(tag))
+            throw new Annotation.InvalidAnnotation("invalid type annotation target type value: " + tag);
+
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
+        Position position = new Position();
         position.type = type;
 
         switch (type) {
@@ -149,6 +152,7 @@ public class ExtendedAnnotation {
         case UNKNOWN:
             break;
         default:
+            throw new AssertionError("Cannot be here");
         }
 
         if (type.hasLocation()) {
@@ -581,13 +585,23 @@ public class ExtendedAnnotation {
             return targets;
         }
 
+        public static boolean isValidTargetTypeValue(int tag) {
+            if (targets == null)
+                targets = buildTargets();
+
+            if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+                return true;
+
+            return (tag >= 0 && tag < targets.length);
+        }
+
         public static TargetType fromTargetTypeValue(int tag) {
             if (targets == null)
                 targets = buildTargets();
 
             if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
                 return UNKNOWN;
-            // we can optimize the algorithm a bit: binary search?
+
             if (tag < 0 || tag >= targets.length)
                 throw new IllegalArgumentException("Unknown TargetType: " + tag);
             return targets[tag];
