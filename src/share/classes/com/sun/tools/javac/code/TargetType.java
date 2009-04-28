@@ -237,13 +237,23 @@ public enum TargetType {
         return targets;
     }
 
+    public static boolean isValidTargetTypeValue(int tag) {
+        if (targets == null)
+            targets = buildTargets();
+
+        if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+            return true;
+
+        return (tag >= 0 && tag < targets.length);
+    }
+
     public static TargetType fromTargetTypeValue(int tag) {
         if (targets == null)
             targets = buildTargets();
 
         if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
             return UNKNOWN;
-        // we can optimize the algorithm a bit: binary search?
+
         if (tag < 0 || tag >= targets.length)
             throw new IllegalArgumentException("Unknown TargetType: " + tag);
         return targets[tag];
