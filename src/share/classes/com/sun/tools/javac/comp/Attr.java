@@ -2838,7 +2838,7 @@ public class Attr extends JCTree.Visitor {
         return types.capture(type);
     }
 
-    private final void validateTypeAnnotations(JCTree tree) {
+    private void validateTypeAnnotations(JCTree tree) {
         tree.accept(typeAnnotationsValidator);
     }
     private final JCTree.Visitor typeAnnotationsValidator =

@@ -867,9 +867,19 @@ public class TreeInfo {
      * or the tree itself otherwise
      */
     public static JCExpression typeIn(JCExpression tree) {
-        if (tree.getTag() == JCTree.ANNOTATED_TYPE)
+        switch (tree.getTag()) {
+        case JCTree.ANNOTATED_TYPE:
             return ((JCAnnotatedType)tree).underlyingType;
-        else
+        case JCTree.IDENT: /* simple names */
+        case JCTree.TYPEIDENT: /* primitive name */
+        case JCTree.SELECT: /* qualified name */
+        case JCTree.TYPEARRAY: /* array types */
+        case JCTree.WILDCARD: /* wild cards */
+        case JCTree.TYPEPARAMETER: /* type parameters */
+        case JCTree.TYPEAPPLY: /* parameterized types */
             return tree;
+        default:
+            throw new AssertionError("Unexpected type tree: " + tree);
+        }
     }
 }

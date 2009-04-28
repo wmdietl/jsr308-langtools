@@ -1022,9 +1022,10 @@ public class JavacParser implements Parser {
 
             /// JSR 308: handle annotated class literals/cast types
             List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
-            if (typeAnnos.isEmpty())
+            if (typeAnnos.isEmpty()) {
                 // else there would be no '@'
                 throw new AssertionError("type annos is empty");
+            }
 
             JCExpression expr = term3();
 
@@ -2088,7 +2089,7 @@ public class JavacParser implements Parser {
         mode = prevmode;
         List<JCAnnotation> annotations = buf.toList();
 
-        if (debugJSR308)
+        if (debugJSR308 && kind == AnnotationKind.TYPE_ANNO)
             System.out.println("TA: parsing " + annotations
                     + " in " + log.currentSourceFile());
         return annotations;
