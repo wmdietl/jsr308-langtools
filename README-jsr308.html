@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<title>JSR 308 Prototype Implementation README</title>
+<title>Type Annotations (JSR 308) Prototype Implementation README</title>
 <!--
 <style type="text/css">
 body {
@@ -16,20 +16,21 @@ pre, blockquote {
 -->
 </head>
 <body>
-<h1>JSR 308 Prototype Implementation README</h1> <!-- omit from toc -->
+<h1>Type Annotations (JSR 308) Prototype Implementation README</h1> <!-- omit from toc -->
 <h4 id="version">Version 0.9 (16 Apr 2009)</h4> <!-- omit from toc -->
-<p>For the latest version, see the <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>.</p>
+<p>For the latest version, see the
+  <a href="http://groups.csail.mit.edu/pag/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
 
 <p>Contents:</p>
 <!-- start toc.  do not edit; run html-update-toc instead -->
     <ul>
       <li><a href="#intro">Introduction</a></li>
-      <li><a href="#features">Features of the JSR 308 prototype implementation</a>
+      <li><a href="#features">Features of the Type Annotations compiler</a>
         <ul>
-          <li><a href="#annotations-in-comment">Writing annotations in comments for backward compatibility</a></li>
-          <li><a href="#proposal">Differences from the JSR 308 proposal</a></li>
+          <li><a href="#annotations-in-comment">Writing annotations in comments for forward compatibility</a></li>
+          <li><a href="#proposal">Differences from the Type Annotations (JSR 308) proposal</a></li>
         </ul></li>
-      <li><a href="#installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</a>
+      <li><a href="#installing">Installing the Type Annotations compiler (&ldquo;langtools&rdquo;)</a>
         <ul>
           <li><a href="#installing-long">Installing from binary</a></li>
           <li><a href="#building">Installing from source</a></li>
@@ -55,21 +56,19 @@ pre, blockquote {
 </p>
 
 <!-- TODO: link to the Sun JDK langtools; but as of now there is no definitive place to link to -->
-<p>The JSR 308 &ldquo;prototype implementation&rdquo; (also called the
-&ldquo;reference implementation&rdquo;) is a version of
-the OpenJDK Java 7 &ldquo;langtools&rdquo; that have been updated to
-support <a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308</a>.
-JSR 308
+<p>The Type Annotations compiler
+is a version of
+the OpenJDK Java 7 &ldquo;langtools&rdquo; that 
+supports the <a href="http://groups.csail.mit.edu/pag/jsr308/">Type
+    Annotations (JSR 308) syntax</a>.
+This syntax
 is a backward-compatible extension of the Java language that
 permits annotations to appear on types.
 </p>
 
 <p>
-You may use the JSR 308 implementation as a replacement for the
-OpenJDK or any other Java implementation.
-In particular, you may use the JSR 308 <code>javac</code> compiler as a drop-in
-replacement for the <a href="http://openjdk.java.net/groups/compiler/">OpenJDK <code>javac</code> compiler</a> or any
-other compiler for the Java 7 language.
+You may use the Type Annotations compiler as a replacement for the
+<a href="http://openjdk.java.net/groups/compiler/">OpenJDK <code>javac</code> compiler</a> or any other Java compiler.
 <!--
 , and you may use the JSR 308 <code>javap</code> tool
 serves as a drop-in replacement for the OpenJDK <code>javap</code> tool,
@@ -80,34 +79,35 @@ annotations.
 </p>
 
 <p>
-JSR 308 makes it possible to create compiler plug-ins that check
+The Type Annotations syntax and compiler make it <em>possible</em> to create compiler plug-ins that check
 user-defined type qualifiers.  The <a
 href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html">Checkers
-Framework</a> makes such plug-ins easy to create, and it includes several
+Framework</a> makes such plug-ins <em>easy</em> to create, and it includes several
 example type qualifiers that you can start using right away.
 </p>
 
 <p>
-The <a href="#installing">&ldquo;Installing the JSR 308
+The <a href="#installing">&ldquo;Installing the Type Annotations
 compiler&rdquo;</a> section below contains
 instructions for installing, running, and testing the compiler.
 </p>
 
 <p>
-IDEs such as Eclipse have not yet been updated to support JSR 308.  To use
-the JSR 308 compiler with Eclipse, write an <a
+IDEs such as Eclipse have not yet been updated to support the Type
+Annotations syntax.  To use
+the Type Annotations compiler with Eclipse, write an <a
 href="http://ant.apache.org/">Ant</a> buildfile that compiles your project
-(using the JSR 308 compiler), then build by running Ant.  Problem markers
+(using the Type Annotations compiler), then build by running Ant.  Problem markers
 will show up in the Eclipse IDE as normal.  (You will lose a few Eclipse
 features, such as error checking as you type, until Eclipse's internal
-compiler is updated for JSR 308.)
+compiler is updated for to support type annotations.)
 </p>
 
 
-<h2 id="features">Features of the JSR 308 prototype implementation</h2>
+<h2 id="features">Features of the Type Annotations compiler</h2>
 
 <p>
-The JSR 308 prototype implementation is a Java compiler that supports the
+The Type Annotations compiler that supports the
 JSR 308 specification
 (<a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.pdf">PDF</a>,
 <a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">HTML</a>),
@@ -117,14 +117,15 @@ which permits annotations to appear on any occurrence of a type.
 <h3 id="annotations-in-comment">Writing annotations in comments for forward compatibility</h3>
 
 <p>
-The prototype implementation of the JSR 308 compiler allows annotations to
+A version of the Type Annotations compiler (that is distributed by
+researchers at MIT and the University of Washington) allows annotations to
 be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
 </p>
 <pre>
   List&lt;/*@NonNull*/ String&gt; strings;
 </pre>
 <p>
-There must be no whitespace within the comment.  The prototype parses these
+There must be no whitespace within the comment.  The compiler parses these
 annotations when the command-line option
 "<code>-XDTAannotationsincomments</code>" is present.
 For additional information about this feature, see the
@@ -133,16 +134,15 @@ Framework Manual</a>.
 </p>
 
 <p>
-This mechanism allows developers to use JSR 308
+This mechanism allows developers to use type
 annotations while maintaining the ability to compile their code with an
 unmodified Java compiler, including compilers for earlier versions of the
 Java language (such as Java 4, Java 5, or Java 6).
 </p>
  
 <p>
-This temporary mechanism will not be part of the official Java language
-when JSR 308 is incorporated into it.  It may or may not continue to be
-supported by the javac compiler.
+The Java 7 language will not require compilers to support this temporary
+mechanism, and Sun's javac compiler will not do so.
 </p>
 
 <!--
@@ -156,34 +156,35 @@ increasing its momentum.
 -->
 
 
-<h3 id="proposal">Differences from the JSR 308 proposal</h3>
+<h3 id="proposal">Differences from the Type Annotations (JSR 308) proposal</h3>
 
-<p>The JSR 308 prototype compiler is a feature-complete implementation of
-the <a
-href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">
-JSR 308 proposal</a>.  There are no unknown differences or bugs at this point.
+<p>The Type Annotations compiler is a feature-complete implementation of
+the
+<a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">
+Type Annotations (JSR 308) proposal</a>.  There are no unknown differences
+or bugs at this point.  If you find any, please help us by
+<a href="#reporting-bugs">reporting</a> them.
 </p>
+
+
+<h2 id="installing">Installing the Type Annotations compiler (&ldquo;langtools&rdquo;)</h2>
+
 <p>
-
-
-<h2 id="installing">Installing the JSR 308 compiler (&ldquo;langtools&rdquo;)</h2>
-
-<p>
-The <b>easiest</b> way to install the JSR 308 compiler, which is sufficient
+The <b>easiest</b> way to install the Type Annotations compiler, which is sufficient
 for most users, is to <a
 href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#installation">install
 the Checker Framework binary distribution</a>.
 </p>
 
 <p>
-The remainder of this section gives instructions for installing the JSR 308
-compiler from source.
+The remainder of this section gives instructions for installing the Type
+Annotations compiler from source.
 </p>
 
 <p>
-Note that while these instructions install the JSR 308 compiler, you do not
-have to make the JSR 308 compiler your default compiler.  For example, you
-could use the JSR 308 compiler only for running pluggable type-checkers.
+Note that while these instructions install the Type Annotations compiler, you do not
+have to make it your default compiler.  For example, you
+could use the Type Annotations compiler only for running pluggable type-checkers.
 Also, you can use javac's <tt>-target</tt> argument to generate bytecodes
 that are compatible with earlier JVMs, so that you can work seamlessly with
 colleagues who are using an earlier version of Java.
@@ -270,8 +271,8 @@ export PATH=$JAVA_HOME/bin:$PATH
 
   </li>
   <li>
-    Download the <a href="http://groups.csail.mit.edu/pag/jsr308/#Download">JSR
-    308 prototype implementation</a>, and unpack it to create a
+    Download the <a href="http://groups.csail.mit.edu/pag/jsr308/#Download">Type
+    Annotations compiler</a>, and unpack it to create a
     <code>langtools</code> directory.  Do <em>not</em> do this inside the
     JDK 7 installation (directory <code>jdk1.7.0</code>) that you
     downloaded in the preceding step.
@@ -329,7 +330,7 @@ javac -version
 </ol>
 
 <p>
-When updating to a newer version of the JSR 308 compiler, you only have to
+When updating to a newer version of the Type Annotations compiler, you only have to
 follow steps 2, 3, and 4.  In other words, you only have to redo step 1 if
 you want a newer version of OpenJDK.
 </p>
@@ -338,7 +339,7 @@ you want a newer version of OpenJDK.
 <h3 id="building">Installing from source</h3>
 
 <p>
-To build the JSR 308 compiler from source, replace <a href="#installing-long">step 3 from above</a> by
+To build the Type Annotations compiler from source, replace <a href="#installing-long">step 3 from above</a> by
 the following.  Building from source is useful mainly for people who are
 developing compiler plug-ins or modifying the compiler itself.  If you only
 want to <em>use</em> the compiler and plug-ins, it is sufficient to install
@@ -367,7 +368,7 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
     Ant to work.
   </li>
   <li>
-    Compile the JSR 308 javac compiler and the javap tool, from
+    Compile the Type Annotations javac compiler and the javap tool, from
     directory <code>langtools/make</code>:
 <pre>cd langtools/make
 ant clean build-javac build-javap</pre>
@@ -380,50 +381,62 @@ ant clean build-javac build-javap</pre>
 
 <p>
 The effect of the above commands is that the <code>javac</code>
-command invokes the JSR 308 Java compiler and the <code>javap</code>
-command invokes the JSR 308 <code>javap</code>, but the Java 7 OpenJDK
+command invokes the Type Annotations Java compiler and the <code>javap</code>
+command invokes the Type Annotations <code>javap</code>, but the Java 7 OpenJDK
 is used for everything else.
 </p>
 
 
 <h2 id="differences">Differences from the OpenJDK distribution</h2>
 
-<p>The JSR 308 distribution includes only the <code>langtools</code>
-portion of the OpenJDK distribution. The JSR 308 prototype implementation
+<p>The Type Annotations distribution includes only the <code>langtools</code>
+portion of the OpenJDK distribution. The Type Annotations prototype implementation
 makes no modifications in other parts of the OpenJDK distribution, and the
 remaining parts of the distribution are not necessary to build and use the
-JSR 308 tools.
+Type Annotations tools.
 </p>
 
-<p>This JSR 308 distribution differs from the <code>langtools</code>
+<p>This Type Annotations distribution differs from the <code>langtools</code>
 portion of Sun's OpenJDK distribution
 in the following ways:
 </p>
 <ul>
-  <li>The compiler source code (which is located in
-    <code>langtools/src/share/classes</code>) supports the JSR 308; it
-    permits annotations to appear on any occurrence of a type.</li>
-  <li>
-    In addition to ordinary JSR 175 annotations, the compiler parses JSR
-    308 annotations, and also any annotation written in <a
-    href="#annotations-in-comment">specifically-formatted comments for
-    backward compatibility</a>.
-  </li>
+  <li>The compiler (which is located in
+    <code>langtools/src/share/classes</code>) supports the Type Annotations syntax; it
+    permits annotations to appear on any occurrence of a type, not just on
+    declarations as the original Java 5 annotations (also known as JSR 175
+    annotations) did.</li>
   <li>This documentation file has been included.</li>
 </ul>
 
+<p>A slightly modified version distributed by researchers at MIT and the
+University of Washington has some further differences:
+</p>
+<ul>
+  <li>
+    The 
+    compiler parses annotations written in <a
+    href="#annotations-in-comment">specifically-formatted comments</a>,
+    which enables your code to
+    <ul>
+      <li>compile with earlier compilers, and</li>
+      <li>be type-checked by the Type Annotations compiler. </li>
+    </ul>
+  </li>
+</ul>
+
+
 <h3 id="diffs">Determining a diff against the OpenJDK distribution</h3>
 
-<p>The JSR 308 distribution is a modification of the 
+<p>The Type Annotations distribution is a modification of the 
 <code>langtools</code> portion of Sun's
 <a href="http://openjdk.java.net/">OpenJDK</a>
 <code>javac</code> distribution.
 
-<p>The following commands determine the differences between the JSR
-308 compiler and the OpenJDK compiler.
+<p>The following commands determine the differences between the Type Annotations compiler and the OpenJDK compiler.
 
 <ol>
-  <li>If you do not have a clean checkout of the JSR 308 source,
+  <li>If you do not have a clean checkout of the Type Annotations compiler source,
   obtain one:
 
   <pre><code>
@@ -431,7 +444,8 @@ in the following ways:
   </code></pre>
 
   If you already have one, then just pull all the changes, by running the
-  following command in the directory of JSR 308 source
+  following command in the directory containing the Type Annotations
+  compiler source
   <pre><code>
   hg pull; hg up
   </code></pre>
@@ -461,7 +475,7 @@ improvements.
 All contributions to <code>javac</code> (annotation-related or not) should follow the
 <a href="http://blogs.sun.com/ahe/entry/contributing_to_javac">guidelines
 for contributing to javac</a>.
-Any code contributed to javac or to the JSR 308 prototype implementation is
+Any code contributed to javac or to the Type Annotations compiler is
 contributed to Sun under Sun's Contributor Agreement
 (<a href="http://openjdk.java.net/contribute/">SCA</a>).
 </p>
@@ -472,25 +486,25 @@ contributed to Sun under Sun's Contributor Agreement
 <p>
 If you have any problems with the compiler, please let us
 know; we welcome bug reports and suggestions.
-We will fix all reported bugs in the JSR 308 prototype implementation.
+We will fix all reported bugs in the Type Annotations compiler.
 Examples of bugs include:
 </p>
 <ul>
-  <li>Any inconsistency between the JSR 308 compiler and the
+  <li>Any inconsistency between the Type Annotations compiler and the
       JSR 308 design (<a
 href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.pdf">PDF</a>,
 <a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">HTML</a>).
   </li>
   <li>Any annotation-related problem.
   </li>
-  <li>Any problem that occurs with the JSR 308 compiler but does not occur
-      with the OpenJDK Java 7 compiler on which the JSR 308 compiler is built.
+  <li>Any problem that occurs with the Type Annotations compiler but does not occur
+      with the OpenJDK Java 7 compiler on which the Type Annotations compiler is built.
   </li>
 </ul>
 
 <p>
-The JSR 308 compiler is built on Sun's OpenJDK compiler.  If you find a bug
-in the JSR 308 compiler, it might be due to a bug in the OpenJDK compiler
+The Type Annotations compiler is built on Sun's OpenJDK compiler.  If you find a bug
+in the Type Annotations compiler, it might be due to a bug in the OpenJDK compiler
 (in which case it should be reported to Sun), or it might be due to the JSR
 308 modifications (in which case it should be reported to the JSR 308
 compiler implementers).  In some cases (such as a problem with processing
@@ -515,7 +529,7 @@ using this procedure:
 
 
 <p>
-If the problem is present in the JSR 308 compiler, but not in the OpenJDK
+If the problem is present in the Type Annotations compiler, but not in the OpenJDK
 compiler, then please report it to us.  Send your bug report to
 <!-- should we use the main JSR 308 mailing list instead?? -->
 <a
@@ -544,7 +558,7 @@ to write a helpful bug report</a>.  Here are some crucial points:
       Also indicate what you expected the result to be &mdash; remember,
       a bug is a difference between desired and actual outcomes.
   </li>
-  <li>Indicate which version of the JSR 308 compiler you are using.
+  <li>Indicate which version of the Type Annotations compiler you are using.
       You can determine that by running <code>javac -version</code>.
   </li>
 </ul>
@@ -556,13 +570,14 @@ to write a helpful bug report</a>.  Here are some crucial points:
 <h3 id="credits">Credits and changelog</h3>
 
 <p>
-The JSR 308 compiler was implemented by Matthew M. Papi as a modification
+The Type Annotations compiler was implemented by Matthew M. Papi and
+Mahmood Ali as a modification
 of the Sun <a href="http://openjdk.java.net/">OpenJDK compiler</a>.
 See above for <a href="#reporting-bugs">how to report bugs</a>.
 </p>
 
 <p>
-Differences from previous versions of the JSR 308 implementation may be found
+Differences from previous versions may be found
 in the <a href="changelog-jsr308.txt">changelog</a>.
 </p>
 
