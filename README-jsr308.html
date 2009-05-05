@@ -406,6 +406,20 @@ in the following ways:
     permits annotations to appear on any occurrence of a type, not just on
     declarations as the original Java 5 annotations (also known as JSR 175
     annotations) did.</li>
+  <li>Note that the <code>-proc:only</code> command-line argument causes
+    javac to stop after ordinary (non-type) annotation processing.  Use of
+    the <code>-proc:only</code> command-line argument causes type
+    processing to be skipped.</li>
+  <li>javac has the ability to warn about redundant casts (when directed to
+   do so using a lint option).  If the target type of the cast contains an
+   annotation, then javac never issues a redundant cast warning, but leaves
+   that up to the annotation processor.  The processor should issue a
+   warning exactly if the cast is redundant with respect to the entire
+   annotated type:  that is, the unannotated type parts are redundant when
+   igoring the annotations, and the annotations are also redundant.
+   (A potential problem is that if a type has multiple annotations that are
+   handled by different type processors, then no redundant cast warning
+   will ever be issued.</li>
   <li>This documentation file has been included.</li>
 </ul>
 
