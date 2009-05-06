@@ -23,10 +23,37 @@
 
 /*
  * @test
- * @summary check that A is accessible in the class type parameters
- * @author Mahmood Ali
- * @compile/fail/ref=Scopes.out -XDrawDiagnostics -source 1.7 Scopes.java
+ * @bug 6754038
+ * @summary Generate call sites for method handle
+ * @author jrose
+ *
+ * @library ..
+ * @compile -source 7 -target 7 InvokeDyn.java
  */
-class Scopes<T extends @UniqueInner Object> {
-  @interface UniqueInner { };
+//No: @run main/othervm -XX:+EnableInvokeDynamic meth.InvokeDyn
+
+/*
+ * Standalone testing:
+ * <code>
+ * $ cd $MY_REPO_DIR/langtools
+ * $ (cd make; make)
+ * $ ./dist/bootstrap/bin/javac -d dist test/tools/javac/meth/InvokeDyn.java
+ * $ javap -c -classpath dist meth.InvokeDyn
+ * </code>
+ */
+
+package meth;
+
+import java.dyn.InvokeDynamic;
+
+public class InvokeDyn {
+    void test() {
+        Object x = "hello";
+        InvokeDynamic.greet(x, "world", 123);
+        InvokeDynamic.greet(x, "mundus", 456);
+        InvokeDynamic.greet(x, "kosmos", 789);
+        InvokeDynamic.<String>cogitate(10.11121, 3.14);
+        InvokeDynamic.<void>#"yow: what I mean to say is, please treat this one specially"(null);
+        InvokeDynamic.<int>invoke("goodbye");
+    }
 }

@@ -1154,7 +1154,13 @@ public class JavacParser implements Parser {
                     return illegal(pos);
                 }
             } else {
-                return illegal();
+                // Support the corner case of myMethodHandle.<void>invoke() by passing
+                // a void type (like other primitive types) to the next phase.
+                // The error will be reported in Attr.attribTypes or Attr.visitApply.
+                JCPrimitiveTypeTree ti = to(F.at(pos).TypeIdent(TypeTags.VOID));
+                S.nextToken();
+                return ti;
+                //return illegal();
             }
             break;
         default:
@@ -2731,36 +2737,24 @@ public class JavacParser implements Parser {
                 if (typarams.length() > 0 && mods.pos == Position.NOPOS) {
                     mods.pos = pos;
                 }
+
+                List<JCAnnotation> annosAfterParams = annotationsOpt(AnnotationKind.DEFAULT_ANNO);
+
                 Token token = S.token();
                 Name name = S.name();
                 pos = S.pos();
                 JCExpression type;
                 boolean isVoid = S.token() == VOID;
                 if (isVoid) {
+                    if (annosAfterParams.nonEmpty())
+                        illegal(annosAfterParams.head.pos);
                     type = to(F.at(pos).TypeIdent(TypeTags.VOID));
                     S.nextToken();
                 } else {
-
-                    // In case of a method declaration like
-                    //    <T> @A String get() { ... }
-                    // @A is parsed as a type annotation on the method return
-                    // type (illegal) rather than an annotation on the method
-                    // itself
-                    List<JCAnnotation> annosAfterParams = List.nil();
-                    if (S.token() == Token.MONKEYS_AT && typarams.nonEmpty())
-                        annosAfterParams = annotationsOpt(AnnotationKind.DEFAULT_ANNO);
-
+                    mods.annotations = mods.annotations.appendList(annosAfterParams);
                     // JSR 308: use a type without annotations, since we have
                     // already parsed JSR 175 annotations with modifiersOpt()
                     type = unannotatedType();
-
-                    if (annosAfterParams.nonEmpty()) {
-                        // appendList could use some wildcards
-                        if (mods.annotations == null)
-                            mods.annotations = annosAfterParams;
-                        else
-                            mods.annotations = mods.annotations.appendList(annosAfterParams);
-                    }
                 }
                 if (S.token() == LPAREN && !isInterface && type.getTag() == JCTree.IDENT) {
                     if (isInterface || name != className)

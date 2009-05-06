@@ -1259,7 +1259,8 @@ public class Flow extends TreeScanner {
         super.visitTypeCast(tree);
         if (!tree.type.isErroneous()
             && lint.isEnabled(Lint.LintCategory.CAST)
-            && types.isSameType(tree.expr.type, tree.clazz.type)) {
+            && types.isSameType(tree.expr.type, tree.clazz.type)
+            && !(IGNORE_ANNOTATED_CASTS && containsTypeAnnotation(tree.clazz))) {
             log.warning(tree.pos(), "redundant.cast", tree.expr.type);
         }
     }
@@ -1267,6 +1268,23 @@ public class Flow extends TreeScanner {
     public void visitTopLevel(JCCompilationUnit tree) {
         // Do nothing for TopLevel since each class is visited individually
     }
+
+/**************************************************************************
+ * utility methods for ignoring type-annotated casts lint checking
+ *************************************************************************/
+        private static final boolean IGNORE_ANNOTATED_CASTS = true;
+        private static class AnnotationFinder extends TreeScanner {
+            public boolean foundTypeAnno = false;
+            public void visitAnnotation(JCAnnotation tree) {
+                foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
+            }
+        }
+
+        private boolean containsTypeAnnotation(JCTree e) {
+            AnnotationFinder finder = new AnnotationFinder();
+            finder.scan(e);
+            return finder.foundTypeAnno;
+        }
 
 /**************************************************************************
  * main method
