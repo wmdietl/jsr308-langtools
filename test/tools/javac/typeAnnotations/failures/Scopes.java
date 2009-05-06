@@ -27,6 +27,6 @@
  * @author Mahmood Ali
  * @compile/fail/ref=Scopes.out -XDrawDiagnostics -source 1.7 Scopes.java
  */
-class Scopes<T extends @A Object> {
-  @interface A { };
+class Scopes<T extends @UniqueInner Object> {
+  @interface UniqueInner { };
 }
