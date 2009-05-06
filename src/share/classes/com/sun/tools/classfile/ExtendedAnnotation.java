@@ -65,7 +65,7 @@ public class ExtendedAnnotation {
     private static Position read_position(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         // Copied from ClassReader
         int tag = (byte)cr.readUnsignedByte();  // cast to introduce signedness
-        if (TargetType.isValidTargetTypeValue(tag))
+        if (!TargetType.isValidTargetTypeValue(tag))
             throw new Annotation.InvalidAnnotation("invalid type annotation target type value: " + tag);
 
         TargetType type = TargetType.fromTargetTypeValue(tag);
