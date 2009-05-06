@@ -988,16 +988,38 @@ public class TransTypes extends TreeTranslator {
         @Override
         public void visitNewArray(JCNewArray tree) {
             findPosition(tree, tree, tree.annotations);
-            for (int i = 0; i < tree.dimAnnotations.size(); ++i) {
-                JCTree frame = tree;
-                TypeAnnotationPosition p =
-                    resolveFrame(tree, frame, frames.toList(),
-                            new TypeAnnotationPosition());
+            int dimAnnosCount = tree.dimAnnotations.size();
+
+            // handle annotations associated with dimentions
+            for (int i = 0; i < dimAnnosCount; ++i) {
+                TypeAnnotationPosition p = new TypeAnnotationPosition();
+                p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                p.pos = tree.pos;
                 p.location = p.location.append(i);
-                p.type = p.type.getGenericComplement();
                 setTypeAnnotationPos(tree.dimAnnotations.get(i), p);
             }
-            super.visitNewArray(tree);
+
+            // handle "free" annotations
+            int i = dimAnnosCount == 0 ? 0 : dimAnnosCount - 1;
+            JCExpression elemType = tree.elemtype;
+            while (elemType != null) {
+                if (elemType.getTag() == JCTree.ANNOTATED_TYPE) {
+                    JCAnnotatedType at = (JCAnnotatedType)elemType;
+                    TypeAnnotationPosition p = new TypeAnnotationPosition();
+                    p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                    p.pos = tree.pos;
+                    p.location = p.location.append(i);
+                    setTypeAnnotationPos(at.annotations, p);
+                    elemType = at.underlyingType;
+                } else if (elemType.getTag() == JCTree.TYPEARRAY) {
+                    ++i;
+                    elemType = ((JCArrayTypeTree)elemType).elemtype;
+                } else
+                    break;
+            }
+
+            // find annotations locations of initializer elements
+            scan(tree.elems);
         }
 
         @Override
