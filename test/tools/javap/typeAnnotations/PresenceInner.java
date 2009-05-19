@@ -26,6 +26,7 @@ import com.sun.tools.classfile.*;
 
 /*
  * @test PresenceInner
+ * @bug 6843077
  * @summary test that annotations in inner types count only once
  */
 

@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary test old array syntax
  * @author Mahmood Ali
  * @compile/fail/ref=OldArray.out -XDrawDiagnostics -source 1.7 OldArray.java

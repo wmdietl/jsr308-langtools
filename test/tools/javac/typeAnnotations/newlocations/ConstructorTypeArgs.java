@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary new type annotation location: constructor type args
  * @author Mahmood Ali
  * @compile -source 1.7 ConstructorTypeArgs.java

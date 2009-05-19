@@ -26,6 +26,7 @@ import com.sun.tools.classfile.*;
 
 /*
  * @test Visibility
+ * @bug 6843077
  * @summary test that type annotations are recorded in the classfile
  */
 
