@@ -1272,19 +1272,19 @@ public class Flow extends TreeScanner {
 /**************************************************************************
  * utility methods for ignoring type-annotated casts lint checking
  *************************************************************************/
-        private static final boolean IGNORE_ANNOTATED_CASTS = true;
-        private static class AnnotationFinder extends TreeScanner {
-            public boolean foundTypeAnno = false;
-            public void visitAnnotation(JCAnnotation tree) {
-                foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
-            }
+    private static final boolean IGNORE_ANNOTATED_CASTS = true;
+    private static class AnnotationFinder extends TreeScanner {
+        public boolean foundTypeAnno = false;
+        public void visitAnnotation(JCAnnotation tree) {
+            foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
         }
+    }
 
-        private boolean containsTypeAnnotation(JCTree e) {
-            AnnotationFinder finder = new AnnotationFinder();
-            finder.scan(e);
-            return finder.foundTypeAnno;
-        }
+    private boolean containsTypeAnnotation(JCTree e) {
+        AnnotationFinder finder = new AnnotationFinder();
+        finder.scan(e);
+        return finder.foundTypeAnno;
+    }
 
 /**************************************************************************
  * main method

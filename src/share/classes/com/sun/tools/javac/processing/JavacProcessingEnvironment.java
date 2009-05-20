@@ -832,7 +832,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
              * annotation processors and then checking for syntax
              * errors on any generated source files.
              */
-            if (messager.errorRaised() || trees.errorRaised()) {
+            if (messager.errorRaised()) {
                 errorStatus = true;
                 break runAround;
             } else {
@@ -908,7 +908,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         * second to last round; errorRaised() gives the error status
         * of the last round.
         */
-       errorStatus = errorStatus || messager.errorRaised() || trees.errorRaised();
+       errorStatus = errorStatus || messager.errorRaised();
 
 
         // Free resources
@@ -918,7 +918,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             taskListener.finished(new TaskEvent(TaskEvent.Kind.ANNOTATION_PROCESSING));
 
         if (errorStatus) {
-            compiler.log.nerrors += messager.errorCount() + trees.errorCount();
+            compiler.log.nerrors += messager.errorCount();
             if (compiler.errorCount() == 0)
                 compiler.log.nerrors++;
         } else if (procOnly) {

@@ -48,7 +48,8 @@ public enum TargetType {
 
     //
     // Some target types are commented out, because Java doesn't permit such
-    // targets.
+    // targets.  They are included here to confirm that their omission is
+    // intentional omission not an accidental omission.
     //
 
     /** For annotations on typecasts. */

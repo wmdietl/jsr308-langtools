@@ -1043,8 +1043,6 @@ public class TransTypes extends TreeTranslator {
 
         void findPosition(JCTree tree, JCTree frame, List<JCTypeAnnotation> annotations) {
             if (!annotations.isEmpty()) {
-                StringBuilder sb = new StringBuilder();
-                if (debugJSR308) sb.append("trans: " + tree + "\n");
                 TypeAnnotationPosition p =
                         resolveFrame(tree, frame, frames.toList(),
                                 new TypeAnnotationPosition());
@@ -1052,8 +1050,8 @@ public class TransTypes extends TreeTranslator {
                     p.type = p.type.getGenericComplement();
                 setTypeAnnotationPos(annotations, p);
                 if (debugJSR308) {
-                    sb.append("  target: " + p + "\n");
-                    System.out.println(sb.toString());
+                    System.out.println("trans: " + tree);
+                    System.out.println("  target: " + p);
                 }
             }
         }
