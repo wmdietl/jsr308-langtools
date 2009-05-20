@@ -53,7 +53,6 @@ import javax.tools.DiagnosticListener;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.api.JavacTaskImpl;
-import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.file.Paths;
@@ -98,7 +97,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private final JavacFiler filer;
     private final JavacMessager messager;
-    private final JavacTrees trees;
     private final JavacElements elementUtils;
     private final JavacTypes typeUtils;
 
@@ -161,7 +159,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         // in case processors use them.
         filer = new JavacFiler(context);
         messager = new JavacMessager(context, this);
-        trees = JavacTrees.instance(context);
         elementUtils = new JavacElements(context);
         typeUtils = new JavacTypes(context);
         processorOptions = initProcessorOptions(context);
