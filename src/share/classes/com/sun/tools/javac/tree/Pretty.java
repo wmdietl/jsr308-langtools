@@ -1134,14 +1134,20 @@ public class Pretty extends JCTree.Visitor {
 
     // Prints the inner element type of a nested array
     private void printBaseElementType(JCTree tree) throws IOException {
-        if (tree instanceof JCArrayTypeTree)
+        switch (tree.getTag()) {
+        case JCTree.TYPEARRAY:
             printBaseElementType(((JCArrayTypeTree)tree).elemtype);
-        else if (tree instanceof JCWildcard)
+            return;
+        case JCTree.WILDCARD:
             printBaseElementType(((JCWildcard)tree).inner);
-        else if (tree instanceof JCAnnotatedType)
+            return;
+        case JCTree.ANNOTATED_TYPE:
             printBaseElementType(((JCAnnotatedType)tree).underlyingType);
-        else
+            return;
+        default:
             printExpr(tree);
+            return;
+        }
     }
 
     // prints the brackets of a nested array in reverse order
@@ -1149,13 +1155,13 @@ public class Pretty extends JCTree.Visitor {
         JCTree elem;
         while (true) {
             elem = tree.elemtype;
-            if (elem instanceof JCAnnotatedType) {
+            if (elem.getTag() == JCTree.ANNOTATED_TYPE) {
                 JCAnnotatedType atype = (JCAnnotatedType) elem;
                 printTypeAnnotations(atype.annotations);
                 elem = atype.underlyingType;
             }
             print("[]");
-            if (!(elem instanceof JCArrayTypeTree)) break;
+            if (elem.getTag() != JCTree.TYPEARRAY) break;
             tree = (JCArrayTypeTree) elem;
         }
     }
