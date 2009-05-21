@@ -25,6 +25,7 @@
 
 package com.sun.tools.javac.parser;
 
+import java.io.File;
 import java.util.*;
 
 import com.sun.tools.javac.tree.*;
@@ -2403,7 +2404,7 @@ public class JavacParser implements Parser {
             JCExpression pid = toP(F.at(S.pos()).Ident(names.fromString(idents[0])));
             for (int i = 1; i < idents.length; ++i) {
                 Name selector;
-                if (idents[i] == "*")
+                if ("*".equals(idents[i]))
                     selector = names.asterisk;
                 else
                     selector = names.fromString(idents[i]);
