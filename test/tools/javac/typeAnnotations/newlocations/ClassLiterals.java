@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary new type annotation location: class literals
  * @author Mahmood Ali
  * @compile -source 1.7 ClassLiterals.java

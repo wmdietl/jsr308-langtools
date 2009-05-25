@@ -26,6 +26,7 @@ import com.sun.tools.classfile.*;
 
 /*
  * @test Presence
+ * @bug 6843077
  * @summary test that all type annotations are present in the classfile
  */
 

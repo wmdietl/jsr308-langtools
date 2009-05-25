@@ -53,10 +53,8 @@ import javax.tools.DiagnosticListener;
 import com.sun.source.util.TaskEvent;
 import com.sun.source.util.TaskListener;
 import com.sun.tools.javac.api.JavacTaskImpl;
-import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.file.Paths;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.jvm.*;
 import com.sun.tools.javac.main.JavaCompiler;
@@ -98,7 +96,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private final JavacFiler filer;
     private final JavacMessager messager;
-    private final JavacTrees trees;
     private final JavacElements elementUtils;
     private final JavacTypes typeUtils;
 
@@ -161,7 +158,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         // in case processors use them.
         filer = new JavacFiler(context);
         messager = new JavacMessager(context, this);
-        trees = JavacTrees.instance(context);
         elementUtils = new JavacElements(context);
         typeUtils = new JavacTypes(context);
         processorOptions = initProcessorOptions(context);
@@ -183,7 +179,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     }
 
     private void initProcessorIterator(Context context, Iterable<? extends Processor> processors) {
-        Paths paths = Paths.instance(context);
         Log   log   = Log.instance(context);
         Iterator<? extends Processor> processorIterator;
 
@@ -832,7 +827,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
              * annotation processors and then checking for syntax
              * errors on any generated source files.
              */
-            if (messager.errorRaised() || trees.errorRaised()) {
+            if (messager.errorRaised()) {
                 errorStatus = true;
                 break runAround;
             } else {
@@ -908,7 +903,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         * second to last round; errorRaised() gives the error status
         * of the last round.
         */
-       errorStatus = errorStatus || messager.errorRaised() || trees.errorRaised();
+       errorStatus = errorStatus || messager.errorRaised();
 
 
         // Free resources
@@ -918,7 +913,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             taskListener.finished(new TaskEvent(TaskEvent.Kind.ANNOTATION_PROCESSING));
 
         if (errorStatus) {
-            compiler.log.nerrors += messager.errorCount() + trees.errorCount();
+            compiler.log.nerrors += messager.errorCount();
             if (compiler.errorCount() == 0)
                 compiler.log.nerrors++;
         } else if (procOnly) {

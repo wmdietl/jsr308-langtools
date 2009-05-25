@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary new type annotation location: throw clauses
  * @author Mahmood Ali
  * @compile -source 1.7 Throws.java

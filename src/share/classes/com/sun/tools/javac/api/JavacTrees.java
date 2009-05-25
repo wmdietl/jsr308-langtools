@@ -88,7 +88,6 @@ public class JavacTrees extends Trees {
     private final TreeMaker treeMaker;
     private final JavacElements elements;
     private final JavacTaskImpl javacTaskImpl;
-    private int errorCount;
 
     public static JavacTrees instance(JavaCompiler.CompilationTask task) {
         if (!(task instanceof JavacTaskImpl))
@@ -366,7 +365,6 @@ public class JavacTrees extends Trees {
         try {
             switch (kind) {
             case ERROR:
-                errorCount++;
                 boolean prev = log.multipleErrors;
                 try {
                     log.error(pos, "proc.messager", msg.toString());
@@ -390,13 +388,5 @@ public class JavacTrees extends Trees {
             if (oldSource != null)
                 log.useSource(oldSource);
         }
-    }
-
-    public int errorCount() {
-        return errorCount;
-    }
-
-    public boolean errorRaised() {
-        return errorCount > 0;
     }
 }

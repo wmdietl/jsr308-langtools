@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary new type annotation location: method return type array/generics
  * @author Mahmood Ali
  * @compile -source 1.7 MethodReturnType.java

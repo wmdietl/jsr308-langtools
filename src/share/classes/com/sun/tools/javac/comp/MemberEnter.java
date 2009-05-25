@@ -101,12 +101,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         target = Target.instance(context);
         Options options = Options.instance(context);
         skipAnnotations = options.get("skipAnnotations") != null;
-        debugJSR308 = options.get("TA:attr") != null;
     }
-
-    /** Switch: debug output for JSR 308-related operations.
-     */
-    boolean debugJSR308;
 
     /** A queue for classes whose members still need to be entered into the
      *  symbol table.

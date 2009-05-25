@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @bug 6843077
  * @summary test scopes of attribution
  * @author Mahmood Ali
  * @compile -source 1.7 Scopes.java

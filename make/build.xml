@@ -35,7 +35,6 @@
     <!-- The following locations can be used to override default property values. -->
 
     <!-- Use this location for customizations specific to this instance of this workspace -->
-    <property environment="env"/>
     <property file="build.properties"/>
 
     <!-- Use this location for customizations common to all OpenJDK langtools workspaces -->
@@ -100,9 +99,6 @@
   
     <!-- clean -->
 
-    <!-- Sometimes it takes 2 tries for this to work; the first "ant clean"
-    says "Unable to delete directory .../langtools/dist", and the second
-    succeeds.  -MDE -->
     <target name="clean" description="Delete all generated files">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
@@ -196,12 +192,7 @@
     <target name="jtreg-javac" depends="build-javac,-def-jtreg">
         <jtreg-tool name="javac" samevm="true" tests="${javac.tests}"/>
     </target>
-
-    <target name="jtreg-jsr308" depends="build-javac,build-javap,-def-jtreg">
-      <jtreg-tool name="jsr308" samevm="true"
-                  tests="${javac.tests}/typeAnnotations ${javap.tests}/typeAnnotations"/>
-    </target>
-
+    
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">
         <findbugs-tool name="javac"/>
     </target>
@@ -402,6 +393,7 @@
             <attribute name="java" default="java"/>
             <attribute name="javac.bootclasspath" default="-J-Xbootclasspath/p:${build.bootstrap.dir}/classes"/>
             <attribute name="javac.java.home" default="${boot.java.home}"/>
+            <attribute name="javac.source" default="${javac.source}"/>
             <attribute name="javac.target" default="${javac.target}"/>
             <attribute name="jarmainclass" default="com.sun.tools.@{name}.Main"/>
             <attribute name="jarclasspath" default=""/>
@@ -420,6 +412,7 @@
                     release="@{release}"
                     full.version="@{full.version}"
                     javac.bootclasspath="@{javac.bootclasspath}"
+                    javac.source="@{javac.source}"
                     javac.target="@{javac.target}"
                 />
                 <mkdir dir="@{bin.dir}"/>
@@ -444,6 +437,7 @@
             <attribute name="lib.dir" default="${dist.lib.dir}"/>
             <attribute name="javac.bootclasspath" default="-J-Xbootclasspath/p:${build.bootstrap.dir}/classes"/>
             <attribute name="javac.java.home" default="${boot.java.home}"/>
+            <attribute name="javac.source" default="${javac.source}"/>
             <attribute name="javac.target" default="${javac.target}"/>
             <attribute name="jarmainclass" default="com.sun.tools.@{name}.Main"/>
             <attribute name="jarclasspath" default=""/>
@@ -459,6 +453,7 @@
                     release="@{release}"
                     full.version="@{full.version}"
                     javac.bootclasspath="@{javac.bootclasspath}"
+                    javac.source="@{javac.source}"
                     javac.target="@{javac.target}"
                 />
                 <mkdir dir="@{lib.dir}"/>
@@ -483,6 +478,7 @@
             <attribute name="gensrc.dir" default="${build.gensrc.dir}"/>
             <attribute name="javac.bootclasspath" default="${build.bootstrap.dir}/classes"/>
             <attribute name="javac.java.home" default="${boot.java.home}"/>
+            <attribute name="javac.source" default="${javac.source}"/>
             <attribute name="javac.target" default="${javac.target}"/>
             <attribute name="release" default="${release}"/>
             <attribute name="full.version" default="${full.version}"/>
@@ -511,6 +507,7 @@
                        includes="@{includes}"
                        sourcepath=""
                        includeAntRuntime="no"
+                       source="@{javac.source}"
                        target="@{javac.target}">
                     <compilerarg value="-J-Xbootclasspath/p:@{javac.bootclasspath}"/>
                     <compilerarg line="${javac.version.opt}"/>
@@ -524,6 +521,7 @@
                        excludes="@{excludes}"
                        sourcepath=""
                        includeAntRuntime="no"
+                       source="@{javac.source}"
                        target="@{javac.target}"
                        debug="${javac.debug}" 
                        debuglevel="${javac.debuglevel}">
@@ -549,6 +547,7 @@
     <target name="-def-build-bootstrap-tool" depends="-check-boot.java.home,-def-build-tool">
         <presetdef name="build-bootstrap-tool">
             <build-tool
+                javac.source="${boot.javac.source}"
                 javac.target="${boot.javac.target}"
                 gensrc.dir="${build.bootstrap.dir}/gensrc"
                 classes.dir="${build.bootstrap.dir}/classes"
@@ -564,6 +563,7 @@
     <target name="-def-build-bootstrap-jar" depends="-def-build-jar">
         <presetdef name="build-bootstrap-jar">
             <build-jar
+                javac.source="${boot.javac.source}"
                 javac.target="${boot.javac.target}"
                 gensrc.dir="${build.bootstrap.dir}/gensrc"
                 classes.dir="${build.bootstrap.dir}/classes"
