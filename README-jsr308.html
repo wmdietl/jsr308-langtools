@@ -401,12 +401,29 @@ portion of Sun's OpenJDK distribution
 in the following ways:
 </p>
 <ul>
+  <li>This documentation file has been included.</li>
+  <li>
+    The 
+    compiler parses annotations written in <a
+    href="#annotations-in-comment">specifically-formatted comments</a>,
+    which enables your code to
+    <ul>
+      <li>compile with earlier compilers, and</li>
+      <li>be type-checked by the Type Annotations compiler. </li>
+    </ul>
+  </li>
+</ul>
+
+<p>The new type annotations features (which appear in both this distribution and in
+  OpenJDK) are:
+</p>
+<ul>
   <li>The compiler (which is located in
     <code>langtools/src/share/classes</code>) supports the Type Annotations syntax; it
     permits annotations to appear on any occurrence of a type, not just on
     declarations as the original Java 5 annotations (also known as JSR 175
     annotations) did.</li>
-  <li>Note that the <code>-proc:only</code> command-line argument causes
+  <li>The <code>-proc:only</code> command-line argument causes
     javac to stop after ordinary (non-type) annotation processing.  Use of
     the <code>-proc:only</code> command-line argument causes type
     processing to be skipped.</li>
@@ -420,23 +437,6 @@ in the following ways:
    (A potential problem is that if a type has multiple annotations that are
    handled by different type processors, then no redundant cast warning
    will ever be issued.</li>
-  <li>This documentation file has been included.</li>
-</ul>
-
-<p>A slightly modified version distributed by researchers at MIT and the
-University of Washington has some further differences:
-</p>
-<ul>
-  <li>
-    The 
-    compiler parses annotations written in <a
-    href="#annotations-in-comment">specifically-formatted comments</a>,
-    which enables your code to
-    <ul>
-      <li>compile with earlier compilers, and</li>
-      <li>be type-checked by the Type Annotations compiler. </li>
-    </ul>
-  </li>
 </ul>
 
 
