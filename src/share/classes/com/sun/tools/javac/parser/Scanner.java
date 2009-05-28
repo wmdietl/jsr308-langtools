@@ -1067,12 +1067,17 @@ public class Scanner implements Lexer {
 
     private boolean isCommentWithoutSpaces() {
         assert ch == '@';
+        int brackets = 0;
         int lbp = bp;
         while (lbp < buflen) {
             char lch = buf[++lbp];
-            if (Character.isWhitespace(lch))
+            if (brackets == 0 && Character.isWhitespace(lch))
                 return false;
-            if (lch == '*'
+            if (lch == '(')
+                brackets++;
+            else if (lch == ')')
+                brackets--;
+            else if (lch == '*'
                 && lbp + 1 < buflen
                 && buf[lbp+1] == '/')
                 return true;
