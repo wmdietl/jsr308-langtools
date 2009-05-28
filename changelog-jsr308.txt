@@ -1,4 +1,4 @@
-Version 0.9, 16 Mar 2009
+Version 0.9, 16 May 2009
 
 Functionality
   Renamed compile commandline options:
