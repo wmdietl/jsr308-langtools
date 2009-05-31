@@ -1,3 +1,4 @@
+
 /*
  * Copyright 2003-2009 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -40,12 +41,6 @@ public enum ElementType {
     /** Class, interface (including annotation type), or enum declaration */
     TYPE,
 
-    /** Uses of a type */
-    TYPE_USE,
-
-    /** type parameters */
-    TYPE_PARAMETER,
-
     /** Field declaration (includes enum constants) */
     FIELD,
 
@@ -65,5 +60,11 @@ public enum ElementType {
     ANNOTATION_TYPE,
 
     /** Package declaration */
-    PACKAGE
+    PACKAGE,
+
+    /** Uses of a type */
+    TYPE_USE,
+
+    /** type parameters */
+    TYPE_PARAMETER
 }
