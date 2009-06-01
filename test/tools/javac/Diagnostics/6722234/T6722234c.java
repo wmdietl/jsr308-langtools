@@ -1,12 +1,10 @@
 /*
- * Copyright 2002 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,38 +21,19 @@
  * have any questions.
  */
 
-
-package sun.tools.javap;
-
-import java.util.*;
-import java.io.*;
-
 /**
- * Stores exception table data in code attribute.
- *
- * @author  Sucheta Dambalkar (Adopted code from jdis)
+ * @test
+ * @bug     6722234
+ * @summary javac diagnostics need better integration with the type-system
+ * @author  mcimadamore
+ * @compile/fail/ref=T6722234c.out -XDrawDiagnostics -XDdiags=simpleNames T6722234c.java
  */
-class TrapData {
-    short start_pc, end_pc, handler_pc, catch_cpx;
-  int num;
 
+class T6722234c {
+    static class String {}
+    <T> void m(String s2) {}
 
-    /**
-     * Read and store exception table data in code attribute.
-     */
-    public TrapData(DataInputStream in, int num) throws IOException {
-        this.num=num;
-        start_pc = in.readShort();
-        end_pc=in.readShort();
-        handler_pc=in.readShort();
-        catch_cpx=in.readShort();
+    void test() {
+        m("");
     }
-
-    /**
-     * returns recommended identifier
-     */
-    public String ident() {
-        return "t"+num;
-    }
-
 }
