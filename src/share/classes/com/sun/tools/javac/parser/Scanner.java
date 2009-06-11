@@ -67,6 +67,7 @@ public class Scanner implements Lexer {
         final Keywords keywords;
         final boolean annotationsincomments;
         final boolean spacesincomments;
+        final boolean debugJSR308;
 
         /** Create a new scanner factory. */
         protected Factory(Context context) {
@@ -76,7 +77,9 @@ public class Scanner implements Lexer {
             this.source = Source.instance(context);
             this.keywords = Keywords.instance(context);
             this.annotationsincomments = true;
-            this.spacesincomments = Options.instance(context).get("TAspacesincomments") != null;
+            Options options = Options.instance(context);
+            this.spacesincomments = options.get("TAspacesincomments") != null;
+            this.debugJSR308 = options.get("TA:scanner") != null;
         }
 
         public Scanner newScanner(CharSequence input) {
@@ -139,6 +142,7 @@ public class Scanner implements Lexer {
     protected boolean magic = false;
     protected boolean annotationsincomments;
     protected boolean spacesincomments;
+    protected boolean debugJSR308;
 
     /** A character buffer for literals.
      */
@@ -179,6 +183,7 @@ public class Scanner implements Lexer {
         this.allowHexFloats = fac.source.allowHexFloats();
         this.annotationsincomments = fac.annotationsincomments;
         this.spacesincomments = fac.spacesincomments;
+        this.debugJSR308 = fac.debugJSR308;
     }
 
     private static final boolean hexFloatsWork = hexFloatsWork();
@@ -1067,12 +1072,17 @@ public class Scanner implements Lexer {
 
     private boolean isCommentWithoutSpaces() {
         assert ch == '@';
+        int parens = 0;
         int lbp = bp;
         while (lbp < buflen) {
             char lch = buf[++lbp];
-            if (Character.isWhitespace(lch))
+            if (parens == 0 && Character.isWhitespace(lch))
                 return false;
-            if (lch == '*'
+            if (lch == '(')
+                parens++;
+            else if (lch == ')')
+                parens--;
+            else if (lch == '*'
                 && lbp + 1 < buflen
                 && buf[lbp+1] == '/')
                 return true;
