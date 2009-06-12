@@ -32,6 +32,7 @@ improvements to the answers, or other questions to include here.
           <li><a href="#ease-of-use">Are type annotations easy to read and write?</a></li>
           <li><a href="#clutter">Will my code become cluttered with type annotations?</a></li>
           <li><a href="#absolute-guarantee">Can a pluggable checker give an absolute guarantee of correctness?</a></li>
+          <li><a href="#bug-detector">Why not just use a bug detector like FindBugs?</a></li>
         </ul></li>
       <li><a href="#tools">Tool support</a>
         <ul>
@@ -169,7 +170,10 @@ may want to retain dynamic checks or use other mechanisms to detect errors.
 There are other circumstances in which a static type-checker may fail to
 detect a possible type error.  In Java, these include arrays, casts, raw
 types, reflection, separate compilation (bytecodes from unverified sources),
-native code, etc.  Java uses dynamic checks for most of these, so that the
+native code, etc.  (For details, see section
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#checker-guarantees">What
+the checker guarantees</a> in the Checker Framework manual.)
+Java uses dynamic checks for most of these, so that the
 type error cannot cause a security vulnerability or a crash.  The pluggable
 type-checkers inherit many (not all) of these weaknesses of Java
 type-checking, but do not currently have built-in dynamic checkers.  That
@@ -183,6 +187,34 @@ guarantee of correctness, it can be extremely useful by finding errors, by
 excluding certain types of possible problems (e.g., restricting the
 possible class of problems), or by increasing confidence in a piece of
 software.
+</p>
+
+
+<h3 id="bug-detector">Why not just use a bug detector like FindBugs?</h3>
+
+<p>
+A bug detector like <a href="http://findbugs.sourceforge.net/">FindBugs</a>,
+<a href="http://artho.com/jlint/">JLint</a>, or
+<a href="http://pmd.sourceforge.net/">PMD</a> aims to find <em>some</em>
+of the most obvious bugs.  It uses a lightweight analysis and heuristics
+for discarding potential warnings.  Even if the tool issues no warnings,
+your code might still have errors &mdash; maybe the analysis was too weak
+to find them, or the tool's heuristics classified the warnings as likely
+false positives and discarded them.
+</p>
+
+<p>
+A type checker aims to find <em>all</em> the bugs (of certain varieties).
+It requires you to write types, or to use a tool that infers types.  Thus,
+it requires slightly more work from the programmer, and in return gives
+stronger guarantees.
+</p>
+
+<p>
+Each tool is useful in different circumstances, depending on the desired level of
+confidence in your code.  For more details on the comparison, see section 
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#other-tools">Comparison
+  to other tools</a> in the Checker Framework manual.
 </p>
 
 
@@ -446,7 +478,7 @@ Sun codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: April 13, 2009.
+Last updated: June 12, 2009.
 </p>
 
 <p>
@@ -467,5 +499,5 @@ End:
 
 <!--  LocalWords:  MacOS nullness NonNull Nullable IGJ bytecodes webpage javac
  -->
-<!--  LocalWords:  codename Nonnull
+<!--  LocalWords:  codename Nonnull IntelliJ EAP TypeQualifier SubtypeOf
  -->
