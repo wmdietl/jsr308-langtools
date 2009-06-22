@@ -404,7 +404,7 @@ should be copied.)
 
 This section defines how to store type annotations in a Java class file.
 It also defines how to store local variable annotations, which are
-permitted in Java SE 6 but are discarded by the compiler.
+permitted in Java SE 6 source code but are discarded by the compiler.
 
 
 \paragraph{Why store type annotations in the class file?}
@@ -418,14 +418,16 @@ of each expression.
 
 
 More pragmatically, Java annotations must be stored in the class file for two reasons.
-%
+
 First, annotated \emph{signatures} (public members) must be available to
 tools that read class files.  For example, a type-checking compiler
-plug-in~\cite{JSR269} needs to read annotations when compiling a client of
-the class file.
+plug-in~\cite{JSR269.PapiACPE2008} needs to read annotations when compiling
+a client of the class file.  The Checker Framework
+(\myurl{http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html}) is
+one way to create such plug-ins.
 % (an annotation processor)
 % , as described in Section~\ref{compile-time})
-%
+
 Second, annotated method \emph{bodies} must be present to permit checking
 the class file against the annotations.  This is necessary to give
 confidence in an entire program, since its parts (class files) may
@@ -1386,6 +1388,19 @@ properties such as whether a file is in the open, read, write, readwrite,
 or closed state, and can guarantee that a file is opened for reading before
 it is read, etc.  The Vault language's type guards and capability states are
 similar~\cite{DelineF2001}.
+
+
+\subsection{Example tools that do pluggable type-checking for type qualifiers\label{type-qualifier-examples}}
+
+The Checker Framework
+(\myurl{http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html})
+gives a way to create pluggable type-checkers.  A pluggable type-checker
+verifies absence of certain bugs (and also verifies correct usage of type
+qualifiers).  The Checker Framework is distributed with a set of example
+type-checkers.  The Checker Framework is built on the Type Annotations (JSR
+308) syntax, though it also permits annotations to be written in comments
+for compatibility with previous versions of Java.
+
 
 
 \section{Discussion of Java language syntax extensions\label{syntax-discussion}}
@@ -3885,4 +3900,4 @@ Java SE/EE in 2008, at the 6th annual JCP Program Awards.
 % LocalWords:  expressionStack ExpressionStackIncrement genericsStack YAML wiki
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
-% LocalWords:  Nonnegative typedefs unabbrev reusability
+% LocalWords:  Nonnegative typedefs unabbrev reusability typedef
