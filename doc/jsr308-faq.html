@@ -31,8 +31,12 @@ improvements to the answers, or other questions to include here.
           <li><a href="#usefulness">What are type annotations good for?</a></li>
           <li><a href="#ease-of-use">Are type annotations easy to read and write?</a></li>
           <li><a href="#clutter">Will my code become cluttered with type annotations?</a></li>
-          <li><a href="#absolute-guarantee">Can a pluggable checker give an absolute guarantee of correctness?</a></li>
+        </ul></li>
+      <li><a href="#pluggable-types">Pluggable type-checking</a>
+        <ul>
+          <li><a href="#absolute-guarantee">Can a pluggable type-checker give an absolute guarantee of correctness?</a></li>
           <li><a href="#bug-detector">Why not just use a bug detector like FindBugs?</a></li>
+          <li><a href="#qualifiers-vs-classes">When should I use type qualifiers, and when should I use subclasses?</a></li>
         </ul></li>
       <li><a href="#tools">Tool support</a>
         <ul>
@@ -48,15 +52,15 @@ improvements to the answers, or other questions to include here.
           <li><a href="#return-type">Does an annotation before a method refer to the return type or to the method?</a></li>
           <li><a href="#array-syntax">I don't like array and receiver annotations.</a></li>
         </ul></li>
-      <li><a href="#features">Features in the Type Annotations Specification</a>
+      <li><a href="#features">Features in the Type Annotations specification</a>
         <ul>
           <li><a href="#type-of-an-object">How do I determine the annotation on an object?</a></li>
           <li><a href="#jsr305">What is the relationship between JSR 308 and JSR 305?</a></li>
           <li><a href="#checker-framework">What is the relationship between JSR 308 and the Checker Framework?</a></li>
           <li><a href="#statement_annotations">Is there a way to annotate statements?</a></li>
-          <li><a href="#feature-x">Should the Type Annotations Specification support feature X?</a></li>
+          <li><a href="#feature-x">Should the Type Annotations specification support feature X?</a></li>
           <li><a href="#modifying-the-specification">Is the Type Annotations specification set in stone?</a></li>
-          <li><a href="#specific-annotations">Why doesn't the Type Annotations Specification define useful annotation types?</a></li>
+          <li><a href="#specific-annotations">Why doesn't the Type Annotations specification define useful annotation types?</a></li>
         </ul></li>
       <li><a href="#misc">Miscellaneous</a>
         <ul>
@@ -64,6 +68,7 @@ improvements to the answers, or other questions to include here.
         </ul></li>
     </ul>
 <!-- end toc -->
+
 
 <h2 id="use">Usability of type annotations</h2>
 
@@ -150,7 +155,10 @@ less frequently than generic types, which Java programmers find acceptable.
 </p>
 
 
-<h3 id="absolute-guarantee">Can a pluggable checker give an absolute guarantee of correctness?</h3>
+<h2 id="pluggable-types">Pluggable type-checking</h2>
+
+
+<h3 id="absolute-guarantee">Can a pluggable type-checker give an absolute guarantee of correctness?</h3>
 
 <p>
 Each checker looks for certain errors.  You can use multiple checkers, but
@@ -196,7 +204,7 @@ software.
 A bug detector like <a href="http://findbugs.sourceforge.net/">FindBugs</a>,
 <a href="http://artho.com/jlint/">JLint</a>, or
 <a href="http://pmd.sourceforge.net/">PMD</a> aims to find <em>some</em>
-of the most obvious bugs.  It uses a lightweight analysis and heuristics
+of the most obvious bugs.  It uses a lightweight analysis, along with heuristics
 for discarding potential warnings.  Even if the tool issues no warnings,
 your code might still have errors &mdash; maybe the analysis was too weak
 to find them, or the tool's heuristics classified the warnings as likely
@@ -215,6 +223,15 @@ Each tool is useful in different circumstances, depending on the desired level o
 confidence in your code.  For more details on the comparison, see section 
 <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#other-tools">Comparison
   to other tools</a> in the Checker Framework manual.
+</p>
+
+
+<h3 id="qualifiers-vs-classes">When should I use type qualifiers, and when should I use subclasses?</h3>
+
+<p>
+In brief, use subtypes when you can, and type qualifiers when you cannot.
+For more details, see section 
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#when-to-use-type-qualifiers">When to use (and not use) type qualifiers</a> in the Checker Framework manual.
 </p>
 
 
@@ -324,7 +341,7 @@ An annotation before a method sometimes refers to the return type, and
 sometimes to the method itself.  There is never any ambiguity regarding
 which is intended.  See section <a
 href="specification/java-annotation-design.html#disambiguating">Disambiguating
-type and declaration annotations</a> in the Type Annotations Specification.
+type and declaration annotations</a> in the Type Annotations specification.
 </p>
 
 <h3 id="array-syntax">I don't like array and receiver annotations.</h3>
@@ -333,7 +350,7 @@ type and declaration annotations</a> in the Type Annotations Specification.
 If you are skeptical of the <em>usefulness</em> of the annotations, see
 section <a
 href="specification/java-annotation-design.html#type-annotation-use-cases">Uses
-for annotations on types</a> in the Type Annotations Specification.
+for annotations on types</a> in the Type Annotations specification.
 </p>
 
 <p>
@@ -341,14 +358,14 @@ If you are skeptical of the <em>syntax</em> of array annotations, then
 perhaps you really don't like Java's array syntax.  The annotation
 extension is a logical extension of Java's syntax; see section <a
 href="specification/java-annotation-design.html#array-syntax">Syntax of
-array annotations</a> in the Type Annotations Specification.
+array annotations</a> in the Type Annotations specification.
 </p>
 
 <p>    
 If you are skeptical of the <em>syntax</em> of receiver annotations, then
 see section <a
 href="specification/java-annotation-design.html#receivers">Receivers</a> in
-the Type Annotations Specification.
+the Type Annotations specification.
 </p>
 
 <p>
@@ -358,7 +375,7 @@ not extremely common in well-written code.  And
 </p>
 
 
-<h2 id="features">Features in the Type Annotations Specification</h2>
+<h2 id="features">Features in the Type Annotations specification</h2>
 
 
 <h3 id="type-of-an-object">How do I determine the annotation on an object?</h3>
@@ -366,7 +383,7 @@ not extremely common in well-written code.  And
 <p>
 Objects are not annotated &mdash; types or declarations are.
 Java has no run-time representation of the types of the variables that
-refer to an object.  The Type Annotations Specification (JSR 308) enriches
+refer to an object.  The Type Annotations specification (JSR 308) enriches
 types, but it does not change that fundamental property.  Type annotations
 as implemented in JSR 308 have no run-time representation.  This means that
 they impose no run-time burden on Java programs that use them.
@@ -388,7 +405,7 @@ such as <tt>@Nonnull</tt> and <tt>@Positive</tt>.  The JSR 305 annotations
 are most useful if they can be written on types, so JSR 305 needs JSR 308
 to achieve its full potential.  For a more detailed comparison, see section
 <a href="specification/java-annotation-design.html#semantics">Semantics of
-annotations</a> in the Type Annotations Specification.
+annotations</a> in the Type Annotations specification.
 </p>
 
 
@@ -424,10 +441,10 @@ that users only have to download and install one file.
 <p>
 Statement annotations are within the scope of JSR 308, and this feature is
 under consideration.  See the section <a
-href="specification/java-annotation-design.html#statement-annotations">Annotations on Statements</a> in the Type Annotations Specification.
+href="specification/java-annotation-design.html#statement-annotations">Annotations on Statements</a> in the Type Annotations specification.
 </p>
 
-<h3 id="feature-x">Should the Type Annotations Specification support feature X?</h3>
+<h3 id="feature-x">Should the Type Annotations specification support feature X?</h3>
 
 <p>
 Perhaps it should.  See section <a
@@ -443,7 +460,7 @@ means.
 
 <p>
 The Type Annotations (JSR 308) expert group gladly welcomes suggestions for improvements to
-the Type Annotations Specification, and to the tools that support it.  See
+the Type Annotations specification, and to the tools that support it.  See
 section <a
 href="specification/java-annotation-design.html#other-annotations">Other
 possible extensions to Java annotations</a> in the Type Annotations
@@ -451,7 +468,7 @@ Specification.
 </p>
 
 
-<h3 id="specific-annotations">Why doesn't the Type Annotations Specification define useful annotation types?</h3>
+<h3 id="specific-annotations">Why doesn't the Type Annotations specification define useful annotation types?</h3>
 
 <p>
 Defining annotations is beyond the scope of the Type Annotations
@@ -469,7 +486,7 @@ A JSR, or Java Specification Request, is a proposed specification for some
 aspect of the Java platform &mdash; the Java language, virtual machine,
 libraries, etc.  For more details, see the
 <a href="http://jcp.org/en/introduction/faq">Java Community Process
-FAQ</a>.  Many people refer to the Type Annotations Specification by its
+FAQ</a>.  Many people refer to the Type Annotations specification by its
 Sun codename, &ldquo;JSR 308&rdquo;.
 </p>
 
@@ -478,7 +495,7 @@ Sun codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: June 12, 2009.
+Last updated: June 26, 2009.
 </p>
 
 <p>
