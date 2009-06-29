@@ -42,6 +42,7 @@
     <!-- The following locations can be used to override default property values. -->
 
     <!-- Use this location for customizations specific to this instance of this workspace -->
+    <property environment="env"/>
     <property file="build.properties"/>
 
     <!-- Use this location for customizations common to all OpenJDK langtools workspaces -->
@@ -106,6 +107,9 @@
   
     <!-- clean -->
 
+    <!-- Sometimes it takes 2 tries for this to work; the first "ant clean"
+    says "Unable to delete directory .../langtools/dist", and the second
+    succeeds.  -MDE -->
     <target name="clean" description="Delete all generated files">
         <delete dir="${build.dir}"/>
         <delete dir="${dist.dir}"/>
@@ -199,7 +203,12 @@
     <target name="jtreg-javac" depends="build-javac,-def-jtreg">
         <jtreg-tool name="javac" samevm="true" tests="${javac.tests}"/>
     </target>
-    
+
+    <target name="jtreg-jsr308" depends="build-javac,build-javap,-def-jtreg">
+      <jtreg-tool name="jsr308" samevm="true"
+                  tests="${javac.tests}/typeAnnotations ${javap.tests}/typeAnnotations"/>
+    </target>
+
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">
         <findbugs-tool name="javac"/>
     </target>
