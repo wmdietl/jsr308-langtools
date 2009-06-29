@@ -60,11 +60,12 @@ pre, blockquote {
 </p>
 
 <p>
-The Type Annotations compiler is a version of the OpenJDK Java 7 compiler.
+The Type Annotations compiler is a version of the OpenJDK Java 7 compiler
+that supports some <a href="#openjdk-differences"><b>extra features</b></a>
+for type annotations.
 The OpenJDK Java 7 compiler already supports the Type Annotations (JSR 308)
-syntax.
-This syntax, which is a part of Java 7, permits annotations to appear on
-types.  The Type Annotations compiler supports some extra features that
+syntax, which permits annotations to appear on
+types.  The extra features in the  Type Annotations compiler
 make it possible for you write (and type-check) type annotations, while
 still permitting your code to be compiled with a Java 4/5/6 compiler.
 </p>
@@ -84,11 +85,12 @@ annotations.
 </p>
 
 <p>
-The Type Annotations syntax makes it <em>possible</em> to create compiler
-plug-ins that check user-defined type qualifiers.  The
+Pluggable type-checking is made <em>possible</em> by the Type Annotations
+syntax.  Pluggable type-checking is made <em>easy</em> by the 
 <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html">Checker
-Framework</a> makes such plug-ins <em>easy</em> to create, and it includes
-several example type qualifiers that you can start using right away.
+Framework</a>.  It includes several example type qualifiers that you can
+start using right away, and it enables you to create your own new compiler
+plug-ins that check user-defined type qualifiers.
 </p>
 
 <p>
@@ -364,9 +366,9 @@ is used for everything else.
 
 
 <p>The Type Annotations distribution includes only the <code>langtools</code>
-portion of the OpenJDK distribution. The Type Annotations prototype implementation
-makes no modifications in other parts of the OpenJDK distribution, and the
-remaining parts of the distribution are not necessary to build and use the
+portion of OpenJDK. The Type Annotations prototype implementation
+makes no modifications in other parts of OpenJDK, and the
+remaining parts of OpenJDK are not necessary to build and use the
 Type Annotations tools.
 </p>
 
@@ -632,14 +634,6 @@ in the <a href="changelog-jsr308.txt">changelog</a>.
 <p>The OpenJDK Java 7 compiler, which appears in the
   <a href="http://hg.openjdk.java.net/jdk7/jdk7/langtools">&ldquo;langtools&rdquo;
 repository</a>.
-
-
-
-that 
-supports the <a href="http://groups.csail.mit.edu/pag/jsr308/">Type
-    Annotations (JSR 308) syntax</a> and a <a href="#features">a few other
-    features</a>.
-</p>
 
 
 <!--  LocalWords:  OpenJDK NetBeans diff TODO SCA subcategory buildfile JRE pre
