@@ -15,8 +15,7 @@ html: design.html type-quals.html
 validate:
 	validate jsr308-webpage.html jsr308-faq.html jsr308-changes.html
 
-# Warning!  This makes a public release!
-# Update the main webpage only, but not any of the supporting documents.
+# Update the main webpage & FAQ only, but not any of the supporting documents.
 # Useful to fix a minor typo (but then you might just want to edit both versions, identically).
 webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 	$(MAKE) checklinks
