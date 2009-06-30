@@ -78,7 +78,7 @@ public class Scanner implements Lexer {
             this.keywords = Keywords.instance(context);
             this.annotationsincomments = true;
             Options options = Options.instance(context);
-            this.spacesincomments = options.get("TAspacesincomments") != null;
+            this.spacesincomments = options.get("TA:spacesincomments") != null;
             this.debugJSR308 = options.get("TA:scanner") != null;
         }
 

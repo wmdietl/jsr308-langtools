@@ -1,3 +1,12 @@
+Version 0.9.4, 30 Jun 2009
+
+Bug fixes
+  Fixed a regression when using '-XDTA:spacesincomments'
+
+Base build
+  Updated to OpenJDK langtools build b62
+
+----------------------------------------------------------------------
 Version 0.9.3, 23 Jun 2009
 
 Bug fixes
