@@ -29,7 +29,7 @@ import com.sun.source.util.TreePath;
 
 /*
  * @test
- * @bug 6843077
+ * @bug 100079
  * @summary test that package annotations are available to type processors
  * @author Mahmood Ali
  * @compile -source 1.7 PackageProcessor.java

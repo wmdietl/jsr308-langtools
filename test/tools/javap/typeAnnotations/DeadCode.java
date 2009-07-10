@@ -26,7 +26,7 @@ import com.sun.tools.classfile.*;
 
 /*
  * @test
- * @bug 6843077
+ * @bug 100081
  * @summary test that optimized away annotations are not emited to classfile
  */
 
