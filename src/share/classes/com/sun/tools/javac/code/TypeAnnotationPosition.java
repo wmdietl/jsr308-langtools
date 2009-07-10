@@ -49,9 +49,9 @@ public class TypeAnnotationPosition {
     public int offset = -1;
 
     // For locals. arrays same length
-    public int[] lvarOffset = new int[] { -1 };
-    public int[] lvarLength = new int[] { -1 };
-    public int[] lvarIndex = new int[] { -1 };
+    public int[] lvarOffset = null;
+    public int[] lvarLength = null;
+    public int[] lvarIndex = null;
 
     // For type parameter bound
     public int bound_index = -1;
