@@ -260,16 +260,13 @@ public class ExtendedAnnotation {
         // For generic/array types.
         public List<Integer> location = new ArrayList<Integer>();
 
-        // Tree position.
-        public int pos = -1;
-
         // For typecasts, type tests, new (and locals, as start_pc).
         public int offset = -1;
 
         // For locals.
-        public int[] lvarOffset = new int[] { -1 };
-        public int[] lvarLength = new int[] { -1 };
-        public int[] lvarIndex = new int[] { -1 };
+        public int[] lvarOffset = null;
+        public int[] lvarLength = null;
+        public int[] lvarIndex = null;
 
         // For type parameter bound
         public int bound_index = -1;
@@ -389,9 +386,6 @@ public class ExtendedAnnotation {
                 sb.append(location);
                 sb.append(")");
             }
-
-            sb.append(", pos = ");
-            sb.append(pos);
 
             sb.append(']');
             return sb.toString();
