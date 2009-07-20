@@ -35,4 +35,13 @@ class InnerClass {
             public <R> void method() { }
         };
     }
+
+    Object f1 = new InnerClass() {
+            <R> void method() { }
+        };
+
+    Object f2 = new InnerClass() {
+            <@A R> void method() { }
+        };
+    @interface A { }
 }
