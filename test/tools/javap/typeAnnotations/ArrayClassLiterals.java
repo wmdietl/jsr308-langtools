@@ -84,7 +84,7 @@ public class ArrayClassLiterals {
                 invisibles += tAttr.annotations.length;
 
             for (ExtendedAnnotation anno : tAttr.annotations)
-                anno.toString();
+                anno.position.toString();
         }
     }
 
@@ -103,7 +103,7 @@ public class ArrayClassLiterals {
                 invisibles += tAttr.annotations.length;
 
             for (ExtendedAnnotation anno : tAttr.annotations)
-                anno.toString();
+                anno.position.toString();
         }
     }
 
@@ -122,7 +122,7 @@ public class ArrayClassLiterals {
                 invisibles += tAttr.annotations.length;
 
             for (ExtendedAnnotation anno : tAttr.annotations)
-                anno.toString();
+                anno.position.toString();
         }
     }
 
