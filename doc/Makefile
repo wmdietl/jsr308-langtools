@@ -69,7 +69,7 @@ design.html: design.tex design.dvi design.bbl
 	hevea -fix urlhref.hva design.tex
 # Then, use the .aux file in preference, but using data from .haux when necessary for the table of contents.
 	hevea urlhref.hva design.tex
-	perl -pi -e 's/(<TT>mernst\@csail.mit.edu<\/TT>)/"$$1<BR>" . `date "+%B %e, %Y"`/e' design.html
+	perl -pi -e 's/(<TT>mernst\@cs.washington.edu<\/TT>)/"$$1<BR>" . `date "+%B %e, %Y"`/e' design.html
 #	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' design.html
 #	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' design.html
 #	html-update-toc design.html
