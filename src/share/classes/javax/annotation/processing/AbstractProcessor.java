@@ -51,8 +51,6 @@ import javax.tools.Diagnostic;
  * general {@link javax.annotation.processing.Processor Processor}
  * contract for that method is obeyed.
  *
- * @see com.sun.source.util.AbstractTypeProcessor
- *
  * @author Joseph D. Darcy
  * @author Scott Seligman
  * @author Peter von der Ah&eacute;

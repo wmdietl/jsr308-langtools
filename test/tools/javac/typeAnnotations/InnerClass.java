@@ -36,7 +36,12 @@ class InnerClass {
         };
     }
 
-    Object e = new InnerClass() {
-        <T> void m() {}
-    };
+    Object f1 = new InnerClass() {
+            <R> void method() { }
+        };
+
+    Object f2 = new InnerClass() {
+            <@A R> void method() { }
+        };
+    @interface A { }
 }
