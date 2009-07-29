@@ -1058,6 +1058,11 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             super.visitTypeParameter(tree);
         }
         @Override
+        public void visitNewClass(JCNewClass tree) {
+            super.visitNewClass(tree);
+            scan(tree.typeargs);
+        }
+        @Override
         public void visitNewArray(final JCNewArray tree) {
             annotate(tree, tree.annotations);
             for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)

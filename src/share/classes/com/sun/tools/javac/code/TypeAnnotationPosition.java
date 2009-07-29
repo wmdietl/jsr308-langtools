@@ -81,8 +81,6 @@ public class TypeAnnotationPosition {
             // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
@@ -139,6 +137,7 @@ public class TypeAnnotationPosition {
             sb.append(type_index);
             break;
         case CLASS_LITERAL:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
@@ -147,7 +146,8 @@ public class TypeAnnotationPosition {
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-            // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");

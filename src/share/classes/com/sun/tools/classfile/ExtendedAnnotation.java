@@ -296,8 +296,6 @@ public class ExtendedAnnotation {
             // new expression
             case NEW:
             case NEW_GENERIC_OR_ARRAY:
-            case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
@@ -364,6 +362,8 @@ public class ExtendedAnnotation {
                 sb.append(parameter_index);
                 break;
             // method type argument: wasn't specified
+            case NEW_TYPE_ARGUMENT:
+            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             case METHOD_TYPE_ARGUMENT:
             case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
                 sb.append(", offset = ");
