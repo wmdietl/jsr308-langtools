@@ -139,7 +139,6 @@ public class TypeAnnotations {
                 }
                 case MEMBER_SELECT: {
                     JCFieldAccess fieldFrame = (JCFieldAccess)frame;
-//                    if (fieldFrame.name == names._class) {
                     if ("class".contentEquals(fieldFrame.name)) {
                         if (fieldFrame.selected instanceof JCAnnotatedType) {
                             p.pos = TreeInfo.typeIn(fieldFrame).pos;
