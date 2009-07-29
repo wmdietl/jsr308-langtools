@@ -31,6 +31,8 @@ import java.util.*;
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
+import com.sun.tools.javac.code.TargetType;
+import com.sun.tools.javadoc.TypeAnnotation;
 
 /**
  * Writes constructor documentation.
@@ -148,6 +150,7 @@ public class ConstructorWriterImpl extends AbstractExecutableMemberWriter
             strong(constructor.name());
         }
         writeParameters(constructor);
+        writer.writeTypeAnnotationInfo(constructor, TypeAnnotation.byType(constructor, TargetType.METHOD_RECEIVER));
         writeExceptions(constructor);
         writer.preEnd();
         assert !writer.getMemberDetailsListPrinted();

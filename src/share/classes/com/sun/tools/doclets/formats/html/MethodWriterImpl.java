@@ -31,6 +31,10 @@ import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
 import com.sun.tools.doclets.internal.toolkit.taglets.*;
+import com.sun.tools.javac.code.TargetType;
+import com.sun.tools.javadoc.TypeAnnotation;
+
+import static com.sun.tools.javac.code.TargetType.*;
 
 /**
  * Writes method documentation in HTML format.
@@ -171,6 +175,7 @@ public class MethodWriterImpl extends AbstractExecutableMemberWriter
             strong(method.name());
         }
         writeParameters(method);
+        writer.writeTypeAnnotationInfo(method, TypeAnnotation.byType(method, TargetType.METHOD_RECEIVER));
         writeExceptions(method);
         writer.preEnd();
         assert !writer.getMemberDetailsListPrinted();

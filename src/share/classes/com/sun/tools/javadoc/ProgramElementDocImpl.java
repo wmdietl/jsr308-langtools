@@ -165,6 +165,15 @@ public abstract class ProgramElementDocImpl
         return res;
     }
 
+    public TypeAnnotationDesc[] typeAnnotations() {
+        TypeAnnotationDesc res[] = new TypeAnnotationDesc[sym.typeAnnotations.length()];
+        int i = 0;
+        for (Attribute.TypeCompound a : sym.typeAnnotations) {
+            res[i++] = new TypeAnnotationDescImpl(env, a);
+        }
+        return res;
+    }
+
     /**
      * Return true if this program element is public
      */

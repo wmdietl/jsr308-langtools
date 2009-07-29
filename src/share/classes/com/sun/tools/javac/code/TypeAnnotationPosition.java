@@ -54,13 +54,13 @@ public class TypeAnnotationPosition {
     public int[] lvarIndex = null;
 
     // For type parameter bound
-    public int bound_index = -1;
+    public int bound_index = Integer.MIN_VALUE;
 
     // For type parameter and method parameter
-    public int parameter_index = -1;
+    public int parameter_index = Integer.MIN_VALUE;
 
     // For class extends, implements, and throws classes
-    public int type_index = -2;
+    public int type_index = Integer.MIN_VALUE;
 
     // For wildcards
     public TypeAnnotationPosition wildcard_position = null;

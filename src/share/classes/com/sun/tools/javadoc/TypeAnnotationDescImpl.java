@@ -4,7 +4,9 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  Sun designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Sun in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -21,22 +23,28 @@
  * have any questions.
  */
 
-/*
- * @test
- * @bug 6843077
- * @summary compiler crashes when visiting inner classes
- * @author Mahmood Ali
- * @compile -source 1.7 InnerClass.java
- */
+package com.sun.tools.javadoc;
 
-class InnerClass {
-    private void a() {
-        new Object() {
-            public <R> void method() { }
-        };
+import com.sun.javadoc.TypeAnnotationDesc;
+import com.sun.tools.javac.code.TypeAnnotationPosition;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+
+/**
+ * Represents a type annotation.
+ *
+ * @author Mahmood Ali
+ */
+public class TypeAnnotationDescImpl extends AnnotationDescImpl implements TypeAnnotationDesc {
+    TypeAnnotationPosition position;
+
+    TypeAnnotationDescImpl(DocEnv env, TypeCompound annotation) {
+        super(env, annotation);
+        this.position = annotation.position;
     }
 
-    Object e = new InnerClass() {
-        <T> void m() {}
-    };
+    @Override
+    public TypeAnnotationPosition position() {
+        return position;
+    }
+
 }

@@ -4,7 +4,9 @@
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.
+ * published by the Free Software Foundation.  Sun designates this
+ * particular file as subject to the "Classpath" exception as provided
+ * by Sun in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -21,22 +23,22 @@
  * have any questions.
  */
 
-/*
- * @test
- * @bug 6843077
- * @summary compiler crashes when visiting inner classes
+package com.sun.javadoc;
+
+import com.sun.tools.javac.code.TypeAnnotationPosition;
+
+/**
+ * Represents a type annotation.
+ *
  * @author Mahmood Ali
- * @compile -source 1.7 InnerClass.java
+ * @since 1.7
  */
+public interface TypeAnnotationDesc extends AnnotationDesc {
 
-class InnerClass {
-    private void a() {
-        new Object() {
-            public <R> void method() { }
-        };
-    }
-
-    Object e = new InnerClass() {
-        <T> void m() {}
-    };
+    /**
+     * Returns a unique descriptor of the type annotation target.
+     *
+     * @return the position of the annotation target
+     */
+    public TypeAnnotationPosition position();
 }

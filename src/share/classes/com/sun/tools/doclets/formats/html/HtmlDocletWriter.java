@@ -1787,6 +1787,43 @@ public class HtmlDocletWriter extends HtmlDocWriter {
         writeAnnotationInfo(0, doc, descList, true);
     }
 
+    public String getTypeAnnotationInfo(Doc doc, TypeAnnotationDesc[] descList) {
+        // copied from writeAnnotationInfo while adding print(" ")
+        List<String> annotations = getAnnotations(0, descList, false);
+        if (annotations.size() == 0) {
+            return "";
+        }
+        StringBuilder buf = new StringBuilder();
+//        fontNoNewLine("-1");
+        for (Iterator<String> iter = annotations.iterator(); iter.hasNext();) {
+            buf.append(iter.next());
+            buf.append(" ");
+        }
+//        fontEnd();
+        return buf.toString();
+    }
+
+    /**
+     * Write the type-annotation types for the given doc
+     *
+     * @param doc the doc to write the annotations for
+     * @param descList the array of {@link TypeAnnotationDesc}.
+     */
+    public boolean writeTypeAnnotationInfo(Doc doc, TypeAnnotationDesc[] descList) {
+        // copied from writeAnnotationInfo while adding print(" ")
+        List<String> annotations = getAnnotations(0, descList, false);
+        if (annotations.size() == 0) {
+            return false;
+        }
+        fontNoNewLine("-1");
+        for (Iterator<String> iter = annotations.iterator(); iter.hasNext();) {
+            print(iter.next());
+            print(" ");
+        }
+        fontEnd();
+        return true;
+    }
+
     /**
      * Write the annotatation types for the given doc.
      *
