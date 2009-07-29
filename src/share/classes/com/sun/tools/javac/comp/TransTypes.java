@@ -61,8 +61,6 @@ public class TransTypes extends TreeTranslator {
         return instance;
     }
 
-    private boolean debugJSR308;
-
     private Names names;
     private Log log;
     private Symtab syms;
@@ -92,7 +90,6 @@ public class TransTypes extends TreeTranslator {
         types = Types.instance(context);
         make = TreeMaker.instance(context);
         resolve = Resolve.instance(context);
-        debugJSR308 = Options.instance(context).get("TA:trans") != null;
     }
 
     /** A hashtable mapping bridge methods to the methods they override after
@@ -440,8 +437,7 @@ public class TransTypes extends TreeTranslator {
     }
 
     public void visitClassDef(JCClassDecl tree) {
-        new TypeAnnotationPositions().scan(tree);
-        new TypeAnnotationLift().scan(tree);
+        new TypeAnnotations().taFillAndLift(tree, true);
         translateClass(tree.sym);
         result = tree;
     }
@@ -801,6 +797,8 @@ public class TransTypes extends TreeTranslator {
         pt = null;
         return translate(cdef, null);
     }
+<<<<<<< local
+=======
 
     private class TypeAnnotationPositions extends TreeScanner {
 
@@ -1152,4 +1150,5 @@ public class TransTypes extends TreeTranslator {
         }
     }
 
+>>>>>>> other
 }

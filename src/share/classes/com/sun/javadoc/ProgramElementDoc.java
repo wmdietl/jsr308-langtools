@@ -95,6 +95,15 @@ public interface ProgramElementDoc extends Doc {
     AnnotationDesc[] annotations();
 
     /**
+     * Get the type annotations of this program element.
+     * Return an empty array if there are none.
+     *
+     * @return the type annotations of this program element.
+     * @since 1.7
+     */
+    TypeAnnotationDesc[] typeAnnotations();
+
+    /**
      * Return true if this program element is public.
      */
     boolean isPublic();

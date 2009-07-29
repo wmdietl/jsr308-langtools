@@ -487,6 +487,7 @@ public class Enter extends JCTree.Visitor {
         } finally {
             uncompleted = prevUncompleted;
             annotate.enterDone();
+            new TypeAnnotations().taFillAndLift(trees, false);
         }
     }
 }

@@ -29,6 +29,8 @@ import com.sun.tools.doclets.internal.toolkit.util.links.*;
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
+import com.sun.tools.javac.code.TargetType;
+import com.sun.tools.javadoc.TypeAnnotation;
 
 /**
  * A factory that returns a link given the information about it.
@@ -108,6 +110,15 @@ public class LinkFactoryImpl extends LinkFactory {
             linkOutput.append(getTypeParameterLinks(linkInfo).toString());
         }
         return linkOutput;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected String getParameterAnnotations(LinkInfo linkInfo, int index) {
+        ProgramElementDoc doc = linkInfo.classDoc != null ? linkInfo.classDoc : linkInfo.executableMemberDoc;
+        return m_writer.getTypeAnnotationInfo(doc,
+                TypeAnnotation.byTypeAndIndex(doc, TargetType.CLASS_TYPE_PARAMETER, index));
     }
 
     /**
