@@ -140,6 +140,7 @@ public class TypeAnnotations {
                 case MEMBER_SELECT: {
                     JCFieldAccess fieldFrame = (JCFieldAccess)frame;
                     if ("class".contentEquals(fieldFrame.name)) {
+                        p.type = TargetType.CLASS_LITERAL;
                         if (fieldFrame.selected instanceof JCAnnotatedType) {
                             p.pos = TreeInfo.typeIn(fieldFrame).pos;
                         } else if (fieldFrame.selected instanceof JCArrayTypeTree) {
@@ -338,6 +339,21 @@ public class TypeAnnotations {
     private static class TypeAnnotationLift extends TreeScanner {
         List<Attribute.TypeCompound> recordedTypeAnnotations = List.nil();
 
+        // TODO: Find a better of handling this
+        // Handle cases where the symbol typeAnnotation is filled multiple times
+        private static <T> List<T> appendUnique(List<T> l1, List<T> l2) {
+            if (l1.isEmpty() || l2.isEmpty())
+                return l1.appendList(l2);
+
+            ListBuffer<T> buf = ListBuffer.lb();
+            buf.appendList(l1);
+            for (T i : l2) {
+                if (!l1.contains(i))
+                    buf.append(i);
+            }
+            return buf.toList();
+        }
+
         private final boolean visitBodies;
         TypeAnnotationLift(boolean visitBodies) {
             this.visitBodies = visitBodies;
@@ -358,7 +374,7 @@ public class TypeAnnotations {
             try {
                 super.visitClassDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
         }
@@ -370,7 +386,7 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
         }
@@ -401,7 +417,7 @@ public class TypeAnnotations {
                 super.visitVarDef(tree);
             } finally {
                 if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE)
-                    tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                    tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = kind.isField() ? prevTAs : prevTAs.appendList(recordedTypeAnnotations);
             }
         }
