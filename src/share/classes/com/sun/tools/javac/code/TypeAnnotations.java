@@ -343,6 +343,18 @@ public class TypeAnnotations {
             this.visitBodies = visitBodies;
         }
 
+        // TODO: Find a better of handling this
+        // Handle cases where the symbol typeAnnotation is filled multiple times
+        private static <T> List<T> appendUnique(List<T> l1, List<T> l2) {
+            List<T> result = l1;
+            for (T item : l2) {
+                if (!result.contains(item))
+                    result = result.append(item);
+            }
+
+            return result;
+        }
+
         boolean isInner = false;
         @Override
         public void visitClassDef(JCClassDecl tree) {
@@ -358,7 +370,7 @@ public class TypeAnnotations {
             try {
                 super.visitClassDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
         }
@@ -370,7 +382,7 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
         }
