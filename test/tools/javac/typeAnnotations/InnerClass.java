@@ -35,4 +35,8 @@ class InnerClass {
             public <R> void method() { }
         };
     }
+
+    Object e = new InnerClass() {
+        <T> void m() {}
+    };
 }
