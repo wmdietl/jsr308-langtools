@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-15">
+<title>Type Annotations</title>
+</head>
+
+<h1>Type Annotations</h1>
+
+<p>
+The Java 5 annotation syntax is useful but limited.  The Type Annotations
+project is implementing a Java language extension that permits annotations
+to be written on uses of types.  One example of the new syntax is generic
+type arguments, as in <code>List&lt;@NonNull Object&gt;</code>.  The type
+annotation syntax is also known as "JSR 308".
+</p>
+
+<p>
+This Project is sponsored by the OpenJDK <a
+href="http://openjdk.java.net/groups/compiler/">Compiler Group</a> and is 
+targeted for inclusion in Java 7.
+</p>
+
+
+
+
+<h2 id="documents">Specification</h2>
+
+<p>
+The Type Annotations specification indicates changes to the Java
+language and platform.
+</p>
+<ul>
+  <li>
+    <a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.pdf">PDF</a>
+  </li>
+  <li>
+    <a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">HTML</a>
+  </li>
+</ul>
+
+
+<h2 id="implementation">Implementation</h2>
+
+<p>
+(This should also point at the Mercurial repository.)
+</p>
+
+<ul>
+  <li><a href="http://groups.csail.mit.edu/pag/jsr308/current/jsr308-langtools.zip">Download</a>
+    (includes source, platform-independent binary, and documentation)
+  </li>
+  <li>
+    <a href="http://groups.csail.mit.edu/pag/jsr308/current/README-jsr308.html">Documentation</a><br />
+    (included in the distribution; includes <a href="http://groups.csail.mit.edu/pag/jsr308/current/README-jsr308.html#installing">installation instructions</a>)
+  </li>
+  <li>
+    <a href="http://groups.csail.mit.edu/pag/jsr308/current/changelog-jsr308.txt">Changelog</a>
+  </li>
+</ul>
+
+
+<h2 id="tools">Other tools that use type annotations</h2>
+
+<p>Several other tools already use the type annotation syntax.</p>
+
+<ul>
+  <li>The <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html">Checker Framework</a> makes it easy to write and use compiler
+      plug-ins that implement a custom type system.  The compiler plug-in
+      enables a programmer to find bugs or to verify their absence.  The
+      Checker Framework comes with several type-checking plug-ins that you
+      can try right away.
+  </li>
+
+  <li>Inference tools automatically add annotations to your code,
+      making it even easier to start using the checkers distributed with the
+      Checker Framework.
+    <ul>
+      <li><a
+      href="http://groups.csail.mit.edu/pag/daikon/download/doc/daikon.html#AnnotateNullable">Daikon</a>
+      infers the <tt>@Nullable</tt> type qualifier.
+	  </li>
+	  <li><a
+      href="http://jastadd.org/jastadd-tutorial-examples/non-null-types-for-java">JastAdd</a>
+      infers the <code>@NonNull</code> type qualifier.
+          </li>
+       <li><a
+      href="http://groups.csail.mit.edu/pag/javari/javarifier/">Javarifier</a>
+      infers the <code>@ReadOnly</code> type qualifier.
+      </li>
+    </ul>
+  </li>
+  <li><a href="http://groups.csail.mit.edu/pag/jsr308/annotation-file-utilities/annotation-file-utilities.zip">Annotation file utilities</a> extract annotations from, and
+      write annotations to, <code>.java</code> and <code>.class</code>
+      files.
+  </li>
+</ul>
+
+
+
+
+<h2 id="community">Community</h2>
+
+<ul>
+  <li>
+    <a href="http://groups.csail.mit.edu/pag/jsr308/">Webpage</a>
+  </li>
+  <li>
+    <a href="https://lists.csail.mit.edu/mailman/listinfo/jsr308/">Mailing list</a>    
+  </li>
+</ul>
+
+
+
+<h2 id="awards">Awards</h2>
+
+<ul>
+  <li>
+    Received the <a href="http://jcp.org/en/press/news/2007award_winners/">Most Innovative Java
+SE/EE JSR of the Year</a> award in 2007.
+  </li>
+  <li>
+    Nominated for the <a href="http://jcp.org/en/press/news/2008JavaOnePR">Most
+    Outstanding Spec Lead for Java SE/EE</a> award in 2008.
+  </li>
+</ul>
+
+
+
+</body> </html>
+
+<!--  LocalWords:  Nullable EE
+ -->

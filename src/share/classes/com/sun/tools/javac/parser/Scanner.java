@@ -65,6 +65,9 @@ public class Scanner implements Lexer {
         final Names names;
         final Source source;
         final Keywords keywords;
+        final boolean annotationsincomments;
+        final boolean spacesincomments;
+        final boolean debugJSR308;
 
         /** Create a new scanner factory. */
         protected Factory(Context context) {
@@ -73,6 +76,10 @@ public class Scanner implements Lexer {
             this.names = Names.instance(context);
             this.source = Source.instance(context);
             this.keywords = Keywords.instance(context);
+            this.annotationsincomments = true;
+            Options options = Options.instance(context);
+            this.spacesincomments = options.get("TA:spacesincomments") != null;
+            this.debugJSR308 = options.get("TA:scanner") != null;
         }
 
         public Scanner newScanner(CharSequence input) {
@@ -129,6 +136,14 @@ public class Scanner implements Lexer {
      */
     protected boolean deprecatedFlag = false;
 
+    // Flags for extracting annotations from comments.
+    protected boolean magicAt = false;
+    protected boolean magicID = false;
+    protected boolean magic = false;
+    protected boolean annotationsincomments;
+    protected boolean spacesincomments;
+    protected boolean debugJSR308;
+
     /** A character buffer for literals.
      */
     private char[] sbuf = new char[128];
@@ -166,6 +181,9 @@ public class Scanner implements Lexer {
         this.names = fac.names;
         this.keywords = fac.keywords;
         this.allowHexFloats = fac.source.allowHexFloats();
+        this.annotationsincomments = fac.annotationsincomments;
+        this.spacesincomments = fac.spacesincomments;
+        this.debugJSR308 = fac.debugJSR308;
     }
 
     private static final boolean hexFloatsWork = hexFloatsWork();
@@ -773,6 +791,22 @@ public class Scanner implements Lexer {
      */
     public void nextToken() {
 
+        if (magicAt) {
+            magicAt = false;
+            magicID = true;
+        }
+        if (magicID && ch == ' ') {
+            while (ch == ' ')
+                scanChar();
+        }
+        if (magicID && ch == '*') {
+            magicID = false;
+            magic = true;
+            scanChar();
+            if (ch != '/') lexError("invalid.anno.comment.char");
+            scanChar();
+        }
+
         try {
             prevEndPos = endPos;
             sp = 0;
@@ -885,18 +919,43 @@ public class Scanner implements Lexer {
                         break;
                     } else if (ch == '*') {
                         scanChar();
+                        if (spacesincomments) {
+                            while (ch == ' ')
+                                scanChar();
+                        }
                         CommentStyle style;
                         if (ch == '*') {
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
+                            if (magicAt) return;
+                        } else if (annotationsincomments && bp < buflen && ch == '@'
+                            && (spacesincomments || isCommentWithoutSpaces())) {
+                            scanChar();
+                            while (Character.isWhitespace(ch))
+                                scanChar();
+                            if (!Character.isJavaIdentifierStart(ch)) break;
+                            token = Token.MONKEYS_AT;
+                            magicAt = true;
+                            return;
                         } else {
                             style = CommentStyle.BLOCK;
                             while (bp < buflen) {
                                 if (ch == '*') {
                                     scanChar();
                                     if (ch == '/') break;
+                                } else if (magic && ch == '@') {
+                                    scanChar();
+                                    if (Character.isJavaIdentifierStart(ch)) {
+                                        token = Token.MONKEYS_AT;
+                                        magicAt = true;
+                                        return;
+                                    }
+                                    scanChar();
+                                    if (ch == '/') break;
                                 } else {
                                     scanCommentChar();
+                                    if (!Character.isWhitespace(ch) || ch == '\n')
+                                        magic = false;
                                 }
                             }
                         }
@@ -1009,6 +1068,27 @@ public class Scanner implements Lexer {
                                    new String(getRawCharacters(pos, endPos))
                                    + "|");
         }
+    }
+
+    private boolean isCommentWithoutSpaces() {
+        assert ch == '@';
+        int parens = 0;
+        int lbp = bp;
+        while (lbp < buflen) {
+            char lch = buf[++lbp];
+            if (parens == 0 && Character.isWhitespace(lch))
+                return false;
+            if (lch == '(')
+                parens++;
+            else if (lch == ')')
+                parens--;
+            else if (lch == '*'
+                && lbp + 1 < buflen
+                && buf[lbp+1] == '/')
+                return true;
+        }
+        // came to end of file before '*/'
+        return false;
     }
 
     /** Return the current token, set by nextToken().

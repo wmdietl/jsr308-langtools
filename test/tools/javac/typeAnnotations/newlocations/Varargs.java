@@ -24,7 +24,6 @@
 
 /*
  * @test
- * @bug 100080
  * @summary test acceptance of varargs annotations
  * @author Mahmood Ali
  * @compile -source 1.7 Varargs.java

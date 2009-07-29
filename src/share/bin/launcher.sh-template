@@ -36,12 +36,15 @@ mylib="`dirname $mydir`"/lib
 # Assume that the jar file being invoked lists all the necessary langtools
 # jar files in its Class-Path manifest entry, so there is no need to search
 # dependent jar files for additional dependencies.
+# Also add the current classpath (at the end).  This permits finding classes
+# used by annotation processors, for example.  It doesn't work to just put 
+# these in the regular classpath.
 
 if [ "$LANGTOOLS_USE_BOOTCLASSPATH" != "no" ]; then
    cp=`unzip -c $mylib/#PROGRAM#.jar META-INF/MANIFEST.MF |
        grep "Class-Path:" |
        sed -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1:|g'`
-   bcp="$mylib/#PROGRAM#.jar":$cp 
+   bcp="$mylib/#PROGRAM#.jar":$cp:$CLASSPATH
 fi
 
 # tools currently assumes that assertions are enabled in the launcher
