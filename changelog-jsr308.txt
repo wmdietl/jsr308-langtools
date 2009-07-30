@@ -1,3 +1,16 @@
+Version 0.9.6, 29 Jul 2009
+
+Functionality
+  Initial support for javadoc
+  Support for type arguments of constructor calls
+
+Bug fixes
+  Fixed a javap crash when processing a class literal array annotation
+
+Base build
+  Updated to OpenJDK langtools build b66 (Milestone 4)
+
+----------------------------------------------------------------------
 Version 0.9.5, 13 Jul 2009
 
 Base build
