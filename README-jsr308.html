@@ -41,10 +41,7 @@ pre, blockquote {
         </ul></li>
       <li><a href="#Contributing">Contributing</a>
         <ul>
-          <li><a href="#reporting-bugs">How to report bugs</a>
-            <ul>
-              <li><a href="#known-bugs">Known problems</a></li>
-            </ul></li>
+          <li><a href="#reporting-bugs">How to report bugs</a></li>
           <li><a href="#credits">Credits</a></li>
           <li><a href="#changelog">Changelog</a></li>
         </ul></li>
@@ -506,8 +503,8 @@ contributed to Sun under Sun's Contributor Agreement
 <h3 id="reporting-bugs">How to report bugs</h3>
 
 <p>
-If you have any problems with the compiler, please let us
-know; we welcome bug reports and suggestions.
+If you have any problems with the compiler, please let us know.
+We welcome bug reports and suggestions, and we want to help.
 We will fix all reported bugs in the Type Annotations compiler.
 Examples of bugs include:
 </p>
@@ -520,16 +517,25 @@ href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-desig
   <li>Any annotation-related problem.
   </li>
   <li>Any problem that occurs with the Type Annotations compiler but does not occur
-      with the OpenJDK Java 7 compiler on which the Type Annotations compiler is built.
+      with the OpenJDK Java 7 compiler on which the Type Annotations compiler is based.
   </li>
 </ul>
 
 <p>
 The Type Annotations compiler is built on Sun's OpenJDK compiler.  If you find a bug
-in the Type Annotations compiler, it might be due to a bug in the OpenJDK compiler
-(in which case it should be reported to Sun), or it might be due to the JSR
-308 modifications (in which case it should be reported to the JSR 308
-compiler implementers).  In some cases (such as a problem with processing
+in the Type Annotations compiler:
+</p>
+<ul>
+  <li>It might be due to a bug in the OpenJDK compiler.
+      In this case, it should be reported to Sun.
+  </li>
+  <li>It might be due to the Type Annotations modifications.
+      In this case, it should be reported to the Type Annotations compiler
+      developers.
+  </li>
+</ul>
+<p>
+In some cases (such as a problem with processing
 annotations on types), the responsibility is clearly with the JSR 308
 modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
@@ -552,11 +558,11 @@ using this procedure:
 
 <p>
 If the problem is present in the Type Annotations compiler, but not in the OpenJDK
-compiler, then please report it to us.  Send your bug report to
-<!-- should we use the main JSR 308 mailing list instead?? -->
-<a
-href="mailto:jsr308-bugs@lists.csail.mit.edu">jsr308-bugs@lists.csail.mit.edu</a>.
-This is not a mailing list for general support or questions.
+compiler, then please report it to us by creating a new issue in the
+<a href="http://code.google.com/p/jsr308-langtools/issues">issue tracking system</a>.
+(Search the issue tracker first, to avoid reporting a duplicate.  But feel
+free to augment an existing issue with more information.)
+The issue tracker is not intended for general support or questions.
 </p>
 
 <p>
@@ -585,18 +591,9 @@ to write a helpful bug report</a>.  Here are some crucial points:
   </li>
 </ul>
 
-
-<h4 id="known-bugs">Known problems</h4>
-
-
-<p>The Type Annotations compiler is a feature-complete implementation of
-the
-<a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">
-Type Annotations (JSR 308) specification</a>.  There are no unknown differences
-or bugs at this point.  If you find any, please help us by
-<a href="#reporting-bugs">reporting</a> them.
+<p>
+Finally, thanks for reporting the bug!
 </p>
-
 
 
 <h3 id="credits">Credits</h3>
