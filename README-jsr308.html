@@ -1,7 +1,7 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-<title>Type Annotations (JSR 308) Prototype Implementation README</title>
+<title>Type Annotations (JSR 308) Compiler README</title>
 <!--
 <style type="text/css">
 body {
@@ -16,7 +16,7 @@ pre, blockquote {
 -->
 </head>
 <body>
-<h1>Type Annotations (JSR 308) Prototype Implementation README</h1> <!-- omit from toc -->
+<h1>Type Annotations (JSR 308) Compiler README</h1> <!-- omit from toc -->
 <h4 id="version">Version 0.9.6 (29 Jul 2009)</h4> <!-- omit from toc -->
 <p>For the latest version, see the
   <a href="http://groups.csail.mit.edu/pag/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
@@ -97,11 +97,15 @@ instructions for installing, running, and testing the compiler.
 </p>
 
 <p>
-IDEs (such as Eclipse, IntelliJ IDEA, and NetBeans) have not yet been updated to support the Type
-Annotations syntax.  To use
-the Type Annotations compiler with Eclipse, write an <a
+IntelliJ IDEA (Maia release)
+<a href="http://blogs.jetbrains.com/idea/2009/07/type-annotations-jsr-308-support/">supports</a>
+the Type Annotations (JSR-308) syntax.  Other IDEs (such as Eclipse and
+NetBeans) are being updated to support the Type Annotations syntax.
+For Eclipse, write an <a
 href="http://ant.apache.org/">Ant</a> buildfile that compiles your project
-(using the Type Annotations compiler), then build by running Ant.  Problem markers
+using the Type Annotations compiler (and maybe does
+<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#ant-task">pluggable
+type-checking</a> too), then build by running Ant.  Problem markers
 will show up in the Eclipse IDE as normal.  (You will lose a few Eclipse
 features, such as error checking as you type, until Eclipse's internal
 compiler is updated for to support type annotations.)
@@ -363,7 +367,7 @@ is used for everything else.
 
 
 <p>The Type Annotations distribution includes only the <code>langtools</code>
-portion of OpenJDK. The Type Annotations prototype implementation
+portion of OpenJDK. The Type Annotations compiler
 makes no modifications in other parts of OpenJDK, and the
 remaining parts of OpenJDK are not necessary to build and use the
 Type Annotations tools.
