@@ -17,7 +17,7 @@ questions to include here.
 </p>
 
 <p>
-Before you read this FAQ, you should probably read either the
+<b>Before you read this FAQ</b>, please read either the
 <a href="specification/java-annotation-design.html">Type Annotations
 Specification</a> (if you are most interested in the language syntax) or
 the
@@ -48,7 +48,7 @@ still have questions, you can see whether this FAQ answers them.
           <li><a href="#absolute-guarantee">Can a pluggable type-checker give an absolute guarantee of correctness?</a></li>
           <li><a href="#qualifiers-vs-classes">When should I use type qualifiers, and when should I use subclasses?</a></li>
           <li><a href="#write-checker">How do I create a new checker?</a></li>
-          <li><a href="#bug-detector">Why not just use a bug detector like FindBugs?</a></li>
+          <li><a href="#bug-detector">Why not just use a bug detector (like FindBugs)?</a></li>
           <li><a href="#jml">How does pluggable type-checking compare with JML?</a></li>
         </ul></li>
       <li><a href="#tools">Tool support</a>
@@ -56,8 +56,7 @@ still have questions, you can see whether this FAQ answers them.
           <li><a href="#inclusion-in-java">Are type annotations part of the Java language?</a></li>
           <li><a href="#backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 7?</a></li>
           <li><a href="#platforms">Do the Type Annotations tools run on Windows?  MacOS?  Linux?</a></li>
-          <li><a href="#eclipse">Does Eclipse support type annotations?</a></li>
-          <li><a href="#idea">Does IntelliJ IDEA support type annotations?</a></li>
+          <li><a href="#eclipse">Do IDEs like Eclipse and IntelliJ IDEA support type annotations</a></li>
           <li><a href="#bug-reporting">How do I file a bug report?</a></li>
         </ul></li>
       <li><a href="#syntax">Syntax of type annotations</a>
@@ -73,7 +72,7 @@ still have questions, you can see whether this FAQ answers them.
           <li><a href="#statement_annotations">Is there a way to annotate statements?</a></li>
           <li><a href="#feature-x">Should the Type Annotations specification support feature X?</a></li>
           <li><a href="#modifying-the-specification">Is the Type Annotations specification set in stone?</a></li>
-          <li><a href="#specific-annotations">Why doesn't the Type Annotations specification define useful annotation types?</a></li>
+          <li><a href="#specific-annotations">Why doesn't the Type Annotations specification define useful annotation types such as <tt>@NonNull</tt>?</a></li>
         </ul></li>
       <li><a href="#misc">Miscellaneous</a>
         <ul>
@@ -187,8 +186,8 @@ less frequently than generic types, which Java programmers find acceptable.
 
 <p>
 Pluggable type-checking is a motivating application for type annotations.
-But a pluggable type-checker is a separate tool that is not specified as
-part of Java itself.
+The Java specification for type annotations does not define any pluggable
+type-checkers; a pluggable type-checker is a separate tool.
 </p>
 
 
@@ -235,7 +234,8 @@ software.
 <h3 id="qualifiers-vs-classes">When should I use type qualifiers, and when should I use subclasses?</h3>
 
 <p>
-In brief, use subtypes when you can, and type qualifiers when you cannot.
+In brief, use subtypes when you can, and type qualifiers when you cannot
+use subtypes.
 For more details, see section 
 <a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#when-to-use-type-qualifiers">When to use (and not use) type qualifiers</a> in the Checker Framework manual.
 </p>
@@ -244,10 +244,10 @@ For more details, see section
 <h3 id="write-checker">How do I create a new checker?</h3>
 
 <p>
-You can use the checkers that are distributed with the Checker Framework,
-or you can write your own to check specific properties that you care
-about.  Thus, you can find and prevent the bugs that are most important to
-you.
+In addition to using the checkers that are distributed with the Checker
+Framework, you can write your own checker to check specific properties that
+you care about.  Thus, you can find and prevent the bugs that are most
+important to you.
 </p>
 
 <p>
@@ -278,7 +278,7 @@ you how to run it.
 
 
 
-<h3 id="bug-detector">Why not just use a bug detector like FindBugs?</h3>
+<h3 id="bug-detector">Why not just use a bug detector (like FindBugs)?</h3>
 
 <p>
 Pluggable type-checking finds more bugs than a bug detector does, for any
@@ -392,21 +392,12 @@ Annotations webpage</a> explains how.
 </p>
 
 
-<h3 id="eclipse">Does Eclipse support type annotations?</h3>
+<h3 id="eclipse">Do IDEs like Eclipse and IntelliJ IDEA support type annotations</h3>
 
 <p>
-Full Type Annotation support is not yet available for the Eclipse compiler.
-However, prototype support is available.  See the
-<a href="current/checkers-manual.html#eclipse">Eclipse</a> section of the
-Checker Framework Manual for details.
-</p>
-
-
-<h3 id="idea">Does IntelliJ IDEA support type annotations?</h3>
-
-<p>
-Preliminary support (green parsing of type annotations) is planned for the 
-summer 2009 EAP (Early Access Programs) builds of the IDEA 9.
+See the 
+<a href="current/checkers-manual.html#running">Running a checker</a> section of the
+Checker Framework Manual.
 </p>
 
 
@@ -441,7 +432,7 @@ for annotations on types</a> in the Type Annotations specification.
 </p>
 
 <p>
-If you are skeptical of the <em>syntax</em> of array annotations, then
+If you are skeptical of the <em>syntax</em> of <em>array annotations</em>, then
 perhaps you really don't like Java's array syntax.  The annotation
 extension is a logical extension of Java's syntax; see section <a
 href="specification/java-annotation-design.html#array-syntax">Syntax of
@@ -449,15 +440,15 @@ array annotations</a> in the Type Annotations specification.
 </p>
 
 <p>    
-If you are skeptical of the <em>syntax</em> of receiver annotations, then
-see section <a
+If you are skeptical of the <em>syntax</em> of <em>receiver annotations</em>,
+then see section <a
 href="specification/java-annotation-design.html#receivers">Receivers</a> in
 the Type Annotations specification.
 </p>
 
 <p>
 While these annotations are critical in important circumstances, they are
-not extremely common in well-written code.  And
+fairly rare in well-written code.  And
 <em>you</em> don't have to use them if you don't want to.
 </p>
 
@@ -555,7 +546,7 @@ Specification.
 </p>
 
 
-<h3 id="specific-annotations">Why doesn't the Type Annotations specification define useful annotation types?</h3>
+<h3 id="specific-annotations">Why doesn't the Type Annotations specification define useful annotation types such as <tt>@NonNull</tt>?</h3>
 
 <p>
 Defining annotations is beyond the scope of the Type Annotations
@@ -582,7 +573,7 @@ Sun codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: July 23, 2009.
+Last updated: August 10, 2009.
 </p>
 
 <p>
