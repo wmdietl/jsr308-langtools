@@ -170,8 +170,20 @@ public class TypeAnnotations {
                 }
 
                 case ARRAY_TYPE: {
-                    p.location = p.location.prepend(0);
+                    int index = 0;
                     List<JCTree> newPath = path.tail;
+                    while (true) {
+                        JCTree npHead = newPath.tail.head;
+                        if (npHead.getKind() == JCTree.Kind.ARRAY_TYPE) {
+                            newPath = newPath.tail;
+                            index++;
+                        } else if (npHead.getKind() == JCTree.Kind.ANNOTATED_TYPE) {
+                            newPath = newPath.tail;
+                        } else {
+                            break;
+                        }
+                    }
+                    p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                 }
 
