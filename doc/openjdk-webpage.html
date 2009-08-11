@@ -5,20 +5,26 @@
 <title>Type Annotations</title>
 </head>
 
+<!-- This is the webpage that is installed at
+     http://openjdk.java.net/projects/type-annotations/
+-->
+
+<body>
+
 <h1>Type Annotations</h1>
 
 <p>
-The Java 5 annotation syntax is useful but limited.  The Type Annotations
-project is implementing a Java language extension that permits annotations
-to be written on uses of types.  One example of the new syntax is generic
-type arguments, as in <code>List&lt;@NonNull Object&gt;</code>.  The type
-annotation syntax is also known as "JSR 308".
+The Java 6 annotation syntax is useful but limited.  The Type Annotations
+syntax permits annotations to be written in more places, such as generic
+type arguments: <code>List&lt;<u>@NonNull</u> Object&gt;</code>.
+Programmers can use type annotations to write more informative types, and
+then tools such as type-checkers can detect and prevent more errors.
 </p>
 
 <p>
-This Project is sponsored by the OpenJDK <a
+This project is sponsored by the OpenJDK <a
 href="http://openjdk.java.net/groups/compiler/">Compiler Group</a> and is 
-targeted for inclusion in Java 7.
+targeted for inclusion in the Java SE 7 platform.
 </p>
 
 
@@ -72,34 +78,38 @@ language and platform.
       can try right away.
   </li>
 
-  <li>Inference tools automatically add annotations to your code,
-      making it even easier to start using the checkers distributed with the
-      Checker Framework.
-    <ul>
-      <li><a
-      href="http://groups.csail.mit.edu/pag/daikon/download/doc/daikon.html#AnnotateNullable">Daikon</a>
-      infers the <tt>@Nullable</tt> type qualifier.
-	  </li>
-	  <li><a
-      href="http://jastadd.org/jastadd-tutorial-examples/non-null-types-for-java">JastAdd</a>
-      infers the <code>@NonNull</code> type qualifier.
+      <!-- This text appears identically at jsr308-webpage.html -->
+      <li>Inference tools automatically add annotations to your code,
+          making it even easier to start using the checkers.  You must
+          download these tools separately.
+        <ul>
+          <li>
+	    To infer the <tt>@Nullable</tt> type qualifier, use <a
+	    href="http://groups.csail.mit.edu/pag/daikon/download/doc/daikon.html#AnnotateNullable">Daikon</a>
           </li>
-       <li><a
-      href="http://groups.csail.mit.edu/pag/javari/javarifier/">Javarifier</a>
-      infers the <code>@ReadOnly</code> type qualifier.
+          <li>
+            To infer the <code>@NonNull</code> type qualifier, use the
+            <a href="http://julia.scienze.univr.it:8080/julia/">Julia
+            Analyzer</a> or <a
+            href="http://jastadd.org/jastadd-tutorial-examples/non-null-types-for-java">JastAdd</a>
+          </li>
+          <li>
+            To infer the <code>@ReadOnly</code> type qualifier, use <a
+            href="http://groups.csail.mit.edu/pag/javari/javarifier/">Javarifier</a>
+          </li>
+        </ul>
       </li>
-    </ul>
-  </li>
-  <li><a href="http://groups.csail.mit.edu/pag/jsr308/annotation-file-utilities/annotation-file-utilities.zip">Annotation file utilities</a> extract annotations from, and
-      write annotations to, <code>.java</code> and <code>.class</code>
-      files.
+
+  <li><a href="http://types.cs.washington.edu/annotation-file-utilities/annotation-file-utilities.zip">Annotation file utilities</a>
+      extract annotations from, and write annotations to,
+      <code>.java</code> and <code>.class</code> files.
   </li>
 </ul>
 
 
 
 
-<h2 id="community">Community</h2>
+<h2 id="Community">Community and getting help</h2>
 
 <ul>
   <li>
@@ -127,7 +137,8 @@ SE/EE JSR of the Year</a> award in 2007.
 
 
 
-</body> </html>
+</body>
+</html>
 
 <!--  LocalWords:  Nullable EE
  -->
