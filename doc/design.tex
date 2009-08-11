@@ -26,6 +26,7 @@
 \def\codesize{\smaller}
 %HEVEA \def\codesize{\relax}
 \newcommand{\code}[1]{\ifmmode{\mbox{\codesize\ttfamily{#1}}}\else{\codesize\ttfamily #1}\fi}
+\def\<#1>{\code{#1}}
 \newcommand{\myurl}[1]{{\codesize\url{#1}}}
 %HEVEA \def\myurl{\url}
 
@@ -421,7 +422,7 @@ More pragmatically, Java annotations must be stored in the class file for two re
 
 First, annotated \emph{signatures} (public members) must be available to
 tools that read class files.  For example, a type-checking compiler
-plug-in~\cite{JSR269.PapiACPE2008} needs to read annotations when compiling
+plug-in~\cite{JSR269,PapiACPE2008} needs to read annotations when compiling
 a client of the class file.  The Checker Framework
 (\myurl{http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html}) is
 one way to create such plug-ins.
@@ -2768,7 +2769,7 @@ As a related motivation, array-valued annotations can be clumsy to write:
   public class MyClass { ... }
 \end{Verbatim}
 
-A cleaner syntax may be desirable for both purposes:
+A cleaner syntax is desirable for both purposes:
 
 \begin{Verbatim}
   @Resource(name = "db1", type = DataSource.class)
@@ -2776,7 +2777,11 @@ A cleaner syntax may be desirable for both purposes:
   public class MyClass { ... }
 \end{Verbatim}
 
-We note two possible approaches to this problem.
+We note two possible approaches to this problem:  desugaring into arrays,
+or adding a \<getAnnotations> method to two interfaces.
+Among the two proposals, the second is cleaner, more elegant, and easier
+for clients to use.  However, it requires either changing existing
+interfaces or creating new ones.
 
 For backward compatibility, in both approaches an annotation may be
 repeated only if its definition is meta-annotated with \code{@Repeatable}:
@@ -2787,12 +2792,16 @@ repeated only if its definition is meta-annotated with \code{@Repeatable}:
   }
 \end{Verbatim}
 
+\noindent
+In the below, assume that the definitions of \<A> and \<B> are
+meta-annotated with \<@Repeatable>.
+
 % \noindent
 % For annotations not so meta-annotated, the compiler throws an
 % error/warning just as for Java SE 6.
 
-\begin{enumerate}
-\item
+
+\subsubsection{Desugar into wrapper annotations}
 
 % Joe Darcy and Danny Coward have volunteered (in 2006 or 2007) to produce
 % a proposal on this, but they have been foot-dragging since early 2007.
@@ -2815,8 +2824,21 @@ convenience; it does not change annotations in any deep way.  This approach
 is compatible with certain existing J2EE annotation processors that are
 already written to process both \code{@A} and \code{@AContainer}.
 
+This proposal would need to specify what happens if only one \code{@A}
+annotation is present.  Most likely, the desugaring
+would still place \code{@A} into a singleton \code{@AContainer} annotation.
+Otherwise, client code would become more complicated, since it would have
+to deal with the possibility of either an \code{@A} annotation or an
+\code{@AContainer} annotation.
+
 This proposal would need to specify what happens if both \code{@A} and
-\code{@AContainer} annotations are present.
+\code{@AContainer} annotations are present.  Most likely, the desugaring
+would insert \code{@A} into the existing \code{@AContainer} annotation,
+either at the front or the back depending on whether the \<@A> or
+\<@AContainer> annotation came first.
+Otherwise, client code would become more complicated, since it would have
+to deal with the possibility of both an \code{@A} annotation or an
+\code{@AContainer} annotation, and with handling the relative order.
 
 One problem with this proposal is that it loses the ordering of
 differently-named annotations (even if the ordering of same-named
@@ -2883,26 +2905,25 @@ cannot be duplicated.
 % retrofitted to existing wrapper annotations.
 
 
-\item
-Add new methods that return multiple annotations.
+\subsubsection{Add new \<getAnnotations> method}
+
+Add a new \<getAnnotations> method, which returns multiple annotations,
+to two interfaces: \code{java.lang.reflect.AnnotatedElement} and
+\code{javax.lang.model.element.Element}.
 
 \begin{enumerate}
 \item
-Each method of the form
+Slightly modify the specification of the existing method
 
 \begin{Verbatim}
   <T extends Annotation> T getAnnotation(Class<T> annotationClass)
 \end{Verbatim}
 
 \noindent
-would have its specification slightly modified.  When
-duplicate annotations exist, method
-\code{getAnnotation} could either give the first one (convenient for
-backward compatibility) or throw an exception (convenient to prevent
-erroneous processing).
-
-The relevant methods are in \code{java.lang.reflect.AnnotatedElement} and
-its 6 implementations, and in \code{javax.lang.model.element.Element}.
+When duplicate annotations exist, method \code{getAnnotation} could either
+give the first one (convenient for backward compatibility) or throw an
+exception (convenient to prevent erroneous processing).  The latter seems
+like a better choice.
 
 % Classes:
 %   java.lang.Class.getAnnotation(java.lang.Class)
@@ -2916,8 +2937,7 @@ its 6 implementations, and in \code{javax.lang.model.element.Element}.
 %   javax.lang.model.element.Element.getAnnotation(java.lang.Class)
 
 \item
-Each \code{getAnnotation} method 
-would be augmented by a new method:
+Create a new method
 
 \begin{Verbatim}
   <T extends Annotation> T[] getAnnotations(Class<T> annotationClass)
@@ -2928,8 +2948,8 @@ would be augmented by a new method:
 
 \noindent
 that returns all annotations for the specified annotation type that are
-present on the receiver element.  As with \code{getAnnotations}, the return
-value is never null but may have zero length.
+present on the receiver element.  As with \code{getDeclaredAnnotations},
+the return value is never null but may have zero length.
 
 \end{enumerate}
 
@@ -2943,12 +2963,35 @@ some other workaround (like special \code{@AContainer} annotations) would
 continue to work.  Or, it could be converted to take advantage of this new
 mechanism.
 
-\end{enumerate}
+The problem with this proposal is that it requires adding a single method,
+\<getAnnotations>, to two interfaces.  While the changes would not break
+upward binary-compatibility, they would break source-compatibility:
+existing implementations of \<Element> and \<AnnotatedElement> would not
+compile without adding a \<getAnnotations> method.  Sun's policy generally
+prohibits such changes, though exceptions are made.
+% Such changes have to be approved by the CCC (conformance change committee).
+For example, the
+SQL interfaces have far more implementations than the compiler or
+reflection APIs, but Java SE 6 adds three methods to the
+\<java.sql.Statement> interface and makes it extend \<Wrapper>.
+% This isn't even documented in the Java 6 Incompatibility Release notes
+% (http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities
 
-The JSR 175 Design FAQ~\cite{JSR175-PFD2} states,
+An alternative to changing the \<Element> (and \<AnnotatedElement>) interface is to create a new
+\<Element2> interface that augments \<Element> with the \<getAnnotations>
+method, and to mark \<Element> as deprecated.  Then, programmers should
+rewrite their existing code to use the \<Element2> interface instead of the
+\<Element> interface.  However, their code continues to compile until they
+make the change.
+
+
+\subsubsection{JSR 175 design justification}
+
+The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
+feature was not originally included:
 
 \begin{quote}
-\textbf{Why is it illegal [to] annotate a single element repeatedly with the same annotation type?}
+Why is it illegal [to] annotate a single element repeatedly with the same annotation type?
 
 A similar effect is available by annotating once with an annotation type
 whose sole element is of an array type. The resulting system is simpler and
@@ -2979,11 +3022,12 @@ reality, then please pitch in!  You can join the
 expand the partial design on the wiki, or work on the implementation.
 
 
-The JSR 175 Design FAQ~\cite{JSR175-PFD2} states,
+The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
+feature was not originally included:
 
 \begin{quote}
-  \textbf{Why can't you annotate arbitrary program elements such as blocks
-    and individual statements?}
+  Why can't you annotate arbitrary program elements such as blocks
+    and individual statements?
 
   This would greatly complicate the annotation syntax: We would have to
   sacrifice the simplicity of saying that annotations are simply modifiers,
@@ -3163,12 +3207,12 @@ two annotations.
 % That processor may need to handle the possibility of multiple annotations
 % even for an annotation that is not permitted to
 
-The JSR 175 Design FAQ~\cite{JSR175-PFD2} states, without further
-elaboration,
+The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
+feature was not originally included:
 
 \begin{quote}
-\textbf{Why don't you support annotation subtyping (where one annotation type
-extends another)?}
+Why don't you support annotation subtyping (where one annotation type
+extends another)?
 
 It complicates the annotation type system, and makes it much more difficult
 to write ``Specific Tools''.
@@ -3307,10 +3351,11 @@ Section~\ref{inheritance-among-annotations}) without permitting possibly
 self-referential annotations.
 
 
-The JSR 175 Design FAQ~\cite{JSR175-PFD2} states,
+The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
+feature was not originally included:
 
 \begin{quote}
-  \textbf{Why is it illegal for an annotation type to contain an element of the same type?}
+  Why is it illegal for an annotation type to contain an element of the same type?
 
 At first glance it would appear that you could never annotate with such a type, so the prohibition might seem unnecessary, but you can get yourself into trouble if you also provide a default:
 
