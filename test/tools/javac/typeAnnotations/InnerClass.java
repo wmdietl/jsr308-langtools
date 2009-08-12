@@ -30,6 +30,10 @@
  */
 
 class InnerClass {
+
+    InnerClass() {}
+    InnerClass(Object o) {}
+
     private void a() {
         new Object() {
             public <R> void method() { }
@@ -41,6 +45,14 @@ class InnerClass {
         };
 
     Object f2 = new InnerClass() {
+            <@A R> void method() { }
+        };
+
+    Object f3 = new InnerClass(null) {
+            <R> void method() { }
+        };
+
+    Object f4 = new InnerClass(null) {
             <@A R> void method() { }
         };
     @interface A { }
