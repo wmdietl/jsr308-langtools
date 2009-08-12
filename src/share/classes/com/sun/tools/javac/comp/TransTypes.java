@@ -437,7 +437,7 @@ public class TransTypes extends TreeTranslator {
     }
 
     public void visitClassDef(JCClassDecl tree) {
-        new TypeAnnotations().taFillAndLift(tree, true);
+        TypeAnnotations.taFillAndLift(tree, true);
         translateClass(tree.sym);
         result = tree;
     }

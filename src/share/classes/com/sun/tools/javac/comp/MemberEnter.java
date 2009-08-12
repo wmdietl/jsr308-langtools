@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
@@ -988,6 +987,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             }
 
             // commit pending annotations
+            annotate.later(TypeAnnotations.positionAnnotator(tree));
             annotate.flush();
         }
     }
@@ -1020,15 +1020,20 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         private boolean isEnclosingClass = false;
         @Override
         public void visitClassDef(final JCClassDecl tree) {
-            if (isEnclosingClass)
-                return;
-            isEnclosingClass = true;
-            scan(tree.mods);
-            // type parameter need to be visited with a separate env
-            // scan(tree.typarams);
-            scan(tree.extending);
-            scan(tree.implementing);
-            scan(tree.defs);
+            boolean wasEnclosing = isEnclosingClass;
+            try {
+            	if (isEnclosingClass)
+            		return;
+            	isEnclosingClass = true;
+            	scan(tree.mods);
+            	// type parameter need to be visited with a separate env
+            	// scan(tree.typarams);
+            	scan(tree.extending);
+            	scan(tree.implementing);
+            	scan(tree.defs);
+            } finally {
+            	isEnclosingClass = wasEnclosing;
+            }
         }
 
         private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
