@@ -1,5 +1,5 @@
-pag = /afs/csail/group/pag
-jsr308_www ?= ${pag}/www/jsr308
+pag = /cse/www2/
+jsr308_www ?= ${pag}/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 
 INV ?= /afs/csail/u/m/mernst/research/invariants
@@ -26,9 +26,11 @@ webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 #   svn log -r '{2007-02-25}:HEAD' jsr308-faq.html
 # where "{2007-02-25}" is the date of the previous entry in jsr308-changes.html
 web: \
+${jsr308_www} \
 ${jsr308_www}/jsr308-webpage.html \
 ${jsr308_www}/jsr308-faq.html \
 ${jsr308_www}/Makefile-jsr308-install \
+${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
 ${jsr308_spec}/jsr308-changes.html \
@@ -48,7 +50,10 @@ ${jsr308_www}/java-type-qualifiers.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks:
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://pag.csail.mit.edu/jsr308/
+#	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/jsr308
+
+checklinks-really:
+	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/jsr308                                                      
 
 ###########################################################################
 
@@ -73,6 +78,12 @@ design.html: design.tex design.dvi design.bbl
 #	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' design.html
 #	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' design.html
 #	html-update-toc design.html
+
+${jsr308_www}:
+	mkdir ${jsr308_www}
+
+${jsr308_spec}:
+	mkdir ${jsr308_spec}
 
 ${jsr308_spec}/java-annotation-design.pdf: design.pdf
 	\cp -f $< $@

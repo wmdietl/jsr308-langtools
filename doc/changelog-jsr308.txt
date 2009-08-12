@@ -1,3 +1,12 @@
+Version 0.9.7, 12 Aug 2009
+
+Bug fixes
+  Fixed a javac crash when using -sourcepath
+
+Base build
+  Updated to OpenJDK langtools build b68
+
+----------------------------------------------------------------------
 Version 0.9.6, 29 Jul 2009
 
 Functionality
