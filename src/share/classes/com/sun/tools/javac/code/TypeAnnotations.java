@@ -28,6 +28,7 @@ package com.sun.tools.javac.code;
 import javax.lang.model.element.ElementKind;
 
 import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.tree.TreeScanner;
@@ -37,7 +38,16 @@ import com.sun.tools.javac.util.ListBuffer;
 
 public class TypeAnnotations {
 
-    public void taFillAndLift(List<JCCompilationUnit> trees, boolean visitBodies) {
+    public static Annotator positionAnnotator(final JCClassDecl tree) {
+        return new Annotator() {
+            @Override
+            public void enterAnnotation() {
+                TypeAnnotations.taFillAndLift(tree, false);
+            }
+        };
+    }
+
+    public static void taFillAndLift(List<JCCompilationUnit> trees, boolean visitBodies) {
         for (JCCompilationUnit tree : trees) {
             for (JCTree def : tree.defs) {
                 if (def.getTag() == JCTree.CLASSDEF)
@@ -46,7 +56,7 @@ public class TypeAnnotations {
         }
     }
 
-    public void taFillAndLift(JCClassDecl tree, boolean visitBodies) {
+    public static void taFillAndLift(JCClassDecl tree, boolean visitBodies) {
         new TypeAnnotationPositions(visitBodies).scan(tree);
         new TypeAnnotationLift(visitBodies).scan(tree);
     }
@@ -170,8 +180,20 @@ public class TypeAnnotations {
                 }
 
                 case ARRAY_TYPE: {
-                    p.location = p.location.prepend(0);
+                    int index = 0;
                     List<JCTree> newPath = path.tail;
+                    while (true) {
+                        JCTree npHead = newPath.tail.head;
+                        if (npHead.getKind() == JCTree.Kind.ARRAY_TYPE) {
+                            newPath = newPath.tail;
+                            index++;
+                        } else if (npHead.getKind() == JCTree.Kind.ANNOTATED_TYPE) {
+                            newPath = newPath.tail;
+                        } else {
+                            break;
+                        }
+                    }
+                    p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                 }
 
@@ -306,10 +328,10 @@ public class TypeAnnotations {
 
         @Override
         public void visitMethodDef(JCMethodDecl tree) {
+            super.visitMethodDef(tree);
             TypeAnnotationPosition p = new TypeAnnotationPosition();
             p.type = TargetType.METHOD_RECEIVER;
             setTypeAnnotationPos(tree.receiverAnnotations, p);
-            super.visitMethodDef(tree);
         }
 
         @Override
