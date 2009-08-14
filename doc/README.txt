@@ -7,4 +7,4 @@ update the jsr308-changes.html file.
 2. Run
   make web
 3. See the results at
-  http://pag.csail.mit.edu/jsr308
+  http://types.cs.washington.edu/jsr308/
