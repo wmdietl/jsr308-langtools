@@ -2734,9 +2734,9 @@ existing code that reflects over annotations encountering unexpected
 structures, are not repeated for each extension.)
 
 
-\paragraph{The last annotations JSR.}
-It is not a goal that JSR 308 is the last annotation-related JSR\@.  It is
-acceptable to leave some issues to future language designers, just as
+\paragraph{Not the last annotations JSR.}
+It is \emph{not} a goal that JSR 308 is the last annotation-related JSR\@.
+JSR 308 may leave some issues to future language designers, just as
 JSR 175 (the previous annotations JSR~\cite{JSR175}) did.
 Leaving issues unresolved is preferable to making hasty decisions, or
 decisions with unknown technical implications.
@@ -2852,7 +2852,9 @@ declarations:
 
 Another problem is that it requires defining an \code{@AContainer}
 annotation for each annotation \code{@A}, or else annotation \code{@A}
-cannot be duplicated.
+cannot be duplicated.  It would be better not to burden programmers with
+writing and maintaining this boilerplate code.
+
 
 %% More details from Joe Darcy, but I don't see that they add much to the
 %% shorter description above.
@@ -2912,6 +2914,22 @@ to two interfaces: \code{java.lang.reflect.AnnotatedElement} and
 \code{javax.lang.model.element.Element}.
 
 \begin{enumerate}
+
+\item
+Create a new method
+
+\begin{Verbatim}
+  <T extends Annotation> T[] getAnnotations(Class<T> annotationClass)
+\end{Verbatim}
+
+% This method returns an array and not a List for consistency with existing
+% methods getAnnotations and getDeclaredAnnotations.
+
+\noindent
+that returns all annotations for the specified annotation type that are
+present on the receiver element.  As with \code{getDeclaredAnnotations},
+the return value is never null but may have zero length.
+
 \item
 Slightly modify the specification of the existing method
 
@@ -2936,21 +2954,6 @@ like a better choice.
 %   java.lang.reflect.AnnotatedElement.getAnnotation(java.lang.Class)
 %   javax.lang.model.element.Element.getAnnotation(java.lang.Class)
 
-\item
-Create a new method
-
-\begin{Verbatim}
-  <T extends Annotation> T[] getAnnotations(Class<T> annotationClass)
-\end{Verbatim}
-
-% This method returns an array and not a List for consistency with existing
-% methods getAnnotations and getDeclaredAnnotations.
-
-\noindent
-that returns all annotations for the specified annotation type that are
-present on the receiver element.  As with \code{getDeclaredAnnotations},
-the return value is never null but may have zero length.
-
 \end{enumerate}
 
 The arrays returned by the methods \code{getAnnotations(Class)},  
@@ -2968,21 +2971,31 @@ The problem with this proposal is that it requires adding a single method,
 upward binary-compatibility, they would break source-compatibility:
 existing implementations of \<Element> and \<AnnotatedElement> would not
 compile without adding a \<getAnnotations> method.  Sun's policy generally
-prohibits such changes, though exceptions are made.
+frowns upon such changes, though they are sometimes made nonetheless.
 % Such changes have to be approved by the CCC (conformance change committee).
 For example, the
 SQL interfaces have far more implementations than the compiler or
 reflection APIs, but Java SE 6 adds three methods to the
 \<java.sql.Statement> interface and makes it extend \<Wrapper>.
 % This isn't even documented in the Java 6 Incompatibility Release notes
-% (http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities
+% (http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities).
 
 An alternative to changing the \<Element> (and \<AnnotatedElement>) interface is to create a new
 \<Element2> interface that augments \<Element> with the \<getAnnotations>
 method, and to mark \<Element> as deprecated.  Then, programmers should
 rewrite their existing code to use the \<Element2> interface instead of the
 \<Element> interface.  However, their code continues to compile until they
-make the change.
+make the change.  A problem with this change is that it requires making a
+copy (with names suffixed ``\<2>'' of the entire \<javax.lang.model>
+package, which is ugly.
+
+Another alternative is to change the \<Elements> utility interface.  Those
+methods logically belong in \<Element>, but the \<Elements> interface is
+explicitly documented with ``Compatibility Note: Methods may be added to
+this interface in future releases of the platform.''  Thus, adding methods
+there is a path toward extending functionality without changing core
+interfaces/classes.  Clients must remember to use the methods of \<Elements>
+when functionalty is not present in \<Element>.
 
 
 \subsubsection{JSR 175 design justification}
@@ -3264,7 +3277,7 @@ be extended to include interfaces (or perhaps only interfaces that extend
 
 
 
-\subsubsection{Potentially recursive annotations (Annotations as members of annotations)\label{annotations-as-members}\label{annotations-as-arguments}\label{recursive-annotations}}
+\subsubsection{Potentially recursive annotations (annotations as members of annotations)\label{annotations-as-members}\label{annotations-as-arguments}\label{recursive-annotations}}
 
 In Java, an annotation can have a parameter (equivalently, a member) that is an
 annotation (JLS
