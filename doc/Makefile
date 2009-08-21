@@ -18,7 +18,7 @@ validate:
 # Update the main webpage & FAQ only, but not any of the supporting documents.
 # Useful to fix a minor typo (but then you might just want to edit both versions, identically).
 webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
-	$(MAKE) checklinks
+#	$(MAKE) checklinks
 
 # Warning!  "make web" makes a public release!
 # Before doing this, update jsr308-changes.html.  Determine changes via log or diff:
@@ -50,7 +50,9 @@ ${jsr308_www}/java-type-qualifiers.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks:
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/jsr308/
+	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/jsr308
+	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/checker-framework
+
 
 
 ###########################################################################
