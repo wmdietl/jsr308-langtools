@@ -986,8 +986,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            // commit pending annotations
-            annotate.later(TypeAnnotations.positionAnnotator(tree));
             annotate.flush();
         }
     }
@@ -997,21 +995,31 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         private Env<AttrContext> env;
         public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
 
-        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations) {
+        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations, JCTree tree) {
             Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
-            if (!skipAnnotations)
+            ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
+            if (!skipAnnotations) {
                 for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
                     JCTypeAnnotation a = al.head;
                     Attribute.Compound c = annotate.enterAnnotation(a,
                             syms.annotationType,
                             env);
                     if (c == null) continue;
+                    buf.append(c);
                     Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, a.annotation_position);
                     a.attribute_field = tc;
                     // Note: @Deprecated has no effect on local variables and parameters
                     if (!annotated.add(a.type.tsym))
                         log.error(a.pos, "duplicate.annotation");
                 }
+                if (tree.getTag() == JCTree.METHODDEF) {
+                    assert tree.type == null;
+                    ((JCMethodDecl)tree).sym.type.receiverTypeAnnotations = buf.toList();
+                } else {
+                    assert tree.type != null;
+                    tree.type.typeAnnotations = buf.toList();
+                }
+            }
         }
 
         // each class (including enclosed inner classes) should be visited
@@ -1044,7 +1052,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 public void enterAnnotation() {
                     JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
                     try {
-                        enterTypeAnnotations(annotations);
+                        enterTypeAnnotations(annotations, tree);
                     } finally {
                         log.useSource(prev);
                     }

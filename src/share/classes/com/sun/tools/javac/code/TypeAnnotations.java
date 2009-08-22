@@ -38,15 +38,6 @@ import com.sun.tools.javac.util.ListBuffer;
 
 public class TypeAnnotations {
 
-    public static Annotator positionAnnotator(final JCClassDecl tree) {
-        return new Annotator() {
-            @Override
-            public void enterAnnotation() {
-                TypeAnnotations.taFillAndLift(tree, false);
-            }
-        };
-    }
-
     public static void taFillAndLift(List<JCCompilationUnit> trees, boolean visitBodies) {
         for (JCCompilationUnit tree : trees) {
             for (JCTree def : tree.defs) {
