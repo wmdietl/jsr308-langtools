@@ -1176,7 +1176,7 @@ using JSR 308, are distributed at the JSR 308 webpage,
 help to prevent and detect null pointer errors (via a \code{@NonNull}
 annotation), equality-checking errors (via a \code{@Interned} annotation),
 mutation errors (via the Javari~\cite{BirkaE2004,TschantzE2005} type
-system), and mutation errors (via the IGJ~\cite{ZibinPAKE2007} type
+system), and mutation errors (via the IGJ~\cite{ZibinPAAKE2007} type
 system).  A paper~\cite{PapiACPE2008} discusses experience
 in which these plug-ins exposed bugs in real programs.
 
@@ -1312,7 +1312,7 @@ type system.
 
 
 \code{@Readonly} and \code{@Immutable} are other examples of useful type
-qualifiers~\cite{ZibinPAKE2007,BirkaE2004,TschantzE2005,GreenfieldboyceF2005,KnieselT2001,SkoglundW2001,PoratBKM2000}.
+qualifiers~\cite{ZibinPAAKE2007,BirkaE2004,TschantzE2005,GreenfieldboyceF2005,KnieselT2001,SkoglundW2001,PoratBKM2000}.
 Similar to C's \code{const}, an object's internal state may not be modified
 through references that are declared \code{@Readonly}. A type qualifier
 designer would create a compiler plug-in (an annotation processor) to check
@@ -2190,10 +2190,10 @@ making annotations at the beginning of the type refer to the whole type,
 using a postfix syntax rather than a prefix syntax, and postfix syntax
 within angle brackets as for generics.
 
-% The IGJ type system~\cite{ZibinPAKE2007} has been implemented using both a
+% The IGJ type system~\cite{ZibinPAAKE2007} has been implemented using both a
 % generics-like syntax and also the JSR 308 annotation syntax.  In a case
 % study, a programmer preferred the JSR 308 syntax to the generics-like
-% syntax~\cite{ZibinPAKE2007}.
+% syntax~\cite{ZibinPAAKE2007}.
 
 
 \subsection{Disambiguating type and declaration annotations\label{disambiguating}}
@@ -2469,7 +2469,7 @@ does not exist in Java SE 5/6), but with no meta-annotation or with a
 meta-annotation that permits annotations on any declaration.
 
 
-\subsection{ASTs and annotation processing}
+\subsection{ASTs and annotation processing\label{asts-and-annotation-processing}}
 
 The Java Model AST of JSR 198 (Extension API for Integrated Development
 Environments)~\cite{JSR198} gives access to the entire source code of a
@@ -2553,7 +2553,7 @@ clients would immediately cast the result of the latter method.)
 % parameter or return value) and to query it directly.
 
 
-\subsubsection{Non-changes to reflection}
+\subsubsection{Non-changes to reflection\label{non-changes-to-reflection}}
 
 Reflection gives no access to method implementations, so no changes are
 needed to
@@ -2801,10 +2801,11 @@ meta-annotated with \<@Repeatable>.
 % error/warning just as for Java SE 6.
 
 
-\subsubsection{Desugar into wrapper annotations}
+\subsubsection{Desugar into wrapper annotations\label{duplicate-annotations-desugar}}
 
 % Joe Darcy and Danny Coward have volunteered (in 2006 or 2007) to produce
-% a proposal on this, but they have been foot-dragging since early 2007.
+% a proposal on this, but they have been foot-dragging since early 2007,
+% and so I have given up on nagging and waiting.
 Desugar duplicate annotations into
 the current array syntax.  For instance, desugar
 
@@ -2907,7 +2908,7 @@ writing and maintaining this boilerplate code.
 % retrofitted to existing wrapper annotations.
 
 
-\subsubsection{Add new \<getAnnotations> method}
+\subsubsection{Add new \<getAnnotations> method\label{duplicate-annotations-getAnnotations}}
 
 Add a new \<getAnnotations> method, which returns multiple annotations,
 to two interfaces: \code{java.lang.reflect.AnnotatedElement} and
@@ -2998,7 +2999,7 @@ interfaces/classes.  Clients must remember to use the methods of \<Elements>
 when functionalty is not present in \<Element>.
 
 
-\subsubsection{JSR 175 design justification}
+\subsubsection{JSR 175 design justification\label{duplicate-annotations-jsr175-justification}}
 
 The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
 feature was not originally included:
@@ -3015,7 +3016,7 @@ modifiers.
 \end{quote}
 
 
-\subsection{Locations for annotations}
+\subsection{Locations for annotations\label{locations-for-annotations}}
 
 
 \subsubsection{Annotations on statements\label{statement-annotations}}
@@ -3120,7 +3121,7 @@ or to a declaration (Section~\ref{disambiguating}).
 %       annotated (but annotation processors should).
 
 
-\subsubsection{Only certain statements}
+\subsubsection{Only certain statements\label{locations-subset-of-statements}}
 
 It would be possible to permit annotations only on blocks and/or loops, as
 a restricted special case of statements.  This is less general than
@@ -3414,7 +3415,7 @@ proposal, many tools that process annotations will have to check whether a
 field's value is null lest they throw a null pointer exception.
 
 
-\subsubsection{Positional arguments}
+\subsubsection{Positional arguments\label{positional-arguments}}
 
 Annotation types cannot have positional arguments (except for the
 \code{value} argument, when it is the only argument).  This limitation
@@ -3432,7 +3433,7 @@ forced to give a member a confusing name.  It would be nice to permit the
 
 \subsection{Semantics of annotations\label{semantics}}
 
-\subsubsection{Annotations for specific purposes}
+\subsubsection{Annotations for specific purposes\label{no-defined-annotations}}
 
 JSR 308 does not define any annotations.
 %  nor take any position on their semantics.
@@ -3530,7 +3531,7 @@ choosing the inherited one.
 %       current behavior is incorrect and needs to be amended in JSR 308?
 %   </li>
 
-\subsubsection{Default annotations}
+\subsubsection{Default annotations\label{default-annotations}}
 
 Specifying a default for annotations can reduce code size and (when used
 carefully and sparingly) increase code readability.  For instance,
@@ -3591,7 +3592,7 @@ In summary, a built-in typedef mechanism might achieve both code
 readability and reusability.
 
 
-\subsection{Class file syntax}
+\subsection{Class file syntax\label{class-file-syntax}}
 
 Changes to the class file syntax are out of the scope of JSR 308, which,
 for backward compatibility, currently does not change the way that existing
@@ -3604,7 +3605,7 @@ Sections~\ref{class-file-tools} and~\ref{other-tools}).
 % benefits.  
 
 
-\subsubsection{Reducing class file size via use of the constant pool}
+\subsubsection{Reducing class file size via use of the constant pool\label{constant-pool}}
 
 Annotations could be stored in the constant pool, and use constant pool
 references from the annotation points.  That would reduce class file size,
@@ -3683,7 +3684,7 @@ with the goal of backward compatibility).
 % Javadoc has /**@ comments.
 
 
-\subsection{Edits to existing standards documents}
+\subsection{Edits to existing standards documents\label{edits-to-standards}}
 
 Edits to the Java Language Specification (JLS):
       We need a document, complementary to the design document, that lists

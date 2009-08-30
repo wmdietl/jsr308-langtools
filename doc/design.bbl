@@ -414,7 +414,7 @@ Kathy Yelick, Luigi Semenzato, Geoff Pike, Carleton Miyamoto, Ben Liblit,
 \newblock {\em Concurrency: Practice and Experience}, 10(11--13):825--836,
   September--November 1998.
 
-\bibitem[ZPA{\etalchar{+}}07]{ZibinPAKE2007}
+\bibitem[ZPA{\etalchar{+}}07]{ZibinPAAKE2007}
 Yoav Zibin, Alex Potanin, Mahmood Ali, Shay Artzi, Adam Kie{\.z}un, and
   Michael~D. Ernst.
 \newblock Object and reference immutability using {Java} generics.
