@@ -2996,7 +2996,7 @@ explicitly documented with ``Compatibility Note: Methods may be added to
 this interface in future releases of the platform.''  Thus, adding methods
 there is a path toward extending functionality without changing core
 interfaces/classes.  Clients must remember to use the methods of \<Elements>
-when functionalty is not present in \<Element>.
+when functionality is not present in \<Element>.
 
 
 \subsubsection{JSR 175 design justification\label{duplicate-annotations-jsr175-justification}}
@@ -3657,11 +3657,13 @@ The expert group will have overlap with any others dealing with other
 added language features that might be annotatable (such as method-reference
 types or closures), to check impact.
 
-The specification and the TCK will be freely available, most likely
-licensed under terms that permit arbitrary use.  The reference
-implementation is built on the OpenJDK Java implementation and is publicly
-available; our goal is for Sun to incorporate JSR 308 into the official
-OpenJDK release.
+The specification, reference implementation, and any tests developed by the
+JSR 308 community are freely available, with no restrictions on use.  The
+reference implementation has been incorporated into Sun's OpenJDK Java
+implementation.  Sun will integrate tho specification into the JLS (without
+any conceptual changes or new information), will write additional tests,
+etc.  We do not have control over the license terms that Sun places on its
+changes.
 
 To ease the transition from standard Java SE 6 code to code with the extended
 annotations, the reference implementation recognizes the extended
@@ -3672,7 +3674,7 @@ annotations when surrounded by comment markers:
 This permits use of both standard Java SE 6 tools and the new annotations even
 before Java SE 7 is released.  However, it is not part of the proposal;
 that is, it is not required that every Java compiler parses comments.
-The final Java SE 7 implementation may or may not support a switch that
+Sun's OpenJDK implementation does not support a switch that
 makes it recognize the new annotations when embedded in comments.
 The Spec\#~\cite{BarnettLS2004} extension to C\# can be made compilable by
 a standard C\# compiler in a similar way, by enclosing its annotations in
