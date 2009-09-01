@@ -26,8 +26,6 @@
 package com.sun.tools.doclets.formats.html;
 
 import com.sun.javadoc.*;
-import com.sun.tools.javac.code.TargetType;
-import com.sun.tools.javadoc.TypeAnnotation;
 
 /**
  * Print method and constructor info.
@@ -179,13 +177,11 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
             writer.print(indent);
             writer.print("throws ");
             indent += "       ";
-            writer.writeTypeAnnotationInfo(member, TypeAnnotation.byTypeAndIndex(member, TargetType.THROWS, 0));
             writer.printLink(new LinkInfoImpl(
                 LinkInfoImpl.CONTEXT_MEMBER, exceptions[0]));
             for(int i = 1; i < exceptions.length; i++) {
                 writer.println(",");
                 writer.print(indent);
-                writer.writeTypeAnnotationInfo(member, TypeAnnotation.byTypeAndIndex(member, TargetType.THROWS, i));
                 writer.printLink(new LinkInfoImpl(
                     LinkInfoImpl.CONTEXT_MEMBER, exceptions[i]));
             }

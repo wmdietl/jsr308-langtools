@@ -152,8 +152,6 @@ public abstract class LinkFactory {
         linkInfo.type = bound;
     }
 
-    protected abstract String getParameterAnnotations(LinkInfo linkInfo, int index);
-
     /**
      * Return the link to the given class.
      *
@@ -215,8 +213,6 @@ public abstract class LinkFactory {
                     linkInfo.displayLength += 1;
                     output.append(",");
                 }
-                if (!linkInfo.excludeTypeBounds)
-                    output.append(getParameterAnnotations(linkInfo, i));
                 output.append(getTypeParameterLink(linkInfo, vars[i]));
             }
             linkInfo.displayLength += 1;

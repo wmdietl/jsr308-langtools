@@ -32,8 +32,6 @@ import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
 import com.sun.tools.doclets.internal.toolkit.builders.*;
 import com.sun.tools.doclets.internal.toolkit.taglets.*;
-import com.sun.tools.javac.code.TargetType;
-import com.sun.tools.javadoc.TypeAnnotation;
 
 /**
  * Generate the Class Information Page.
@@ -193,7 +191,6 @@ public class ClassWriterImpl extends SubWriterHolderWriter
             if (superclass != null) {
                 println();
                 print("extends ");
-                writeTypeAnnotationInfo(classDoc, TypeAnnotation.byTypeAndIndex(classDoc, TargetType.CLASS_EXTENDS, -1));
                 printLink(new LinkInfoImpl(
                     LinkInfoImpl.CONTEXT_CLASS_SIGNATURE_PARENT_NAME,
                     superclass));
@@ -214,7 +211,6 @@ public class ClassWriterImpl extends SubWriterHolderWriter
                 } else {
                     print(", ");
                 }
-                writeTypeAnnotationInfo(this.classDoc, TypeAnnotation.byTypeAndIndex(this.classDoc, TargetType.CLASS_EXTENDS, i));
                 printLink(new LinkInfoImpl(
                     LinkInfoImpl.CONTEXT_CLASS_SIGNATURE_PARENT_NAME,
                     implIntfacs[i]));

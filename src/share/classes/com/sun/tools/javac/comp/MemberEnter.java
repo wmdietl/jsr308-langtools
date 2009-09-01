@@ -997,7 +997,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         private void enterTypeAnnotations(List<JCTypeAnnotation> annotations, JCTree tree) {
             Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
-            ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
             if (!skipAnnotations) {
                 for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
                     JCTypeAnnotation a = al.head;
@@ -1005,19 +1004,11 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                             syms.annotationType,
                             env);
                     if (c == null) continue;
-                    buf.append(c);
                     Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, a.annotation_position);
                     a.attribute_field = tc;
                     // Note: @Deprecated has no effect on local variables and parameters
                     if (!annotated.add(a.type.tsym))
                         log.error(a.pos, "duplicate.annotation");
-                }
-                if (tree.getTag() == JCTree.METHODDEF) {
-                    assert tree.type == null;
-                    ((JCMethodDecl)tree).sym.type.receiverTypeAnnotations = buf.toList();
-                } else {
-                    assert tree.type != null;
-                    tree.type.typeAnnotations = buf.toList();
                 }
             }
         }
