@@ -30,7 +30,9 @@
  JDK itself, in which case it is invoked from the wrapper Makefile.
  -->
 
-<project name="langtools" default="build" basedir="..">
+<project name="langtools" default="clean-and-build-all-tools" basedir="..">
+
+    <target name="clean-and-build-all-tools" depends="clean,build-all-tools"/>
 
     <!-- Force full debuginfo for javac if the debug.classfiles
     property is set.  This must be BEFORE the include of
