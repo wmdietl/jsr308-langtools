@@ -106,7 +106,7 @@ type-quals.pdf: type-quals.tex type-quals.dvi
 
 type-quals.html: type-quals.tex type-quals.dvi
 	hevea urlhref.hva type-quals.tex
-	perl -pi -e 's/({<TT>mpapi<\/TT>,<TT>mernst<\/TT>}<TT>\@csail.mit.edu<\/TT>)/"$$1<BR>" . `date "+%B %e, %Y"`/e' type-quals.html
+	perl -pi -e 's/(<TT>mernst\@cs.washington.edu<\/TT>)/"$$1<BR>" . `date "+%B %e, %Y"`/e' type-quals.html
 	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' type-quals.html
 	html-update-toc type-quals.html
 

@@ -251,7 +251,7 @@ diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/resources/javac.prope
 -after checking the Bug Parade for duplicates. \
 -Include your program and the following diagnostic in your report.  Thank you.
 +Please report this bug so we can fix it.  For instructions, see \
-+http://groups.csail.mit.edu/pag/jsr308/current/README-jsr308.html#reporting-bugs \
++http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#reporting-bugs \
 +.  Thank you.
  
  javac.msg.io=\

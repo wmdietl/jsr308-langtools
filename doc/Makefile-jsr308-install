@@ -1,11 +1,11 @@
 ## Makefile for installing the JSR 308 compiler and the Checker Framework.
 # This automates the instructions that are found in the manuals, available
-# from http://groups.csail.mit.edu/pag/jsr308/ .
+# from http://types.cs.washington.edu/jsr308/ .
 
 ## 3 steps to install:
 # 1. Obtain this Makefile:
 #   cd
-#   wget -nv -N http://groups.csail.mit.edu/pag/jsr308/current/Makefile-jsr308-install
+#   wget -nv -N http://types.cs.washington.edu/jsr308/current/Makefile-jsr308-install
 # 2. Execute the following command, which installs the "langtools" and
 # "checkers" directories into JSR308 (by default, ~/jsr308).
 #   make -f Makefile-jsr308-install
@@ -21,11 +21,11 @@
 #  * This has only been tested on Linux.
 #  * You should only run this script if you agree to the Sun Java SE
 #    Development Kit (JDK) license.
-#  * If the installation fails, please report the problem to
-#     jsr308-bugs@lists.csail.mit.edu .
+#  * If the installation fails, please report the problem at
+#      http://code.google.com/p/jsr308-langtools/issues/list .
 #    Then, follow the detailed installation instructions at
-#      http://groups.csail.mit.edu/pag/jsr308/current/README-jsr308.html#installing
-#      http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#installation
+#      http://types.cs.washington.edu/jsr308/current/README-jsr308.html#installing
+#      http://types.cs.washington.edu/jsr308/current/checkers-manual.html#installation
 #  * Except for the default target, this Makefile should be run in
 #    #${JSR308}, which defaults to ~/jsr308 .
 
@@ -49,7 +49,7 @@ JSR308 ?= ${HOME}/jsr308
 ###
 
 # Override to obtain a development release or a test release.
-JSR308_WEB ?= http://groups.csail.mit.edu/pag/jsr308/current
+JSR308_WEB ?= http://types.cs.washington.edu/jsr308/current
 JSR308_BUILD := 0.9.8
 
 # export MAKEFILE_DIR

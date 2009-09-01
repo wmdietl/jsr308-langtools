@@ -19,7 +19,7 @@ pre, blockquote {
 <h1>Type Annotations (JSR 308) Compiler README</h1> <!-- omit from toc -->
 <h4 id="version">Version 0.9.8 (21 Aug 2009)</h4> <!-- omit from toc -->
 <p>For the latest version, see the
-  <a href="http://groups.csail.mit.edu/pag/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
+  <a href="http://types.cs.washington.edu/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
 
 <p>Contents:</p>
 <!-- start toc.  do not edit; run html-update-toc instead -->
@@ -84,7 +84,7 @@ annotations.
 <p>
 Pluggable type-checking is made <em>possible</em> by the Type Annotations
 syntax.  Pluggable type-checking is made <em>easy</em> by the 
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html">Checker
+<a href="http://types.cs.washington.edu/checker-framework/">Checker
 Framework</a>.  It includes several example type qualifiers that you can
 start using right away, and it enables you to create your own new compiler
 plug-ins that check user-defined type qualifiers.
@@ -104,7 +104,7 @@ NetBeans) are being updated to support the Type Annotations syntax.
 For Eclipse, write an <a
 href="http://ant.apache.org/">Ant</a> buildfile that compiles your project
 using the Type Annotations compiler (and maybe does
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#ant-task">pluggable
+<a href="http://types.cs.washington.edu/checker-framework/#ant-task">pluggable
 type-checking</a> too), then build by running Ant.  Problem markers
 will show up in the Eclipse IDE as normal.  (You will lose a few Eclipse
 features, such as error checking as you type, until Eclipse's internal
@@ -117,7 +117,7 @@ compiler is updated for to support type annotations.)
 <p>
 The <b>easiest</b> way to install the Type Annotations compiler, which is sufficient
 for most users, is to <a
-href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#installation">install
+href="http://types.cs.washington.edu/checker-framework/#installation">install
 the Checker Framework binary distribution</a>.
 </p>
 
@@ -216,7 +216,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 
   </li>
   <li>
-    Download the <a href="http://groups.csail.mit.edu/pag/jsr308/#Download">Type
+    Download the <a href="http://types.cs.washington.edu/jsr308/#Download">Type
     Annotations compiler</a>, and unpack it to create a
     <code>langtools</code> directory.  Do <em>not</em> do this inside the
     JDK 7 installation (directory <code>jdk1.7.0</code>) that you
@@ -225,7 +225,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 <pre>
 mkdir ~/jsr308
 cd ~/jsr308
-wget http://groups.csail.mit.edu/pag/jsr308/current/jsr308-langtools.zip
+wget http://types.cs.washington.edu/jsr308/current/jsr308-langtools.zip
 unzip jsr308-langtools.zip
 </pre>
   </li>
@@ -349,8 +349,8 @@ is used for everything else.
     declarations as the original Java 5 annotations (also known as JSR 175
     annotations) did.  For details of the syntax, see the Type Annotations
     (JSR 308) specification
-    (<a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.pdf">PDF</a>,
-    <a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">HTML</a>).</li>
+    (<a href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf">PDF</a>,
+    <a href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.html">HTML</a>).</li>
   <li>javac has the ability to warn about redundant casts (when directed to
    do so using a lint option).  If the target type of the cast contains an
    annotation, then javac never issues a redundant cast warning, but leaves
@@ -409,7 +409,7 @@ be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
 <p>
 There must be no whitespace within the comment.
 For additional information about this feature, see the
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments">Checker
+<a href="http://types.cs.washington.edu/checker-framework/#annotations-in-comments">Checker
 Framework Manual</a>.
 </p>
 
@@ -425,7 +425,7 @@ A related mechanism, that also facilitates compatibility with compilers
 that do not support the Type Annotations syntax, is 
 the ability to specify imported packages from the command line.  It is also
 documented in the
-<a href="http://groups.csail.mit.edu/pag/jsr308/current/checkers-manual.html#annotations-in-comments">Checker
+<a href="http://types.cs.washington.edu/checker-framework/#annotations-in-comments">Checker
 Framework Manual</a>.
 </p>
 
@@ -507,6 +507,17 @@ contributed to Sun under Sun's Contributor Agreement
 <h3 id="reporting-bugs">How to report bugs</h3>
 
 <p>
+To report a bug, use the
+<a href="http://code.google.com/p/jsr308-langtools/issues/list">issue
+  tracking system</a>.<br/>
+Please see below for details that will help you submit an informative bug
+report, that is most likely to be accepted.
+</p>
+
+
+<h4>What bugs should you report?</h4> <!-- omit from toc -->
+
+<p>
 If you have any problems with the compiler, please let us know.
 We welcome bug reports and suggestions, and we want to help.
 We will fix all reported bugs in the Type Annotations compiler.
@@ -515,8 +526,8 @@ Examples of bugs include:
 <ul>
   <li>Any inconsistency between the Type Annotations compiler and the
       JSR 308 design (<a
-href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.pdf">PDF</a>,
-<a href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-design.html">HTML</a>).
+href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf">PDF</a>,
+<a href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.html">HTML</a>).
   </li>
   <li>Any annotation-related problem.
   </li>
@@ -524,6 +535,9 @@ href="http://groups.csail.mit.edu/pag/jsr308/specification/java-annotation-desig
       with the OpenJDK Java 7 compiler on which the Type Annotations compiler is based.
   </li>
 </ul>
+
+
+<h4>To whom should you report the bug?</h4> <!-- omit from toc -->
 
 <p>
 The Type Annotations compiler is built on Sun's OpenJDK compiler.  If you find a bug
@@ -569,6 +583,9 @@ free to augment an existing issue with more information.)
 The issue tracker is not intended for general support or questions.
 </p>
 
+
+<h4>How can you make a clear, complete bug report?</h4> <!-- omit from toc -->
+
 <p>
 Please ensure that your bug report is clear and that it is complete.
 Otherwise, we may be unable to understand it or to reproduce it, either of
@@ -595,6 +612,9 @@ to write a helpful bug report</a>.  Here are some crucial points:
   </li>
 </ul>
 
+
+<h4>Thanks for reporting a bug</h4> <!-- omit from toc -->
+
 <p>
 Finally, thanks for reporting the bug!
 </p>
@@ -619,7 +639,7 @@ in the <a href="changelog-jsr308.txt">changelog</a>.
 <hr>
 
 <p>
-<a href="http://groups.csail.mit.edu/pag/jsr308/">JSR 308 webpage</a>
+<a href="http://types.cs.washington.edu/jsr308/">JSR 308 webpage</a>
 </p>
 
 </body>
