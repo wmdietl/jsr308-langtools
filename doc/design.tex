@@ -2801,6 +2801,18 @@ meta-annotated with \<@Repeatable>.
 % error/warning just as for Java SE 6.
 
 
+It is already possible in Java SE 6 for a location to have both an
+inherited and an explicit annotation of the same type.  The 
+\code{@Inherited} meta-annotation specification states that a
+\code{getAnnotation}[\code{s}] query returns only the
+explicit annotation.  This requirement should perhaps be relaxed, even if
+inheritance among annotations (Section~\ref{inheritance-among-annotations})
+is not permitted.  For some annotation
+processors, it is best to check that the explicit annotation is consistent
+with the overridden, inherited one and possibly merge information in the
+two annotations.
+
+
 \subsubsection{Desugar into wrapper annotations\label{duplicate-annotations-desugar}}
 
 % Joe Darcy and Danny Coward have volunteered (in 2006 or 2007) to produce
@@ -3145,7 +3157,7 @@ annotating complete constructs (such as a full statement).
 
 % \label{subclassing-annotations}\label{subtyping-annotations}
 
-Annotations cannot subclass one another, and an annotation is not allowed
+In Java SE 6, annotations cannot subclass one another, and an annotation is not allowed
 to extend/implement any interfaces.  These restrictions make it difficult
 to share behavior or to express similarities or relationships among
 annotation types.  For example, it is inconvenient to define annotations
@@ -3180,45 +3192,45 @@ We briefly elaborate on the two designs.
 Permitting inheritance among annotations requires that the \code{final}
 modifier on an annotation type declaration works just like for ordinary
 classes:  it prevents creation of subtypes of the given annotation.  A
-framework that defines annotation \code{@A} will not want to load an
+framework that defines annotation \code{@A} may not want to load an
 untrusted subclass \code{@B} of \code{@A} into the framework.
 
-% Suppose annotation \code{@A} is tied to a framework.  If
-% modifier on an annotation type declaration prevents creation of subtypes
-% of the given annotation, just as for ordinary classes.  A framework that
-% defines annotation \code{@A} will not want to load an untrusted subclass
-% \code{@B} of \code{@A} into the framework.  If
-% someone creates \code{@B}, a subclass of annotation
-% \code{@A}, then by the Liskov Substitution Principle, \code{@B} must
-% function as \code{@A}.  But the framework will not want to load the
-% subclass \code{@B} into its VM, as \code{@B} is alien and untrusted code
-% from the framework's viewpoint.
+The specification of the \code{getAnnotation(Class)} method must be
+updated.  Suppose that annotation types \code{Sub1} and \code{Sub2} are
+direct subtypes of \code{Super}, and \code{Super} has a \code{value} field
+of type \code{int}.  The specification must indicate the behavior of
+\code{getAnnotation(Super.class)} when called on locations with all
+possible combinations of the three annotations, with all possible
+combinations of arguments.  Here are a few examples:
 
-Subclassing annotations raises the possibility of multiple effective
+\begin{itemize}
+\item
+ a location that is annotated with \code{@Sub1(1)} but not annotated with
+ \code{@Super}
+\item
+ a location that is annotated with both \code{@Super(0)} and \code{@Sub1(1)}
+\item
+ a location that is annotated with both \code{@Sub1(0)} and
+ \code{@Sub2(0)}, but not annotated with \code{@Super}
+\item
+ a location that is annotated with \code{@Sub1(1)} and \code{@Sub2(2)}, but
+ not annotated with \code{@Super}
+\end{itemize}
+
+\noindent
+Reflection APIs may also need to be updated.
+
+As is clear from the examples above,
+subclassing annotations raises the possibility of multiple effective
 annotations applying at a location.
-Suppose that annotation types
-\code{Sub1} and \code{Sub2} are subtypes of \code{Super} which has an
-\code{int} value field and a location is annotated with both
-\code{@Sub1(1)} and \code{@Sub2(2)}.
-The old \code{getAnnotation(Class)} method should throw an error in this case.
-If duplicate annotations are permitted (see
-Section~\ref{duplicate-annotations}), then
+Therefore, subclassing annotations makes most sense if the specification
+already permits duplicate annotations (see
+Section~\ref{duplicate-annotations}).
+In that case,
 the new \code{getAnnotations(Class)} method returns all of the annotations.
 (Then, the client can decide what to do with them, such as raise an
 error, merge the annotations, or take some other action.)
 
-It is already possible in Java SE 6 for a location to have both an
-inherited and an explicit annotation of the same type.  The 
-\code{@Inherited} meta-annotation specification states that a
-\code{getAnnotation}[\code{s}] query returns only the
-explicit annotation.  This requirement should perhaps be relaxed, even if
-inheritance among annotations is not permitted.  For some annotation
-processors, it is best to check that the explicit annotation is consistent
-with the overridden, inherited one and possibly merge information in the
-two annotations.
-
-% That processor may need to handle the possibility of multiple annotations
-% even for an annotation that is not permitted to
 
 The JSR 175 Design FAQ~\cite{JSR175-PFD2} briefly addresses why this
 feature was not originally included:
