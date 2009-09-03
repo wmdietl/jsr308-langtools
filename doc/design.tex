@@ -2811,7 +2811,7 @@ inheritance among annotations (Section~\ref{inheritance-among-annotations})
 is not permitted.  For some annotation
 processors, it is best to check that the explicit annotation is consistent
 with the overridden, inherited one and possibly merge information in the
-two annotations.
+two annotations.  The current design makes that inconvenient to do.
 
 
 \subsubsection{Desugar into wrapper annotations\label{duplicate-annotations-desugar}}
@@ -2854,6 +2854,12 @@ Otherwise, client code would become more complicated, since it would have
 to deal with the possibility of both an \code{@A} annotation or an
 \code{@AContainer} annotation, and with handling the relative order.
 
+This proposal would need to specify what happens if the user queries for
+annotation \code{@A}:  would that always throw an exception (probably the
+best choice), or succeed if one \code{@A} annotation is present, or succeed
+if an \code{@AContainer} annotation with a length-1 array is present, or
+return the first \code{@A} annotation?
+
 One problem with this proposal is that it loses the ordering of
 differently-named annotations (even if the ordering of same-named
 annotations is preserved within the container).  For example, it cannot
@@ -2868,6 +2874,12 @@ Another problem is that it requires defining an \code{@AContainer}
 annotation for each annotation \code{@A}, or else annotation \code{@A}
 cannot be duplicated.  It would be better not to burden programmers with
 writing and maintaining this boilerplate code.
+
+Another problem with this proposal is that it makes other possible
+extensions to annotations, such as inheritance among annotations
+(Section~\ref{inheritance-among-annotations}), more difficult and clumsy to
+implement and use.  JSR 308 should aim to preserve, not to preclude, future
+avenues of extension (see Section~\ref{other-annotations}).
 
 
 %% More details from Joe Darcy, but I don't see that they add much to the
@@ -2983,14 +2995,15 @@ mechanism.
 The problem with this proposal is that it requires adding a single method,
 \<getAnnotations>, to two interfaces.  While the changes would not break
 upward binary-compatibility, they would break source-compatibility:
-existing implementations of \<Element> and \<AnnotatedElement> would not
-compile without adding a \<getAnnotations> method.  Sun's policy generally
-frowns upon such changes, though they are sometimes made nonetheless.
+existing implementations of \<Element> and \<AnnotatedElement> could not
+be re-compiled under Java 7 without adding a \<getAnnotations> method.
+Sun's policy generally frowns upon such changes that break
+source-compatibility, though they are sometimes made nonetheless.
 % Such changes have to be approved by the CCC (conformance change committee).
 For example, the
 SQL interfaces have far more implementations than the compiler or
-reflection APIs, but Java SE 6 adds three methods to the
-\<java.sql.Statement> interface and makes it extend \<Wrapper>.
+reflection APIs, but Java SE 6 added three methods to the
+\<java.sql.Statement> interface and made it extend \<Wrapper>.
 % This isn't even documented in the Java 6 Incompatibility Release notes
 % (http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities).
 
@@ -3000,16 +3013,20 @@ method, and to mark \<Element> as deprecated.  Then, programmers should
 rewrite their existing code to use the \<Element2> interface instead of the
 \<Element> interface.  However, their code continues to compile until they
 make the change.  A problem with this change is that it requires making a
-copy (with names suffixed ``\<2>'' of the entire \<javax.lang.model>
+copy (with names suffixed ``\<2>'') of the entire \<javax.lang.model>
 package, which is ugly.
 
-Another alternative is to change the \<Elements> utility interface.  Those
-methods logically belong in \<Element>, but the \<Elements> interface is
-explicitly documented with ``Compatibility Note: Methods may be added to
-this interface in future releases of the platform.''  Thus, adding methods
-there is a path toward extending functionality without changing core
-interfaces/classes.  Clients must remember to use the methods of \<Elements>
-when functionality is not present in \<Element>.
+Another alternative is to change the \<Elements> utility interface.  The
+new \<getAnnotations> methods logically belong in \<Element>, but they can
+be added to the \<Elements> interface because it is explicitly documented
+with ``Compatibility Note: Methods may be added to this interface in future
+releases of the platform.''  Thus, adding static methods in \<Elements> is
+a path toward extending functionality without changing core
+interfaces/classes such as \<Element>.  A problem with this proposal is
+that clients must remember to use the methods of \<Elements> when
+functionality is not present in \<Element>.  A programmer browsing the
+\<Element> interface might not think to check for static methods in
+\<Elements>.
 
 
 \subsubsection{JSR 175 design justification\label{duplicate-annotations-jsr175-justification}}
@@ -3027,6 +3044,14 @@ single instance of the annotation type or multiple instances when you query
 an annotation. Also it's consistent with the usual restriction on
 modifiers.
 \end{quote}
+
+The argument that ``the resulting system is simpler and cleaner'' is
+perplexing.  A client must check for both the singular and plural versions
+of the annotation and must handle the case when both the singular and the
+plural versions are present.  By contrast to the stated claim, a system for
+duplicate annotations with an interface that always returns a list (or
+always returns an array) is what is needed to relieve the client of ``worry
+about whether you're going to get back a single instance''.
 
 
 \subsection{Locations for annotations\label{locations-for-annotations}}

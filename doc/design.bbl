@@ -292,8 +292,7 @@ Tim Lindholm and Frank Yellin.
 Tim Lindholm and Frank Yellin.
 \newblock The \texttt{class} file format.
 \newblock
-  \url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java%
-5.pdf}, December 2007.
+  \url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}, December 2007.
 \newblock Revision to chapter 4 of \cite{LindholmY99} for JDK 1.5.
 
 \bibitem[Mor06]{JSR250}
