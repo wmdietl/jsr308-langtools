@@ -3198,6 +3198,13 @@ work around the problem, one could meta-annotate an annotation as a
 all the work to interpret the meta-annotation.  This is clumsy and
 indirect.)
 
+A potential objection is that multiple annotation processors might try to
+claim the same annotation, one directly and one by claiming its supertype.
+This can be accomodated.  In general, annotation processor designers
+should, and can, avoid this situation by running one processor at a time
+for a family of annotations that are related by inheritance.
+
+
 %% This text is inaccurate; JLS 9.6 merely says that an member can have an
 %% annotation type, and elsewhere inheritance among annotations is prohibited.
 % Inheritance among annotations would slightly relax Java's current
