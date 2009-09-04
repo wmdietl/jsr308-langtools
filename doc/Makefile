@@ -1,8 +1,7 @@
-pag = /cse/www2/
-jsr308_www ?= ${pag}/types/jsr308
+jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 
-INV ?= /afs/csail/u/m/mernst/research/invariants
+INV ?= /homes/gws/mernst/research/invariants
 
 # There is no use of "cp -p" in this Makefile, to avoid problems with
 # browser caches.
@@ -22,9 +21,8 @@ webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 
 # Warning!  "make web" makes a public release!
 # Before doing this, update jsr308-changes.html.  Determine changes via log or diff:
-#   svn log -r '{2007-02-25}:HEAD' design.tex
-#   svn log -r '{2007-02-25}:HEAD' jsr308-faq.html
-# where "{2007-02-25}" is the date of the previous entry in jsr308-changes.html
+#   hg log --style changelog --date '>{2009-05-14}' design.tex jsr308-faq.html
+# where "{2009-05-14}" is the date of the previous entry in jsr308-changes.html
 web: \
 ${jsr308_www} \
 ${jsr308_www}/jsr308-webpage.html \
