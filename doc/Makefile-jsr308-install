@@ -50,12 +50,12 @@ JSR308 ?= ${HOME}/jsr308
 
 # Override to obtain a development release or a test release.
 JSR308_WEB ?= http://types.cs.washington.edu/jsr308/current
-JSR308_BUILD := 0.9.8
+JSR308_BUILD := 0.9.9
 
 # export MAKEFILE_DIR
 export JSR308
 
-export JDK_7_BIN := jdk-7-ea-bin-b70-linux-i586-20_aug_2009.bin
+export JDK_7_BIN := jdk-7-ea-bin-b71-linux-i586-03_sep_2009.bin
 export DARWIN_TAR_BASENAME := openjdk7-darwin-i386-20080820
 export DARWIN_TAR := ${DARWIN_TAR_BASENAME}.tar.bz2
 export MAKEFILE := ${MAKEFILE_DIR}/Makefile-jsr308-install
