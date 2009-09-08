@@ -468,6 +468,9 @@ public class TypeAnnotations {
         }
 
         private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+            if (annotations.isEmpty())
+                return List.nil();
+
             ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
             for (JCTypeAnnotation anno : annotations) {
                 buf.append(anno.attribute_field);
