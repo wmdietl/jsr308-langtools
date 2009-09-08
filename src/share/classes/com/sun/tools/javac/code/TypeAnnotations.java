@@ -28,6 +28,7 @@ package com.sun.tools.javac.code;
 import javax.lang.model.element.ElementKind;
 
 import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.code.Type.MethodType;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
@@ -411,6 +412,7 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
+                tree.type.asMethodType().receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
                 tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
@@ -463,6 +465,19 @@ public class TypeAnnotations {
             if (tree instanceof JCTypeAnnotation)
                 recordedTypeAnnotations = recordedTypeAnnotations.append(((JCTypeAnnotation)tree).attribute_field);
             super.visitAnnotation(tree);
+        }
+
+        private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+            ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
+            for (JCTypeAnnotation anno : annotations) {
+                buf.append(anno.attribute_field);
+            }
+            return buf.toList();
+        }
+
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            super.visitAnnotatedType(tree);
+            tree.type.typeAnnotations = fromAnnotations(tree.annotations);
         }
     }
 }

@@ -64,7 +64,7 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType {
+public class Type implements PrimitiveType, Cloneable {
 
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
@@ -85,7 +85,6 @@ public class Type implements PrimitiveType {
     public TypeSymbol tsym;
 
     public List<Compound> typeAnnotations = List.nil();
-    public List<Compound> receiverTypeAnnotations = List.nil();
 
     /**
      * The constant value of this type, null if this type does not
@@ -789,6 +788,7 @@ public class Type implements PrimitiveType {
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
+        public List<Compound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
                           Type restype,

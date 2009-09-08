@@ -2682,16 +2682,10 @@ public class Attr extends JCTree.Visitor {
         result = tree.type = syms.errType;
     }
 
-    private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
-        ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
-        for (JCTypeAnnotation anno : annotations) {
-            chk.validateTypeAnnotation((JCTypeAnnotation)anno, false);
-            buf.append(anno.attribute_field);
-        }
-        return buf.toList();
-    }
     public void visitAnnotatedType(JCAnnotatedType tree) {
-        result = tree.type = attribType(tree.getUnderlyingType(), env);
+        Type underlyingType = attribType(tree.getUnderlyingType(), env);
+        Type type = (Type)underlyingType.clone();
+        result = tree.type = type;
     }
 
     public void visitErroneous(JCErroneous tree) {
