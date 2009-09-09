@@ -2173,7 +2173,7 @@ declaration:
 % \end{Verbatim}
 
 A potential criticism is that a type annotation at the very beginning of a
-declaration does not refer to the full type, even though variable
+declaration does not refer to the full type, even though declaration
 annotations (which also occur at the beginning of
 the declaration) do refer to the entire variable.  As an example, in
 \code{@NonNull String[] arr2;} the variable \code{arr2} is not non-null.
@@ -2202,7 +2202,7 @@ within angle brackets as for generics.
 An annotation before a method declaration annotates either the return type,
 or the method declaration.  There is never any ambiguity regarding the
 programmer intention:  in that location, a type annotation annotates the
-return type, and a non-type annotation annotates the method itself.  The
+return type, and a declaration annotation annotates the method itself.  The
 \code{@Target} meta-annotation indicates whether an annotation is a type
 annotation.  Field declarations are treated similarly.
 
@@ -2265,7 +2265,7 @@ appear on the receiver of an inner class constructor.
 
 
 Strictly speaking, a \code{@Target} meta-annotation could indicate that an
-annotation is \emph{both} a type annotation and a non-type annotation.  In
+annotation is \emph{both} a type annotation and a declaration annotation.  In
 such a case, the annotation would apply to both the return type and the
 method declaration, and it would exist twice in the class file.  We have
 not found an example where that is desirable; although it is legal, it is
@@ -3489,7 +3489,7 @@ By contrast, JSR 305 ``Annotations for Software Defect Detection'' aims to
 define a small set of annotations.
 Examples include type annotations such as non-nullness
 (\code{@Nonnull}), signedness (\code{@Nonnegative}), tainting, and string
-format; and also non-type annotations such as whether a method's return
+format; and also declaration annotations such as whether a method's return
 value should always be checked by the caller.
 A programmer who cares about code quality will use both annotations
 defined in the JSR 305 ``standard library'', and also others that are
