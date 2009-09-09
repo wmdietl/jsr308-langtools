@@ -142,7 +142,10 @@ public class LinkFactoryImpl extends LinkFactory {
         } else {
             return output;
         }
-        
+
+        if (annotations.length == 0)
+            return output;
+
         List<String> annos = m_writer.getAnnotations(0, annotations, false);
 
         boolean isFirst = true;
@@ -160,7 +163,7 @@ public class LinkFactoryImpl extends LinkFactory {
 
         return output;
     }
-    
+
     /**
      * Given a class, return the appropriate tool tip.
      *
