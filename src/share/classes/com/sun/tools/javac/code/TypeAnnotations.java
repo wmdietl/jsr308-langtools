@@ -28,7 +28,6 @@ package com.sun.tools.javac.code;
 import javax.lang.model.element.ElementKind;
 
 import com.sun.tools.javac.code.Symbol.VarSymbol;
-import com.sun.tools.javac.code.Type.MethodType;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
@@ -38,6 +37,17 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 
 public class TypeAnnotations {
+
+    public static Annotator annotator(final JCClassDecl tree) {
+        return new Annotator() {
+
+            @Override
+            public void enterAnnotation() {
+                taFillAndLift(tree, false);
+            }
+            
+        };
+    }
 
     public static void taFillAndLift(List<JCCompilationUnit> trees, boolean visitBodies) {
         for (JCCompilationUnit tree : trees) {
@@ -412,7 +422,7 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
-                tree.type.asMethodType().receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
+                tree.sym.type.asMethodType().receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
                 tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
@@ -480,6 +490,11 @@ public class TypeAnnotations {
 
         public void visitAnnotatedType(JCAnnotatedType tree) {
             super.visitAnnotatedType(tree);
+            tree.type.typeAnnotations = fromAnnotations(tree.annotations);
+        }
+
+        public void visitTypeParameter(JCTypeParameter tree) {
+            super.visitTypeParameter(tree);
             tree.type.typeAnnotations = fromAnnotations(tree.annotations);
         }
     }

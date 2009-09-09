@@ -1817,7 +1817,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      * @return an array of strings representing the annotations being
      *         documented.
      */
-    private List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
+    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
         List<String> results = new ArrayList<String>();
         StringBuffer annotation;
         for (int i = 0; i < descList.length; i++) {
