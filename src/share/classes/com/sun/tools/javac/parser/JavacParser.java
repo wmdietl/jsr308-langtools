@@ -1068,8 +1068,10 @@ public class JavacParser implements Parser {
 
                         S.nextToken();
 
-                        t = bracketsOpt(t, annos);
+                        t = bracketsOpt(t);
                         t = toP(F.at(pos).TypeArray(t));
+                        if (annos.nonEmpty())
+                            t = toP(F.at(pos).AnnotatedType(annos, t));
                         t = bracketsSuffix(t);
                     } else {
                         if ((mode & EXPR) != 0) {
@@ -1441,17 +1443,20 @@ public class JavacParser implements Parser {
         return t;
     }
 
-    /** BracketsOpt = {"[" TypeAnnotations "]"}
+    /** BracketsOpt = { Annotations "[" "]"}
      */
     private JCExpression bracketsOpt(JCExpression t) {
         return bracketsOpt(t, List.<JCTypeAnnotation>nil());
     }
 
-    private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos,
+    private JCExpression bracketsOptCont(JCExpression t, int pos,
             List<JCTypeAnnotation> annotations) {
         accept(RBRACKET);
-        t = bracketsOpt(t, annotations);
-        return toP(F.at(pos).TypeArray(t));
+        t = bracketsOpt(t);
+        t = toP(F.at(pos).TypeArray(t));
+        if (annotations.nonEmpty())
+            t = toP(F.at(pos).AnnotatedType(annotations, t));
+        return t;
     }
 
     /** BracketsSuffixExpr = "." CLASS

@@ -45,7 +45,7 @@ public class TypeAnnotations {
             public void enterAnnotation() {
                 taFillAndLift(tree, false);
             }
-            
+
         };
     }
 
@@ -222,9 +222,9 @@ public class TypeAnnotations {
                         case LOCAL_VARIABLE:
                             p.type = TargetType.LOCAL_VARIABLE; break;
                         case FIELD:
-                            p.type = TargetType.FIELD_GENERIC_OR_ARRAY; break;
+                            p.type = TargetType.FIELD; break;
                         case PARAMETER:
-                            p.type = TargetType.METHOD_PARAMETER_GENERIC_OR_ARRAY;
+                            p.type = TargetType.METHOD_PARAMETER;
                             p.parameter_index = methodParamIndex(path, frame);
                             break;
                         default: throw new AssertionError();
