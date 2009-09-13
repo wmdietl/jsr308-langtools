@@ -451,7 +451,12 @@ public class TypeAnnotations {
                 }
             }
             try {
-                super.visitVarDef(tree);
+                // copied from super.visitVarDef. need to skip tree.init
+                scan(tree.mods);
+                scan(tree.vartype);
+                if (visitBodies)
+                    scan(tree.init);
+
             } finally {
                 if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE)
                     tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);

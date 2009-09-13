@@ -336,7 +336,9 @@ public class Types {
         return isSubtype(t, s, false);
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
-        if (t == s)
+        if (t == s
+            || (t.tag == TYPEVAR && s.tag == TYPEVAR
+                    && ((TypeVar)t).tsym == ((TypeVar)s).tsym))
             return true;
 
         if (s.tag >= firstPartialTag)
@@ -369,7 +371,8 @@ public class Types {
                 case BOOLEAN: case VOID:
                     return t.tag == s.tag;
                 case TYPEVAR:
-                    return isSubtypeNoCapture(t.getUpperBound(), s);
+                    boolean b = isSubtypeNoCapture(t.getUpperBound(), s);
+                    return b;
                 case BOT:
                     return
                         s.tag == BOT || s.tag == CLASS ||
@@ -589,6 +592,8 @@ public class Types {
                 case DOUBLE: case BOOLEAN: case VOID: case BOT: case NONE:
                     return t.tag == s.tag;
                 case TYPEVAR:
+                    if (t.tsym == s.tsym)
+                        return true;
                     return s.isSuperBound()
                         && !s.isExtendsBound()
                         && visit(t, upperBound(s));

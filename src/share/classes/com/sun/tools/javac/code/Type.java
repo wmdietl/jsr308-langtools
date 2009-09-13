@@ -373,7 +373,9 @@ public class Type implements PrimitiveType, Cloneable {
 
     public Object clone() {
         try {
-            return super.clone();
+            Object o = super.clone();
+            return o;
+//            return super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
@@ -953,7 +955,11 @@ public class Type implements PrimitiveType, Cloneable {
             return v.visitTypeVar(this, s);
         }
 
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if (bound == null)
+                bound = ((TypeVar)tsym.type).bound;
+            return bound;
+        }
 
         int rank_field = -1;
 

@@ -41,6 +41,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.*;
+
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 /** This is the second phase of Enter, in which classes are completed
@@ -753,6 +754,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                           Symbol s) {
         ListBuffer<Attribute.Compound> buf =
             new ListBuffer<Attribute.Compound>();
+        ListBuffer<Attribute.TypeCompound> typeBuf =
+            new ListBuffer<Attribute.TypeCompound>();
         Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
         if (!skipAnnotations)
         for (List<JCAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
@@ -761,7 +764,14 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                                                             syms.annotationType,
                                                             env);
             if (c == null) continue;
-            buf.append(c);
+            switch (annotationType(a, s)) {
+            case BOTH:
+            case DECLARATION:
+                buf.append(c);
+                break;
+            case TYPE:
+                typeBuf.append(toTypeAnnotation(c, s));
+            }
             // Note: @Deprecated has no effect on local variables and parameters
             if (!c.type.isErroneous()
                 && s.owner.kind != MTH
@@ -1208,5 +1218,70 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
         List<JCExpression> typeargs = typarams.nonEmpty() ? make.Types(typarams) : null;
         return make.Exec(make.Apply(typeargs, meth, make.Idents(params)));
+    }
+
+    // Modification of Check.annotationApplicable
+    enum AnnotationType { DECLARATION, TYPE, BOTH };
+
+    private AnnotationType annotationType(JCAnnotation a, Symbol s) {
+        Attribute.Compound atTarget =
+            a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
+        if (atTarget == null) return AnnotationType.DECLARATION;
+        Attribute atValue = atTarget.member(names.value);
+        if (!(atValue instanceof Attribute.Array)) return AnnotationType.DECLARATION; // error recovery
+        Attribute.Array arr = (Attribute.Array) atValue;
+        boolean isDecl = false, isType = false;
+        for (Attribute app : arr.values) {
+            if (!(app instanceof Attribute.Enum)) return AnnotationType.DECLARATION; // recovery
+            Attribute.Enum e = (Attribute.Enum) app;
+            if (e.value.name == names.TYPE)
+                { if (s.kind == TYP) isDecl = true; }
+            else if (e.value.name == names.FIELD)
+                { if (s.kind == VAR && s.owner.kind != MTH) isDecl = true; }
+            else if (e.value.name == names.METHOD)
+                { if (s.kind == MTH && !s.isConstructor()) isDecl = true; }
+            else if (e.value.name == names.PARAMETER)
+                { if (s.kind == VAR &&
+                      s.owner.kind == MTH &&
+                      (s.flags() & PARAMETER) != 0)
+                    isDecl = true;
+                }
+            else if (e.value.name == names.CONSTRUCTOR)
+                { if (s.kind == MTH && s.isConstructor()) isDecl = true; }
+            else if (e.value.name == names.LOCAL_VARIABLE)
+                { if (s.kind == VAR && s.owner.kind == MTH &&
+                      (s.flags() & PARAMETER) == 0)
+                    isDecl = true;
+                }
+            else if (e.value.name == names.ANNOTATION_TYPE)
+                { if (s.kind == TYP && (s.flags() & ANNOTATION) != 0)
+                    isDecl = true;
+                }
+            else if (e.value.name == names.PACKAGE)
+                { if (s.kind == PCK) isDecl = true; }
+            else if (e.value.name == names.TYPE_USE)
+                { if (s.kind == TYP ||
+                      s.kind == VAR ||
+                      (s.kind == MTH && !s.isConstructor() &&
+                       s.type.getReturnType().tag != VOID))
+                    isType = false;
+                }
+            else
+                isDecl = true; // recovery
+        }
+        if (isDecl && isType)
+            return AnnotationType.BOTH;
+        else if (isType)
+            return AnnotationType.TYPE;
+        else
+            return AnnotationType.DECLARATION;
+    }
+
+    private Attribute.TypeCompound toTypeAnnotation(Attribute.Compound anno, Symbol s) {
+        TypeAnnotationPosition p = new TypeAnnotationPosition();
+        
+        
+        Attribute.TypeCompound typeAnno = new Attribute.TypeCompound(anno, p);
+        return typeAnno;
     }
 }
