@@ -371,8 +371,7 @@ public class Types {
                 case BOOLEAN: case VOID:
                     return t.tag == s.tag;
                 case TYPEVAR:
-                    boolean b = isSubtypeNoCapture(t.getUpperBound(), s);
-                    return b;
+                    return isSubtypeNoCapture(t.getUpperBound(), s);
                 case BOT:
                     return
                         s.tag == BOT || s.tag == CLASS ||

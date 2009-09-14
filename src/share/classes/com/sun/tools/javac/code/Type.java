@@ -373,9 +373,7 @@ public class Type implements PrimitiveType, Cloneable {
 
     public Object clone() {
         try {
-            Object o = super.clone();
-            return o;
-//            return super.clone();
+            return super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError(e);
         }
