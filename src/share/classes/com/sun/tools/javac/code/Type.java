@@ -953,7 +953,11 @@ public class Type implements PrimitiveType, Cloneable {
             return v.visitTypeVar(this, s);
         }
 
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if (bound == null)
+                bound = tsym.type.getUpperBound();
+            return bound;
+        }
 
         int rank_field = -1;
 
