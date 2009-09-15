@@ -34,7 +34,7 @@ import com.sun.tools.javac.util.*;
 *  This code and its internal interfaces are subject to change or
 *  deletion without notice.</b>
 */
-public class TypeAnnotationPosition {
+public class TypeAnnotationPosition implements Cloneable {
 
     public TargetType type = TargetType.UNKNOWN;
 
@@ -64,6 +64,11 @@ public class TypeAnnotationPosition {
 
     // For wildcards
     public TypeAnnotationPosition wildcard_position = null;
+
+    public TypeAnnotationPosition() { }
+    public TypeAnnotationPosition(TargetType type) {
+        this.type = type;
+    }
 
     @Override
     public String toString() {
@@ -193,5 +198,13 @@ public class TypeAnnotationPosition {
             return wildcard_position.isValidOffset;
         else
             return !type.isLocal() || isValidOffset;
+    }
+
+    public TypeAnnotationPosition clone() {
+        try {
+            return (TypeAnnotationPosition)super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("This not cloneable");
+        }
     }
 }
