@@ -338,7 +338,22 @@ the \code{@Target(ElementType.TYPE\_USE)} meta-annotation indicates that
 \code{ElementType.TYPE\_PARAMETER} and \code{ElementType.TYPE\_USE} are
 distinct from the existing \code{ElementType.TYPE} enum element
 of Java SE 6, which indicates that an annotation may appear on a type
-declaration (a class, interface, or enum declaration).
+declaration (a class, interface, or enum declaration).  The locations
+denoted by \code{ElementType.TYPE\_PARAMETER},
+\code{ElementType.TYPE\_USE}, and \code{ElementType.TYPE} are disjoint.
+
+If an annotation is not meta-annotated with \<@Target> (which would be poor
+style), then the compiler treats the annotation as if it is
+meta-annotated with all of the \code{ElementType} enum constants
+that are defined in Java SE 6:  
+\code{ANNOTATION\_TYPE},
+\code{CONSTRUCTOR},
+\code{FIELD},
+\code{LOCAL\_VARIABLE},
+\code{METHOD},
+\code{PACKAGE},
+\code{PARAMETER}, and
+\code{TYPE}.
 
 The compiler applies an annotation to every target that is consistent with
 its meta-annotation.  The order of annotations is not used to disambiguate.
@@ -2271,12 +2286,18 @@ method declaration, and it would exist twice in the class file.  We have
 not found an example where that is desirable; although it is legal, it is
 considered bad style.
 
-A related case is that when annotation has no \code{@Target}
-meta-annotation (which is bad style!), it is treated as if it applies to
-\emph{all} locations, to ensure that it can be used wherever the designer
-intended.  Applying the annotation to multiple locations does not cause any
-problems, because any annotation processor will look only where the
-designer had in mind and will ignore any other positions.  For example, the
+
+When an annotation has no \code{@Target} meta-annotation (which is bad
+style!), it is treated as if it applies to all locations that were possible
+in Java SE 6.  
+If there is no \code{@Target} meta-annotation, a Java SE 6
+and a Java SE 7 put the same 
+annotations in the \code{.class} file, and no annotation is placed
+on multiple locations nor appears more than once in the \code{.class} file.
+If you wish to write a type annotation, you must meta-annotate its
+definition with \code{@Target(ElementType.TYPE\_USE)}.
+
+For example, the
 \code{@Deprecated} annotation lacks a \code{@Target} annotation, so in this
 code:
 
@@ -2285,12 +2306,8 @@ code:
 \end{Verbatim}
 
 \noindent
-the \code{@Deprecated} annotation applies to both the \code{int} data type
-and to the \code{foo} method.  Any annotation processor that processes the
-\code{@Deprecated} annotation will not even look in the type annotation
-position, and the existence of an extra annotation in that position will
-not interfere with any other annotation processor either.
-
+the \code{@Deprecated} annotation applies to only the \code{foo} method,
+not the \code{int} data type.
 
 In summary:  for certain syntactic locations, which target (Java construct)
 is being annotated depends on the annotation.
@@ -3200,7 +3217,7 @@ indirect.)
 
 A potential objection is that multiple annotation processors might try to
 claim the same annotation, one directly and one by claiming its supertype.
-This can be accomodated.  In general, annotation processor designers
+This can be accommodated.  In general, annotation processor designers
 should, and can, avoid this situation by running one processor at a time
 for a family of annotations that are related by inheritance.
 
