@@ -522,7 +522,6 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
-                tree.sym.type.asMethodType().receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
                 tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
@@ -582,25 +581,12 @@ public class TypeAnnotations {
             super.visitAnnotation(tree);
         }
 
-        private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
-            if (annotations.isEmpty())
-                return List.nil();
-
-            ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
-            for (JCTypeAnnotation anno : annotations) {
-                buf.append(anno.attribute_field);
-            }
-            return buf.toList();
-        }
-
         public void visitAnnotatedType(JCAnnotatedType tree) {
             super.visitAnnotatedType(tree);
-            tree.type.typeAnnotations = fromAnnotations(tree.annotations);
         }
 
         public void visitTypeParameter(JCTypeParameter tree) {
             super.visitTypeParameter(tree);
-            tree.type.typeAnnotations = fromAnnotations(tree.annotations);
         }
     }
 
@@ -639,7 +625,6 @@ public class TypeAnnotations {
     }
 
     private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
-        // just need to worry about arrays
         if (type.tag != TypeTags.ARRAY) {
             Type atype = (Type)type.clone();
             atype.typeAnnotations = List.convert(Compound.class, annotations);
