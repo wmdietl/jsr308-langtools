@@ -988,7 +988,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            annotate.laterOnDone(typeAnnotations.annotator(tree));
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
         }
     }
@@ -1039,19 +1039,21 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
 
         private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
-            annotate.later(new Annotate.Annotator() {
-                public String toString() {
-                    return "annotate " + annotations + " onto " + tree;
-                }
-                public void enterAnnotation() {
-                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
-                    try {
-                        enterTypeAnnotations(annotations, tree);
-                    } finally {
-                        log.useSource(prev);
+            if (annotations.nonEmpty()) {
+                annotate.later(new Annotate.Annotator() {
+                    public String toString() {
+                        return "annotate " + annotations + " onto " + tree;
                     }
-                }
-            });
+                    public void enterAnnotation() {
+                        JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                        try {
+                            enterTypeAnnotations(annotations, tree);
+                        } finally {
+                            log.useSource(prev);
+                        }
+                    }
+                });
+            }
         }
 
         @Override
