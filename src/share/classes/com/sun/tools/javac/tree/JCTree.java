@@ -1377,7 +1377,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     public static class JCNewArray extends JCExpression implements NewArrayTree {
         public JCExpression elemtype;
         public List<JCExpression> dims;
-        public List<JCTypeAnnotation> annotations;
         public List<List<JCTypeAnnotation>> dimAnnotations;
         public List<JCExpression> elems;
         protected JCNewArray(JCExpression elemtype,
@@ -1386,7 +1385,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         {
             this.elemtype = elemtype;
             this.dims = dims;
-            this.annotations = List.nil();
             this.dimAnnotations = List.nil();
             this.elems = elems;
         }

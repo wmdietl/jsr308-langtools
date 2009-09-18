@@ -417,13 +417,6 @@ public class TypeAnnotations {
                     break;
             }
 
-            // find annotations locations of initializer elements
-            TypeAnnotationPosition p = new TypeAnnotationPosition();
-            p.type = TargetType.NEW_GENERIC_OR_ARRAY;
-            p.location = p.location.append(i);
-            p.pos = tree.pos;
-            setTypeAnnotationPos(tree.annotations, p);
-
             // TODO: Is this needed?
             scan(tree.elems);
         }

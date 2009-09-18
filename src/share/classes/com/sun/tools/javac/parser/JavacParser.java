@@ -1578,13 +1578,6 @@ public class JavacParser implements Parser {
      */
     JCExpression arrayCreatorRest(int newpos, JCExpression elemtype) {
 
-        List<JCTypeAnnotation> topAnnos = List.nil();
-        if (elemtype.getTag() == JCTree.ANNOTATED_TYPE) {
-            JCAnnotatedType atype = (JCAnnotatedType) elemtype;
-            topAnnos = atype.annotations;
-            elemtype = atype.underlyingType;
-        }
-
         List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
         accept(LBRACKET);
@@ -1596,8 +1589,6 @@ public class JavacParser implements Parser {
 
             if (S.token() == LBRACE) {
                 JCNewArray na = (JCNewArray)arrayInitializer(newpos, elemtype);
-
-                na.annotations = topAnnos;
 
                 return na;
             } else {
@@ -1631,7 +1622,6 @@ public class JavacParser implements Parser {
             }
 
             JCNewArray na = toP(F.at(newpos).NewArray(elemtype, dims.toList(), null));
-            na.annotations = topAnnos;
             na.dimAnnotations = dimAnnotations.toList();
             return na;
         }
