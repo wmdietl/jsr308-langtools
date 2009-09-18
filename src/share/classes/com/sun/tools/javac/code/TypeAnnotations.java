@@ -382,15 +382,19 @@ public class TypeAnnotations {
 
         @Override
         public void visitNewArray(JCNewArray tree) {
-            findPosition(tree, tree, tree.annotations);
             int dimAnnosCount = tree.dimAnnotations.size();
 
             // handle annotations associated with dimentions
             for (int i = 0; i < dimAnnosCount; ++i) {
                 TypeAnnotationPosition p = new TypeAnnotationPosition();
-                p.type = TargetType.NEW_GENERIC_OR_ARRAY;
                 p.pos = tree.pos;
-                p.location = p.location.append(i);
+                if (i == 0) {
+                    p.type = TargetType.NEW;
+                } else {
+                    p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                    p.location = p.location.append(i - 1);
+                }
+
                 setTypeAnnotationPos(tree.dimAnnotations.get(i), p);
             }
 
@@ -414,6 +418,13 @@ public class TypeAnnotations {
             }
 
             // find annotations locations of initializer elements
+            TypeAnnotationPosition p = new TypeAnnotationPosition();
+            p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+            p.location = p.location.append(i);
+            p.pos = tree.pos;
+            setTypeAnnotationPos(tree.annotations, p);
+
+            // TODO: Is this needed?
             scan(tree.elems);
         }
 
