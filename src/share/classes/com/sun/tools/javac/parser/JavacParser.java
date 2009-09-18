@@ -27,6 +27,7 @@ package com.sun.tools.javac.parser;
 
 import java.util.*;
 
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.util.*;
@@ -2934,6 +2935,30 @@ public class JavacParser implements Parser {
         return mods;
     }
 
+    /**
+     * Need to create a new array level at the most inner level of the array
+     * tree, but return the reference of the top array or type
+     */
+    private JCExpression insertNewArrayLevel(JCExpression type, List<JCTypeAnnotation> varargs) {
+        JCExpression mostInnerType = type;
+        JCArrayTypeTree mostInnerArrayType = null;
+        while (TreeInfo.typeIn(mostInnerType).getKind() == Tree.Kind.ARRAY_TYPE) {
+            mostInnerArrayType = (JCArrayTypeTree)TreeInfo.typeIn(mostInnerType);
+            mostInnerType = mostInnerArrayType.elemtype;
+        }
+
+        mostInnerType = F.at(S.pos()).TypeArray(mostInnerType);
+        if (varargs != null && varargs.nonEmpty())
+            mostInnerType = F.at(S.pos()).AnnotatedType(varargs, mostInnerType);
+
+        if (mostInnerArrayType == null) {
+            return to(mostInnerType);
+        } else {
+            mostInnerArrayType.elemtype = mostInnerType;
+            return to(type);
+        }
+    }
+
     /** FormalParameter = { FINAL | '@' Annotation } Type VariableDeclaratorId
      *  LastFormalParameter = { FINAL | '@' Annotation } Type '...' Ident | FormalParameter
      */
@@ -2951,9 +2976,7 @@ public class JavacParser implements Parser {
             checkVarargs();
             mods.flags |= Flags.VARARGS;
             // insert var arg type annotations
-            if (varargsAnnos != null && varargsAnnos.nonEmpty())
-                type = F.at(S.pos()).AnnotatedType(varargsAnnos, type);
-            type = to(F.at(S.pos()).TypeArray(type));
+            type = insertNewArrayLevel(type, varargsAnnos);
 
             S.nextToken();
         } else {
