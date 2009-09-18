@@ -988,7 +988,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            annotate.laterOnDone(typeAnnotations.annotator(tree));
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
         }
     }

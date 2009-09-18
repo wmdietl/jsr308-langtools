@@ -81,14 +81,14 @@ public class Annotate {
     private int enterCount = 0;
 
     ListBuffer<Annotator> q = new ListBuffer<Annotator>();
-    ListBuffer<Annotator> doneQ = new ListBuffer<Annotator>();
+    ListBuffer<Annotator> flushQ = new ListBuffer<Annotator>();
 
     public void later(Annotator a) {
         q.append(a);
     }
 
-    public void laterOnDone(Annotator a) {
-        doneQ.append(a);
+    public void laterOnFlush(Annotator a) {
+        flushQ.append(a);
     }
 
     public void earlier(Annotator a) {
@@ -104,8 +104,6 @@ public class Annotate {
     public void enterDone() {
         enterCount--;
         flush();
-        while (doneQ.nonEmpty())
-            doneQ.next().enterAnnotation();
     }
 
     public void flush() {
@@ -114,6 +112,8 @@ public class Annotate {
         try {
             while (q.nonEmpty())
                 q.next().enterAnnotation();
+            while (flushQ.nonEmpty())
+                flushQ.next().enterAnnotation();
         } finally {
             enterCount--;
         }
