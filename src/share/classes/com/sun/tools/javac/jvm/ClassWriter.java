@@ -975,6 +975,7 @@ public class ClassWriter extends ClassFile {
             databuf.appendChar(p.offset);
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             databuf.appendByte(p.parameter_index);
             break;
@@ -987,7 +988,9 @@ public class ClassWriter extends ClassFile {
             databuf.appendByte(p.type_index);
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:

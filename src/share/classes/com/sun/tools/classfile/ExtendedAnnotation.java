@@ -134,6 +134,7 @@ public class ExtendedAnnotation {
             position.offset = cr.readUnsignedShort();
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             position.parameter_index = cr.readUnsignedByte();
             break;
@@ -146,7 +147,9 @@ public class ExtendedAnnotation {
             position.type_index = cr.readUnsignedByte();
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
@@ -224,6 +227,7 @@ public class ExtendedAnnotation {
             n += 1; // offset
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             n += 1; // parameter_index
             break;
@@ -236,7 +240,9 @@ public class ExtendedAnnotation {
             n += 1; // type index
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
@@ -357,6 +363,7 @@ public class ExtendedAnnotation {
                 sb.append(offset);
                 break;
             // method parameter: not specified
+            case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
@@ -372,7 +379,9 @@ public class ExtendedAnnotation {
                 sb.append(type_index);
                 break;
             // We don't need to worry abut these
+            case METHOD_RETURN:
             case METHOD_RETURN_GENERIC_OR_ARRAY:
+            case FIELD:
             case FIELD_GENERIC_OR_ARRAY:
                 break;
             case UNKNOWN:
@@ -430,8 +439,8 @@ public class ExtendedAnnotation {
         /** For annotations on a type argument or nested array of a local. */
         LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation),
 
-        // already handled by regular annotations
-        // METHOD_RETURN(0x0A),
+        /** For type annotations on a method return */
+        METHOD_RETURN(0x0A),
 
         /**
          * For annotations on a type argument or nested array of a method return
@@ -439,14 +448,14 @@ public class ExtendedAnnotation {
          */
         METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
 
-        // already handled by regular annotations
-        // METHOD_PARAMETER(0x0C),
+        /** For type annotations on a type parameter */
+        METHOD_PARAMETER(0x0C),
 
         /** For annotations on a type argument or nested array of a method parameter. */
         METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
 
-        // already handled by regular annotations
-        // FIELD(0x0E),
+        /** For type annotations on a field */
+        FIELD(0x0E),
 
         /** For annotations on a type argument or nested array of a field. */
         FIELD_GENERIC_OR_ARRAY(0x0F, HasLocation),
