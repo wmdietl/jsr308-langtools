@@ -606,12 +606,17 @@ public class TypeAnnotations {
             case DECLARATION:
                 declAnnos.append(a);
                 break;
-            case BOTH:
+            case BOTH: {
                 declAnnos.append(a);
-                // fall-through
-            case TYPE:
                 TypeCompound ta = toTypeCompound(a, pos);
                 typeAnnos.append(ta);
+                break;
+            }
+            case TYPE: {
+                TypeCompound ta = toTypeCompound(a, pos);
+                typeAnnos.append(ta);
+                break;
+            }
             }
         }
 
@@ -619,7 +624,7 @@ public class TypeAnnotations {
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
         Type atype = typeWithAnnotations(type, typeAnnotations);
         if (sym.getKind() == ElementKind.METHOD) {
-            ((MethodType)sym.type).restype = atype;
+            sym.type.asMethodType().restype = atype;
         } else
             sym.type = atype;
 
