@@ -726,7 +726,7 @@ public class Attr extends JCTree.Visitor {
                 attribStat(tree.body, localEnv);
             }
             localEnv.info.scope.leave();
-            ((MethodType)m.type).receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
+            //((MethodType)m.type).receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
         }
@@ -2599,7 +2599,7 @@ public class Attr extends JCTree.Visitor {
 
     public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar a = (TypeVar)tree.type;
-        a.typeAnnotations = fromAnnotations(tree.annotations);
+        //a.typeAnnotations = fromAnnotations(tree.annotations);
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())
             return;
@@ -2688,7 +2688,7 @@ public class Attr extends JCTree.Visitor {
         Type type = (Type)underlyingType.clone();
         this.attribAnnotationTypes(
                 List.convert(JCAnnotation.class, tree.annotations), env);
-        type.typeAnnotations = fromAnnotations(tree.annotations);
+        //type.typeAnnotations = fromAnnotations(tree.annotations);
         result = tree.type = type;
     }
 

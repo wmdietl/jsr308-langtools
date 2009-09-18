@@ -282,6 +282,7 @@ public class TreeTranslator extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        tree.annotations = translate(tree.annotations);
         List<List<JCTypeAnnotation>> dimAnnos = List.nil();
         for (List<JCTypeAnnotation> origDimAnnos : tree.dimAnnotations)
             dimAnnos = dimAnnos.append(translate(origDimAnnos));

@@ -631,8 +631,8 @@ public class JavacParser implements Parser {
     public JCExpression parseType(List<JCTypeAnnotation> annotations) {
         JCExpression result = unannotatedType();
 
-        if (!annotations.isEmpty())
-            result = F.AnnotatedType(annotations, result);
+        if (annotations.nonEmpty())
+            result = insertAnnotationsToMostInner(result, annotations);
 
         return result;
     }
@@ -1589,7 +1589,12 @@ public class JavacParser implements Parser {
 
             if (S.token() == LBRACE) {
                 JCNewArray na = (JCNewArray)arrayInitializer(newpos, elemtype);
-
+                if (annos.nonEmpty()) {
+                    JCAnnotatedType annotated = (JCAnnotatedType)elemtype;
+                    assert annotated.annotations == annos;
+                    na.annotations = annotated.annotations;
+                    na.elemtype = annotated.underlyingType;
+                }
                 return na;
             } else {
                 return syntaxError(S.pos(), "array.dimension.missing");
@@ -2923,6 +2928,26 @@ public class JavacParser implements Parser {
         checkNoMods(mods.flags & ~(Flags.FINAL | Flags.DEPRECATED));
         mods.flags |= flags;
         return mods;
+    }
+
+    private JCExpression insertAnnotationsToMostInner(JCExpression type, List<JCTypeAnnotation> annos) {
+        JCExpression mostInnerType = type;
+        JCArrayTypeTree mostInnerArrayType = null;
+        while (TreeInfo.typeIn(mostInnerType).getKind() == Tree.Kind.ARRAY_TYPE) {
+            mostInnerArrayType = (JCArrayTypeTree)TreeInfo.typeIn(mostInnerType);
+            mostInnerType = mostInnerArrayType.elemtype;
+        }
+
+        //mostInnerType = F.at(S.pos()).TypeArray(mostInnerType);
+        if (annos != null && annos.nonEmpty())
+            mostInnerType = F.at(S.pos()).AnnotatedType(annos, mostInnerType);
+
+        if (mostInnerArrayType == null) {
+            return to(mostInnerType);
+        } else {
+            mostInnerArrayType.elemtype = mostInnerType;
+            return to(type);
+        }
     }
 
     /**

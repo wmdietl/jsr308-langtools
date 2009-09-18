@@ -859,6 +859,7 @@ public class Pretty extends JCTree.Visitor {
         try {
             if (tree.elemtype != null) {
                 print("new ");
+                printTypeAnnotations(tree.annotations);
                 JCTree elem = tree.elemtype;
                 printBaseElementType(elem);
                 boolean isElemAnnoType = elem instanceof JCAnnotatedType;

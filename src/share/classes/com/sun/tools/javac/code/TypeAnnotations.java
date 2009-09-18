@@ -382,6 +382,7 @@ public class TypeAnnotations {
 
         @Override
         public void visitNewArray(JCNewArray tree) {
+            findPosition(tree, tree, tree.annotations);
             int dimAnnosCount = tree.dimAnnotations.size();
 
             // handle annotations associated with dimentions
