@@ -2107,12 +2107,22 @@ public class Types {
                 return new MethodType(argtypes, restype, thrown, t.tsym);
         }
 
+        private boolean equalTypes(Type t1, Type t2) {
+            if (t1 == t2)
+                return true;
+
+            if ((t1 instanceof TypeVar) && (t2 instanceof TypeVar))
+                return t1.tsym == t2.tsym;
+
+            return false;
+        }
+
         @Override
         public Type visitTypeVar(TypeVar t, Void ignored) {
             for (List<Type> from = this.from, to = this.to;
                  from.nonEmpty();
                  from = from.tail, to = to.tail) {
-                if (t == from.head) {
+                if (equalTypes(t, from.head)) {
                     return to.head.withTypeVar(t);
                 }
             }
