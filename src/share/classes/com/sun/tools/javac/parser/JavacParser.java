@@ -1047,7 +1047,7 @@ public class JavacParser implements Parser {
                 }
             } else {
                 // type annotation targeting a cast
-                t = toP(F.at(S.pos()).AnnotatedType(typeAnnos, expr));
+                t = insertAnnotationsToMostInner(expr, typeAnnos);
             }
             break;
         case IDENTIFIER: case ASSERT: case ENUM:
