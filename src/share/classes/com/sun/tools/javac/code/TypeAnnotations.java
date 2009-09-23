@@ -451,7 +451,6 @@ public class TypeAnnotations {
 
         void findPosition(JCTree tree, JCTree frame, List<JCTypeAnnotation> annotations) {
             if (!annotations.isEmpty()) {
-                frame.toString();
                 TypeAnnotationPosition p =
                         resolveFrame(tree, frame, frames.toList(),
                                 new TypeAnnotationPosition());
