@@ -1044,7 +1044,7 @@ public class JavacParser implements Parser {
                 if (sel.name != names._class)
                     return illegal();
                 else {
-                    sel.selected = F.AnnotatedType(typeAnnos, sel.selected);
+                    sel.selected = insertAnnotationsToMostInner(sel.selected, typeAnnos);
                     t = expr;
                 }
             } else {
@@ -1056,7 +1056,7 @@ public class JavacParser implements Parser {
             if (typeArgs != null) return illegal();
             t = toP(F.at(S.pos()).Ident(ident()));
             loop: while (true) {
-                pos = S.pos();
+//                pos = S.pos();
                 final List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
                 // need to report an error later if LBRACKET is for array
