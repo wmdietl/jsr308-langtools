@@ -254,7 +254,7 @@ public class TypeAnnotations {
                     JCFieldAccess fieldFrame = (JCFieldAccess)frame;
                     if ("class".contentEquals(fieldFrame.name)) {
                         p.type = TargetType.CLASS_LITERAL;
-                        p.pos = TreeInfo.typeIn(fieldFrame.selected).pos;
+                        p.pos = TreeInfo.innermostType(fieldFrame.selected).pos;
                     } else
                         throw new AssertionError();
                     return p;
@@ -451,6 +451,7 @@ public class TypeAnnotations {
 
         void findPosition(JCTree tree, JCTree frame, List<JCTypeAnnotation> annotations) {
             if (!annotations.isEmpty()) {
+                frame.toString();
                 TypeAnnotationPosition p =
                         resolveFrame(tree, frame, frames.toList(),
                                 new TypeAnnotationPosition());
