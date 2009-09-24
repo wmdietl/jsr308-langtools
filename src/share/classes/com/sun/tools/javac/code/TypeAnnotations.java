@@ -242,7 +242,7 @@ public class TypeAnnotations {
                         p.type = TargetType.THROWS;
                         p.type_index = frameMethod.thrown.indexOf(tree);
                     } else if (((JCMethodDecl)frame).restype == tree) {
-                        p.type = TargetType.METHOD_RETURN_GENERIC_OR_ARRAY;
+                        p.type = TargetType.METHOD_RETURN;
                     } else if (frameMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
                         p.parameter_index = frameMethod.typarams.indexOf(tree);
