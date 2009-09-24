@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for method parameters
- * @compile -g Driver.java ReferenceInfoUtil.java MethodParameters
+ * @compile -g Driver.java ReferenceInfoUtil.java MethodParameters.java
  * @run main Driver MethodParameters
  */
 public class MethodParameters {
@@ -49,7 +49,7 @@ public class MethodParameters {
         @TADescription(annotation = "TC", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }, paramIndex = 0),
         @TADescription(annotation = "TD", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }, paramIndex = 0),
+                genericLocation = { 1, 0 }, paramIndex = 0)
     })
     public String methodParamAsParametrized() {
         return "void test(@TA Map<@TB String, @TC List<@TD String>> a) { }";
@@ -60,7 +60,7 @@ public class MethodParameters {
         @TADescription(annotation = "TB", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, paramIndex = 1),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
-                genericLocation = { 1 }, paramIndex = 1),
+                genericLocation = { 1 }, paramIndex = 1)
     })
     public String methodParamAsArray() {
         return "void test(Object b, @TC String @TA [] @TB [] a) { }";
@@ -94,7 +94,7 @@ public class MethodParameters {
         @TADescription(annotation = "TC", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }, paramIndex = 0),
         @TADescription(annotation = "TD", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }, paramIndex = 0),
+                genericLocation = { 1, 0 }, paramIndex = 0)
     })
     public String interfacemethodParamAsParametrized() {
         return "interface Test { void test(@TA Map<@TB String, @TC List<@TD String>> a); }";

@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for method exception clauses
- * @compile -g Driver.java ReferenceInfoUtil.java MethodThrows
+ * @compile -g Driver.java ReferenceInfoUtil.java MethodThrows.java
  * @run main Driver MethodThrows
  */
 public class MethodThrows {

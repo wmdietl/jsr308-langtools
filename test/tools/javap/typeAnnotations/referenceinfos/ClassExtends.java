@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for class extends clauses
- * @compile -g Driver.java ReferenceInfoUtil.java ClassExtends
+ * @compile -g Driver.java ReferenceInfoUtil.java ClassExtends.java
  * @run main Driver ClassExtends
  */
 public class ClassExtends {

@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for method return
- * @compile -g Driver.java ReferenceInfoUtil.java MethodReturns
+ * @compile -g Driver.java ReferenceInfoUtil.java MethodReturns.java
  * @run main Driver MethodReturns
  */
 public class MethodReturns {
@@ -49,7 +49,7 @@ public class MethodReturns {
         @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }),
         @TADescription(annotation = "TD", type = METHOD_RETURN_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }),
+                genericLocation = { 1, 0 })
     })
     public String methodReturnAsParametrized() {
         return "@TA Map<@TB String, @TC List<@TD String>> test() { return null; }";
@@ -60,7 +60,7 @@ public class MethodReturns {
         @TADescription(annotation = "TB", type = METHOD_RETURN_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }),
         @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
-                genericLocation = { 1 }),
+                genericLocation = { 1 })
     })
     public String methodReturnAsArray() {
         return "@TC String @TA [] @TB [] test() { return null; }";
@@ -95,7 +95,7 @@ public class MethodReturns {
         @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }),
         @TADescription(annotation = "TD", type = METHOD_RETURN_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }),
+                genericLocation = { 1, 0 })
     })
     public String interfaceMethodReturnAsParametrized() {
         return "interface Test { @TA Map<@TB String, @TC List<@TD String>> test(); }";

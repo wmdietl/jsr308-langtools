@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for class type parameters
- * @compile -g Driver.java ReferenceInfoUtil.java ClassTypeParam
+ * @compile -g Driver.java ReferenceInfoUtil.java ClassTypeParam.java
  * @run main Driver ClassTypeParam
  */
 public class ClassTypeParam {
@@ -36,7 +36,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularClass() {
         return "class Test<@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> { }";
@@ -48,7 +48,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
-        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
+        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularClassParameterized() {
         return "class Test<K extends @TA Map<String, @TB String>, V extends @TF Object& @TC List<@TD List<@TE Object>>> { }";
@@ -59,7 +59,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String abstractClass() {
         return "abstract class Test<@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> { }";
@@ -71,7 +71,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
-        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
+        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String abstractClassParameterized() {
         return "abstract class Test<K extends @TA Map<String, @TB String>, V extends @TF Object& @TC List<@TD List<@TE Object>>> { }";
@@ -82,7 +82,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularInterface() {
         return "interface Test<@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> { }";
@@ -94,7 +94,7 @@ public class ClassTypeParam {
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
-        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
+        @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularInterfaceParameterized() {
         return "interface Test<K extends @TA Map<String, @TB String>, V extends @TF Object& @TC List<@TD List<@TE Object>>> { }";

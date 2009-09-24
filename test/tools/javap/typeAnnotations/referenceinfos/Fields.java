@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for field
- * @compile -g Driver.java ReferenceInfoUtil.java Fields
+ * @compile -g Driver.java ReferenceInfoUtil.java Fields.java
  * @run main Driver Fields
  */
 public class Fields {
@@ -49,7 +49,7 @@ public class Fields {
         @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }),
         @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }),
+                genericLocation = { 1, 0 })
     })
     public String fieldAsParametrized() {
         return "@TA Map<@TB String, @TC List<@TD String>> test;";
@@ -60,7 +60,7 @@ public class Fields {
         @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }),
         @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
-                genericLocation = { 1 }),
+                genericLocation = { 1 })
     })
     public String fieldAsArray() {
         return "@TC String @TA [] @TB [] test;";
@@ -94,7 +94,7 @@ public class Fields {
         @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }),
         @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }),
+                genericLocation = { 1, 0 })
     })
     public String interfacefieldAsParametrized() {
         return "interface Test { @TA Map<@TB String, @TC List<@TD String>> test = null; }";
@@ -108,7 +108,7 @@ public class Fields {
         @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
                 genericLocation = { 1 }),
         @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
-                genericLocation = { 1, 0 }),
+                genericLocation = { 1, 0 })
     })
     public String staticFieldAsParametrized() {
         return "static @TA Map<@TB String, @TC List<@TD String>> test;";

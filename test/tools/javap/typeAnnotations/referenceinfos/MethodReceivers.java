@@ -26,7 +26,7 @@ import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
 /*
  * @test
  * @summary Test population of reference info for method receivers
- * @compile -g Driver.java ReferenceInfoUtil.java MethodReceivers
+ * @compile -g Driver.java ReferenceInfoUtil.java MethodReceivers.java
  * @run main Driver MethodReceivers
  */
 public class MethodReceivers {
