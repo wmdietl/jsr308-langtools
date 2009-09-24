@@ -123,7 +123,10 @@ public class ExtendedAnnotation {
          // Class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-            position.type_index = cr.readUnsignedByte();
+            int in = cr.readUnsignedByte();
+            if (in == 0xFF)
+                in = -1;
+            position.type_index = in;
             break;
         // throws
         case THROWS:
