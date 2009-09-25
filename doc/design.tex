@@ -816,6 +816,11 @@ When the annotation's target is a method receiver (or an inner class
 constructor receiver), \code{reference\_info}
 is empty.
 
+% A motivation for generic annotations on the receiver is the annotation on
+% toArray, which (in the nullness case) should be:
+%   public @Polynull java.lang.Object [] toArray() ArrayList<@PolyNull E> { ... }
+
+
 \subsubsection{Type Arguments on method return type and fields\label{class-file:ext:ri:return}}
 
 When the annotation's target is a type argument of a method return type, a
@@ -2320,10 +2325,10 @@ have no difficulty in understanding what a given annotation means.
 
 
 % Alternative syntaxes for receiver annotations:
-%  new syntactic location
-%  @ReceiverNonNull
-%  @ @NonNull Receiver   <-- this is legal!
-%  @Receiver(@NonNull)
+%  new syntactic location <-- our choice
+%  @ReceiverNonNull      <-- it's ugly to duplicate every annotation definition
+%  @ @NonNull Receiver   <-- this is legal (!), but ugly & maybe shouldn't be legal
+%  @Receiver(@NonNull)   <-- this requires arbitrary annotations as arguments to annotations
 
 
 
