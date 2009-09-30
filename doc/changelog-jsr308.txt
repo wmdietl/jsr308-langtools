@@ -1,3 +1,17 @@
+Version 1.0.0, 30 Sep 2009
+
+Functionality
+  Separated type annotations from declaration annotations
+    when targetting method return/parameter and field types
+
+Bug fixes
+  javap: Fixed crash related to class literal arrays annotations
+  javac: emit class literal array annotations to classfile
+
+Base build
+  Updated to OpenJDK langtools build b72
+
+----------------------------------------------------------------------
 Version 0.9.9, 4 Sep 2009
 
 Base build
