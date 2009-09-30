@@ -1,5 +1,6 @@
+
 /*
- * Copyright 2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2003-2009 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,43 +24,47 @@
  * have any questions.
  */
 
-package com.sun.javadoc;
-
+package java.lang.annotation;
 
 /**
- * Represents a type variable.
- * For example, the generic interface {@code List<E>} has a single
- * type variable {@code E}.
- * A type variable may have explicit bounds, as in
- * {@code C<R extends Remote>}.
+ * A program element type.  The constants of this enumerated type
+ * provide a simple classification of the declared elements in a
+ * Java program.
  *
- * @author Scott Seligman
+ * <p>These constants are used with the {@link Target} meta-annotation type
+ * to specify where it is legal to use an annotation type.
+ *
+ * @author  Joshua Bloch
  * @since 1.5
  */
-public interface TypeVariable extends Type {
+public enum ElementType {
+    /** Class, interface (including annotation type), or enum declaration */
+    TYPE,
 
-    /**
-     * Return the bounds of this type variable.
-     * These are the types given by the <i>extends</i> clause.
-     * Return an empty array if there are no explicit bounds.
-     *
-     * @return the bounds of this type variable.
-     */
-    Type[] bounds();
+    /** Field declaration (includes enum constants) */
+    FIELD,
 
-    /**
-     * Return the class, interface, method, or constructor within
-     * which this type variable is declared.
-     *
-     * @return the class, interface, method, or constructor within
-     *         which this type variable is declared.
-     */
-    ProgramElementDoc owner();
+    /** Method declaration */
+    METHOD,
 
-    /**
-     * Get the annotations of this program element.
-     * Return an empty array if there are none.
-     */
-    public AnnotationDesc[] annotations();
+    /** Parameter declaration */
+    PARAMETER,
 
+    /** Constructor declaration */
+    CONSTRUCTOR,
+
+    /** Local variable declaration */
+    LOCAL_VARIABLE,
+
+    /** Annotation type declaration */
+    ANNOTATION_TYPE,
+
+    /** Package declaration */
+    PACKAGE,
+
+    /** Uses of a type */
+    TYPE_USE,
+
+    /** type parameters */
+    TYPE_PARAMETER
 }
