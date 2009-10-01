@@ -988,16 +988,40 @@ typecast), {\em plus} the following fields at the end:
     u1 location[location_length];
 \end{Verbatim}
 
-The \code{location\_length} field specifies the number of elements in
-the variable-length \code{location} field. \code{location} encodes
-which type argument or array element the annotation targets.
-Specifically, the $i$th item in \code{location} denotes the index of
-the type argument or array dimension at the $i$th level of the
-hierarchy.  Figure~\ref{tbl:locations} shows the values of the
+A type can be viewed as a tree, where each node is a type and its children
+are the type arguments in case of parameterized.  The \code{location} field
+encodes the path to the annotation from the raw type.  Specifically,
+the $i$th item in \code{location} denotes the child index at the $i$th level.
+The \code{location\_length} field is the length of the \code{location} field,
+which is the depth of the tree.
+
+For example, the type \code{Map<@B String, @C List<@D String>>} can be
+viewed as the following tree:
+
+\begin{Verbatim}
+    @A Map
+       \- @B String
+       \- @C List
+             \- @D String
+\end{Verbatim}
+
+Thus the annotations will have the following values:
+
+\begin{center}
+\begin{tabular}{|l|c|c|}
+\hline
+\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
+\code{@A}       & \multicolumn{2}{c|}{not applicable} \\
+\code{@B}       & 1     & 0 \\
+\code{@C}       & 1     & 1 \\
+\code{@D}       & 2     & 1, 0 \\
+\hline
+\end{tabular}
+\end{center}
+
+Figure~\ref{tbl:locations} shows the values of the
 \code{location\_length} and \code{location} fields for the annotations
-in a sample field declaration.
-
-
+in another sample field declaration.
 
 % Mahmood says:  By the way, the compiler fails when parsing such types.
 TODO:  The specification does not indicate how to differentiate \code{@A} and
@@ -1192,7 +1216,7 @@ annotation), equality-checking errors (via a \code{@Interned} annotation),
 mutation errors (via the Javari~\cite{BirkaE2004,TschantzE2005} type
 system), and mutation errors (via the IGJ~\cite{ZibinPAAKE2007} type
 system).  A paper~\cite{PapiACPE2008} discusses experience
-in which these plug-ins exposed bugs in real programs.
+in which these plug-ins exposed bugs in real programmers.
 
 
 \subsection{Examples of type qualifiers\label{type-qualifier-examples}}
