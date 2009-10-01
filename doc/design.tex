@@ -467,7 +467,7 @@ trust annotated classes of unknown provenance~\cite{BurdyHP2007}.
 \paragraph{How Java SE 6 stores annotations in the class file}
 
 % Class files already store annotations in the form of
-% ``attributes''.    
+% ``attributes''.
 
 In Java SE 6, an annotation is stored in the class file in an
 \emph{attribute}~\cite{JSR175,LindholmY99:CFF5}.  An attribute 
@@ -617,12 +617,12 @@ every possible annotation location.
 %% so whenever that is updated, this table should be as well.
 method receiver                                 & \code{0x06} & \S\ref{class-file:ext:ri:receiver} \\
 method receiver generic/array                   & \code{0x07}\rlunused & Future extension to JSR 308 \\ % +\S\ref{class-file:ext:ri:typearg}
-method return type                              & \code{0x0A}\rlunused & use \RuntimeInOrVisibleAnnotations \\
-method return type generic/array                & \code{0x0B} & \S\ref{class-file:ext:ri:return} \\
-method parameter                                & \code{0x0C}\rlunused & use \RuntimeInOrVisibleParameterAnnotations \\
-method parameter generic/array                  & \code{0x0D} & \S\ref{class-file:ext:ri:parameters} \\
-field                                           & \code{0x0E}\rlunused & use \RuntimeInOrVisibleAnnotations \\
-field generic/array                             & \code{0x0F} & \S\ref{class-file:ext:ri:return}\\
+method return type                              & \code{0x0A} & \S\ref{class-file:ext:ri:return} \\
+method return type generic/array                & \code{0x0B} & +\S\ref{class-file:ext:ri:typearg} \\
+method parameter                                & \code{0x0C} & \S\ref{class-file:ext:ri:parameters} \\
+method parameter generic/array                  & \code{0x0D} & +\S\ref{class-file:ext:ri:typearg} \\
+field                                           & \code{0x0E} & \S\ref{class-file:ext:ri:return} \\
+field generic/array                             & \code{0x0F} & +\S\ref{class-file:ext:ri:typearg} \\
 class type parameter bound                      & \code{0x10} & \S\ref{class-file:ext:ri:tpbound} \\
 class type parameter bound generic/array        & \code{0x11} & +\S\ref{class-file:ext:ri:typearg} \\
 method type parameter bound                     & \code{0x12} & \S\ref{class-file:ext:ri:tpbound} \\
@@ -794,21 +794,17 @@ variables.  Further, a local variable with no live range may not appear in
 the class file (but it is also irrelevant to the program).
 
 
-\subsubsection{Type Arguments on Method Parameters\label{class-file:ext:ri:parameters}}
+\subsubsection{Method Parameters\label{class-file:ext:ri:parameters}}
 
-When the annotation's target is a method parameter, \code{reference\_info}
-indicates which of the method's formal parameters is being annotated:
+When the type annotation's target is a method parameter,
+\code{reference\_info} indicates which of the method's formal
+parameters is being annotated:
 
 \begin{Verbatim}
     {
         u1 parameter_index;
-        u2 location_length;
-        u1 location[location_length];
     } reference_info;
 \end{Verbatim}
-
-The \code{location\_length} and \code{location} fields are as in
-Section~\ref{class-file:ext:ri:typearg}.
 
 \subsubsection{Method Receivers\label{class-file:ext:ri:receiver}}
 
@@ -821,22 +817,13 @@ is empty.
 %   public @Polynull java.lang.Object [] toArray() ArrayList<@PolyNull E> { ... }
 
 
-\subsubsection{Type Arguments on method return type and fields\label{class-file:ext:ri:return}}
+\subsubsection{Method return type and fields\label{class-file:ext:ri:return}}
 
-When the annotation's target is a type argument of a method return type, a
-constructor result, or a field,
-\code{reference\_info} has the following structure:
+When the type annotation's target is a method return type, a constructor
+result, or a field, \code{reference\_info} is empty.
 
-\begin{Verbatim}
-    {
-        u2 location_length;
-        u1 location[location_length];
-    } reference_info;
-\end{Verbatim}
-
-The \code{location\_length} and \code{location} fields are as in
-Section~\ref{class-file:ext:ri:typearg}.
-
+Section~\ref{class-file:ext:ri:typearg} describes the \code{reference\_info}
+if the target is a type argument.
 
 \subsubsection{Type Parameters\label{class-file:ext:ri:mtp}}
 
