@@ -9,6 +9,11 @@
 
 <h1>Changelog for type annotations (JSR 308)</h1>
 
+<!--
+ This file lists changes made to the SPECIFICATION.
+ For changes to the IMPLEMENTATION, see file changelog-jsr308.txt.
+-->
+
 <p>
 This webpage lists changes made to the specification
 for <a href="../">Type annotations (JSR 308)</a>.
@@ -22,6 +27,33 @@ current version of the specification
 
 <!-- See Makefile for documentation of how to compute a new changelog entry.
 -->
+
+  <dt><a href="java-annotation-design-20091001.html">1 October 2009</a></dt>
+  <dd>
+    Changes to normative section:
+    <ul>
+      <li>
+	Use terminology 'declaration annotation' for old Java SE 5/6
+        annotations.
+      </li>
+      <li>
+	New behavior for annotations with no @Target meta-annotation: they
+	are treated as declaration annotation, compatibly with the current
+	behavior of Java SE 6.
+      </li>
+      <li>
+        In classfile, put declaration annotations and type annotations in
+        different places.
+      </li>
+      <li>
+        Better specification of array locations, which were only specified
+        by example before.
+      </li>
+      <li>
+        Specify how to annotate LDC bytecode in classfile
+      </li>
+    </ul>
+  </dd>    
 
   <dt><a href="java-annotation-design-20090904.html">4 September 2009</a></dt>
   <dd>
@@ -635,5 +667,5 @@ current version of the specification
  -->
 <!--  LocalWords:  Refactor ValueMember SingleElementAnnotation nullness Niko
  -->
-<!--  LocalWords:  Matsakis Aldrich
+<!--  LocalWords:  Matsakis Aldrich multi
  -->
