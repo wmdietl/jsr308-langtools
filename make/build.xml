@@ -125,6 +125,7 @@
 
     <target name="jtreg" depends="build-all-tools,-def-jtreg">
         <jtreg-tool name="all" tests="${jtreg.tests}"/>
+        <fail unless="jtreg.passed" />
     </target>
 
     <target name="findbugs" depends="-def-findbugs,build-all-tools">
