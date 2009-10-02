@@ -173,7 +173,8 @@ public class Driver {
         sb.append("\nimport java.lang.annotation.*;");
 
         sb.append("\n\n");
-        boolean isSnippet = !compact.contains("class")
+        boolean isSnippet = !(compact.startsWith("class")
+                              || compact.contains(" class"))
                             && !compact.contains("interface")
                             && !compact.contains("enum");
         if (isSnippet)
