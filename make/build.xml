@@ -131,7 +131,6 @@
 
     <target name="jtreg" depends="build-all-tools,-def-jtreg">
         <jtreg-tool name="all" tests="${jtreg.tests}"/>
-        <fail unless="jtreg.passed" />
     </target>
 
     <target name="findbugs" depends="-def-findbugs,build-all-tools">
@@ -218,7 +217,6 @@
     <target name="jtreg-jsr308" depends="build-javac,build-javap,-def-jtreg">
       <jtreg-tool name="jsr308" samevm="true"
                   tests="${javac.tests}/typeAnnotations ${javap.tests}/typeAnnotations"/>
-      <fail unless="jtreg.passed" />
     </target>
 
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">

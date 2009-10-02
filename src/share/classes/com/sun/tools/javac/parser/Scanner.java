@@ -189,13 +189,16 @@ public class Scanner implements Lexer {
 
     /** Common code for constructors. */
     private Scanner(Factory fac) {
-        this.log = fac.log;
-        this.names = fac.names;
-        this.keywords = fac.keywords;
-        this.allowHexFloats = fac.source.allowHexFloats();
-        this.annotationsincomments = fac.annotationsincomments;
-        this.spacesincomments = fac.spacesincomments;
-        this.debugJSR308 = fac.debugJSR308;
+        log = fac.log;
+        names = fac.names;
+        keywords = fac.keywords;
+        source = fac.source;
+        allowBinaryLiterals = source.allowBinaryLiterals();
+        allowHexFloats = source.allowHexFloats();
+        allowUnderscoresInLiterals = source.allowBinaryLiterals();
+        annotationsincomments = fac.annotationsincomments;
+        spacesincomments = fac.spacesincomments;
+        debugJSR308 = fac.debugJSR308;
     }
 
     private static final boolean hexFloatsWork = hexFloatsWork();

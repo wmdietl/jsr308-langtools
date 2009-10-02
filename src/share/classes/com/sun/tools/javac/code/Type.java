@@ -954,7 +954,7 @@ public class Type implements PrimitiveType, Cloneable {
         }
 
         public Type getUpperBound() {
-            if (bound == null)
+            if (bound == null && this != tsym.type)
                 bound = tsym.type.getUpperBound();
             return bound;
         }
