@@ -8,6 +8,9 @@ INV ?= /homes/gws/mernst/research/invariants
 
 local: design.pdf design.html type-quals.pdf type-quals.html validate
 
+figures-all:
+	${MAKE} -C figures all
+
 html: design.html type-quals.html
 
 # Check HTML
@@ -56,6 +59,7 @@ checklinks:
 ###########################################################################
 
 design.dvi: design.tex
+	$(MAKE) -C figures
 	latex $<
 	bibtex $(basename $<)
 	perl -pi -e 's/%\n//' design.bbl
@@ -69,9 +73,13 @@ design.pdf: design.tex design.dvi
 
 design.html: design.tex design.dvi design.bbl
 # First, generate the .haux file, for use by table of contents.
-	hevea -fix -exec xxdate.exe urlhref.hva design.tex
+	hevea -exec xxdate.exe urlhref.hva design.tex
+	hevea -exec xxdate.exe urlhref.hva design.tex
 # Then, use the .aux file in preference, but using data from .haux when necessary for the table of contents.
 	hevea -exec xxdate.exe urlhref.hva design.tex
+# Work around bug in generated file; would have been nicer to use "hevea -fix ..."
+	perl -pi -e 's/.*(sout|rlap).*//g' design.image.tex
+	imagen design
 	mv design.html design.html-with-htoc
 	retarget-hevea-crossrefs < design.html-with-htoc > design.html
 	rm -rf design.html-with-htoc
@@ -90,7 +98,7 @@ ${jsr308_spec}/java-annotation-design.pdf: design.pdf
 	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/java-annotation-design.html: design.html
-	\cp -f $< $@
+	\cp -f $< design001.png $@
 	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
 
 ###########################################################################

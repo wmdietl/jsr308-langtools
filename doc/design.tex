@@ -1,6 +1,8 @@
 \documentclass[10pt]{article}
+\usepackage{pslatex}
 \usepackage{fancyvrb}
 \usepackage{fullpage}
+\usepackage{graphicx}
 \usepackage{relsize}
 \usepackage{url}
 \usepackage{xspace}
@@ -10,8 +12,8 @@
 
 \title{Type Annotations Specification (JSR 308)}
 \author{Michael D. Ernst \\
-{\ttfamily mernst@cs.washington.edu} \\
-\today
+{\ttfamily mernst@cs.washington.edu}
+%HEVEA \\ \today
 }
 
 % At least 80% of every float page must be taken up by
@@ -493,7 +495,7 @@ Annotations on a class are stored as attributes of the class's
 \code{attributes} structure~\cite[\S 4.2]{LindholmY99:CFF5}.
 
 Generic type information is stored in a different way in the class file, in
-a signature attribute.  It details are not germane to the current
+a signature attribute.  Its details are not germane to the current
 discussion.
 
 
@@ -513,7 +515,7 @@ Section~\ref{class-file:ext}.
 % one for class/field/method and one for formal parameters, so we don't do
 % so.
 
-An annotation is stored in a \RuntimeInOrVisibleTypeAnnotations attribute
+A type annotation is stored in a \RuntimeInOrVisibleTypeAnnotations attribute
 on the smallest enclosing class, field, or method.
 
 Type annotations targeting declaration types (e.g. field, method return type)
@@ -524,7 +526,7 @@ annotations.
 \paragraph{Backward compatibility}
 For backward compatibility, JSR 308 uses new attributes for storing
 the type annotations.  In other words, JSR 308 merely reserves the
-names of a few attributes and specifies their layout.
+names of a few new attributes and specifies their layout.
 JVMs ignore unknown
 attributes.
 JSR 308 does
@@ -541,7 +543,7 @@ Furthermore, the bytecode array will be identical between two programs that
 differ only in their annotations.
 Attributes have no effect on the bytecode array, because they exist outside
 it; however, they can represent properties of it by referring to the
-bytecode (including specific instructions, or bytecode offsets).
+bytecode (including referring to specific instructions, or bytecode offsets).
 
 
 \paragraph{To do}
@@ -620,42 +622,42 @@ every possible annotation location.
 %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
 %% so whenever that is updated, this table should be as well.
 method receiver                                 & \code{0x06} & \S\ref{class-file:ext:ri:receiver} \\
-method receiver generic/array                   & \code{0x07}\rlunused & Future extension to JSR 308 \\ % +\S\ref{class-file:ext:ri:typearg}
+~~~~\ldots type argument or array element type  & \code{0x07}\rlunused & Future extension to JSR 308 \\ % +\S\ref{class-file:ext:ri:typearg}
 method return type                              & \code{0x0A} & \S\ref{class-file:ext:ri:return} \\
-method return type generic/array                & \code{0x0B} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x0B} & +\S\ref{class-file:ext:ri:typearg} \\
 method parameter                                & \code{0x0C} & \S\ref{class-file:ext:ri:parameters} \\
-method parameter generic/array                  & \code{0x0D} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x0D} & +\S\ref{class-file:ext:ri:typearg} \\
 field                                           & \code{0x0E} & \S\ref{class-file:ext:ri:return} \\
-field generic/array                             & \code{0x0F} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x0F} & +\S\ref{class-file:ext:ri:typearg} \\
 class type parameter bound                      & \code{0x10} & \S\ref{class-file:ext:ri:tpbound} \\
-class type parameter bound generic/array        & \code{0x11} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x11} & +\S\ref{class-file:ext:ri:typearg} \\
 method type parameter bound                     & \code{0x12} & \S\ref{class-file:ext:ri:tpbound} \\
-method type parameter bound generic/array       & \code{0x13} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x13} & +\S\ref{class-file:ext:ri:typearg} \\
 class \code{extends}/\code{implements}          & \code{0x14} & \S\ref{class-file:ext:ri:extends} \\
-class \code{extends}/\code{implements} generic/array  & \code{0x15} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x15} & +\S\ref{class-file:ext:ri:typearg} \\
 exception type in \code{throws}                 & \code{0x16} & \S\ref{class-file:ext:ri:throws} \\
-exception type in \code{throws} generic/array   & \code{0x17}\rlunused & forbidden by Java \\
+~~~~\ldots type argument or array element type  & \code{0x17}\rlunused & forbidden by Java \\
 wildcard bound                                  & \code{0x1C} & \S\ref{class-file:ext:ri:wildcard} \\
-wildcard bound generic/array                    & \code{0x1D} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x1D} & +\S\ref{class-file:ext:ri:typearg} \\
 method type parameter                           & \code{0x20} & \S\ref{class-file:ext:ri:mtp} \\
-method type parameter generic/array             & \code{0x21}\rlunused & Java does not support \\
+~~~~\ldots type argument or array element type  & \code{0x21}\rlunused & Java does not support \\
 class type parameter                            & \code{0x22} & \S\ref{class-file:ext:ri:mtp} \\
-class type parameter generic/array              & \code{0x23}\rlunused & Java does not support \\
+~~~~\ldots type argument or array element type  & \code{0x23}\rlunused & Java does not support \\
 \hline
 typecast                                        & \code{0x00} & \S\ref{class-file:ext:ri:typecast} \\
-typecast generic/array                          & \code{0x01} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x01} & +\S\ref{class-file:ext:ri:typearg} \\
 type test (\code{instanceof})                   & \code{0x02} & \S\ref{class-file:ext:ri:typecast} \\
-type test (\code{instanceof}) generic/array     & \code{0x03} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x03} & +\S\ref{class-file:ext:ri:typearg} \\
 object creation (\code{new})                    & \code{0x04} & \S\ref{class-file:ext:ri:typecast} \\
-object creation (\code{new}) generic/array      & \code{0x05} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x05} & +\S\ref{class-file:ext:ri:typearg} \\
 local variable                                  & \code{0x08} & \S\ref{class-file:ext:ri:localvar} \\
-local variable generic/array                    & \code{0x09} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x09} & +\S\ref{class-file:ext:ri:typearg} \\
 type argument in constructor call               & \code{0x18} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in constructor call generic/array & \code{0x19} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x19} & +\S\ref{class-file:ext:ri:typearg} \\
 type argument in method call                    & \code{0x1A} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in method call generic/array      & \code{0x1B} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x1B} & +\S\ref{class-file:ext:ri:typearg} \\
 class literal                                   & \code{0x1E} & \S\ref{class-file:ext:ri:typecast} \\
-class literal generic/array                     & \code{0x1F} & +\S\ref{class-file:ext:ri:typearg} \\
+~~~~\ldots type argument or array element type  & \code{0x1F} & +\S\ref{class-file:ext:ri:typearg} \\
 
 \hline
 \end{tabular}
@@ -710,11 +712,11 @@ of the \code{reference\_info} is determined by the value of
 
 
 
-\subsubsection{Typecasts, type tests, object creation and class literal\label{class-file:ext:ri:typecast}}
+\subsubsection{Typecasts, type tests, object creation, and class literals\label{class-file:ext:ri:typecast}}
 
-When the annotation's target is a typecast, an \code{instanceof} expression, a \code{new} expression, or a class literal expression
-\code{reference\_info} has
-the following structure:
+When the annotation's target is a typecast, an \code{instanceof}
+expression, a \code{new} expression, or a class literal expression,
+\code{reference\_info} has the following structure:
 
 \begin{Verbatim}
     {
@@ -725,20 +727,20 @@ the following structure:
 The \code{offset} field denotes the offset (i.e., within the bytecodes
 of the containing method) of the \code{checkcast} bytecode emitted for
 the typecast, the \code{instanceof} bytecode emitted for the type tests,
-the \code{new} bytecode emitted for the object creation expression, or
-the \code{ldc(\_w)} bytecode emitted for class literals (or the
-\code{getstatic} bytecode emitted for primitive class literals).
+the \code{new} bytecode emitted for the object creation expression,
+the \code{ldc(\_w)} bytecode emitted for class literals, or the
+\code{getstatic} bytecode emitted for primitive class literals.
 Typecast annotations are attached to a single bytecode, not a bytecode range
 (or ranges):  the annotation provides information about the type of a
 single value, not about the behavior of a code block.
-A similar explanation applies to type tests and object creation.
+A similar explanation applies to type tests, object creation, and class literals.
 
 For annotated typecasts, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
 this is that the Java compiler is permitted to omit \code{checkcast}
 bytecodes for typecasts that are guaranteed to be no-ops.  For example, a
 cast from \code{String} to \code{@NonNull String} may be a no-op for the
-underlying Java type system (which sees a cast from \code{String}
+underlying Java type system (which sees a cast from \code{String} to
 \code{String}).  If the compiler omits the \code{checkcast} bytecode, the
 \code{@NonNull} attribute would be attached to the (last) bytecode that
 creates the target expression instead.  This approach permits code
@@ -746,8 +748,7 @@ generation for existing compilers to be unaffected.
 
 
 
-See Section~\ref{class-file:ext:ri:typearg}
-for handling of generic
+See Section~\ref{class-file:ext:ri:typearg} for handling of generic
 type arguments and arrays.
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
@@ -767,7 +768,7 @@ type arguments and arrays.
 % un-annotated type casts.
 
 
-\subsubsection{Local Variables\label{class-file:ext:ri:localvar}}
+\subsubsection{Local variables\label{class-file:ext:ri:localvar}}
 
 When the annotation's target is a local variable,
 \code{reference\_info} has the following structure:
@@ -800,7 +801,7 @@ variables.  Further, a local variable with no live range may not appear in
 the class file (but it is also irrelevant to the program).
 
 
-\subsubsection{Method Parameters\label{class-file:ext:ri:parameters}}
+\subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
 When the type annotation's target is a method parameter,
 \code{reference\_info} indicates which of the method's formal
@@ -812,7 +813,7 @@ parameters is being annotated:
     } reference_info;
 \end{Verbatim}
 
-\subsubsection{Method Receivers\label{class-file:ext:ri:receiver}}
+\subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
 
 When the annotation's target is a method receiver (or an inner class
 constructor receiver), \code{reference\_info}
@@ -831,7 +832,7 @@ result, or a field, \code{reference\_info} is empty.
 Section~\ref{class-file:ext:ri:typearg} describes the \code{reference\_info}
 if the target is a type argument.
 
-\subsubsection{Type Parameters\label{class-file:ext:ri:mtp}}
+\subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
 
 When the annotation's target is a type parameter of a class or method,
 \code{reference\_info} has the following structure:
@@ -844,7 +845,7 @@ When the annotation's target is a type parameter of a class or method,
 
 \code{param\_index} specifies the 0-based index of the type parameter.
 
-\subsubsection{Type Parameter Bounds\label{class-file:ext:ri:tpbound}}
+\subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
 
 When the annotation's target is a bound of a type parameter of a class or
 method, \code{reference\_info} has the following structure:
@@ -892,7 +893,7 @@ annotations are attached to a single bytecode, not a bytecode range.
 \code{type\_index} specifies the index of the type argument in the
 expression.
 
-\subsubsection{Class \code{extends} and \code{implements} Clauses\label{class-file:ext:ri:extends}}
+\subsubsection{Class \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
 
 When the annotation's target is a type in an \code{extends} or
 \code{implements} clause, \code{reference\_info} has the following
@@ -909,7 +910,7 @@ structure:
 type, and the value $i$ is used if the annotation is on the $i$th
 superinterface type (counting from zero).
 
-\subsubsection{\code{throws} Clauses\label{class-file:ext:ri:throws}}
+\subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
 When the annotation's target is a type in a \code{throws} clause,
 \code{reference\_info} has the following structure:
 
@@ -975,37 +976,59 @@ Here are examples:
    }
 \end{Verbatim}
 
-\subsubsection{Generic Type Arguments and Arrays\label{class-file:ext:ri:typearg}}
+\subsubsection{Type arguments and array element types\label{class-file:ext:ri:typearg}}
 
-When the annotation's target is a generic type argument or
+In a parameterized type or array, there are multiple places that an
+annotation may appear.  For example, consider the difference among:
+\code{@X Map<String, Object>},
+\code{Map<@X String, Object>}, and
+\code{Map<String, @X Object>},
+or the difference  among 
+\code{@X String [] []},
+\code{String @X [] []}, and
+\code{String [] @X []}.
+The classfile must distinguish among these locations.
+
+When the annotation's target is within a parameterized type or
 array type,
-\code{reference\_info} contains what it normally would for the raw type
+\code{reference\_info} contains what it normally would for the a raw,
+non-array type
 (e.g., \code{offset} for an annotation on a type argument in a
-typecast), {\em plus} the following fields at the end:
+typecast, see Section~\ref{class-file:ext:ri:typecast}), {\em plus} the following fields at the end:
 
 \begin{Verbatim}
     u2 location_length;
     u1 location[location_length];
 \end{Verbatim}
 
-A type can be viewed as a tree, where each node is a type and its children
-are the type arguments in case of parameterized.  The \code{location} field
-encodes the path to the annotation from the raw type.  Specifically,
+The \code{location} field is a list of numbers that encodes a path, in the
+type, to the annotation.
+
+A parameterized or array type can be viewed as a tree.  For a parameterized
+type, the children of the raw type are the type arguments.  For an array
+type, the children are the types of elements at each level; each of these
+is itself an array type (of lesser dimensions than the main type), except
+for the last one which is a non-array type.  For a 1-dimensional array,
+there is only one child, which is a non-array.
+
+, where each node is a type and its children
+are the type arguments in case of parameterized.    Specifically,
 the $i$th item in \code{location} denotes the child index at the $i$th level.
 The \code{location\_length} field is the length of the \code{location} field,
 which is the depth of the tree.
 
-For example, the type \code{Map<@B String, @C List<@D String>>} can be
-viewed as the following tree:
+For example, the parameterized types
+\code{@A Map<@B String, @C List<@D Object>>}
+and
+\code{@H String @E [] @F [] @G []}
+can be viewed as the following trees:
 
-\begin{Verbatim}
-    @A Map
-       \- @B String
-       \- @C List
-             \- @D String
-\end{Verbatim}
+\begin{center}
+\resizebox{!}{2cm}{\includegraphics{figures/type-tree}}
+\end{center}
 
-Thus the annotations will have the following values:
+\noindent
+Thus the annotations are represented in the class file as follows:
 
 \begin{center}
 \begin{tabular}{|l|c|c|}
@@ -1015,16 +1038,24 @@ Thus the annotations will have the following values:
 \code{@B}       & 1     & 0 \\
 \code{@C}       & 1     & 1 \\
 \code{@D}       & 2     & 1, 0 \\
+\code{@E}       & \multicolumn{2}{c|}{not applicable} \\
+\code{@F}       & 1     & 0 \\
+\code{@G}       & 1     & 1 \\
+\code{@H}       & 1     & 2 \\
 \hline
 \end{tabular}
 \end{center}
 
 Figure~\ref{tbl:locations} shows the values of the
-\code{location\_length} and \code{location} fields for the annotations
-in another sample field declaration.
+\code{location\_length} and \code{location} fields in an example that
+combines both parameterized and array types.
+
+Indexes start at zero.  For a parameterized type, they count from the
+left.  For an array type, they count from the first dimension.
 
 % Mahmood says:  By the way, the compiler fails when parsing such types.
-TODO:  The specification does not indicate how to differentiate \code{@A} and
+\paragraph{To do}
+The specification does not indicate how to differentiate \code{@A} and
 \code{@B} uniquely in \code{OuterClass<@A String>.InnerClass<@B String>}.
 
 
@@ -1053,7 +1084,7 @@ Declaration: \code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H
 \end{tabular}
 \end{center}
 \caption{Values of the \code{location\_length} and \code{location} fields for
-a sample declaration.\label{tbl:locations}}
+a declaration that combines parameterized and array types.\label{tbl:locations}}
 \end{figure}
 
 
@@ -3924,15 +3955,13 @@ independence~\cite{BanerjeeN2002}.
 
 
 JavaCOP~\cite{AndreaeNMM2006} is a framework for implementing pluggable
-type systems in Java.  Whereas JSR 308 uses
-standard
+type systems in Java.  Whereas JSR 308 uses standard
 interfaces such as the Tree API and the JSR 269 annotation processing
 framework, JavaCOP defines its own incompatible variants.
 A JavaCOP type checker must be programmed in a combination of Java and
-JavaCOP's own declarative pattern-matching and rule-based
-language.
-JavaCOP's authors have defined over a dozen
-type-checkers in their language.  The paper does not report that they have
+JavaCOP's own declarative pattern-matching and rule-based language.
+JavaCOP's authors have defined parts of over a dozen
+type-checkers in their language.  Their paper does not report that they have
 run any of these type-checkers on a real program; this is due to
 limitations that make JavaCOP impractical (so far) for real use.
 
@@ -3948,8 +3977,9 @@ elements of the array~\cite{MalePPD2008}.
 
 \section*{Acknowledgments}
 
-Matt Papi designed and implemented the JSR 308 compiler as modifications to
-Sun's OpenJDK javac compiler, and contributed to the JSR 308 design.
+Matt Papi and Mahmood Ali designed and implemented the JSR 308 compiler as
+modifications to Sun's OpenJDK javac compiler, and contributed to the JSR
+308 design.
 
 The members of the JSR 308 mailing list
 (\myurl{http://groups.google.com/group/jsr308-discuss}) provided
@@ -3992,6 +4022,11 @@ at the 5th annual JCP Program Awards.
 JSR 308's spec leads (Michael
 Ernst and Alex Buckley) were nominated as Most Outstanding Spec Lead for
 Java SE/EE in 2008, at the 6th annual JCP Program Awards.
+% http://java.sun.com/javaone/2009/rockstars.jsp
+Michael Ernst won a Java Rock Star award for a presentation on the Checker
+Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
+
+
 
 
 

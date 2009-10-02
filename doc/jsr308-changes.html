@@ -37,20 +37,25 @@ current version of the specification
         annotations.
       </li>
       <li>
-	New behavior for annotations with no @Target meta-annotation: they
-	are treated as declaration annotation, compatibly with the current
+	An annotation with no @Target meta-annotation is
+	treated as a declaration annotation, compatibly with the current
 	behavior of Java SE 6.
       </li>
       <li>
-        In classfile, put declaration annotations and type annotations in
-        different places.
-      </li>
-      <li>
-        Better specification of array locations, which were only specified
-        by example before.
-      </li>
-      <li>
-        Specify the reference_info for class literal annotations
+        Classfile format changes:
+        <ul>
+        <li>
+	  In classfile, put declaration annotations and type annotations in
+	  different places.
+	</li>
+	<li>
+	  Better specification of array locations, which were only specified
+	  by example before.
+	</li>
+	<li>
+	  Specify the reference_info for annotations on class literals.
+	</li>
+        </ul>
       </li>
     </ul>
   </dd>    
