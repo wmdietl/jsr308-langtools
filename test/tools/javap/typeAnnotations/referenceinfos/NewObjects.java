@@ -54,11 +54,11 @@ public class NewObjects {
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = NEW_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TC", type = NEW_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectGeneric() {
-        return "void initObjectGeneric() { Object a = new @TA HashMap<@TB String, @TC String>)null; }";
+        return "void initObjectGeneric() { Object a = new @TA HashMap<@TB String, @TC String>(); }";
     }
 
     @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE)
