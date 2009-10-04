@@ -40,9 +40,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectArray() {
-        return "Object returnObjectArray() { return @TB String @TA [].class; }";
+        return "Object returnObjectArray() { return @TC String @TA [] @TB [].class; }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)
@@ -54,9 +56,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnPrimArray() {
-        return "Object returnPrimArray() { return @TB int @TA [].class; }";
+        return "Object returnPrimArray() { return @TC int @TA [] @TB [].class; }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)
@@ -75,9 +79,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectArray() {
-        return "void initObjectArray() { Object a = @TB String @TA [].class; }";
+        return "void initObjectArray() { Object a = @TC String @TA [] @TB [].class; }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)
@@ -89,9 +95,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initPrimArray() {
-        return "void initPrimArray() { Object a = @TB int @TA [].class; }";
+        return "void initPrimArray() { Object a = @TC int @TA [] @TB [].class; }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)
@@ -110,9 +118,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectArray() {
-        return "void eqtestObjectArray() { if (null == @TB String @TA [].class); }";
+        return "void eqtestObjectArray() { if (null == @TC String @TA [] @TB [].class); }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)
@@ -124,9 +134,11 @@ public class ClassLiterals {
         @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = CLASS_LITERAL_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestPrimArray() {
-        return "void eqtestPrimArray() { if (null == @TB int @TA [].class); }";
+        return "void eqtestPrimArray() { if (null == @TC int @TA [] @TB [].class); }";
     }
 
     @TADescription(annotation = "TA", type = CLASS_LITERAL, offset = ReferenceInfoUtil.IGNORE_VALUE)

@@ -40,9 +40,11 @@ public class TypeCasts {
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = TYPECAST_GENERIC_OR_ARRAY,
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
     })
     public String returnObjectArray() {
-        return "Object returnObjectArray() { return (@TB String @TA [])null; }";
+        return "Object returnObjectArray() { return (@TC String @TA [] @TB [])null; }";
     }
 
     @TADescriptions({
