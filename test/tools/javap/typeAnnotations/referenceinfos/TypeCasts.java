@@ -41,7 +41,7 @@ public class TypeCasts {
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TC", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectArray() {
         return "Object returnObjectArray() { return (@TC String @TA [] @TB [])null; }";
@@ -50,7 +50,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectGeneric() {
         return "Object returnObjectGeneric() { return (@TA List<@TB String>)null; }";
@@ -64,7 +64,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnPrimArray() {
         return "Object returnPrimArray() { return (@TB int @TA [])null; }";
@@ -78,7 +78,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectArray() {
         return "void initObjectArray() { Object a = (@TB String @TA [])null; }";
@@ -87,7 +87,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectGeneric() {
         return "void initObjectGeneric() { Object a = (@TA List<@TB String>)null; }";
@@ -101,7 +101,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initPrimArray() {
         return "void initPrimArray() { Object a = (@TB int @TA [])null; }";
@@ -115,7 +115,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectArray() {
         return "void eqtestObjectArray() { if (null == (@TB String @TA [])null); }";
@@ -124,7 +124,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectGeneric() {
         return "void eqtestObjectGeneric() { if (null == (@TA List<@TB String >)null); }";
@@ -138,7 +138,7 @@ public class TypeCasts {
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
         @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestPrimArray() {
         return "void eqtestPrimArray() { if (null == (@TB int @TA [])null); }";
