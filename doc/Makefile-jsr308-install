@@ -55,7 +55,7 @@ JSR308_BUILD := 1.0.0
 # export MAKEFILE_DIR
 export JSR308
 
-export JDK_7_BIN := jdk-7-ea-bin-b72-linux-i586-17_sep_2009.bin
+export JDK_7_BIN := jdk-7-ea-bin-bea-linux-i586-2009.bin
 export DARWIN_TAR_BASENAME := openjdk7-darwin-i386-20080820
 export DARWIN_TAR := ${DARWIN_TAR_BASENAME}.tar.bz2
 export MAKEFILE := ${MAKEFILE_DIR}/Makefile-jsr308-install
@@ -118,7 +118,7 @@ ifeq ($(UNAME),Darwin)
 # Users of PowerPC need to build OpenJDK themselves (if they can?).
 	wget -nv -N http://landonf.bikemonkey.org/static/soylatte/openjdk/${DARWIN_TAR}
 else
-	wget -nv -N http://www.java.net/download/jdk7/binaries/${JDK_7_BIN}
+	wget -O ${JDK_7_BIN}-nv -N http://types.cs.washington.edu/jsr308/latest-jdk.php
 endif
 
 jsr308-langtools.zip:
