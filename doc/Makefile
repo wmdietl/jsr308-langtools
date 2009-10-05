@@ -2,6 +2,7 @@ jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 
 INV ?= /homes/gws/mernst/research/invariants
+RELEASEDATE ?= `date '+%Y%m%d'`
 
 # There is no use of "cp -p" in this Makefile, to avoid problems with
 # browser caches.
@@ -37,7 +38,7 @@ ${jsr308_spec}/java-annotation-design.html \
 ${jsr308_spec}/jsr308-changes.html \
 ${jsr308_www}/java-type-qualifiers.pdf \
 ${jsr308_www}/java-type-qualifiers.html
-	\cp -f design.html ${jsr308_spec}/java-annotation-design-`date '+%Y%m%d'`.html
+	\cp -f design.html ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.html
 	$(MAKE) checklinks
 
 ## There are some expected errors, but they should all be suppressed by
@@ -98,7 +99,10 @@ ${jsr308_spec}/java-annotation-design.pdf: design.pdf
 	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/java-annotation-design.html: design.html
-	\cp -f $< design001.png $@
+	\cp -f $< $@
+# We don't know which of the two files will be created
+	-\cp -f design001.gif ${jsr308_spec}
+	-\cp -f design001.png ${jsr308_spec}
 	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
 
 ###########################################################################
