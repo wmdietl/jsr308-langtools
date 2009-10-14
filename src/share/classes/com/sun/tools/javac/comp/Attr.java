@@ -2694,7 +2694,7 @@ public class Attr extends JCTree.Visitor {
     }
 
     private void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
-        annotate.later(new Annotator() {
+        annotate.laterOnFlush(new Annotator() {
             @Override
             public void enterAnnotation() {
                 List<Attribute.Compound> compounds = fromAnnotations(annotations);
