@@ -131,8 +131,9 @@ public class TypeCasts {
     }
 
     @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE)
+    // compiler optimizes away compile time constants casts
     public String eqtestPrim() {
-        return "void eqtestPrim() { if (0 == (@TA int)0); }";
+        return "void eqtestPrim(int a) { if (0 == (@TA int)a); }";
     }
 
     @TADescriptions({
