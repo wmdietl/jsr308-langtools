@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.tools.JavaFileObject;
 
@@ -727,6 +726,7 @@ public class Attr extends JCTree.Visitor {
                 attribStat(tree.body, localEnv);
             }
             localEnv.info.scope.leave();
+            //((MethodType)m.type).receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
         }
@@ -2599,6 +2599,7 @@ public class Attr extends JCTree.Visitor {
 
     public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar a = (TypeVar)tree.type;
+        //a.typeAnnotations = fromAnnotations(tree.annotations);
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())
             return;
@@ -2683,7 +2684,23 @@ public class Attr extends JCTree.Visitor {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
-        result = tree.type = attribType(tree.getUnderlyingType(), env);
+        Type underlyingType = attribType(tree.getUnderlyingType(), env);
+        Type type = (Type)underlyingType.clone();
+        this.attribAnnotationTypes(
+                List.convert(JCAnnotation.class, tree.annotations), env);
+        //type.typeAnnotations = fromAnnotations(tree.annotations);
+        result = tree.type = type;
+    }
+
+    private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+        if (annotations.isEmpty())
+            return List.nil();
+
+        ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
+        for (JCTypeAnnotation anno : annotations) {
+            buf.append(anno.attribute_field);
+        }
+        return buf.toList();
     }
 
     public void visitErroneous(JCErroneous tree) {
