@@ -40,6 +40,7 @@ import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.code.Type.*;
+import com.sun.tools.javac.comp.Annotate.Annotator;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
@@ -726,7 +727,7 @@ public class Attr extends JCTree.Visitor {
                 attribStat(tree.body, localEnv);
             }
             localEnv.info.scope.leave();
-            //((MethodType)m.type).receiverTypeAnnotations = fromAnnotations(tree.receiverAnnotations);
+            annotateType(m.type.asMethodType(), tree.receiverAnnotations);
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
         }
@@ -2599,7 +2600,7 @@ public class Attr extends JCTree.Visitor {
 
     public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar a = (TypeVar)tree.type;
-        //a.typeAnnotations = fromAnnotations(tree.annotations);
+        annotateType(a, tree.annotations);
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())
             return;
@@ -2688,8 +2689,21 @@ public class Attr extends JCTree.Visitor {
         Type type = (Type)underlyingType.clone();
         this.attribAnnotationTypes(
                 List.convert(JCAnnotation.class, tree.annotations), env);
-        //type.typeAnnotations = fromAnnotations(tree.annotations);
+        annotateType(type, tree.annotations);
         result = tree.type = type;
+    }
+
+    private void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
+        annotate.later(new Annotator() {
+            @Override
+            public void enterAnnotation() {
+                List<Attribute.Compound> compounds = fromAnnotations(annotations);
+                if (type instanceof MethodType)
+                    type.asMethodType().receiverTypeAnnotations = compounds;
+                else
+                    type.typeAnnotations = compounds;
+            }
+        });
     }
 
     private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
