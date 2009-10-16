@@ -142,6 +142,16 @@ public interface Type {
     WildcardType asWildcardType();
 
     /**
+     * Returns this type as a <code>AnnotatedType</code> if it represents
+     * an annotated type.
+     *
+     * @return a <code>AnnotatedType</code> if the type if an annotated type,
+     *         or null if it is not
+     * @since 1.7
+     */
+    AnnotatedType asAnnotatedType();
+
+    /**
      * Return this type as an <code>AnnotationTypeDoc</code> if it represents
      * an annotation type.  Array dimensions are ignored.
      *

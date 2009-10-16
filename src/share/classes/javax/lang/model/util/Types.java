@@ -298,4 +298,12 @@ public interface Types {
      *          for the given type
      */
     TypeMirror asMemberOf(DeclaredType containing, Element element);
+
+    /**
+     * Returns the annotations targeting the type
+     * 
+     * @param type  the targeted type
+     * @return the type annotations targetting the type
+     */
+    List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type);
 }
