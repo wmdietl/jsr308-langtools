@@ -70,10 +70,10 @@ for i in "$@" ; do
    -J* )       javaOpts=$javaOpts$nl`echo $i | sed -e 's/^-J//'` ;;
    *   )       toolOpts=$toolOpts$nl$i ;;
    esac
-   if [ "$i" == "-cp" ]; then
+   if [ "$i" = "-cp" ]; then
      cpOpt="";
    fi
-   if [ "$i" == "-classpath" ]; then
+   if [ "$i" = "-classpath" ]; then
      cpOpt="";
    fi
    IFS="$saveIFS"
