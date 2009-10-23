@@ -1,0 +1,258 @@
+A patch to enable some "prototype" features that ease transition to
+adopting type annotations.
+
+In summary they are:
+1. parse annotations in comments:
+   Allows the code to be compatible with all java versions 5/6/7.
+2. command line imports
+   Allows importing type annotations classes in comments, without adding
+   the compile-time dependancy for all compilers.
+3. Default source verison to 1.7
+   Eleminates the need for the user to pass '-source 1.7'
+4. Permit target 5 (or higher) when using source level 1.7
+   Allows one to compile classes with annotations, yet having those classes
+   runnable with previous java jvms
+
+diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/code/Source.java
+--- a/src/share/classes/com/sun/tools/javac/code/Source.java	Tue Apr 21 09:06:49 2009 -0400
++++ b/src/share/classes/com/sun/tools/javac/code/Source.java	Tue Apr 21 09:24:11 2009 -0400
+@@ -95,13 +95,14 @@
+         this.name = name;
+     }
+ 
+-    public static final Source DEFAULT = JDK1_5;
++    public static final Source DEFAULT = JDK1_7;
+ 
+     public static Source lookup(String name) {
+         return tab.get(name);
+     }
+ 
+     public Target requiredTarget() {
++        if (this == JDK1_7) return Target.JDK1_5;
+         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
+         if (this.compareTo(JDK1_6) >= 0) return Target.JDK1_6;
+         if (this.compareTo(JDK1_5) >= 0) return Target.JDK1_5;
+diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/jvm/ClassReader.java
+--- a/src/share/classes/com/sun/tools/javac/jvm/ClassReader.java	Tue Apr 21 09:06:49 2009 -0400
++++ b/src/share/classes/com/sun/tools/javac/jvm/ClassReader.java	Tue Apr 21 09:24:11 2009 -0400
+@@ -1074,13 +1074,13 @@
+             },
+ 
+             // v51 attributes
+-            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
++            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+                 void read(Symbol sym, int attrLen) {
+                     attachTypeAnnotations(sym);
+                 }
+             },
+ 
+-            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
++            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+                 void read(Symbol sym, int attrLen) {
+                     attachTypeAnnotations(sym);
+                 }
+diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/parser/JavacParser.java
+--- a/src/share/classes/com/sun/tools/javac/parser/JavacParser.java	Tue Apr 21 09:06:49 2009 -0400
++++ b/src/share/classes/com/sun/tools/javac/parser/JavacParser.java	Tue Apr 21 09:24:11 2009 -0400
+@@ -2376,6 +2376,10 @@
+         }
+         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
+         boolean checkForImports = true;
++        // JSR 308: Add imports
++        Collection<JCTree> commandImports = commandLineImports();
++        for (JCTree commendImport : commandImports)
++            defs.append(commendImport);
+         while (S.token() != EOF) {
+             if (S.pos() <= errorEndPos) {
+                 // error recovery
+@@ -2406,6 +2410,40 @@
+         return toplevel;
+     }
+ 
++    private final static String JSR308_IMPORTS = "jsr308.imports";
++    private final static String JSR308_IMPORTS_ALT = "jsr308_imports";
++
++    Collection<JCTree> commandLineImports() {
++        int pos = S.pos();
++        String commandImports = System.getProperty(JSR308_IMPORTS);
++        if (commandImports == null)
++            commandImports = System.getProperty(JSR308_IMPORTS_ALT);
++        if (commandImports == null)
++            commandImports = System.getenv(JSR308_IMPORTS);
++        if (commandImports == null)
++            commandImports = System.getenv(JSR308_IMPORTS_ALT);
++        if (commandImports == null)
++            return new ListBuffer<JCTree>();
++        String[] importClasses = commandImports.split(File.pathSeparator);
++        ListBuffer<JCTree> imports = new ListBuffer<JCTree>();
++        for (String importClass : importClasses) {
++            if (importClass == null || importClass.length() == 0)
++                continue;
++            String[] idents = importClass.split("\\.");
++            JCExpression pid = toP(F.at(S.pos()).Ident(names.fromString(idents[0])));
++            for (int i = 1; i < idents.length; ++i) {
++                Name selector;
++                if (idents[i] == "*")
++                    selector = names.asterisk;
++                else
++                    selector = names.fromString(idents[i]);
++                pid = toP(F.at(S.pos()).Select(pid, selector));
++            }
++            imports.append(toP(F.at(pos).Import(pid, false)));
++        }
++        return imports;
++    }
++
+     /** ImportDeclaration = IMPORT [ STATIC ] Ident { "." Ident } [ "." "*" ] ";"
+      */
+     JCTree importDeclaration() {
+diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/parser/Scanner.java
+--- a/src/share/classes/com/sun/tools/javac/parser/Scanner.java	Tue Apr 21 09:06:49 2009 -0400
++++ b/src/share/classes/com/sun/tools/javac/parser/Scanner.java	Tue Apr 21 09:24:11 2009 -0400
+@@ -65,6 +65,8 @@
+         final Names names;
+         final Source source;
+         final Keywords keywords;
++        final boolean annotationsincomments;
++        final boolean spacesincomments;
+ 
+         /** Create a new scanner factory. */
+         protected Factory(Context context) {
+@@ -73,6 +75,8 @@
+             this.names = Names.instance(context);
+             this.source = Source.instance(context);
+             this.keywords = Keywords.instance(context);
++            this.annotationsincomments = true;
++            this.spacesincomments = Options.instance(context).get("TAspacesincomments") != null;
+         }
+ 
+         public Scanner newScanner(CharSequence input) {
+@@ -129,6 +133,13 @@
+      */
+     protected boolean deprecatedFlag = false;
+ 
++    // Flags for extracting annotations from comments.
++    protected boolean magicAt = false;
++    protected boolean magicID = false;
++    protected boolean magic = false;
++    protected boolean annotationsincomments;
++    protected boolean spacesincomments;
++
+     /** A character buffer for literals.
+      */
+     private char[] sbuf = new char[128];
+@@ -166,6 +177,8 @@
+         this.names = fac.names;
+         this.keywords = fac.keywords;
+         this.allowHexFloats = fac.source.allowHexFloats();
++        this.annotationsincomments = fac.annotationsincomments;
++        this.spacesincomments = fac.spacesincomments;
+     }
+ 
+     private static final boolean hexFloatsWork = hexFloatsWork();
+@@ -743,6 +756,22 @@
+      */
+     public void nextToken() {
+ 
++        if (magicAt) {
++            magicAt = false;
++            magicID = true;
++        }
++        if (magicID && ch == ' ') {
++            while (ch == ' ')
++                scanChar();
++        }
++        if (magicID && ch == '*') {
++            magicID = false;
++            magic = true;
++            scanChar();
++            if (ch != '/') lexError("invalid.anno.comment.char");
++            scanChar();
++        }
++
+         try {
+             prevEndPos = endPos;
+             sp = 0;
+@@ -855,18 +884,43 @@
+                         break;
+                     } else if (ch == '*') {
+                         scanChar();
++                        if (spacesincomments) {
++                            while (ch == ' ')
++                                scanChar();
++                        }
+                         CommentStyle style;
+                         if (ch == '*') {
+                             style = CommentStyle.JAVADOC;
+                             scanDocComment();
++                            if (magicAt) return;
++                        } else if (annotationsincomments && bp < buflen && ch == '@'
++                            && (spacesincomments || isCommentWithoutSpaces())) {
++                            scanChar();
++                            while (Character.isWhitespace(ch))
++                                scanChar();
++                            if (!Character.isJavaIdentifierStart(ch)) break;
++                            token = Token.MONKEYS_AT;
++                            magicAt = true;
++                            return;
+                         } else {
+                             style = CommentStyle.BLOCK;
+                             while (bp < buflen) {
+                                 if (ch == '*') {
+                                     scanChar();
+                                     if (ch == '/') break;
++                                } else if (magic && ch == '@') {
++                                    scanChar();
++                                    if (Character.isJavaIdentifierStart(ch)) {
++                                        token = Token.MONKEYS_AT;
++                                        magicAt = true;
++                                        return;
++                                    }
++                                    scanChar();
++                                    if (ch == '/') break;
+                                 } else {
+                                     scanCommentChar();
++                                    if (!Character.isWhitespace(ch) || ch == '\n')
++                                        magic = false;
+                                 }
+                             }
+                         }
+@@ -961,6 +1015,22 @@
+         }
+     }
+ 
++    private boolean isCommentWithoutSpaces() {
++        assert ch == '@';
++        int lbp = bp;
++        while (lbp < buflen) {
++            char lch = buf[++lbp];
++            if (Character.isWhitespace(lch))
++                return false;
++            if (lch == '*'
++                && lbp + 1 < buflen
++                && buf[lbp+1] == '/')
++                return true;
++        }
++        // came to end of file before '*/'
++        return false;
++    }
++
+     /** Return the current token, set by nextToken().
+      */
+     public Token token() {
+diff -r 2d79f902046c src/share/classes/com/sun/tools/javac/resources/javac.properties
+--- a/src/share/classes/com/sun/tools/javac/resources/javac.properties	Tue Apr 21 09:06:49 2009 -0400
++++ b/src/share/classes/com/sun/tools/javac/resources/javac.properties	Tue Apr 21 09:24:11 2009 -0400
+@@ -192,9 +192,9 @@
+ 	
+ javac.msg.bug=\
+ An exception has occurred in the compiler ({0}). \
+-Please file a bug at the Java Developer Connection (http://java.sun.com/webapps/bugreport)  \
+-after checking the Bug Parade for duplicates. \
+-Include your program and the following diagnostic in your report.  Thank you.
++Please report this bug so we can fix it.  For instructions, see \
++http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#reporting-bugs \
++.  Thank you.
+ 
+ javac.msg.io=\
+ \n\nAn input/output error occurred.\n\
