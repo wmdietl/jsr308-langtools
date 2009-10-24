@@ -25,6 +25,9 @@
 
 package javax.lang.model.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.AnnotationTypeMismatchException;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.List;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
@@ -306,4 +309,52 @@ public interface Types {
      * @return the type annotations targetting the type
      */
     List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type);
+
+    /**
+     * Returns the type's annotation for the specified type if
+     * such an annotation is present, else {@code null}.  The
+     * annotation has to be directly present on this
+     * element.
+     *
+     * <p> The annotation returned by this method could contain an element
+     * whose value is of type {@code Class}.
+     * This value cannot be returned directly:  information necessary to
+     * locate and load a class (such as the class loader to use) is
+     * not available, and the class might not be loadable at all.
+     * Attempting to read a {@code Class} object by invoking the relevant
+     * method on the returned annotation
+     * will result in a {@link MirroredTypeException},
+     * from which the corresponding {@link TypeMirror} may be extracted.
+     * Similarly, attempting to read a {@code Class[]}-valued element
+     * will result in a {@link MirroredTypesException}.
+     *
+     * <blockquote>
+     * <i>Note:</i> This method is unlike others in this and related
+     * interfaces.  It operates on runtime reflective information &mdash;
+     * representations of annotation types currently loaded into the
+     * VM &mdash; rather than on the representations defined by and used
+     * throughout these interfaces.  Consequently, calling methods on
+     * the returned annotation object can throw many of the exceptions
+     * that can be thrown when calling methods on an annotation object
+     * returned by core reflection.  This method is intended for
+     * callers that are written to operate on a known, fixed set of
+     * annotation types.
+     * </blockquote>
+     *
+     * @param <A>  the annotation type
+     * @param type  the targetted type
+     * @param annotationType  the {@code Class} object corresponding to
+     *          the annotation type
+     * @return the type's annotation for the specified annotation
+     *         type if present on the type, else {@code null}
+     *
+     * @see #getAnnotationMirrors()
+     * @see EnumConstantNotPresentException
+     * @see AnnotationTypeMismatchException
+     * @see IncompleteAnnotationException
+     * @see MirroredTypeException
+     * @see MirroredTypesException
+     */
+    <A extends Annotation> A typeAnnotationOf(TypeMirror type, Class<A> annotationType);
+
 }

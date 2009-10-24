@@ -25,6 +25,7 @@
 
 package com.sun.tools.javac.model;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 import java.util.EnumSet;
@@ -305,5 +306,10 @@ public class JavacTypes implements javax.lang.model.util.Types {
 
     public List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type) {
         return ((Type)type).typeAnnotations;
+    }
+
+    public <A extends Annotation> A typeAnnotationOf(TypeMirror type,
+            Class<A> annotationType) {
+        return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
     }
 }
