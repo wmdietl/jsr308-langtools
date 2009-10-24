@@ -312,4 +312,17 @@ public class JavacTypes implements javax.lang.model.util.Types {
             Class<A> annotationType) {
         return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
     }
+
+    public List<? extends AnnotationMirror> receiverTypeAnnotationsOf(
+            ExecutableType type) {
+        return ((Type)type).asMethodType().receiverTypeAnnotations;
+    }
+
+    public <A extends Annotation> A receiverTypeAnnotationOf(
+            ExecutableType type, Class<A> annotationType) {
+        return JavacElements.getAnnotation(
+                ((Type)type).asMethodType().receiverTypeAnnotations,
+                annotationType);
+    }
+
 }
