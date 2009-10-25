@@ -123,14 +123,14 @@ public class ExtendedAnnotation {
          // Class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-            int in = cr.readUnsignedByte();
-            if (in == 0xFF)
+            int in = cr.readUnsignedShort();
+            if (in == 0xFFFF)
                 in = -1;
             position.type_index = in;
             break;
         // throws
         case THROWS:
-            position.type_index = cr.readUnsignedByte();
+            position.type_index = cr.readUnsignedShort();
             break;
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
@@ -219,11 +219,11 @@ public class ExtendedAnnotation {
          // Class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-            n += 1; // type_index
+            n += 2; // type_index
             break;
         // throws
         case THROWS:
-            n += 1; // type_index
+            n += 2; // type_index
             break;
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
@@ -278,13 +278,13 @@ public class ExtendedAnnotation {
         public int[] lvarIndex = null;
 
         // For type parameter bound
-        public int bound_index = -1;
+        public int bound_index = Integer.MIN_VALUE;
 
         // For type parameter and method parameter
-        public int parameter_index = -1;
+        public int parameter_index = Integer.MIN_VALUE;
 
         // For class extends, implements, and throws classes
-        public int type_index = -2;
+        public int type_index = Integer.MIN_VALUE;
 
         // For wildcards
         public Position wildcard_position = null;
