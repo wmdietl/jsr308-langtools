@@ -991,31 +991,30 @@ The classfile must distinguish among these locations.
 
 When the annotation's target is within a parameterized type or
 array type,
-\code{reference\_info} contains what it normally would for the a raw,
+\code{reference\_info} contains what it normally would for a raw,
 non-array type
-(e.g., \code{offset} for an annotation on a type argument in a
-typecast, see Section~\ref{class-file:ext:ri:typecast}), {\em plus} the following fields at the end:
+% (e.g., \code{offset} for an annotation on a type argument in a
+% typecast, see Section~\ref{class-file:ext:ri:typecast}),
+{\em plus} the following fields at the end:
 
 \begin{Verbatim}
     u2 location_length;
     u1 location[location_length];
 \end{Verbatim}
 
-The \code{location} field is a list of numbers that encodes a path, in the
-type, to the annotation.
+The \code{location} field is a list of numbers that represents the annotation
+location among the generic type arguments and array levels.
+If the type is viewed as a tree, then 
+the \code{location} field can be viewed as a path in that tree.
+The \code{location\_length} field is the length of the \code{location}
+field, which is also the depth of the annotation in the tree.
 
-A parameterized or array type can be viewed as a tree.  For a parameterized
+A parameterized or array type can be viewed as a tree in the following way.  For a parameterized
 type, the children of the raw type are the type arguments.  For an array
 type, the children are the types of elements at each level; each of these
 is itself an array type (of lesser dimensions than the main type), except
 for the last one which is a non-array type.  For a 1-dimensional array,
 there is only one child, which is a non-array.
-
-, where each node is a type and its children
-are the type arguments in case of parameterized.    Specifically,
-the $i$th item in \code{location} denotes the child index at the $i$th level.
-The \code{location\_length} field is the length of the \code{location} field,
-which is the depth of the tree.
 
 For example, the parameterized types
 \code{@A Map<@B String, @C List<@D Object>>}
@@ -4075,9 +4074,9 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  DefaultQualifier grep nullable MyRepeatedAnnotationContainer lst
 % LocalWords:  AnnotatedElement getRepeatedAnnotation annotationClass ASTNode
 % LocalWords:  OuterClass InnerClass ReadonlyReceiver lastAccessedTime astStack
-% LocalWords:  getReturnAnnotation getReturnAnnotations getAnnotation enums
+% LocalWords:  getReturnAnnotation getReturnAnnotations getAnnotation enums ldc
 % LocalWords:  SingleElementAnnotation ValueMember AstStackIncrement dividedBy
 % LocalWords:  expressionStack ExpressionStackIncrement genericsStack YAML wiki
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
-% LocalWords:  Nonnegative typedefs unabbrev reusability typedef
+% LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic
