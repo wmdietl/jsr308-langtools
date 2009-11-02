@@ -1,11 +1,11 @@
-Version 1.0.1, 25 Oct 2009
+Version 1.0.1, 1 Nov 2009
 
 Functionality
   Added Compiler API support for JSR 308
     Found in javax.lang.model.utils.Types
 
 Base build
-  Updated to OpenJDK langtools build b74
+  Updated to OpenJDK langtools build b75
 
 ----------------------------------------------------------------------
 Version 1.0.0, 30 Sep 2009
