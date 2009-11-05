@@ -37,7 +37,7 @@ import java.io.*;
 
 @Target({TYPE_USE, TYPE_PARAMETER, TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface A {}
+@interface A {}
 
 /** wildcard bound */
 class T0x1C {
