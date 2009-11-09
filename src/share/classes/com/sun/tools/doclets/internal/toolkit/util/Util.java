@@ -428,15 +428,21 @@ public class Util {
         //Try walking the tree.
         addAllInterfaceTypes(results,
             superType,
-            superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+            interfaceTypesOf(superType),
             false, configuration);
         List<Type> resultsList = new ArrayList<Type>(results.values());
         if (sort) {
                 Collections.sort(resultsList, new TypeComparator());
         }
         return resultsList;
+    }
+
+    private static Type[] interfaceTypesOf(Type type) {
+        if (type instanceof AnnotatedType)
+            type = ((AnnotatedType)type).underlyingType();
+        return type instanceof ClassDoc ?
+                ((ClassDoc)type).interfaceTypes() :
+                ((ParameterizedType)type).interfaceTypes();
     }
 
     public static List<Type> getAllInterfaces(Type type, Configuration configuration) {
@@ -449,9 +455,7 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+                interfaceTypesOf(superType),
                 raw, configuration);
     }
 
@@ -461,9 +465,7 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+                interfaceTypesOf(superType),
                 false, configuration);
     }
 
@@ -487,6 +489,9 @@ public class Util {
                 results.put(superInterface.asClassDoc(), superInterface);
             }
         }
+        if (type instanceof AnnotatedType)
+            type = ((AnnotatedType)type).underlyingType();
+
         if (type instanceof ParameterizedType)
             findAllInterfaceTypes(results, (ParameterizedType) type, configuration);
         else if (((ClassDoc) type).typeParameters().length == 0)
