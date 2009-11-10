@@ -247,6 +247,25 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 %             [final] Type FormalParameterDeclsRest]
 
 
+Annotations may appear on the type parameter declaration in a class or method
+declaration.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeParameter}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+\end{tabbing}
+
+Annotations may appear on the wildcard in any type argument.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeArgument}: \\
+\qquad            \new{\opt{\nt{Annotations}}} ? \opt{\nt{(} extends \altor{} super \nt{)} \nt{Type}}
+\end{tabbing}
+
+
+
 \item
 To permit annotations on levels of an array (in declarations, not
 constructors), change ``\multi{\term{[]}}''  to
@@ -262,7 +281,7 @@ For example:
 \qquad            \opt{\nt{Annotations}} \nt{BasicType}
 \end{tabbing}
 
-Also permit annotations on varargs (\code{...}):
+Annotations may also appear on varargs (\code{...}):
 
 \begin{tabbing}
 \qquad \= \kill
@@ -282,25 +301,6 @@ to ``\nt{FormalParameters} \new{\opt{Annotations}}''.  For example:
 \qquad \= \kill
 \nt{VoidMethodDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{throws \nt{QualifiedIdentifierList}} \nt{(} \nt{MethodBody} \altor{} \term{;} \nt{)}
-\end{tabbing}
-
-\item
-Annotations may appear on the type parameter declaration in a class or method
-declaration.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
-\end{tabbing}
-
-\item
-Annotations may appear on the wildcard in any type argument.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeArgument}: \\
-\qquad            \new{\opt{\nt{Annotations}}} ? \opt{\nt{(} extends \altor{} super \nt{)} \nt{Type}}
 \end{tabbing}
 
 \end{enumerate}
