@@ -1091,7 +1091,7 @@ a declaration that combines parameterized and array types.\label{tbl:locations}}
 \section{Detailed grammar changes\label{grammar-details}}
 
 This section
-gives detailed changes to the grammar of the Java
+gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/second_edition/html/syntax.doc.html}{grammar} of the Java
 language~\cite[ch.~18]{GoslingJSB2005}, based on the conceptually
 simple summary from
 Section~\ref{grammar-summary}.    Additions are
@@ -1144,6 +1144,10 @@ version attempts to minimize changes to existing grammar productions.
 \nt{ConstructorDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{MethodBody} \\
  \\
+% Only used for throws clause
+\nt{QualifiedIdentifierList}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} } \\
+\\
 \nt{Primary}: \\
 \qquad        ... \\
 \qquad        \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
