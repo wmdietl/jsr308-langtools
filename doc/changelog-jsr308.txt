@@ -1,3 +1,13 @@
+Version 1.0.2, ?? Nov 2009
+
+ClassFile format
+  Changed reference info structure for class extends/implements
+    and throws to contain a char instead of a byte
+
+Base build
+  Updated to OpenJDK langtools build b76
+
+----------------------------------------------------------------------
 Version 1.0.1, 1 Nov 2009
 
 Functionality
