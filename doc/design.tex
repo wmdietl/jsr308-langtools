@@ -33,9 +33,9 @@
 \newcommand{\myurl}[1]{{\codesize\url{#1}}}
 %HEVEA \def\myurl{\url}
 
-%HEVEA \makeatletter
-%HEVEA \newcommand{\sout}[1]{\@print{<STRIKE>}{}#1\@print{</STRIKE>}}
-%HEVEA \makeatother
+%NOT HEVEA \makeatletter
+%NOT HEVEA \newcommand{\sout}[1]{\@print{<STRIKE>}{}#1\@print{</STRIKE>}}
+%NOT HEVEA \makeatother
 
 %HEVEA \def\strut{\relax}
 
@@ -609,8 +609,11 @@ every possible annotation location.
 
 
 \def\unused{\ensuremath{*}}
-%HEVEA \def{\rlap}{\relax}
-\def\rlunused{\rlap{\unused}}
+\ifhevea
+  \def\rlapunused{\relax}
+\else
+  \def\rlunused{\rlap{\unused}}
+\fi
 
 
 \begin{figure}[thp!]
@@ -1096,7 +1099,7 @@ language~\cite[ch.~18]{GoslingJSB2005}, based on the conceptually
 simple summary from
 Section~\ref{grammar-summary}.    Additions are
 \underline{underlined}.
-% , and and deletions \sout{crossed out}.
+% , and deletions \sout{crossed out}.
 
 This section is of interest primarily to language tool implementers, such
 as compiler writers.  Most users can read just
@@ -1552,37 +1555,9 @@ these locations.
 \end{Verbatim}
 
 \preverbnegspace
-It is desirable for a method to express constraints on the generic
-parameters of the receiver, just as is already possible for other formal
-parameters.
-% "does not currently" was written 9/26/2008, still true 2/26/2009
-The grammar of Section~\ref{grammar-details} does not currently permit
-this, but it may be revised in the future.  For example, here are examples
-of a possible syntax:
-\preverbnegspace
-\begin{Verbatim}
-  class C<T> {
-    public int size() @Readonly<@Readonly> { ... }
-  }
-  class Map<T,U> {
-    public void requiresNonNullKeys() <@NonNull,> { ... }
-  }
-\end{Verbatim}
-
-% I don't think this is necessary; for generic type parameters, one should
-% just use List<@Multibyte String> in the declaration, which does not
-% require any changes.  But maybe it's good to be generic.  Can we think of
-% any uses?
-% \preverbnegspace
-% Annotations on the generic type parameters of the receiver are written
-% within angle brackets.  The annotation on the receiver type itself may be
-% present or absent.
-% \preverbnegspace
-% \begin{Verbatim}
-%     public @Multibyte E get(int index) @NonEmpty<@Multibyte> { ... }
-%     public add(@Multibyte E) <@Multibyte> { ... }
-% \end{Verbatim}
-
+It is not currently possible to express constraints on the generic
+parameters of the receiver.  See
+Section~\ref{receiver-type-parameter-annotations}.
 
 \item for constructor results:
 
@@ -3130,6 +3105,63 @@ about whether you're going to get back a single instance''.
 \subsection{Locations for annotations\label{locations-for-annotations}}
 
 
+\subsubsection{Annotations on receiver type parameters\label{receiver-type-parameter-annotations}}
+
+It is sometimes desirable for a method to express constraints on the
+generic parameters of the receiver, just as is already possible for other
+formal parameters.  This is not currently possible (see the grammar of
+Section~\ref{grammar-details}).
+
+For example, consider the \<Collection.toArray()> method, which returns an
+array of objects, where the objects have the same annotation as the
+elements of the receiver.  A natural way to write this would be 
+
+\begin{Verbatim}
+public @Polynull Object [] toArray() ArrayList<@PolyNull E> { ... }
+\end{Verbatim}
+
+\noindent
+except that this is illegal syntax:  the \code{ArrayList<@PolyNull E>} in
+the receiver position is not legal.  It is permissible to write an
+annotation on the raw type of the receiver, as in
+
+\begin{Verbatim}
+public Object [] toArray() @Readonly { ... }
+\end{Verbatim}
+
+\noindent
+but not on the receiver's type parameters.
+
+Here are other examples:
+
+\begin{Verbatim}
+  interface List<T> {
+    // The size() method changes neither the receiver nor any of the elements.
+    public int size() @Readonly List<@Readonly T> { ... }
+  }
+  class MyMap<T,U> {
+    // The method requires that the map's keys be non-null, but the values may be arbitrary.
+    public void requiresNonNullKeys() MyMap<@NonNull T,U> { ... }
+  }
+\end{Verbatim}
+
+%% Here is an alternate syntax:
+% I don't think this is necessary; for generic type parameters, one should
+% just use List<@Multibyte String> in the declaration, which does not
+% require any changes.  But maybe it's good to be generic.  Can we think of
+% any uses?
+% \preverbnegspace
+% Annotations on the generic type parameters of the receiver are written
+% within angle brackets.  The annotation on the receiver type itself may be
+% present or absent.
+% \preverbnegspace
+% \begin{Verbatim}
+%     public @Multibyte E get(int index) @NonEmpty<@Multibyte> { ... }
+%     public add(@Multibyte E) <@Multibyte> { ... }
+% \end{Verbatim}
+
+
+
 \subsubsection{Annotations on statements\label{statement-annotations}}
 
 Annotations on statements (or on some subset of statements, such as blocks
@@ -3731,7 +3763,7 @@ more likely once JSR 308 support is in place.
 % with the annotations enabled by JSR 308 and those proposed in
 % JSR 305.
 
-\subsubsection{Optional/default fields in annotations}
+\subsubsection{Optional/default fields in annotations\label{optional-default-fields}}
 
 In order to reduce the size of the class file, some fields may be omitted
 from the .class file, in which case any access of them returns their
@@ -4084,3 +4116,4 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic
+% LocalWords:  QualifiedIdentifier toArray
