@@ -1,4 +1,4 @@
-Version 1.0.2, ?? Nov 2009
+Version 1.0.2, 16 Nov 2009
 
 ClassFile format
   Changed reference info structure for class extends/implements
