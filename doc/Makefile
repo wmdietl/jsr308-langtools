@@ -9,6 +9,9 @@ RELEASEDATE ?= `date '+%Y%m%d'`
 
 local: design.pdf design.html type-quals.pdf type-quals.html validate
 
+clean:
+	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png figures/type-tree.eps figures/type-tree.pdf type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
+
 figures-all:
 	${MAKE} -C figures all
 
@@ -73,14 +76,7 @@ design.pdf: design.tex design.dvi
 	pdflatex $<
 
 design.html: design.tex design.dvi design.bbl
-# First, generate the .haux file, for use by table of contents.
-	hevea -exec xxdate.exe urlhref.hva design.tex
-	hevea -exec xxdate.exe urlhref.hva design.tex
-# Then, use the .aux file in preference, but using data from .haux when necessary for the table of contents.
-	hevea -exec xxdate.exe urlhref.hva design.tex
-# Work around bug in generated file; would have been nicer to use "hevea -fix ..."
-	perl -pi -e 's/.*(sout|rlap).*//g' design.image.tex
-	imagen design
+	hevea -fix -exec xxdate.exe urlhref.hva design.tex
 	mv design.html design.html-with-htoc
 	retarget-hevea-crossrefs < design.html-with-htoc > design.html
 	rm -rf design.html-with-htoc
