@@ -553,6 +553,10 @@ inference for local variables and stack elements.  The class file format
 should similarly store the annotations on those types, to aid in annotation
 verification in class files.
 
+% StackMapTable is the attribute that defines these.  They are differential
+% and rather tricky, but we'll just copy that format.  There is no public
+% API, just a defined classfile format.
+
 
 \subsection{The \code{extended\_annotation} structure\label{class-file:ext}}
 
@@ -2549,6 +2553,8 @@ also be revised.
 
 
 \subsection{Reflection\label{reflection}}
+
+To do:  Complete this design.
 
 The \code{java.lang.reflect.*} and \code{java.lang.Class} APIs give access
 to annotations on public API elements such as classes,
