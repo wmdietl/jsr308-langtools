@@ -573,9 +573,20 @@ extended_annotation {
     } element_value_pairs[num_element_value_pairs];
     // New fields in JSR 308:
     u1 target_type;    // the type of the targeted program element, see Section 4.2
-    {
-        ...
-    } reference_info;  // uniquely identifies the targeted program element, see Section 4.3
+    union {
+        offset_target;
+        localvar_target;
+        methodparam_target;
+        field_target;
+        typeparam_target;
+        typeparam_bound_target;
+        typearg_target;
+        supertype_target;
+        typeindex_target;
+        wildcard_bound_target;
+        
+        empty_target;
+    } target_info;  // uniquely identifies the targeted program element, see Section 4.3
 }
 \end{Verbatim}
 
@@ -600,7 +611,7 @@ These fields implement a discriminated (tagged) union type:
 field \code{target\_type} is the tag (see
 Section~\ref{class-file:ext:target_type}), and its value determines the
 size and
-contents of \code{reference\_info} (see Section~\ref{class-file:ext:reference_info}).
+contents of \code{target\_info} (see Section~\ref{class-file:ext:target_info}).
 
 
 \subsection{The \code{target\_type} field\label{class-file:ext:target_type}\label{target_type}}
@@ -624,7 +635,7 @@ every possible annotation location.
 \begin{center}
 \begin{tabular}{|l|c|c|}
 \hline
-{\bf Annotation target} & {\bf \code{target\_type} value} & {\bf \code{reference\_info} definition} \\ \hline
+{\bf Annotation target} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
 %% The canonical location for this information is
 %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
 %% so whenever that is updated, this table should be as well.
@@ -707,15 +718,15 @@ attribute.  The unused enumeration elements are included for completeness.
 % and convenience for annotation processors.
 
 
-\subsection{The \code{reference\_info} field\label{class-file:ext:reference_info}}
+\subsection{The \code{target\_info} field\label{class-file:ext:target_info}}
 
-\code{reference\_info} is a structure that contains enough information to
+\code{target\_info} is a structure that contains enough information to
 uniquely identify the target of a given annotation.  A different
 \code{target\_type} may require a different set of fields, so the structure
-of the \code{reference\_info} is determined by the value of
+of the \code{target\_info} is determined by the value of
 \code{target\_type}.
 
-% , and in some cases the size of \code{reference\_info} is zero ...
+% , and in some cases the size of \code{target\_info} is zero ...
 
 
 
@@ -723,12 +734,13 @@ of the \code{reference\_info} is determined by the value of
 
 When the annotation's target is a typecast, an \code{instanceof}
 expression, a \code{new} expression, or a class literal expression,
-\code{reference\_info} has the following structure:
+\code{target\_info} contains one \code{offset\_target} which has the
+following structure:
 
 \begin{Verbatim}
-    {
+    offset_target {
         u2 offset;
-    } reference_info;
+    };
 \end{Verbatim}
 
 The \code{offset} field denotes the offset (i.e., within the bytecodes
@@ -753,7 +765,9 @@ underlying Java type system (which sees a cast from \code{String} to
 creates the target expression instead.  This approach permits code
 generation for existing compilers to be unaffected.
 
-
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{offset\_target} lives in the attributes table of a
+\code{method\_info} structure.
 
 See Section~\ref{class-file:ext:ri:typearg} for handling of generic
 type arguments and arrays.
@@ -778,17 +792,18 @@ type arguments and arrays.
 \subsubsection{Local variables\label{class-file:ext:ri:localvar}}
 
 When the annotation's target is a local variable,
-\code{reference\_info} has the following structure:
+\code{target\_info} contains one \code{localvar\_target}, which has the
+following structure:
 
 \begin{Verbatim}
-    {
+    localvar_target {
         u2 table_length;
         {
             u2 start_pc;
             u2 length;
             u2 index;
         } table[table_length];
-    } reference_info;
+    };
 \end{Verbatim}
 
 The \code{table\_length} field specifies the number of entries in the
@@ -807,24 +822,37 @@ challenges.  For example, live ranges are not isomorphic to local
 variables.  Further, a local variable with no live range may not appear in
 the class file (but it is also irrelevant to the program).
 
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{localvar\_target} lives in the attributes table of a
+\code{method\_info} structure.
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
 When the type annotation's target is a method parameter,
-\code{reference\_info} indicates which of the method's formal
-parameters is being annotated:
+\code{target\_info} contains one \code{methodparam\_target} which
+indicates which of the method's formal parameters is being annotated:
 
 \begin{Verbatim}
-    {
+    methodparam_target{
         u1 parameter_index;
-    } reference_info;
+    };
 \end{Verbatim}
+
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{methodparam\_target} lives in the attributes table of a
+\code{method\_info} structure.
 
 \subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
 
+% TODO: Specify an empty_target here!
 When the annotation's target is a method receiver (or an inner class
-constructor receiver), \code{reference\_info}
-is empty.
+constructor receiver), \code{target\_info} is empty.
+
+% TODO: Make the following paragraph consistent with the rest
+An \RuntimeInOrVisibleTypeAnnotations attribute targeting
+a method receiver lives in the attributes table of a
+\code{method\_info} structure.
+
 
 % A motivation for generic annotations on the receiver is the annotation on
 % toArray, which (in the nullness case) should be:
@@ -833,35 +861,48 @@ is empty.
 
 \subsubsection{Method return type and fields\label{class-file:ext:ri:return}}
 
+% TODO: Specify methodorfield_target
 When the type annotation's target is a method return type, a constructor
-result, or a field, \code{reference\_info} is empty.
+result, or a field, \code{target\_info} is empty.
 
-Section~\ref{class-file:ext:ri:typearg} describes the \code{reference\_info}
+Section~\ref{class-file:ext:ri:typearg} describes the \code{target\_info}
 if the target is a type argument.
+
+% TODO: Make the following paragraph consistent with the rest
+An \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
+type lives in the attributes table of a \code{field\_info} structure.
+An \RuntimeInOrVisibleTypeAnnotations attribute targeting a method return
+type lives in the attributes table of a \code{field\_info} structure.
 
 \subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
 
 When the annotation's target is a type parameter of a class or method,
-\code{reference\_info} has the following structure:
+\code{target\_info} contains one \code {typeparam\_info} which has the
+following structure:
 
 \begin{Verbatim}
-    {
+    typeparam_info {
         u1 param_index;
-    } reference_info;
+    };
 \end{Verbatim}
 
 \code{param\_index} specifies the 0-based index of the type parameter.
 
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{offset\_target} lives in the attributes table of a
+\code{method\_info} structure if it 
+
 \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
 
 When the annotation's target is a bound of a type parameter of a class or
-method, \code{reference\_info} has the following structure:
+method, \code{target\_info} contains one \code{typeparam\_bound\_target}
+which has the following structure:
 
 \begin{Verbatim}
-    {
+    typeparam_bound_target {
         u1 param_index;
         u1 bound_index;
-    } reference_info;
+    };
 \end{Verbatim}
 
 \code{param\_index} specifies the index of the type parameter, while
@@ -878,16 +919,23 @@ Here
 \code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
 \code{@C} has \code{param\_index} 1 and \code{bound\_index} 0.
 
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} lives in the attributes table of a
+\code{method\_info} structure if it targets a method type parameter bound,
+otherwise, in the \code{attributes} of \code{ClassFile} structure if it
+targets a class declaration type parameter bound.
+
 \subsubsection{Constructor and method call type arguments\label{class-file:ext:ri:con-typearg}}
 
 When the annotation's type is a type argument in a constructor call or
-a method call, \code{reference\_info} has the following structure:
+a method call, \code{target\_info} has one \code{typearg\_target}
+which has the following structure:
 
 \begin{Verbatim}
-    {
+    typearg_target {
         u2 offset;
         u1 type_index;
-    } reference_info;
+    };
 \end{Verbatim}
 
 The \code{offset} field denotes the offset (i.e., within the bytecodes
@@ -900,49 +948,70 @@ annotations are attached to a single bytecode, not a bytecode range.
 \code{type\_index} specifies the index of the type argument in the
 expression.
 
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} lives in the attributes table of a
+\code{method\_info} structure.
+
+
 \subsubsection{Class \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
 
 When the annotation's target is a type in an \code{extends} or
-\code{implements} clause, \code{reference\_info} has the following
+\code{implements} clause, \code{target\_info} has the following
 structure:
 
 \begin{Verbatim}
-    {
+    supertype_target {
         u2 type_index;
-    } reference_info;
+    };
 \end{Verbatim}
 
-\code{type\_index} specifies the index of the type in the clause:
-\code{-1} (\code{255}) is used if the annotation is on the superclass
-type, and the value $i$ is used if the annotation is on the $i$th
+\code{type\_index} specifies the index of the targeted type in the
+\code{interfaces} array field of the \code{ClassFile} structure;
+simply the value $i$ is used if the annotation is on the $i$th
 superinterface type (counting from zero).
+
+% TODO: handle superclass properly
+\code{-1} (\code{65535}) is used if the annotation is on the superclass type.
+
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{supertype\_target} lives in the attributes table of a
+\code{ClassFile} structure.
+
 
 \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
 When the annotation's target is a type in a \code{throws} clause,
-\code{reference\_info} has the following structure:
+\code{target\_info} contains \code{exception\_target} which has the
+following structure:
 
 \begin{Verbatim}
-    {
-        u1 type_index;
-    } reference_info
+    exception_target {
+        u2 type_index;
+    };
 \end{Verbatim}
 
 \code{type\_index} specifies the index of the exception type in the
-clause: the value $i$ denotes an annotation on the $i$th exception
+clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
+simply the value $i$ denotes an annotation on the $i$th exception
 type (counting from zero).
+
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} lives in the attributes table of a
+\code{method\_info} structure.
+
 
 \subsubsection{Wildcard bounds\label{class-file:ext:ri:wildcard}}
 
 When the annotation's target is the bound of a wildcard,
-\code{reference\_info} has the following structure:
+\code{target\_info} contains one \code{wildcard_bound_target} which
+has the following structure:
 
 \begin{Verbatim}
-    {
+    wildcard_bound_target {
         u1 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 4.2)
         {
             ...
-        } reference_info;  // uniquely identifies the targeted program element, see Section 4.3
-    } reference_info
+        } target_info;  // uniquely identifies the targeted program element, see Section 4.3
+    }
 \end{Verbatim}
 
 Here are examples:
@@ -952,7 +1021,7 @@ Here are examples:
 
 \begin{Verbatim}
    target_type = WILDCARD_BOUND
-   reference_info =
+   target_info =
      {
        wildcard_location_type = METHOD_PARAMETER (0x0C)
        wildcard_location =
@@ -967,7 +1036,7 @@ Here are examples:
 
 \begin{Verbatim}
    target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
-   reference_info =
+   target_info =
    {
      // location of wildcard: type argument of the return type
      wildcard_location_type = RETURN_TYPE_GENERIC_OR_ARRAY;
@@ -982,6 +1051,27 @@ Here are examples:
      location = { 0 };
    }
 \end{Verbatim}
+
+An \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{wildcard\_bound\_target} lives in the attributes table of
+
+\begin{enumerate}
+\item
+a \code{ClassFile} structure, if the annotation appears on the class
+type parameters, a super class, or a super interface type,
+
+\item
+a \code{field\_info}, if the annotation appears on the field type
+arguments, or
+
+\item
+a \code{method\_info}, if the annotation appears on the method type
+parameters, return type, parameter types, exception types, or any type
+in its method body.
+
+\end{enumerate}
+
+\code{method\_info} structure.
 
 \subsubsection{Type arguments and array element types\label{class-file:ext:ri:typearg}}
 
@@ -998,8 +1088,8 @@ The classfile must distinguish among these locations.
 
 When the annotation's target is within a parameterized type or
 array type,
-\code{reference\_info} contains what it normally would for a raw,
-non-array type
+\code{target\_info} contains what it normally would for a
+non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
 % typecast, see Section~\ref{class-file:ext:ri:typecast}),
 {\em plus} the following fields at the end:
