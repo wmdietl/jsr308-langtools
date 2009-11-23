@@ -186,7 +186,7 @@ for receiver types and for constructor results.
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
 
 
-\subsection{Java language grammar changes\label{grammar-summary}}
+\subsection{Summary of Java language grammar changes\label{grammar-summary}}
 
 % The original grammar appears at
 % http://java.sun.com/docs/books/jls/third_edition/html/syntax.html
@@ -387,7 +387,11 @@ precisely, if a programmer places an annotation (with class file or runtime
 retention) on the type of an expression, and that expression is represented
 in the compiled class file, then the annotation must be present, in the
 compiled class file, on the type of the compiled representation of the
-expression.  If the compiler optimizes away an expression, then it may also
+expression.  For annotations within a field initializer or a
+static initializer block, the compiled representation might be in an
+\code{init} or \code{clinit} method, or in a helper method called by them.
+
+If the compiler optimizes away an expression, then it may also
 optimize away the annotation.  (Exception:  when a type cast
 is optimized away without optimizing away its argument, the
 annotation remains on the argument; see Section~\ref{target_type}.)
@@ -4212,4 +4216,5 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic
-% LocalWords:  QualifiedIdentifier toArray
+% LocalWords:  QualifiedIdentifier toArray localvar methodparam typeparam
+% LocalWords:  typearg ClassFile
