@@ -393,16 +393,23 @@ is optimized away without optimizing away its argument, the
 annotation remains on the argument; see Section~\ref{target_type}.)
 
 The compiler sometimes creates new methods that did not appear in the
-source code, and that do nothing but call an existing method.  In this
-case, annotations should be copied from the method being invoked.
-Two examples are bridge methods (an implementation strategy used when the
-erased signature of the actual method being invoked differs from that of
-the compile-time method declaration~\cite[\S15.12.4.5]{GoslingJSB2005}) and
-anonymous constructors~\cite[\S15.9.5.1]{GoslingJSB2005}.
-(As of Java SE 6, javac does not copy/transfer any annotations from
-original methods to the compiler-generated methods; that is probably a bug
-in javac.  It is, however, perhaps debatable whether \emph{all} annotations
-should be copied.)
+source code.  The compiler should annotate these compiler-generated methods
+in an appropriate way.  For example, a bridge method is an implementation
+strategy used when the erased signature of the actual method being invoked
+differs from that of the compile-time method
+declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
+nothing but call an existing method, and in this case, annotations should
+be copied from the method being invoked.
+
+%% Cut this -- too compiler-specific.
+% and
+% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
+
+%% Remarks about javac are not appropriate in a specification.
+% (As of Java SE 6, javac does not copy/transfer any annotations from
+% original methods to the compiler-generated methods; that is probably a bug
+% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
+% should be copied.)
 
 
 \section{Class file format extensions\label{class-file}}
@@ -2535,7 +2542,7 @@ in Sections~\ref{syntax} and~\ref{class-file}.
 \subsection{Compiler\label{compiler-mods}}
 
 The syntax extensions described in Section~\ref{syntax}
-require the \code{javac} Java compiler to accept annotations in the proposed
+require the Java compiler to accept annotations in the proposed
 locations and to add them to the program's AST\@.  The relevant AST node
 classes must also be modified to store these annotations.
 
@@ -3217,7 +3224,7 @@ public @Polynull Object [] toArray() ArrayList<@PolyNull E> { ... }
 \end{Verbatim}
 
 \noindent
-except that this is illegal syntax:  the \code{ArrayList<@PolyNull E>} in
+except that this is illegal syntax:  ``\code{ArrayList<@PolyNull E>}'' in
 the receiver position is not legal.  It is permissible to write an
 annotation on the raw type of the receiver, as in
 
@@ -3236,8 +3243,8 @@ Here are other examples:
     public int size() @Readonly List<@Readonly T> { ... }
   }
   class MyMap<T,U> {
-    // The method requires that the map's keys be non-null, but the values may be arbitrary.
-    public void requiresNonNullKeys() MyMap<@NonNull T,U> { ... }
+    // The method requires that the map's values be non-null, but the keys may be arbitrary.
+    public void requiresNonNullKeys() MyMap<T, @NonNull U> { ... }
   }
 \end{Verbatim}
 
