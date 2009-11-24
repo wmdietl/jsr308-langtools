@@ -1186,8 +1186,12 @@ public class JavacParser implements Parser {
                     mode = TYPE;
                     if (S.token() == RBRACKET) {
                         S.nextToken();
-                        t = bracketsOpt(t, annos);
-                        t = toP(F.at(pos1).TypeArray(t));
+
+                        t = bracketsOpt(t);
+                        t = toP(F.at(pos).TypeArray(t));
+                        if (annos.nonEmpty())
+                            t = toP(F.at(pos).AnnotatedType(annos, t));
+
                         return t;
                     }
                     mode = oldmode;
