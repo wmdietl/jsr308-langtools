@@ -389,7 +389,7 @@ in the compiled class file, then the annotation must be present, in the
 compiled class file, on the type of the compiled representation of the
 expression.  For annotations within a field initializer or a
 static initializer block, the compiled representation might be in an
-\code{init} or \code{clinit} method, or in a helper method called by them.
+\code{<init>} or \code{<clinit>} method, or in a helper method called by them.
 
 If the compiler optimizes away an expression, then it may also
 optimize away the annotation.  (Exception:  when a type cast
@@ -837,7 +837,7 @@ When the type annotation's target is a method parameter,
 indicates which of the method's formal parameters is being annotated:
 
 \begin{Verbatim}
-    methodparam_target{
+    methodparam_target {
         u1 parameter_index;
     };
 \end{Verbatim}
