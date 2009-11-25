@@ -83,7 +83,7 @@ sample annotation processors.
 JSR 308 extends Java's annotation system~\cite{JSR175} so that
 annotations may appear on nearly any use of a type.
 (By contrast, Java~SE~6 permits annotations only on
-class/method/field/variable declarations; JSR 308 is
+declarations; JSR 308 is
 backward-compatible and continues to permit those annotations.)
 Such a generalization removes
 % removed "arbitrary" in response to Brian Goetz comment.
@@ -159,7 +159,8 @@ see \myurl{http://types.cs.washington.edu/jsr308/jsr308-faq.html}.
 
 In Java SE 6, annotations can be written only on method parameters
 and the declarations of packages, classes, methods, fields, and local variables.
-JSR 308 extends Java to allow annotations on any use of a type.
+JSR 308 extends Java to allow annotations on nearly any use of a type, and
+on type parameter declarations.
 % (whether explicit or implicit, as in the case of method receivers)
 JSR 308 uses a simple prefix syntax for type annotations, with a special case
 for receiver types and for constructor results.
@@ -181,6 +182,9 @@ for receiver types and for constructor results.
   just after the parameter list and before any \code{throws} clause.
   (Each non-static method has an implicit parameter, \code{this}, which is
   called the \emph{receiver}.)
+\item
+  An annotation on a type parameter declaration appears before the declared
+  name or wildcard.
 \end{enumerate}
 
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
@@ -198,7 +202,7 @@ Section~\ref{type-annotation-syntax-examples} contains examples of the annotatio
 This section
 % Section~\ref{grammar-summary}
 summarizes the Java language grammar changes, which correspond to
-the three rules of Section~\ref{type-annotation-locations}.
+the rules of Section~\ref{type-annotation-locations}.
 Section~\ref{grammar-details} shows the grammar changes in detail.
 Additions are \underline{underlined}.
 % and deletions crossed out.
@@ -247,25 +251,6 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 %             [final] Type FormalParameterDeclsRest]
 
 
-Annotations may appear on the type parameter declaration in a class or method
-declaration.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
-\end{tabbing}
-
-Annotations may appear on the wildcard in any type argument.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeArgument}: \\
-\qquad            \new{\opt{\nt{Annotations}}} ? \opt{\nt{(} extends \altor{} super \nt{)} \nt{Type}}
-\end{tabbing}
-
-
-
 \item
 To permit annotations on levels of an array (in declarations, not
 constructors), change ``\multi{\term{[]}}''  to
@@ -302,6 +287,27 @@ to ``\nt{FormalParameters} \new{\opt{Annotations}}''.  For example:
 \nt{VoidMethodDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{throws \nt{QualifiedIdentifierList}} \nt{(} \nt{MethodBody} \altor{} \term{;} \nt{)}
 \end{tabbing}
+
+
+\item
+Annotations may appear on the type parameter declaration in a class or method
+declaration.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeParameter}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+\end{tabbing}
+
+Annotations may also appear on the wildcard in any type argument.
+A wildcard is the declaration of an anonymous (unnamed) type parameter.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeArgument}: \\
+\qquad            \new{\opt{\nt{Annotations}}} ?\ \opt{\nt{(} extends \altor{} super \nt{)} \nt{Type}}
+\end{tabbing}
+
 
 \end{enumerate}
 
@@ -374,13 +380,13 @@ described in Section~\ref{class-file}.
 % (The JLS needs to be updated to so state.)
 
 The compiler is required to preserve annotations in the class file.  More
-precisely, if a programmer places an annotation (with class file or runtime
-retention) on the type of an expression, and that expression is represented
+precisely, if an expression has an annotated type (and the annotation has
+class file or runtime retention), and that expression is represented
 in the compiled class file, then the annotation must be present, in the
 compiled class file, on the type of the compiled representation of the
-expression.  For annotations within a field initializer or a
-static initializer block, the compiled representation might be in an
-\code{<init>} or \code{<clinit>} method, or in a helper method called by them.
+expression.  For expressions within a field initializer or a static
+initializer block, the compiled representation might be in an \code{<init>}
+or \code{<clinit>} method, or in a helper method called by them.
 
 If the compiler optimizes away an expression, then it may also
 optimize away the annotation.  (Exception:  when a type cast
@@ -415,6 +421,7 @@ be copied from the method being invoked.
 \newcommand{\RuntimeVisibleParameterAnnotations}{\code{Runtime\-Visible\-Parameter\-Annotations}\xspace}
 \newcommand{\RuntimeInvisibleParameterAnnotations}{\code{Runtime\-Invisible\-Parameter\-Annotations}\xspace}
 \newcommand{\RuntimeInOrVisibleParameterAnnotations}{\code{Runtime}\-[\code{In}]\code{visible\-Parameter\-Annotations}\xspace}
+\newcommand{\RuntimeInOrVisibleAnnotationsOrParameterAnnotations}{\code{Runtime}\-[\code{In}]\code{visible}[\code{Parameter}]\code{Annotations}\xspace}
 \newcommand{\RuntimeVisibleTypeAnnotations}{\code{Runtime\-Visible\-Type\-Annotations}\xspace}
 \newcommand{\RuntimeInvisibleTypeAnnotations}{\code{Runtime\-Invisible\-Type\-Annotations}\xspace}
 \newcommand{\RuntimeInOrVisibleTypeAnnotations}{\code{Runtime}\-[\code{In}]\code{visible\-Type\-Annotations}\xspace}
@@ -432,7 +439,8 @@ permitted in Java SE 6 source code but are discarded by the compiler.
 
 The class file format represents the type of every variable and expression
 in a Java class, including all temporaries and values stored on the stack.
-(Sometimes the representation is explicit, and sometimes it is implicit.)
+(Sometimes the representation is explicit, such as via the
+\code{StackMapTable} attribute, and sometimes it is implicit.)
 Since JSR 308 permits annotations to be added to a type, the class file
 format should be updated to continue to represent the full, annotated type
 of each expression.
@@ -730,6 +738,9 @@ of the \code{target\_info} is determined by the value of
 
 % , and in some cases the size of \code{target\_info} is zero ...
 
+See Section~\ref{class-file:ext:ri:typearg} for handling of generic
+type arguments and arrays.
+
 
 
 \subsubsection{Typecasts, type tests, object creation, and class literals\label{class-file:ext:ri:typecast}}
@@ -770,9 +781,6 @@ generation for existing compilers to be unaffected.
 An \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{offset\_target} lives in the attributes table of a
 \code{method\_info} structure.
-
-See Section~\ref{class-file:ext:ri:typearg} for handling of generic
-type arguments and arrays.
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
 % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
@@ -866,9 +874,6 @@ a method receiver lives in the attributes table of a
 % TODO: Specify methodorfield_target
 When the type annotation's target is a method return type, a constructor
 result, or a field, \code{target\_info} is empty.
-
-Section~\ref{class-file:ext:ri:typearg} describes the \code{target\_info}
-if the target is a type argument.
 
 % TODO: Make the following paragraph consistent with the rest
 An \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
@@ -1019,7 +1024,7 @@ has the following structure:
 Here are examples:
 
 \noindent
-\code{@A} in \code{void m(List<? extends @A String> lst) \{ ... \}} is described as:
+\code{@A} in \code{void m(List<?\ extends @A String> lst) \{ ... \}} is described as:
 
 \begin{Verbatim}
    target_type = WILDCARD_BOUND
@@ -1034,7 +1039,7 @@ Here are examples:
 \end{Verbatim}
 
 \noindent
-\code{@B} in \code{Map<Object, ? extends List<@B String>> newMap() \{ ... \}} is described as:
+\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \{ ... \}} is described as:
 
 \begin{Verbatim}
    target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
@@ -1349,7 +1354,7 @@ annotation), equality-checking errors (via a \code{@Interned} annotation),
 mutation errors (via the Javari~\cite{BirkaE2004,TschantzE2005} type
 system), and mutation errors (via the IGJ~\cite{ZibinPAAKE2007} type
 system).  A paper~\cite{PapiACPE2008} discusses experience
-in which these plug-ins exposed bugs in real programmers.
+in which these plug-ins exposed bugs in real programs.
 
 
 \subsection{Examples of type qualifiers\label{type-qualifier-examples}}
@@ -1438,7 +1443,8 @@ enables its clients to depend on the fact that it will always return a
 \textbf{(2)}
 The two \code{@Readonly} annotations on method \code{getNeighbors}
 (line~\ref{getNeighbors}) guarantee to clients that the method does not
-modify, respectively, its \code{Vertex} argument or its \code{DAG} receiver.
+modify, respectively, its \code{Vertex} argument or its \code{DAG} receiver
+(including its \code{edges} set or any edge in that set).
 The lack of a \code{@Readonly} annotation on the return value indicates
 that clients are free to modify the returned \code{List}.
 \newline
@@ -1655,7 +1661,7 @@ It is not currently possible to express constraints on the generic
 parameters of the receiver.  See
 Section~\ref{receiver-type-parameter-annotations}.
 
-\item for constructor results:
+\item for constructor declaration return types:
 
 \preverbnegspace
 % TODO:  Use a more realistic example.
@@ -1701,7 +1707,7 @@ It is not permitted to omit the Java type, as in
 \code{myString = (@NonNull) myObject;}; see
 Sections~\ref{type-annotation-use-cases} and~\ref{implicit-java-types-in-casts}.
 
-\item for constructor results:
+\item for constructor invocation results:
 
 \preverbnegspace
 \begin{Verbatim}
@@ -2070,21 +2076,21 @@ Java program.
 
 Annotation of the type test permits the idiom
 
-%BEGIN LATEX
-\begin{Verbatim}[commandchars=\\\[\]]
-  if (x instanceof \emph[MyType]) {
-    ... (\emph[MyType]) x ...
-  }
-\end{Verbatim}
-%END LATEX
-%BEGIN HEVEA
+\ifhevea
 \begin{Verbatim}
   if (x instanceof MyType) {
     ... (MyType) x ...
   }
 \end{Verbatim}
-%END HEVEA
+\else
+\begin{Verbatim}[commandchars=\\\[\]]
+  if (x instanceof \emph[MyType]) {
+    ... (\emph[MyType]) x ...
+  }
+\end{Verbatim}
+\fi
 
+\noindent
 to be used with the same annotated type \emph{\code{T}} in both
 occurrences.  By contrast, using different types in the type test and the
 type cast might be confusing.
@@ -2259,7 +2265,7 @@ type ``length-2 array of length-5 array of Strings'':
   order of reading:  2------------->  1 ------------------------>
 \end{Verbatim}
 
-The prefix notation is natural, because because the type is read in exactly
+The prefix notation is natural, because the type is read in exactly
 the same order as any Java array type.  As another example, to express
 ``non-null array of length-10 arrays of English Strings'' a programmer
 would write
@@ -2447,7 +2453,7 @@ the compiler applies the annotation to every
 target that is consistent with its meta-annotation (see
 Section~\ref{target-meta-annotation}).
 In practice, programmers
-have no difficulty in understanding what a given annotation means.
+have no difficulty in understanding where a given annotation applies.
 
 
 % Alternative syntaxes for receiver annotations:
@@ -2769,7 +2775,7 @@ is expressible in Java SE 5 (see Section~\ref{compiler-mods}).  It is
 desirable for class file tools to be able to read at least that subset of
 type qualifiers.  Therefore, APIs for reading annotations from a class file
 should be dependent on the class file version (as a number of APIs already
-are).  If the class file version indicates Java 5 or 6, and none of the
+are).  If the class file version indicates Java SE 5 or 6, and none of the
 extended annotations defined by JSR 308 appear in the class file, then the
 API may return (all) annotations from declarations when queried for the
 annotations on the top-level type associated with the declaration (for
@@ -3632,7 +3638,8 @@ At first glance it would appear that you could never annotate with such a type, 
 @Foo int i;
 \end{Verbatim}
 
-If this were legal, the resulting annotation would self-referential (or infinite), as well as useless.
+If this were legal, the resulting annotation would be self-referential (or
+infinite), as well as useless.
 \end{quote}
 
 
@@ -3704,6 +3711,8 @@ defined by third parties or by the programmer himself.
 For more details about JSR 305, see
 \myurl{http://jcp.org/en/jsr/detail?id=305} and
 \myurl{http://groups.google.com/group/jsr-305/}.
+Since JSR 305 appears to be abandoned, this section is now primarily of
+historical interest.
 
 Any type annotation, including those defined by JSR 305, is of limited use
 without the JSR 308 syntax.  Without the JSR 308 annotation syntax, a
@@ -3715,11 +3724,16 @@ is even worse than the type unsoundness of pre-generics Java, when there
 was no compiler-enforced type correctness guarantee for collections
 classes.  Therefore, use of JSR 305 without JSR 308 is much less effective.
 
-As of fall 2008, no reference implementation that uses JSR 305 annotations
-is planned.  This hinders both programmers who want to use the annotations,
+% As of fall 2008,
+The JSR 305 team does not plan any reference implementation.
+This hinders both programmers who want to use the annotations,
 and also people trying to interpret the meaning of the specification.  By
-contrast, the JSR 308 reference implementation and the Checker framework
+contrast, the JSR 308 reference implementation and the Checker Framework
 for compile-time type-checking have been available since January 2007.
+The Checker Framework contains checkers for many of the most useful
+annotations proposed in JSR 305.
+
+
 
 
 % For
@@ -3912,7 +3926,7 @@ The specification, reference implementation, and tests developed by the
 JSR 308 community are freely available, with no restrictions on use.  As of
 build M4 (see \url{http://openjdk.java.net/projects/jdk7/milestones/}), the
 reference implementation has been incorporated into Sun's OpenJDK Java
-implementation.  Sun will integrate tho specification into the JLS (without
+implementation.  Sun will integrate the specification into the JLS (without
 any conceptual changes or new information), will write additional tests,
 etc.  We do not have control over the license terms that Sun places on its
 changes.
@@ -3965,7 +3979,7 @@ Edits to the Java Virtual Machine Specification (JVMS)~\cite{LindholmY99,Lindhol
       The most important of these is the following:
 \begin{itemize}
 \item
-        Sections 4.8.15-18 define the Runtime{V,Inv}isible{,Parameter}Annotations
+        Sections 4.8.15-18 define the \RuntimeInOrVisibleAnnotationsOrParameterAnnotations
         attributes.  (See
         \ahrefurl{\url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}}
         for the JDK 1.5 revisions to chapter 4, ``The class file Format''.)
@@ -4217,6 +4231,6 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  expressionStack ExpressionStackIncrement genericsStack YAML wiki
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
-% LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic
+% LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
 % LocalWords:  QualifiedIdentifier toArray localvar methodparam typeparam
-% LocalWords:  typearg ClassFile
+% LocalWords:  typearg ClassFile clinit StackMapTable
