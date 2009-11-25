@@ -28,8 +28,8 @@ webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 
 # Warning!  "make web" makes a public release!
 # Before doing this, update jsr308-changes.html.  Determine changes via log or diff:
-#   hg log --style changelog --date '>{2009-05-14}' design.tex jsr308-faq.html
-# where "{2009-05-14}" is the date of the previous entry in jsr308-changes.html
+#   hg log --style changelog --date '>2009-05-14' design.tex jsr308-faq.html
+# where "2009-05-14" is the date of the previous entry in jsr308-changes.html
 web: \
 ${jsr308_www} \
 ${jsr308_www}/jsr308-webpage.html \
