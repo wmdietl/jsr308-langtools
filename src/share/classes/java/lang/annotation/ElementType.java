@@ -65,6 +65,6 @@ public enum ElementType {
     /** Type parameter declaration */
     TYPE_PARAMETER,
 
-    /** Uses of a type */
+    /** Use of a type */
     TYPE_USE
 }
