@@ -2392,17 +2392,17 @@ annotation need not also be meta-annotated with the targets
 type, or a field type --- and it generally should \emph{not} contain such a
 \code{@Target} meta-annotation.
 \item
-  A type annotation may not appear before a void method.
+  A type annotation may not appear before a void method (a method with no
+  return type).
 \item
-A type
-annotation may not appear on a package (packages do not contain a use of a type).
+  A type annotation may not appear on a package (a package declaration does
+  not contain a use of a type).
 \item
-A type annotation may appear before a 
-constructor, in which case it represents the object that the constructor is
-creating.
+  A type annotation may appear before a constructor, in which case it
+  represents the object that the constructor is creating.
 \item
   As with any other non-static method, a type annotation may
-appear on the receiver of an inner class constructor.
+  appear on the receiver of an inner class constructor.
 \end{itemize}
 
 
@@ -2416,7 +2416,7 @@ considered bad style.
 
 When an annotation has no \code{@Target} meta-annotation (which is bad
 style!), it is treated as if it applies to all locations.
-
+%
 For example, the
 \code{@Deprecated} annotation lacks a \code{@Target} annotation, so in this
 code:
@@ -2428,7 +2428,17 @@ code:
 \noindent
 the \code{@Deprecated} annotation applies to both the \code{foo} method,
 and the \code{int} data type.  (It will be ignored by any type annotation
-processor, so it does no harm on the \code{int} data type.)
+processor, so it does no harm on the \code{int} data type.)  
+The \code{@Deprecated} annotation appears twice in the AST during
+annotation processing, and it appears twice in the classfile.
+% In other words, a Java 6 and a Java 7 compiler would
+% produce classfiles with different numbers of annotations.
+Classfile processing tools, such as decompilers, must take care not to
+write an annotation twice in the decompiled code.  This requirement does
+not add extra work when constructing the tool, since the tool has to handle
+the case where the \<@Target> annotation explicitly included both
+\<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
+
 
 In summary:  for certain syntactic locations, which target (Java construct)
 is being annotated depends on the annotation.
