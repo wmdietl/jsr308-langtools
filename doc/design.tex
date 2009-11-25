@@ -346,16 +346,7 @@ denoted by \code{ElementType.TYPE\_PARAMETER},
 
 If an annotation is not meta-annotated with \<@Target> (which would be poor
 style), then the compiler treats the annotation as if it is
-meta-annotated with all of the \code{ElementType} enum constants
-that are defined in Java SE 6:  
-\code{ANNOTATION\_TYPE},
-\code{CONSTRUCTOR},
-\code{FIELD},
-\code{LOCAL\_VARIABLE},
-\code{METHOD},
-\code{PACKAGE},
-\code{PARAMETER}, and
-\code{TYPE}.
+meta-annotated with all of the \code{ElementType} enum constants.
 
 The compiler applies an annotation to every target that is consistent with
 its meta-annotation.  The order of annotations is not used to disambiguate.
@@ -2424,14 +2415,7 @@ considered bad style.
 
 
 When an annotation has no \code{@Target} meta-annotation (which is bad
-style!), it is treated as if it applies to all locations that were possible
-in Java SE 6.  
-If there is no \code{@Target} meta-annotation, a Java SE 6
-and a Java SE 7 put the same 
-annotations in the \code{.class} file, and no annotation is placed
-on multiple locations nor appears more than once in the \code{.class} file.
-If you wish to write a type annotation, you must meta-annotate its
-definition with \code{@Target(ElementType.TYPE\_USE)}.
+style!), it is treated as if it applies to all locations.
 
 For example, the
 \code{@Deprecated} annotation lacks a \code{@Target} annotation, so in this
@@ -2442,8 +2426,9 @@ code:
 \end{Verbatim}
 
 \noindent
-the \code{@Deprecated} annotation applies to only the \code{foo} method,
-not the \code{int} data type.
+the \code{@Deprecated} annotation applies to both the \code{foo} method,
+and the \code{int} data type.  (It will be ignored by any type annotation
+processor, so it does no harm on the \code{int} data type.)
 
 In summary:  for certain syntactic locations, which target (Java construct)
 is being annotated depends on the annotation.
