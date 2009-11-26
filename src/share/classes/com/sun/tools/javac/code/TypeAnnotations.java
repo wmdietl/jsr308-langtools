@@ -669,7 +669,7 @@ public class TypeAnnotations {
     AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return AnnotationType.BOTH;
+        if (atTarget == null) return annotationTypeWithNoTargetMeta(a, s);
         Attribute atValue = atTarget.member(names.value);
         if (!(atValue instanceof Attribute.Array)) return AnnotationType.DECLARATION; // error recovery
         Attribute.Array arr = (Attribute.Array) atValue;
@@ -716,6 +716,15 @@ public class TypeAnnotations {
             return AnnotationType.BOTH;
         else
             return isType ? AnnotationType.TYPE : AnnotationType.DECLARATION;
+    }
+
+    private AnnotationType annotationTypeWithNoTargetMeta(Compound a, Symbol s) {
+        if (s.kind == TYP || s.kind == VAR
+            || (s.kind == MTH && !s.isConstructor() &&
+                    s.type.getReturnType().tag != VOID))
+            return AnnotationType.BOTH;
+        else
+            return AnnotationType.DECLARATION;
     }
 
 }
