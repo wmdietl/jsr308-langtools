@@ -669,7 +669,7 @@ public class TypeAnnotations {
     AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return AnnotationType.DECLARATION;
+        if (atTarget == null) return AnnotationType.BOTH;
         Attribute atValue = atTarget.member(names.value);
         if (!(atValue instanceof Attribute.Array)) return AnnotationType.DECLARATION; // error recovery
         Attribute.Array arr = (Attribute.Array) atValue;

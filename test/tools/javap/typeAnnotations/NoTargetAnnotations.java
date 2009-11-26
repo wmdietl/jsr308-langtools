@@ -25,14 +25,14 @@ import java.io.*;
 import com.sun.tools.classfile.*;
 
 /*
- * @test JSR175Annotations
- * @bug 6843077
- * @summary test that only type annotations are recorded as such in classfile
+ * @test NoTargetAnnotations
+ * @summary test that annotations with no Target meta type is emitted
+ *          twice: once as type annotation, and once as declaration annotation
  */
+public class NoTargetAnnotations {
 
-public class JSR175Annotations {
     public static void main(String[] args) throws Exception {
-        new JSR175Annotations().run();
+        new NoTargetAnnotations().run();
     }
 
     public void run() throws Exception {
@@ -42,9 +42,11 @@ public class JSR175Annotations {
         ClassFile cf = ClassFile.read(classFile);
         for (Field f : cf.fields) {
             test(cf, f);
+            testDeclaration(cf, f);
         }
         for (Method m: cf.methods) {
             test(cf, m);
+            testDeclaration(cf, m);
         }
 
         countAnnotations();
@@ -62,6 +64,16 @@ public class JSR175Annotations {
     void test(ClassFile cf, Field m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
+    void testDeclaration(ClassFile cf, Method m) {
+        testDecl(cf, m, Attribute.RuntimeVisibleAnnotations, true);
+        testDecl(cf, m, Attribute.RuntimeInvisibleAnnotations, false);
+    }
+
+    void testDeclaration(ClassFile cf, Field m) {
+        testDecl(cf, m, Attribute.RuntimeVisibleAnnotations, true);
+        testDecl(cf, m, Attribute.RuntimeInvisibleAnnotations, false);
     }
 
     // test the result of Attributes.getIndex according to expectations
@@ -96,19 +108,44 @@ public class JSR175Annotations {
         }
     }
 
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void testDecl(ClassFile cf, Method m, String name, boolean visible) {
+        int index = m.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = m.attributes.get(index);
+            assert attr instanceof RuntimeAnnotations_attribute;
+            RuntimeAnnotations_attribute tAttr = (RuntimeAnnotations_attribute)attr;
+            this.declAnnotations += tAttr.annotations.length;
+        }
+    }
+
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void testDecl(ClassFile cf, Field m, String name, boolean visible) {
+        int index = m.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = m.attributes.get(index);
+            assert attr instanceof RuntimeAnnotations_attribute;
+            RuntimeAnnotations_attribute tAttr = (RuntimeAnnotations_attribute)attr;
+            this.declAnnotations += tAttr.annotations.length;
+        }
+    }
+
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+
         out.println("import java.lang.annotation.Retention;");
         out.println("import java.lang.annotation.RetentionPolicy;");
-        out.println("abstract class Test { ");
+        out.println("abstract class Test {");
         out.println("  @Retention(RetentionPolicy.RUNTIME)");
-        out.println("  @interface A { }");
-        out.println("  @A String m;");
-        out.println("  @A String method(@A String a) {");
-        out.println("    return a;");
+        out.println("  @interface A {}");
+        out.println("  @A String method() {");
+        out.println("    return null;");
         out.println("  }");
         out.println("}");
+
         out.close();
         return f;
     }
@@ -122,7 +159,7 @@ public class JSR175Annotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 6;
+        int expected_visibles = 0, expected_invisibles = 1, expected_decl = 1;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
@@ -143,10 +180,17 @@ public class JSR175Annotations {
                     + " invisibles annotations but found " + invisibles);
         }
 
+        if (expected_decl != declAnnotations) {
+            errors++;
+            System.err.println("expected " + expected_decl
+                    + " declaration annotations but found " + declAnnotations);
+        }
     }
 
     int errors;
     int all;
     int visibles;
     int invisibles;
+
+    int declAnnotations;
 }
