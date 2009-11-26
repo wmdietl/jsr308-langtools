@@ -119,6 +119,8 @@ public class TypeAnnotations {
 
         @Override
         public void visitMethodDef(final JCMethodDecl tree) {
+            // clear all annotations
+            tree.sym.typeAnnotations = List.nil();
             if (!areAllDecl(tree.sym))
                 shuffleTypeAnnotations(tree.sym, tree.sym.type.getReturnType(),
                         new TypeAnnotationPosition(TargetType.METHOD_RETURN));
@@ -137,6 +139,7 @@ public class TypeAnnotations {
 
         @Override
         public void visitVarDef(final JCVariableDecl tree) {
+            tree.sym.typeAnnotations = List.nil();
             if (!areAllDecl(tree.sym)) {
                 if (tree.sym.getKind() == ElementKind.FIELD) {
                     shuffleTypeAnnotations(tree.sym, tree.sym.type,
@@ -669,7 +672,7 @@ public class TypeAnnotations {
     AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return annotationTypeWithNoTargetMeta(a, s);
+        if (atTarget == null) return inferTargetMetaInfo(a, s);
         Attribute atValue = atTarget.member(names.value);
         if (!(atValue instanceof Attribute.Array)) return AnnotationType.DECLARATION; // error recovery
         Attribute.Array arr = (Attribute.Array) atValue;
@@ -718,7 +721,7 @@ public class TypeAnnotations {
             return isType ? AnnotationType.TYPE : AnnotationType.DECLARATION;
     }
 
-    private AnnotationType annotationTypeWithNoTargetMeta(Compound a, Symbol s) {
+    private AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
         if (s.kind == TYP || s.kind == VAR
             || (s.kind == MTH && !s.isConstructor() &&
                     s.type.getReturnType().tag != VOID))

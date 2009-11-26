@@ -122,7 +122,7 @@ public class JSR175Annotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 6;
+        int expected_visibles = 3, expected_invisibles = 0;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

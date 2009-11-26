@@ -151,7 +151,7 @@ public class NoTargetAnnotations {
     }
 
     File compileTestFile(File f) {
-        int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.7", "-g", f.getPath() });
+        int rc = com.sun.tools.javac.Main.compile(new String[] { "-XDTA:writer", "-source", "1.7", "-g", f.getPath() });
         if (rc != 0)
             throw new Error("compilation failed. rc=" + rc);
         String path = f.getPath();
@@ -159,7 +159,7 @@ public class NoTargetAnnotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 1, expected_decl = 1;
+        int expected_visibles = 1, expected_invisibles = 0, expected_decl = 1;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

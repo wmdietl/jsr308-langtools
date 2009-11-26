@@ -68,10 +68,10 @@ public class Fields {
 
     @TADescriptions({})
     public String fieldWithDeclarationAnnotatin() {
-        return "@Deprecated String test;";
+        return "@Decl String test;";
     }
 
-    @TADescriptions({})
+    @TADescription(annotation = "TA", type = FIELD)
     public String fieldWithNoTargetAnno() {
         return "@A String test;";
     }

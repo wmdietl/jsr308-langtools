@@ -68,10 +68,10 @@ public class MethodReturns {
 
     @TADescriptions({})
     public String methodWithDeclarationAnnotatin() {
-        return "@Deprecated String test() { return null; }";
+        return "@Decl String test() { return null; }";
     }
 
-    @TADescriptions({})
+    @TADescription(annotation = "TA", type = METHOD_RETURN)
     public String methodWithNoTargetAnno() {
         return "@A String test() { return null; }";
     }

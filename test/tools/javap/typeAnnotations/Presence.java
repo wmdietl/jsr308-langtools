@@ -159,7 +159,7 @@ public class Presence {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 39;
+        int expected_visibles = 0, expected_invisibles = 42;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

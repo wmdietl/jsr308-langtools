@@ -68,10 +68,10 @@ public class MethodParameters {
 
     @TADescriptions({})
     public String methodWithDeclarationAnnotatin() {
-        return "void test(@Deprecated String a) { }";
+        return "void test(@Decl String a) { }";
     }
 
-    @TADescriptions({})
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0)
     public String methodWithNoTargetAnno() {
         return "void test(@A String a) { }";
     }
