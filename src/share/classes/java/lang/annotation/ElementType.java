@@ -47,7 +47,7 @@ public enum ElementType {
     /** Method declaration */
     METHOD,
 
-    /** Parameter declaration */
+    /** Formal parameter declaration */
     PARAMETER,
 
     /** Constructor declaration */
@@ -62,9 +62,9 @@ public enum ElementType {
     /** Package declaration */
     PACKAGE,
 
-    /** Uses of a type */
-    TYPE_USE,
+    /** Type parameter declaration */
+    TYPE_PARAMETER,
 
-    /** type parameters */
-    TYPE_PARAMETER
+    /** Use of a type */
+    TYPE_USE
 }
