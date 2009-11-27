@@ -120,27 +120,27 @@ public class TypeAnnotations {
         @Override
         public void visitMethodDef(final JCMethodDecl tree) {
             // clear all annotations
-            tree.sym.typeAnnotations = List.nil();
-            if (!areAllDecl(tree.sym))
-                shuffleTypeAnnotations(tree.sym, tree.sym.type.getReturnType(),
-                        new TypeAnnotationPosition(TargetType.METHOD_RETURN));
-            int i = 0;
-            for (JCVariableDecl param : tree.params) {
-                if (!areAllDecl(param.sym)) {
-                    TypeAnnotationPosition pos =
-                        new TypeAnnotationPosition(TargetType.METHOD_PARAMETER);
-                    pos.parameter_index = i;
-                    shuffleTypeAnnotations(param.sym, param.sym.type, pos);
+            if (!visitBodies) {
+                if (!areAllDecl(tree.sym))
+                    shuffleTypeAnnotations(tree.sym, tree.sym.type.getReturnType(),
+                            new TypeAnnotationPosition(TargetType.METHOD_RETURN));
+                int i = 0;
+                for (JCVariableDecl param : tree.params) {
+                    if (!areAllDecl(param.sym)) {
+                        TypeAnnotationPosition pos =
+                            new TypeAnnotationPosition(TargetType.METHOD_PARAMETER);
+                        pos.parameter_index = i;
+                        shuffleTypeAnnotations(param.sym, param.sym.type, pos);
+                    }
+                    ++i;
                 }
-                ++i;
             }
             super.visitMethodDef(tree);
         }
 
         @Override
         public void visitVarDef(final JCVariableDecl tree) {
-            tree.sym.typeAnnotations = List.nil();
-            if (!areAllDecl(tree.sym)) {
+            if (!visitBodies && !areAllDecl(tree.sym)) {
                 if (tree.sym.getKind() == ElementKind.FIELD) {
                     shuffleTypeAnnotations(tree.sym, tree.sym.type,
                             new TypeAnnotationPosition(TargetType.FIELD));
