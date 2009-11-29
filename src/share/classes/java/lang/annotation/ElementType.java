@@ -47,7 +47,7 @@ public enum ElementType {
     /** Method declaration */
     METHOD,
 
-    /** Parameter declaration */
+    /** Formal parameter declaration */
     PARAMETER,
 
     /** Constructor declaration */
