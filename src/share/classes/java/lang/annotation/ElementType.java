@@ -63,14 +63,14 @@ public enum ElementType {
     PACKAGE,
 
     /**
-     * Uses of a type
+     * Use of a type
      *
      * @since 1.7
      */
     TYPE_USE,
 
     /**
-     * type parameters
+     * type parameter declaration
      *
      * @since 1.7
      */
