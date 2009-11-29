@@ -4,6 +4,8 @@
 ^TAGS$
 ~$
 ^.\#
+^.project$
+^.classpath$
 doc/design.aux
 doc/design.blg
 doc/design.dvi
