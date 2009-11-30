@@ -70,7 +70,7 @@ public enum ElementType {
     TYPE_USE,
 
     /**
-     * type parameter declaration
+     * Type parameter declaration
      *
      * @since 1.7
      */
