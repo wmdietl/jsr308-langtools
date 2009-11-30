@@ -594,7 +594,6 @@ extended_annotation {
         supertype_target;
         typeindex_target;
         wildcard_bound_target;
-        
         empty_target;
     } target_info;  // uniquely identifies the targeted program element, see Section 4.3
 }
@@ -854,9 +853,15 @@ A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 
 \subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
 
-% TODO: Specify an empty_target here!
 When the annotation's target is a method receiver (or an inner class
-constructor receiver), \code{target\_info} is empty.
+constructor receiver), \code{target\_info} is empty.  More formally, it
+contains \code{empty\_target}:
+
+\begin{Verbatim}
+    empty_target {
+    };
+\end{Verbatim}
+
 
 % TODO: Make the following paragraph consistent with the rest
 A \RuntimeInOrVisibleTypeAnnotations attribute targeting
@@ -873,7 +878,7 @@ a method receiver appears in the attributes table of a
 
 % TODO: Specify methodorfield_target
 When the type annotation's target is a method return type, a constructor
-result, or a field, \code{target\_info} is empty.
+result, or a field, \code{target\_info} is empty (contains \code{empty\_target}).
 
 % TODO: Make the following paragraph consistent with the rest
 A \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
