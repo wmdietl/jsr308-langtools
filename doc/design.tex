@@ -778,8 +778,8 @@ underlying Java type system (which sees a cast from \code{String} to
 creates the target expression instead.  This approach permits code
 generation for existing compilers to be unaffected.
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{offset\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{offset\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
@@ -832,8 +832,8 @@ challenges.  For example, live ranges are not isomorphic to local
 variables.  Further, a local variable with no live range may not appear in
 the class file (but it is also irrelevant to the program).
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{localvar\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{localvar\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
@@ -848,8 +848,8 @@ indicates which of the method's formal parameters is being annotated:
     };
 \end{Verbatim}
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{methodparam\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{methodparam\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 \subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
@@ -859,8 +859,8 @@ When the annotation's target is a method receiver (or an inner class
 constructor receiver), \code{target\_info} is empty.
 
 % TODO: Make the following paragraph consistent with the rest
-An \RuntimeInOrVisibleTypeAnnotations attribute targeting
-a method receiver lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute targeting
+a method receiver appears in the attributes table of a
 \code{method\_info} structure.
 
 
@@ -876,10 +876,10 @@ When the type annotation's target is a method return type, a constructor
 result, or a field, \code{target\_info} is empty.
 
 % TODO: Make the following paragraph consistent with the rest
-An \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
-type lives in the attributes table of a \code{field\_info} structure.
-An \RuntimeInOrVisibleTypeAnnotations attribute targeting a method return
-type lives in the attributes table of a \code{method\_info} structure.
+A \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
+type appears in the attributes table of a \code{field\_info} structure.
+A \RuntimeInOrVisibleTypeAnnotations attribute targeting a method return
+type appears in the attributes table of a \code{method\_info} structure.
 
 \subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
 
@@ -895,8 +895,8 @@ following structure:
 
 \code{param\_index} specifies the 0-based index of the type parameter.
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{offset\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{offset\_target} appears in the attributes table of a
 \code{method\_info} structure if it 
 
 \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
@@ -926,8 +926,8 @@ Here
 \code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
 \code{@C} has \code{param\_index} 1 and \code{bound\_index} 0.
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure if it targets a method type parameter bound,
 otherwise, in the \code{attributes} of \code{ClassFile} structure if it
 targets a class declaration type parameter bound.
@@ -955,8 +955,8 @@ annotations are attached to a single bytecode, not a bytecode range.
 \code{type\_index} specifies the index of the type argument in the
 expression.
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 
@@ -980,8 +980,8 @@ superinterface type (counting from zero).
 % TODO: handle superclass properly
 \code{-1} (\code{65535}) is used if the annotation is on the superclass type.
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{supertype\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{supertype\_target} appears in the attributes table of a
 \code{ClassFile} structure.
 
 
@@ -1001,8 +1001,8 @@ clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
 simply the value $i$ denotes an annotation on the $i$th exception
 type (counting from zero).
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} lives in the attributes table of a
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 
@@ -1059,8 +1059,8 @@ Here are examples:
    }
 \end{Verbatim}
 
-An \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{wildcard\_bound\_target} lives in the attributes table of
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{wildcard\_bound\_target} appears in the attributes table of
 
 \begin{enumerate}
 \item
