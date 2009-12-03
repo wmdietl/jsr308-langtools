@@ -2391,12 +2391,11 @@ use ``type annotation'' as shorthand for ``an annotation that is
 meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
 \begin{itemize}
 \item
-A type
-annotation need not also be meta-annotated with the targets
-\code{ElementType.TYPE}, \code{ElementType.METHOD}, or
-\code{ElementType.FIELD} in order to be applied to a class, a method return
-type, or a field type --- and it generally should \emph{not} contain such a
-\code{@Target} meta-annotation.
+  A type annotation need not also be meta-annotated with the targets
+  \code{ElementType.TYPE}, \code{ElementType.METHOD}, or
+  \code{ElementType.FIELD} in order to be applied to a class, a method
+  return type, or a field type --- and it generally should \emph{not}
+  contain such a \code{@Target} meta-annotation.
 \item
   A type annotation may not appear before a void method (a method with no
   return type).  This also follows from the fact that \code{void} is not a
