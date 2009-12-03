@@ -2423,24 +2423,25 @@ considered bad style.
 When an annotation has no \code{@Target} meta-annotation (which is bad
 style!), it is treated as if it applies to all locations.
 %
-For example, the
-\code{@Deprecated} annotation lacks a \code{@Target} annotation, so in this
-code:
+For example, if the \code{@Foo} annotation definition lacks a
+\code{@Target} meta-annotation, then in this code:
 
 \begin{Verbatim}
-  @Deprecated int foo() { return 0; }
+  @Foo int m() { return 0; }
 \end{Verbatim}
 
 \noindent
-the \code{@Deprecated} annotation applies to both the \code{foo} method,
-and the \code{int} data type.  (It will be ignored by any type annotation
-processor, so it does no harm on the \code{int} data type.)  
-The \code{@Deprecated} annotation appears twice in the AST during
-annotation processing, and it appears twice in the classfile.
+the \code{@Foo} annotation applies to both the \code{m} method, and the
+\code{int} data type.  (If it is not intended as a type annotation, it will
+be ignored by any type annotation processor, so it does no harm on the
+\code{int} data type.)  The \code{@Foo} annotation appears twice in the AST
+during annotation processing, and it appears twice in the classfile.
 % In other words, a Java 6 and a Java 7 compiler would
 % produce classfiles with different numbers of annotations.
-Classfile processing tools, such as decompilers, must take care not to
-write an annotation twice in the decompiled code.  This requirement does
+A tool that reads a classfile and writes Java-like output, such as Javadoc
+or a decompiler, must take care not to write an annotation twice in the
+decompiled code, as in ``\code{@Foo @Foo int m()}\ldots''.
+This requirement does
 not add extra work when constructing the tool, since the tool has to handle
 the case where the \<@Target> annotation explicitly included both
 \<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
