@@ -3915,7 +3915,11 @@ of IDE extensions that are portable across multiple IDEs --- precisely the
 situation with compiler plug-ins.  JSR 308 may be shipped without defining
 this API, but defining this API may be desirable in the future (say, in a
 later version of Java), particularly after more experience is gained with
-JSR 308 annotation processors.
+type annotation processors.
+
+In the absence of such an API, a type checker can be written using
+compiler-specific APIs.  This is how the Checker Framework
+(\myurl{http://types.cs.washington.edu/checker-framework/}) works.
 
 
 \section{Logistical matters\label{logistics}}
