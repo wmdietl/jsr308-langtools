@@ -869,11 +869,6 @@ a method receiver appears in the attributes table of a
 \code{method\_info} structure.
 
 
-% A motivation for generic annotations on the receiver is the annotation on
-% toArray, which (in the nullness case) should be:
-%   public @Polynull java.lang.Object [] toArray() ArrayList<@PolyNull E> { ... }
-
-
 \subsubsection{Method return type and fields\label{class-file:ext:ri:return}}
 
 % TODO: Specify methodorfield_target
@@ -3230,7 +3225,7 @@ array of objects, where the objects have the same annotation as the
 elements of the receiver.  A natural way to write this would be 
 
 \begin{Verbatim}
-  public @Polynull Object[] toArray() ArrayList<@PolyNull E> { ... }
+  public @PolyNull Object[] toArray() ArrayList<@PolyNull E> { ... }
 \end{Verbatim}
 
 \noindent
