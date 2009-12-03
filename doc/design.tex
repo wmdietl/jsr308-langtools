@@ -2399,7 +2399,8 @@ type, or a field type --- and it generally should \emph{not} contain such a
 \code{@Target} meta-annotation.
 \item
   A type annotation may not appear before a void method (a method with no
-  return type).
+  return type).  This also follows from the fact that \code{void} is not a
+  type.
 \item
   A type annotation may not appear on a package (a package declaration does
   not contain a use of a type).
@@ -3248,7 +3249,7 @@ Here are other examples:
     public int size() @Readonly List<@Readonly T> { ... }
   }
   class MyMap<T,U> {
-    // The method requires that the map's values be non-null, but the keys may be arbitrary.
+    // The map's values must be non-null, but the keys may be arbitrary.
     public void requiresNonNullValues() MyMap<T, @NonNull U> { ... }
   }
 \end{Verbatim}
