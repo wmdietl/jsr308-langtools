@@ -3254,7 +3254,7 @@ Here are other examples:
   }
   class MyMap<T,U> {
     // The method requires that the map's values be non-null, but the keys may be arbitrary.
-    public void requiresNonNullKeys() MyMap<T, @NonNull U> { ... }
+    public void requiresNonNullValues() MyMap<T, @NonNull U> { ... }
   }
 \end{Verbatim}
 
@@ -3513,6 +3513,14 @@ into the virtual machine, but will load annotation interfaces.
 
 \paragraph{Extending/implementing interfaces}
 
+%% Joe Darcy says:
+% I would support allowing annotation type to extend interfaces, including
+% when those interfaces happened to be annotation types, keeping the current
+% restrictions on what methods can be declared in an annotation type.  There
+% would be no deeper annotation subtyping relation between annotation types
+% where one extended the other in terms of how they were processed, etc.
+
+
 Permitting annotation types to extend/implement interfaces is less
 powerful than subclassing among annotations.
 For example, interfaces can't define default values, nor is it possible
@@ -3522,7 +3530,7 @@ annotations with a given supertype appearing at a location.
 
 One use case is marker interfaces.
 %
-In another use case, the interface could define several elements/methods
+In another use case, the interface could define several elements/methods.
 These could define a standard set of element names that are used by a set
 of specific annotations.  APIs that use the interface could work with any
 annotation from that set.
