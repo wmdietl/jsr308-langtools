@@ -3230,7 +3230,7 @@ array of objects, where the objects have the same annotation as the
 elements of the receiver.  A natural way to write this would be 
 
 \begin{Verbatim}
-public @Polynull Object [] toArray() ArrayList<@PolyNull E> { ... }
+  public @Polynull Object[] toArray() ArrayList<@PolyNull E> { ... }
 \end{Verbatim}
 
 \noindent
@@ -3239,7 +3239,7 @@ the receiver position is not legal.  It is permissible to write an
 annotation on the raw type of the receiver, as in
 
 \begin{Verbatim}
-public Object [] toArray() @Readonly { ... }
+  public Object[] toArray() @Readonly { ... }
 \end{Verbatim}
 
 \noindent
