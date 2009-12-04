@@ -26,9 +26,11 @@
 package com.sun.tools.doclets.internal.toolkit.util;
 
 import java.io.*;
+import java.lang.annotation.ElementType;
 import java.util.*;
 
 import com.sun.javadoc.*;
+import com.sun.javadoc.AnnotationDesc.ElementValuePair;
 import com.sun.tools.doclets.internal.toolkit.*;
 
 /**
@@ -627,6 +629,44 @@ public class Util {
             }
         }
         return false;
+    }
+
+    private static final String TYPE_USE_NAME =
+        ElementType.class.getCanonicalName() + "." + ElementType.TYPE_USE.name();
+    private static boolean isDeclarationTarget(AnnotationDesc targetAnno) {
+        // The error recovery steps here are analogous to TypeAnnotations
+        ElementValuePair[] elems = targetAnno.elementValues();
+        if (elems == null
+            || elems.length != 1
+            || !"value".equals(elems[0].element().name())
+            || !(elems[0].value().value() instanceof AnnotationValue[]))
+            return true;    // error recovery
+
+        AnnotationValue[] values = (AnnotationValue[])elems[0].value().value();
+        for (int i = 0; i < values.length; i++) {
+            Object value = values[i].value();
+            if (!(value instanceof FieldDoc))
+                return true; // error recovery
+            
+            FieldDoc eValue = (FieldDoc)value;
+            if (!TYPE_USE_NAME.equals(eValue.qualifiedName())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc) {
+        AnnotationDesc[] annotationDescList = annotationDoc.annotations();
+        for (int i = 0; i < annotationDescList.length; i++) {
+            if (annotationDescList[i].annotationType().qualifiedName().equals(
+                    java.lang.annotation.Target.class.getName())) {
+                return isDeclarationTarget(annotationDescList[i]);
+            }
+        }
+        // Annotations with no target are treated as declaration as well
+        return true;
     }
 
     /**

@@ -122,6 +122,7 @@ public class LinkFactoryImpl extends LinkFactory {
         typeLinkInfo.excludeTypeBounds = linkInfo.excludeTypeBounds;
         typeLinkInfo.excludeTypeParameterLinks = linkInfo.excludeTypeParameterLinks;
         typeLinkInfo.linkToSelf = linkInfo.linkToSelf;
+        typeLinkInfo.isDeclarationLocation = false;
         LinkOutput output = getLinkOutput(typeLinkInfo);
         ((LinkInfoImpl) linkInfo).displayLength += typeLinkInfo.displayLength;
         return output;
@@ -146,7 +147,7 @@ public class LinkFactoryImpl extends LinkFactory {
         if (annotations.length == 0)
             return output;
 
-        List<String> annos = m_writer.getAnnotations(0, annotations, false);
+        List<String> annos = m_writer.getAnnotations(0, annotations, false, linkInfo.isDeclarationLocation);
 
         boolean isFirst = true;
         for (String anno : annos) {
@@ -158,8 +159,10 @@ public class LinkFactoryImpl extends LinkFactory {
             linkInfo.displayLength += anno.length();
             output.append(anno);
         }
-        linkInfo.displayLength += 1;
-        output.append(" ");
+        if (!annos.isEmpty()) {
+            linkInfo.displayLength += 1;
+            output.append(" ");
+        }
 
         return output;
     }
