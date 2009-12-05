@@ -24,8 +24,8 @@
 #  * If the installation fails, please report the problem at
 #      http://code.google.com/p/jsr308-langtools/issues/list .
 #    Then, follow the detailed installation instructions at
-#      http://types.cs.washington.edu/jsr308/current/README-jsr308.html#installing
-#      http://types.cs.washington.edu/jsr308/current/checkers-manual.html#installation
+#      http://types.cs.washington.edu/jsr308/checker-framework/current/README-jsr308.html#installing
+#      http://types.cs.washington.edu/jsr308/checker-framework/current/checkers-manual.html#installation
 #  * Except for the default target, this Makefile should be run in
 #    #${JSR308}, which defaults to ~/jsr308 .
 
@@ -49,7 +49,7 @@ JSR308 ?= ${HOME}/jsr308
 ###
 
 # Override to obtain a development release or a test release.
-JSR308_WEB ?= http://types.cs.washington.edu/jsr308/current
+JSR308_WEB ?= http://types.cs.washington.edu/jsr308/checker-framework/current
 JSR308_BUILD := 1.0.2
 
 # export MAKEFILE_DIR
