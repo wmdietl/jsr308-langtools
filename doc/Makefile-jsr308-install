@@ -5,7 +5,7 @@
 ## 3 steps to install:
 # 1. Obtain this Makefile:
 #   cd
-#   wget -nv -N http://types.cs.washington.edu/jsr308/current/Makefile-jsr308-install
+#   wget -nv -N http://types.cs.washington.edu/jsr308/Makefile-jsr308-install
 # 2. Execute the following command, which installs the "langtools" and
 # "checkers" directories into JSR308 (by default, ~/jsr308).
 #   make -f Makefile-jsr308-install

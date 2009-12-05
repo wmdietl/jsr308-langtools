@@ -55,9 +55,8 @@ ${jsr308_www}/java-type-qualifiers.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks:
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/jsr308
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` http://types.cs.washington.edu/checker-framework
-
+	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` ${jsr308_www}
+	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` ${jsr308_www}/../checker-framework
 
 
 ###########################################################################
