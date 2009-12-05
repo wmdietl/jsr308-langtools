@@ -3226,11 +3226,11 @@ array of objects, where the objects have the same annotation as the
 elements of the receiver.  A natural way to write this would be 
 
 \begin{Verbatim}
-  public @PolyNull Object[] toArray() ArrayList<@PolyNull E> { ... }
+  public @PolyNull Object[] toArray() Collection<@PolyNull E> { ... }
 \end{Verbatim}
 
 \noindent
-except that this is illegal syntax:  ``\code{ArrayList<@PolyNull E>}'' in
+except that this is illegal syntax:  ``\code{Collection<@PolyNull E>}'' in
 the receiver position is not legal.  It is permissible to write an
 annotation on the raw type of the receiver, as in
 
@@ -3261,7 +3261,9 @@ annotation on the receiver type itself may be present or absent.  For
 example:
 
 \begin{Verbatim}
-  public @PolyNull Object[] toArray() <@PolyNull> { ... }
+  interface Collection<E> {
+    public @PolyNull Object[] toArray() <@PolyNull> { ... }
+  }
   interface List<T> {
     // The size() method changes neither the receiver nor any of the elements.
     public int size() @Readonly<@Readonly> { ... }
