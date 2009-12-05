@@ -8,7 +8,7 @@ ClassFile format
     and once as a declaration annotation
 
 Base build
-  Updated to OpenJDK langtools build b
+  Updated to OpenJDK langtools build b77
 
 ----------------------------------------------------------------------
 Version 1.0.2, 16 Nov 2009
