@@ -78,7 +78,7 @@ abstract class AbstractTypeImpl implements com.sun.javadoc.Type {
     }
 
     public boolean isPrimitive() {
-        return this.type.isPrimitive();
+        return false;
     }
 
     public ClassDoc asClassDoc() {

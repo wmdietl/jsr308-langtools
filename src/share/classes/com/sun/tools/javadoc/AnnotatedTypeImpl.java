@@ -48,6 +48,10 @@ public class AnnotatedTypeImpl
         super(env, type);
     }
 
+    public boolean isPrimitive() {
+        return this.type.isPrimitive();
+    }
+
     /**
      * Get the annotations of this program element.
      * Return an empty array if there are none.
@@ -73,7 +77,7 @@ public class AnnotatedTypeImpl
 
     @Override
     public String toString() {
-        return type.typeAnnotations + " " + type;
+        return typeName();
     }
 
     @Override
