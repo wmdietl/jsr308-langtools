@@ -1,3 +1,16 @@
+Version 1.0.3, 5 Dec 2009
+
+ClassFile format
+  Added ambiguous annotations to classfile twice
+    annotations that could be a type annotation and a declaration
+    annotation (e.g. with missing Target meta-annotation) are
+    emitted to classfile twice: once as type annotation,
+    and once as a declaration annotation
+
+Base build
+  Updated to OpenJDK langtools build b
+
+----------------------------------------------------------------------
 Version 1.0.2, 16 Nov 2009
 
 ClassFile format
