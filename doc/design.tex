@@ -3254,21 +3254,23 @@ Here are other examples:
   }
 \end{Verbatim}
 
-%% Here is an alternate syntax:
-% I don't think this is necessary; for generic type parameters, one should
-% just use List<@Multibyte String> in the declaration, which does not
-% require any changes.  But maybe it's good to be generic.  Can we think of
-% any uses?
-% \preverbnegspace
-% Annotations on the generic type parameters of the receiver are written
-% within angle brackets.  The annotation on the receiver type itself may be
-% present or absent.
-% \preverbnegspace
-% \begin{Verbatim}
-%     public @Multibyte E get(int index) @NonEmpty<@Multibyte> { ... }
-%     public add(@Multibyte E) <@Multibyte> { ... }
-% \end{Verbatim}
+An alternate, more concise syntax would write only the annotations, rather
+than explicitly writing the receiver type.  Annotations on the generic type
+parameters of the receiver are written within angle brackets.  The
+annotation on the receiver type itself may be present or absent.  For
+example:
 
+\begin{Verbatim}
+  public @PolyNull Object[] toArray() <@PolyNull> { ... }
+  interface List<T> {
+    // The size() method changes neither the receiver nor any of the elements.
+    public int size() @Readonly<@Readonly> { ... }
+  }
+  class MyMap<T,U> {
+    // The map's values must be non-null, but the keys may be arbitrary.
+    public void requiresNonNullValues() <,@NonNull> { ... }
+  }
+\end{Verbatim}
 
 
 \subsubsection{Annotations on statements\label{statement-annotations}}
