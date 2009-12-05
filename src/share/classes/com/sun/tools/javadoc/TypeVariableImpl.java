@@ -28,6 +28,7 @@ package com.sun.tools.javadoc;
 
 import com.sun.javadoc.*;
 
+import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
@@ -119,5 +120,18 @@ public class TypeVariableImpl extends AbstractTypeImpl implements TypeVariable {
         } else {
             return env.types.getBounds(v);
         }
+    }
+
+    /**
+     * Get the annotations of this program element.
+     * Return an empty array if there are none.
+     */
+    public AnnotationDesc[] annotations() {
+        AnnotationDesc res[] = new AnnotationDesc[type.typeAnnotations.length()];
+        int i = 0;
+        for (Attribute.Compound a : type.typeAnnotations) {
+            res[i++] = new AnnotationDescImpl(env, a);
+        }
+        return res;
     }
 }
