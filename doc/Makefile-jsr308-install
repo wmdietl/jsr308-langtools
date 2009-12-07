@@ -97,7 +97,7 @@ clean-checkers:
 
 .PHONY : clean-langtools
 clean-langtools:
-	rm -rf jsr308-langtools.zip langtools .install-langtools
+	rm -rf jsr308-langtools.zip jsr308-langtools .install-langtools
 
 .PHONY : clean-jdk1.7.0
 clean-jdk1.7.0:
@@ -165,7 +165,7 @@ langtools:
 .install-langtools: jsr308-langtools.zip
 	$(MAKE) -f ${MAKEFILE} test-jdk1.7.0
 	unzip -q -o jsr308-langtools.zip
-	cd langtools/binary && yes | ant install
+	cd jsr308-langtools/binary && yes | ant install
 	touch .install-langtools
 
 test-langtools:
