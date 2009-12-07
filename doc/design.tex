@@ -24,6 +24,11 @@
 \def\dblfloatpagefraction{\topfraction}  % default .5
 \def\textfraction{.05}
 
+% Left and right curly braces and backslash, in tt font
+\newcommand{\ttlcb}{\texttt{\char "7B}}
+\newcommand{\ttrcb}{\texttt{\char "7D}}
+\newcommand{\ttbs}{\texttt{\char "5C}}
+
 \begin{document}
 
 \def\codesize{\smaller}
@@ -324,7 +329,11 @@ enum.
 \begin{itemize}
 \item
 \code{ElementType.TYPE\_PARAMETER} stands for a type parameter --- that is,
-the declaration of a type variable.
+the declaration of a type variable.  Examples are generic class
+declarations \code{class MyClass<T> \ttlcb ... \ttrcb}, generic method
+declarations \code{<T> foo(...) \ttlcb ... \ttrcb}, and wildcards
+\code{List<?>}, which declare an anonymous type variable.
+
 \item
 \code{ElementType.TYPE\_USE} stands for all uses of types.
 \end{itemize}
@@ -558,7 +567,7 @@ bytecode (including referring to specific instructions, or bytecode offsets).
 
 \paragraph{To do}
 In Java SE 6, the class file stores the types of elements on the stack;
-this eliminates the need for byte code verification to to perform type
+this eliminates the need for byte code verification to perform type
 inference for local variables and stack elements.  The class file format
 should similarly store the annotations on those types, to aid in annotation
 verification in class files.
@@ -648,6 +657,11 @@ every possible annotation location.
 %% The canonical location for this information is
 %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
 %% so whenever that is updated, this table should be as well.
+method type parameter                           & \code{0x20} & \S\ref{class-file:ext:ri:mtp} \\
+~~~~\ldots type argument or array element type  & \code{0x21}\rlunused & Java does not support \\
+class type parameter                            & \code{0x22} & \S\ref{class-file:ext:ri:mtp} \\
+~~~~\ldots type argument or array element type  & \code{0x23}\rlunused & Java does not support \\
+\hline
 method receiver                                 & \code{0x06} & \S\ref{class-file:ext:ri:receiver} \\
 ~~~~\ldots type argument or array element type  & \code{0x07}\rlunused & Future extension to JSR 308 \\ % +\S\ref{class-file:ext:ri:typearg}
 method return type                              & \code{0x0A} & \S\ref{class-file:ext:ri:return} \\
@@ -666,10 +680,6 @@ exception type in \code{throws}                 & \code{0x16} & \S\ref{class-fil
 ~~~~\ldots type argument or array element type  & \code{0x17}\rlunused & forbidden by Java \\
 wildcard bound                                  & \code{0x1C} & \S\ref{class-file:ext:ri:wildcard} \\
 ~~~~\ldots type argument or array element type  & \code{0x1D} & +\S\ref{class-file:ext:ri:typearg} \\
-method type parameter                           & \code{0x20} & \S\ref{class-file:ext:ri:mtp} \\
-~~~~\ldots type argument or array element type  & \code{0x21}\rlunused & Java does not support \\
-class type parameter                            & \code{0x22} & \S\ref{class-file:ext:ri:mtp} \\
-~~~~\ldots type argument or array element type  & \code{0x23}\rlunused & Java does not support \\
 \hline
 typecast                                        & \code{0x00} & \S\ref{class-file:ext:ri:typecast} \\
 ~~~~\ldots type argument or array element type  & \code{0x01} & +\S\ref{class-file:ext:ri:typearg} \\
@@ -695,7 +705,8 @@ class literal                                   & \code{0x1E} & \S\ref{class-fil
 \caption{\label{tbl:target_types}
   Values of \code{target\_type} for each possible target of a type
   annotation.
-  Ordinary Java annotations on declarations are not included, because they
+  Declaration annotations are not included (except those on type parameter
+  declarations), because they
   appear in \code{annotation}, not \extendedannotation, attributes
   in the class file.
   Table elements such as local variable, method parameter, and field refer
@@ -704,12 +715,17 @@ class literal                                   & \code{0x1E} & \S\ref{class-fil
   Enumeration elements marked \unused{} will never appear in a
   \code{target\_type} field; see Section~\ref{target_type}.
 \newline
-  The top half of the table contains targets that may appear on classes and
-  members --- places that annotations already appear in the class file in
-  Java SE 6.
+  The table has three parts.
+  The first part contains targets for type parameter declarations
+  (\<ElementType.TYPE\_PARAMETER>).  The second and third parts contain
+  targets for type uses (\<ElementType.TYPE\_USE>).
+  The second part contains targets that are externally visible, such as may
+  appear on classes and members --- places that annotations already appear
+  in the class file in Java SE 6.
   The bottom half of the table contains targets that only appear inside
   method bodies, where annotations do not appear in Java SE 6 (not even
   local variable annotations written by the programmer).
+TO DO: mention the exception table?
 }
 \end{figure}
 
@@ -736,6 +752,8 @@ of the \code{target\_info} is determined by the value of
 \code{target\_type}.
 
 % , and in some cases the size of \code{target\_info} is zero ...
+
+All indexes count from zero.
 
 See Section~\ref{class-file:ext:ri:typearg} for handling of generic
 type arguments and arrays.
@@ -837,7 +855,7 @@ A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
-When the type annotation's target is a method parameter,
+When the type annotation's target is a method parameter type,
 \code{target\_info} contains one \code{methodparam\_target} which
 indicates which of the method's formal parameters is being annotated:
 
@@ -853,8 +871,8 @@ A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 
 \subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
 
-When the annotation's target is a method receiver (or an inner class
-constructor receiver), \code{target\_info} is empty.  More formally, it
+When the annotation's target is a method receiver type (or an inner class
+constructor receiver type), \code{target\_info} is empty.  More formally, it
 contains \code{empty\_target}:
 
 \begin{Verbatim}
@@ -975,7 +993,7 @@ structure:
 \code{type\_index} specifies the index of the targeted type in the
 \code{interfaces} array field of the \code{ClassFile} structure;
 simply the value $i$ is used if the annotation is on the $i$th
-superinterface type (counting from zero).
+superinterface type.
 
 % TODO: handle superclass properly
 \code{-1} (\code{65535}) is used if the annotation is on the superclass type.
@@ -999,7 +1017,7 @@ following structure:
 \code{type\_index} specifies the index of the exception type in the
 clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
 simply the value $i$ denotes an annotation on the $i$th exception
-type (counting from zero).
+type.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{typeparam\_bound\_target} appears in the attributes table of a
@@ -1039,7 +1057,9 @@ Here are examples:
 \end{Verbatim}
 
 \noindent
-\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \{ ... \}} is described as:
+\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \{
+  ... \}} is described as (see Section~\ref{class-file:ext:ri:typearg} for
+an explanation of \<location\_length> and \<location>):
 
 \begin{Verbatim}
    target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
@@ -1195,11 +1215,10 @@ a declaration that combines parameterized and array types.\label{tbl:locations}}
 \section{Detailed grammar changes\label{grammar-details}}
 
 This section
-gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/second_edition/html/syntax.doc.html}{grammar} of the Java
+gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{grammar} of the Java
 language~\cite[ch.~18]{GoslingJSB2005}, based on the conceptually
-simple summary from
-Section~\ref{grammar-summary}.    Additions are
-\underline{underlined}.
+simple summary from Section~\ref{grammar-summary}. 
+Additions are \underline{underlined}.
 % , and deletions \sout{crossed out}.
 
 This section is of interest primarily to language tool implementers, such
@@ -2182,9 +2201,23 @@ problems with this approach.)
 Annotations in the \code{throws} clauses of method declarations allow
 programmers to enhance exception types. For instance, programs that
 use the \code{@Critical} annotation from the above examples could be
-statically checked to ensure that \code{catch} blocks for
+statically checked to ensure that \code{catch} blocks that can catch a
 \code{@Critical} exceptions are not empty.
 
+% Actually, the JLS3 grammar for CatchClause refers to FormalParameter,
+% which is not itself defined, so maybe special syntax is needed,
+% depending on how that error is fixed.
+
+There is no need for special syntax to permit annotations on the type of a
+caught exception, as in
+
+\begin{Verbatim}
+  catch (@NonCritical Exception e) { ... }
+\end{Verbatim}
+
+\noindent
+In this example case, a tool could warn if any \<@Critical> exception can
+reach the \<catch> clause.
 
 
 % \subsection{Target meta-annotation for type annotations}
