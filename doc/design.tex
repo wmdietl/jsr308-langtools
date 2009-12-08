@@ -1047,13 +1047,16 @@ Here are examples:
 \begin{Verbatim}
    target_type = WILDCARD_BOUND
    target_info =
+   {
+     wildcard_location_type = METHOD_PARAMETER_GENERIC_OR_ARRAY (0x0D)
+     wildcard_location =
      {
-       wildcard_location_type = METHOD_PARAMETER (0x0C)
-       wildcard_location =
-         {
-           u1 parameter_index = 0;
-         }
+       u1 parameter_index = 0;
+       // the first type variable of List
+       location_length = 1;
+       location = { 0 };
      }
+   }
 \end{Verbatim}
 
 \noindent
