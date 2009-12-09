@@ -99,20 +99,27 @@ public class JavacElements implements Elements {
         enter = Enter.instance(context);
     }
 
+    /**
+     * An internal-use utility that creates a reified annotation.
+     */
+    public static <A extends Annotation> A getAnnotation(List<Attribute.Compound> annotations,
+            Class<A> annoType) {
+        if (!annoType.isAnnotation())
+            throw new IllegalArgumentException("Not an annotation type: "
+                                               + annoType);
+        String name = annoType.getName();
+        for (Attribute.Compound anno : annotations)
+            if (name.equals(anno.type.tsym.flatName().toString()))
+                return AnnotationProxyMaker.generateAnnotation(anno, annoType);
+        return null;
+    }
 
     /**
      * An internal-use utility that creates a reified annotation.
      */
     public static <A extends Annotation> A getAnnotation(Symbol annotated,
                                                          Class<A> annoType) {
-        if (!annoType.isAnnotation())
-            throw new IllegalArgumentException("Not an annotation type: "
-                                               + annoType);
-        String name = annoType.getName();
-        for (Attribute.Compound anno : annotated.getAnnotationMirrors())
-            if (name.equals(anno.type.tsym.flatName().toString()))
-                return AnnotationProxyMaker.generateAnnotation(anno, annoType);
-        return null;
+        return getAnnotation(annotated.getAnnotationMirrors(), annoType);
     }
 
     /**
