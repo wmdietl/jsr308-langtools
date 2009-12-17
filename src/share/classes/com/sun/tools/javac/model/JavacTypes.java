@@ -25,11 +25,13 @@
 
 package com.sun.tools.javac.model;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 import java.util.EnumSet;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
+
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.util.*;
@@ -301,4 +303,26 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(o.toString());
         return clazz.cast(o);
     }
+
+    public List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type) {
+        return ((Type)type).typeAnnotations;
+    }
+
+    public <A extends Annotation> A typeAnnotationOf(TypeMirror type,
+            Class<A> annotationType) {
+        return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
+    }
+
+    public List<? extends AnnotationMirror> receiverTypeAnnotationsOf(
+            ExecutableType type) {
+        return ((Type)type).asMethodType().receiverTypeAnnotations;
+    }
+
+    public <A extends Annotation> A receiverTypeAnnotationOf(
+            ExecutableType type, Class<A> annotationType) {
+        return JavacElements.getAnnotation(
+                ((Type)type).asMethodType().receiverTypeAnnotations,
+                annotationType);
+    }
+
 }

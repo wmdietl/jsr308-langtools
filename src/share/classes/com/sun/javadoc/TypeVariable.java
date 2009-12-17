@@ -55,4 +55,11 @@ public interface TypeVariable extends Type {
      *         which this type variable is declared.
      */
     ProgramElementDoc owner();
+
+    /**
+     * Get the annotations of this program element.
+     * Return an empty array if there are none.
+     */
+    public AnnotationDesc[] annotations();
+
 }
