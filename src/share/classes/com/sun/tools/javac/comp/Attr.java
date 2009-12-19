@@ -2714,6 +2714,14 @@ public class Attr extends JCTree.Visitor {
         result = tree.type = type;
     }
 
+    /**
+     * Apply the annotations to the particular type.
+     *
+     * This method expects the {@code MethodType} type as argument,
+     * to handle its receiver types.  Note that type annotations
+     * cannot target methods.
+     *
+     */
     private void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
         annotate.laterOnFlush(new Annotator() {
             @Override

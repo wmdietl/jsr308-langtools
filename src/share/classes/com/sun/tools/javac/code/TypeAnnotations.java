@@ -27,10 +27,7 @@ package com.sun.tools.javac.code;
 
 import static com.sun.tools.javac.code.Flags.ANNOTATION;
 import static com.sun.tools.javac.code.Flags.PARAMETER;
-import static com.sun.tools.javac.code.Kinds.MTH;
-import static com.sun.tools.javac.code.Kinds.PCK;
-import static com.sun.tools.javac.code.Kinds.TYP;
-import static com.sun.tools.javac.code.Kinds.VAR;
+import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.VOID;
 
 import javax.lang.model.element.ElementKind;
@@ -39,7 +36,6 @@ import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Type.ArrayType;
-import com.sun.tools.javac.code.Type.MethodType;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
@@ -50,6 +46,9 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Names;
 
+/**
+ * Contains operations specific to processing type annotations
+ */
 public class TypeAnnotations {
     private static final Context.Key<TypeAnnotations> key
         = new Context.Key<TypeAnnotations>();
@@ -91,17 +90,20 @@ public class TypeAnnotations {
     }
 
     public void taFillAndLift(JCClassDecl tree, boolean visitBodies) {
-        new TypeAnnotationsShuffle(visitBodies).scan(tree);
+        new AnnotationsKindSeparator(visitBodies).scan(tree);
         new TypeAnnotationPositions(visitBodies).scan(tree);
         new TypeAnnotationLift(visitBodies).scan(tree);
     }
 
     enum AnnotationType { DECLARATION, TYPE, BOTH };
 
-    private class TypeAnnotationsShuffle extends TreeScanner {
+    /**
+     * Separates type annotations from declaration annotations
+     */
+    private class AnnotationsKindSeparator extends TreeScanner {
 
         private final boolean visitBodies;
-        public TypeAnnotationsShuffle(boolean visitBodies) {
+        public AnnotationsKindSeparator(boolean visitBodies) {
             this.visitBodies = visitBodies;
         }
 
@@ -122,7 +124,7 @@ public class TypeAnnotations {
             // clear all annotations
             if (!visitBodies) {
                 if (!areAllDecl(tree.sym))
-                    shuffleTypeAnnotations(tree.sym, tree.sym.type.getReturnType(),
+                    separateAnnotationsKinds(tree.sym, tree.sym.type.getReturnType(),
                             new TypeAnnotationPosition(TargetType.METHOD_RETURN));
                 int i = 0;
                 for (JCVariableDecl param : tree.params) {
@@ -130,7 +132,7 @@ public class TypeAnnotations {
                         TypeAnnotationPosition pos =
                             new TypeAnnotationPosition(TargetType.METHOD_PARAMETER);
                         pos.parameter_index = i;
-                        shuffleTypeAnnotations(param.sym, param.sym.type, pos);
+                        separateAnnotationsKinds(param.sym, param.sym.type, pos);
                     }
                     ++i;
                 }
@@ -142,12 +144,12 @@ public class TypeAnnotations {
         public void visitVarDef(final JCVariableDecl tree) {
             if (!visitBodies && !areAllDecl(tree.sym)) {
                 if (tree.sym.getKind() == ElementKind.FIELD) {
-                    shuffleTypeAnnotations(tree.sym, tree.sym.type,
+                    separateAnnotationsKinds(tree.sym, tree.sym.type,
                             new TypeAnnotationPosition(TargetType.FIELD));
                 } else if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE) {
                     TypeAnnotationPosition pos = new TypeAnnotationPosition(TargetType.LOCAL_VARIABLE);
                     pos.pos = tree.pos;
-                    shuffleTypeAnnotations(tree.sym, tree.sym.type, pos);
+                    separateAnnotationsKinds(tree.sym, tree.sym.type, pos);
                 }
 
             }
@@ -428,11 +430,6 @@ public class TypeAnnotations {
         }
 
         @Override
-        public void visitVarDef(JCVariableDecl tree) {
-            super.visitVarDef(tree);
-        }
-
-        @Override
         public void visitMethodDef(JCMethodDecl tree) {
             super.visitMethodDef(tree);
             TypeAnnotationPosition p = new TypeAnnotationPosition();
@@ -460,10 +457,6 @@ public class TypeAnnotations {
                 if (!p.location.isEmpty())
                     p.type = p.type.getGenericComplement();
                 setTypeAnnotationPos(annotations, p);
-//                if (debugJSR308) {
-//                    System.out.println("trans: " + tree);
-//                    System.out.println("  target: " + p);
-//                }
             }
         }
 
@@ -572,6 +565,7 @@ public class TypeAnnotations {
             super.visitNewClass(tree);
             scan(tree.typeargs);
         }
+
         @Override
         public void visitApply(JCMethodInvocation tree) {
             scan(tree.meth);
@@ -584,17 +578,9 @@ public class TypeAnnotations {
                 recordedTypeAnnotations = recordedTypeAnnotations.append(((JCTypeAnnotation)tree).attribute_field);
             super.visitAnnotation(tree);
         }
-
-        public void visitAnnotatedType(JCAnnotatedType tree) {
-            super.visitAnnotatedType(tree);
-        }
-
-        public void visitTypeParameter(JCTypeParameter tree) {
-            super.visitTypeParameter(tree);
-        }
     }
 
-    private void shuffleTypeAnnotations(Symbol sym, Type type, TypeAnnotationPosition pos) {
+    private void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
         List<Compound> annotations = sym.attributes_field;
 
         ListBuffer<Compound> declAnnos = new ListBuffer<Compound>();

@@ -100,7 +100,9 @@ public class JavacElements implements Elements {
     }
 
     /**
-     * An internal-use utility that creates a reified annotation.
+     * An internal-use utility that creates a reified annotation,
+     * of the given {@code annoType}, to be found in the passed
+     * list.
      */
     public static <A extends Annotation> A getAnnotation(List<Attribute.Compound> annotations,
             Class<A> annoType) {
