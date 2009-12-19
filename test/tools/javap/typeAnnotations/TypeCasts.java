@@ -33,7 +33,7 @@ import com.sun.tools.classfile.*;
 
 public class TypeCasts {
     public static void main(String[] args) throws Exception {
-        new DeadCode().run();
+        new TypeCasts().run();
     }
 
     public void run() throws Exception {
