@@ -23,7 +23,7 @@
 
 /**
  * @test
- * @compile HelloPathWorld.java
+ * @compile -g:none HelloPathWorld.java
  * @run main CompileTest
  */
 
@@ -91,7 +91,7 @@ public class CompileTest {
         List<String> options = new ArrayList<String>();
         options.addAll(Arrays.asList(opts));
         options.addAll(Arrays.asList(
-                "-verbose", "-XDverboseCompilePolicy",
+                "-verbose", "-XDverboseCompilePolicy", "-g:none",
                 "-d", classes.toString()
         ));
         Iterable<? extends JavaFileObject> compilationUnits =
