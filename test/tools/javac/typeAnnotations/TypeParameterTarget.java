@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
 import java.lang.annotation.ElementType;
 
 class TypeUseTarget<@A K extends Object> {
-kldjf  String[] field;
+  String[] field;
 
   <@A K, @A V> String genericMethod(K k) { return null; }
 }
