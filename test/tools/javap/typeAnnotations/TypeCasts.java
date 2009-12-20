@@ -140,8 +140,9 @@ public class TypeCasts {
         out.println("  void alldeadcode() {");
         out.println("    Object o = null;");
 
-        out.println("    if (false)");
+        out.println("    if (false) {");
         out.println("      String a0 = (@A String)o;");
+        out.println("    }");
         out.println("  }");
 
         out.println("}");

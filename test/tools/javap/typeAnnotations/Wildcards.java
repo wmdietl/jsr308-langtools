@@ -31,7 +31,7 @@ import com.sun.tools.classfile.*;
  */
 public class Wildcards {
     public static void main(String[] args) throws Exception {
-        new NewArray().run();
+        new Wildcards().run();
     }
 
     public void run() throws Exception {
@@ -126,7 +126,7 @@ public class Wildcards {
 
         out.println("  List<? extends @A Number> f;");
 
-        out.println(" void List<? extends @A Object> test(List<? extends @A Number> p) {");
+        out.println("  List<? extends @A Object> test(List<? extends @A Number> p) {");
         out.println("    List<? extends @A Object> l;");    // not counted... gets optimized away
         out.println("    return null;");
         out.println(" }");
