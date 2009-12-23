@@ -26,6 +26,7 @@
 package com.sun.tools.javac.code;
 
 import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Symbol.*;
 
 import javax.lang.model.type.*;
@@ -63,7 +64,7 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType {
+public class Type implements PrimitiveType, Cloneable {
 
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
@@ -82,6 +83,8 @@ public class Type implements PrimitiveType {
     /** The defining class / interface / package / type variable
      */
     public TypeSymbol tsym;
+
+    public List<Compound> typeAnnotations = List.nil();
 
     /**
      * The constant value of this type, null if this type does not
@@ -785,6 +788,7 @@ public class Type implements PrimitiveType {
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
+        public List<Compound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -949,7 +953,11 @@ public class Type implements PrimitiveType {
             return v.visitTypeVar(this, s);
         }
 
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if ((bound == null || bound.tag == NONE) && this != tsym.type)
+                bound = tsym.type.getUpperBound();
+            return bound;
+        }
 
         int rank_field = -1;
 

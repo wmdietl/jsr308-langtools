@@ -1425,17 +1425,18 @@ public class ClassReader implements Completer {
          // Class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-            position.type_index = nextByte();
+            position.type_index = nextChar();
             break;
         // throws
         case THROWS:
-            position.type_index = nextByte();
+            position.type_index = nextChar();
             break;
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             position.offset = nextChar();
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             position.parameter_index = nextByte();
             break;
@@ -1448,7 +1449,9 @@ public class ClassReader implements Completer {
             position.type_index = nextByte();
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:

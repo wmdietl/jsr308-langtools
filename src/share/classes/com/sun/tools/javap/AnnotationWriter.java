@@ -100,8 +100,6 @@ public class AnnotationWriter extends BasicWriter {
         // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -162,17 +160,20 @@ public class AnnotationWriter extends BasicWriter {
             print(pos.type_index);
             break;
         case CLASS_LITERAL:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
             }
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             print(", param_index=");
             print(pos.parameter_index);
             break;
-        // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             if (showOffsets) {
@@ -183,7 +184,9 @@ public class AnnotationWriter extends BasicWriter {
             print(pos.type_index);
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
