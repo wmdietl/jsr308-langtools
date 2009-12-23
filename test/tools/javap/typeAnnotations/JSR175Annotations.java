@@ -99,9 +99,9 @@ public class JSR175Annotations {
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("import java.lang.annotation.Retention;");
-        out.println("import java.lang.annotation.RetentionPolicy;");
+        out.println("import java.lang.annotation.*;");
         out.println("abstract class Test { ");
+        out.println("  @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})");
         out.println("  @Retention(RetentionPolicy.RUNTIME)");
         out.println("  @interface A { }");
         out.println("  @A String m;");
@@ -122,7 +122,7 @@ public class JSR175Annotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 3, expected_invisibles = 0;
+        int expected_visibles = 0, expected_invisibles = 0;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

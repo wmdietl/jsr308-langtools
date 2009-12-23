@@ -126,7 +126,7 @@ public class Wildcards {
 
         out.println("  List<? extends @A Number> f;");
 
-        out.println("  List<? extends @A Object> test(List<? extends @A Number> p) {");
+        out.println(" List<? extends @A Object> test(List<? extends @A Number> p) {");
         out.println("    List<? extends @A Object> l;");    // not counted... gets optimized away
         out.println("    return null;");
         out.println(" }");
