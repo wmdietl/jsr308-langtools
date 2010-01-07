@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,14 +25,15 @@ import java.io.*;
 import com.sun.tools.classfile.*;
 
 /*
- * @test JSR175Annotations
+ * @test
  * @bug 6843077
- * @summary test that only type annotations are recorded as such in classfile
+ * @summary test that typecasts annotation are emitted if only the cast
+ *          expression is optimized away
  */
 
-public class JSR175Annotations {
+public class TypeCasts {
     public static void main(String[] args) throws Exception {
-        new JSR175Annotations().run();
+        new TypeCasts().run();
     }
 
     public void run() throws Exception {
@@ -40,6 +41,7 @@ public class JSR175Annotations {
         File classFile = compileTestFile(javaFile);
 
         ClassFile cf = ClassFile.read(classFile);
+        test(cf);
         for (Field f : cf.fields) {
             test(cf, f);
         }
@@ -54,6 +56,11 @@ public class JSR175Annotations {
         System.out.println("PASSED");
     }
 
+    void test(ClassFile cf) {
+        test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
+        test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
     void test(ClassFile cf, Method m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
@@ -62,6 +69,22 @@ public class JSR175Annotations {
     void test(ClassFile cf, Field m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
+    }
+
+    // test the result of Attributes.getIndex according to expectations
+    // encoded in the method's name
+    void test(ClassFile cf, String name, boolean visible) {
+        int index = cf.attributes.getIndex(cf.constant_pool, name);
+        if (index != -1) {
+            Attribute attr = cf.attributes.get(index);
+            assert attr instanceof RuntimeTypeAnnotations_attribute;
+            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
+            all += tAttr.annotations.length;
+            if (visible)
+                visibles += tAttr.annotations.length;
+            else
+                invisibles += tAttr.annotations.length;
+        }
     }
 
     // test the result of Attributes.getIndex according to expectations
@@ -96,18 +119,32 @@ public class JSR175Annotations {
         }
     }
 
+
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("import java.lang.annotation.*;");
-        out.println("abstract class Test { ");
-        out.println("  @Target({ElementType.FIELD, ElementType.METHOD, ElementType.PARAMETER})");
-        out.println("  @Retention(RetentionPolicy.RUNTIME)");
+        out.println("class Test { ");
         out.println("  @interface A { }");
-        out.println("  @A String m;");
-        out.println("  @A String method(@A String a) {");
-        out.println("    return a;");
+
+        out.println("  void emit() {");
+        out.println("    Object o = null;");
+        out.println("    String s = null;");
+
+        out.println("    String a0 = (@A String)o;");
+        out.println("    Object a1 = (@A Object)o;");
+
+        out.println("    String b0 = (@A String)s;");
+        out.println("    Object b1 = (@A Object)s;");
         out.println("  }");
+
+        out.println("  void alldeadcode() {");
+        out.println("    Object o = null;");
+
+        out.println("    if (false) {");
+        out.println("      String a0 = (@A String)o;");
+        out.println("    }");
+        out.println("  }");
+
         out.println("}");
         out.close();
         return f;
@@ -122,7 +159,7 @@ public class JSR175Annotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 0;
+        int expected_visibles = 0, expected_invisibles = 4;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

@@ -1788,6 +1788,15 @@ public class HtmlDocletWriter extends HtmlDocWriter {
     }
 
     /**
+     * Write the annotation types of the executable receiver.
+     *
+     * @param method the executable to write the receiver annotations for
+     */
+    public void writeReceiverAnnotationInfo(ExecutableMemberDoc method) {
+        writeAnnotationInfo(method, method.receiverAnnotations());
+    }
+
+    /**
      * Write the annotatation types for the given doc.
      *
      * @param doc the doc to write annotations for.

@@ -114,8 +114,10 @@ public class TypeVariableImpl extends AbstractTypeImpl implements TypeVariable {
      * Get the bounds of a type variable as listed in the "extends" clause.
      */
     private static List<Type> getBounds(TypeVar v, DocEnv env) {
-        Name boundname = v.getUpperBound().tsym.getQualifiedName();
-        if (boundname == boundname.table.names.java_lang_Object) {
+        final Type upperBound = v.getUpperBound();
+        Name boundname = upperBound.tsym.getQualifiedName();
+        if (boundname == boundname.table.names.java_lang_Object
+            && upperBound.typeAnnotations.isEmpty()) {
             return List.nil();
         } else {
             return env.types.getBounds(v);

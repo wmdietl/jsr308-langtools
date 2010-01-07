@@ -354,6 +354,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
     Type signature(List<JCTypeParameter> typarams,
                    List<JCVariableDecl> params,
                    JCTree res,
+                   List<JCTypeAnnotation> receiverAnnotations,
                    List<JCExpression> thrown,
                    Env<AttrContext> env) {
 
@@ -383,6 +384,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                                     restype,
                                     thrownbuf.toList(),
                                     syms.methodClass);
+        attr.annotateType(mtype, receiverAnnotations);
         return tvars.isEmpty() ? mtype : new ForAll(tvars, mtype);
     }
 
@@ -574,7 +576,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         // Compute the method type
         m.type = signature(tree.typarams, tree.params,
-                           tree.restype, tree.thrown,
+                           tree.restype, tree.receiverAnnotations,
+                           tree.thrown,
                            localEnv);
 
         // Set m.params

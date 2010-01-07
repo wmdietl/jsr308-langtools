@@ -118,6 +118,13 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
         writeParameters(member, true);
     }
 
+    protected void writeReceiverAnnotations(ExecutableMemberDoc member) {
+        if (member.receiverAnnotations().length > 0) {
+            writer.space();
+            writer.writeReceiverAnnotationInfo(member);
+        }
+    }
+
     protected void writeParameters(ExecutableMemberDoc member,
             boolean includeAnnotations) {
         print('(');

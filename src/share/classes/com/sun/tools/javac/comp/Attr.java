@@ -2722,7 +2722,7 @@ public class Attr extends JCTree.Visitor {
      * cannot target methods.
      *
      */
-    private void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
+    public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
         annotate.laterOnFlush(new Annotator() {
             @Override
             public void enterAnnotation() {
