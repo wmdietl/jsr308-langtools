@@ -265,9 +265,8 @@ public class TypeAnnotations {
                     return p;
                 }
                 case PARAMETERIZED_TYPE: {
-                    TypeAnnotationPosition nextP;
                     if (((JCTypeApply)frame).clazz == tree)
-                        nextP = p; // generic: RAW; noop
+                    { } // generic: RAW; noop
                     else if (((JCTypeApply)frame).arguments.contains(tree))
                         p.location = p.location.prepend(
                                 ((JCTypeApply)frame).arguments.indexOf(tree));
@@ -279,8 +278,20 @@ public class TypeAnnotations {
                 }
 
                 case ARRAY_TYPE: {
-                    p.location = p.location.prepend(0);
+                    int index = 0;
                     List<JCTree> newPath = path.tail;
+                    while (true) {
+                        JCTree npHead = newPath.tail.head;
+                        if (npHead.getKind() == JCTree.Kind.ARRAY_TYPE) {
+                            newPath = newPath.tail;
+                            index++;
+                        } else if (npHead.getKind() == JCTree.Kind.ANNOTATED_TYPE) {
+                            newPath = newPath.tail;
+                        } else {
+                            break;
+                        }
+                    }
+                    p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                 }
 
@@ -378,9 +389,14 @@ public class TypeAnnotations {
             // handle annotations associated with dimentions
             for (int i = 0; i < dimAnnosCount; ++i) {
                 TypeAnnotationPosition p = new TypeAnnotationPosition();
-                p.type = TargetType.NEW_GENERIC_OR_ARRAY;
                 p.pos = tree.pos;
-                p.location = p.location.append(i);
+                if (i == 0) {
+                    p.type = TargetType.NEW;
+                } else {
+                    p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                    p.location = p.location.append(i - 1);
+                }
+
                 setTypeAnnotationPos(tree.dimAnnotations.get(i), p);
             }
 
@@ -441,10 +457,6 @@ public class TypeAnnotations {
                 if (!p.location.isEmpty())
                     p.type = p.type.getGenericComplement();
                 setTypeAnnotationPos(annotations, p);
-//                if (debugJSR308) {
-//                    System.out.println("trans: " + tree);
-//                    System.out.println("  target: " + p);
-//                }
             }
         }
 
