@@ -1,7 +1,7 @@
 jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 
-INV ?= /homes/gws/mernst/research/invariants
+PLUME ?= /homes/gws/mernst/bin/share-plume
 RELEASEDATE ?= `date '+%Y%m%d'`
 
 # There is no use of "cp -p" in this Makefile, to avoid problems with
@@ -55,8 +55,8 @@ ${jsr308_www}/java-type-qualifiers.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks:
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` ${jsr308_www}
-	${INV}/scripts/checklink -q -r -e `cat ${INV}/scripts/checklink-args.txt` ${jsr308_www}/../checker-framework
+	${PLUME}/checklink -q -r -e `cat ${PLUME}/checklink-args.txt` ${jsr308_www_online}
+	${PLUME}/checklink -q -r -e `cat ${PLUME}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
 
 
 ###########################################################################

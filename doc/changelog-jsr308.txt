@@ -1,3 +1,15 @@
+Version 1.0.5, 12 Jan 2009
+
+Javadoc changes
+  Fixed bugs causing javadoc to miss some annotations, in particular
+    some receiver annotations of constructors
+    annotations on extends clauses of type Object
+    some annotations that are both declaration and type annotations
+
+Base build
+  No release since 17 Dec 2009
+
+----------------------------------------------------------------------
 Version 1.0.4, 19 Dec 2009
 
 Base build
