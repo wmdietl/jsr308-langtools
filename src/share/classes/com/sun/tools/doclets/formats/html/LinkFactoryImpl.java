@@ -147,7 +147,9 @@ public class LinkFactoryImpl extends LinkFactory {
         if (annotations.length == 0)
             return output;
 
-        List<String> annos = m_writer.getAnnotations(0, annotations, false, linkInfo.isDeclarationLocation);
+        // TODO: filter out isDeclarationLocation
+        // possibly using linkInfo.isDeclarationLocation
+        List<String> annos = m_writer.getAnnotations(0, annotations, false, false);
 
         boolean isFirst = true;
         for (String anno : annos) {
