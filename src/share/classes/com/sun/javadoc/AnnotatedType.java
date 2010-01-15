@@ -1,5 +1,5 @@
 /*
- * Copyright 2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2003-2004 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,39 +27,19 @@ package com.sun.javadoc;
 
 
 /**
- * Represents a type variable.
- * For example, the generic interface {@code List<E>} has a single
- * type variable {@code E}.
- * A type variable may have explicit bounds, as in
- * {@code C<R extends Remote>}.
- *
- * @author Scott Seligman
- * @since 1.5
+ * Represents an annotated type.
+ * For example:
+ * <pre>
+ *      {@code @NonNull String}
+ *      {@code @Positive int}
+ * </pre>
+ * 
+ * @author Mahmood Ali
+ * @since 1.7
  */
-public interface TypeVariable extends Type {
+public interface AnnotatedType extends Type {
 
-    /**
-     * Return the bounds of this type variable.
-     * These are the types given by the <i>extends</i> clause.
-     * Return an empty array if there are no explicit bounds.
-     *
-     * @return the bounds of this type variable.
-     */
-    Type[] bounds();
+    AnnotationDesc[] annotations();
 
-    /**
-     * Return the class, interface, method, or constructor within
-     * which this type variable is declared.
-     *
-     * @return the class, interface, method, or constructor within
-     *         which this type variable is declared.
-     */
-    ProgramElementDoc owner();
-
-    /**
-     * Get the annotations of this program element.
-     * Return an empty array if there are none.
-     */
-    public AnnotationDesc[] annotations();
-
+    Type underlyingType();
 }
