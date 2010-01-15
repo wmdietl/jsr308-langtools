@@ -100,8 +100,6 @@ public class AnnotationWriter extends BasicWriter {
         // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -173,7 +171,8 @@ public class AnnotationWriter extends BasicWriter {
             print(", param_index=");
             print(pos.parameter_index);
             break;
-        // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             if (showOffsets) {

@@ -104,7 +104,13 @@ public class TypeAnnotations {
                     return p;
 
                 case NEW_CLASS:
-                    p.type = TargetType.NEW;
+                    JCNewClass frameNewClass = (JCNewClass)frame;
+                    if (frameNewClass.typeargs.contains(tree)) {
+                        p.type = TargetType.NEW_TYPE_ARGUMENT;
+                        p.type_index = frameNewClass.typeargs.indexOf(tree);
+                    } else {
+                        p.type = TargetType.NEW;
+                    }
                     p.pos = frame.pos;
                     return p;
 
@@ -245,6 +251,12 @@ public class TypeAnnotations {
             scan(tree.meth);
             scan(tree.typeargs);
             scan(tree.args);
+        }
+
+        @Override
+        public void visitNewClass(JCNewClass tree) {
+            scan(tree.typeargs);
+            super.visitNewClass(tree);
         }
 
         private void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
@@ -392,6 +404,12 @@ public class TypeAnnotations {
                     tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
                 recordedTypeAnnotations = kind.isField() ? prevTAs : prevTAs.appendList(recordedTypeAnnotations);
             }
+        }
+
+        @Override
+        public void visitNewClass(JCNewClass tree) {
+            super.visitNewClass(tree);
+            scan(tree.typeargs);
         }
 
         @Override
