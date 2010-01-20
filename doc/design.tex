@@ -906,7 +906,7 @@ When the annotation's target is a type parameter of a class or method,
 following structure:
 
 \begin{Verbatim}
-    typeparam_info {
+    typeparam_target {
         u1 param_index;
     };
 \end{Verbatim}
@@ -914,7 +914,7 @@ following structure:
 \code{param\_index} specifies the 0-based index of the type parameter.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{offset\_target} appears in the attributes table of a
+\code{typeparam\_target} appears in the attributes table of a
 \code{method\_info} structure if it 
 
 \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
@@ -974,7 +974,7 @@ annotations are attached to a single bytecode, not a bytecode range.
 expression.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{typearg\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 
@@ -1020,7 +1020,7 @@ simply the value $i$ denotes an annotation on the $i$th exception
 type.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{exception\_target} appears in the attributes table of a
 \code{method\_info} structure.
 
 
@@ -1100,8 +1100,6 @@ parameters, return type, parameter types, exception types, or any type
 in its method body.
 
 \end{enumerate}
-
-\code{method\_info} structure.
 
 \subsubsection{Type arguments and array element types\label{class-file:ext:ri:typearg}}
 
