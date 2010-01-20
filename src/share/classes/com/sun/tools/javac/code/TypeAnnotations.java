@@ -63,7 +63,7 @@ public class TypeAnnotations {
     private final Symtab syms;
     private final Names names;
 
-    private TypeAnnotations(Context context) {
+    protected TypeAnnotations(Context context) {
         context.put(key, this);
         syms = Symtab.instance(context);
         names = Names.instance(context);

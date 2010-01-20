@@ -739,7 +739,6 @@ public class Attr extends JCTree.Visitor {
                 attribStat(tree.body, localEnv);
             }
             localEnv.info.scope.leave();
-            annotateType(m.type.asMethodType(), tree.receiverAnnotations);
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
         }
