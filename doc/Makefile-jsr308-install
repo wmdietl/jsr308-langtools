@@ -18,6 +18,8 @@
 
 
 ## Notes:
+#  * This file assumes a 32-bit architecture.  If you have a 64-bit machine
+#    without multilib support, you will need to tweak the Makefile.
 #  * This has only been tested on Linux.
 #  * You should only run this script if you agree to the Sun Java SE
 #    Development Kit (JDK) license.
