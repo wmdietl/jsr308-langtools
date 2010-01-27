@@ -187,7 +187,7 @@ public class TypeAnnotationPosition {
     public boolean emitToClassfile() {
         if (type == TargetType.WILDCARD_BOUND
             || type == TargetType.WILDCARD_BOUND_GENERIC_OR_ARRAY)
-            return wildcard_position.isValidOffset;
+            return wildcard_position.emitToClassfile();
         else
             return !type.isLocal() || isValidOffset;
     }
