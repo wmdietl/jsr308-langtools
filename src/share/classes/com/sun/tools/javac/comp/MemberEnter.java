@@ -982,6 +982,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         // Enter all member fields and methods of a set of half completed
         // classes in a second phase.
+        annotate.laterOnFlush(typeAnnotations.annotator(tree));
         if (wasFirst) {
             try {
                 while (halfcompleted.nonEmpty()) {
@@ -991,7 +992,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
         }
     }
