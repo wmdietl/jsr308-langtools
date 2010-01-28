@@ -22,6 +22,9 @@
  */
 
 import java.io.*;
+import java.net.URL;
+import java.util.List;
+
 import com.sun.tools.classfile.*;
 
 /*
@@ -35,10 +38,7 @@ public class NewTypeArguments {
     }
 
     public void run() throws Exception {
-        File javaFile = writeTestFile();
-        File classFile = compileTestFile(javaFile);
-
-        ClassFile cf = ClassFile.read(classFile);
+        ClassFile cf = getClassFile("NewTypeArguments$Test.class");
         test(cf);
         for (Field f : cf.fields) {
             test(cf, f);
@@ -54,6 +54,17 @@ public class NewTypeArguments {
         System.out.println("PASSED");
     }
 
+    ClassFile getClassFile(String name) throws IOException, ConstantPoolException {
+        URL url = getClass().getResource(name);
+        InputStream in = url.openStream();
+        try {
+            return ClassFile.read(in);
+        } finally {
+            in.close();
+        }
+    }
+
+    /************ Helper annotations counting methods ******************/
     void test(ClassFile cf) {
         test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
@@ -117,34 +128,7 @@ public class NewTypeArguments {
         }
     }
 
-    File writeTestFile() throws IOException {
-      File f = new File("Testa.java");
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("import java.util.*;");
-        out.println("class Testa { ");
-        out.println("  @interface A { }");
-        out.println("  <E> Testa(E e) { }");
-
-        out.println(" void test() {");
-        out.println("  new <@A String> Testa(null);");
-        out.println("  new <@A List<@A String>> Testa(null);");
-        out.println(" }");
-        out.println("}");
-
-        out.close();
-        return f;
-    }
-
-    File compileTestFile(File f) {
-      int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.7", "-g", f.getPath() });
-        if (rc != 0)
-            throw new Error("compilation failed. rc=" + rc);
-        String path = f.getPath();
-        return new File(path.substring(0, path.length() - 5) + ".class");
-    }
-
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 3;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
@@ -171,4 +155,17 @@ public class NewTypeArguments {
     int all;
     int visibles;
     int invisibles;
+
+    /*********************** Test class *************************/
+    static int expected_invisibles = 3;
+    static int expected_visibles = 0;
+    static class Test {
+        @interface A {}
+        <E> Test(E e) {}
+
+        void test() {
+            new <@A String> Test(null);
+            new <@A List<@A String>> Test(null);
+        }
+    }
 }

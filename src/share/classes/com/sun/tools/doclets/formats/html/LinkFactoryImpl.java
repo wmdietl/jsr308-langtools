@@ -25,6 +25,7 @@
 
 package com.sun.tools.doclets.formats.html;
 
+import java.lang.annotation.ElementType;
 import java.util.List;
 
 import com.sun.tools.doclets.internal.toolkit.util.links.*;
@@ -122,7 +123,7 @@ public class LinkFactoryImpl extends LinkFactory {
         typeLinkInfo.excludeTypeBounds = linkInfo.excludeTypeBounds;
         typeLinkInfo.excludeTypeParameterLinks = linkInfo.excludeTypeParameterLinks;
         typeLinkInfo.linkToSelf = linkInfo.linkToSelf;
-        typeLinkInfo.isDeclarationLocation = false;
+        typeLinkInfo.elemType = ElementType.TYPE_USE;
         LinkOutput output = getLinkOutput(typeLinkInfo);
         ((LinkInfoImpl) linkInfo).displayLength += typeLinkInfo.displayLength;
         return output;
@@ -147,9 +148,7 @@ public class LinkFactoryImpl extends LinkFactory {
         if (annotations.length == 0)
             return output;
 
-        // TODO: filter out isDeclarationLocation
-        // possibly using linkInfo.isDeclarationLocation
-        List<String> annos = m_writer.getAnnotations(0, annotations, false, false);
+        List<String> annos = m_writer.getAnnotations(0, annotations, false, linkInfo.elemType);
 
         boolean isFirst = true;
         for (String anno : annos) {
@@ -158,7 +157,6 @@ public class LinkFactoryImpl extends LinkFactory {
                 output.append(" ");
                 isFirst = false;
             }
-            linkInfo.displayLength += anno.length();
             output.append(anno);
         }
         if (!annos.isEmpty()) {

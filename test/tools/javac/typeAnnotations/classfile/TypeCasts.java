@@ -22,6 +22,9 @@
  */
 
 import java.io.*;
+import java.net.URL;
+import java.util.List;
+
 import com.sun.tools.classfile.*;
 
 /*
@@ -37,10 +40,7 @@ public class TypeCasts {
     }
 
     public void run() throws Exception {
-        File javaFile = writeTestFile();
-        File classFile = compileTestFile(javaFile);
-
-        ClassFile cf = ClassFile.read(classFile);
+        ClassFile cf = getClassFile("TypeCasts$Test.class");
         test(cf);
         for (Field f : cf.fields) {
             test(cf, f);
@@ -56,6 +56,17 @@ public class TypeCasts {
         System.out.println("PASSED");
     }
 
+    ClassFile getClassFile(String name) throws IOException, ConstantPoolException {
+        URL url = getClass().getResource(name);
+        InputStream in = url.openStream();
+        try {
+            return ClassFile.read(in);
+        } finally {
+            in.close();
+        }
+    }
+
+    /************ Helper annotations counting methods ******************/
     void test(ClassFile cf) {
         test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
@@ -119,47 +130,7 @@ public class TypeCasts {
         }
     }
 
-
-    File writeTestFile() throws IOException {
-        File f = new File("Test.java");
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("class Test { ");
-        out.println("  @interface A { }");
-
-        out.println("  void emit() {");
-        out.println("    Object o = null;");
-        out.println("    String s = null;");
-
-        out.println("    String a0 = (@A String)o;");
-        out.println("    Object a1 = (@A Object)o;");
-
-        out.println("    String b0 = (@A String)s;");
-        out.println("    Object b1 = (@A Object)s;");
-        out.println("  }");
-
-        out.println("  void alldeadcode() {");
-        out.println("    Object o = null;");
-
-        out.println("    if (false) {");
-        out.println("      String a0 = (@A String)o;");
-        out.println("    }");
-        out.println("  }");
-
-        out.println("}");
-        out.close();
-        return f;
-    }
-
-    File compileTestFile(File f) {
-        int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.7", "-g", f.getPath() });
-        if (rc != 0)
-            throw new Error("compilation failed. rc=" + rc);
-        String path = f.getPath();
-        return new File(path.substring(0, path.length() - 5) + ".class");
-    }
-
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 4;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
@@ -186,4 +157,30 @@ public class TypeCasts {
     int all;
     int visibles;
     int invisibles;
+
+    /*********************** Test class *************************/
+    static int expected_invisibles = 4;
+    static int expected_visibles = 0;
+    static class Test {
+        @interface A {}
+
+        void emit() {
+            Object o = null;
+            String s = null;
+
+            String a0 = (@A String)o;
+            Object a1 = (@A Object)o;
+
+            String b0 = (@A String)s;
+            Object b1 = (@A Object)s;
+        }
+
+        void alldeadcode() {
+            Object o = null;
+
+            if (false) {
+                String a0 = (@A String)o;
+            }
+        }
+    }
 }

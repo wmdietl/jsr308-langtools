@@ -22,6 +22,11 @@
  */
 
 import java.io.*;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.net.URL;
+import java.util.List;
+
 import com.sun.tools.classfile.*;
 
 /*
@@ -36,10 +41,7 @@ public class NoTargetAnnotations {
     }
 
     public void run() throws Exception {
-        File javaFile = writeTestFile();
-        File classFile = compileTestFile(javaFile);
-
-        ClassFile cf = ClassFile.read(classFile);
+        ClassFile cf = getClassFile("NoTargetAnnotations$Test.class");
         for (Field f : cf.fields) {
             test(cf, f);
             testDeclaration(cf, f);
@@ -56,6 +58,17 @@ public class NoTargetAnnotations {
         System.out.println("PASSED");
     }
 
+    ClassFile getClassFile(String name) throws IOException, ConstantPoolException {
+        URL url = getClass().getResource(name);
+        InputStream in = url.openStream();
+        try {
+            return ClassFile.read(in);
+        } finally {
+            in.close();
+        }
+    }
+
+    /************ Helper annotations counting methods ******************/
     void test(ClassFile cf, Method m) {
         test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
@@ -132,24 +145,6 @@ public class NoTargetAnnotations {
         }
     }
 
-    File writeTestFile() throws IOException {
-        File f = new File("Test.java");
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-
-        out.println("import java.lang.annotation.Retention;");
-        out.println("import java.lang.annotation.RetentionPolicy;");
-        out.println("abstract class Test {");
-        out.println("  @Retention(RetentionPolicy.RUNTIME)");
-        out.println("  @interface A {}");
-        out.println("  @A String method() {");
-        out.println("    return null;");
-        out.println("  }");
-        out.println("}");
-
-        out.close();
-        return f;
-    }
-
     File compileTestFile(File f) {
         int rc = com.sun.tools.javac.Main.compile(new String[] { "-XDTA:writer", "-source", "1.7", "-g", f.getPath() });
         if (rc != 0)
@@ -159,7 +154,6 @@ public class NoTargetAnnotations {
     }
 
     void countAnnotations() {
-        int expected_visibles = 1, expected_invisibles = 0, expected_decl = 1;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
@@ -193,4 +187,18 @@ public class NoTargetAnnotations {
     int invisibles;
 
     int declAnnotations;
+
+    /*********************** Test class *************************/
+    static int expected_invisibles = 0;
+    static int expected_visibles = 1;
+    static int expected_decl = 1;
+
+    static class Test {
+        @Retention(RetentionPolicy.RUNTIME)
+        @interface A {}
+
+        @A String method() {
+            return null;
+        }
+    }
 }

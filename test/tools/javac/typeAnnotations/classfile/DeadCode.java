@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright 2009-2010 Sun Microsystems, Inc.  All Rights Reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,10 +22,14 @@
  */
 
 import java.io.*;
+import java.net.URL;
+import java.util.List;
+
 import com.sun.tools.classfile.*;
 
 /*
  * @test
+ * @bug 6917130
  * @summary test that optimized away annotations are not emited to classfile
  */
 
@@ -35,10 +39,7 @@ public class DeadCode {
     }
 
     public void run() throws Exception {
-        File javaFile = writeTestFile();
-        File classFile = compileTestFile(javaFile);
-
-        ClassFile cf = ClassFile.read(classFile);
+        ClassFile cf = getClassFile("DeadCode$Test.class");
         test(cf);
         for (Field f : cf.fields) {
             test(cf, f);
@@ -54,6 +55,17 @@ public class DeadCode {
         System.out.println("PASSED");
     }
 
+    ClassFile getClassFile(String name) throws IOException, ConstantPoolException {
+        URL url = getClass().getResource(name);
+        InputStream in = url.openStream();
+        try {
+            return ClassFile.read(in);
+        } finally {
+            in.close();
+        }
+    }
+
+    /************ Helper annotations counting methods ******************/
     void test(ClassFile cf) {
         test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
         test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
@@ -117,43 +129,7 @@ public class DeadCode {
         }
     }
 
-
-    File writeTestFile() throws IOException {
-        File f = new File("Test.java");
-        PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
-        out.println("import java.util.*;");
-        out.println("class Test { ");
-        out.println("  @interface A { }");
-
-        out.println("  void test() {");
-        out.println("    List<? extends @A Object> o = null;");
-        out.println("    o.toString();");
-
-        out.println("    @A String m;");
-        out.println("    if (false) {");
-        out.println("      @A String a;");
-        out.println("      @A String b = \"m\";");
-        out.println("      b.toString();");
-        out.println("      List<? extends @A Object> c = null;");
-        out.println("      c.toString();");
-        out.println("    }");
-        out.println("  }");
-
-        out.println("}");
-        out.close();
-        return f;
-    }
-
-    File compileTestFile(File f) {
-        int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.7", "-g", f.getPath() });
-        if (rc != 0)
-            throw new Error("compilation failed. rc=" + rc);
-        String path = f.getPath();
-        return new File(path.substring(0, path.length() - 5) + ".class");
-    }
-
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 1;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
@@ -180,4 +156,26 @@ public class DeadCode {
     int all;
     int visibles;
     int invisibles;
+
+    /*********************** Test class *************************/
+    static int expected_invisibles = 1;
+    static int expected_visibles = 0;
+    static class Test {
+        @interface A {}
+
+        void test() {
+            List<? extends @A Object> o = null;
+            o.toString();
+
+            @A String m;
+            if (false) {
+                @A String a;
+                @A String b = "m";
+                b.toString();
+                List<? extends @A Object> c = null;
+                c.toString();
+            }
+        }
+    }
+
 }
