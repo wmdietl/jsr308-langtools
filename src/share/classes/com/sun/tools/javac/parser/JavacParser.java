@@ -25,7 +25,9 @@
 
 package com.sun.tools.javac.parser;
 
+import java.io.File;
 import java.util.*;
+import java.io.File;
 
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.tree.*;
@@ -2397,6 +2399,10 @@ public class JavacParser implements Parser {
         }
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
         boolean checkForImports = true;
+        // JSR 308: Add imports
+        Collection<JCTree> commandImports = commandLineImports();
+        for (JCTree commendImport : commandImports)
+            defs.append(commendImport);
         while (S.token() != EOF) {
             if (S.pos() <= errorEndPos) {
                 // error recovery
@@ -2425,6 +2431,40 @@ public class JavacParser implements Parser {
         if (keepLineMap)
             toplevel.lineMap = S.getLineMap();
         return toplevel;
+    }
+
+    private final static String JSR308_IMPORTS = "jsr308.imports";
+    private final static String JSR308_IMPORTS_ALT = "jsr308_imports";
+
+    Collection<JCTree> commandLineImports() {
+        int pos = S.pos();
+        String commandImports = System.getProperty(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getProperty(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            return new ListBuffer<JCTree>();
+        String[] importClasses = commandImports.split(File.pathSeparator);
+        ListBuffer<JCTree> imports = new ListBuffer<JCTree>();
+        for (String importClass : importClasses) {
+            if (importClass == null || importClass.length() == 0)
+                continue;
+            String[] idents = importClass.split("\\.");
+            JCExpression pid = toP(F.at(S.pos()).Ident(names.fromString(idents[0])));
+            for (int i = 1; i < idents.length; ++i) {
+                Name selector;
+                if (idents[i].equals("*"))
+                    selector = names.asterisk;
+                else
+                    selector = names.fromString(idents[i]);
+                pid = toP(F.at(S.pos()).Select(pid, selector));
+            }
+            imports.append(toP(F.at(pos).Import(pid, false)));
+        }
+        return imports;
     }
 
     /** ImportDeclaration = IMPORT [ STATIC ] Ident { "." Ident } [ "." "*" ] ";"
