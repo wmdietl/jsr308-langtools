@@ -34,7 +34,7 @@ import com.sun.tools.javac.util.*;
 *  This code and its internal interfaces are subject to change or
 *  deletion without notice.</b>
 */
-public class TypeAnnotationPosition {
+public class TypeAnnotationPosition implements Cloneable {
 
     public TargetType type = TargetType.UNKNOWN;
 
@@ -65,6 +65,11 @@ public class TypeAnnotationPosition {
     // For wildcards
     public TypeAnnotationPosition wildcard_position = null;
 
+    public TypeAnnotationPosition() { }
+    public TypeAnnotationPosition(TargetType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -81,8 +86,6 @@ public class TypeAnnotationPosition {
             // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
@@ -144,11 +147,13 @@ public class TypeAnnotationPosition {
             sb.append(offset);
             break;
             // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-            // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
@@ -157,7 +162,9 @@ public class TypeAnnotationPosition {
             sb.append(type_index);
             break;
             // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
@@ -188,8 +195,16 @@ public class TypeAnnotationPosition {
     public boolean emitToClassfile() {
         if (type == TargetType.WILDCARD_BOUND
             || type == TargetType.WILDCARD_BOUND_GENERIC_OR_ARRAY)
-            return wildcard_position.isValidOffset;
+            return wildcard_position.emitToClassfile();
         else
             return !type.isLocal() || isValidOffset;
+    }
+
+    public TypeAnnotationPosition clone() {
+        try {
+            return (TypeAnnotationPosition)super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("This not cloneable");
+        }
     }
 }

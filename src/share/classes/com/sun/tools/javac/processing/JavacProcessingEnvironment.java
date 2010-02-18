@@ -1081,8 +1081,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         if (discoveredProcs != null) // Make calling close idempotent
             discoveredProcs.close();
         discoveredProcs = null;
-        if (processorClassLoader != null && processorClassLoader instanceof Closeable)
-            ((Closeable) processorClassLoader).close();
+        // XXX: Work around a compiler bug
+//      if (processorClassLoader != null && processorClassLoader instanceof Closeable)
+//          ((Closeable) processorClassLoader).close();
     }
 
     private List<ClassSymbol> getTopLevelClasses(List<? extends JCCompilationUnit> units) {
@@ -1287,6 +1288,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             }
             public void visitNewClass(JCNewClass node) {
                 node.constructor = null;
+                scan(node.typeargs);
                 super.visitNewClass(node);
             }
             public void visitAssignop(JCAssignOp node) {
