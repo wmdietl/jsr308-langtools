@@ -1288,7 +1288,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             }
             public void visitNewClass(JCNewClass node) {
                 node.constructor = null;
-                scan(node.typeargs);
                 super.visitNewClass(node);
             }
             public void visitAssignop(JCAssignOp node) {
