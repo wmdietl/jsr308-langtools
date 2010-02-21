@@ -18,23 +18,25 @@ changes introduced in this prototype.
 The JSR 308 specification does not introduce any required command-line
 change to any of the langtools commands.
 
-The prototype includes some hidden options for debugging:
- -XDTA:parser    parsing annotations in JavacParser
- -XDTA:attr      attributing annotations in MemberEnter
- -XDTA:trans     translating types in TransTypes
- -XDTA:reader    reading annotations from classfile in ClassReader
- -XDTA:writer    writing annotations to classfile in ClassWriter
+The Type Annotations compiler includes one non-standard option
+ -XDTA:spacesincomments
+that is documented in the Checker Framework manual [1].
 
-It also includes one non-standard option
- -XDTAannotationsincomments
- -XDTAspacesincomments
-both are documented in [1]
-
-Additionally the compiler recognize one more environment variable/property:
+Additionally, the compiler recognizes one more environment variable/property:
   jsr308.import
 The value needs to be a package or a type name.  The parser inserts
 import statements for the package/class to all compiled classes.
-This is discussed in [2].
+This is discussed in the Checker Framework manual [2].
+
+Finally, the compiler includes some hidden options for debugging:
+ -XDTA:parser    parsing annotations in JavacParser
+ -XDTA:reader    reading annotations from classfile in ClassReader
+ -XDTA:writer    writing annotations to classfile in ClassWriter
+ -XDTA:scanner
+
+You can get an up-to-date list of all the options by searching for
+   .get("TA
+in the jsr308-langtools repository.
 
 ===========================================================
 
