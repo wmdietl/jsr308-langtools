@@ -21,25 +21,20 @@
  * have any questions.
  */
 
-/*
- * @test
- * @ignore
- * @build DA TA Test TestProcessor
- * @compile -proc:only -processor TestProcessor AnnoTreeTests.java
- */
+import javax.annotation.processing.*;
+import javax.lang.model.*;
+import javax.lang.model.element.*;
+import java.util.Set;
 
-@Test(6)
-class AnnoTreeTests {
-    // primitive types
-    @DA("int") int i1;
-    int i2 = (@TA("int") int) 0;
-
-    // simple array types
-    @DA("int") int[] a1;
-    int @TA("int[]") [] a2;
-    int[] a3 = (@TA("int") int[]) a1;
-    int[] a4 = (int @TA("int[]") []) a1;
-
-    // multi-dimensional array types
-    // (still to come)
+@SupportedAnnotationTypes("*")
+public class DummyProcessor extends  AbstractProcessor {
+   public boolean process(Set<? extends TypeElement> annotations,
+                  RoundEnvironment roundEnv) {
+       return true;
+   }
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
+    }
 }
+

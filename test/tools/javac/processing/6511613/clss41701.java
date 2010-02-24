@@ -23,23 +23,21 @@
 
 /*
  * @test
- * @ignore
- * @build DA TA Test TestProcessor
- * @compile -proc:only -processor TestProcessor AnnoTreeTests.java
+ * @bug 6511613
+ * @summary javac unexpectedly doesn't fail in some cases if an annotation processor specified
+ *
+ * @build DummyProcessor
+ * @compile/fail clss41701.java
+ * @compile/fail -processor DummyProcessor clss41701.java
  */
 
-@Test(6)
-class AnnoTreeTests {
-    // primitive types
-    @DA("int") int i1;
-    int i2 = (@TA("int") int) 0;
+import java.io.PrintStream;
 
-    // simple array types
-    @DA("int") int[] a1;
-    int @TA("int[]") [] a2;
-    int[] a3 = (@TA("int") int[]) a1;
-    int[] a4 = (int @TA("int[]") []) a1;
+interface clss41701i {
+    void run();
+}
 
-    // multi-dimensional array types
-    // (still to come)
+class clss41701a<A extends clss41701i,
+                 B extends clss41701i,
+                 C extends A&B> {
 }
