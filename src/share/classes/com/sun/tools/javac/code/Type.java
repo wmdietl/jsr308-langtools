@@ -26,6 +26,7 @@
 package com.sun.tools.javac.code;
 
 import com.sun.tools.javac.util.*;
+import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Symbol.*;
 
 import javax.lang.model.type.*;
@@ -82,6 +83,8 @@ public class Type implements PrimitiveType {
     /** The defining class / interface / package / type variable
      */
     public TypeSymbol tsym;
+
+    public List<Compound> typeAnnotations = List.nil();
 
     /**
      * The constant value of this type, null if this type does not
