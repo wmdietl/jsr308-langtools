@@ -92,14 +92,14 @@ ${jsr308_spec}:
 
 ${jsr308_spec}/java-annotation-design.pdf: design.pdf
 	\cp -f $< $@
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/java-annotation-design.html: design.html
 	\cp -f $< $@
 # We don't know which of the two files will be created
 	-\cp -f design001.gif ${jsr308_spec}
 	-\cp -f design001.png ${jsr308_spec}
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
@@ -116,28 +116,28 @@ type-quals.html: type-quals.tex type-quals.dvi
 
 ${jsr308_www}/java-type-qualifiers.pdf: type-quals.pdf
 	\cp -f $< $@
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ${jsr308_www}/java-type-qualifiers.html: type-quals.html
 	\cp -f $< $@
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
 ${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html
 	validate $<
 	\cp -f $< $@
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ${jsr308_www}/jsr308-faq.html: jsr308-faq.html
 	validate $<
 	\cp -f $< $@
-#	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+#	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/jsr308-changes.html: jsr308-changes.html
 	validate $<
 	\cp -f $< $@
-	cd ${jsr308_www}; update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
 
 ${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install
 	\cp -f $< $@
