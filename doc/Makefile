@@ -1,5 +1,6 @@
 jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
+jsr308_www_online ?= http://types.cs.washington.edu/jsr308
 
 PLUME ?= /homes/gws/mernst/bin/share-plume
 RELEASEDATE ?= `date '+%Y%m%d'`
