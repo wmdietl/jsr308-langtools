@@ -55,8 +55,8 @@
                 <AnnotationTypeRequiredMemberSummary/>
             <AnnotationTypeOptionalMemberSummary/>
         </MemberSummary>
+        <ElementDetailHeader/>
         <AnnotationTypeRequiredMemberDetails>
-            <Header/>
             <AnnotationTypeRequiredMember>
                 <MemberHeader/>
                 <Signature/>
