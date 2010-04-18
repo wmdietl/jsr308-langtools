@@ -170,10 +170,13 @@
 
     <!-- Sometimes it takes 2 tries for this to work; the first "ant clean"
     says "Unable to delete directory .../jsr308-langtools/dist", and the second
-    succeeds.  -MDE -->
+    succeeds.
+    A possible reason may be .nfs files in the directory.  So, I am trying
+    the quiet="true" option, and hope that doesn't hurt anything later.
+    Probably I should rename the directory if it still exists...  -MDE -->
     <target name="clean" description="Delete all generated files">
         <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
+        <delete dir="${dist.dir}" quiet="true"/>
     </target>
 
     <!-- Additional targets for running tools on the build -->
