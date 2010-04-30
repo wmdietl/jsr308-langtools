@@ -696,8 +696,6 @@ public class ClassWriter {
             // new expression
             case NEW:
             case NEW_GENERIC_OR_ARRAY:
-            case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
                 out.writeShort(p.offset);
                 break;
              // local variable
@@ -748,17 +746,22 @@ public class ClassWriter {
                 out.writeShort(p.offset);
                 break;
             // method parameter: not specified
+            case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 out.writeByte(p.parameter_index);
                 break;
             // method type argument: wasn't specified
+            case NEW_TYPE_ARGUMENT:
+            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             case METHOD_TYPE_ARGUMENT:
             case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
                 out.writeShort(p.offset);
                 out.writeByte(p.type_index);
                 break;
             // We don't need to worry abut these
+            case METHOD_RETURN:
             case METHOD_RETURN_GENERIC_OR_ARRAY:
+            case FIELD:
             case FIELD_GENERIC_OR_ARRAY:
                 break;
             case UNKNOWN:
