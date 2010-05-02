@@ -2840,6 +2840,7 @@ public class Attr extends JCTree.Visitor {
      *
      */
     public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
+        if (annotations.isEmpty()) return;
         annotate.laterOnFlush(new Annotator() {
             @Override
             public void enterAnnotation() {
