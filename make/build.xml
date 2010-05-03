@@ -119,10 +119,10 @@
     <property name="javac.classpath" value=""/>
 
     <!-- Set the default bootclasspath option used for javac. 
-	Note that different variants of the option are used, meaning we can't just 
-	define the value for the option.
-	Note the explicit use of the standard property ${path.separator} in the following.
-	This is because Ant is not clever enough to handle direct use of : or ; -->
+        Note that different variants of the option are used, meaning we can't just 
+        define the value for the option.
+        Note the explicit use of the standard property ${path.separator} in the following.
+        This is because Ant is not clever enough to handle direct use of : or ; -->
     <condition property="javac.bootclasspath.opt"
             value="-Xbootclasspath:${build.classes.dir}${path.separator}${import.jdk.jar}"
             else="-Xbootclasspath/p:${build.classes.dir}">
@@ -625,7 +625,8 @@
                executable="${boot.java.home}/bin/javac"
                srcdir="${make.tools.dir}/CompileProperties"
                destdir="${build.toolclasses.dir}/"
-               classpath="${ant.home}/lib/ant.jar"/>
+               classpath="${ant.home}/lib/ant.jar"
+               includeantruntime="false"/>
         <taskdef name="pcompile"
                  classname="CompilePropertiesTask"
                  classpath="${build.toolclasses.dir}/"/>
@@ -639,7 +640,8 @@
                executable="${boot.java.home}/bin/javac"
                srcdir="${make.tools.dir}/GenStubs"
                destdir="${build.toolclasses.dir}/"
-               classpath="${build.bootstrap.dir}/classes:${ant.home}/lib/ant.jar"/>
+               classpath="${build.bootstrap.dir}/classes:${ant.home}/lib/ant.jar"
+               includeantruntime="false"/>
         <taskdef name="genstubs"
                  classname="GenStubs$$Ant"
                  classpath="${build.toolclasses.dir}/"/>
@@ -832,4 +834,3 @@
 
     </target>
 </project>
-
