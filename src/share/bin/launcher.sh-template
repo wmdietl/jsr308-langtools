@@ -53,7 +53,7 @@ ea=-ea:com.sun.tools...
 # If user supplies no explicit -cp argument, use this, after the -jar
 # option (i.e., as an option to #PROGRAM# and not to java).
 # Otherwise, #PROGRAM# can't find classes on the classpath.
-cpOpt="-classpath ${CLASSPATH:-.}"
+cpOpt="-classpath '${CLASSPATH:-.}'"
 
 # Any parameters starting with -J are passed to the JVM.
 # All other parameters become parameters of #PROGRAM#.
@@ -67,8 +67,8 @@ nl='
 for i in "$@" ; do
    IFS=
    case $i in
-   -J* )       javaOpts=$javaOpts$nl`echo $i | sed -e 's/^-J//'` ;;
-   *   )       toolOpts=$toolOpts$nl$i ;;
+   -J* )       javaOpts=$javaOpts$nl"'"`echo $i | sed -e 's/^-J//'`"'" ;;
+   *   )       toolOpts=$toolOpts$nl"'"$i"'" ;;
    esac
    if [ "$i" = "-cp" ]; then
      cpOpt="";
