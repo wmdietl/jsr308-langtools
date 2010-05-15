@@ -1185,6 +1185,14 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
+    public void visitTypeDisjoint(JCTypeDisjoint tree) {
+        try {
+            printExprs(tree.components, " | ");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public void visitTypeParameter(JCTypeParameter tree) {
         try {
             print(tree.name);
