@@ -402,11 +402,18 @@ public class TypeAnnotations {
 
         @Override
         public void visitMethodDef(JCMethodDecl tree) {
+            super.visitMethodDef(tree);
             TypeAnnotationPosition p = new TypeAnnotationPosition();
             p.type = TargetType.METHOD_RECEIVER;
             setTypeAnnotationPos(tree.receiverAnnotations, p);
-            super.visitMethodDef(tree);
         }
+
+        @Override
+        public void visitBlock(JCBlock tree) {
+            if (visitBodies)
+                super.visitBlock(tree);
+        }
+
         @Override
         public void visitTypeParameter(JCTypeParameter tree) {
             findPosition(tree, peek2(), tree.annotations);
@@ -436,6 +443,21 @@ public class TypeAnnotations {
     private static class TypeAnnotationLift extends TreeScanner {
         List<Attribute.TypeCompound> recordedTypeAnnotations = List.nil();
 
+        // TODO: Find a better of handling this
+        // Handle cases where the symbol typeAnnotation is filled multiple times
+        private static <T> List<T> appendUnique(List<T> l1, List<T> l2) {
+            if (l1.isEmpty() || l2.isEmpty())
+                return l1.appendList(l2);
+
+            ListBuffer<T> buf = ListBuffer.lb();
+            buf.appendList(l1);
+            for (T i : l2) {
+                if (!l1.contains(i))
+                    buf.append(i);
+            }
+            return buf.toList();
+        }
+
         private final boolean visitBodies;
         TypeAnnotationLift(boolean visitBodies) {
             this.visitBodies = visitBodies;
@@ -456,7 +478,7 @@ public class TypeAnnotations {
             try {
                 super.visitClassDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
         }
@@ -468,9 +490,15 @@ public class TypeAnnotations {
             try {
                 super.visitMethodDef(tree);
             } finally {
-                tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = prevTAs;
             }
+        }
+
+        @Override
+        public void visitBlock(JCBlock tree) {
+            if (visitBodies)
+                super.visitBlock(tree);
         }
 
         @Override
@@ -490,10 +518,15 @@ public class TypeAnnotations {
                 }
             }
             try {
-                super.visitVarDef(tree);
+                // copied from super.visitVarDef. need to skip tree.init
+                scan(tree.mods);
+                scan(tree.vartype);
+                if (visitBodies)
+                    scan(tree.init);
+
             } finally {
                 if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE)
-                    tree.sym.typeAnnotations = tree.sym.typeAnnotations.appendList(recordedTypeAnnotations);
+                    tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = kind.isField() ? prevTAs : prevTAs.appendList(recordedTypeAnnotations);
             }
         }
