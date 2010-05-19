@@ -23,6 +23,7 @@
 
 /*
  * @test
+ * @ignore
  * @build DA TA Test TestProcessor
  * @compile -proc:only -processor TestProcessor AnnoTreeTests.java
  */
