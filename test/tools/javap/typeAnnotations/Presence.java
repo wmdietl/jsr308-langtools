@@ -141,7 +141,9 @@ public class Presence {
         out.println("    new @A ArrayList<@A String>();");
         out.println("    Object lc8 = new @A String @A [4];");
         out.println("    Object lc9 = @A String.class;");
-        out.println("    Object lc10 = @A int.class;");
+        out.println("    try {");
+        out.println("      Object lc10 = @A int.class;");
+        out.println("    } catch (@A Exception e) { e.toString(); }");
         out.println("    return null;");
         out.println("  }");
         out.println("  void vararg1(String @A ... t) { } ");
@@ -159,7 +161,7 @@ public class Presence {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 39;
+        int expected_visibles = 0, expected_invisibles = 40;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {
