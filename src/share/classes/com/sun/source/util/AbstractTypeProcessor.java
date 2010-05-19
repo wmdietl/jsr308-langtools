@@ -91,7 +91,7 @@ import com.sun.source.tree.ClassTree;
  * general {@link javax.annotation.processing.Processor Processor}
  * contract is obeyed, with one notable exception.
  * {@link #process(Set, RoundEnvironment)} may not be overridden, as it
- * is called during the regular annotation phase before classes are analyzed.
+ * is called during the declaration annotation phase before classes are analyzed.
  *
  * @author Mahmood Ali
  * @since 1.7
@@ -119,7 +119,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
 
     /**
      * The use of this method is obsolete in type processors.  The method is
-     * called during regular annotation processing phase only.
+     * called during declaration annotation processing phase only.
      */
     @Override
     public final boolean process(Set<? extends TypeElement> annotations,
