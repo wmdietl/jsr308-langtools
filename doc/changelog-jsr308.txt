@@ -1,3 +1,13 @@
+Version 1.0.9, 25 May 2010
+
+Bug fixes
+  javadoc: Fixed a bug related to annotated primitive array
+  javac: Emit annotations targeting exceptions in catch clauses
+
+Base build
+  Updated to OpenJDK langtools build b94
+
+----------------------------------------------------------------------
 Version 1.0.8, 15 May 2010
 
 Base build
