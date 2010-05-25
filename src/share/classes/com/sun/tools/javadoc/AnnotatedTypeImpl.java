@@ -28,80 +28,81 @@ package com.sun.tools.javadoc;
 
 import com.sun.javadoc.*;
 
+import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Type.ClassType;
 
 
 /**
- * Abstract implementation of <code>Type</code>, with useful
- * defaults for the methods in <code>Type</code> (and a couple from
- * <code>ProgramElementDoc</code>).
+ * Implementation of <code>AnnotatedType</code>, which
+ * represents an annotated type.
  *
- * @author Scott Seligman
- * @since 1.5
+ * @author Mahmood Ali
+ * @since 1.7
  */
-abstract class AbstractTypeImpl implements com.sun.javadoc.Type {
+public class AnnotatedTypeImpl
+        extends AbstractTypeImpl implements AnnotatedType {
 
-    protected final DocEnv env;
-    protected final Type type;
-
-    protected AbstractTypeImpl(DocEnv env, Type type) {
-        this.env = env;
-        this.type = type;
+    AnnotatedTypeImpl(DocEnv env, Type type) {
+        super(env, type);
     }
 
-    public String typeName() {
-        return type.tsym.name.toString();
+    /**
+     * Get the annotations of this program element.
+     * Return an empty array if there are none.
+     */
+    public AnnotationDesc[] annotations() {
+        AnnotationDesc res[] = new AnnotationDesc[type.typeAnnotations.length()];
+        int i = 0;
+        for (Attribute.Compound a : type.typeAnnotations) {
+            res[i++] = new AnnotationDescImpl(env, a);
+        }
+        return res;
     }
 
-    public String qualifiedTypeName() {
-        return type.tsym.getQualifiedName().toString();
+    @Override
+    public com.sun.javadoc.Type underlyingType() {
+        return TypeMaker.getType(env, type, true, false);
     }
 
-    public String simpleTypeName() {
-        return type.tsym.name.toString();
+    @Override
+    public AnnotatedType asAnnotatedType() {
+        return this;
     }
 
-    public String name() {
+    @Override
+    public String toString() {
         return typeName();
     }
 
-    public String qualifiedName() {
-        return qualifiedTypeName();
-    }
-
-    public String toString() {
-        return qualifiedTypeName();
-    }
-
+    @Override
     public String dimension() {
-        return "";
+        return this.underlyingType().dimension();
     }
 
+    @Override
     public boolean isPrimitive() {
-        return false;
+        return this.underlyingType().isPrimitive();
     }
 
+    @Override
     public ClassDoc asClassDoc() {
-        return null;
+        return this.underlyingType().asClassDoc();
     }
 
+    @Override
     public TypeVariable asTypeVariable() {
-        return null;
+        return this.underlyingType().asTypeVariable();
     }
 
+    @Override
     public WildcardType asWildcardType() {
-        return null;
+        return this.underlyingType().asWildcardType();
     }
 
+    @Override
     public ParameterizedType asParameterizedType() {
-        return null;
-    }
-
-    public AnnotationTypeDoc asAnnotationTypeDoc() {
-        return null;
-    }
-
-    public AnnotatedType asAnnotatedType() {
-        return null;
+        return this.underlyingType().asParameterizedType();
     }
 }
