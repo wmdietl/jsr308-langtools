@@ -65,6 +65,7 @@ There is a separate
       <li><a href="#syntax">Syntax of type annotations</a>
         <ul>
           <li><a href="#return-type">Does an annotation before a method refer to the return type or to the method?</a></li>
+          <li><a href="#array-syntax-meaning">What is the meaning of array annotations such as <tt>@NonNull Object @Nullable []</tt>?</a></li>
           <li><a href="#array-syntax">I don't like array and receiver annotations.</a></li>
         </ul></li>
       <li><a href="#features">Features in the Type Annotations specification</a>
@@ -330,6 +331,7 @@ Annotations webpage</a>.
 </p>
 
 
+<!-- This is duplicated in the Checker Framework FAQ. -->
 <h2 id="syntax">Syntax of type annotations</h2>
 
 
@@ -342,6 +344,24 @@ which is intended.  See section <a
 href="specification/java-annotation-design.html#disambiguating">Disambiguating
 type and declaration annotations</a> in the Type Annotations specification.
 </p>
+
+
+<h3 id="array-syntax-meaning">What is the meaning of array annotations such as <tt>@NonNull Object @Nullable []</tt>?</h3>
+
+<p>
+<tt>@NonNull Object @Nullable []</tt> is a possibly-null array of non-null
+objects.  Note that even though the first token in the type is
+&ldquo;<tt>@NonNull</tt>&rdquo;, that annotation applies to the element
+type <tt>Object</tt>.  The annotation <tt>@Nullable</tt> applies to the
+array (<tt>[]</tt>).
+</p>
+
+<p>
+Similarly,
+<tt>@Nullable Object @NonNull []</tt> is a non-null array of possibly-null
+objects.
+</p>
+
 
 <h3 id="array-syntax">I don't like array and receiver annotations.</h3>
 
@@ -476,7 +496,7 @@ Sun codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: September 9, 2009.
+Last updated: May 30, 2010.
 </p>
 
 <p>
