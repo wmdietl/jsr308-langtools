@@ -104,7 +104,13 @@ public class TypeAnnotations {
                     return p;
 
                 case NEW_CLASS:
-                    p.type = TargetType.NEW;
+                    JCNewClass frameNewClass = (JCNewClass)frame;
+                    if (frameNewClass.typeargs.contains(tree)) {
+                        p.type = TargetType.NEW_TYPE_ARGUMENT;
+                        p.type_index = frameNewClass.typeargs.indexOf(tree);
+                    } else {
+                        p.type = TargetType.NEW;
+                    }
                     p.pos = frame.pos;
                     return p;
 
