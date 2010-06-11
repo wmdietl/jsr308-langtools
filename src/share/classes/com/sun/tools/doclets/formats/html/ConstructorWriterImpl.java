@@ -148,6 +148,7 @@ public class ConstructorWriterImpl extends AbstractExecutableMemberWriter
             strong(constructor.name());
         }
         writeParameters(constructor);
+        writeReceiverAnnotations(constructor);
         writeExceptions(constructor);
         writer.preEnd();
         assert !writer.getMemberDetailsListPrinted();
