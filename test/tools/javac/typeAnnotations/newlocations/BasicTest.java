@@ -72,4 +72,7 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
     void test3(Object @A... objs) {
 
     }
+
+    void test4(Class<?> @A ... clz) {
+    }
 }
