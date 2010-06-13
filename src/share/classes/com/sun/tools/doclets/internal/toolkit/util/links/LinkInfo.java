@@ -63,6 +63,8 @@ public abstract class LinkInfo {
      */
     public boolean isTypeBound = false;
 
+    public boolean isDeclarationLocation = true;
+
     /**
      * The label for the link.
      */
