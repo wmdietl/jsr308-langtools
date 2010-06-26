@@ -102,6 +102,7 @@ public enum Source {
     }
 
     public Target requiredTarget() {
+        if (this == JDK1_7) return Target.JDK1_5;
         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
         if (this.compareTo(JDK1_6) >= 0) return Target.JDK1_6;
         if (this.compareTo(JDK1_5) >= 0) return Target.JDK1_5;
@@ -184,7 +185,12 @@ public enum Source {
         case JDK1_6:
             return RELEASE_6;
         case JDK1_7:
-            return RELEASE_7;
+            try {
+                return RELEASE_7;
+            } catch (NoSuchFieldError e) {
+                // Running on a pre-Java 7 JVM
+                return RELEASE_6;
+            }
         default:
             return null;
         }
