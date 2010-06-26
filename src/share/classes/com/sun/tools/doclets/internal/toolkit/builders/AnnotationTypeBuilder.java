@@ -189,6 +189,27 @@ public class AnnotationTypeBuilder extends AbstractBuilder {
     }
 
     /**
+     * Build the header of the element detail section
+     */
+    public void buildElementDetailHeader(XMLNode node) throws Exception {
+        MemberSummaryBuilder memberSummaryBuilder = (MemberSummaryBuilder)
+        configuration.getBuilderFactory().getMemberSummaryBuilder(writer);
+        AnnotationTypeRequiredMemberWriter writerOptional =
+            ((AnnotationTypeRequiredMemberWriter) memberSummaryBuilder.
+                    getMemberSummaryWriter(VisibleMemberMap.ANNOTATION_TYPE_MEMBER_OPTIONAL));
+        AnnotationTypeRequiredMemberWriter writerRequired =
+            ((AnnotationTypeRequiredMemberWriter) memberSummaryBuilder.
+                    getMemberSummaryWriter(VisibleMemberMap.ANNOTATION_TYPE_MEMBER_REQUIRED));
+        if (writerOptional != null){
+            ((AnnotationTypeRequiredMemberBuilder)
+             configuration.getBuilderFactory().getAnnotationTypeRequiredMemberBuilder(writer)).buildHeader(node);
+        } else if (writerRequired != null){
+            ((AnnotationTypeRequiredMemberBuilder)
+                    configuration.getBuilderFactory().getAnnotationTypeOptionalMemberBuilder(writer)).buildHeader(node);
+        }
+    }
+
+    /**
      * Build the annotation type optional member documentation.
      *
      * @param elements the XML elements that specify how a annotation type
