@@ -78,7 +78,7 @@ design.pdf: design.tex design.dvi
 design.html: design.tex design.dvi design.bbl
 	hevea -fix -exec xxdate.exe urlhref.hva design.tex
 	mv design.html design.html-with-htoc
-	retarget-hevea-crossrefs < design.html-with-htoc > design.html
+	hevea-retarget-crossrefs < design.html-with-htoc > design.html
 	rm -rf design.html-with-htoc
 #	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' design.html
 #	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' design.html
