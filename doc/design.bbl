@@ -84,8 +84,8 @@ Chandrasekhar Boyapati.
 \bibitem[Bra04]{Bracha2004}
 Gilad Bracha.
 \newblock Pluggable type systems.
-\newblock In {\em OOPSLA Workshop on Revival of Dynamic Languages}, Vancouver,
-  BC, Canada, October 2004.
+\newblock In {\em Workshop on Revival of Dynamic Languages}, Vancouver, BC,
+  Canada, October~25, 2004.
 
 \bibitem[BSBR03]{BoyapatiSBR2003}
 Chandrasekhar Boyapati, Alexandru Salcianu, William {Beebee, Jr.}, and Martin
@@ -350,7 +350,7 @@ Frank Pfenning.
 
 \bibitem[PNCB06]{PotaninNCB2006}
 Alex Potanin, James Noble, Dave Clarke, and Robert Biddle.
-\newblock Generic ownership for generic {Java}.
+\newblock {Generic} {Ownership} for {Generic} {Java}.
 \newblock In {\em Object-Oriented Programming Systems, Languages, and
   Applications (OOPSLA 2006)}, pages 311--324, Portland, OR, USA,
   October~24--26, 2006.
