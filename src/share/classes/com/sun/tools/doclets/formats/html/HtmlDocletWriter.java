@@ -26,6 +26,7 @@
 package com.sun.tools.doclets.formats.html;
 
 import java.io.*;
+import java.lang.annotation.ElementType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -1837,23 +1838,25 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      *         documented.
      */
     public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
-        return getAnnotations(indent, descList, linkBreak, false);
+        return getAnnotations(indent, descList, linkBreak, null);
     }
 
     /**
      * Return the string representations of the annotation types for
      * the given doc.
      *
-     * If {@code filterDeclAnnos} is true, then the annotations are
-     * declaration annotations are omitted from the output.
+     * A {@code null} {@code elementType} indicates that all the
+     * annotations should be returned without any filtering.
      *
      * @param indent the number of extra spaces to indent the annotations.
      * @param descList the array of {@link AnnotationDesc}.
      * @param linkBreak if true, add new line between each member value.
+     * @param elementType the type of targeted element (used for filtering
+     *        type annotations from declaration annotations)
      * @return an array of strings representing the annotations being
      *         documented.
      */
-    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak, boolean filterDeclAnnos) {
+    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak, ElementType elementType) {
         List<String> results = new ArrayList<String>();
         StringBuffer annotation;
         for (int i = 0; i < descList.length; i++) {
@@ -1861,7 +1864,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             if (! Util.isDocumentedAnnotation(annotationDoc)){
                 continue;
             }
-            if  (filterDeclAnnos && Util.isDeclarationAnnotation(annotationDoc)) {
+            if  (elementType != null
+                 && Util.isDeclarationAnnotation(annotationDoc, elementType)) {
                 continue;
             }
             annotation = new StringBuffer();
