@@ -1175,8 +1175,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             discoveredProcs.close();
         discoveredProcs = null;
         // XXX: Work around a compiler bug
-//      if (processorClassLoader != null && processorClassLoader instanceof Closeable)
-//          ((Closeable) processorClassLoader).close();
+//        if (processorClassLoader != null && processorClassLoader instanceof Closeable)
+//            ((Closeable) processorClassLoader).close();
     }
 
     private List<ClassSymbol> getTopLevelClasses(List<? extends JCCompilationUnit> units) {
