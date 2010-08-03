@@ -999,7 +999,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
             annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
-        }
+        } else {
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
+	}
     }
 
     // A sub-phase that "compiles" annotations in annotated types.
