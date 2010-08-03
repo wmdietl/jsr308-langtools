@@ -25,6 +25,8 @@
 
 package com.sun.tools.doclets.internal.toolkit.util.links;
 
+import java.lang.annotation.ElementType;
+
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.Configuration;
 
@@ -63,7 +65,10 @@ public abstract class LinkInfo {
      */
     public boolean isTypeBound = false;
 
-    public boolean isDeclarationLocation = true;
+    /**
+     * The type of the document element
+     */
+    public ElementType elemType = null;
 
     /**
      * The label for the link.
