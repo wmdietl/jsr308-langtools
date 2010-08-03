@@ -88,7 +88,7 @@ import static javax.tools.JavaFileObject.Kind;
  * object.
  *
  * <p><em>Implementation note:</em> a consequence of this requirement
- * is that a trivial implementation of output to a {@linkplain
+ * is that a trivial implementation of output to a {@link
  * java.util.jar.JarOutputStream} is not a sufficient implementation.
  * That is, rather than creating a JavaFileObject that returns the
  * JarOutputStream directly, the contents must be cached until closed
