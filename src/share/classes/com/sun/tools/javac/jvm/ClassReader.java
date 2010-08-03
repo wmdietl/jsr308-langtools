@@ -1442,6 +1442,7 @@ public class ClassReader implements Completer {
             position.offset = nextChar();
             break;
         // method parameter: not specified
+        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             position.parameter_index = nextByte();
             break;
@@ -1454,7 +1455,9 @@ public class ClassReader implements Completer {
             position.type_index = nextByte();
             break;
         // We don't need to worry abut these
+        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
