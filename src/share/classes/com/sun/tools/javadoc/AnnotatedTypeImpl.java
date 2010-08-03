@@ -80,7 +80,7 @@ public class AnnotatedTypeImpl
     public String typeName() {
         return this.underlyingType().typeName();
     }
-    
+
     @Override
     public String qualifiedTypeName() {
         return this.underlyingType().qualifiedTypeName();
