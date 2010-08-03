@@ -171,6 +171,7 @@ public class MethodWriterImpl extends AbstractExecutableMemberWriter
             strong(method.name());
         }
         writeParameters(method);
+        writeReceiverAnnotations(method);
         writeExceptions(method);
         writer.preEnd();
         assert !writer.getMemberDetailsListPrinted();
