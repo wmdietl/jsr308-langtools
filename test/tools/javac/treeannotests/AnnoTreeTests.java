@@ -34,10 +34,10 @@ class AnnoTreeTests {
     int i2 = (@TA("int") int) 0;
 
     // simple array types
-    @DA("int[]") int[] a1;
-    int @TA("int") [] a2;
-    int[] a3 = (@TA("int[]") int[]) a1;
-    int[] a4 = (int @TA("int") []) a1;
+    @DA("int") int[] a1;
+    int @TA("int[]") [] a2;
+    int[] a3 = (@TA("int") int[]) a1;
+    int[] a4 = (int @TA("int[]") []) a1;
 
     // multi-dimensional array types
     // (still to come)
