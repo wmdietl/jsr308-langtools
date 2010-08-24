@@ -1160,17 +1160,21 @@ Thus the annotations are represented in the class file as follows:
 \begin{tabular}{|l|c|c|}
 \hline
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{not applicable} \\
+\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
 \code{@B}       & 1     & 0 \\
 \code{@C}       & 1     & 1 \\
 \code{@D}       & 2     & 1, 0 \\
-\code{@E}       & \multicolumn{2}{c|}{not applicable} \\
+\code{@E}       & \multicolumn{2}{c|}{stored elsewhere} \\
 \code{@F}       & 1     & 0 \\
 \code{@G}       & 1     & 1 \\
 \code{@H}       & 1     & 2 \\
 \hline
 \end{tabular}
 \end{center}
+
+% Really ought to say exactly where...
+In this example, the entries for \<@A> and \<@E> are stored elsewhere in
+the classfile, rather than in the ``location'' array.
 
 Figure~\ref{tbl:locations} shows the values of the
 \code{location\_length} and \code{location} fields in an example that
@@ -1198,7 +1202,7 @@ Declaration: \code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H
 \begin{tabular}{|l|c|c|}
 \hline
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{not applicable} \\
+\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
 \code{@B}       & 1     & 0 \\
 \code{@C}       & 3     & 0, 0, 2 \\
 \code{@D}       & 2     & 0, 0 \\
