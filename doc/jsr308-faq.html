@@ -58,6 +58,7 @@ There is a separate
       <li><a href="#tools">Tool support</a>
         <ul>
           <li><a href="#backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 7?</a></li>
+          <li><a href="#openjdk">What is the relationship between the Type Annotations compiler and the OpenJDK compiler?</a></li>
           <li><a href="#platforms">Do the Type Annotations tools run on Linux?  MacOS?  Windows?</a></li>
           <li><a href="#eclipse">Do IDEs like Eclipse and IntelliJ IDEA support type annotations?</a></li>
           <li><a href="#bug-reporting">How do I file a bug report?</a></li>
@@ -303,6 +304,36 @@ Framework Manual.
 </p>
 
 
+<h3 id="openjdk">What is the relationship between the Type Annotations compiler and the OpenJDK compiler?</h3>
+
+<p>
+Oracle's announced plan is to incorporate all of the changes in the Type
+Annotations compiler into the OpenJDK compiler, with the exception of the
+<a href="README-jsr308.html#annotations-in-comment">annotations in comments
+  feature</a>.  The Oracle process for incorporating changes into OpenJDK is
+a lengthy one, so sometimes it takes a while before improvements to the
+Type Annotations compiler appear in OpenJDK.
+</p>
+
+<p>
+Periodically, all public changes to the OpenJDK compiler are merged into
+the Type Annotations compiler.  This can be done relatively easily, and
+without corporate approval required.
+</p>
+
+<p>
+As a result, at any moment each compiler may have features the other one
+lacks.  In general, you are better off using the Type Annotations compiler,
+particularly if you are interested in writing and checking type annotations.
+</p>
+
+<p>
+For a more detailed description of the differences between the two
+compilers, see the <a href="../README-jsr308.html#openjdk-differences">Type
+    Annotations compiler README file</a>.
+</p>
+
+
 <h3 id="platforms">Do the Type Annotations tools run on Linux?  MacOS?  Windows?</h3>
 
 <p>
@@ -496,7 +527,7 @@ Sun codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: May 30, 2010.
+Last updated: August 27, 2010.
 </p>
 
 <p>
