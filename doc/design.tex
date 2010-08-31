@@ -2325,8 +2325,9 @@ would write
 % \emph{right-to-left}, as ``String array array''.
 
 
-An important property of this syntax is that adding array levels does not
-change the meaning of existing annotations.  For example, \code{var1} has
+An important property of this syntax is that, in two declarations that
+differ only in the number of array levels, the annotations mean the same
+thing.  For example, \code{var1} has
 the same annotations as the elements of \code{arr2}:
 
 \begin{Verbatim}
@@ -2386,6 +2387,12 @@ within angle brackets as for generics.
 % generics-like syntax and also the JSR 308 annotation syntax.  In a case
 % study, a programmer preferred the JSR 308 syntax to the generics-like
 % syntax~\cite{ZibinPAAKE2007}.
+
+
+%% For a discussion of the two major alternatives for array syntax, see my
+%% email of July 13, 2010 titled "Consistency of array type and expression
+%% annotations" (and subsequent and previous email).
+
 
 
 \subsection{Disambiguating type and declaration annotations\label{disambiguating}}
