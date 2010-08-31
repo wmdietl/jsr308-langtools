@@ -2,7 +2,9 @@ jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 jsr308_www_online ?= http://types.cs.washington.edu/jsr308
 
-PLUME ?= /homes/gws/mernst/bin/share-plume
+pl ?= ${HOME}/plume-lib
+PLUME_BIN ?= ${pl}/bin
+
 RELEASEDATE ?= `date '+%Y%m%d'`
 
 # There is no use of "cp -p" in this Makefile, to avoid problems with
@@ -55,9 +57,9 @@ ${jsr308_www}/java-type-qualifiers.html
 #   AnnotatedType tree) or affected by it (e.g. AnnotatedTypeVisitor,
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
-checklinks:
-	${PLUME}/checklink -q -r -e `cat ${PLUME}/checklink-args.txt` ${jsr308_www_online}
-	${PLUME}/checklink -q -r -e `cat ${PLUME}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
+checklinks: ${PLUME_BIN}
+	${PLUME_BIN}/checklink -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
+	${PLUME_BIN}/checklink -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
 
 
 ###########################################################################
@@ -85,21 +87,21 @@ design.html: design.tex design.dvi design.bbl
 #	html-update-toc design.html
 
 ${jsr308_www}:
-	mkdir ${jsr308_www}
+	mkdir -p ${jsr308_www}
 
 ${jsr308_spec}:
-	mkdir ${jsr308_spec}
+	mkdir -p ${jsr308_spec}
 
-${jsr308_spec}/java-annotation-design.pdf: design.pdf
+${jsr308_spec}/java-annotation-design.pdf: design.pdf ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_spec}/java-annotation-design.html: design.html
+${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
 # We don't know which of the two files will be created
 	-\cp -f design001.gif ${jsr308_spec}
 	-\cp -f design001.png ${jsr308_spec}
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
@@ -114,32 +116,42 @@ type-quals.html: type-quals.tex type-quals.dvi
 	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' type-quals.html
 	html-update-toc type-quals.html
 
-${jsr308_www}/java-type-qualifiers.pdf: type-quals.pdf
+${jsr308_www}/java-type-qualifiers.pdf: type-quals.pdf ${jsr308_www} ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/java-type-qualifiers.html: type-quals.html
+${jsr308_www}/java-type-qualifiers.html: type-quals.html ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
-${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html
+${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html ${jsr308_www} ${PLUME_BIN}
 	validate $<
 	\cp -f $< $@
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/jsr308-faq.html: jsr308-faq.html
+${jsr308_www}/jsr308-faq.html: jsr308-faq.html ${jsr308_www} ${PLUME_BIN}
 	validate $<
 	\cp -f $< $@
-#	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+#	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_spec}/jsr308-changes.html: jsr308-changes.html
+${jsr308_spec}/jsr308-changes.html: jsr308-changes.html ${jsr308_spec} ${PLUME_BIN}
 	validate $<
 	\cp -f $< $@
-	cd ${jsr308_www}; html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install
+${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install ${jsr308_www}
 	\cp -f $< $@
+
+###########################################################################
+
+## These targets ensure that the directory exists, but do *not* make
+## it up to date.
+
+${pl}:
+	cd ${pl}/..; hg clone https://plume-lib.googlecode.com/hg/ plume-lib
+
+${PLUME_BIN}: ${pl}
 
 ###########################################################################
