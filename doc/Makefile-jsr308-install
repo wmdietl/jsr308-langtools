@@ -65,7 +65,7 @@ export MAKEFILE := ${MAKEFILE_DIR}/Makefile-jsr308-install
 export JAVA_HOME := ${JSR308}/jdk1.7.0
 export PATH := ${JAVA_HOME}/bin:${PATH}
 
-export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.7.0/lib/tools.jar:${JSR308}/checkers/checkers.jar
+export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.7.0/lib/tools.jar:${JSR308}/checker-framework/checkers/checkers.jar
 
 UNAME := $(shell uname)
 
