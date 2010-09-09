@@ -336,7 +336,9 @@ public class Types {
         return isSubtype(t, s, false);
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
-        if (t == s)
+        if (t == s
+            || (t.tag == TYPEVAR && s.tag == TYPEVAR
+                    && ((TypeVar)t).tsym == ((TypeVar)s).tsym))
             return true;
 
         if (s.tag >= firstPartialTag)
@@ -589,7 +591,9 @@ public class Types {
                 case DOUBLE: case BOOLEAN: case VOID: case BOT: case NONE:
                     return t.tag == s.tag;
                 case TYPEVAR: {
-                    if (s.tag == TYPEVAR) {
+                    if (t.tsym == s.tsym) {
+                        return true;
+                    } else if (s.tag == TYPEVAR) {
                         //type-substitution does not preserve type-var types
                         //check that type var symbols and bounds are indeed the same
                         return t.tsym == s.tsym &&
@@ -2127,12 +2131,22 @@ public class Types {
                 return new MethodType(argtypes, restype, thrown, t.tsym);
         }
 
+        private boolean equalTypes(Type t1, Type t2) {
+            if (t1 == t2)
+                return true;
+
+            if ((t1 instanceof TypeVar) && (t2 instanceof TypeVar))
+                return t1.tsym == t2.tsym;
+
+            return false;
+        }
+
         @Override
         public Type visitTypeVar(TypeVar t, Void ignored) {
             for (List<Type> from = this.from, to = this.to;
                  from.nonEmpty();
                  from = from.tail, to = to.tail) {
-                if (t == from.head) {
+                if (equalTypes(t, from.head)) {
                     return to.head.withTypeVar(t);
                 }
             }
