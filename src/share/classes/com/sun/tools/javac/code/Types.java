@@ -336,11 +336,11 @@ public class Types {
         return isSubtype(t, s, false);
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
-        if (t == s
-            || (t.tag == TYPEVAR && s.tag == TYPEVAR
-                    && ((TypeVar)t).tsym == ((TypeVar)s).tsym))
+        if (t == s)
             return true;
-
+        if (t.tag == TYPEVAR && s.tag == TYPEVAR
+            && ((TypeVar)t).tsym == ((TypeVar)s).tsym)
+            return true;
         if (s.tag >= firstPartialTag)
             return isSuperType(s, t);
 
