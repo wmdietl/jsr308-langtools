@@ -1072,7 +1072,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 task.updateContext(next);
             }
 
-            context.clear();
+            // Disabled; makes test cases TypeProcOnly and PackageProcessor fail.
+            // context.clear();
             return next;
         }
     }
