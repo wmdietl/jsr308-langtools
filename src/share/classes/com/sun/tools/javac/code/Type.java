@@ -1034,7 +1034,10 @@ public class Type implements PrimitiveType, Cloneable {
             return "capture#"
                 + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
                 + " of "
-                + wildcard;
+                + ((wildcard.type == this)
+                   ? (wildcard.kind.toString() + "capture#"
+                      + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME)
+                   : wildcard);
         }
     }
 
