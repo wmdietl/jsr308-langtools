@@ -371,6 +371,16 @@ public class Types {
                 case BOOLEAN: case VOID:
                     return t.tag == s.tag;
                 case TYPEVAR:
+                    if (t==t.getUpperBound()) {
+                        // XXX
+                        if (s == syms.objectType) {
+                            return true;
+                        }
+                        if ((s instanceof TypeVar) &&
+                            ((TypeVar) s).getUpperBound() == syms.objectType) {
+                            return true;
+                        }
+                    }
                     return isSubtypeNoCapture(t.getUpperBound(), s);
                 case BOT:
                     return
