@@ -215,6 +215,15 @@ jprt_build_product jprt_build_debug jprt_build_fastdebug: all
 	  $(ZIP) -q -r $(JPRT_ARCHIVE_BUNDLE) build dist )
 
 #-------------------------------------------------------------------
+#
+# Emacs tags table
+
+.PHONY: tags TAGS
+tags: TAGS
+TAGS:
+	(cd ..; etags `find src/share/classes -name '*.java' -print | ${pl}/bin/sort-directory-order`)
+
+#-------------------------------------------------------------------
 
 # Declare these phony (not filenames)
 .PHONY: $(ANT_TARGETS) all clobber \
