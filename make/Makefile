@@ -221,7 +221,9 @@ jprt_build_product jprt_build_debug jprt_build_fastdebug: all
 .PHONY: tags TAGS
 tags: TAGS
 TAGS:
-	(cd ..; etags `find src/share/classes -name '*.java' -print | ${pl}/bin/sort-directory-order`)
+# Lexicographic sorting of file names doesn't help with JavaCompiler.java:
+# there are 3 such files, but the interesting one sorts in the middle.
+	(cd ..; etags `find src/share/classes -name '*.java' -print`)
 
 #-------------------------------------------------------------------
 
