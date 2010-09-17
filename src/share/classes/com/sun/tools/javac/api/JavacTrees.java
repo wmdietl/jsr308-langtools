@@ -108,7 +108,11 @@ public class JavacTrees extends Trees {
         return instance;
     }
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     private JavacTrees(Context context) {
+        uid = ++uidCounter;
         context.put(JavacTrees.class, this);
         attr = Attr.instance(context);
         enter = Enter.instance(context);
@@ -118,6 +122,10 @@ public class JavacTrees extends Trees {
         treeMaker = TreeMaker.instance(context);
         memberEnter = MemberEnter.instance(context);
         javacTaskImpl = context.get(JavacTaskImpl.class);
+    }
+
+    @Override public String toString() {
+        return "JavacTrees#" + uid;
     }
 
     public SourcePositions getSourcePositions() {
