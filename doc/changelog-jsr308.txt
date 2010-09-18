@@ -1,3 +1,9 @@
+Version 1.1.1, 17 Sep 2010
+
+Base build
+  Updated to OpenJDK langtools build b108
+
+----------------------------------------------------------------------
 Version 1.1.0, 13 Jun 2010
 
 Base build
