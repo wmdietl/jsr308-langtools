@@ -1446,13 +1446,15 @@ class DAG {
 The \code{DAG} class, which represents a directed acyclic graph,
 illustrates how type qualifiers might be written by a
 programmer and checked by a type-checking plug-in in order to detect or
-prevent errors.
+prevent errors.  Typical code uses less than 1 type annotation per 50
+lines~\cite{PapiACPE2008}, but this example was chosen to illustrate places
+where annotations do appear.
 % Most programs would use only a subset of these annotations.
 \newline
 \textbf{(1)}
 The \code{@DefaultQualifier("NonNull")} annotation (line~\ref{NonNullDefault})
 indicates that no reference in the \code{DAG}
-class may be null (unless otherwise annotated).  It is equivalent to
+class may be null unless otherwise annotated.  It is equivalent to
 writing line~\ref{edgesNonNull} as ``\code{@NonNull Set<@NonNull Edge> edges;}'',
 for example.
 % The @NonNull annotation on line~\ref{eNonNull}
@@ -1462,7 +1464,8 @@ a null pointer exception.
 % That annotation is correct because each
 % element of \code{edges} is non-null, as indicated on
 % line~\ref{edgesNonNull}.
-Similarly, the (implicit) \code{@NonNull} return type of \code{getNeighbors()} (line~\ref{getNeighbors})
+Similarly, the return type of \code{getNeighbors()} (line~\ref{getNeighbors})
+is \code{@NonNull}, which
 enables its clients to depend on the fact that it will always return a
 \code{List}, even if \code{v} has no neighbors.
 \newline
