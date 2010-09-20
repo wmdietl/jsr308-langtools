@@ -221,21 +221,21 @@ export PATH=$JAVA_HOME/bin:$PATH
   <li>
     Download the <a href="http://types.cs.washington.edu/jsr308/#Download">Type
     Annotations compiler</a>, and unpack it to create a
-    <code>langtools</code> directory.  Do <em>not</em> do this inside the
+    <code>jsr308-langtools</code> directory.  Do <em>not</em> do this inside the
     JDK 7 installation (directory <code>jdk1.7.0</code>) that you
     downloaded in the preceding step.
     Example commands:
 <pre>
 mkdir ~/jsr308
 cd ~/jsr308
-wget http://types.cs.washington.edu/jsr308/current/jsr308-langtools.zip
+wget http://types.cs.washington.edu/checker-framework/current/jsr308-langtools.zip
 unzip jsr308-langtools.zip
 </pre>
   </li>
   <li>
     Ensure that the <code>JAVA_HOME</code> environment variable points to the
     JDK you wish to patch, then patch your JDK 7 installation by running:
-<pre>cd langtools/binary
+<pre>cd jsr308-langtools/binary
 ant install</pre>
     This step makes a backup copy of <tt>tools.jar</tt> and then
     modifies the original by copying some new <tt>.class</tt> files into it.
@@ -249,7 +249,7 @@ ant install</pre>
     <p>If you get this error message:</p>
     <!-- This is a made-up error message; this document needs to be updated. -->
 <pre>
-  c:\jsr308\langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar.patched) to new file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar)
+  c:\jsr308\jsr308-langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar.patched) to new file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar)
 </pre>
     <p>
     then rename the file manually using the shell.
@@ -264,16 +264,16 @@ ant install</pre>
 javac -version
 </pre>
     and confirm that the output contains the
-    string <code>jsr308</code>, such as <code>javac 1.7.0-jsr308-0.9.2</code>.
+    string <code>jsr308</code>, such as <code>javac 1.7.0-jsr308-1.1.1</code>.
     <br />
     If the output is does not contain <code>jsr308</code> 
     (e.g., <code>javac 1.7.0-ea</code>), but you are using the
-    correct <code>javac</code> binary (in <code>langtools/dist/bin</code>), 
+    correct <code>javac</code> binary (in <code>jsr308-langtools/dist/bin</code>), 
     then it is possible that
     <code>tools.jar</code> is on your classpath.  You should either remove
     <code>tools.jar</code> from your classpath, or else put 
-    <code>langtools/dist/lib/javac.jar</code> and/or 
-    <code>langtools/dist/lib/javap.jar</code>
+    <code>jsr308-langtools/dist/lib/javac.jar</code> and/or 
+    <code>jsr308-langtools/dist/lib/javap.jar</code>
     on your classpath before <code>tools.jar</code>.
   </li>
 </ol>
@@ -318,12 +318,12 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
   </li>
   <li>
     Compile the Type Annotations javac compiler and the javap tool, from
-    directory <code>langtools/make</code>:
-<pre>cd langtools/make
+    directory <code>jsr308-langtools/make</code>:
+<pre>cd jsr308-langtools/make
 ant clean build-javac build-javap</pre>
   </li>
   <li>
-    Add the <code>langtools/dist/bin</code> directory to the front of your
+    Add the <code>jsr308-langtools/dist/bin</code> directory to the front of your
     <code>PATH</code> environment variable.
   </li>
 </ol>
@@ -346,7 +346,7 @@ is used for everything else.
 </p>
 <ul>
   <li>The compiler (which is located in
-    <code>langtools/src/share/classes</code>) supports the Type Annotations
+    <code>jsr308-langtools/src/share/classes</code>) supports the Type Annotations
     syntax.  This syntax
     permits annotations to appear on any occurrence of a type, not just on
     declarations as declaration annotation (also known as Java 5
