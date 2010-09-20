@@ -21,7 +21,7 @@
 #  * This file assumes a 32-bit architecture.  If you have a 64-bit machine
 #    without multilib support, you will need to tweak the Makefile.
 #  * This has only been tested on Linux.
-#  * You should only run this script if you agree to the Sun Java SE
+#  * You should only run this script if you agree to the Oracle Java SE
 #    Development Kit (JDK) license.
 #  * If the installation fails, please report the problem at
 #      http://code.google.com/p/jsr308-langtools/issues/list .

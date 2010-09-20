@@ -141,7 +141,7 @@ Java annotations, some of which are within the scope of JSR 308 (and might
 be included in a future revision) and some of which are not.
 The document concludes with
 logistical matters relating to
-incorporation in the Sun JDK (Section~\ref{logistics})
+incorporation in the Oracle JDK (Section~\ref{logistics})
 and
 related work (Section~\ref{related-work}).
 
@@ -2682,7 +2682,7 @@ Environments)~\cite{JSR198} gives access to the entire source code of a
 method.  This AST (abstract syntax tree) must be updated to represent all
 new locations for annotations.
 
-Sun's Tree API, which exposes the AST (including annotations) to authors of
+Oracle's Tree API, which exposes the AST (including annotations) to authors of
 javac annotation processors (compile-time plug-ins), must be updated to
 reflect the modifications made to the internal AST node classes described in
 Section~\ref{syntax}.
@@ -2846,7 +2846,7 @@ method signature.
 % elements", and "are documented by javadoc and similar tools by default".
 % (No option exists at present in the standard doclet to override that default.)
 
-Similar modifications need to be made to tools outside the Sun JDK,
+Similar modifications need to be made to tools outside the Oracle JDK,
 such as IDEs (Eclipse, IDEA, JBuilder, jEdit, NetBeans), other tools that
 manipulate Java code (grammars for CUP, javacc), and tools that
 manipulate class files (ASM, BCEL\@).  These changes need to be made by the
@@ -3204,8 +3204,8 @@ The problem with this proposal is that it requires adding a single method,
 upward binary-compatibility, they would break source-compatibility:
 existing implementations of \<Element> and \<AnnotatedElement> could not
 be re-compiled under Java 7 without adding a \<getAnnotations> method.
-Sun's policy generally frowns upon such changes that break
-source-compatibility, though they are sometimes made nonetheless.
+Oracle's policy generally frowns upon such changes that break
+source-compatibility, though Oracle sometimes makes them nonetheless.
 % Such changes have to be approved by the CCC (conformance change committee).
 For example, the
 SQL interfaces have far more implementations than the compiler or
@@ -3992,10 +3992,10 @@ types or closures), to check impact.
 The specification, reference implementation, and tests developed by the
 JSR 308 community are freely available, with no restrictions on use.  As of
 build M4 (see \url{http://openjdk.java.net/projects/jdk7/milestones/}), the
-reference implementation has been incorporated into Sun's OpenJDK Java
-implementation.  Sun will integrate the specification into the JLS (without
+reference implementation has been incorporated into Oracle's OpenJDK Java
+implementation.  Oracle will integrate the specification into the JLS (without
 any conceptual changes or new information), will write additional tests,
-etc.  We do not have control over the license terms that Sun places on its
+etc.  We do not have control over the license terms that Oracle places on its
 changes.
 
 To ease the transition from standard Java SE 6 code to code with the extended
@@ -4007,7 +4007,7 @@ annotations when surrounded by comment markers:
 This permits use of both standard Java SE 6 tools and the new annotations even
 before Java SE 7 is released.  However, it is not part of the proposal;
 that is, it is not required that every Java compiler parses comments.
-Sun's OpenJDK implementation does not support a switch that
+Oracle's OpenJDK implementation does not support a switch that
 makes it recognize the new annotations when embedded in comments.
 The Spec\#~\cite{BarnettLS2004} extension to C\# can be made compilable by
 a standard C\# compiler in a similar way, by enclosing its annotations in
@@ -4196,7 +4196,7 @@ elements of the array~\cite{MalePPD2008}.
 \section*{Acknowledgments}
 
 Matt Papi and Mahmood Ali designed and implemented the JSR 308 compiler as
-modifications to Sun's OpenJDK javac compiler, and contributed to the JSR
+modifications to Oracle's OpenJDK javac compiler, and contributed to the JSR
 308 design.
 
 The members of the JSR 308 mailing list
