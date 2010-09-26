@@ -387,7 +387,7 @@ in the following ways:
     The 
     compiler parses annotations written in <a
     href="#annotations-in-comments">specially-formatted comments</a>,
-    which enables your code to
+    which enables your code to both:
     <ul>
       <li>compile with earlier compilers, and</li>
       <li>be type-checked by the Type Annotations compiler. </li>
@@ -410,9 +410,6 @@ be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
 </pre>
 <p>
 There must be no whitespace within the comment.
-For additional information about this feature, see the
-<a href="http://types.cs.washington.edu/checker-framework/#annotations-in-comments">Checker
-Framework Manual</a>.
 </p>
 
 <p>
@@ -425,10 +422,7 @@ Java language (such as Java 4, Java 5, or Java 6).
 <p>
 A related mechanism, that also facilitates compatibility with compilers
 that do not support the Type Annotations syntax, is 
-the ability to specify imported packages from the command line.  It is also
-documented in the
-<a href="http://types.cs.washington.edu/checker-framework/#annotations-in-comments">Checker
-Framework Manual</a>.
+the ability to specify imported packages from the command line.
 </p>
 
 
@@ -449,6 +443,18 @@ compatibility, that might help more people adopt Java 7 sooner, thus
 increasing its momentum.
 -->
 
+<p>
+Finally, the compiler accepts the <tt>-target 5</tt> command-line option
+even when the <tt>-source</tt> option is 7 or is omitted.  The compiler
+creates a <tt>.class</tt> file that is compatible with a Java 5 JVM, but
+that contains the type annotations.
+</p>
+
+<p>
+For additional information about these features, see the
+<a href="http://types.cs.washington.edu/checker-framework/#annotations-in-comments">Checker
+Framework Manual</a>.
+</p>
 
 
 <h4 id="diffs">Determining a diff against the OpenJDK distribution</h4>
