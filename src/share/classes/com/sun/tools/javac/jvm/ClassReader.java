@@ -54,6 +54,7 @@ import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.*;
 import static com.sun.tools.javac.jvm.ClassFile.*;
+import com.sun.tools.javac.jvm.ClassFile.Version;
 import static com.sun.tools.javac.jvm.ClassFile.Version.*;
 
 /** This class provides operations to read a classfile into an internal
