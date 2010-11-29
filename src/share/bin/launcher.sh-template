@@ -43,7 +43,7 @@ mylib="`dirname $mydir`"/lib
 if [ "$LANGTOOLS_USE_BOOTCLASSPATH" != "no" ]; then
    cp=`unzip -c "$mylib/#PROGRAM#.jar" META-INF/MANIFEST.MF |
        grep "Class-Path:" |
-       sed -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1:|g'`
+       sed -e 's|\r||' -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1:|g'`
    bcp="$mylib/#PROGRAM#.jar":$cp:$CLASSPATH
 fi
 
@@ -67,6 +67,8 @@ nl='
 for i in "$@" ; do
    IFS=
    case $i in
+   -Xbootclasspath/p:* ) bcp=`echo $i | sed -e 's/^-Xbootclasspath.p://'`:${bcp} ;; 
+   -J-Xbootclasspath/p:* ) bcp=`echo $i | sed -e 's/^-J-Xbootclasspath.p://'`:${bcp} ;; 
    -J* )       javaOpts=$javaOpts$nl"'"`echo $i | sed -e 's/^-J//'`"'" ;;
    *   )       toolOpts=$toolOpts$nl"'"$i"'" ;;
    esac
