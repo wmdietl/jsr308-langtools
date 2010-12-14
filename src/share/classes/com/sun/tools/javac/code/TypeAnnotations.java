@@ -652,11 +652,18 @@ public class TypeAnnotations {
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) return inferTargetMetaInfo(a, s);
         Attribute atValue = atTarget.member(names.value);
-        if (!(atValue instanceof Attribute.Array)) return AnnotationType.DECLARATION; // error recovery
+        if (!(atValue instanceof Attribute.Array)) {
+            System.out.printf("Bad @Target argument %s (%s)%n", atValue, atValue.getClass());
+            return AnnotationType.DECLARATION; // error recovery
+        }
         Attribute.Array arr = (Attribute.Array) atValue;
         boolean isDecl = false, isType = false;
         for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return AnnotationType.DECLARATION; // recovery
+            if (!(app instanceof Attribute.Enum)) {
+                System.out.printf("annotationType(): unrecognized app=%s (%s)%n", app, app.getClass());
+                isDecl = true;
+                continue;
+            }
             Attribute.Enum e = (Attribute.Enum) app;
             if (e.value.name == names.TYPE)
                 { if (s.kind == TYP) isDecl = true; }
@@ -690,8 +697,15 @@ public class TypeAnnotations {
                        s.type.getReturnType().tag != VOID))
                     isType = true;
                 }
-            else
-                return AnnotationType.DECLARATION; // recovery
+            else if (e.value.name == names.TYPE_PARAMETER)
+                { if (s.kind == TYP ||
+                      s.kind == VAR)
+                    isType = true;
+                }
+            else {
+                System.out.printf("annotationType(): unrecognized e.value.name=%s (%s)%n", e.value.name, e.value.name.getClass());
+                isDecl = true;
+            }
         }
         if (isDecl && isType)
             return AnnotationType.BOTH;
