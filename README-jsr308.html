@@ -17,7 +17,7 @@ pre, blockquote {
 </head>
 <body>
 <h1>Type Annotations (JSR 308) Compiler README</h1> <!-- omit from toc -->
-<h4 id="version">Version 1.1.1 (18 Sep 2010)</h4> <!-- omit from toc -->
+<h4 id="version">Version 1.1.1 (19 Sep 2010)</h4> <!-- omit from toc -->
 <p>For the latest version, see the
   <a href="http://types.cs.washington.edu/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
 
@@ -27,8 +27,7 @@ pre, blockquote {
       <li><a href="#intro">Introduction</a></li>
       <li><a href="#installing">Installing the Type Annotations compiler</a>
         <ul>
-          <li><a href="#installing-long">Installing from binary</a></li>
-          <li><a href="#building">Installing from source</a></li>
+          <li><a href="#installing-source">Installing from source</a></li>
         </ul></li>
       <li><a href="#differences">Features of the Type Annotations compiler</a>
         <ul>
@@ -130,6 +129,13 @@ Annotations compiler from source.
 </p>
 
 <p>
+Building from source is useful mainly for people who are
+developing compiler plug-ins or modifying the compiler itself.
+Also, if you use an Apple <b>Macintosh (Mac OS X)</b> computer, you must
+<a href="#building">build the compiler from source</a>.
+</p>
+
+<p>
 Note that while these instructions install the Type Annotations compiler, you do not
 have to make it your default compiler.  For example, you
 could use the Type Annotations compiler only for running pluggable type-checkers.
@@ -138,20 +144,30 @@ that are compatible with earlier JVMs, so that you can work seamlessly with
 colleagues who are using an earlier version of Java.
 </p>
 
-<p>
-If you use an Apple <b>Macintosh (Mac OS X)</b> computer, you must <a href="#building">build
-the compiler from source</a>.
-</p>
 
-<h3 id="installing-long">Installing from binary</h3>
-
+<h3 id="installing-source">Installing from source</h3>
 
 <p>
-<b>Requirements:</b> These instructions assume that <a
-href="http://ant.apache.org/">Ant</a> is installed.
-If you use an Apple <b>Macintosh</b> computer, you must <a href="#building">build
-the compiler from source</a>.
+<b>Requirements:</b> These instructions assume that
+<!-- Need a version of Ant that supports the nested "condition" element
+  inside a <fail> directive.   Version 1.6 (Feb 2004) does not work. -->
+<a href="http://ant.apache.org/">Ant</a> (version 1.7 or later)
+and the JDK (version 6 or later) are installed.  Furthermore, the
+<code>JAVA_HOME</code> environment variable should be set to the location
+of your JDK installation.  Most likely it is already set for Ant to work.
 </p>
+
+<!--  Too much detail, so cut.
+<p>
+You will use your existing JDK 6 to compile OpenJDK,
+but will not use it thereafter.  You can get JDK 6 from
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/">Oracle</a> or
+elsewhere.  If you use an Apple Macintosh (Mac OS X), then depending on
+your hardware and operating system, you can either use <a
+href="http://developer.apple.com/java/">Apple's implementation</a> or <a
+href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
+</p>
+-->
 
 <ol>
   <li>
@@ -233,30 +249,19 @@ unzip jsr308-langtools.zip
 </pre>
   </li>
   <li>
-    Ensure that the <code>JAVA_HOME</code> environment variable points to the
-    JDK you wish to patch, then patch your JDK 7 installation by running:
-<pre>cd jsr308-langtools/binary
-ant install</pre>
-    This step makes a backup copy of <tt>tools.jar</tt> and then
-    modifies the original by copying some new <tt>.class</tt> files into it.
+	Compile the Type Annotations javac compiler and the javap tool, from
+	directory <code>jsr308-langtools/make</code>:
+    <pre>cd jsr308-langtools/make
+    ant clean build-javac build-javap</pre>
+	Add the <code>jsr308-langtools/dist/bin</code> directory to the front of your
+	<code>PATH</code> environment variable.
 
-    <p>(You shouldn't need to undo this step, but you
-    can do so by running <tt>ant uninstall</tt>
-    which puts back the original version of the <tt>tools.jar</tt> file.)
-    </p>
-
-    <!-- This is only applicable to Windows users. -->
-    <p>If you get this error message:</p>
-    <!-- This is a made-up error message; this document needs to be updated. -->
-<pre>
-  c:\jsr308\jsr308-langtools\binary\build.xml:29: Unable to rename old file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar.patched) to new file (c:\Program Files\Java\jdk1.7.0\lib\tools.jar)
-</pre>
     <p>
-    then rename the file manually using the shell.
-    (This error occurs under Windows when some other process, such as an anti-virus
-    program or another Java process, is accessing the given file.)
+    The effect of the above commands is that the <code>javac</code>
+    command invokes the Type Annotations Java compiler and the <code>javap</code>
+    command invokes the Type Annotations <code>javap</code>, but the Java 7 OpenJDK
+    is used for everything else.
     </p>
-
   </li>
   <li>
     Run
@@ -282,57 +287,6 @@ javac -version
 When updating to a newer version of the Type Annotations compiler, you only have to
 follow steps 2, 3, and 4.  In other words, you only have to redo step 1 if
 you want a newer version of OpenJDK.
-</p>
-
-
-<h3 id="building">Installing from source</h3>
-
-<p>
-To build the Type Annotations compiler from source, replace <a href="#installing-long">step 3 from above</a> by
-the following.  Building from source is useful mainly for people who are
-developing compiler plug-ins or modifying the compiler itself.  If you only
-want to <em>use</em> the compiler and plug-ins, it is sufficient to install
-the pre-compiled version.
-</p>
-
-<p>
-<b>Requirements:</b> These instructions assume that
-<!-- Need a version of Ant that supports the nested "condition" element
-  inside a <fail> directive.   Version 1.6 (Feb 2004) does not work. -->
-<a href="http://ant.apache.org/">Ant</a> (version 1.7 or later)
-and
-JDK 6 are installed.  You will use JDK 6 to compile OpenJDK, but will not use it
-thereafter.  You can get JDK 6 from
-<a href="http://www.oracle.com/technetwork/java/javase/downloads/">Oracle</a> or
-elsewhere.  If you use an Apple Macintosh (Mac OS X), then depending on
-your hardware and operating system, you can either use <a
-href="http://developer.apple.com/java/">Apple's implementation</a> or <a
-href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
-</p>
-
-<ol>
-  <li>
-    Set <code>JAVA_HOME</code> environment file to the location of
-    your JDK 6 or 7 installation.  Most likely it is already set for
-    Ant to work.
-  </li>
-  <li>
-    Compile the Type Annotations javac compiler and the javap tool, from
-    directory <code>jsr308-langtools/make</code>:
-<pre>cd jsr308-langtools/make
-ant clean build-javac build-javap</pre>
-  </li>
-  <li>
-    Add the <code>jsr308-langtools/dist/bin</code> directory to the front of your
-    <code>PATH</code> environment variable.
-  </li>
-</ol>
-
-<p>
-The effect of the above commands is that the <code>javac</code>
-command invokes the Type Annotations Java compiler and the <code>javap</code>
-command invokes the Type Annotations <code>javap</code>, but the Java 7 OpenJDK
-is used for everything else.
 </p>
 
 
