@@ -7,6 +7,8 @@ PLUME_BIN ?= ${pl}/bin
 
 RELEASEDATE ?= `date '+%Y%m%d'`
 
+export PERLLIB := ${PERLLIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
+
 # There is no use of "cp -p" in this Makefile, to avoid problems with
 # browser caches.
 
