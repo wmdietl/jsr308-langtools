@@ -2991,6 +2991,10 @@ public class Attr extends JCTree.Visitor {
         result = tree.type = syms.errType;
     }
 
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        result = tree.type = attribType(tree.getUnderlyingType(), env);
+    }
+
     public void visitErroneous(JCErroneous tree) {
         if (tree.errs != null)
             for (JCTree err : tree.errs)
@@ -3203,6 +3207,9 @@ public class Attr extends JCTree.Visitor {
             (c.flags() & ABSTRACT) == 0) {
             checkSerialVersionUID(tree, c);
         }
+
+        // Check type annotations applicability rules
+        validateTypeAnnotations(tree);
     }
         // where
         /** check if a class is a subtype of Serializable, if that is available. */
@@ -3249,6 +3256,35 @@ public class Attr extends JCTree.Visitor {
     private Type capture(Type type) {
         return types.capture(type);
     }
+
+    private void validateTypeAnnotations(JCTree tree) {
+        tree.accept(typeAnnotationsValidator);
+    }
+    //where
+    private final JCTree.Visitor typeAnnotationsValidator =
+        new TreeScanner() {
+        public void visitAnnotation(JCAnnotation tree) {
+            if (tree instanceof JCTypeAnnotation) {
+                chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
+            }
+            super.visitAnnotation(tree);
+        }
+        public void visitTypeParameter(JCTypeParameter tree) {
+            chk.validateTypeAnnotations(tree.annotations, true);
+            // don't call super. skip type annotations
+            scan(tree.bounds);
+        }
+        public void visitMethodDef(JCMethodDecl tree) {
+            // need to check static methods
+            if ((tree.sym.flags() & Flags.STATIC) != 0) {
+                for (JCTypeAnnotation a : tree.receiverAnnotations) {
+                    if (chk.isTypeAnnotation(a, false))
+                        log.error(a.pos(), "annotation.type.not.applicable");
+                }
+            }
+            super.visitMethodDef(tree);
+        }
+    };
 
     // <editor-fold desc="post-attribution visitor">
 
