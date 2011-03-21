@@ -64,7 +64,7 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType {
+public class Type implements PrimitiveType, Cloneable {
 
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
@@ -841,6 +841,7 @@ public class Type implements PrimitiveType {
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
+        public List<Compound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -1008,7 +1009,11 @@ public class Type implements PrimitiveType {
         }
 
         @Override
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if ((bound == null || bound.tag == NONE) && this != tsym.type)
+                bound = tsym.type.getUpperBound();
+            return bound;
+        }
 
         int rank_field = -1;
 
@@ -1037,6 +1042,14 @@ public class Type implements PrimitiveType {
             return result;
         }
 
+        // FIXME: clone() isn't conformant to the clone specification
+        public TypeVar clonedType = null;
+        public Object clone() {
+            TypeVar type = (TypeVar)super.clone();
+            type.clonedType = (this.clonedType == null) ?
+                    this: this.clonedType;
+            return type;
+        }
     }
 
     /** A captured type variable comes from wildcards which can have

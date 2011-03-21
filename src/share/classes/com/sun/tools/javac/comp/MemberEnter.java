@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
@@ -76,6 +75,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
     private final Target target;
     private final DeferredLintHandler deferredLintHandler;
 
+    private final TypeAnnotations typeAnnotations;
     private final boolean skipAnnotations;
 
     public static MemberEnter instance(Context context) {
@@ -97,6 +97,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         reader = ClassReader.instance(context);
         todo = Todo.instance(context);
         annotate = Annotate.instance(context);
+        typeAnnotations = TypeAnnotations.instance(context);
         types = Types.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         target = Target.instance(context);
@@ -350,6 +351,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
     Type signature(List<JCTypeParameter> typarams,
                    List<JCVariableDecl> params,
                    JCTree res,
+                   List<JCTypeAnnotation> receiverAnnotations,
                    List<JCExpression> thrown,
                    Env<AttrContext> env) {
 
@@ -379,6 +381,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                                     restype,
                                     thrownbuf.toList(),
                                     syms.methodClass);
+        attr.annotateType(mtype, receiverAnnotations);
         return tvars.isEmpty() ? mtype : new ForAll(tvars, mtype);
     }
 
@@ -573,7 +576,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         try {
             // Compute the method type
             m.type = signature(tree.typarams, tree.params,
-                               tree.restype, tree.thrown,
+                               tree.restype, tree.receiverAnnotations,
+                               tree.thrown,
                                localEnv);
         } finally {
             chk.setDeferredLintHandler(prevLintHandler);
@@ -1029,7 +1033,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            // commit pending annotations
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
         }
     }
@@ -1039,9 +1043,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         private Env<AttrContext> env;
         public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
 
-        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations) {
+        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations, JCTree tree) {
             Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
-            if (!skipAnnotations)
+            if (!skipAnnotations) {
                 for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
                     JCTypeAnnotation a = al.head;
                     Attribute.Compound c = annotate.enterAnnotation(a,
@@ -1054,6 +1058,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                     if (!annotated.add(a.type.tsym))
                         log.error(a.pos, "duplicate.annotation");
                 }
+            }
         }
 
         // each class (including enclosed inner classes) should be visited
@@ -1062,31 +1067,38 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         private boolean isEnclosingClass = false;
         @Override
         public void visitClassDef(final JCClassDecl tree) {
-            if (isEnclosingClass)
-                return;
-            isEnclosingClass = true;
-            scan(tree.mods);
-            // type parameter need to be visited with a separate env
-            // scan(tree.typarams);
-            scan(tree.extending);
-            scan(tree.implementing);
-            scan(tree.defs);
+            boolean wasEnclosing = isEnclosingClass;
+            try {
+            	if (isEnclosingClass)
+            		return;
+            	isEnclosingClass = true;
+            	scan(tree.mods);
+            	// type parameter need to be visited with a separate env
+            	// scan(tree.typarams);
+            	scan(tree.extending);
+            	scan(tree.implementing);
+            	scan(tree.defs);
+            } finally {
+            	isEnclosingClass = wasEnclosing;
+            }
         }
 
         private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
-            annotate.later(new Annotate.Annotator() {
-                public String toString() {
-                    return "annotate " + annotations + " onto " + tree;
-                }
-                public void enterAnnotation() {
-                    JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
-                    try {
-                        enterTypeAnnotations(annotations);
-                    } finally {
-                        log.useSource(prev);
+            if (annotations.nonEmpty()) {
+                annotate.later(new Annotate.Annotator() {
+                    public String toString() {
+                        return "annotate " + annotations + " onto " + tree;
                     }
-                }
-            });
+                    public void enterAnnotation() {
+                        JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                        try {
+                            enterTypeAnnotations(annotations, tree);
+                        } finally {
+                            log.useSource(prev);
+                        }
+                    }
+                });
+            }
         }
 
         @Override
