@@ -674,9 +674,8 @@ public class Util {
         return false;
     }
 
-    private static final String TYPE_USE_NAME =
-        ElementType.class.getCanonicalName() + "." + ElementType.TYPE_USE.name();
-    private static boolean isDeclarationTarget(AnnotationDesc targetAnno) {
+    private static boolean isDeclarationTarget(AnnotationDesc targetAnno, ElementType elemType) {
+        assert elemType != null && elemType != ElementType.TYPE_USE;
         // The error recovery steps here are analogous to TypeAnnotations
         ElementValuePair[] elems = targetAnno.elementValues();
         if (elems == null
@@ -690,9 +689,9 @@ public class Util {
             Object value = values[i].value();
             if (!(value instanceof FieldDoc))
                 return true; // error recovery
-            
+
             FieldDoc eValue = (FieldDoc)value;
-            if (!TYPE_USE_NAME.equals(eValue.qualifiedName())) {
+            if (elemType.name().equals(eValue.name())) {
                 return true;
             }
         }
@@ -700,16 +699,27 @@ public class Util {
         return false;
     }
 
-    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc) {
+    /**
+     * Returns true if the {@code annotationDoc} is to be treated
+     * as a declaration annotation, when targeting the
+     * {@code elemType} element type.
+     *
+     * @param annotationDoc the annotationDoc to check
+     * @param elemType  the targetted elemType
+     * @return true if annotationDoc is a declaration annotation
+     */
+    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc, ElementType elemType) {
+        if (elemType == null || elemType == ElementType.TYPE_USE)
+            return false;
         AnnotationDesc[] annotationDescList = annotationDoc.annotations();
         for (int i = 0; i < annotationDescList.length; i++) {
             if (annotationDescList[i].annotationType().qualifiedName().equals(
                     java.lang.annotation.Target.class.getName())) {
-                return isDeclarationTarget(annotationDescList[i]);
+                return isDeclarationTarget(annotationDescList[i], elemType);
             }
         }
         // Annotations with no target are treated as declaration as well
-        return true;
+        return elemType == ElementType.TYPE_USE ? false : true;
     }
 
     /**
