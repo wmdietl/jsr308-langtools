@@ -27,17 +27,17 @@
  * @compile -proc:only -processor TestProcessor AnnoTreeTests.java
  */
 
-@Test(6)
+@Test(5)
 class AnnoTreeTests {
     // primitive types
-    @DA("int") int i1;
-    int i2 = (@TA("int") int) 0;
+    @DA("int") int i1 = 0;
+    long i2 = (@TA("long") long) 0;
 
     // simple array types
-    @DA("int[]") int[] a1;
-    int @TA("int") [] a2;
-    int[] a3 = (@TA("int[]") int[]) a1;
-    int[] a4 = (int @TA("int") []) a1;
+    //@TA("short") short[] a1; // Fixed by a later patch
+    byte @TA("byte[]") [] a2;
+    float[] a3 = (@TA("float") float[]) a1;
+    double[] a4 = (double @TA("double[]") []) a1;
 
     // multi-dimensional array types
     // (still to come)
