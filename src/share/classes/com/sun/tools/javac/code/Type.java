@@ -1017,6 +1017,15 @@ public class Type implements PrimitiveType {
         public <R, P> R accept(TypeVisitor<R, P> v, P p) {
             return v.visitTypeVariable(this, p);
         }
+
+
+        public String toStringVerbose() {
+            String result = super.toString();
+            result = result + " lower:" + getLowerBound();
+            result = result + " upper:" + getUpperBound();
+            return result;
+        }
+
     }
 
     /** A captured type variable comes from wildcards which can have
@@ -1053,7 +1062,10 @@ public class Type implements PrimitiveType {
             return "capture#"
                 + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
                 + " of "
-                + wildcard;
+                + ((wildcard.type == this)
+                   ? (wildcard.kind.toString() + "capture#"
+                      + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME)
+                   : wildcard);
         }
     }
 
