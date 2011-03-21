@@ -514,7 +514,10 @@ public class Pretty extends JCTree.Visitor {
             } else {
                 printExpr(tree.mods);
                 if ((tree.mods.flags & VARARGS) != 0) {
-                    printExpr(((JCArrayTypeTree) tree.vartype).elemtype);
+                    JCTree vartype = tree.vartype;
+                    if (vartype instanceof JCAnnotatedType)
+                        vartype = ((JCAnnotatedType)vartype).underlyingType;
+                    printExpr(((JCArrayTypeTree) vartype).elemtype);
                     print("... " + tree.name);
                 } else {
                     printExpr(tree.vartype);
