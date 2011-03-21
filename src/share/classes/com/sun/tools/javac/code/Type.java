@@ -400,6 +400,14 @@ public class Type implements PrimitiveType {
      */
     public void complete() {}
 
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     public TypeSymbol asElement() {
         return tsym;
     }
