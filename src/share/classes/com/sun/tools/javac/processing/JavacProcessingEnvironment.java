@@ -118,6 +118,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     private DiscoveredProcessors discoveredProcs;
 
     /**
+     * Type processors, which should have Processor.init called later in
+     * compilation than declaration processors.
+     */
+    public static java.util.List<AbstractTypeProcessor> typeProcessorsToInit = new java.util.ArrayList<AbstractTypeProcessor>();
+
+    /**
      * Map of processor-specific options.
      */
     private final Map<String, String> processorOptions;
@@ -511,7 +517,11 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             contributed = false;
 
             try {
-                processor.init(env);
+                if (processor instanceof AbstractTypeProcessor) {
+                    typeProcessorsToInit.add((AbstractTypeProcessor) processor);
+                } else {
+                    processor.init(env);
+                }
 
                 checkSourceVersionCompatibility(source, log);
 
