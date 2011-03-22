@@ -2068,23 +2068,17 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
-    public static class JCAnnotatedType extends JCExpression
-//308            implements com.sun.source.tree.AnnotatedTypeTree
-    {
+    public static class JCAnnotatedType extends JCExpression implements com.sun.source.tree.AnnotatedTypeTree {
         public List<JCTypeAnnotation> annotations;
         public JCExpression underlyingType;
         protected JCAnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
-            throw new UnsupportedOperationException();
-//308            this.annotations = annotations;
-//308            this.underlyingType = underlyingType;
+            this.annotations = annotations;
+            this.underlyingType = underlyingType;
         }
         @Override
         public void accept(Visitor v) { v.visitAnnotatedType(this); }
 
-        public Kind getKind() {
-            throw new UnsupportedOperationException();
-//308            return Kind.ANNOTATED_TYPE;
-        }
+        public Kind getKind() { return Kind.ANNOTATED_TYPE; }
         public List<JCTypeAnnotation> getAnnotations() {
             return annotations;
         }
@@ -2093,8 +2087,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
         @Override
         public <R,D> R accept(TreeVisitor<R,D> v, D d) {
-            throw new UnsupportedOperationException();
-//308            return v.visitAnnotatedType(this, d);
+            return v.visitAnnotatedType(this, d);
         }
         @Override
         public int getTag() {

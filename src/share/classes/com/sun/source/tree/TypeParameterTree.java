@@ -47,5 +47,5 @@ import javax.lang.model.element.Name;
 public interface TypeParameterTree extends Tree {
     Name getName();
     List<? extends Tree> getBounds();
-//308    List<? extends AnnotationTree> getAnnotations();
+    List<? extends AnnotationTree> getAnnotations();
 }
