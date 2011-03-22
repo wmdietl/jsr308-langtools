@@ -279,6 +279,9 @@ public class Enter extends JCTree.Visitor {
     @Override
     public void visitTopLevel(JCCompilationUnit tree) {
         JavaFileObject prev = log.useSource(tree.sourcefile);
+        if (tree.endPositions != null) {
+            log.setEndPosTable(tree.sourcefile, tree.endPositions);
+        }
         boolean addEnv = false;
         boolean isPkgInfo = tree.sourcefile.isNameCompatible("package-info",
                                                              JavaFileObject.Kind.SOURCE);
