@@ -348,7 +348,7 @@ public interface Types {
      * @return the type's annotation for the specified annotation
      *         type if present on the type, else {@code null}
      *
-     * @see #getAnnotationMirrors()
+     * @see Element#getAnnotationMirrors()
      * @see EnumConstantNotPresentException
      * @see AnnotationTypeMismatchException
      * @see IncompleteAnnotationException
@@ -403,7 +403,7 @@ public interface Types {
      * @return the type's annotation for the specified annotation
      *         type if present on the type, else {@code null}
      *
-     * @see #getAnnotationMirrors()
+     * @see Element#getAnnotationMirrors()
      * @see EnumConstantNotPresentException
      * @see AnnotationTypeMismatchException
      * @see IncompleteAnnotationException

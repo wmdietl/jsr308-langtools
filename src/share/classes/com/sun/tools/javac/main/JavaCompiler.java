@@ -315,9 +315,13 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
      **/
     protected boolean implicitSourceFilesRead;
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /** Construct a new compiler using a shared context.
      */
-    public JavaCompiler(Context context) {
+    public JavaCompiler(final Context context) {
+        uid = ++uidCounter;
         this.context = context;
         context.put(compilerKey, this);
 
@@ -1632,4 +1636,27 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
        }
 
     }
+
+    @Override
+    public String toString() {
+        return "JavaCompiler#" + uid;
+    }
+
+    public String dump(String varname) {
+        return dump(varname, "");
+    }
+
+    public String dump(String varname, String indent) {
+        StringBuilder sb = new StringBuilder();
+        dump(varname, indent, sb);
+        return sb.toString();
+    }
+
+    public void dump(String varname, String indent, StringBuilder sb) {
+        sb.append(String.format("%s%s = %s%n", indent, varname, this));
+        sb.append(String.format("%s  enter = %s%n", indent, enter));
+        sb.append(String.format("%s  context = %s%n", indent, context));
+        sb.append(String.format("%s  procEnvImpl = %s%n", indent, procEnvImpl));
+    }
+
 }
