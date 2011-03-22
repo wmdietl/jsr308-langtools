@@ -1119,7 +1119,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 trees.updateContext(next);
             }
 
-            context.clear();
+            // Disabled; makes test cases TypeProcOnly and PackageProcessor fail.
+            // context.clear();
             return next;
         }
     }
@@ -1238,14 +1239,14 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         if (discoveredProcs != null) // Make calling close idempotent
             discoveredProcs.close();
         discoveredProcs = null;
-        if (processorClassLoader != null && processorClassLoader instanceof Closeable) {
-            try {
-                ((Closeable) processorClassLoader).close();
-            } catch (IOException e) {
-                JCDiagnostic msg = diags.fragment("fatal.err.cant.close.loader");
-                throw new FatalError(msg, e);
-            }
-        }
+//        if (processorClassLoader != null && processorClassLoader instanceof Closeable) {
+//            try {
+//                ((Closeable) processorClassLoader).close();
+//            } catch (IOException e) {
+//                JCDiagnostic msg = diags.fragment("fatal.err.cant.close.loader");
+//                throw new FatalError(msg, e);
+//            }
+//        }
     }
 
     private List<ClassSymbol> getTopLevelClasses(List<? extends JCCompilationUnit> units) {
