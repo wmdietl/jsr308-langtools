@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,36 +23,34 @@
  * questions.
  */
 
-package com.sun.tools.javap;
+package com.sun.tools.classfile;
 
-import com.sun.tools.classfile.Instruction;
+import java.io.IOException;
 
-
-/*
- *  Write additional details for an instruction.
+/**
+ * See JSR 308 specification, section 4.1
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
-public abstract class InstructionDetailWriter extends BasicWriter {
-    public enum Kind {
-        LOCAL_VARS("localVariables"),
-        LOCAL_VAR_TYPES("localVariableTypes"),
-        SOURCE("source"),
-        STACKMAPS("stackMaps"),
-        TRY_BLOCKS("tryBlocks"),
-        TYPE_ANNOS("typeAnnotations");
-        Kind(String option) {
-            this.option = option;
-        }
-        final String option;
-    }
-    InstructionDetailWriter(Context context) {
-        super(context);
+public class RuntimeVisibleTypeAnnotations_attribute extends RuntimeTypeAnnotations_attribute {
+    RuntimeVisibleTypeAnnotations_attribute(ClassReader cr, int name_index, int length)
+            throws IOException, Annotation.InvalidAnnotation {
+        super(cr, name_index, length);
     }
 
-    abstract void writeDetails(Instruction instr);
-    void flush() { }
+    public RuntimeVisibleTypeAnnotations_attribute(ConstantPool cp, ExtendedAnnotation[] annotations)
+            throws ConstantPoolException {
+        this(cp.getUTF8Index(Attribute.RuntimeVisibleTypeAnnotations), annotations);
+    }
+
+    public RuntimeVisibleTypeAnnotations_attribute(int name_index, ExtendedAnnotation[] annotations) {
+        super(name_index, annotations);
+    }
+
+    public <R, P> R accept(Visitor<R, P> visitor, P p) {
+        return visitor.visitRuntimeVisibleTypeAnnotations(this, p);
+    }
 }
