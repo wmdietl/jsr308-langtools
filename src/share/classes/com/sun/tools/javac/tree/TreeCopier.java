@@ -82,7 +82,13 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCAnnotation t = (JCAnnotation) node;
         JCTree annotationType = copy(t.annotationType, p);
         List<JCExpression> args = copy(t.args, p);
-        return M.at(t.pos).Annotation(annotationType, args);
+        if (t instanceof JCTypeAnnotation) {
+            JCTypeAnnotation ta = M.at(t.pos).TypeAnnotation(annotationType, args);
+            ta.attribute_field = ((JCTypeAnnotation)t).attribute_field;
+            return ta;
+        } else {
+            return M.at(t.pos).Annotation(annotationType, args);
+        }
     }
 
     public JCTree visitAssert(AssertTree node, P p) {

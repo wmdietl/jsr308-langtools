@@ -192,7 +192,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             if (e.getTypeElement() == null)
                 throw new AssertionError("event task without a type element");
             if (e.getCompilationUnit() == null)
-                throw new AssertionError("even task without compilation unit");
+                throw new AssertionError("event task without compilation unit");
 
             if (!elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
@@ -204,6 +204,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             TreePath p = Trees.instance(env).getPath(elem);
 
             typeProcess(elem, p);
+            log.reportDeferredDiagnostics();
 
             if (!hasInvokedTypeProcessingOver && elements.isEmpty() && log.nerrors == 0) {
                 typeProcessingOver();

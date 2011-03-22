@@ -826,6 +826,13 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                     enterTrees(stopIfError(CompileState.PARSE, parseFiles(sourceFileObjects))),
                     classnames);
 
+            delegateCompiler.initProcessAnnotations(JavacProcessingEnvironment.typeProcessorsToInit);
+            for (com.sun.source.util.AbstractTypeProcessor p : JavacProcessingEnvironment.typeProcessorsToInit) {
+                p.init(delegateCompiler.procEnvImpl);
+            }
+            JavacProcessingEnvironment.typeProcessorsToInit.clear();
+            delegateCompiler.taskListener = delegateCompiler.context.get(TaskListener.class);
+
             delegateCompiler.compile2();
             delegateCompiler.close();
             elapsed_msec = delegateCompiler.elapsed_msec;
