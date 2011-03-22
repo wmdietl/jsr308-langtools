@@ -520,12 +520,23 @@ public class TypeAnnotations {
                 super.visitBlock(tree);
         }
 
+        private boolean isCatchParameter = false;
+
+        @Override
+        public void visitCatch(JCCatch tree) {
+            isCatchParameter = true;
+            scan(tree.param);
+            isCatchParameter = false;
+            scan(tree.body);
+        }
+
         @Override
         public void visitVarDef(JCVariableDecl tree) {
             List<Attribute.TypeCompound> prevTAs = recordedTypeAnnotations;
             recordedTypeAnnotations = List.nil();
             ElementKind kind = tree.sym.getKind();
-            if (kind == ElementKind.LOCAL_VARIABLE && tree.mods.annotations.nonEmpty()) {
+            if (tree.mods.annotations.nonEmpty()
+                && (kind == ElementKind.LOCAL_VARIABLE || isCatchParameter)) {
                 // need to lift the annotations
                 TypeAnnotationPosition position = new TypeAnnotationPosition();
                 position.pos = tree.pos;
@@ -544,7 +555,7 @@ public class TypeAnnotations {
                     scan(tree.init);
 
             } finally {
-                if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE)
+                if (kind.isField() || kind == ElementKind.LOCAL_VARIABLE || isCatchParameter)
                     tree.sym.typeAnnotations = appendUnique(tree.sym.typeAnnotations, recordedTypeAnnotations);
                 recordedTypeAnnotations = kind.isField() ? prevTAs : prevTAs.appendList(recordedTypeAnnotations);
             }
