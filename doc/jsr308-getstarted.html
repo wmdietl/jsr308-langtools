@@ -55,10 +55,10 @@ or elsewhere.  If you are using Apple Mac OS X, you can either use
   <li>
   Verify that you installed the correct version.
   <pre>  $ jsr308-javac -version
-  javac 1.7.0-jsr308-0.8.1</code></pre>
+  javac 1.7.0-jsr308-0.8.1</pre>
   </li>
 
-  <li> You're ready to start using the checkers !</li>
+  <li> You're ready to start using the checkers!
   </li>
 </ol>
 
@@ -95,7 +95,7 @@ public class GetStarted {
   <li>Run the nullness checker on the class.
   <pre>jsr308-javac -processor checkers.nullness.NullnessChecker GetStarted.java</pre>
   The compilation should end without any errors.
-  </li><br />
+  </li>
 
   <li>Let's introduce an error now.  Modify ref assignment to:
   <pre>  @NonNull Object ref = null;</pre></li>
@@ -104,12 +104,12 @@ public class GetStarted {
   the following error:
   <pre>
 GetStarted.java:5: incompatible types.
-found   : @Nullable <nulltype>
+found   : @Nullable &lt;nulltype&gt;
 required: @NonNull Object
 		@NonNull Object ref = null;
 		                      ^
 1 error
-  </code>  
+  </pre>  
   </li>
 </ol>
 
@@ -125,7 +125,7 @@ that would write a type, including generics and casts.
 <hr />
 
 <p>
-Last updated: August 31, 2010.
+Last updated: April 2, 2011.
 </p>
 
 <p>
