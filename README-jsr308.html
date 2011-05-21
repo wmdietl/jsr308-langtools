@@ -331,7 +331,7 @@ Type Annotations tools.
 </p>
 
 <p>This Type Annotations distribution differs from the <code>langtools</code>
-portion of Sun's OpenJDK distribution
+portion of Oracle's OpenJDK distribution
 in the following ways:
 </p>
 <ul>
@@ -383,7 +383,7 @@ the ability to specify imported packages from the command line.
 <!--
 <p>
 The Java 7 language will not require compilers to support this temporary
-mechanism, and Sun's javac compiler will not do so.
+mechanism, and Oracle's javac compiler will not do so.
 </p>
 -->
 
@@ -414,7 +414,7 @@ Framework Manual</a>.
 <h4 id="diffs">Determining a diff against the OpenJDK distribution</h4>
 
 <p>The Type Annotations distribution is a modification of the 
-<code>langtools</code> portion of Sun's
+<code>langtools</code> portion of Oracle's
 <a href="http://openjdk.java.net/">OpenJDK</a>
 <code>javac</code> distribution.
 
@@ -432,10 +432,10 @@ Framework Manual</a>.
   <pre><code>hg pull; hg up</code></pre>
   </li>
   
-  <li>Determine the identifier of the last changeset done by Sun.  Run
+  <li>Determine the identifier of the last changeset done by Oracle.  Run
   "<code>hg log | less</code>" to find the last changeset with an author
-  other than <code>mahmood</code>, <code>mali</code>, or
-  <code>mernst</code>, or <code>notnoop</code>.  The changeset
+  other than <code>mahmood</code>, <code>mali</code>,
+  <code>mernst</code>, <code>notnoop</code>, or <code>wmdietl</code>.  The changeset
   identifier is in the format:
   <pre><code>450:143956db282e</code></pre>
   </li>
@@ -454,7 +454,7 @@ All contributions to <code>javac</code> (annotation-related or not) should follo
 <a href="http://blogs.sun.com/ahe/entry/contributing_to_javac">guidelines
 for contributing to javac</a>.
 Any code contributed to javac or to the Type Annotations compiler is
-contributed to Sun under Sun's Contributor Agreement
+contributed to Oracle under Oracle's Contributor Agreement
 (<a href="http://openjdk.java.net/contribute/">SCA</a>).
 </p>
 
@@ -495,12 +495,12 @@ href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design
 <h4>To whom should you report the bug?</h4> <!-- omit from toc -->
 
 <p>
-The Type Annotations compiler is built on Sun's OpenJDK compiler.  If you find a bug
+The Type Annotations compiler is built on Oracle's OpenJDK compiler.  If you find a bug
 in the Type Annotations compiler:
 </p>
 <ul>
   <li>It might be due to a bug in the OpenJDK compiler.
-      In this case, it should be reported to Sun.
+      In this case, it should be reported to Oracle.
   </li>
   <li>It might be due to the Type Annotations modifications.
       In this case, it should be reported to the Type Annotations compiler
@@ -522,7 +522,7 @@ using this procedure:
   <a href="http://bugs.sun.com/bugdatabase/index.jsp">bug database</a> (use
   the &ldquo;Java&rdquo; category).  If the problem is not in the bug database, then
   <a href="http://bugreport.sun.com/bugreport/index.jsp">report your
-  bug to Sun</a>, using category &ldquo;Java&rdquo;
+  bug to Oracle</a>, using category &ldquo;Java&rdquo;
   and subcategory &ldquo;compiler&rdquo;.
   </li>
 </ol>
@@ -544,7 +544,7 @@ The issue tracker is not intended for general support or questions.
 <p>
 Please ensure that your bug report is clear and that it is complete.
 Otherwise, we may be unable to understand it or to reproduce it, either of
-which would prevent us from fixing the bug.  Sun has a description of
+which would prevent us from fixing the bug.  Oracle has a description of
 <a
 href="http://java.sun.com/developer/technicalArticles/bugreport_howto/index.html">how
 to write a helpful bug report</a>.  Here are some crucial points:
@@ -580,7 +580,7 @@ Finally, thanks for reporting the bug!
 <p>
 The Type Annotations compiler was implemented by Matthew M. Papi and
 Mahmood Ali as a modification
-of the Sun <a href="http://openjdk.java.net/">OpenJDK compiler</a>.
+of the Oracle <a href="http://openjdk.java.net/">OpenJDK compiler</a>.
 See above for <a href="#reporting-bugs">how to report bugs</a>.
 </p>
 
@@ -611,7 +611,7 @@ Framework.
 </body>
 </html>
 
-<!-- TODO: link to the Sun JDK langtools; but as of now there is no definitive place to link to -->
+<!-- TODO: link to the Oracle JDK langtools; but as of now there is no definitive place to link to -->
 <!--
 <p>The OpenJDK Java 7 compiler, which appears in the
   <a href="http://hg.openjdk.java.net/jdk7/jdk7/langtools">&ldquo;langtools&rdquo;

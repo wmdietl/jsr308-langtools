@@ -371,7 +371,7 @@ compiler issues the error even if no annotation processor is being run.)
 % The Target Javadocs state
 %   If such a meta-annotation is present, the compiler will enforce the
 %   specified usage restriction.
-% (See http://java.sun.com/javase/6/docs/api/java/lang/annotation/Target.html.)
+% (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
 
 
@@ -1502,7 +1502,7 @@ A compiler plug-in would check that a \code{@NonNull} variable is never
 assigned a possibly-\code{null} value, thus enforcing the \code{@NonNull}
 type system.
 
-%% Commented out to avoid complaints from Sun.
+%% Commented out to avoid complaints from Oracle.
 % A pair
 % of plug-ins would check that \code{@NonNull} variables are never
 % assigned a possibly-\code{null} value: one plug-in for the compiler, which
@@ -2521,7 +2521,7 @@ have no difficulty in understanding where a given annotation applies.
 % The Target Javadocs state
 %   If such a meta-annotation is present, the compiler will enforce the
 %   specified usage restriction.
-% (See http://java.sun.com/javase/6/docs/api/java/lang/annotation/Target.html.)
+% (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
 
 
@@ -2548,7 +2548,7 @@ have no difficulty in understanding where a given annotation applies.
 % \code{@NonNull @Override Dimension getSize()} has the same
 % meaning but is poor style.  (An annotation processor could warn about this
 % order, just as tools warn about modifiers --- such as \code{final static}
-% --- that are not written in the order recommended by Sun.)
+% --- that are not written in the order recommended by Oracle.)
 % % The recommended order is:
 % %   public protected private abstract static final transient volatile synchronized native strictfp interface
 
@@ -2701,7 +2701,7 @@ needs to be updated only with respect to declaration-related annotations
 (the top of Figure~\ref{tbl:target_types}; also see Section~\ref{out-of-scope-annotation-processing-api}).
 The JSR 269 model, \code{javax.lang.model.*},
 already has some classes representing annotations; see
-\myurl{http://java.sun.com/javase/6/docs/api/javax/lang/model/element/package-summary.html}.
+\myurl{http://download.oracle.com/javase/6/docs/api/javax/lang/model/element/package-summary.html}.
 The annotation processing API in \code{javax.annotation.processing} must
 also be revised.
 
@@ -2772,7 +2772,7 @@ provide access to annotations on casts (or other annotations inside
 a method body), type parameter names, or similar implementation details.
 
 
-% This is lifted from http://blogs.sun.com/darcy/entry/so_you_want_to_change
+% This is lifted from http://blogs.oracle.com/darcy/entry/so_you_want_to_change
 The Mirror API \code{com.sun.mirror.*} need not be updated, as it has been
 superseded by JSR 269~\cite{JSR269}.
 
@@ -2819,7 +2819,7 @@ file format and must output annotations.
 
 The pack200/unpack200 tool must preserve the new attributes through a
 compress-decompress cycle.
-% http://java.sun.com/javase/6/docs/api/java/util/jar/Pack200.html
+% http://download.oracle.com/javase/6/docs/api/java/util/jar/Pack200.html
 
 
 The compiler and other tools that read class files are trivially compatible
@@ -2844,7 +2844,7 @@ method signature.
 %% (Does the doclet API itself need to change??
 
 % This is true but irrelevant: "(if meta-annotated with \code{@Documented})"
-% http://java.sun.com/javase/6/docs/api/java/lang/annotation/Documented.html
+% http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Documented.html
 % @Documented annotations "are part of the public API of the annotated
 % elements", and "are documented by javadoc and similar tools by default".
 % (No option exists at present in the standard doclet to override that default.)
@@ -3215,7 +3215,7 @@ SQL interfaces have far more implementations than the compiler or
 reflection APIs, but Java SE 6 added three methods to the
 \<java.sql.Statement> interface and made it extend \<Wrapper>.
 % This isn't even documented in the Java 6 Incompatibility Release notes
-% (http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities).
+% (http://www.oracle.com/technetwork/java/javase/compatibility-137541.html#incompatibilities; was http://java.sun.com/javase/6/webnotes/compatibility.html#incompatibilities).
 
 An alternative to changing the \<Element> (and \<AnnotatedElement>) interface is to create a new
 \<Element2> interface that augments \<Element> with the \<getAnnotations>
@@ -3815,7 +3815,7 @@ may inherit from other classes/interfaces.  Rather, it is about whether a
 class/interface inherits annotations from its superclasses/interfaces.)
 
 The annotation type
-\ahref{http://java.sun.com/javase/6/docs/api/java/lang/annotation/Inherited.html}{\code{java.lang.annotation.Inherited}}
+\ahref{http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Inherited.html}{\code{java.lang.annotation.Inherited}}
 (JLS \ahref{\jlsNineSixOneThreeURL}{\S9.6.1.3})
 indicates that annotations on a class \code{C} corresponding to a given
 annotation type are inherited by subclasses of \code{C}\@.  This implies
@@ -3842,7 +3842,7 @@ choosing the inherited one.
 % super- and sub-types.)
 
 %   <li>A dynamic proxy class is a class (created by
-%       <a href="http://java.sun.com/javase/6/docs/api/java/lang/reflect/Proxy.html"><code>java.lang.reflect.Proxy</code></a>) that is created at run time and
+%       <a href="http://download.oracle.com/javase/6/docs/api/java/lang/reflect/Proxy.html"><code>java.lang.reflect.Proxy</code></a>) that is created at run time and
 %       that implements a list of interfaces (that are also given at run
 %       time).  What annotations should appear on the methods of the proxy
 %       class?  Arguably, whichever annotations were on the methods of the

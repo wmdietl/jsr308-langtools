@@ -55,7 +55,7 @@ ${jsr308_www}/java-type-qualifiers.html
 # * The two errors related to 'annotation_type_element_detail' are the due to
 #   a bug in the Javadoc generator when a default value is given to an
 #   annotation element.
-# * Others are a result of linking our javadocs to the Sun JDK
+# * Others are a result of linking our javadocs to the Oracle JDK
 #   javadoc.  Any classes that are introduced by JSR 308 (e.g.
 #   AnnotatedType tree) or affected by it (e.g. AnnotatedTypeVisitor,
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
