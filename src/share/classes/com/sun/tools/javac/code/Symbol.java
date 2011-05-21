@@ -57,6 +57,9 @@ import static com.sun.tools.javac.code.TypeTags.*;
 public abstract class Symbol implements Element {
     // public Throwable debug = new Throwable();
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /** The kind of this symbol.
      *  @see Kinds
      */
@@ -99,6 +102,17 @@ public abstract class Symbol implements Element {
      */
     public Type type;
 
+    /** The type annotations targeted to a tree directly owned by this symbol
+     */
+    // type annotations are stored here for two purposes:
+    //  - convenient location to store annotations for generation after erasure
+    //  - a private interface for accessing type annotations parsed from
+    //    classfiles
+    //  the field is populated for the following declaration only
+    //  class, field, variable and type parameters
+    //
+    public List<Attribute.TypeCompound> typeAnnotations;
+
     /** The owner of this symbol.
      */
     public Symbol owner;
@@ -121,7 +135,9 @@ public abstract class Symbol implements Element {
         this.completer = null;
         this.erasure_field = null;
         this.attributes_field = List.nil();
+        this.typeAnnotations = List.nil();
         this.name = name;
+        uid = ++uidCounter;
     }
 
     /** Clone this symbol with new owner.
@@ -141,6 +157,11 @@ public abstract class Symbol implements Element {
     public String toString() {
         return name.toString();
     }
+
+    public String toStringDebug() {
+        return name.toString() + " " + getClass().getSimpleName() + "#" + uid;
+    }
+
 
     /** A Java source description of the location of this symbol; used for
      *  error reporting.
