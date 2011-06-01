@@ -1131,7 +1131,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         }
     }
 
-    private boolean unrecoverableError() {
+    public boolean unrecoverableError() {
         for (JCDiagnostic d: log.deferredDiagnostics) {
             if (d.getKind() == JCDiagnostic.Kind.ERROR && !d.isFlagSet(RECOVERABLE))
                 return true;
