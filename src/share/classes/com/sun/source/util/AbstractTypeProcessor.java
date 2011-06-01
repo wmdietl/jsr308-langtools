@@ -35,6 +35,7 @@ import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 
+import com.sun.tools.javac.main.JavaCompiler;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
@@ -197,8 +198,11 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             if (!elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
 
-            if (log.nerrors != 0)
+            JavaCompiler comp = JavaCompiler.instance(env.getContext());
+            if (comp.errorCount() != 0 || comp.unrecoverableError()) {
+                log.reportDeferredDiagnostics();
                 return;
+            }
 
             TypeElement elem = e.getTypeElement();
             TreePath p = Trees.instance(env).getPath(elem);
