@@ -442,7 +442,7 @@ public class ExtendedAnnotation {
         /** For annotations on a type argument or nested array of a local. */
         LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation),
 
-        /** For type annotations on a method return */
+        /** For type annotations on a method return. */
         METHOD_RETURN(0x0A),
 
         /**
@@ -451,13 +451,13 @@ public class ExtendedAnnotation {
          */
         METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
 
-        /** For type annotations on a type parameter */
+        /** For type annotations on a method parameter. */
         METHOD_PARAMETER(0x0C),
 
         /** For annotations on a type argument or nested array of a method parameter. */
         METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
 
-        /** For type annotations on a field */
+        /** For type annotations on a field. */
         FIELD(0x0E),
 
         /** For annotations on a type argument or nested array of a field. */
