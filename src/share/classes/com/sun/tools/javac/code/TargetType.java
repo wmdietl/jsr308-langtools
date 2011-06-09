@@ -80,7 +80,7 @@ public enum TargetType {
     /** For annotations on a type argument or nested array of a local. */
     LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation, IsLocal),
 
-    /** For type annotations on a method return type */
+    /** For type annotations on a method return type. */
     METHOD_RETURN(0x0A),
 
     /**
@@ -89,15 +89,13 @@ public enum TargetType {
      */
     METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
 
-    /**
-     * For type annotations on a method parameter
-     */
+    /** For type annotations on a method parameter. */
     METHOD_PARAMETER(0x0C),
 
     /** For annotations on a type argument or nested array of a method parameter. */
     METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
 
-    /** For type annotations on a method parameter */
+    /** For type annotations on a field. */
     FIELD(0x0E),
 
     /** For annotations on a type argument or nested array of a field. */
