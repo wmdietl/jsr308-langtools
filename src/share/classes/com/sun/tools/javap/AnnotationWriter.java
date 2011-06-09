@@ -94,7 +94,7 @@ public class AnnotationWriter extends BasicWriter {
         // type case
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
         // new expression
@@ -105,7 +105,7 @@ public class AnnotationWriter extends BasicWriter {
                 print(pos.offset);
             }
             break;
-         // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             print(", {");
@@ -122,7 +122,7 @@ public class AnnotationWriter extends BasicWriter {
             }
             print("}");
             break;
-         // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
@@ -142,13 +142,13 @@ public class AnnotationWriter extends BasicWriter {
             print(", bound_index=");
             print(pos.bound_index);
             break;
-         // wildcard
+        // wildcard
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             print(", wild_card=");
             print(pos.wildcard_position);
             break;
-         // Class extends and implements clauses
+        // class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             print(", type_index=");
@@ -159,6 +159,7 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
+        // class literals
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             if (showOffsets) {
@@ -166,12 +167,13 @@ public class AnnotationWriter extends BasicWriter {
                 print(pos.offset);
             }
             break;
-        // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             print(", param_index=");
             print(pos.parameter_index);
             break;
+        // method/constructor type arguments
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
@@ -183,7 +185,7 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
-        // We don't need to worry abut these
+        // We don't need to worry about these
         case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
         case FIELD:
