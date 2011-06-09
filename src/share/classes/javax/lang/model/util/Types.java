@@ -303,9 +303,9 @@ public interface Types {
     TypeMirror asMemberOf(DeclaredType containing, Element element);
 
     /**
-     * Returns the annotations targeting the type
+     * Returns the annotations targeting the type.
      *
-     * @param type  the targeted type
+     * @param type the targeted type
      * @return the type annotations targeting the type
      */
     List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type);
@@ -341,7 +341,7 @@ public interface Types {
      * annotation types.
      * </blockquote>
      *
-     * @param <A>  the annotation type
+     * @param <A>   the annotation type
      * @param type  the targeted type
      * @param annotationType  the {@code Class} object corresponding to
      *          the annotation type
@@ -358,9 +358,9 @@ public interface Types {
     <A extends Annotation> A typeAnnotationOf(TypeMirror type, Class<A> annotationType);
 
     /**
-     * Returns the annotations targeting the method receiver type
+     * Returns the annotations targeting the method receiver type.
      *
-     * @param type  the targeted type
+     * @param type the targeted type
      * @return the type annotations targeting the type
      */
     List<? extends AnnotationMirror> receiverTypeAnnotationsOf(ExecutableType type);
@@ -396,7 +396,7 @@ public interface Types {
      * annotation types.
      * </blockquote>
      *
-     * @param <A>  the annotation type
+     * @param <A>   the annotation type
      * @param type  the method type
      * @param annotationType  the {@code Class} object corresponding to
      *          the annotation type
