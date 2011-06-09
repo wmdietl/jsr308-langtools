@@ -44,11 +44,14 @@ public abstract class InstructionDetailWriter extends BasicWriter {
         STACKMAPS("stackMaps"),
         TRY_BLOCKS("tryBlocks"),
         TYPE_ANNOS("typeAnnotations");
+
         Kind(String option) {
             this.option = option;
         }
+
         final String option;
     }
+
     InstructionDetailWriter(Context context) {
         super(context);
     }
