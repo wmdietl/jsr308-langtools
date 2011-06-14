@@ -47,7 +47,7 @@ import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Names;
 
 /**
- * Contains operations specific to processing type annotations
+ * Contains operations specific to processing type annotations.
  */
 public class TypeAnnotations {
     private static final Context.Key<TypeAnnotations> key

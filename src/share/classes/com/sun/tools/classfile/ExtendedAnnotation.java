@@ -77,7 +77,7 @@ public class ExtendedAnnotation {
         // type case
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
         // new expression
@@ -85,7 +85,7 @@ public class ExtendedAnnotation {
         case NEW_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();
             break;
-         // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             int table_length = cr.readUnsignedShort();
@@ -98,7 +98,7 @@ public class ExtendedAnnotation {
                 position.lvarIndex[i] = cr.readUnsignedShort();
             }
             break;
-         // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
@@ -115,12 +115,12 @@ public class ExtendedAnnotation {
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
-         // wildcards
+        // wildcards
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             position.wildcard_position = read_position(cr);
             break;
-         // Class extends and implements clauses
+        // class extends and implements clauses
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             int in = cr.readUnsignedShort();
@@ -132,6 +132,7 @@ public class ExtendedAnnotation {
         case THROWS:
             position.type_index = cr.readUnsignedShort();
             break;
+        // class literals
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();

@@ -720,7 +720,7 @@ public class ClassWriter {
             // type case
             case TYPECAST:
             case TYPECAST_GENERIC_OR_ARRAY:
-            // object creation
+            // instanceof
             case INSTANCEOF:
             case INSTANCEOF_GENERIC_OR_ARRAY:
             // new expression
@@ -728,7 +728,7 @@ public class ClassWriter {
             case NEW_GENERIC_OR_ARRAY:
                 out.writeShort(p.offset);
                 break;
-             // local variable
+            // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
                 int table_length = p.lvarOffset.length;
@@ -740,7 +740,7 @@ public class ClassWriter {
                     out.writeShort(p.lvarIndex[i]);
                 }
                 break;
-             // method receiver
+            // method receiver
             case METHOD_RECEIVER:
                 // Do nothing
                 break;
@@ -757,12 +757,12 @@ public class ClassWriter {
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
-             // wildcards
+            // wildcards
             case WILDCARD_BOUND:
             case WILDCARD_BOUND_GENERIC_OR_ARRAY:
                 write(p.wildcard_position, out);
                 break;
-            // Class extends and implements clauses
+            // class extends and implements clauses
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
                 out.writeByte(p.type_index);
@@ -771,16 +771,17 @@ public class ClassWriter {
             case THROWS:
                 out.writeByte(p.type_index);
                 break;
+            // class literals
             case CLASS_LITERAL:
             case CLASS_LITERAL_GENERIC_OR_ARRAY:
                 out.writeShort(p.offset);
                 break;
-            // method parameter: not specified
+            // method parameters
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 out.writeByte(p.parameter_index);
                 break;
-            // method type argument: wasn't specified
+            // method/constructor type arguments
             case NEW_TYPE_ARGUMENT:
             case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             case METHOD_TYPE_ARGUMENT:
