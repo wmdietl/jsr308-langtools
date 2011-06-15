@@ -2,8 +2,8 @@ jsr308_www ?= /cse/www2/types/jsr308
 jsr308_spec = ${jsr308_www}/specification
 jsr308_www_online ?= http://types.cs.washington.edu/jsr308
 
-pl ?= ${HOME}/plume-lib
-PLUME_BIN ?= ${pl}/bin
+PLUME_LIB ?= ${HOME}/plume-lib
+PLUME_BIN ?= ${PLUME_LIB}/bin
 
 RELEASEDATE ?= `date '+%Y%m%d'`
 
@@ -152,9 +152,15 @@ ${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install ${jsr308_www}
 ## These targets ensure that the directory exists, but do *not* make
 ## it up to date.
 
-${pl}:
-	cd ${pl}/..; hg clone https://plume-lib.googlecode.com/hg/ plume-lib
+# These targets don't work!
+# The "cd ${PLUME_LIB}/.." doesn't work if the directory doesn't exist.
+# Instead, create the directory? Or use /tmp?
+ 
+# ${PLUME_LIB}:
+#	cd ${PLUME_LIB}/..; hg clone https://plume-lib.googlecode.com/hg/ plume-lib
 
-${PLUME_BIN}: ${pl}
+${PLUME_BIN}: # ${PLUME_LIB}
+
+
 
 ###########################################################################
