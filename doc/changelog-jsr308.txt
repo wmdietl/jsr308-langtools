@@ -13,7 +13,6 @@ Base build
   Updated to OpenJDK langtools build b145
 
 ----------------------------------------------------------------------
-
 Version 1.1.2, 12 Jan 2011
 
 Documentation fixes only
