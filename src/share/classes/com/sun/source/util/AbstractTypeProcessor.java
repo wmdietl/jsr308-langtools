@@ -208,6 +208,9 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             TreePath p = Trees.instance(env).getPath(elem);
 
             typeProcess(elem, p);
+            
+            // report errors accumulated during type checking
+            log.reportDeferredDiagnostics();
 
             if (!hasInvokedTypeProcessingOver && elements.isEmpty() && log.nerrors == 0) {
                 typeProcessingOver();
