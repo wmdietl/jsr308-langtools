@@ -46,6 +46,7 @@ ${jsr308_www}/jsr308-webpage.html \
 ${jsr308_www}/jsr308-faq.html \
 ${jsr308_www}/README-jsr308.html \
 ${jsr308_www}/Makefile-jsr308-install \
+${jsr308_www}/favicon-jsr308.png \
 ${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
