@@ -151,6 +151,10 @@ ${jsr308_spec}/jsr308-changes.html: jsr308-changes.html ${jsr308_spec} ${PLUME_B
 ${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install ${jsr308_www}
 	\cp -f $< $@
 
+${jsr308_www}/favicon-jsr308.png: favicon-jsr308.png ${jsr308_www}
+	\cp -f $< $@
+
+
 ###########################################################################
 
 ## These targets ensure that the directory exists, but do *not* make
