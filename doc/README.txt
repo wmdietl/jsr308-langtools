@@ -1,7 +1,7 @@
 This directory contains design documents related to JSR 308 ("Annotations
 on Java types").
 
-Also see file ../README-jsr308.html .
+Also see file README-jsr308.html .
 
 To copy the documents to the website:
 1. See the comments in the Makefile for instructions regarding how to
