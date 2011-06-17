@@ -1,7 +1,11 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<title>Type Annotations (JSR 308) Compiler README</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <title>Type Annotations (JSR 308) Compiler README</title>
+  <link rel="icon" type="image/png" href="favicon-jsr308.png"></link>
+
 <!--
 <style type="text/css">
 body {
@@ -14,13 +18,17 @@ pre, blockquote {
 }
 </style>
 -->
-<link rel="icon" type="image/png" href="favicon-jsr308.png" />
 </head>
+
 <body>
+
 <h1>Type Annotations (JSR 308) Compiler README</h1> <!-- omit from toc -->
+
 <h4 id="version">Version 1.1.3 (15 Jun 2011)</h4> <!-- omit from toc -->
+
 <p>For the latest version, see the
-  <a href="http://types.cs.washington.edu/jsr308/">Type Annotations (JSR 308) webpage</a>.</p>
+  <a href="http://types.cs.washington.edu/jsr308/">Type Annotations (JSR 308) webpage</a>.
+</p>
 
 <p>Contents:</p>
 <!-- start toc.  do not edit; run html-update-toc instead -->
@@ -224,6 +232,7 @@ export PATH=$JAVA_HOME/bin:$PATH
           </ol>
         If you want to be able to run javac from Cygwin, then set
 	environment variables as for Linux, above.
+        </li>
 	</ul>
       </li>
       <li>
@@ -321,8 +330,8 @@ you want a newer version of OpenJDK.
    will ever be issued.)</li>
 </ul>
 
-<h3 id="openjdk-differences">Differences from the OpenJDK compiler</h3>
 
+<h3 id="openjdk-differences">Differences from the OpenJDK compiler</h3>
 
 <p>The Type Annotations distribution includes only the <code>langtools</code>
 portion of OpenJDK. The Type Annotations compiler
@@ -335,6 +344,7 @@ Type Annotations tools.
 portion of Oracle's OpenJDK distribution
 in the following ways:
 </p>
+
 <ul>
   <li>This documentation file has been included.</li>
   <li>A <tt>doc/</tt> subdirectory contains other design documentation.</li>
@@ -351,6 +361,7 @@ in the following ways:
   <li>
     Bug fixes appear in this distribution before they
     are incorporated in the OpenJDK.
+  </li>
 </ul>
 
 
@@ -418,8 +429,10 @@ Framework Manual</a>.
 <code>langtools</code> portion of Oracle's
 <a href="http://openjdk.java.net/">OpenJDK</a>
 <code>javac</code> distribution.
+</p>
 
 <p>The following commands determine the differences between the Type Annotations compiler and the OpenJDK compiler.
+</p>
 
 <ol>
   <li>If you do not have a clean checkout of the Type Annotations compiler source,
@@ -443,6 +456,7 @@ Framework Manual</a>.
   
   <li> Use <code>hg diff</code> to generate the diff.
   <pre><code>hg diff -r450:tip</code></pre>
+  </li>
 </ol>
 
 
@@ -479,6 +493,7 @@ We welcome bug reports and suggestions, and we want to help.
 We will fix all reported bugs in the Type Annotations compiler.
 Examples of bugs include:
 </p>
+
 <ul>
   <li>Any inconsistency between the Type Annotations compiler and the
       JSR 308 design (<a
@@ -499,6 +514,7 @@ href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design
 The Type Annotations compiler is built on Oracle's OpenJDK compiler.  If you find a bug
 in the Type Annotations compiler:
 </p>
+
 <ul>
   <li>It might be due to a bug in the OpenJDK compiler.
       In this case, it should be reported to Oracle.
@@ -508,12 +524,14 @@ in the Type Annotations compiler:
       developers.
   </li>
 </ul>
+
 <p>
 In some cases (such as a problem with processing
 annotations on types), the responsibility is clearly with the JSR 308
 modifications.  Otherwise, please determine who is responsible for the bug
 using this procedure:
 </p>
+
 <ol>
   <li>Obtain a copy of
   the OpenJDK compiler, using the commands in the <a href="#diffs">diff
@@ -527,8 +545,6 @@ using this procedure:
   and subcategory &ldquo;compiler&rdquo;.
   </li>
 </ol>
-
-
 
 <p>
 If the problem is present in the Type Annotations compiler, but not in the OpenJDK
@@ -550,6 +566,7 @@ which would prevent us from fixing the bug.  Oracle has a description of
 href="http://java.sun.com/developer/technicalArticles/bugreport_howto/index.html">how
 to write a helpful bug report</a>.  Here are some crucial points:
 </p>
+
 <ul>
   <li>Indicate exactly what you did.  Show the exact commands (don't merely
       describe them in words).  Don't skip any steps.
@@ -585,12 +602,14 @@ of the Oracle <a href="http://openjdk.java.net/">OpenJDK compiler</a>.
 See above for <a href="#reporting-bugs">how to report bugs</a>.
 </p>
 
+
 <h3 id="changelog">Changelog</h3>
 
 <p>
 Differences from previous versions may be found
 in the <a href="changelog-jsr308.txt">changelog</a>.
 </p>
+
 
 <h3 id="release">Making a release (a distribution)</h3>
 
@@ -603,7 +622,7 @@ Framework.
 </p>
 
 
-<hr>
+<hr />
 
 <p>
 <a href="http://types.cs.washington.edu/jsr308/">JSR 308 webpage</a>
