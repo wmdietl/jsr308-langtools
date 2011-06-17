@@ -46,6 +46,7 @@ ${jsr308_www}/jsr308-webpage.html \
 ${jsr308_www}/jsr308-faq.html \
 ${jsr308_www}/README-jsr308.html \
 ${jsr308_www}/Makefile-jsr308-install \
+${jsr308_www}/changelog-jsr308.txt \
 ${jsr308_www}/favicon-jsr308.png \
 ${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
@@ -144,6 +145,9 @@ ${jsr308_www}/jsr308-faq.html: jsr308-faq.html ${jsr308_www} ${PLUME_BIN}
 	validate $<
 	\cp -f $< $@
 #	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+
+${jsr308_www}/changelog-jsr308.txt: changelog-jsr308.txt ${jsr308_www}
+	\cp -f $< $@
 
 ${jsr308_www}/README-jsr308.html: README-jsr308.html ${jsr308_www} ${PLUME_BIN}
 	validate $<
