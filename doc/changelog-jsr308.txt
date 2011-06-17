@@ -1,9 +1,11 @@
-Version 1.1.3, 15 Jun 2011
+Version 1.1.3, 17 Jun 2011
 
 Bug fixes:
   javac: don't run type annotation processors if deferred errors exist
 
 Rename occurrences of "Sun" to "Oracle"
+
+Updates to the web-site build process
 
 The commits from March 21st/22nd 2011 re-add JSR 308 support that was
 previously removed in langtools. All of them previously existed in
