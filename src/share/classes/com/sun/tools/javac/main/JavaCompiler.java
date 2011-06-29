@@ -1023,7 +1023,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
     }
 
     /**
-     * Process any anotations found in the specifed compilation units.
+     * Process any annotations found in the specified compilation units.
      * @param roots a list of compilation units
      * @return an instance of the compiler in which to complete the compilation
      */
@@ -1131,7 +1131,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         }
     }
 
-    public boolean unrecoverableError() {
+    private boolean unrecoverableError() {
         for (JCDiagnostic d: log.deferredDiagnostics) {
             if (d.getKind() == JCDiagnostic.Kind.ERROR && !d.isFlagSet(RECOVERABLE))
                 return true;
