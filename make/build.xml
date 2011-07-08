@@ -472,6 +472,10 @@
         <build-classes includes="${javac.includes}"/>
     </target>
 
+    <target name="check-nullness-javac" depends="clean,build-bootstrap-javac,-create-import-jdk-stubs,-def-check-nullness-classes">
+        <check-nullness-classes includes="${javac.includes}"/>
+    </target>
+
     <target name="build-javac" depends="build-classes-javac">
         <build-jar  name="javac" includes="${javac.includes}"/>
         <build-tool name="javac"/>
@@ -820,6 +824,104 @@
                     <compilerarg line="${javac.version.opt}"/>
                     <compilerarg line="${javac.lint.opts}"/>
                 </javac>
+                <copy todir="@{classes.dir}" includeemptydirs="false">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
+                        <exclude name="**/*.java"/>
+                        <exclude name="**/*.properties"/>
+                        <exclude name="**/*-template"/>
+                        <exclude name="**/*.rej"/>
+                        <exclude name="**/*.orig"/>
+                        <exclude name="**/overview.html"/>
+                        <exclude name="**/package.html"/>
+                    </fileset>
+                </copy>
+            </sequential>
+        </macrodef>
+    </target>
+
+    <property environment="env"/>
+    <presetdef name="jsr308.javac">
+      <javac fork="yes">
+        <!-- JSR308 related compiler arguments -->
+        <compilerarg value="-version"/>
+        <!-- optional, so .class files work with older JVMs: <compilerarg line="-target 5"/> -->
+        <compilerarg value="-implicit:class"/>
+        <compilerarg line="-Awarns -Xmaxwarns 10000"/>
+        <compilerarg value="-J-Xbootclasspath/p:${env.CHECKERS}/binary/jsr308-all.jar"/>
+        <!-- <compilerarg value="-J-Xbootclasspath/p:/home/mernst/research/types/checker-framework/checkers/binary/jsr308-all.jar"/> -->
+
+        <classpath>
+          <pathelement location="${env.CHECKERS}/checkers.jar"/>
+          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checkers/checkers.jar"/> -->
+        </classpath>
+      </javac>
+    </presetdef>
+
+    <!-- A copy of the -def-build-classes target. -->
+    <target name="-def-check-nullness-classes" depends="-def-pcompile">
+        <macrodef name="check-nullness-classes">
+            <attribute name="includes"/>
+            <attribute name="excludes" default="${exclude.files} **/package-info.java"/>
+            <attribute name="classes.dir" default="${build.classes.dir}"/>
+            <attribute name="gensrc.dir" default="${build.gensrc.dir}"/>
+            <attribute name="javac.bootclasspath" default="${build.bootstrap.dir}/classes"/>
+            <attribute name="bootclasspath.opt" default="${javac.bootclasspath.opt}"/>
+            <attribute name="classpath" default="${javac.classpath}"/>
+            <attribute name="sourcepath" default="${javac.sourcepath}"/>
+            <attribute name="java.home" default="${boot.java.home}"/>
+            <attribute name="source" default="${javac.source}"/>
+            <attribute name="target" default="${javac.target}"/>
+            <attribute name="release" default="${release}"/>
+            <attribute name="full.version" default="${full.version}"/>
+            <sequential>
+                <echo level="verbose" message="build-classes: excludes=@{excludes}"/>
+                <echo level="verbose" message="build-classes: bootclasspath.opt=@{bootclasspath.opt}"/>
+                <echo level="verbose" message="build-classes: classpath=@{classpath}"/>
+                <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
+                <mkdir dir="@{gensrc.dir}"/>
+                <mkdir dir="@{classes.dir}"/>
+                <pcompile srcdir="${src.classes.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="@{includes}"/>
+                <copy todir="@{gensrc.dir}">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}"/>
+                    <globmapper from="*.properties-template" to="*.properties"/>
+                    <filterset begintoken="$(" endtoken=")">
+                        <filter token="JDK_VERSION" value="${jdk.version}"/>
+                        <filter token="RELEASE" value="@{release}"/>
+                        <filter token="FULL_VERSION" value="@{full.version}"/>
+                    </filterset>
+                </copy>
+                <pcompile srcdir="@{gensrc.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="**/*.properties"/>
+                <jsr308.javac fork="true"
+                       executable="@{java.home}/bin/javac"
+                       srcdir="${src.classes.dir}:@{gensrc.dir}"
+                       destdir="@{classes.dir}"
+                       includes="@{includes}"
+                       excludes="@{excludes}"
+                       sourcepath="@{sourcepath}"
+                       classpath="@{classpath}"
+                       includeAntRuntime="no"
+                       source="@{source}"
+                       target="@{target}"
+                       debug="${javac.debug}"
+                       debuglevel="${javac.debuglevel}">
+                    <compilerarg value="-implicit:none"/>
+                    <compilerarg value="-Xprefer:source"/>
+                    <compilerarg value="-J-Xbootclasspath/p:@{javac.bootclasspath}"/>
+                    <compilerarg line="@{bootclasspath.opt}"/>
+                    <compilerarg line="${javac.no.jdk.warnings}"/>
+                    <compilerarg line="${javac.version.opt}"/>
+                    <!-- <compilerarg line="${javac.lint.opts}"/> -->
+
+                    <!-- Checker Framework command-line arguments -->
+                    <compilerarg line="-processor checkers.nullness.NullnessChecker"/>
+		    <!-- This -Xbootclasspath must appear *after* the previous compilerarg lines -->
+                    <compilerarg value="-Xbootclasspath/p:${env.CHECKERS}/jdk/jdk.jar"/>
+                    <compilerarg value="-J-Djsr308_imports=checkers.nullness.quals.*"/>
+                </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
                         <exclude name="**/*.java"/>
