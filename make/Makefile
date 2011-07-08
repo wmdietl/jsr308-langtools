@@ -215,6 +215,17 @@ jprt_build_product jprt_build_debug jprt_build_fastdebug: all
 	  $(ZIP) -q -r $(JPRT_ARCHIVE_BUNDLE) build dist )
 
 #-------------------------------------------------------------------
+#
+# Emacs tags table
+
+.PHONY: tags TAGS
+tags: TAGS
+TAGS:
+# Lexicographic sorting of file names doesn't help with JavaCompiler.java:
+# there are 3 such files, but the interesting one sorts in the middle.
+	(cd ..; etags `find src/share/classes -name '*.java' -print`)
+
+#-------------------------------------------------------------------
 
 # Declare these phony (not filenames)
 .PHONY: $(ANT_TARGETS) all clobber \
