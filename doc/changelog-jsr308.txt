@@ -4,6 +4,9 @@ Bug fixes:
   javac: don't run type annotation processors if symbol resolution
     errors exist (improvement to fix in the last release)
 
+Base build
+  Updated to OpenJDK langtools build b147
+
 ----------------------------------------------------------------------
 Version 1.1.3, 17 Jun 2011
 
