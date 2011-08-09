@@ -65,6 +65,10 @@ public class ClassWriter extends ClassFile {
 
     private final Options options;
 
+    /** Switch: debugging output for JSR 308-related operations.
+     */
+    private boolean debugJSR308;
+
     /** Switch: verbose output.
      */
     private boolean verbose;
@@ -176,6 +180,7 @@ public class ClassWriter extends ClassFile {
         types = Types.instance(context);
         fileManager = context.get(JavaFileManager.class);
 
+        debugJSR308    = options.isSet("TA:writer");
         verbose        = options.isSet(VERBOSE);
         scramble       = options.isSet("-scramble");
         scrambleAll    = options.isSet("-scrambleAll");
@@ -675,6 +680,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getAnnotationMirrors());
+        acount += writeTypeAnnotations(sym.typeAnnotations);
         return acount;
     }
 
@@ -769,6 +775,46 @@ public class ClassWriter extends ClassFile {
         return attrCount;
     }
 
+    int writeTypeAnnotations(List<Attribute.TypeCompound> typeAnnos) {
+        if (typeAnnos.isEmpty()) return 0;
+
+        ListBuffer<Attribute.TypeCompound> visibles = ListBuffer.lb();
+        ListBuffer<Attribute.TypeCompound> invisibles = ListBuffer.lb();
+
+        for (Attribute.TypeCompound tc : typeAnnos) {
+            if (tc.position.type == TargetType.UNKNOWN
+                || !tc.position.emitToClassfile())
+                continue;
+            switch (types.getRetention(tc)) {
+            case SOURCE: break;
+            case CLASS: invisibles.append(tc); break;
+            case RUNTIME: visibles.append(tc); break;
+            default: ;// /* fail soft */ throw new AssertionError(vis);
+            }
+        }
+
+        int attrCount = 0;
+        if (visibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeVisibleTypeAnnotations);
+            databuf.appendChar(visibles.length());
+            for (Attribute.TypeCompound p : visibles)
+                writeTypeAnnotation(p);
+            endAttr(attrIndex);
+            attrCount++;
+        }
+
+        if (invisibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeInvisibleTypeAnnotations);
+            databuf.appendChar(invisibles.length());
+            for (Attribute.TypeCompound p : invisibles)
+                writeTypeAnnotation(p);
+            endAttr(attrIndex);
+            attrCount++;
+        }
+
+        return attrCount;
+    }
+
     /** A visitor to write an attribute including its leading
      *  single-character marker.
      */
@@ -845,6 +891,107 @@ public class ClassWriter extends ClassFile {
             p.snd.accept(awriter);
         }
     }
+
+    void writeTypeAnnotation(Attribute.TypeCompound c) {
+        if (debugJSR308)
+            System.out.println("TA: writing " + c + " at " + c.position
+                    + " in " + log.currentSourceFile());
+        writeCompoundAttribute(c);
+        writePosition(c.position);
+    }
+
+    void writePosition(TypeAnnotationPosition p) {
+        databuf.appendByte(p.type.targetTypeValue());
+        switch (p.type) {
+        // type case
+        case TYPECAST:
+        case TYPECAST_GENERIC_OR_ARRAY:
+        // object creation
+        case INSTANCEOF:
+        case INSTANCEOF_GENERIC_OR_ARRAY:
+        // new expression
+        case NEW:
+        case NEW_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.offset);
+            break;
+         // local variable
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.lvarOffset.length);  // for table length
+            for (int i = 0; i < p.lvarOffset.length; ++i) {
+                databuf.appendChar(p.lvarOffset[i]);
+                databuf.appendChar(p.lvarLength[i]);
+                databuf.appendChar(p.lvarIndex[i]);
+            }
+            break;
+         // method receiver
+        case METHOD_RECEIVER:
+            // Do nothing
+            break;
+        // type parameters
+        case CLASS_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER:
+            databuf.appendByte(p.parameter_index);
+            break;
+        // type parameters bounds
+        case CLASS_TYPE_PARAMETER_BOUND:
+        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND:
+        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            databuf.appendByte(p.parameter_index);
+            databuf.appendByte(p.bound_index);
+            break;
+         // wildcards
+        case WILDCARD_BOUND:
+        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            writePosition(p.wildcard_position);
+            break;
+         // Class extends and implements clauses
+        case CLASS_EXTENDS:
+        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.type_index);
+            break;
+        // throws
+        case THROWS:
+            databuf.appendChar(p.type_index);
+            break;
+        case CLASS_LITERAL:
+        case CLASS_LITERAL_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.offset);
+            break;
+        // method parameter: not specified
+        case METHOD_PARAMETER:
+        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            databuf.appendByte(p.parameter_index);
+            break;
+        // method type argument: wasn't specified
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT:
+        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            databuf.appendChar(p.offset);
+            databuf.appendByte(p.type_index);
+            break;
+        // We don't need to worry abut these
+        case METHOD_RETURN:
+        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case FIELD:
+        case FIELD_GENERIC_OR_ARRAY:
+            break;
+        case UNKNOWN:
+            break;
+        default:
+            throw new AssertionError("unknown position: " + p);
+        }
+
+        // Append location data for generics/arrays.
+        if (p.type.hasLocation()) {
+            databuf.appendChar(p.location.size());
+            for (int i : p.location)
+                databuf.appendByte((byte)i);
+        }
+    }
+
 /**********************************************************************
  * Writing Objects
  **********************************************************************/
@@ -1557,6 +1704,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getAnnotationMirrors());
+        acount += writeTypeAnnotations(c.typeAnnotations);
         acount += writeEnclosingMethodAttribute(c);
 
         poolbuf.appendInt(JAVA_MAGIC);
