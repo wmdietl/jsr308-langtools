@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary new type annotation location: expressions
  * @author Mahmood Ali
- * @compile -source 1.7 Expressions.java
+ * @compile -source 1.8 Expressions.java
  */
 class Expressions {
   void instanceOf() {

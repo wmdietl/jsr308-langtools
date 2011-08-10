@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary new type annotation location: type casts
  * @author Mahmood Ali
- * @compile -source 1.7 TypeCasts.java
+ * @compile -source 1.8 TypeCasts.java
  */
 class TypeCasts {
   void methodA() {

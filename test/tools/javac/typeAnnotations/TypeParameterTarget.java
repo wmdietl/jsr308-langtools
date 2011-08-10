@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary check that type annotations may appear on all type parameter
  * @author Mahmood Ali
- * @compile -source 1.7 TypeParameterTarget.java
+ * @compile -source 1.8 TypeParameterTarget.java
  */
 
 import java.lang.annotation.Target;

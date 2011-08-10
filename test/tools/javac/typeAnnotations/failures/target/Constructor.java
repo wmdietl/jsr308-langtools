@@ -3,7 +3,7 @@
  * @bug 6843077
  * @summary test invalid location of TypeUse
  * @author Mahmood Ali
- * @compile/fail/ref=Constructor.out -XDrawDiagnostics -source 1.7 Constructor.java
+ * @compile/fail/ref=Constructor.out -XDrawDiagnostics -source 1.8 Constructor.java
  */
 
 import java.lang.annotation.Target;

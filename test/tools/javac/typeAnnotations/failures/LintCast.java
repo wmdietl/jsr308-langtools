@@ -5,7 +5,7 @@ import java.util.List;
  * @bug 6843077
  * @summary test that compiler doesn't warn about annotated redundant casts
  * @author Mahmood Ali
- * @compile/ref=LintCast.out -Xlint:cast -XDrawDiagnostics -source 1.7 LintCast.java
+ * @compile/ref=LintCast.out -Xlint:cast -XDrawDiagnostics -source 1.8 LintCast.java
  */
 class LintCast {
     void unparameterized() {

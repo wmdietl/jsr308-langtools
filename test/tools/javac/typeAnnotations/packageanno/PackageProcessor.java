@@ -31,8 +31,8 @@ import com.sun.source.util.TreePath;
  * @test
  * @summary test that package annotations are available to type processors
  * @author Mahmood Ali
- * @compile -source 1.7 PackageProcessor.java
- * @compile -source 1.7 -cp . -processor PackageProcessor mypackage/Anno.java mypackage/MyClass.java mypackage/package-info.java
+ * @compile -source 1.8 PackageProcessor.java
+ * @compile -source 1.8 -cp . -processor PackageProcessor mypackage/Anno.java mypackage/MyClass.java mypackage/package-info.java
  */
 
 @SupportedAnnotationTypes("*")

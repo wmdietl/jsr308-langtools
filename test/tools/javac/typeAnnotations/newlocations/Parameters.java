@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary new type annotation location: parameter type array/generics
  * @author Mahmood Ali
- * @compile -source 1.7 Parameters.java
+ * @compile -source 1.8 Parameters.java
  */
 
 class Parameters {

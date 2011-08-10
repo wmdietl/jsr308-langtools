@@ -27,7 +27,7 @@
  * @summary check that type annotations may appear on void method if it is a
  *          method annotation too.
  * @author Mahmood Ali
- * @compile -source 1.7 MultipleTargets.java
+ * @compile -source 1.8 MultipleTargets.java
  */
 
 import java.lang.annotation.Target;

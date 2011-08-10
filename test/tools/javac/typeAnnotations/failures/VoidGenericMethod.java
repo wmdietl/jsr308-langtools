@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary test type annotation on void generic methods
  * @author Mahmood Ali
- * @compile/fail -source 1.7 VoidGenericMethod.java
+ * @compile/fail -source 1.8 VoidGenericMethod.java
  */
 class VoidGenericMethod {
   public <T> @A void method() { }
