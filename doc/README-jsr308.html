@@ -314,7 +314,7 @@ you want a newer version of OpenJDK.
     syntax.  This syntax
     permits annotations to appear on any occurrence of a type, not just on
     declarations as declaration annotation (also known as Java 5
-    annoatations or JSR 175 annotations) do.  For details of the syntax,
+    annotations or JSR 175 annotations) do.  For details of the syntax,
     see the Type Annotations (JSR 308) specification
     (<a href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf">PDF</a>,
     <a href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design.html">HTML</a>).</li>
@@ -486,7 +486,9 @@ To report a bug, use the
 <a href="http://code.google.com/p/jsr308-langtools/issues/list">issue
   tracking system</a>.<br/>
 Please see below for details that will help you submit an informative bug
-report, that is most likely to be accepted.
+report to the <a href="#reporting-bugs-to-whom">right developers</a>, that
+is most likely to be accepted and fixed.<br/>
+Thank you for your bug report!
 </p>
 
 
@@ -512,42 +514,90 @@ href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design
   </li>
 </ul>
 
+<p>
+Whenever you get a message such as
+</p>
+<pre>
+  An exception has occurred in the compiler (1.7.0-jsr308-1.1.5). Please
+  report this bug so we can fix it.  For instructions, see
+  http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#reporting-bugs
+</pre>
+<p>
+then you should always report it.  However, there are three different
+places you might need to report the bug.  Please report it in the
+appropriate place, and it is more likely to be fixed.
+</p>
 
-<h4>To whom should you report the bug?</h4> <!-- omit from toc -->
+
+<h4 id="reporting-bugs-to-whom">To whom should you report the bug?</h4> <!-- omit from toc -->
 
 <p>
-The Type Annotations compiler is built on Oracle's OpenJDK compiler.  If you find a bug
-in the Type Annotations compiler:
+The Type Annotations compiler is built on Oracle's OpenJDK compiler, and
+annotation processors use the Type Annotations compiler.  If
+you find a bug while using the Type Annotations compiler:
 </p>
 
 <ul>
-  <li>It might be due to a bug in the OpenJDK compiler.
+  <li>It might be due to a bug in the OpenJDK compiler.<br/>
       In this case, it should be reported to Oracle.
   </li>
-  <li>It might be due to the Type Annotations modifications.
+  <li>It might be due to the Type Annotations modifications.<br/>
       In this case, it should be reported to the Type Annotations compiler
       developers.
+  </li>
+  <li>It might be due to an annotation processor you are running.  For
+      instance, you supplied a command line argument such as <code>-processor
+      checkers.nullness.NullnessChecker</code>, and the annotation
+      processor crashed which led to the compiler failure.<br/>
+      In this case, it should be reported to the author of the annotation
+      processor, such as the Checker Framework developers.
   </li>
 </ul>
 
 <p>
-In some cases (such as a problem with processing
-annotations on types), the responsibility is clearly with the JSR 308
-modifications.  Otherwise, please determine who is responsible for the bug
+Please determine who is responsible for the bug (and where it should be reported)
 using this procedure:
 </p>
 
 <ol>
-  <li>Obtain a copy of
-  the OpenJDK compiler, using the commands in the <a href="#diffs">diff
-  section</a> of this document.</li>
-  <li>Try your test case using the
-  OpenJDK compiler.  If the problem is present, then search the
-  <a href="http://bugs.sun.com/bugdatabase/index.jsp">bug database</a> (use
-  the &ldquo;Java&rdquo; category).  If the problem is not in the bug database, then
-  <a href="http://bugreport.sun.com/bugreport/index.jsp">report your
-  bug to Oracle</a>, using category &ldquo;Java&rdquo;
-  and subcategory &ldquo;compiler&rdquo;.
+  <li>If the error message contains text similar to
+    <pre>java.lang.Error: <i>NullnessSubchecker</i> processor threw unexpected exception when processing <i>MyFile.java</i></pre>
+    then the problem is with the annotation processor.  Report the bug to
+    the author of the annotation processor, such as
+    the
+    <a href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#reporting-bugs">Checker
+    Framework developers</a>.
+  </li>
+  <li>Try to reproduce the error without using an annotation processor.  If
+    you cannot reproduce the error, then the problem may be due to the
+    annotation processor.  Report the bug to
+    the author of the annotation processor, such as
+    the
+    <a href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#reporting-bugs">Checker
+    Framework developers</a>.
+  </li>
+  <li>Try to reproduce the error using the OpenJDK compiler, without the
+    Type Annotations enhancements.
+    <ol>
+      <li>
+        Obtain a copy of
+        the OpenJDK compiler, using the commands in the <a href="#diffs">diff
+        section</a> of this document.
+      </li>
+      <li>
+        Try your test case using the OpenJDK compiler.
+      </li>
+      <li>
+	If you can reproduce the problem, then search the
+	<a href="http://bugs.sun.com/bugdatabase/index.jsp">bug database</a> (use
+	the &ldquo;Java&rdquo; category).  If the problem is in the bug
+        database, then vote for it.
+        If the problem is not in the bug database, then
+	<a href="http://bugreport.sun.com/bugreport/index.jsp">report your
+	bug to Oracle</a>, using category &ldquo;Java&rdquo;
+	and subcategory &ldquo;compiler&rdquo;.
+      </li>
+    </ol>
   </li>
 </ol>
 
@@ -656,5 +706,5 @@ repository</a>.
  -->
 <!--  LocalWords:  BrowserJavaVersion exe SoyLatte IntelliJ javac's bytecodes
  -->
-<!--  LocalWords:  jdk jre Cygwin mkdir
+<!--  LocalWords:  jdk jre Cygwin mkdir NullnessSubchecker MyFile
  -->
