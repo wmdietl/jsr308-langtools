@@ -28,7 +28,6 @@ package com.sun.tools.javac.code;
 import java.util.Collections;
 
 import com.sun.tools.javac.util.*;
-import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Symbol.*;
 
 import javax.lang.model.type.*;
@@ -89,7 +88,7 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public TypeSymbol tsym;
 
-    public List<Compound> typeAnnotations = List.nil();
+    public List<Attribute.TypeCompound> typeAnnotations = List.nil();
 
     /**
      * The constant value of this type, null if this type does not
@@ -883,7 +882,7 @@ public class Type implements PrimitiveType, Cloneable {
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
-        public List<Compound> receiverTypeAnnotations = List.nil();
+        public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
                           Type restype,

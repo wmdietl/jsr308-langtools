@@ -3066,7 +3066,7 @@ public class Attr extends JCTree.Visitor {
         annotate.laterOnFlush(new Annotator() {
             @Override
             public void enterAnnotation() {
-                List<Attribute.Compound> compounds = fromAnnotations(annotations);
+                List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
                 if (type instanceof MethodType)
                     type.asMethodType().receiverTypeAnnotations = compounds;
                 else
@@ -3075,11 +3075,11 @@ public class Attr extends JCTree.Visitor {
         });
     }
 
-    private List<Attribute.Compound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+    private List<Attribute.TypeCompound> fromAnnotations(List<JCTypeAnnotation> annotations) {
         if (annotations.isEmpty())
             return List.nil();
 
-        ListBuffer<Attribute.Compound> buf = ListBuffer.lb();
+        ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
         for (JCTypeAnnotation anno : annotations) {
             buf.append(anno.attribute_field);
         }

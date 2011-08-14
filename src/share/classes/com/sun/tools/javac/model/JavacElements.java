@@ -99,7 +99,7 @@ public class JavacElements implements Elements {
      * of the given {@code annoType}, to be found in the passed
      * list.
      */
-    public static <A extends Annotation> A getAnnotation(List<Attribute.Compound> annotations,
+    public static <A extends Annotation> A getAnnotation(List<? extends Attribute.Compound> annotations,
             Class<A> annoType) {
         if (!annoType.isAnnotation())
             throw new IllegalArgumentException("Not an annotation type: "

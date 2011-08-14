@@ -617,7 +617,7 @@ public class TypeAnnotations {
     private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
             Type atype = (Type)type.clone();
-            atype.typeAnnotations = List.convert(Compound.class, annotations);
+            atype.typeAnnotations = annotations;
             return atype;
         } else {
             ArrayType arType = (ArrayType)type;
