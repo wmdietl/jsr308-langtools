@@ -1882,8 +1882,8 @@ public class ClassReader implements Completer {
             try {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
-              if (debugJSR308)
-              System.out.println("TA: reading: adding " + newList
+                if (debugJSR308)
+                    System.out.println("TA: reading: adding " + newList
                       + " to symbol " + sym + " in " + log.currentSourceFile());
                 sym.typeAnnotations = ((sym.typeAnnotations == null)
                                         ? newList
