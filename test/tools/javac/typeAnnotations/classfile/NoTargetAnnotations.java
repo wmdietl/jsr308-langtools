@@ -146,7 +146,7 @@ public class NoTargetAnnotations {
     }
 
     File compileTestFile(File f) {
-        int rc = com.sun.tools.javac.Main.compile(new String[] { "-XDTA:writer", "-source", "1.7", "-g", f.getPath() });
+        int rc = com.sun.tools.javac.Main.compile(new String[] { "-XDTA:writer", "-source", "1.8", "-g", f.getPath() });
         if (rc != 0)
             throw new Error("compilation failed. rc=" + rc);
         String path = f.getPath();
