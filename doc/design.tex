@@ -290,7 +290,7 @@ to ``\nt{FormalParameters} \new{\opt{Annotations}}''.  For example:
 \begin{tabbing}
 \qquad \= \kill
 \nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{throws \nt{QualifiedIdentifierList}} \nt{(} \nt{MethodBody} \altor{} \term{;} \nt{)}
+\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{throws \nt{QualifiedIdentifierList}} \nt{(} \nt{Block} \altor{} \term{;} \nt{)}
 \end{tabbing}
 
 
@@ -363,7 +363,9 @@ If an annotation is not meta-annotated with \<@Target> (which would be poor
 style), then the compiler treats the annotation as if it is
 meta-annotated with all of the \code{ElementType} enum constants.
 
-The compiler applies an annotation to every target that is consistent with
+If an annotation appears at a source location where it could be interpreted
+as applying to either a declaration or a type, as in \<@A int x;>, then
+the compiler applies an annotation to every target that is consistent with
 its meta-annotation.  The order of annotations is not used to disambiguate.
 As in Java SE 6, the compiler issues an error if a programmer places an
 annotation in a location not permitted by its Target meta-annotation.  (The
@@ -1223,7 +1225,7 @@ a declaration that combines parameterized and array types.\label{tbl:locations}}
 
 This section
 gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{grammar} of the Java
-language~\cite[ch.~18]{GoslingJSB2005}, based on the conceptually
+language~\cite[ch.~18]{GoslingJSBB2011}, based on the conceptually
 simple summary from Section~\ref{grammar-summary}. 
 Additions are \underline{underlined}.
 % , and deletions \sout{crossed out}.
@@ -1240,30 +1242,45 @@ version attempts to minimize changes to existing grammar productions.
 
 \begin{tabbing}
 \qquad \= \kill
+%% PAGE 591:
+% Only used for throws clause
+\nt{QualifiedIdentifierList}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} } \\
+ \\
+%% PAGE 593:
 \nt{Type}: \\
 \qquad \new{\opt{\nt{Annotations}} \nt{UnannType}} \\
-\\
+ \\
 \new{\nt{UnannType}}: \\
-\qquad            \nt{Identifier} \opt{TypeArguments}\multi{   .   \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
-\qquad            \nt{BasicType} \\
-\\
-\nt{FormalParameterDecls}: \\
-\qquad       \opt{\term{final}} \opt{\nt{Annotations}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
-\\
-\nt{ForVarControl}: \\
-\qquad       \opt{\term{final}} \opt{\nt{Annotations}} \nt{\new{Unann}Type} \nt{Identifier} \nt{ForVarControlRest} \\
-\\
+\qquad            \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+\qquad            \nt{\new{Unann}ReferenceType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+ \\
+\nt{ReferenceType}: \\
+\qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
+ \\
+\new{\nt{UnannReferenceType}}: \\
+\qquad            \nt{Identifier} \opt{TypeArguments}\multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+ \\
+%% PAGE 594:
+\nt{TypeParameter}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+ \\
+%% PAGE 596:
 \nt{MethodOrFieldDecl}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
-\\
-\nt{InterfaceMethodOrFieldDecl}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
-\\
+ \\
 \nt{MethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \alt{ \nt{MethodBody} \altor{} \term{;} } \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \alt{ \nt{Block} \altor{} \term{;} } \\
  \\
 \nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} ( \nt{MethodBody} \altor{}   \term{;}  ) \\
+\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} ( \nt{Block} \altor{}   \term{;}  ) \\
+ \\
+\nt{ConstructorDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{Block} \\
+ \\
+%% PAGE 597:
+\nt{InterfaceMethodOrFieldDecl}: \\
+\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
  \\
 \nt{InterfaceMethodDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
@@ -1271,25 +1288,14 @@ version attempts to minimize changes to existing grammar productions.
 \nt{VoidInterfaceMethodDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
  \\
-\nt{ConstructorDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{MethodBody} \\
- \\
-% Only used for throws clause
-\nt{QualifiedIdentifierList}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} } \\
-\\
-\nt{Primary}: \\
-\qquad        ... \\
-\qquad        \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
- \\
-\nt{IdentifierSuffix}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \term{[} \alt{ \term{]} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \altor{} \nt{Expression} \term{]}} \\
-\qquad        ... \\
- \\
-\nt{VariableDeclaratorRest}: \\
+\nt{ConstantDeclaratorRest}: \\
 \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
  \\
-\nt{ConstantDeclaratorRest}: \\
+%% PAGE 598:
+\nt{FormalParameterDecls}: \\
+\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
+ \\
+\nt{VariableDeclaratorRest}: \\
 \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
  \\
 \nt{VariableDeclaratorId}: \\
@@ -1299,8 +1305,24 @@ version attempts to minimize changes to existing grammar productions.
 \qquad       \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
 \qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId} \\
  \\
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+%% PAGE 600:
+\nt{Resource}: \\
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression}
+\\
+%% PAGE 601:
+\nt{ForVarControl}: \\
+\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
+\\
+%% PAGE 604:
+\nt{Primary}: \\
+\qquad        ... \\
+\qquad        \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
+ \\
+%% PAGE 605:
+%% IdentifierSuffix rule should be updated when JLS typo is fixed
+\nt{IdentifierSuffix}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \term{[} \alt{ \term{]} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \altor{} \nt{Expression} \term{]}} \\
+\qquad        ... \\
 \end{tabbing}
 
 
@@ -2453,6 +2475,12 @@ meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
   A type annotation may not appear before a void method (a method with no
   return type).  This also follows from the fact that \code{void} is not a
   type.
+\item
+  It is legal to write \<@A void foo() { ... }>, where \<@A> is
+  meta-annotated with \<@Target({ ElementType.TYPE\_USE, ElementType.METHOD })>
+   or \<@A> has no \<@Target> meta-annotation; in ethier case, the \<@A>
+  annotation is applied only to the method declaration.  The code construct
+  would have been illegal if \<@A> were a type annotation.
 \item
   A type annotation may not appear on a package (a package declaration does
   not contain a use of a type).
@@ -4376,7 +4404,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  myObject GuardedBy accessLock Goetz JavaCOP signedness Nonnull
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
 % LocalWords:  FormalParameterDecls ForVarControlRest FormalParameterDeclsRest
-% LocalWords:  FormalParameters VoidMethodDeclaratorRest MethodBody BracketsOpt
+% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt
 % LocalWords:  QualifiedIdentifierList MethodDeclaratorRest IdentifierSuffix
 % LocalWords:  InterfaceMethodDeclaratorRest VoidInterfaceMethodDeclaratorRest
 % LocalWords:  ConstructorDeclaratorRest VariableDeclaratorRest nonnullelements
