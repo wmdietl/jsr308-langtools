@@ -16,8 +16,8 @@
 %HEVEA \\ \today
 }
 
-% At least 80% of every float page must be taken up by
-% floats; there will be no page with more than 20% white space.
+% At least 95% of every float page must be taken up by
+% floats; there will be no page with more than 5% white space.
 \def\topfraction{.95}
 \def\dbltopfraction{\topfraction}
 \def\floatpagefraction{\topfraction}     % default .5
@@ -2913,6 +2913,13 @@ detail of our tools.
 
 \section{Other possible extensions to Java annotations\label{other-annotations}}
 
+%% Oracle folks suggest:
+% In appendix D, for each proposal, state its impact on
+%  * grammar
+%  * class file
+%  * reflection
+% If there is only impact on the grammar, it can be considered a desugaring.
+
 The Type Annotations (JSR 308) specification may be extended in the future,
 both to improve the specification and also to add new material.
 Any improvement to Java's annotation system is within bounds.  The JSR is
@@ -3070,17 +3077,7 @@ best choice), or succeed if one \code{@A} annotation is present, or succeed
 if an \code{@AContainer} annotation with a length-1 array is present, or
 return the first \code{@A} annotation?
 
-One problem with this proposal is that it loses the ordering of
-differently-named annotations (even if the ordering of same-named
-annotations is preserved within the container).  For example, it cannot
-distinguish these
-declarations:
-\begin{Verbatim}
-  @A(1) @B @A(2) Object x;
-  @A(1) @A(2) @B Object x;
-\end{Verbatim}
-
-Another problem is that it requires defining an \code{@AContainer}
+A problem with this proposal is that it requires defining an \code{@AContainer}
 annotation for each annotation \code{@A}, or else annotation \code{@A}
 cannot be duplicated.  It would be better not to burden programmers with
 writing and maintaining this boilerplate code.
@@ -3090,6 +3087,16 @@ extensions to annotations, such as inheritance among annotations
 (Section~\ref{inheritance-among-annotations}), more difficult and clumsy to
 implement and use.  JSR 308 should aim to preserve, not to preclude, future
 avenues of extension (see Section~\ref{other-annotations}).
+
+A final, rather minor, problem is that this proposal loses the ordering of
+differently-named annotations (even if the ordering of same-named
+annotations is preserved within the container).  For example, it cannot
+distinguish these
+declarations:
+\begin{Verbatim}
+  @A(1) @B @A(2) Object x;
+  @A(1) @A(2) @B Object x;
+\end{Verbatim}
 
 
 %% More details from Joe Darcy, but I don't see that they add much to the
@@ -3452,6 +3459,42 @@ annotating complete constructs (such as a full statement).
 
 \subsubsection{Inheritance among annotations (subclassing/subtyping annotations)\label{inheritance-among-annotations}}
 
+% Multiple inheritance (i.e., from interfaces) when subtyping annotations:
+% 
+% According to the Java Language Specification section 9.4.1:
+% 
+% > It is possible for an interface to inherit several methods with  
+% > override-equivalent signatures (§8.4.2). Such a situation does not  
+% > in itself cause a compile-time error. The interface is considered to  
+% > inherit all the methods. However, one of the inherited methods must  
+% > must be return type substitutable for any other inherited method;  
+% > otherwise, a compile-time error occurs (The throws clauses do not  
+% > cause errors in this case.)
+% 
+% Therefore, we would make a similar rule regarding the properties/ 
+% methods of annotation types.  Since all methods on annotation types  
+% take no arguments, their signatures are trivially override- 
+% equivalent.  Therefore, you can combine inherit multiple properties  
+% with the same name so long as one of them has a "most specific" return  
+% type that is substitutable for all the others.  I could not find the  
+% precise definition of when a type is "substitutable" for another,  
+% perhaps it refers to the return type substitution of 8.4.5?  I guess  
+% that here I would simply to reproduce the behavior of interfaces,  
+% which I believe must also resolve the return type of a multiply- 
+% inherited method in such a scenario.
+% 
+% However, there is one additional wrinkle that occurs with annotations  
+% that do not occur with interfaces: default values.  The simplest rule  
+% here would be to say that at most one inherited method can supply a  
+% default value.  Alternatively, any number can supply default values  
+% but they must all have the same type and value.
+% 
+% The same rule would then apply to "overriding" members declared in sub- 
+% annotation-types: in other words, you can redeclare a property from a  
+% supertype, but the return type and default value must be compatible as  
+% described above.
+
+
 % \label{subclassing-annotations}\label{subtyping-annotations}
 
 In Java SE 6, annotations cannot subclass one another, and an annotation is not allowed
@@ -3602,6 +3645,61 @@ be extended to include interfaces (or perhaps only interfaces that extend
 
 
 \subsubsection{Potentially recursive annotations (annotations as members of annotations)\label{annotations-as-members}\label{annotations-as-arguments}\label{recursive-annotations}}
+
+% Annotations as members of annotations
+% 
+% There is no need to change the classfile format.  Here is an email exchange
+% where Joe Darcy says that a change is necessary, and Jonathan Aldrich
+% explains that it is not.
+% 
+% Joe Darcy says:
+% 
+% One implication of being about to 
+% return an arbitrary annotation is that the binary encoding of the 
+% annotation data in the class files would need to change.  The actual 
+% annotation objects returned at runtime are dynamic proxies implementing 
+% the annotation as an interface.  For example, in something like
+% 
+% @Constraint(
+%  trigger={"Child(ddl, this)", "Type(ddl, DropDownListCtrl.class)", 
+% "Equals(select, true)"},
+%  post={"!Selected(ddl)"}
+% )
+% 
+% the fact that an array of strings needs to be returned for "trigger" is 
+% gleaned from class definition of the Constraint annotation type.  If 
+% that reasoning path is changed, this type information needs to be stored 
+% somewhere else.  Such a change to the annotation encoding implies 
+% downstream tools that consume classfiles and manipulate annotations need 
+% to be updated too, etc.  So this change would actually be much more 
+% pervasive throughout the Java ecosystem than, say, a repeating 
+% annotation proposal which just desugars to a wrapper annotation with an 
+% array-valued member, as has been proposed to the list before.  (As an 
+% aside, changing the API to basically require instanceof checks is by 
+% default a bit suspect.)
+% 
+% Jonathan Aldrich responds:
+% 
+% Joe raised a great question 
+% about whether annotations taking other annotations as parameters would 
+% require changing the class file format as well.  As far as I can tell, 
+% from the specification of the Java 5 classfile format, it would not:
+% 
+% http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf
+% 
+% Specifically, annotations are stored in an "annotation" structure in the 
+% classfile.  This structure contains a type index (the type of the 
+% annotation) and a list of element_value_pairs.  The value in the 
+% element_value_pair is an element_value, which is a tagged union, and if 
+% the tag is "@" for annotation, then the union stores an "annotation" 
+% structure.  That's the annotation structure above--which in fact 
+% contains a type index, that in the case of "annotations taking arbitrary 
+% annotations" tells us what type the nested annotation is.  Ironically, 
+% in the current classfile format, this is wasted space, as it could be 
+% inferred from the surrounding annotation type, but it nicely supports 
+% this extension.  Thus, "annotations containing arbitrary annotations" 
+% need change neither the syntax of the language nor the classfile format. 
+
 
 In Java, an annotation can have a parameter (equivalently, a member) that is an
 annotation (JLS
