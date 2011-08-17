@@ -153,6 +153,11 @@ effort of writing type annotations for it may not be justified.
 
 <h3 id="clutter">Will my code become cluttered with type annotations?</h3>
 
+<!--
+This FAQ also appears in the Checker Framework FAQ.
+When I update one, also update the other.
+-->
+
 <p>
 As with any language feature, it is possible to write ugly code that
 over-uses annotations.  However, in normal use, very few annotations need
@@ -176,14 +181,23 @@ type-annotated code:
   </li>
 </ul>
 <p>
-Furthermore, these numbers are for annotating existing code.  New code that
+These numbers are for annotating existing code.  New code that
 is written with the type annotation system in mind is cleaner and more
 correct, so it requires even fewer annotations.
 </p>
 
 <p>
-In other words, annotations do not clutter code, and they are used much
-less frequently than generic types, which Java programmers find acceptable.
+Each annotation that a programmer writes replaces a sentence or phrase of
+English descriptive text that would otherwise have been written in the
+Javadoc.  So, use of annotations actually reduces the overall size of the
+documentation, at the same time as making it less ambiguous and
+machine-processable.
+</p>
+
+<p>
+In summary:  annotations do not clutter code; they are used much
+less frequently than generic types, which Java programmers find acceptable;
+and they reduce the overall volume of documentation that a codebase needs.
 </p>
 
 
@@ -535,7 +549,7 @@ JCP codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: June 15, 2011.
+Last updated: August 16, 2011.
 </p>
 
 <p>
@@ -558,5 +572,5 @@ End:
  -->
 <!--  LocalWords:  codename Nonnull IntelliJ EAP TypeQualifier SubtypeOf JLint
  -->
-<!--  LocalWords:  FindBugs PMD toolset standalone JSRs EDR
+<!--  LocalWords:  FindBugs PMD toolset standalone JSRs EDR JCP README
  -->
