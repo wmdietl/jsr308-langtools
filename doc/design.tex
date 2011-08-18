@@ -534,6 +534,15 @@ exception: rather than an array of \code{annotation} elements,
 \extendedannotation elements, which are described in
 Section~\ref{class-file:ext}.
 
+\begin{Verbatim}
+Runtime[In]VisibleTypeAnnotations_attribute {
+   u2 attribute_name_index;  // "Runtime[In]VisibleTypeAnnotation"
+   u2 attribute_length;
+   u2 num_annotations;
+   extended_annotation annotations[num_annotations];
+}
+\end{Verbatim}
+
 % There's no point in separating the type annotations into two attributes,
 % one for class/field/method and one for formal parameters, so we don't do
 % so.
@@ -850,8 +859,8 @@ These fields are similar to those of the optional
 
 Storing local variable annotations in the class file raises certain
 challenges.  For example, live ranges are not isomorphic to local
-variables.  Further, a local variable with no live range may not appear in
-the class file (but it is also irrelevant to the program).
+variables.  Note that a local variable with no live range might not appear in
+the class file; that is OK, becauuse it is irrelevant to the program.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{localvar\_target} appears in the attributes table of a
@@ -1141,7 +1150,7 @@ The \code{location\_length} field is the length of the \code{location}
 field, which is also the depth of the annotation in the tree.
 
 A parameterized or array type can be viewed as a tree in the following way.  For a parameterized
-type, the children of the raw type are the type arguments.  For an array
+type, the children of the parameterized (``raw'') type are the type arguments.  For an array
 type, the children are the types of elements at each level; each of these
 is itself an array type (of lesser dimensions than the main type), except
 for the last one which is a non-array type.  For a 1-dimensional array,
