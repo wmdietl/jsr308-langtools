@@ -230,7 +230,7 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \begin{tabbing}
 \qquad \= \kill
     \nt{Type}: \\
-\qquad            \new{\opt{\nt{Annotations}}} Identifier \opt{TypeArguments} \multi{. \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\term{[]}} \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}} \multi{. \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\term{[]}} \\
 \qquad            \new{\opt{\nt{Annotations}}} \nt{BasicType}
 \end{tabbing}
 
@@ -267,7 +267,7 @@ For example:
 \begin{tabbing}
 \qquad \= \kill
     \nt{Type}: \\
-\qquad            \opt{\nt{Annotations}} Identifier \opt{TypeArguments}\multi{   .   \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+\qquad            \opt{\nt{Annotations}} \nt{Identifier} \opt{\nt{TypeArguments}}\multi{   .   \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
 \qquad            \opt{\nt{Annotations}} \nt{BasicType}
 \end{tabbing}
 
@@ -290,7 +290,7 @@ to ``\nt{FormalParameters} \new{\opt{Annotations}}''.  For example:
 \begin{tabbing}
 \qquad \= \kill
 \nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{throws \nt{QualifiedIdentifierList}} \nt{(} \nt{Block} \altor{} \term{;} \nt{)}
+\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{(} \nt{Block} \altor{} \term{;} \nt{)}
 \end{tabbing}
 
 
@@ -301,7 +301,7 @@ declaration.
 \begin{tabbing}
 \qquad \= \kill
 \nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
 \end{tabbing}
 
 Annotations may also appear on the wildcard in any type argument.
@@ -310,7 +310,7 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 \begin{tabbing}
 \qquad \= \kill
 \nt{TypeArgument}: \\
-\qquad            \new{\opt{\nt{Annotations}}} ?\ \opt{\nt{(} extends \altor{} super \nt{)} \nt{Type}}
+\qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
 \end{tabbing}
 
 
@@ -1259,11 +1259,11 @@ version attempts to minimize changes to existing grammar productions.
 \qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
  \\
 \new{\nt{UnannReferenceType}}: \\
-\qquad            \nt{Identifier} \opt{TypeArguments}\multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \\
+\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \\
  \\
 %% PAGE 594:
 \nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{extends \nt{Bound}}
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
  \\
 %% PAGE 596:
 \nt{MethodOrFieldDecl}: \\
