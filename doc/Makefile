@@ -17,15 +17,18 @@ export PERL5LIB := ${PERL5LIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_per
 # There is no use of "cp -p" in this Makefile, to avoid problems with
 # browser caches.
 
-local: design.pdf design.html type-quals.pdf type-quals.html validate
+local: annotation-extensions.pdf annotation-extensions.html design.pdf design.html type-quals.pdf type-quals.html validate
 
 clean:
-	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png figures/type-tree.eps figures/type-tree.pdf type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
+	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.dvi annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
+	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png
+	rm -f figures/type-tree.eps figures/type-tree.pdf
+	rm -f type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
 
 figures-all:
 	${MAKE} -C figures all
 
-html: design.html type-quals.html
+html: annotation-extensions.html design.html type-quals.html
 
 # Check HTML
 validate:
@@ -73,6 +76,38 @@ checklinks: ${PLUME_BIN}
 
 
 ###########################################################################
+
+annotation-extensions.dvi: annotation-extensions.tex
+	$(MAKE) -C figures
+	latex $<
+	bibtex $(basename $<)
+	perl -pi -e 's/%\n//' annotation-extensions.bbl
+	latex $<
+
+annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi
+	pdflatex $<
+	bibtex $(basename $<)
+	perl -pi -e 's/%\n//' annotation-extensions.bbl
+	pdflatex $<
+
+annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi annotation-extensions.bbl
+	hevea -fix -exec xxdate.exe urlhref.hva annotation-extensions.tex
+	mv annotation-extensions.html annotation-extensions.html-with-htoc
+	hevea-retarget-crossrefs < annotation-extensions.html-with-htoc > annotation-extensions.html
+	rm -rf annotation-extensions.html-with-htoc
+#	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' annotation-extensions.html
+#	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' annotation-extensions.html
+#	html-update-toc annotation-extensions.html
+
+${jsr308_spec}/java-annotation-extensions.pdf: java-annotaton-extensions.pdf ${jsr308_spec} ${PLUME_BIN}
+	\cp -f $< $@
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+
+${jsr308_spec}/java-annotation-extensions.html: java-annotation-extensions.html ${jsr308_spec} ${PLUME_BIN}
+	\cp -f $< $@
+# We don't know which of the two files will be created
+	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+
 
 design.dvi: design.tex
 	$(MAKE) -C figures

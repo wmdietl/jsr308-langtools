@@ -43,16 +43,10 @@ Lilian Burdy, Marieke Huisman, and Mariela Pavlova.
 \newblock In {\em Fundamental Approaches to Software Engineering}, pages
   215--229, Braga, Portugal, March~27--30, 2007.
 
-\bibitem[Blo04a]{JSR175}
+\bibitem[Blo04]{JSR175}
 Joshua Bloch.
 \newblock {JSR} 175: A metadata facility for the {Java} programming language.
 \newblock \url{http://jcp.org/en/jsr/detail?id=175}, September~30, 2004.
-
-\bibitem[Blo04b]{JSR175-PFD2}
-Joshua Bloch.
-\newblock {JSR175}: A program annotation facility for the {Java} programming
-  language: Proposed final draft 2.
-\newblock \url{http://jcp.org/en/jsr/detail?id=175}, August~12, 2004.
 
 \bibitem[BLR02]{BoyapatiLR2002}
 Chandrasekhar Boyapati, Robert Lee, and Martin Rinard.
@@ -227,7 +221,7 @@ David Greenfieldboyce and Jeffrey~S. Foster.
 James Gosling, Bill Joy, Guy Steele, Gilad Bracha, and Alex Buckley.
 \newblock {\em The Java Language Specification}.
 \newblock \url{http://download.oracle.com/javase/7/specs/jls/JLS-JavaSE7.pdf},
-  java se 7 edition, 2011.
+  {Java SE 7} edition, 2011.
 \newblock ``2011-07-15 Full'' version.
 
 \bibitem[GJSB00]{GoslingJSB2000}
@@ -299,7 +293,8 @@ Tim Lindholm and Frank Yellin.
 Tim Lindholm and Frank Yellin.
 \newblock The \texttt{class} file format.
 \newblock
-  \url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}, December 2007.
+  \url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java%
+5.pdf}, December 2007.
 \newblock Revision to chapter 4 of \cite{LindholmY99} for JDK 1.5.
 
 \bibitem[Mor06]{JSR250}
