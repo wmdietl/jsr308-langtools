@@ -4131,23 +4131,7 @@ compiler-specific APIs.  This is how the Checker Framework
 (\myurl{http://types.cs.washington.edu/checker-framework/}) works.
 
 
-\section{Logistical matters\label{logistics}}
-
-JSR 308 (``Type annotations'') should be included under the Java SE 7
-umbrella JSR (which lists the JSRs that are part of the Java SE 7 release).
-However, it should be a separate JSR because it needs a separate expert group.
-The expert group will have overlap with any others dealing with other
-added language features that might be annotatable (such as method-reference
-types or closures), to check impact.
-
-The specification, reference implementation, and tests developed by the
-JSR 308 community are freely available, with no restrictions on use.  As of
-build M4 (see \url{http://openjdk.java.net/projects/jdk7/milestones/}), the
-reference implementation has been incorporated into Oracle's OpenJDK Java
-implementation.  Oracle will integrate the specification into the JLS (without
-any conceptual changes or new information), will write additional tests,
-etc.  We do not have control over the license terms that Oracle places on its
-changes.
+\section{Annotations in comments\label{annotations-in-comments}}
 
 To ease the transition from standard Java SE 6 code to code with the extended
 annotations, the reference implementation recognizes the extended
@@ -4168,94 +4152,6 @@ Splint~\cite{Evans96}, ESC/Java~\cite{FlanaganLLNSS02}, and
 JML~\cite{LeavensBR2006:JML} tools (that is, not
 with the goal of backward compatibility).
 % Javadoc has /**@ comments.
-
-
-\subsection{Edits to existing standards documents\label{edits-to-standards}}
-
-Edits to the Java Language Specification (JLS):
-      We need a document, complementary to the design document, that lists
-      every edit that is required in the JLS.
-      A preliminary step would be a list of all the locations that must be
-      edited (for instance, by searching the entire JLS for uses of
-      ``annotation'', but the list will be a superset of the list of
-      locations that were edited for
-      JSR 175).
-      The most important locations are the following.
-\begin{itemize}
-\item
-Changes to sections 9.6 and 9.7
-\item
-Merge the BNF description of the Java syntax changes
-(Sections~\ref{grammar-summary} and~\ref{grammar-details})
-into \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{JLS
-          chapter 18: Syntax}.
-\end{itemize}
-
-Edits to the Java Virtual Machine Specification (JVMS)~\cite{LindholmY99,LindholmY99:CFF5}:
-      We need a document, complementary to the design document, that lists
-      every edit that is required in the JVMS\@.
-      The most important of these is the following:
-\begin{itemize}
-\item
-        Sections 4.8.15-18 define the \RuntimeInOrVisibleAnnotationsOrParameterAnnotations
-        attributes.  (See
-        \ahrefurl{\url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}}
-        for the JDK 1.5 revisions to chapter 4, ``The class file Format''.)
-        Similar definitions are required for \RuntimeInOrVisibleTypeAnnotations.
-\end{itemize}
-
-
-
-\subsection{Testing (TCK, Technology Compatibility Kit)\label{testing}}
-
-JSR 308 will ship with a test suite (known as a TCK, or Technology
-Compatibility Kit).
-
-Each tool that needs to be tested appears in Section~\ref{mods};
-the TCK will include tests for each of them.
-
-For each modified tool, we will test backward compatibility by passing all
-of its existing tests.  (We may need to modify a few of them, for instance
-those that depend on specific bytecodes that are created by the compiler.)
-
-We will test most other functionality by creating a set of Java programs
-that include annotations in every possible location.  For instance, this
-can be used to test all aspects of the compiler (parsing, code generation,
-\code{-Xprint}).
-
-
-We will provide multiple annotation processors (including at least one for
-checking \code{@NonNull} and one for checking \code{@Interned}) that
-utilize the new annotations, along with a test suite for each one.  Each
-annotation processor's test suite consists of annotated code, along with
-expected output from the given annotation processor.  Since the annotation
-processors utilize all aspects of JSR 308, this serves as an additional
-end-to-end test of the JSR 308 implementation.  As a side benefit, the
-annotation processors will be useful in their own right, will thereby
-illustrate the utility of JSR 308, and will serve as examples for people
-who wish to create their own type-checking plug-ins.
-
-
-
-\subsection{Process\label{process}}
-
-JSR 308 follows an unusually  open and transparent process.  Any interested
-party may participate, decisions are made by consensus
-to the greatest extent possible, and discussions
-are publicly archived.  The Java Community Process requires that an
-expert group formally approve the JSR at
-% <a href="http://jcp.org/en/procedures/jcp2">
-each stage.  The expert group members will only decide issues on which the
-group cannot obtain consensus.
-
-When posting, please act
-professionally and courteously.  For example, your arguments should be
-technical, specific, and based on logic; do not rely on your status or past
-accomplishments to convince others, and give specific examples rather
-than vague descriptions.  As another example, it is perfectly acceptable to
-criticize a technical proposal, but do not make personal attacks.
-Obviously, you should read the specification
-and, preferably, try the implementation before posting to the mailing list.
 
 
 \section{Related work\label{related-work}}
