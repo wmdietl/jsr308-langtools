@@ -808,6 +808,24 @@ underlying Java type system (which sees a cast from \code{String} to
 creates the target expression instead.  This approach permits code
 generation for existing compilers to be unaffected.
 
+If the compiler eliminates an annotated cast, it is required to retain the
+annotations on the cast in the class file.  When a cast is removed, the
+compiler may need to adjust (the locations of) the annotations, to account
+for the relationship between the expression's type and the casted-to type.
+Consider:
+
+\begin{Verbatim}
+  class C<S, T> { ... }
+  class D<A, B> extends C<B, A> { ... }
+  ...
+  ... (C<@A1 X, @A2 Y>) myD ...
+\end{Verbatim}
+
+\noindent
+The compiler may leave out the upcast, but in that case it must record that
+@A1 is attached to the second type parameter of C, even though it was
+originally attached to the first type parameter of D.
+
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{offset\_target} appears in the attributes table of a
 \code{method\_info} structure.
