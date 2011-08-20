@@ -187,8 +187,11 @@ for receiver types and for constructor results.
   named \code{this}, and such a parameter is only permitted on an instance
   method, or on a static method or constructor of an inner class.  The type
   of the \code{this} parameter must be the same as the class that contains
-  the method, may include type arguments, and for an inner type can be
-  written as (for example) either \code{Inner} or as \code{Outer.Inner}.
+  the method and may include type arguments.  In a method in an inner type,
+  the receiver type can be
+  written as (for example) either \code{Inner} or as \code{Outer.Inner},
+  and in the latter case annotations on both parts are possible, as in
+  \code{@ReadOnly Outer . @Mutable Inner}.
 
   The optional \code{this} parameter has no effect on execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
