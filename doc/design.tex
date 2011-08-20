@@ -170,6 +170,9 @@ for receiver types and for constructor results.
 \item
   A type annotation appears before the type, as in \code{@NonNull String}.
 \item
+  An annotation on a type parameter declaration appears before the declared
+  name or wildcard, as in \code{class MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.
+\item
   The annotation on a given array level
   prefixes the brackets that introduce that level.  To declare
   a non-empty array of English-language strings, write \code{@English String
@@ -178,12 +181,20 @@ for receiver types and for constructor results.
   and may also be prefixed by an annotation.
 \item
   An annotation on the type of a method receiver (\code{this}) appears
-  just after the parameter list and before any \code{throws} clause.
+  on the type of an optional first formal parameter named \code{this}.
   (Each non-static method has an implicit parameter, \code{this}, which is
-  called the \emph{receiver}.)
-\item
-  An annotation on a type parameter declaration appears before the declared
-  name or wildcard.
+  called the \emph{receiver}.)  Only the first formal parameter may be
+  named \code{this}, and such a parameter is only permitted on an instance
+  method, or on a static method or constructor of an inner class.  The type
+  of the \code{this} parameter must be the same as the class that contains
+  the method, may include type arguments, and for an inner type can be
+  written as (for example) either \code{Inner} or as \code{Outer.Inner}.
+
+  The optional \code{this} parameter has no effect on execution --- it only
+  serves as a place to write annotations on the receiver.  The compiler
+  generates the same bytecodes, and reflection returns the same results
+  regarding number of method parameters, whether or not the optional
+  \code{this} parameter is present.
 \end{enumerate}
 
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
@@ -251,6 +262,26 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 
 
 \item
+Annotations may appear on the type parameter declaration in a class or method
+declaration.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeParameter}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
+\end{tabbing}
+
+Annotations may also appear on the wildcard in any type argument.
+A wildcard is the declaration of an anonymous (unnamed) type parameter.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeArgument}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
+\end{tabbing}
+
+
+\item
 To permit annotations on levels of an array (in declarations, not
 constructors), change ``\multi{\term{[]}}''  to
 ``\multi{\new{\opt{\nt{Annotations}}} \term{[]}}''.
@@ -276,35 +307,17 @@ Annotations may also appear on varargs (\code{...}):
 
 
 \item
-Annotations may appear on the receiver type by changing uses of
-``\nt{FormalParameters}'' (in
-all 5 places it appears in the grammar)
-to ``\nt{FormalParameters} \new{\opt{Annotations}}''.  For example:
+Annotations may appear on the receiver type by changing the definition of 
+``\nt{FormalParameters}'':
 
 \begin{tabbing}
 \qquad \= \kill
-\nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{(} \nt{Block} \altor{} \term{;} \nt{)}
-\end{tabbing}
-
-
-\item
-Annotations may appear on the type parameter declaration in a class or method
-declaration.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
-\end{tabbing}
-
-Annotations may also appear on the wildcard in any type argument.
-A wildcard is the declaration of an anonymous (unnamed) type parameter.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeArgument}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
+\nt{FormalParameters}: \\
+\qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
+\\
+\new{\nt{FormalParameterOrReceiverDecls}}: \\
+\qquad        \multi{\nt{VariableModifier}} \nt{UnannType} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{FormalParameterDecls} \\
 \end{tabbing}
 
 
@@ -1280,35 +1293,33 @@ version attempts to minimize changes to existing grammar productions.
  \\
 %% PAGE 594:
 \nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}} \\
  \\
 %% PAGE 596:
 \nt{MethodOrFieldDecl}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
  \\
 \nt{MethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \alt{ \nt{Block} \altor{} \term{;} } \\
- \\
-\nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} ( \nt{Block} \altor{}   \term{;}  ) \\
- \\
-\nt{ConstructorDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \nt{Block} \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \alt{ \nt{Block} \altor{} \term{;} } \\
  \\
 %% PAGE 597:
 \nt{InterfaceMethodOrFieldDecl}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
  \\
 \nt{InterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
- \\
-\nt{VoidInterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \new{\opt{\nt{Annotations}}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
  \\
 \nt{ConstantDeclaratorRest}: \\
 \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
  \\
 %% PAGE 598:
+\nt{FormalParameters}: \\
+\qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
+\\
+\new{\nt{FormalParameterOrReceiverDecls}}: \\
+\qquad        \multi{\nt{VariableModifier}} \nt{UnannType} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{FormalParameterDecls} \\
+\\
 \nt{FormalParameterDecls}: \\
 \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
  \\
@@ -1720,13 +1731,8 @@ these locations.
 \item for method receivers:
 \preverbnegspace
 \begin{Verbatim}
-  public String toString() @Readonly { ... }
-  public void write() @Writable throws IOException { ... }
+  public String toString(@Readonly MyClass this) { ... }
 \end{Verbatim}
-
-\preverbnegspace
-TO DO:  Discuss how to express constraints on the generic
-parameters of the receiver.
 
 \item for constructor declaration return types:
 
@@ -1980,18 +1986,38 @@ annotation on the receiver is a contract regarding what the method may
 For example, consider the following method:
 
 \begin{Verbatim}
-package javax.xml.bind;
-class Marshaller {
-  void marshal(@Readonly Object jaxbElement,
-               @Mutable Writer writer) @Readonly {
-    ...
+  package javax.xml.bind;
+  class Marshaller {
+    void marshal(@Readonly Marshaller this,
+                 @Readonly Object jaxbElement,
+                 @Mutable Writer writer) {
+      ...
+    }
   }
-}
 \end{Verbatim}
 
 \noindent
 The annotations indicate that \code{marshal} modifies its second parameter
 but does not modify its first parameter nor its receiver.
+
+The syntax also permits expressing constraints on the
+generic parameters of the receiver.  Here are some examples:
+
+\begin{Verbatim}
+  class Collection<E> {
+    // The elements of the result have the same annotation as the elements
+    // of the receiver.  (In fact, they are the same elements.)
+    public @PolyNull Object[] toArray(Collection<@PolyNull E> this) { ... }
+  }
+  interface List<T> {
+    // The size() method changes neither the receiver nor any of the elements.
+    public int size() @Readonly List<@Readonly T> { ... }
+  }
+  class MyMap<T,U> {
+    // The map's values must be non-null, but the keys may be arbitrary.
+    public void requiresNonNullValues() MyMap<T, @NonNull U> { ... }
+  }
+\end{Verbatim}
 
 A receiver annotation is different than a class annotation, a method
 annotation, or a return value annotation:
@@ -2022,12 +2048,15 @@ annotation, or a return value annotation:
 
 \noindent
 Since a receiver annotation is distinct from other
-annotations, new syntax is required for the receiver annotation.  The syntax
-is adopted from C++, just as the overall syntax of Java was.
-This syntax is cleaner than creating a parallel annotation, such as
-\code{@ReadonlyReceiver}, for each type annotation, and is also cleaner
-than changing the definition of annotations to permit writing the similar
-\code{@Receiver(@Readonly)}.
+annotations, new syntax is required for the receiver annotation.
+
+%% This is about the C++ receiver syntax, which Java used to use.
+% The syntax
+% is adopted from C++, just as the overall syntax of Java was.
+% This syntax is cleaner than creating a parallel annotation, such as
+% \code{@ReadonlyReceiver}, for each type annotation, and is also cleaner
+% than changing the definition of annotations to permit writing the similar
+% \code{@Receiver(@Readonly)}.
 
 % In Joe Darcy's words, this is a syntactic problem, so a syntactic
 % solution like a new location for receiver annotations is cleaner than a
@@ -2557,13 +2586,6 @@ target that is consistent with its meta-annotation (see
 Section~\ref{target-meta-annotation}).
 In practice, programmers
 have no difficulty in understanding where a given annotation applies.
-
-
-% Alternative syntaxes for receiver annotations:
-%  new syntactic location <-- our choice
-%  @ReceiverNonNull      <-- it's ugly to duplicate every annotation definition
-%  @ @NonNull Receiver   <-- this is legal (!), but ugly & maybe shouldn't be legal
-%  @Receiver(@NonNull)   <-- this requires arbitrary annotations as arguments to annotations
 
 
 
