@@ -359,7 +359,7 @@ meta-annotated with all of the \code{ElementType} enum constants.
 
 If an annotation appears at a source location where it could be interpreted
 as applying to either a declaration or a type, as in \<@A int x;>, then
-the compiler applies an annotation to every target that is consistent with
+the compiler applies the annotation to every target that is consistent with
 its meta-annotation.  The order of annotations is not used to disambiguate.
 As in Java SE 7, the compiler issues an error if a programmer places an
 annotation in a location not permitted by its Target meta-annotation.  (The
@@ -760,7 +760,7 @@ type arguments and arrays.
 
 
 
-\subsubsection{Typecasts, type tests, object creation, and class literals\label{class-file:ext:ri:typecast}}
+\subsubsection{Typecasts, type tests, and object creation\label{class-file:ext:ri:typecast}}
 
 When the annotation's target is a typecast, an \code{instanceof}
 expression, a \code{new} expression, or a class literal expression,
@@ -857,7 +857,8 @@ permitted to break a single variable into multiple live ranges with different
 local variable indices.
 The \code{start\_pc} and \code{length} fields specify the variable's
 live range in the bytecodes of the local variable's containing method
-(from offset \code{start\_pc} to offset \code{start\_pc + length}).  The
+(from offset \code{start\_pc}, inclusive, to offset \code{start\_pc +
+  length}, exclusive).  The
 \code{index} field stores the local variable's index in that method.
 These fields are similar to those of the optional
 \code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmY99:CFF5}.
@@ -1155,7 +1156,7 @@ The \code{location\_length} field is the length of the \code{location}
 field, which is also the depth of the annotation in the tree.
 
 A parameterized or array type can be viewed as a tree in the following way.  For a parameterized
-type, the children of the parameterized (``raw'') type are the type arguments.  For an array
+type, the children of the parameterized type are the type arguments.  For an array
 type, the children are the types of elements at each level; each of these
 is itself an array type (of lesser dimensions than the main type), except
 for the last one which is a non-array type.  For a 1-dimensional array,
