@@ -86,7 +86,7 @@ sample annotation processors.
 \section{Introduction\label{intro}}
 
 JSR 308 extends Java's annotation system~\cite{JSR175} so that
-annotations may appear on nearly any use of a type.
+annotations may appear on any use of a type.
 (By contrast, Java~SE~7 permits annotations only on
 declarations; JSR 308 is
 backward-compatible and continues to permit those annotations.)
@@ -158,8 +158,11 @@ see \myurl{http://types.cs.washington.edu/jsr308/jsr308-faq.html}.
 
 In Java SE 7, annotations can be written only on method parameters
 and the declarations of packages, classes, methods, fields, and local variables.
-JSR 308 extends Java to allow annotations on nearly any use of a type, and
-on type parameter declarations.
+JSR 308 extends Java to allow annotations on any use of a type, and
+on type parameter declarations.  JSR 308 does not extend Java to allow
+annotations on type names that are not type uses, such as the type names
+that appear in \<import> statements, class literals, static member accesses,
+and annotation uses.
 % (whether explicit or implicit, as in the case of method receivers)
 JSR 308 uses a simple prefix syntax for type annotations, with a special case
 for receiver types.
@@ -168,7 +171,15 @@ for receiver types.
 
 \begin{enumerate}
 \item
-  A type annotation appears before the type, as in \code{@NonNull String}.
+  A type annotation appears before the type, as in \code{@NonNull String}
+  or \code{@NonNull java.lang.String}.  A type annotation appears before
+  the package name, if any.
+\item
+  For a nested type, the type annotation appears before the type's simple
+  name, as in \code{Outer. @NonNull StaticNested} or \code{myVar. @NonNull
+    Inner}.  If the nested type is a static type, then both the nested and
+  the outer type can be annotated individually, as in \code{@ReadOnly
+    Outer. @ReadWrite StaticNested}.
 \item
   An annotation on a type parameter declaration appears before the declared
   name or wildcard, as in \code{class MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.
@@ -210,6 +221,11 @@ Furthermore, a type annotation is permitted in front of a constructor
 declaration, where declaration annotations are already permitted.  In that
 location, a type annotation is treated as applying to the constructed
 object (which is different than the receiver, if any, of the constructor).
+Generic type parameter annotations and outer class annotations are not
+possible on the constructor result.
+
+
+
 
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
 
@@ -274,6 +290,18 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 %     FormalParameterDecls:
 %             [final] Type FormalParameterDeclsRest]
 
+
+\item
+Annotations are permitted on any simple name in a static nested class.
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{ReferenceType}: \\
+\qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
+ \\
+\new{\nt{UnannReferenceType}}: \\
+\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \\
+\end{tabbing}
 
 \item
 Annotations may appear on the type parameter declaration in a class or method
@@ -586,6 +614,20 @@ appear in the \RuntimeInOrVisibleTypeAnnotations attribute.
 Section~\ref{disambiguating} discusses disambiguating type and declaration
 annotations.
 
+
+No changes are made to the StackMapTable that stores the types of elements
+on the stack.
+% Doing so would eliminates the need for pluggable type-checking on byte code
+% to perform type qualifier inference for local variables and stack elements,
+% much as byte code verification does not need to perform type inference for
+% local variables and stack elements.
+% StackMapTable is the attribute that defines these.  They are differential
+% and rather tricky, but we'll just copy that format.  There is no public
+% API, just a defined classfile format.
+No changes are made to the Exception table.
+
+
+
 \paragraph{Backward compatibility}
 For backward compatibility, JSR 308 uses new attributes for storing
 the type annotations.  In other words, JSR 308 merely reserves the
@@ -607,18 +649,6 @@ differ only in their annotations.
 Attributes have no effect on the bytecode array, because they exist outside
 it; however, they can represent properties of it by referring to the
 bytecode (including referring to specific instructions, or bytecode offsets).
-
-
-\paragraph{To do}
-In Java SE 7, the class file stores the types of elements on the stack;
-this eliminates the need for byte code verification to perform type
-inference for local variables and stack elements.  The class file format
-should similarly store the annotations on those types, to aid in annotation
-verification in class files.
-
-% StackMapTable is the attribute that defines these.  They are differential
-% and rather tricky, but we'll just copy that format.  There is no public
-% API, just a defined classfile format.
 
 
 \subsection{The \code{extended\_annotation} structure\label{class-file:ext}}
@@ -761,8 +791,6 @@ type argument in method call                    & \code{0x1A}, \code{0x1B} & \S\
   local variable annotations written by the programmer).
   Table elements such as field, method parameter, and local variable refer
   to the declaration, not the use, of such elements.
-%
-TO DO: mention the exception table?
 }
 \end{figure}
 
@@ -1784,9 +1812,6 @@ object, and in the body of the constructor it is referred to as
 \code{this}.  In any non-constructor, the receiver (if any) is referred to
 as \code{this}.
 
-TO DO:  Are generic type parameters possible on the constructor result
-annotation?
-
 
 \item for arrays:
 \preverbnegspace
@@ -1862,7 +1887,7 @@ Sections~\ref{type-annotation-use-cases}.
 \item for static class member access:
 \preverbnegspace
 \begin{Verbatim}
-  @NonNull Map.Entry mapEntry;
+  Map.@NonNull Entry mapEntry;
 \end{Verbatim}
 
 \end{itemize}
@@ -2049,6 +2074,18 @@ generic parameters of the receiver.  Here are some examples:
     public void requiresNonNullValues() MyMap<T, @NonNull U> { ... }
   }
 \end{Verbatim}
+
+In an inner class, there are two \<this> parameters:  that for the inner
+class, and that for the currently-executing method in the outer class.  It
+is desirable to specify the types for both.  
+One use case for this is a read-only type system, where you want to
+make the distinction between the outer and inner object.
+This can be specified as
+
+\begin{Verbatim}
+  void m(@ReadOnly Outer.@ReadWrite Inner this) {}
+\end{Verbatim}
+
 
 A receiver annotation is different than a class annotation, a method
 annotation, or a return value annotation:
@@ -2393,6 +2430,91 @@ on itself.
 %     @Override Container getContainer() { ... }  // OK; correct use of @Override
 % \end{Verbatim}
 
+
+\subsection{Not all type names are annotatable\label{type-names}}
+
+The Java language uses type names in three different ways:  in type
+definitions/declarations; in type uses; and in other contexts that are not
+a type declaration or use.  JSR 308 permits annotations on type uses (and
+also on type parameter declarations).  JSR 308 does not support annotations
+on type names that syntactically look like, but are not, type uses.
+In the JLS grammar, type uses have a non-terminal name ending in
+\emph{Type}.
+% Say something about other uses of type names?  I would need to see the
+% new grammar first.
+
+Here are examples of such type names that are not annotatable.
+
+\paragraph{Annotation uses}
+An annotation use cannot itself be annotated.  (An annotation declaration
+can be annotated by a so-called meta-annotation.)
+For instance, in
+
+\begin{Verbatim}
+  @MyAnnotation Object x;
+\end{Verbatim}
+
+\noindent
+there is no way to annotate the use of \<MyAnnotation>.
+
+\paragraph{Class literals}
+It is not permitted to annotate the type name in a class literal, as in
+
+\begin{Verbatim}
+  @Even int.class    // illegal!
+\end{Verbatim}
+
+\noindent
+This type name refers to a class, not a type.  The expression evaluates to a
+\<Class>, which does not reflect the type of the annotation, so there is no
+point in being able to write the annotation, which would have no effect.
+
+\paragraph{Import statement}
+It is not permitted to annotate the type name in an \<import> statement.
+
+\begin{Verbatim}
+  import @NotAllowed java.util.Date;        // illegal!
+\end{Verbatim}
+
+\noindent
+This use of a type name is not a type use and is more properly viewed as
+a scoping mechanism.
+
+\paragraph{Static member accesses}
+
+Static member accesses are preceded by a type name, but that type name may
+not be annotated:
+
+\begin{Verbatim}
+  @Illegal Outer . StaticNestedClass      // illegal!
+  @Illegal Outer . staticField            // illegal!
+\end{Verbatim}
+
+\noindent
+A static member access may itself be a type use, in which cane the used
+type may be annotated by annotating the last component of the static member
+access, which is the simple name of the type being used.
+
+\begin{Verbatim}
+  Outer . @Legal StaticNestedClass x = ...;
+  myvar . @Legal StaticNestedClass x = ...;     // legal, but poor style
+\end{Verbatim}
+
+The type name in front of a static member access is a scoping mechanism,
+not a use of a type --- there's nothing of type \<Outer> in the above
+example.  Furthermore, since there is only one instance of any static
+member, what it is cannot possibly be affected by an annotation on name of
+the class being used to access it.  Affecting the type of that single
+thing, depending on the annotation on the class name being used to access
+it, feels unnatural.
+
+The syntax for instance (non-static) type member accesses is consistent
+with that for static type member accesses:  the annotation goes on the
+simple name of the type being annotated.  For instance:
+
+\begin{Verbatim}
+  myVar . @Bar NonStaticClass    // legal (on variables and casts only)
+\end{Verbatim}
 
 
 \subsection{Syntax of array annotations\label{array-syntax}}
@@ -3033,7 +3155,6 @@ extending Java's annotations; it is better viewed as an implementation
 detail of our tools.
 
 
-%% TO DO
 
 % \subsection{Java Language Specification}
 % 
