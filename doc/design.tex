@@ -162,7 +162,7 @@ JSR 308 extends Java to allow annotations on nearly any use of a type, and
 on type parameter declarations.
 % (whether explicit or implicit, as in the case of method receivers)
 JSR 308 uses a simple prefix syntax for type annotations, with a special case
-for receiver types and for constructor results.
+for receiver types.
 % that is necessitated by
 % non-orthogonality in the Java grammar.
 
@@ -172,6 +172,12 @@ for receiver types and for constructor results.
 \item
   An annotation on a type parameter declaration appears before the declared
   name or wildcard, as in \code{class MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.
+\item
+  An annotation on a disjunctive type in a multi-\<catch> clause appears
+  before the opening parenthesis, and is treated as syntactic sugar for
+  writing the type annotation on each disjunct.
+  % In addition, of course, to any explicitly-present annotations on the
+  % disjuncts.
 \item
   The annotation on a given array level
   prefixes the brackets that introduce that level.  To declare
@@ -199,6 +205,11 @@ for receiver types and for constructor results.
   regarding number of method parameters, whether or not the optional
   \code{this} parameter is present.
 \end{enumerate}
+
+Furthermore, a type annotation is permitted in front of a constructor
+declaration, where declaration annotations are already permitted.  In that
+location, a type annotation is treated as applying to the constructed
+object (which is different than the receiver, if any, of the constructor).
 
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
 
@@ -281,6 +292,16 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 \qquad \= \kill
 \nt{TypeArgument}: \\
 \qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
+\end{tabbing}
+
+
+\item
+Annotations may appear before the parenthesis of a multi-\<catch>:
+
+\begin{tabbing}
+\nt{CatchClause}: \\
+\qquad \= \kill
+\qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
 \end{tabbing}
 
 
@@ -1299,6 +1320,10 @@ version attempts to minimize changes to existing grammar productions.
 \qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}} \\
  \\
 %% PAGE 596:
+% No need to change 
+%   MemberDecl: Identifier ConstructorDeclaratorRest
+% because (declaration) annotations are already permitted there.
+ \\
 \nt{MethodOrFieldDecl}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
  \\
@@ -1337,6 +1362,9 @@ version attempts to minimize changes to existing grammar productions.
 \qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId} \\
  \\
 %% PAGE 600:
+\nt{CatchClause}: \\
+\qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block} \\
+\\
 \nt{Resource}: \\
 \qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression}
 \\
@@ -2306,6 +2334,30 @@ caught exception, as in
 \noindent
 In this example case, a tool could warn if any \<@Critical> exception can
 reach the \<catch> clause.
+
+However, special syntax is provided for the disjunctive types that arise
+from a multi-\<catch> clause.
+It is possible to annotate the individual alternatives, as in
+
+\begin{Verbatim}
+  catch ( @A E1 | @A E2 | @A E3 e ) { ... }
+\end{Verbatim}
+
+\noindent
+but it is desirable to annotate the disjunctive type as a whole, since a
+programmer often wants to annotate each disjuct identically.  This code
+desugars to the above:
+% It would be a shame to force a programmer to repeat the annotations, since
+% the multi-\<catch> syntax is intended to reduce code size.
+
+\begin{Verbatim}
+  catch @A ( E1 | E2 | E3 e ) { ... }
+\end{Verbatim}
+
+It is possible to specify both a type annotation on the disjunction and
+also type annotations on (some of) the disjuncts.  Each disjuct is treated
+as containing all the annotations on the disjunct, plus all the annotations
+on itself.
 
 
 % \subsection{Target meta-annotation for type annotations}
