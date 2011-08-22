@@ -64,14 +64,14 @@ public enum ElementType {
     /**
      * Use of a type
      *
-     * @since 1.7
+     * @since 1.8
      */
     TYPE_USE,
 
     /**
      * Type parameter declaration
      *
-     * @since 1.7
+     * @since 1.8
      */
     TYPE_PARAMETER
 }

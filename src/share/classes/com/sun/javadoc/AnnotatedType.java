@@ -35,7 +35,7 @@ package com.sun.javadoc;
  * </pre>
  * 
  * @author Mahmood Ali
- * @since 1.7
+ * @since 1.8
  */
 public interface AnnotatedType extends Type {
 

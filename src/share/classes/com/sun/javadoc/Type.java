@@ -147,7 +147,7 @@ public interface Type {
      *
      * @return a <code>AnnotatedType</code> if the type if an annotated type,
      *         or null if it is not
-     * @since 1.7
+     * @since 1.8
      */
     AnnotatedType asAnnotatedType();
 
