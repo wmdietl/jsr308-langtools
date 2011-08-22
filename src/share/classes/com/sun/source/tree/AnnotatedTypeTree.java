@@ -39,7 +39,7 @@ import java.util.List;
  * @see "JSR 308: Annotations on Java Types"
  *
  * @author Mahmood Ali
- * @since 1.7
+ * @since 1.8
  */
 public interface AnnotatedTypeTree extends ExpressionTree {
     List<? extends AnnotationTree> getAnnotations();

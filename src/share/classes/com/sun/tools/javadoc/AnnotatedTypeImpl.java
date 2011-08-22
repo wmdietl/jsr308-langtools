@@ -39,7 +39,7 @@ import com.sun.tools.javac.code.Type.ClassType;
  * represents an annotated type.
  *
  * @author Mahmood Ali
- * @since 1.7
+ * @since 1.8
  */
 public class AnnotatedTypeImpl
         extends AbstractTypeImpl implements AnnotatedType {

@@ -97,7 +97,7 @@ import com.sun.source.tree.ClassTree;
  * is called during the declaration annotation phase before classes are analyzed.
  *
  * @author Mahmood Ali
- * @since 1.7
+ * @since 1.8
  */
 public abstract class AbstractTypeProcessor extends AbstractProcessor {
     private final Set<Name> elements = new HashSet<Name>();

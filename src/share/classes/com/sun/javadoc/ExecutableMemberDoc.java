@@ -92,7 +92,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * Return an empty array if there are none.
      *
      * @return the receiver annotations of this executable element.
-     * @since 1.7
+     * @since 1.8
      */
     AnnotationDesc[] receiverAnnotations();
 
