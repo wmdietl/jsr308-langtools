@@ -1187,9 +1187,9 @@ in its method body.
 
 \end{enumerate}
 
-\subsubsection{Type arguments and array element types\label{class-file:ext:ri:typearg}}
+\subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
-In a parameterized type or array, there are multiple places that an
+In a parameterized type, array, or nested class, there are multiple places that an
 annotation may appear.  For example, consider the difference among:
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
@@ -1197,11 +1197,14 @@ annotation may appear.  For example, consider the difference among:
 or the difference  among 
 \code{@X String [] []},
 \code{String @X [] []}, and
-\code{String [] @X []}.
+\code{String [] @X []},
+or the difference among 
+\code{@X Outer . Inner} and
+\code{Outer . @X Inner}.
 The classfile must distinguish among these locations.
 
-When the annotation's target is within a parameterized type or
-array type,
+When the annotation's target is within a parameterized type,
+array type, or nested type,
 \code{target\_info} contains what it normally would for a
 non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
@@ -1220,21 +1223,30 @@ the \code{location} field can be viewed as a path in that tree.
 The \code{location\_length} field is the length of the \code{location}
 field, which is also the depth of the annotation in the tree.
 
-A parameterized or array type can be viewed as a tree in the following way.  For a parameterized
-type, the children of the parameterized type are the type arguments.  For an array
+A parameterized, array, or nested type can be viewed as a tree in the
+following way.
+%
+For a parameterized type, the children of the parameterized type are the
+type arguments.
+%
+For a nested type, the children are the type arguments (if any), followed
+by the outer types, in order from innermost to outermost.
+%
+For an array
 type, the children are the types of elements at each level; each of these
 is itself an array type (of lesser dimensions than the main type), except
 for the last one which is a non-array type.  For a 1-dimensional array,
 there is only one child, which is a non-array.
 
 For example, the parameterized types
-\code{@A Map<@B String, @C List<@D Object>>}
+\code{@A Map<@B String, @C List<@D Object>>},
+\code{@H String @E [] @F [] @G []},
 and
-\code{@H String @E [] @F [] @G []}
+\code{@L O1.@K O2.@J O3.@I NestedStatic}
 can be viewed as the following trees:
 
 \begin{center}
-\resizebox{!}{2cm}{\includegraphics{figures/type-tree}}
+\resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
 \end{center}
 
 \noindent
@@ -1252,12 +1264,16 @@ Thus the annotations are represented in the class file as follows:
 \code{@F}       & 1     & 0 \\
 \code{@G}       & 1     & 1 \\
 \code{@H}       & 1     & 2 \\
+\code{@I}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@J}       & 1     & 0 \\
+\code{@K}       & 1     & 1 \\
+\code{@L}       & 1     & 2 \\
 \hline
 \end{tabular}
 \end{center}
 
 % Really ought to say exactly where...
-In this example, the entries for \<@A> and \<@E> are stored elsewhere in
+In this example, the entries for \<@A>, \<@E>, and \<I> are stored elsewhere in
 the classfile, rather than in the ``location'' array.
 
 Figure~\ref{tbl:locations} shows the values of the
@@ -1266,12 +1282,6 @@ combines both parameterized and array types.
 
 Indexes start at zero.  For a parameterized type, they count from the
 left.  For an array type, they count from the first dimension.
-
-% Mahmood says:  By the way, the compiler fails when parsing such types.
-\paragraph{To do}
-The specification does not indicate how to differentiate \code{@A} and
-\code{@B} uniquely in \code{OuterClass<@A String>.InnerClass<@B String>}.
-
 
 
 \begin{figure}[t]
@@ -1296,6 +1306,41 @@ Declaration: \code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H
 \code{@H}       & 2     & 1, 0 \\
 \hline
 \end{tabular}
+
+%BEGIN LATEX
+~
+%END LATEX
+
+Declaration: \code{@A O1.@B O2<@C S,@D T>.@E O3.@F Inner<@G U, @H V>}
+
+%BEGIN LATEX
+~
+%END LATEX
+
+\textbf{TO DO}
+
+\begin{tabular}{|l|c|c|}
+\hline
+\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
+\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@B}       & 1     & 0 \\
+\code{@C}       & 3     & 0, 0, 2 \\
+\code{@D}       & 2     & 0, 0 \\
+\code{@E}       & 3     & 0, 0, 0 \\
+\code{@F}       & 3     & 0, 0, 1 \\
+\code{@G}       & 1     & 1 \\
+\code{@H}       & 2     & 1, 0 \\
+\hline
+\end{tabular}
+
+\end{center}
+\caption{Values of the \code{location\_length} and \code{location} fields for
+a declaration that combines parameterized and array types.\label{tbl:locations}}
+\end{figure}
+
+\begin{figure}[t]
+\begin{center}
+
 \end{center}
 \caption{Values of the \code{location\_length} and \code{location} fields for
 a declaration that combines parameterized and array types.\label{tbl:locations}}
