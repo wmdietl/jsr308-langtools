@@ -1189,7 +1189,93 @@ in its method body.
 
 \subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
-In a parameterized type, array, or nested class, there are multiple places that an
+\begin{figure}[tp]
+\begin{center}
+
+\code{@A Map<@B String, @C List<@D Object>>} \hfill 
+\code{@H String @E [] @F [] @G []} \hfill
+\code{@L O1.@K O2.@J O3.@I NestedStatic}
+
+\resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
+
+\begin{tabular}{|l|c|c|}
+\hline
+\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
+\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@B}       & 1     & 0 \\
+\code{@C}       & 1     & 1 \\
+\code{@D}       & 2     & 1, 0 \\
+\code{@E}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@F}       & 1     & 0 \\
+\code{@G}       & 1     & 1 \\
+\code{@H}       & 1     & 2 \\
+\code{@I}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@J}       & 1     & 0 \\
+\code{@K}       & 1     & 1 \\
+\code{@L}       & 1     & 2 \\
+\hline
+\end{tabular}
+
+%BEGIN LATEX
+~ \\ ~
+%END LATEX
+
+\code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H Document>>}
+
+%BEGIN LATEX
+~
+%END LATEX
+
+% The table is not top-aligned if I increase the size.  I don't know why.
+\resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
+~~
+\begin{tabular}{|l|c|c|}
+\hline
+\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
+\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@B}       & 1     & 0 \\
+\code{@C}       & 3     & 0, 0, 2 \\
+\code{@D}       & 2     & 0, 0 \\
+\code{@E}       & 3     & 0, 0, 0 \\
+\code{@F}       & 3     & 0, 0, 1 \\
+\code{@G}       & 1     & 1 \\
+\code{@H}       & 2     & 1, 0 \\
+\hline
+\end{tabular}
+
+%BEGIN LATEX
+~ \\ ~
+%END LATEX
+
+\code{@A O1.@B O2<@C S,@D T>.@E O3.@F Nested<@G U, @H V>}
+
+%BEGIN LATEX
+~
+%END LATEX
+
+\resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
+~~
+\begin{tabular}{|l|c|c|}
+\hline
+\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
+\code{@F}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@G}       & 1     & 0 \\
+\code{@H}       & 1     & 1 \\
+\code{@E}       & 1     & 2 \\
+\code{@B}       & 1     & 3 \\
+\code{@C}       & 2     & 3, 0 \\
+\code{@D}       & 2     & 3, 1 \\
+\code{@A}       & 1     & 4 \\
+\hline
+\end{tabular}
+
+\end{center}
+\caption{Example values of the \code{location\_length} and \code{location}
+  fields.  Top-level annotations are stored elsewhere in the classfile,
+  rather than in the ``location'' array.\label{tbl:locations}}
+\end{figure}
+
+In a parameterized type, array, or nested type, there are multiple places that an
 annotation may appear.  For example, consider the difference among:
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
@@ -1217,9 +1303,10 @@ non-parameterized, non-array type
 \end{Verbatim}
 
 The \code{location} field is a list of numbers that represents the annotation
-location among the type arguments and array levels.
+location among the type arguments, array levels, and type nestings.
 If the type is viewed as a tree, then 
-the \code{location} field can be viewed as a path in that tree.
+the \code{location} field can be viewed as a path in that tree, with
+children numbered starting at 0.
 The \code{location\_length} field is the length of the \code{location}
 field, which is also the depth of the annotation in the tree.
 
@@ -1227,125 +1314,24 @@ A parameterized, array, or nested type can be viewed as a tree in the
 following way.
 %
 For a parameterized type, the children of the parameterized type are the
-type arguments.
+type arguments, numbered from the left.
 %
 For a nested type, the children are the type arguments (if any), followed
-by the outer types, in order from innermost to outermost.
+by the outer types, numbered from innermost to outermost.
+The type argument positions count even for a raw type; for
+example, the annotations on \code{@A Outer.@B MyClass} and \code{@A
+  Outer<T>.@B MyClass<U>} are stored identically.
 %
 For an array
-type, the children are the types of elements at each level; each of these
+type, the children are the types of elements at each level, numbered from
+the first dimension.  At each level, the element type
 is itself an array type (of lesser dimensions than the main type), except
 for the last one which is a non-array type.  For a 1-dimensional array,
 there is only one child, which is a non-array.
 
-For example, the parameterized types
-\code{@A Map<@B String, @C List<@D Object>>},
-\code{@H String @E [] @F [] @G []},
-and
-\code{@L O1.@K O2.@J O3.@I NestedStatic}
-can be viewed as the following trees:
-
-\begin{center}
-\resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
-\end{center}
-
-\noindent
-Thus the annotations are represented in the class file as follows:
-
-\begin{center}
-\begin{tabular}{|l|c|c|}
-\hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
-\code{@B}       & 1     & 0 \\
-\code{@C}       & 1     & 1 \\
-\code{@D}       & 2     & 1, 0 \\
-\code{@E}       & \multicolumn{2}{c|}{stored elsewhere} \\
-\code{@F}       & 1     & 0 \\
-\code{@G}       & 1     & 1 \\
-\code{@H}       & 1     & 2 \\
-\code{@I}       & \multicolumn{2}{c|}{stored elsewhere} \\
-\code{@J}       & 1     & 0 \\
-\code{@K}       & 1     & 1 \\
-\code{@L}       & 1     & 2 \\
-\hline
-\end{tabular}
-\end{center}
-
 % Really ought to say exactly where...
-In this example, the entries for \<@A>, \<@E>, and \<I> are stored elsewhere in
-the classfile, rather than in the ``location'' array.
 
-Figure~\ref{tbl:locations} shows the values of the
-\code{location\_length} and \code{location} fields in an example that
-combines both parameterized and array types.
-
-Indexes start at zero.  For a parameterized type, they count from the
-left.  For an array type, they count from the first dimension.
-
-
-\begin{figure}[t]
-\begin{center}
-
-Declaration: \code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H Document>>}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-\begin{tabular}{|l|c|c|}
-\hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
-\code{@B}       & 1     & 0 \\
-\code{@C}       & 3     & 0, 0, 2 \\
-\code{@D}       & 2     & 0, 0 \\
-\code{@E}       & 3     & 0, 0, 0 \\
-\code{@F}       & 3     & 0, 0, 1 \\
-\code{@G}       & 1     & 1 \\
-\code{@H}       & 2     & 1, 0 \\
-\hline
-\end{tabular}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-Declaration: \code{@A O1.@B O2<@C S,@D T>.@E O3.@F Inner<@G U, @H V>}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-\textbf{TO DO}
-
-\begin{tabular}{|l|c|c|}
-\hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
-\code{@B}       & 1     & 0 \\
-\code{@C}       & 3     & 0, 0, 2 \\
-\code{@D}       & 2     & 0, 0 \\
-\code{@E}       & 3     & 0, 0, 0 \\
-\code{@F}       & 3     & 0, 0, 1 \\
-\code{@G}       & 1     & 1 \\
-\code{@H}       & 2     & 1, 0 \\
-\hline
-\end{tabular}
-
-\end{center}
-\caption{Values of the \code{location\_length} and \code{location} fields for
-a declaration that combines parameterized and array types.\label{tbl:locations}}
-\end{figure}
-
-\begin{figure}[t]
-\begin{center}
-
-\end{center}
-\caption{Values of the \code{location\_length} and \code{location} fields for
-a declaration that combines parameterized and array types.\label{tbl:locations}}
-\end{figure}
-
+Figure~\ref{tbl:locations} shows some examples.
 
 
 \section{Detailed grammar changes\label{grammar-details}}
