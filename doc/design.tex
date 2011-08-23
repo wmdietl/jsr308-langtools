@@ -497,7 +497,7 @@ be copied from the method being invoked.
 \newcommand{\RuntimeInOrVisibleTypeAnnotations}{\code{Runtime}\-[\code{In}]\code{visible\-Type\-Annotations}\xspace}
 
 % Don't use this in section headings, as that throws Hevea off.
-\newcommand{\extendedannotation}{\code{extend\-ed\-\_anno\-ta\-tion}\xspace}
+\newcommand{\extendedannotation}{\code{type\-\_anno\-ta\-tion}\xspace}
 
 
 This section defines how to store type annotations in a Java class file.
@@ -598,7 +598,7 @@ Runtime[In]VisibleTypeAnnotations_attribute {
    u2 attribute_name_index;  // "Runtime[In]VisibleTypeAnnotation"
    u2 attribute_length;
    u2 num_annotations;
-   extended_annotation annotations[num_annotations];
+   type_annotation annotations[num_annotations];
 }
 \end{Verbatim}
 
@@ -651,12 +651,12 @@ it; however, they can represent properties of it by referring to the
 bytecode (including referring to specific instructions, or bytecode offsets).
 
 
-\subsection{The \code{extended\_annotation} structure\label{class-file:ext}}
+\subsection{The \code{type\_annotation} structure\label{class-file:ext}}
 
 The \extendedannotation structure has the following format:
 
 \begin{Verbatim}
-extended_annotation {
+type_annotation {
     // Original fields from "annotation" structure:
     u2 type_index;
     u2 num_element_value_pairs;
@@ -2860,7 +2860,7 @@ methods).  (The \code{-Xprint} functionality is similar to javap, but
 cannot provide
 any information about bytecodes or method bodies, because it is implemented
 internally as an annotation processor.)
-This must be updated to print the extended annotations as well.
+This must be updated to print the type annotations as well.
 Also see Section~\ref{class-file-tools}.
 
 
@@ -2929,7 +2929,7 @@ meta-annotation that permits annotations on any declaration.
 \subsubsection{Annotations in comments\label{annotations-in-comments}}
 
 To ease the transition from standard Java SE 7 code to code with type
-annotations, the reference implementation recognizes the extended
+annotations, the reference implementation recognizes the type
 annotations when surrounded by comment markers:
 \begin{Verbatim}
   List</*@Readonly*/ Object> myList;
@@ -2988,7 +2988,7 @@ To do:  Complete this design.
 The \code{java.lang.reflect.*} and \code{java.lang.Class} APIs give access
 to annotations on public API elements such as classes,
 method signatures, etc.  They must be updated to give the same
-access to the new extended annotations in the top of
+access to the type annotations in the top of
 Figure~\ref{tbl:target_types}.
 
 Here are a few examples (the design is not yet complete).
