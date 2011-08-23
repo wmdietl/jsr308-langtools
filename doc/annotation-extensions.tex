@@ -1135,6 +1135,20 @@ compilers, JVMs, javap, and other class file tools.
 % benefits.  
 
 
+\subsection{Type annotations for stack elemests}
+
+The Java class file stores the types of stack elements, at entry to each
+basic block in the control flow graph (which may differ from the Java
+blocks in the program).  As a result, byte code verification need not
+perform type inference for local variables and stack elements.  The class
+file format should eventually similarly store the annotations on those
+types, to aid in annotation verification of class files.
+
+We will defer this change until after a maintenance review fixes some other
+issues in StackMap.  The fixes will make this enhancement much easier to
+implement.
+
+
 \subsection{Reducing class file size via use of the constant pool\label{constant-pool}}
 
 Annotations could be stored in the constant pool, and use constant pool
@@ -1147,7 +1161,7 @@ more likely once JSR 308 support is in place.
 \subsection{Optional/default fields in annotations\label{optional-default-fields}}
 
 In order to reduce the size of the class file, some fields may be omitted
-from the .class file, in which case any access of them returns their
+from the \<.class> file, in which case any access of them returns their
 default value.
 
 
