@@ -22,7 +22,7 @@ local: annotation-extensions.pdf annotation-extensions.html design.pdf design.ht
 clean:
 	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.dvi annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
 	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png
-	rm -f figures/type-tree.eps figures/type-tree.pdf
+	rm -f figures/type-tree.eps figures/type-tree.pdf figures/type-tree2.eps figures/type-tree2.pdf figures/type-tree3.eps figures/type-tree3.pdf
 	rm -f type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
 
 figures-all:

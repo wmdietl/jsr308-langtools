@@ -1,12 +1,7 @@
 \newcommand{\etalchar}[1]{$^{#1}$}
 \begin{thebibliography}{GPB{\etalchar{+}}06}
 
-\bibitem[Blo04a]{JSR175}
-Joshua Bloch.
-\newblock {JSR} 175: A metadata facility for the {Java} programming language.
-\newblock \url{http://jcp.org/en/jsr/detail?id=175}, September~30, 2004.
-
-\bibitem[Blo04b]{JSR175-PFD2}
+\bibitem[Blo04]{JSR175-PFD2}
 Joshua Bloch.
 \newblock {JSR175}: A program annotation facility for the {Java} programming
   language: Proposed final draft 2.
