@@ -21,7 +21,7 @@ local: annotation-extensions.pdf annotation-extensions.html design.pdf design.ht
 
 clean:
 	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.dvi annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
-	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png
+	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png design002.gif design002.png design003.gif design003.png
 	rm -f figures/type-tree.eps figures/type-tree.pdf figures/type-tree2.eps figures/type-tree2.pdf figures/type-tree3.eps figures/type-tree3.pdf
 	rm -f type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
 
@@ -146,6 +146,10 @@ ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_B
 # We don't know which of the two files will be created
 	-\cp -f design001.gif ${jsr308_spec}
 	-\cp -f design001.png ${jsr308_spec}
+	-\cp -f design002.gif ${jsr308_spec}
+	-\cp -f design002.png ${jsr308_spec}
+	-\cp -f design003.gif ${jsr308_spec}
+	-\cp -f design003.png ${jsr308_spec}
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
