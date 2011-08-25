@@ -129,7 +129,8 @@ public final class Constructor<T> extends Executable {
         // which implicitly requires that new java.lang.reflect
         // objects be fabricated for each reflective call on Class
         // objects.)
-        Constructor<T> res = new Constructor<>(clazz,
+    	// JSR 308: remove diamond to allow Java 6 compilation.
+        Constructor<T> res = new Constructor<T>(clazz,
                                                parameterTypes,
                                                exceptionTypes, modifiers, slot,
                                                signature,
