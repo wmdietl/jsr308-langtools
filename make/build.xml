@@ -136,6 +136,8 @@
     <property name="make.tools.dir" location="${make.dir}/tools"/>
     <property name="src.dir" location="src"/>
     <property name="src.bin.dir" location="${src.dir}/share/bin"/>
+    <!-- JSR 308: a directory that contains changes to the JDK. -->
+    <property name="jdkchanges.classes.dir" location="${src.dir}/jdk-changes"/>
     <property name="src.classes.dir" location="${src.dir}/share/classes"/>
     <property name="test.dir" location="test"/>
 
@@ -794,6 +796,9 @@
                 <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
                 <mkdir dir="@{gensrc.dir}"/>
                 <mkdir dir="@{classes.dir}"/>
+                <pcompile srcdir="${jdkchanges.classes.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="@{includes}"/>
                 <pcompile srcdir="${src.classes.dir}"
                           destdir="@{gensrc.dir}"
                           includes="@{includes}"/>
@@ -811,7 +816,7 @@
                           includes="**/*.properties"/>
                 <javac fork="true"
                        executable="@{java.home}/bin/javac"
-                       srcdir="${src.classes.dir}:@{gensrc.dir}"
+                       srcdir="${jdkchanges.classes.dir}:${src.classes.dir}:@{gensrc.dir}"
                        destdir="@{classes.dir}"
                        includes="@{includes}"
                        excludes="@{excludes}"
