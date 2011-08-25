@@ -665,7 +665,7 @@ type_annotation {
         element_value value;
     } element_value_pairs[num_element_value_pairs];
     // New fields in JSR 308:
-    u1 target_type;    // the type of the targeted program element, see Section 4.2
+    u2 target_type;    // the type of the targeted program element, see Section 4.2
     union {
         offset_target;
         localvar_target;
@@ -1118,7 +1118,7 @@ has the following structure:
 
 \begin{Verbatim}
     wildcard_bound_target {
-        u1 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 4.2)
+        u2 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 4.2)
         {
             ...
         } target_info;  // uniquely identifies the targeted program element, see Section 4.3
