@@ -168,7 +168,11 @@ public class AccessibleObject implements AnnotatedElement {
     // Reflection factory used by subclasses for creating field,
     // method, and constructor accessors. Note that this is called
     // very early in the bootstrapping process.
+	// JSR 308 needed for Java 6 compilation
+	@SuppressWarnings("unchecked")
     static final ReflectionFactory reflectionFactory =
+    	// JSR 308: cast needed for Java 6 compilation
+    	(ReflectionFactory)
         AccessController.doPrivileged(
             new sun.reflect.ReflectionFactory.GetReflectionFactoryAction());
 

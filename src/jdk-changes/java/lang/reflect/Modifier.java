@@ -51,7 +51,11 @@ class Modifier {
      *  packages
      */
     static {
+    	// JSR 308 needed for Java 6 compilation
+    	@SuppressWarnings("unchecked")
         sun.reflect.ReflectionFactory factory =
+            // JSR 308: cast needed for Java 6 compilation
+            (ReflectionFactory)
             AccessController.doPrivileged(
                 new ReflectionFactory.GetReflectionFactoryAction());
         factory.setLangReflectAccess(new java.lang.reflect.ReflectAccess());

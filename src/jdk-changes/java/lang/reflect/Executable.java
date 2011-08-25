@@ -378,9 +378,13 @@ public abstract class Executable extends AccessibleObject
         return AnnotationParser.toArray(declaredAnnotations());
     }
 
-    private transient Map<Class<? extends Annotation>, Annotation> declaredAnnotations;
+    // JSR 308: remove Class<? extends Annotation> in field type to allow Java 6 compilation
+    @SuppressWarnings("rawtypes")
+    private transient Map<Class, Annotation> declaredAnnotations;
 
-    private synchronized  Map<Class<? extends Annotation>, Annotation> declaredAnnotations() {
+    // JSR 308: remove Class<? extends Annotation> in return type to allow Java 6 compilation
+    @SuppressWarnings("rawtypes")
+    private synchronized  Map<Class, Annotation> declaredAnnotations() {
         if (declaredAnnotations == null) {
             declaredAnnotations = AnnotationParser.parseAnnotations(
                 getAnnotationBytes(),
