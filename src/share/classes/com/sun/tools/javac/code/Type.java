@@ -84,10 +84,12 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public int tag;
 
-    /** The defining class / interface / package / type variable
+    /** The defining class / interface / package / type variable.
      */
     public TypeSymbol tsym;
 
+    /** The type annotations on this type.
+     */
     public List<Attribute.TypeCompound> typeAnnotations = List.nil();
 
     /**
@@ -103,7 +105,7 @@ public class Type implements PrimitiveType, Cloneable {
     /**
      * Get the representation of this type used for modelling purposes.
      * By default, this is itself. For ErrorType, a different value
-     * may be provided,
+     * may be provided.
      */
     public Type getModelType() {
         return this;
@@ -882,6 +884,9 @@ public class Type implements PrimitiveType, Cloneable {
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
+
+        /** The type annotations on the method receiver.
+         */
         public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
