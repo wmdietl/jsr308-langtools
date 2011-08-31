@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.tools.JavaFileObject;
 
@@ -42,6 +41,7 @@ import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.code.Type.*;
+import com.sun.tools.javac.comp.Annotate.Annotator;
 
 import com.sun.source.tree.IdentifierTree;
 import com.sun.source.tree.MemberSelectTree;
@@ -2960,6 +2960,7 @@ public class Attr extends JCTree.Visitor {
 
     public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar a = (TypeVar)tree.type;
+        annotateType(a, tree.annotations);
         Set<Type> boundSet = new HashSet<Type>();
         if (a.bound.isErroneous())
             return;
@@ -3041,6 +3042,48 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotation(JCAnnotation tree) {
         log.error(tree.pos(), "annotation.not.valid.for.type", pt);
         result = tree.type = syms.errType;
+    }
+
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        Type underlyingType = attribType(tree.getUnderlyingType(), env);
+        Type type = (Type)underlyingType.clone();
+        this.attribAnnotationTypes(
+                List.convert(JCAnnotation.class, tree.annotations), env);
+        annotateType(type, tree.annotations);
+        result = tree.type = type;
+    }
+
+    /**
+     * Apply the annotations to the particular type.
+     *
+     * This method expects the {@code MethodType} type as argument,
+     * to handle its receiver types.  Note that type annotations
+     * cannot target methods.
+     *
+     */
+    public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
+        if (annotations.isEmpty()) return;
+        annotate.laterOnFlush(new Annotator() {
+            @Override
+            public void enterAnnotation() {
+                List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
+                if (type instanceof MethodType)
+                    type.asMethodType().receiverTypeAnnotations = compounds;
+                else
+                    type.typeAnnotations = compounds;
+            }
+        });
+    }
+
+    private List<Attribute.TypeCompound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+        if (annotations.isEmpty())
+            return List.nil();
+
+        ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
+        for (JCTypeAnnotation anno : annotations) {
+            buf.append(anno.attribute_field);
+        }
+        return buf.toList();
     }
 
     public void visitErroneous(JCErroneous tree) {
@@ -3258,6 +3301,9 @@ public class Attr extends JCTree.Visitor {
             (c.flags() & ABSTRACT) == 0) {
             checkSerialVersionUID(tree, c);
         }
+
+        // Check type annotations applicability rules
+        validateTypeAnnotations(tree);
     }
         // where
         /** check if a class is a subtype of Serializable, if that is available. */
@@ -3304,6 +3350,35 @@ public class Attr extends JCTree.Visitor {
     private Type capture(Type type) {
         return types.capture(type);
     }
+
+    private void validateTypeAnnotations(JCTree tree) {
+        tree.accept(typeAnnotationsValidator);
+    }
+    //where
+    private final JCTree.Visitor typeAnnotationsValidator =
+        new TreeScanner() {
+        public void visitAnnotation(JCAnnotation tree) {
+            if (tree instanceof JCTypeAnnotation) {
+                chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
+            }
+            super.visitAnnotation(tree);
+        }
+        public void visitTypeParameter(JCTypeParameter tree) {
+            chk.validateTypeAnnotations(tree.annotations, true);
+            // don't call super. skip type annotations
+            scan(tree.bounds);
+        }
+        public void visitMethodDef(JCMethodDecl tree) {
+            // need to check static methods
+            if ((tree.sym.flags() & Flags.STATIC) != 0) {
+                for (JCTypeAnnotation a : tree.receiverAnnotations) {
+                    if (chk.isTypeAnnotation(a, false))
+                        log.error(a.pos(), "annotation.type.not.applicable");
+                }
+            }
+            super.visitMethodDef(tree);
+        }
+    };
 
     // <editor-fold desc="post-attribution visitor">
 

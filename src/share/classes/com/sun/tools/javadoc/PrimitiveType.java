@@ -129,6 +129,13 @@ class PrimitiveType implements com.sun.javadoc.Type {
     }
 
     /**
+     * Return null, as this is not an annotated type;
+     */
+    public AnnotatedType asAnnotatedType() {
+        return null;
+    }
+
+    /**
      * Returns a string representation of the type.
      *
      * Return name of type including any dimension information.
