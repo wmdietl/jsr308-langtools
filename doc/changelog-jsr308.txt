@@ -1,3 +1,23 @@
+Version 1.2.0, 1 Sep 2011
+
+Specification
+  Updates to the specification (some already implemented, some not;
+  see issue tracker for open items):
+  - receiver annotations on dedicated "this" parameter
+  - annotations on disjunctive types in multi-catch  
+  - renumbering of TargetType constants  
+  - change extended_annotation's target_type field from u1 to u2     
+  - not all type names are annotatable (e.g. int.class, static member access)
+  
+Bug fixes
+  Move JDK changes into separate src/jdk-changes directory
+  
+Base build
+  Updated to OpenJDK 8 langtools as of 31 Aug 2011
+  This version of langtools continues to support building on Java 5;
+  however, the official OpenJDK release will require Java 7.
+
+----------------------------------------------------------------------
 Version 1.1.5, 22 Jul 2011
 
 No changes in functionality.
