@@ -2098,11 +2098,11 @@ generic parameters of the receiver.  Here are some examples:
   }
   interface List<T> {
     // The size() method changes neither the receiver nor any of the elements.
-    public int size() @Readonly List<@Readonly T> { ... }
+    public int size(@Readonly List<@Readonly T> this) { ... }
   }
   class MyMap<T,U> {
     // The map's values must be non-null, but the keys may be arbitrary.
-    public void requiresNonNullValues() MyMap<T, @NonNull U> { ... }
+    public void requiresNonNullValues(MyMap<T, @NonNull U> this) { ... }
   }
 \end{Verbatim}
 
