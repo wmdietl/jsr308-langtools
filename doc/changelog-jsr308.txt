@@ -1,14 +1,12 @@
+This file is the changelog for the JSR 308 (Type Annotations) reference
+implementation.  For the changelog for the specification, see file
+jsr308-changes.html .
+
+----------------------------------------------------------------------
 Version 1.2.0, 1 Sep 2011
 
-Specification
-  Updates to the specification (some already implemented, some not;
-  see issue tracker for open items):
-  - receiver annotations on dedicated "this" parameter
-  - annotations on disjunctive types in multi-catch  
-  - renumbering of TargetType constants  
-  - change extended_annotation's target_type field from u1 to u2     
-  - not all type names are annotatable (e.g. int.class, static member access)
-  
+Changes to accommodate some recent specification changes.
+
 Bug fixes
   Move JDK changes into separate src/jdk-changes directory
   
