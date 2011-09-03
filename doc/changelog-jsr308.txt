@@ -1,14 +1,10 @@
-This file is the changelog for the JSR 308 (Type Annotations) reference
-implementation.  For the changelog for the specification, see file
-jsr308-changes.html .
-
-----------------------------------------------------------------------
-Version 1.2.0, 1 Sep 2011
+Version 1.2.0, 2 Sep 2011
 
 Changes to accommodate some recent specification changes.
 
 Bug fixes
-  Move JDK changes into separate src/jdk-changes directory
+  To cleanly separate langtool changes from JDK changes, the latter
+  are now in the separate directory src/jdk-changes
   
 Base build
   Updated to OpenJDK 8 langtools as of 31 Aug 2011
