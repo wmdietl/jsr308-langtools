@@ -68,6 +68,7 @@ ${jsr308_spec}/java-annotation-extensions.pdf \
 ${jsr308_spec}/java-annotation-extensions.html \
 ${jsr308_spec}/jsr308-changes.html \
 	\cp -f design.html ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.html
+	\cp -f design.pdf ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.pdf
 	$(MAKE) checklinks
 
 
