@@ -40,9 +40,6 @@ webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 #	$(MAKE) checklinks
 
 # Warning!  "make web" makes a public release!
-# Before doing this, update jsr308-changes.html.  Determine changes via log or diff:
-#   hg log --style changelog --date '>2009-05-14' design.tex jsr308-faq.html
-# where "2009-05-14" is the date of the previous entry in jsr308-changes.html
 web: \
 ${jsr308_www} \
 ${jsr308_www}/jsr308-webpage.html \
@@ -51,14 +48,29 @@ ${jsr308_www}/README-jsr308.html \
 ${jsr308_www}/Makefile-jsr308-install \
 ${jsr308_www}/changelog-jsr308.txt \
 ${jsr308_www}/favicon-jsr308.png \
+${jsr308_www}/java-type-qualifiers.pdf \
+${jsr308_www}/java-type-qualifiers.html
+	$(MAKE) checklinks
+
+# Make a release of the specification.
+# The "web" target is executed with every JSR 308 compiler release.
+# The "web-spec" target will be executed less frequently.
+#
+# Before doing this, update jsr308-changes.html.  Determine changes via log or diff:
+#   hg log --style changelog --date '>2009-05-14' design.tex jsr308-faq.html
+# where "2009-05-14" is the date of the previous entry in jsr308-changes.html
+web-spec: \
+${jsr308_www} \
 ${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
+${jsr308_spec}/java-annotation-extensions.pdf \
+${jsr308_spec}/java-annotation-extensions.html \
 ${jsr308_spec}/jsr308-changes.html \
-${jsr308_www}/java-type-qualifiers.pdf \
-${jsr308_www}/java-type-qualifiers.html
 	\cp -f design.html ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.html
 	$(MAKE) checklinks
+
+
 
 ## There are some expected errors, but they should all be suppressed by
 ## the checklink-args.txt file, so this should complete cleanly.
