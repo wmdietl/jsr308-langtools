@@ -169,7 +169,7 @@ public class AccessibleObject implements AnnotatedElement {
     // method, and constructor accessors. Note that this is called
     // very early in the bootstrapping process.
 	// JSR 308 needed for Java 6 compilation
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "cast"})
     static final ReflectionFactory reflectionFactory =
     	// JSR 308: cast needed for Java 6 compilation
     	(ReflectionFactory)

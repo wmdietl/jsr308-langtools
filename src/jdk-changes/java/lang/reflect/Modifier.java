@@ -52,7 +52,7 @@ class Modifier {
      */
     static {
     	// JSR 308 needed for Java 6 compilation
-    	@SuppressWarnings("unchecked")
+    	@SuppressWarnings({"unchecked", "cast"})
         sun.reflect.ReflectionFactory factory =
             // JSR 308: cast needed for Java 6 compilation
             (ReflectionFactory)
