@@ -1,3 +1,9 @@
+Version 1.2.0.1, 4 Sep 2011
+
+A small bug fix release to ensure that the build works
+correctly with Java 7.
+
+----------------------------------------------------------------------
 Version 1.2.0, 2 Sep 2011
 
 Changes to accommodate some recent specification changes.
