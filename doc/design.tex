@@ -122,7 +122,7 @@ compatible with the original vision for annotations~\cite{JSR175}.
 This document has two parts:  a short normative part and a longer
 non-normative part.
 The normative part specifies the changes to
-the Java language syntax (Sections~\ref{syntax} and~\ref{grammar-details}),
+the Java language syntax (Section~\ref{syntax}),
 the Java toolset (Section~\ref{mods}), and
 the class file format (Section~\ref{class-file}).
 
@@ -230,7 +230,20 @@ possible on the constructor result.
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
 
 
-\subsection{Summary of Java language grammar changes\label{grammar-summary}}
+\subsection{Java language grammar changes\label{grammar}}
+
+This section
+gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{grammar} of the Java
+language~\cite[ch.~18]{GoslingJSBB2011}, organized in the same way as
+the rules of Section~\ref{type-annotation-locations}.
+Additions are \underline{underlined}.
+% , and deletions \sout{crossed out}.
+
+Infelicities in the Java grammar make this section somewhat long.
+Some improvements are
+possible (for instance, by slightly refactoring the Java grammar), but this
+version attempts to minimize changes to existing grammar productions.
+
 
 % The original grammar appears at
 % http://java.sun.com/docs/books/jls/third_edition/html/syntax.html
@@ -239,16 +252,6 @@ Section~\ref{type-annotation-syntax-examples} contains examples of the annotatio
 % implementation.  An example is that the BNF does not address the ">>" issue
 % in generics, even though that's important for an implementation.
 
-This section
-% Section~\ref{grammar-summary}
-summarizes the Java language grammar changes, which correspond to
-the rules of Section~\ref{type-annotation-locations}.
-Section~\ref{grammar-details} shows the grammar changes in detail.
-Additions are \underline{underlined}.
-% and deletions crossed out.
-
-
-% \subsubsection{Summary\label{grammar-summary}}
 
 \newcommand{\term}[1]{\code{#1}}         % terminal
 \newcommand{\nt}[1]{\emph{#1}}           % non-terminal
@@ -258,15 +261,35 @@ Additions are \underline{underlined}.
 \newcommand{\altor}[1]{\ensuremath{\mathit{|}}} % alternatives separator
 \newcommand{\new}[1]{\underline{#1}}     % additions
 
+\newcommand{\basictypename}{\alt{ \term{byte} \altor{} \term{short} \altor{} \term{char} \altor{} \term{int} \altor{} \term{long} \altor{} \term{float} \altor{} \term{double} \altor{} \term{boolean} }}
+
 \begin{enumerate}
 \item
 Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 
 \begin{tabbing}
 \qquad \= \kill
-    \nt{Type}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}} \multi{. \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\term{[]}} \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{BasicType}
+\nt{Type}: \\
+\qquad \new{\opt{\nt{Annotations}} \nt{UnannType}} \\
+ \\
+\new{\nt{UnannType}}: \\
+\qquad    \basictypename{} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+\qquad    \nt{\new{Unann}ReferenceType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+ \\
+\nt{MethodOrFieldDecl}: \\
+\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
+ \\
+\nt{InterfaceMethodOrFieldDecl}: \\
+\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
+\\
+\nt{Resource}: \\
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression}
+\\
+\nt{ForVarControl}: \\
+\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
+\\
+\nt{QualifiedTypeList}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedType} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedType} }
 \end{tabbing}
 
 
@@ -300,7 +323,7 @@ Annotations are permitted on any simple name in a static nested class.
 \qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
  \\
 \new{\nt{UnannReferenceType}}: \\
-\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \\
+\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}}
 \end{tabbing}
 
 \item
@@ -328,7 +351,6 @@ Annotations may appear before the parenthesis of a multi-\<catch>:
 
 \begin{tabbing}
 \nt{CatchClause}: \\
-\qquad \= \kill
 \qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
 \end{tabbing}
 
@@ -339,22 +361,44 @@ constructors), change ``\multi{\term{[]}}''  to
 ``\multi{\new{\opt{\nt{Annotations}}} \term{[]}}''.
 (This was abstracted out as
 ``\nt{BracketsOpt}'' in the 2nd edition of the JLS~\cite{GoslingJSB2000}.)
-For example:
 
 \begin{tabbing}
 \qquad \= \kill
-    \nt{Type}: \\
-\qquad            \opt{\nt{Annotations}} \nt{Identifier} \opt{\nt{TypeArguments}}\multi{   .   \nt{Identifier} \opt{\nt{TypeArguments}}} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
-\qquad            \opt{\nt{Annotations}} \nt{BasicType}
+\nt{Primary}: \\
+\qquad        ... \\
+\qquad        \basictypename{} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
+\\
+%% IdentifierSuffix rule should be updated when JLS typo is fixed
+\nt{IdentifierSuffix}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \term{[} \alt{ \term{]} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \altor{} \nt{Expression} \term{]}} \\
+\qquad        ... \\
+\\
+\nt{VariableDeclaratorRest}: \\
+\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
+ \\
+\nt{VariableDeclaratorId}: \\
+\qquad       \nt{Identifier} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+ \\
+\nt{MethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedTypeList}} \alt{ \nt{Block} \altor{} \term{;} } \\
+ \\
+\nt{InterfaceMethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedTypeList}}   \term{;} \\
+ \\
+\nt{ConstantDeclaratorRest}: \\
+\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}}
 \end{tabbing}
 
 Annotations may also appear on varargs (\code{...}):
 
 \begin{tabbing}
 \qquad \= \kill
-    \nt{FormalParameterDeclsRest}: \\
-\qquad             \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad            \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId}
+\nt{FormalParameterDecls}: \\
+\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
+ \\
+\nt{FormalParameterDeclsRest}: \\
+\qquad       \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId}
 \end{tabbing}
 
 
@@ -368,13 +412,12 @@ Annotations may appear on the receiver type by changing the definition of
 \qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
 \\
 \new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{UnannType} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad        \nt{FormalParameterDecls} \\
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{FormalParameterDecls}
 \end{tabbing}
 
 
 \end{enumerate}
-
 
 
 \subsection{Target meta-annotations for type annotations\label{target-meta-annotation}}
@@ -1334,116 +1377,6 @@ there is only one child, which is a non-array.
 Figure~\ref{tbl:locations} shows some examples.
 
 
-\section{Detailed grammar changes\label{grammar-details}}
-
-This section
-gives detailed changes to the \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{grammar} of the Java
-language~\cite[ch.~18]{GoslingJSBB2011}, based on the conceptually
-simple summary from Section~\ref{grammar-summary}. 
-Additions are \underline{underlined}.
-% , and deletions \sout{crossed out}.
-
-This section is of interest primarily to language tool implementers, such
-as compiler writers.  Most users can read just
-Sections~\ref{type-annotation-locations} and~\ref{type-annotation-syntax-examples}.
-
-Infelicities in the Java grammar make this section longer than the simple
-summary of Section~\ref{grammar-summary}.  Some improvements are
-possible (for instance, by slightly refactoring the Java grammar), but this
-version attempts to minimize changes to existing grammar productions.
-
-
-\begin{tabbing}
-\qquad \= \kill
-%% PAGE 591:
-% Only used for throws clause
-\nt{QualifiedIdentifierList}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedIdentifier} } \\
- \\
-%% PAGE 593:
-\nt{Type}: \\
-\qquad \new{\opt{\nt{Annotations}} \nt{UnannType}} \\
- \\
-\new{\nt{UnannType}}: \\
-\qquad            \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
-\qquad            \nt{\new{Unann}ReferenceType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
- \\
-\nt{ReferenceType}: \\
-\qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
- \\
-\new{\nt{UnannReferenceType}}: \\
-\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}} \\
- \\
-%% PAGE 594:
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}} \\
- \\
-%% PAGE 596:
-% No need to change 
-%   MemberDecl: Identifier ConstructorDeclaratorRest
-% because (declaration) annotations are already permitted there.
- \\
-\nt{MethodOrFieldDecl}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
- \\
-\nt{MethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedIdentifierList}} \alt{ \nt{Block} \altor{} \term{;} } \\
- \\
-%% PAGE 597:
-\nt{InterfaceMethodOrFieldDecl}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
- \\
-\nt{InterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedIdentifierList}}   \term{;} \\
- \\
-\nt{ConstantDeclaratorRest}: \\
-\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
- \\
-%% PAGE 598:
-\nt{FormalParameters}: \\
-\qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
-\\
-\new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{UnannType} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad        \nt{FormalParameterDecls} \\
-\\
-\nt{FormalParameterDecls}: \\
-\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
- \\
-\nt{VariableDeclaratorRest}: \\
-\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
- \\
-\nt{VariableDeclaratorId}: \\
-\qquad       \nt{Identifier} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
- \\
-\nt{FormalParameterDeclsRest}: \\
-\qquad       \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId} \\
- \\
-%% PAGE 600:
-\nt{CatchClause}: \\
-\qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block} \\
-\\
-\nt{Resource}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression}
-\\
-%% PAGE 601:
-\nt{ForVarControl}: \\
-\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
-\\
-%% PAGE 604:
-\nt{Primary}: \\
-\qquad        ... \\
-\qquad        \nt{BasicType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
- \\
-%% PAGE 605:
-%% IdentifierSuffix rule should be updated when JLS typo is fixed
-\nt{IdentifierSuffix}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \term{[} \alt{ \term{]} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \altor{} \nt{Expression} \term{]}} \\
-\qquad        ... \\
-\end{tabbing}
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Non-normative text follows
 %%%
@@ -1761,7 +1694,7 @@ methods.
 \subsection{Examples of annotation syntax\label{type-annotation-syntax-examples}}
 
 This section gives examples of the annotation syntax specified in
-Sections~\ref{type-annotation-locations} and~\ref{grammar-details}.
+Sections~\ref{type-annotation-locations} and~\ref{grammar}.
 This list is not necessarily exhaustive (but if you notice something
 missing, let us know so that we can add it).
 Section~\ref{type-annotation-use-cases} motivates annotating these
@@ -3383,7 +3316,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
 % LocalWords:  FormalParameterDecls ForVarControlRest FormalParameterDeclsRest
 % LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt
-% LocalWords:  QualifiedIdentifierList MethodDeclaratorRest IdentifierSuffix
+% LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix
 % LocalWords:  InterfaceMethodDeclaratorRest VoidInterfaceMethodDeclaratorRest
 % LocalWords:  ConstructorDeclaratorRest VariableDeclaratorRest nonnullelements
 % LocalWords:  VariableInitializer ConstantDeclaratorRest VariableDeclaratorId
@@ -3406,5 +3339,5 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedIdentifier toArray localvar methodparam typeparam
+% LocalWords:  QualifiedType toArray localvar methodparam typeparam
 % LocalWords:  typearg ClassFile clinit StackMapTable
