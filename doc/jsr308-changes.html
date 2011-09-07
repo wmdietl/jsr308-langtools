@@ -29,21 +29,90 @@ current version of the specification
 <!-- See Makefile for documentation of how to compute a new changelog entry.
 -->
 
-<!--
-TO DO:  Here is a possibly-incomplete list of specification changes since
-  the last official specification release.  There are also other
-  specification changes that need to be mentioned, such as removal of an
-  appendix or two, etc.
-Specification
-  Updates to the specification:
-  - receiver annotations on dedicated "this" parameter
-  - annotations on disjunctive types in multi-catch  
-  - renumbering of TargetType constants  
-  - change extended_annotation's target_type field from u1 to u2     
-  - not all type names are annotatable (e.g. int.class, static member access)
-  Some of these are already implemented in the reference implementation,
-  and some are not yet; see the issue tracker for status.
--->
+  <!-- TODO: update this date! -->
+  <dt><a href="java-annotation-design-20110907.html">7 September 2011</a></dt>
+  <dd>
+    Annotation syntax changes:
+    <ul>
+      <li>
+	New receiver annotation syntax.  An annotation on the type of a method
+	receiver (<tt>this</tt>) appears on the type of an optional first formal
+	parameter named <tt>this</tt>, that has no run-time effect nor any
+        purpose other than serving as a place for the receiver annotation.
+        For example, what was previously written as
+	<pre>  public String toString() @Readonly { ... }</pre>
+	is now written as
+	<pre>  public String toString(@Readonly MyClass this) { ... }</pre>
+	The syntax allows type parameter annotations, annotation of outer
+	<tt>this</tt> types, etc.
+      </li>
+      <li>
+ 	Syntax for annotations on disjunctive types (found in
+        multi-<tt>catch</tt> statements).
+      </li>
+    </ul>
+    Classfile changes:
+    <ul>
+      <li>
+	Rename <tt>extended_annotation</tt> to <tt>type_annotation</tt>.
+      </li>
+      <li>
+	Add a class file format for annotations on static nested classes.
+      </li>
+      <li>
+	Change the <tt>target_type</tt> field of <tt>type_annotation</tt>,
+	and the <tt>wildcard_location_type</tt> field of
+	<tt>wildcard_bound_target</tt>, from <tt>u1</tt> to <tt>u2</tt>, to
+	permit future expansion and to improve word-alignment of the
+	classfile.
+      </li>
+      <li>
+	Renumber all the enumeration constants of <tt>target_type</tt>.
+      </li>
+    </ul>
+    Other specification document changes:
+    <ul>
+      <li>
+	Change grammar productions to be compatible with the grammar in
+        chapter 18 of the forthcoming Java Language Specification, Java SE
+        7 version..  Remove section 5, merging the two lists of
+	grammar changes into one list.  Separate the declaration annotation
+	on type parameters from the list of type annotations.
+      </li>
+      <li>
+	Clarify the difference between type uses and other type names that
+	appear in Java code.  Examples of type names that are not type uses
+	are <tt>import</tt> statements and class constants such as
+	<tt>int.class</tt>.  Type annotations cannot be written on these
+	type names.
+      </li>
+      <li>
+	Clarify that for a constructor result, there is no syntax for annotating
+	its type parameters nor any outer class.
+      </li>
+      <li>
+	Improve discussion of compiler optimizations that remove an
+        annotated cast. 
+      </li>
+      <li>
+	Remove the "Other possible extensions to Java annotations" appendix.
+        It will be maintained as a separate document.
+	Also remove the "Logistical matters" appendix (Appendix E).
+      </li>
+      <li>
+	Change "Java SE 7" to "Java SE 8".
+        Change "Sun" to "Oracle".
+        Update URLs.
+      </li>
+    </ul>
+    FAQ:
+    <ul>
+      <li>
+	Add section "What is the relationship between the Type Annotations
+	compiler and the OpenJDK compiler?"
+      </li>
+    </ul>
+  </dd>    
 
   <dt><a href="java-annotation-design-20100729.html">29 July 2010</a></dt>
   <dd>
@@ -740,5 +809,5 @@ Specification
  -->
 <!--  LocalWords:  Refactor ValueMember SingleElementAnnotation nullness Niko
  -->
-<!--  LocalWords:  Matsakis Aldrich multi ElementTypes
+<!--  LocalWords:  Matsakis Aldrich multi ElementTypes Readonly MyClass
  -->
