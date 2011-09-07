@@ -181,8 +181,8 @@ for receiver types.
   the outer type can be annotated individually, as in \code{@ReadOnly
     Outer. @ReadWrite StaticNested}.
 \item
-  An annotation on a type parameter declaration appears before the declared
-  name or wildcard, as in \code{class MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.
+  An annotation on a type parameter wildcard appears before the wildcard,
+  as in \code{MyClass<@Immutable ? extends Comparable<MyClass>>}.
 \item
   An annotation on a disjunctive type in a multi-\<catch> clause appears
   before the opening parenthesis, and is treated as syntactic sugar for
@@ -224,7 +224,11 @@ object (which is different than the receiver, if any, of the constructor).
 Generic type parameter annotations and outer class annotations are not
 possible on the constructor result.
 
-
+Finally, it is also permitted to write an annotation on a type parameter
+declaration.  This appears before the declared name, as in \code{class
+  MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.  This is a declaration
+annotation, not a type annotation, but it was an oversight in JSR
+175~\cite{JSR175} and JSR 308 is taking the opportunity to correct it.
 
 
 Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
@@ -327,16 +331,7 @@ Annotations are permitted on any simple name in a static nested class.
 \end{tabbing}
 
 \item
-Annotations may appear on the type parameter declaration in a class or method
-declaration.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
-\end{tabbing}
-
-Annotations may also appear on the wildcard in any type argument.
+Annotations may appear on the wildcard in any type argument.
 A wildcard is the declaration of an anonymous (unnamed) type parameter.
 
 \begin{tabbing}
@@ -418,6 +413,18 @@ Annotations may appear on the receiver type by changing the definition of
 
 
 \end{enumerate}
+
+A final change permits annotations to appear on the type parameter
+declaration in a class or method declaration, which is a declaration
+annotation rather than a type annotation:
+
+\begin{tabbing}
+\qquad \= \kill
+\nt{TypeParameter}: \\
+\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
+\end{tabbing}
+
+
 
 
 \subsection{Target meta-annotations for type annotations\label{target-meta-annotation}}
