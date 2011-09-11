@@ -25,11 +25,13 @@
 
 package com.sun.tools.javac.model;
 
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 import java.util.EnumSet;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
+
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.util.*;
@@ -54,11 +56,20 @@ public class JavacTypes implements javax.lang.model.util.Types {
         return instance;
     }
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /**
      * Public for use only by JavacProcessingEnvironment
      */
     protected JavacTypes(Context context) {
+        uid = ++uidCounter;
         setContext(context);
+    }
+
+    @Override
+    public String toString() {
+        return "JavacTypes#" + uid + " with this.types=" + types;
     }
 
     /**
@@ -133,7 +144,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(t.toString());
         Type unboxed = types.unboxedType((Type) t);
         if (! unboxed.isPrimitive())    // only true primitives, not void
-            throw new IllegalArgumentException(t.toString());
+            throw new IllegalArgumentException(String.format("unboxed (%s) is not primitive:  t=%s, this=%s, this.types=%s", unboxed, t, this, this.types));
         return unboxed;
     }
 
@@ -300,4 +311,26 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(o.toString());
         return clazz.cast(o);
     }
+
+    public List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type) {
+        return ((Type)type).typeAnnotations;
+    }
+
+    public <A extends Annotation> A typeAnnotationOf(TypeMirror type,
+            Class<A> annotationType) {
+        return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
+    }
+
+    public List<? extends AnnotationMirror> receiverTypeAnnotationsOf(
+            ExecutableType type) {
+        return ((Type)type).asMethodType().receiverTypeAnnotations;
+    }
+
+    public <A extends Annotation> A receiverTypeAnnotationOf(
+            ExecutableType type, Class<A> annotationType) {
+        return JavacElements.getAnnotation(
+                ((Type)type).asMethodType().receiverTypeAnnotations,
+                annotationType);
+    }
+
 }

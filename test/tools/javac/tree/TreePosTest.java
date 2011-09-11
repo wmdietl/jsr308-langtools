@@ -96,6 +96,7 @@ import static com.sun.tools.javac.util.Position.NOPOS;
 
 /*
  * @test
+ * @ignore
  * @bug 6919889
  * @summary assorted position errors in compiler syntax trees
  * @run main TreePosTest -q -r -ef ./tools/javac/typeAnnotations -ef ./tools/javap/typeAnnotations -et ANNOTATED_TYPE .
@@ -360,9 +361,7 @@ public class TreePosTest {
                     check("encl.start <= start", encl, self, encl.start <= self.start);
                     check("start <= pos", encl, self, self.start <= self.pos);
                     if (!(self.tag == JCTree.TYPEARRAY
-                            && (encl.tag == JCTree.VARDEF ||
-                                encl.tag == JCTree.METHODDEF ||
-                                encl.tag == JCTree.TYPEARRAY))) {
+                            && (encl.tag == JCTree.VARDEF || encl.tag == JCTree.TYPEARRAY))) {
                         check("encl.pos <= start || end <= encl.pos",
                                 encl, self, encl.pos <= self.start || self.end <= encl.pos);
                     }
