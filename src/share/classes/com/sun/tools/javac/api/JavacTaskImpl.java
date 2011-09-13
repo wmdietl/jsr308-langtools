@@ -153,8 +153,8 @@ public class JavacTaskImpl extends JavacTask {
 
     private void prepareCompiler() throws IOException {
         if (used.getAndSet(true)) {
-            // if (compiler == null)
-            //     throw new IllegalStateException();
+            if (compiler == null)
+                 throw new IllegalStateException();
         } else {
             initContext();
             compilerMain.setOptions(Options.instance(context));
@@ -274,6 +274,9 @@ public class JavacTaskImpl extends JavacTask {
     public Iterable<? extends TypeElement> enter(Iterable<? extends CompilationUnitTree> trees)
         throws IOException
     {
+        if (trees == null && notYetEntered != null && notYetEntered.isEmpty())
+            return List.nil();
+
         prepareCompiler();
 
         ListBuffer<JCCompilationUnit> roots = null;
