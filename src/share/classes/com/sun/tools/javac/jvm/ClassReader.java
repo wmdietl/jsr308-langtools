@@ -57,7 +57,6 @@ import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.*;
 import static com.sun.tools.javac.jvm.ClassFile.*;
-import com.sun.tools.javac.jvm.ClassFile.Version;
 import static com.sun.tools.javac.jvm.ClassFile.Version.*;
 
 import static com.sun.tools.javac.main.OptionName.*;
@@ -1436,10 +1435,10 @@ public class ClassReader implements Completer {
         position.type = type;
 
         switch (type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
         // new expression
@@ -1447,7 +1446,7 @@ public class ClassReader implements Completer {
         case NEW_GENERIC_OR_ARRAY:
             position.offset = nextChar();
             break;
-         // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             int table_length = nextChar();
@@ -1461,16 +1460,16 @@ public class ClassReader implements Completer {
                 position.lvarIndex[i] = nextChar();
             }
             break;
-         // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
-        // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             position.parameter_index = nextByte();
             break;
-        // type parameter bounds
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -1478,12 +1477,12 @@ public class ClassReader implements Completer {
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
             break;
-         // wildcard
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             position.wildcard_position = readPosition();
             break;
-         // Class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             position.type_index = nextChar();
@@ -1492,16 +1491,17 @@ public class ClassReader implements Completer {
         case THROWS:
             position.type_index = nextChar();
             break;
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             position.offset = nextChar();
             break;
-        // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             position.parameter_index = nextByte();
             break;
-        // method type argument: wasn't specified
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:

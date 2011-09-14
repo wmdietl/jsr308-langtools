@@ -210,7 +210,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             TreePath p = Trees.instance(env).getPath(elem);
 
             typeProcess(elem, p);
-            
+
             // report errors accumulated during type checking
             log.reportDeferredDiagnostics();
 
@@ -239,7 +239,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
         return false;
     }
 
-    
+
     /**
      * A task listener multiplexer.
      */

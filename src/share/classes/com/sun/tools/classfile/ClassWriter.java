@@ -717,7 +717,7 @@ public class ClassWriter {
         private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
-            // type case
+            // type cast
             case TYPECAST:
             case TYPECAST_GENERIC_OR_ARRAY:
             // instanceof
@@ -757,12 +757,12 @@ public class ClassWriter {
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
-            // wildcards
+            // wildcard bound
             case WILDCARD_BOUND:
             case WILDCARD_BOUND_GENERIC_OR_ARRAY:
                 write(p.wildcard_position, out);
                 break;
-            // class extends and implements clauses
+            // class extends or implements clause
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
                 out.writeByte(p.type_index);
@@ -771,17 +771,17 @@ public class ClassWriter {
             case THROWS:
                 out.writeByte(p.type_index);
                 break;
-            // class literals
+            // class literal
             case CLASS_LITERAL:
             case CLASS_LITERAL_GENERIC_OR_ARRAY:
                 out.writeShort(p.offset);
                 break;
-            // method parameters
+            // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 out.writeByte(p.parameter_index);
                 break;
-            // method/constructor type arguments
+            // method/constructor type argument
             case NEW_TYPE_ARGUMENT:
             case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             case METHOD_TYPE_ARGUMENT:

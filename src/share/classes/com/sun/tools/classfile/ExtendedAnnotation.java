@@ -74,7 +74,7 @@ public class ExtendedAnnotation {
         position.type = type;
 
         switch (type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
         // instanceof
@@ -102,12 +102,12 @@ public class ExtendedAnnotation {
         case METHOD_RECEIVER:
             // Do nothing
             break;
-        // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             position.parameter_index = cr.readUnsignedByte();
             break;
-        // type parameter bounds
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -115,12 +115,12 @@ public class ExtendedAnnotation {
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
-        // wildcards
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             position.wildcard_position = read_position(cr);
             break;
-        // class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             int in = cr.readUnsignedShort();
@@ -132,17 +132,17 @@ public class ExtendedAnnotation {
         case THROWS:
             position.type_index = cr.readUnsignedShort();
             break;
-        // class literals
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             position.offset = cr.readUnsignedShort();
             break;
-        // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             position.parameter_index = cr.readUnsignedByte();
             break;
-        // method type argument: wasn't specified
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
@@ -176,10 +176,10 @@ public class ExtendedAnnotation {
         int n = 0;
         n += 1; // target_type
         switch (pos.type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
         // new expression
@@ -187,7 +187,7 @@ public class ExtendedAnnotation {
         case NEW_GENERIC_OR_ARRAY:
             n += 2;
             break;
-         // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             n += 2; // table_length;
@@ -196,16 +196,16 @@ public class ExtendedAnnotation {
             n += 2 * table_length; // length;
             n += 2 * table_length; // index
             break;
-         // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
-        // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             n += 1; // parameter_index;
             break;
-        // type parameter bounds
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -213,11 +213,12 @@ public class ExtendedAnnotation {
             n += 1; // parameter_index
             n += 1; // bound_index
             break;
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             n += position_length(pos.wildcard_position);
             break;
-         // Class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             n += 2; // type_index
@@ -226,16 +227,17 @@ public class ExtendedAnnotation {
         case THROWS:
             n += 2; // type_index
             break;
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             n += 1; // offset
             break;
-        // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             n += 1; // parameter_index
             break;
-        // method type argument: wasn't specified
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
@@ -297,10 +299,10 @@ public class ExtendedAnnotation {
             sb.append(type);
 
             switch (type) {
-            // type case
+            // type cast
             case TYPECAST:
             case TYPECAST_GENERIC_OR_ARRAY:
-            // object creation
+            // instanceof
             case INSTANCEOF:
             case INSTANCEOF_GENERIC_OR_ARRAY:
             // new expression
@@ -309,7 +311,7 @@ public class ExtendedAnnotation {
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
-             // local variable
+            // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
                 sb.append(", {");
@@ -324,17 +326,17 @@ public class ExtendedAnnotation {
                 }
                 sb.append("}");
                 break;
-             // method receiver
+            // method receiver
             case METHOD_RECEIVER:
                 // Do nothing
                 break;
-            // type parameters
+            // type parameter
             case CLASS_TYPE_PARAMETER:
             case METHOD_TYPE_PARAMETER:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 break;
-            // type parameters bound
+            // type parameter bound
             case CLASS_TYPE_PARAMETER_BOUND:
             case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
             case METHOD_TYPE_PARAMETER_BOUND:
@@ -344,13 +346,13 @@ public class ExtendedAnnotation {
                 sb.append(", bound_index = ");
                 sb.append(bound_index);
                 break;
-             // wildcard
+            // wildcard bound
             case WILDCARD_BOUND:
             case WILDCARD_BOUND_GENERIC_OR_ARRAY:
                 sb.append(", wild_card = ");
                 sb.append(wildcard_position);
                 break;
-             // Class extends and implements clauses
+            // class extends or implements clause
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
                 sb.append(", type_index = ");
@@ -361,18 +363,19 @@ public class ExtendedAnnotation {
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
+            // class literal
             case CLASS_LITERAL:
             case CLASS_LITERAL_GENERIC_OR_ARRAY:
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
-            // method parameter: not specified
+            // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 break;
-            // method type argument: wasn't specified
+            // method/constructor type argument
             case NEW_TYPE_ARGUMENT:
             case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             case METHOD_TYPE_ARGUMENT:

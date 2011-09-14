@@ -91,7 +91,7 @@ public class AnnotationWriter extends BasicWriter {
         print(pos.type);
 
         switch (pos.type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
         // instanceof
@@ -126,13 +126,13 @@ public class AnnotationWriter extends BasicWriter {
         case METHOD_RECEIVER:
             // Do nothing
             break;
-        // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             print(", param_index=");
             print(pos.parameter_index);
             break;
-        // type parameters bound
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -142,13 +142,13 @@ public class AnnotationWriter extends BasicWriter {
             print(", bound_index=");
             print(pos.bound_index);
             break;
-        // wildcard
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             print(", wild_card=");
             print(pos.wildcard_position);
             break;
-        // class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             print(", type_index=");
@@ -159,7 +159,7 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
-        // class literals
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             if (showOffsets) {
@@ -173,7 +173,7 @@ public class AnnotationWriter extends BasicWriter {
             print(", param_index=");
             print(pos.parameter_index);
             break;
-        // method/constructor type arguments
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:

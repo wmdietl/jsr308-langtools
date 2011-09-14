@@ -154,7 +154,7 @@ public class JavacTaskImpl extends JavacTask {
     private void prepareCompiler() throws IOException {
         if (used.getAndSet(true)) {
             if (compiler == null)
-                 throw new IllegalStateException();
+                throw new IllegalStateException();
         } else {
             initContext();
             compilerMain.setOptions(Options.instance(context));

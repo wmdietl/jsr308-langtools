@@ -903,10 +903,10 @@ public class ClassWriter extends ClassFile {
     void writePosition(TypeAnnotationPosition p) {
         databuf.appendByte(p.type.targetTypeValue());
         switch (p.type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
         // new expression
@@ -914,7 +914,7 @@ public class ClassWriter extends ClassFile {
         case NEW_GENERIC_OR_ARRAY:
             databuf.appendChar(p.offset);
             break;
-         // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             databuf.appendChar(p.lvarOffset.length);  // for table length
@@ -924,16 +924,16 @@ public class ClassWriter extends ClassFile {
                 databuf.appendChar(p.lvarIndex[i]);
             }
             break;
-         // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
-        // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             databuf.appendByte(p.parameter_index);
             break;
-        // type parameters bounds
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -941,12 +941,12 @@ public class ClassWriter extends ClassFile {
             databuf.appendByte(p.parameter_index);
             databuf.appendByte(p.bound_index);
             break;
-         // wildcards
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             writePosition(p.wildcard_position);
             break;
-         // Class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             databuf.appendChar(p.type_index);
@@ -955,16 +955,17 @@ public class ClassWriter extends ClassFile {
         case THROWS:
             databuf.appendChar(p.type_index);
             break;
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             databuf.appendChar(p.offset);
             break;
-        // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             databuf.appendByte(p.parameter_index);
             break;
-        // method type argument: wasn't specified
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:

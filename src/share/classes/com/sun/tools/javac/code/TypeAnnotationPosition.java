@@ -77,19 +77,19 @@ public class TypeAnnotationPosition implements Cloneable {
         sb.append(type);
 
         switch (type) {
-        // type case
+        // type cast
         case TYPECAST:
         case TYPECAST_GENERIC_OR_ARRAY:
-            // object creation
+        // instanceof
         case INSTANCEOF:
         case INSTANCEOF_GENERIC_OR_ARRAY:
-            // new expression
+        // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
-            // local variable
+        // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
             sb.append(", {");
@@ -104,17 +104,17 @@ public class TypeAnnotationPosition implements Cloneable {
             }
             sb.append("}");
             break;
-            // method receiver
+        // method receiver
         case METHOD_RECEIVER:
             // Do nothing
             break;
-            // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-            // type parameters bound
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
         case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
         case METHOD_TYPE_PARAMETER_BOUND:
@@ -124,34 +124,36 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(", bound_index = ");
             sb.append(bound_index);
             break;
-            // wildcard
+        // wildcard bound
         case WILDCARD_BOUND:
         case WILDCARD_BOUND_GENERIC_OR_ARRAY:
             sb.append(", wild_card = ");
             sb.append(wildcard_position);
             break;
-            // Class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_GENERIC_OR_ARRAY:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-            // throws
+        // throws
         case THROWS:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
+        // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
-            // method parameter: not specified
+        // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
+        // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
         case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
         case METHOD_TYPE_ARGUMENT:
@@ -161,7 +163,7 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-            // We don't need to worry abut these
+        // We don't need to worry abut these
         case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
         case FIELD:
