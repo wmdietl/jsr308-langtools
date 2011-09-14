@@ -65,7 +65,10 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType {
+public class Type implements PrimitiveType, Cloneable {
+
+    private static int uidCounter = 0;
+    private final int uid;
 
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
@@ -81,9 +84,13 @@ public class Type implements PrimitiveType {
      */
     public int tag;
 
-    /** The defining class / interface / package / type variable
+    /** The defining class / interface / package / type variable.
      */
     public TypeSymbol tsym;
+
+    /** The type annotations on this type.
+     */
+    public List<Attribute.TypeCompound> typeAnnotations = List.nil();
 
     /**
      * The constant value of this type, null if this type does not
@@ -98,7 +105,7 @@ public class Type implements PrimitiveType {
     /**
      * Get the representation of this type used for modelling purposes.
      * By default, this is itself. For ErrorType, a different value
-     * may be provided,
+     * may be provided.
      */
     public Type getModelType() {
         return this;
@@ -118,6 +125,7 @@ public class Type implements PrimitiveType {
     public Type(int tag, TypeSymbol tsym) {
         this.tag = tag;
         this.tsym = tsym;
+        uid = ++uidCounter;
     }
 
     /** An abstract class for mappings from types to types
@@ -195,8 +203,12 @@ public class Type implements PrimitiveType {
         String s = (tsym == null || tsym.name == null)
             ? "<none>"
             : tsym.name.toString();
-        if (moreInfo && tag == TYPEVAR) s = s + hashCode();
+        if (moreInfo && tag == TYPEVAR) s = s + uid;
         return s;
+    }
+
+    public String toStringDebug() {
+        return toString() + " " + getClass().getSimpleName() + "#" + uid;
     }
 
     /**
@@ -401,6 +413,14 @@ public class Type implements PrimitiveType {
     /** Complete loading all classes in this type.
      */
     public void complete() {}
+
+    public Object clone() {
+        try {
+            return super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     public TypeSymbol asElement() {
         return tsym;
@@ -865,6 +885,10 @@ public class Type implements PrimitiveType {
         public Type restype;
         public List<Type> thrown;
 
+        /** The type annotations on the method receiver.
+         */
+        public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
+
         public MethodType(List<Type> argtypes,
                           Type restype,
                           List<Type> thrown,
@@ -1031,7 +1055,11 @@ public class Type implements PrimitiveType {
         }
 
         @Override
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if ((bound == null || bound.tag == NONE) && this != tsym.type)
+                bound = tsym.type.getUpperBound();
+            return bound;
+        }
 
         int rank_field = -1;
 
@@ -1050,6 +1078,23 @@ public class Type implements PrimitiveType {
 
         public <R, P> R accept(TypeVisitor<R, P> v, P p) {
             return v.visitTypeVariable(this, p);
+        }
+
+
+        public String toStringVerbose() {
+            String result = super.toString();
+            result = result + " lower:" + getLowerBound();
+            result = result + " upper:" + getUpperBound();
+            return result;
+        }
+
+        // FIXME: clone() isn't conformant to the clone specification
+        public TypeVar clonedType = null;
+        public Object clone() {
+            TypeVar type = (TypeVar)super.clone();
+            type.clonedType = (this.clonedType == null) ?
+                    this: this.clonedType;
+            return type;
         }
     }
 
@@ -1087,7 +1132,10 @@ public class Type implements PrimitiveType {
             return "capture#"
                 + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
                 + " of "
-                + wildcard;
+                + ((wildcard.type == this)
+                   ? (wildcard.kind.toString() + "capture#"
+                      + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME)
+                   : wildcard);
         }
     }
 

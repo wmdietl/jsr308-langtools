@@ -138,6 +138,7 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
         r = scanAndReduce(node.getReturnType(), p, r);
         r = scanAndReduce(node.getTypeParameters(), p, r);
         r = scanAndReduce(node.getParameters(), p, r);
+        r = scanAndReduce(node.getReceiverAnnotations(), p, r);
         r = scanAndReduce(node.getThrows(), p, r);
         r = scanAndReduce(node.getBody(), p, r);
         r = scanAndReduce(node.getDefaultValue(), p, r);
@@ -360,7 +361,8 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
     }
 
     public R visitTypeParameter(TypeParameterTree node, P p) {
-        R r = scan(node.getBounds(), p);
+        R r = scan(node.getAnnotations(), p);
+        r = scanAndReduce(node.getBounds(), p, r);
         return r;
     }
 
@@ -377,6 +379,12 @@ public class TreeScanner<R,P> implements TreeVisitor<R,P> {
         r = scanAndReduce(node.getArguments(), p, r);
         return r;
     }
+
+   public R visitAnnotatedType(AnnotatedTypeTree node, P p) {
+       R r = scan(node.getAnnotations(), p);
+       r = scanAndReduce(node.getUnderlyingType(), p, r);
+       return r;
+   }
 
     public R visitOther(Tree node, P p) {
         return null;

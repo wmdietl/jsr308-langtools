@@ -65,6 +65,7 @@ import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeCopier;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.tree.TreeMaker;
+import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.JCDiagnostic;
 import com.sun.tools.javac.util.List;
@@ -112,7 +113,11 @@ public class JavacTrees extends Trees {
         return instance;
     }
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     private JavacTrees(Context context) {
+        uid = ++uidCounter;
         context.put(JavacTrees.class, this);
         init(context);
     }
@@ -130,6 +135,10 @@ public class JavacTrees extends Trees {
         treeMaker = TreeMaker.instance(context);
         memberEnter = MemberEnter.instance(context);
         javacTaskImpl = context.get(JavacTaskImpl.class);
+    }
+
+    @Override public String toString() {
+        return "JavacTrees#" + uid;
     }
 
     public SourcePositions getSourcePositions() {
@@ -313,10 +322,19 @@ public class JavacTrees extends Trees {
                     break;
                 case BLOCK: {
 //                    System.err.println("BLOCK: ");
-                    if (method != null)
-                        env = memberEnter.getMethodEnv(method, env);
-                    JCTree body = copier.copy((JCTree)tree, (JCTree) path.getLeaf());
-                    env = attribStatToTree(body, env, copier.leafCopy);
+                    if (method != null) {
+                        try {
+                            Assert.check(method.body == tree);
+                            method.body = copier.copy((JCBlock)tree, (JCTree) path.getLeaf());
+                            env = memberEnter.getMethodEnv(method, env);
+                            env = attribStatToTree(method.body, env, copier.leafCopy);
+                        } finally {
+                            method.body = (JCBlock) tree;
+                        }
+                    } else {
+                        JCBlock body = copier.copy((JCBlock)tree, (JCTree) path.getLeaf());
+                        env = attribStatToTree(body, env, copier.leafCopy);
+                    }
                     return env;
                 }
                 default:
@@ -329,7 +347,7 @@ public class JavacTrees extends Trees {
                     }
             }
         }
-        return field != null ? memberEnter.getInitEnv(field, env) : env;
+        return (field != null) ? memberEnter.getInitEnv(field, env) : env;
     }
 
     private Env<AttrContext> attribStatToTree(JCTree stat, Env<AttrContext>env, JCTree tree) {
