@@ -65,7 +65,7 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType, Cloneable {
+public class Type implements PrimitiveType {
 
     private static int uidCounter = 0;
     private final int uid;
@@ -413,14 +413,6 @@ public class Type implements PrimitiveType, Cloneable {
     /** Complete loading all classes in this type.
      */
     public void complete() {}
-
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
-    }
 
     public TypeSymbol asElement() {
         return tsym;
@@ -1079,23 +1071,6 @@ public class Type implements PrimitiveType, Cloneable {
         public <R, P> R accept(TypeVisitor<R, P> v, P p) {
             return v.visitTypeVariable(this, p);
         }
-
-
-        public String toStringVerbose() {
-            String result = super.toString();
-            result = result + " lower:" + getLowerBound();
-            result = result + " upper:" + getUpperBound();
-            return result;
-        }
-
-        // FIXME: clone() isn't conformant to the clone specification
-        public TypeVar clonedType = null;
-        public Object clone() {
-            TypeVar type = (TypeVar)super.clone();
-            type.clonedType = (this.clonedType == null) ?
-                    this: this.clonedType;
-            return type;
-        }
     }
 
     /** A captured type variable comes from wildcards which can have
@@ -1131,11 +1106,7 @@ public class Type implements PrimitiveType, Cloneable {
         public String toString() {
             return "capture#"
                 + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
-                + " of "
-                + ((wildcard.type == this)
-                   ? (wildcard.kind.toString() + "capture#"
-                      + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME)
-                   : wildcard);
+                + " of " + wildcard;
         }
     }
 

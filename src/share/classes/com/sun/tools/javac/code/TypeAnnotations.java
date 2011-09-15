@@ -35,7 +35,6 @@ import javax.lang.model.element.ElementKind;
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
-import com.sun.tools.javac.code.Type.ArrayType;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeInfo;
@@ -60,8 +59,15 @@ public class TypeAnnotations {
         return instance;
     }
 
-    private final Symtab syms;
-    private final Names names;
+    /*
+     * These two fields are only used in method annotationType; The fields are
+     * effectively private, as they are only assigned once in the constructor.
+     * Setting static fields in a constructor is not clean, but these are
+     * basically global data structures.
+     */
+    private static Symtab syms;
+    private static Names names;
+
 
     protected TypeAnnotations(Context context) {
         context.put(key, this);
@@ -95,12 +101,12 @@ public class TypeAnnotations {
         new TypeAnnotationLift(visitBodies).scan(tree);
     }
 
-    enum AnnotationType { DECLARATION, TYPE, BOTH };
+    private enum AnnotationType { DECLARATION, TYPE, BOTH };
 
     /**
      * Separates type annotations from declaration annotations
      */
-    private class AnnotationsKindSeparator extends TreeScanner {
+    private static class AnnotationsKindSeparator extends TreeScanner {
 
         private final boolean visitBodies;
         public AnnotationsKindSeparator(boolean visitBodies) {
@@ -364,7 +370,7 @@ public class TypeAnnotations {
             return p;
         }
 
-        private void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
+        private static void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
             for (JCTypeAnnotation anno : annotations) {
                 anno.annotation_position = position;
                 anno.attribute_field.position = position;
@@ -568,6 +574,7 @@ public class TypeAnnotations {
             scan(tree.args);
         }
 
+        @Override
         public void visitAnnotation(JCAnnotation tree) {
             if (tree instanceof JCTypeAnnotation)
                 recordedTypeAnnotations = recordedTypeAnnotations.append(((JCTypeAnnotation)tree).attribute_field);
@@ -575,7 +582,7 @@ public class TypeAnnotations {
         }
     }
 
-    private void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
+    private static void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
         List<Compound> annotations = sym.attributes_field;
 
         ListBuffer<Compound> declAnnos = new ListBuffer<Compound>();
@@ -614,16 +621,15 @@ public class TypeAnnotations {
             sym.owner.typeAnnotations = sym.owner.typeAnnotations.appendList(typeAnnotations);
     }
 
-    private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
+    private static Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
-            Type atype = (Type)type.clone();
-            atype.typeAnnotations = annotations;
-            return atype;
+            type.typeAnnotations = annotations;
+            return type;
         } else {
-            ArrayType arType = (ArrayType)type;
+            Type.ArrayType arType = (Type.ArrayType) type;
             int depth = 0;
             while (arType.elemtype.tag == TypeTags.ARRAY) {
-                arType = (ArrayType)arType.elemtype;
+                arType = (Type.ArrayType) arType.elemtype;
                 depth++;
             }
             arType.elemtype = typeWithAnnotations(arType.elemtype, annotations);
@@ -637,11 +643,11 @@ public class TypeAnnotations {
         return type;
     }
 
-    private TypeCompound toTypeCompound(Compound a, TypeAnnotationPosition p) {
+    private static TypeCompound toTypeCompound(Compound a, TypeAnnotationPosition p) {
         return new TypeCompound(a, p.clone());
     }
 
-    private boolean areAllDecl(Symbol s) {
+    private static boolean areAllDecl(Symbol s) {
         for (Compound a : s.attributes_field) {
             if (annotationType(a, s) != AnnotationType.DECLARATION)
                 return false;
@@ -650,7 +656,7 @@ public class TypeAnnotations {
         return true;
     }
 
-    AnnotationType annotationType(Compound a, Symbol s) {
+    private static AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) return inferTargetMetaInfo(a, s);
@@ -718,7 +724,7 @@ public class TypeAnnotations {
             return isType ? AnnotationType.TYPE : AnnotationType.DECLARATION;
     }
 
-    private AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
+    private static AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
         if (s.kind == TYP || s.kind == VAR
             || (s.kind == MTH && !s.isConstructor() &&
                     s.type.getReturnType().tag != VOID))
