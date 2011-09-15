@@ -44,3 +44,6 @@ doc/annotation-extensions.htoc
 doc/annotation-extensions.log
 doc/annotation-extensions.pdf
 doc/annotation-extensions.toc
+
+syntax: regexp
+^\.settings$

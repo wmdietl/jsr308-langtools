@@ -3054,11 +3054,10 @@ public class Attr extends JCTree.Visitor {
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
         Type underlyingType = attribType(tree.getUnderlyingType(), env);
-        Type type = (Type)underlyingType.clone();
         this.attribAnnotationTypes(
                 List.convert(JCAnnotation.class, tree.annotations), env);
-        annotateType(type, tree.annotations);
-        result = tree.type = type;
+        annotateType(underlyingType, tree.annotations);
+        result = tree.type = underlyingType;
     }
 
     /**

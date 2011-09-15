@@ -2329,26 +2329,12 @@ public class Types {
                 return new MethodType(argtypes, restype, thrown, t.tsym);
         }
 
-        private boolean equalTypes(Type t1, Type t2) {
-            if (t1 == t2)
-                return true;
-
-            if ((t1 instanceof TypeVar) && (t2 instanceof TypeVar)) {
-                TypeVar tv1 = (TypeVar)t1, tv2 = (TypeVar)t2;
-                return (tv1.clonedType == t2
-                        || tv2.clonedType == t1
-                        || (tv1.clonedType != null && tv1.clonedType == tv2.clonedType));
-            }
-
-            return false;
-        }
-
         @Override
         public Type visitTypeVar(TypeVar t, Void ignored) {
             for (List<Type> from = this.from, to = this.to;
                  from.nonEmpty();
                  from = from.tail, to = to.tail) {
-                if (equalTypes(t, from.head)) {
+                if (t == from.head) {
                     return to.head.withTypeVar(t);
                 }
             }
