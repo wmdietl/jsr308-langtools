@@ -28,9 +28,9 @@
 
 import java.io.*;
 
-public class ArrayClassLiterals {
+public class ArrayClassLiterals3 {
     public static void main(String[] args) throws Exception {
-        new ArrayClassLiterals().run();
+        new ArrayClassLiterals3().run();
     }
 
     public void run() throws IOException {
