@@ -21,14 +21,14 @@
  * questions.
  */
 
-import java.io.*;
-import com.sun.tools.classfile.*;
-
 /*
  * @test ArrayClassLiterals
  * @bug 6863814
  * @summary test that class literals array doesn't crash javap
  */
+
+import java.io.*;
+import com.sun.tools.classfile.*;
 
 public class ArrayClassLiterals {
     public static void main(String[] args) throws Exception {
