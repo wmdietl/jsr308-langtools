@@ -163,7 +163,7 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-        // We don't need to worry abut these
+        // We don't need to worry about these
         case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
         case FIELD:

@@ -150,7 +150,7 @@ public class ExtendedAnnotation {
             position.offset = cr.readUnsignedShort();
             position.type_index = cr.readUnsignedByte();
             break;
-        // We don't need to worry abut these
+        // We don't need to worry about these
         case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
         case FIELD:

@@ -59,14 +59,8 @@ public class TypeAnnotations {
         return instance;
     }
 
-    /*
-     * These two fields are only used in method annotationType; The fields are
-     * effectively private, as they are only assigned once in the constructor.
-     * Setting static fields in a constructor is not clean, but these are
-     * basically global data structures.
-     */
-    private static Symtab syms;
-    private static Names names;
+    private final Symtab syms;
+    private final Names names;
 
 
     protected TypeAnnotations(Context context) {
@@ -106,7 +100,7 @@ public class TypeAnnotations {
     /**
      * Separates type annotations from declaration annotations
      */
-    private static class AnnotationsKindSeparator extends TreeScanner {
+    private class AnnotationsKindSeparator extends TreeScanner {
 
         private final boolean visitBodies;
         public AnnotationsKindSeparator(boolean visitBodies) {
@@ -582,7 +576,7 @@ public class TypeAnnotations {
         }
     }
 
-    private static void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
+    private void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
         List<Compound> annotations = sym.attributes_field;
 
         ListBuffer<Compound> declAnnos = new ListBuffer<Compound>();
@@ -621,7 +615,7 @@ public class TypeAnnotations {
             sym.owner.typeAnnotations = sym.owner.typeAnnotations.appendList(typeAnnotations);
     }
 
-    private static Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
+    private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
             type.typeAnnotations = annotations;
             return type;
@@ -643,11 +637,11 @@ public class TypeAnnotations {
         return type;
     }
 
-    private static TypeCompound toTypeCompound(Compound a, TypeAnnotationPosition p) {
+    private TypeCompound toTypeCompound(Compound a, TypeAnnotationPosition p) {
         return new TypeCompound(a, p.clone());
     }
 
-    private static boolean areAllDecl(Symbol s) {
+    private boolean areAllDecl(Symbol s) {
         for (Compound a : s.attributes_field) {
             if (annotationType(a, s) != AnnotationType.DECLARATION)
                 return false;
@@ -656,7 +650,7 @@ public class TypeAnnotations {
         return true;
     }
 
-    private static AnnotationType annotationType(Compound a, Symbol s) {
+    private AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) return inferTargetMetaInfo(a, s);
@@ -724,7 +718,7 @@ public class TypeAnnotations {
             return isType ? AnnotationType.TYPE : AnnotationType.DECLARATION;
     }
 
-    private static AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
+    private AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
         if (s.kind == TYP || s.kind == VAR
             || (s.kind == MTH && !s.isConstructor() &&
                     s.type.getReturnType().tag != VOID))

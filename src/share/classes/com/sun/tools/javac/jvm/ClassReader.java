@@ -1509,7 +1509,7 @@ public class ClassReader implements Completer {
             position.offset = nextChar();
             position.type_index = nextByte();
             break;
-        // We don't need to worry abut these
+        // We don't need to worry about these
         case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
         case FIELD:

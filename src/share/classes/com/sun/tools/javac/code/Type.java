@@ -1106,7 +1106,8 @@ public class Type implements PrimitiveType {
         public String toString() {
             return "capture#"
                 + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
-                + " of " + wildcard;
+                + " of "
+                + wildcard;
         }
     }
 

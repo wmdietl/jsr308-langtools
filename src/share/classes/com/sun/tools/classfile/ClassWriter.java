@@ -789,7 +789,7 @@ public class ClassWriter {
                 out.writeShort(p.offset);
                 out.writeByte(p.type_index);
                 break;
-            // We don't need to worry abut these
+            // We don't need to worry about these
             case METHOD_RETURN:
             case METHOD_RETURN_GENERIC_OR_ARRAY:
             case FIELD:
