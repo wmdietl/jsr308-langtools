@@ -206,6 +206,16 @@ public class JavacParser implements Parser {
      */
     boolean keepLineMap;
 
+    /** Switch: is "this" allowed as an identifier?
+     * This is needed to parse receiver types.
+     */
+    boolean allowThisIdent;
+    
+    /** The type of the method receiver, as specified by a first "this" parameter.
+     */
+    JCVariableDecl receiverParam;
+    
+
     /** When terms are parsed, the mode determines which is expected:
      *     mode = EXPR        : an expression
      *     mode = TYPE        : a type
@@ -490,6 +500,19 @@ public class JavacParser implements Parser {
                 Name name = S.name();
                 S.nextToken();
                 return name;
+            }
+        } else if (S.token() == THIS) {
+            if (allowThisIdent) {
+            	// Make sure we're using a supported source version.
+        		checkTypeAnnotations();
+            	Name name = S.name();
+                S.nextToken();
+                return name;
+            } else {
+            	// TODO: add error message
+                error(S.pos(), "this.as.identifier");
+                S.nextToken();
+                return names.error;
             }
         } else {
             accept(IDENTIFIER);
@@ -2060,11 +2083,16 @@ public class JavacParser implements Parser {
         }
     }
 
-    /** CatchClause     = CATCH "(" FormalParameter ")" Block
+    /** CatchClause     = CATCH [Annotations] "(" FormalParameter ")" Block
+     * TODO: the "FormalParameter" is not correct, it uses the special "catchTypes" rule below.
      */
     JCCatch catchClause() {
         int pos = S.pos();
         accept(CATCH);
+        
+        List<JCTypeAnnotation> annotations = typeAnnotationsOpt();
+        // pass annotations to TypeUnion.
+        
         accept(LPAREN);
         JCModifiers mods = optFinal(Flags.PARAMETER);
         List<JCExpression> catchTypes = catchTypes();
@@ -2083,7 +2111,9 @@ public class JavacParser implements Parser {
         while (S.token() == BAR) {
             checkMulticatch();
             S.nextToken();
-            catchTypes.add(qualident());
+            // Instead of qualident this is now parseType.
+            // But would that allow too much, e.g. arrays or generics?
+            catchTypes.add(parseType());
         }
         return catchTypes.toList();
     }
@@ -2942,20 +2972,10 @@ public class JavacParser implements Parser {
                               List<JCTypeParameter> typarams,
                               boolean isInterface, boolean isVoid,
                               String dc) {
+    	this.receiverParam = null;
+    	// Parsing formalParameters sets the receiverParam, if present
         List<JCVariableDecl> params = formalParameters();
-
-        List<JCTypeAnnotation> receiverAnnotations;
-        if (!isVoid) {
-            // need to distinguish between receiver anno and array anno
-            // look at typeAnnotationsPushedBack comment
-            this.permitTypeAnnotationsPushBack = true;
-            type = methodReturnArrayRest(type);
-            this.permitTypeAnnotationsPushBack = false;
-            receiverAnnotations = typeAnnotationsPushedBack;
-            typeAnnotationsPushedBack = List.nil();
-        } else
-            receiverAnnotations = typeAnnotationsOpt();
-
+        if (!isVoid) type = bracketsOpt(type);
         List<JCExpression> thrown = List.nil();
         if (S.token() == THROWS) {
             S.nextToken();
@@ -2985,32 +3005,33 @@ public class JavacParser implements Parser {
 
         JCMethodDecl result =
             toP(F.at(pos).MethodDef(mods, name, type, typarams,
-                                    params, receiverAnnotations, thrown,
+                                    params, receiverParam, thrown,
                                     body, defaultValue));
         attach(result, dc);
         return result;
     }
 
-    /** Parses the array levels after the format parameters list, and append
-     * them to the return type, while preseving the order of type annotations
+    /** Parses the array levels after the formal parameter list, and appends
+     * them to the return type, while preserving the order of type annotations
      */
+    /* TODO: this seems no longer needed with the new receiver syntax or is it?
     private JCExpression methodReturnArrayRest(JCExpression type) {
         if (type.getTag() != JCTree.TYPEARRAY)
             return bracketsOpt(type);
 
-        JCArrayTypeTree baseArray = (JCArrayTypeTree)type;
+        JCArrayTypeTree baseArray = (JCArrayTypeTree) type;
         while (TreeInfo.typeIn(baseArray.elemtype) instanceof JCArrayTypeTree)
-            baseArray = (JCArrayTypeTree)TreeInfo.typeIn(baseArray.elemtype);
+            baseArray = (JCArrayTypeTree) TreeInfo.typeIn(baseArray.elemtype);
 
         if (baseArray.elemtype.getTag() == JCTree.ANNOTATED_TYPE) {
-            JCAnnotatedType at = (JCAnnotatedType)baseArray.elemtype;
+            JCAnnotatedType at = (JCAnnotatedType) baseArray.elemtype;
             at.underlyingType = bracketsOpt(at.underlyingType);
         } else {
             baseArray.elemtype = bracketsOpt(baseArray.elemtype);
         }
 
         return type;
-    }
+    }*/
 
     /** QualidentList = [Annotations] Qualident {"," [Annotations] Qualident}
      */
@@ -3082,7 +3103,14 @@ public class JavacParser implements Parser {
         JCVariableDecl lastParam = null;
         accept(LPAREN);
         if (S.token() != RPAREN) {
-            params.append(lastParam = formalParameter());
+        	this.allowThisIdent = true;
+        	lastParam = formalParameter();
+        	if (lastParam.name.contentEquals(Token.THIS.name)) {
+        		this.receiverParam = lastParam;
+        	} else {
+        		params.append(lastParam);
+        	}
+            this.allowThisIdent = false;
             while ((lastParam.mods.flags & Flags.VARARGS) == 0 && S.token() == COMMA) {
                 S.nextToken();
                 params.append(lastParam = formalParameter());
@@ -3148,7 +3176,7 @@ public class JavacParser implements Parser {
     JCVariableDecl formalParameter() {
         JCModifiers mods = optFinal(Flags.PARAMETER);
         // need to distinguish between vararg annos and array annos
-        // look at typeAnnotaitonsPushedBack comment
+        // look at typeAnnotationsPushedBack comment
         this.permitTypeAnnotationsPushBack = true;
         JCExpression type = parseType();
         this.permitTypeAnnotationsPushBack = false;

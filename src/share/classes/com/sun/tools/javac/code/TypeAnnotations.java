@@ -136,6 +136,11 @@ public class TypeAnnotations {
                     }
                     ++i;
                 }
+                if (tree.recvparam!=null) {
+                	// TODO: Why is this slightly different from the return type above?
+                	separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
+                			new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
+                }
             }
             super.visitMethodDef(tree);
         }
@@ -242,14 +247,15 @@ public class TypeAnnotations {
                     return p;
 
                 case METHOD: {
-                    JCMethodDecl frameMethod = (JCMethodDecl)frame;
+                    JCMethodDecl frameMethod = (JCMethodDecl) frame;
                     p.pos = frame.pos;
-                    if (frameMethod.receiverAnnotations.contains(tree))
+                    if (frameMethod.recvparam == tree) {
+                    	// TODO: is the right tree used above?
                         p.type = TargetType.METHOD_RECEIVER;
-                    else if (frameMethod.thrown.contains(tree)) {
+                    } else if (frameMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
                         p.type_index = frameMethod.thrown.indexOf(tree);
-                    } else if (((JCMethodDecl)frame).restype == tree) {
+                    } else if (frameMethod.restype == tree) {
                         p.type = TargetType.METHOD_RETURN;
                     } else if (frameMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
@@ -417,14 +423,6 @@ public class TypeAnnotations {
         public void visitAnnotatedType(JCAnnotatedType tree) {
             findPosition(tree, peek2(), tree.annotations);
             super.visitAnnotatedType(tree);
-        }
-
-        @Override
-        public void visitMethodDef(JCMethodDecl tree) {
-            super.visitMethodDef(tree);
-            TypeAnnotationPosition p = new TypeAnnotationPosition();
-            p.type = TargetType.METHOD_RECEIVER;
-            setTypeAnnotationPos(tree.receiverAnnotations, p);
         }
 
         @Override
@@ -603,20 +601,28 @@ public class TypeAnnotations {
         sym.attributes_field = declAnnos.toList();
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
         Type atype = typeWithAnnotations(type, typeAnnotations);
+
         if (sym.getKind() == ElementKind.METHOD) {
             sym.type.asMethodType().restype = atype;
-        } else
+        } else {
             sym.type = atype;
-
+        }
+        
         sym.typeAnnotations = sym.typeAnnotations.appendList(typeAnnotations);
         if (sym.getKind() == ElementKind.PARAMETER
-            || sym.getKind() == ElementKind.LOCAL_VARIABLE)
+            || sym.getKind() == ElementKind.LOCAL_VARIABLE) {
             sym.owner.typeAnnotations = sym.owner.typeAnnotations.appendList(typeAnnotations);
+        }
+        
+        if (sym.getKind() == ElementKind.PARAMETER &&
+        		sym.getQualifiedName().equals(names._this)) {
+        	sym.owner.type.asMethodType().recvtype = atype;
+        }
     }
 
     private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
-            Type atype = (Type)type.clone();
+            Type atype = (Type) type.clone();
             atype.typeAnnotations = annotations;
             return atype;
         } else {
