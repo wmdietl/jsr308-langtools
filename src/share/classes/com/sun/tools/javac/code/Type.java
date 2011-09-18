@@ -879,7 +879,7 @@ public class Type implements PrimitiveType {
 
         /** The type annotations on the method receiver.
          */
-        public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
+        public Type recvtype;
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -963,6 +963,7 @@ public class Type implements PrimitiveType {
             for (List<Type> l = argtypes; l.nonEmpty(); l = l.tail)
                 l.head.complete();
             restype.complete();
+            recvtype.complete();
             for (List<Type> l = thrown; l.nonEmpty(); l = l.tail)
                 l.head.complete();
         }
