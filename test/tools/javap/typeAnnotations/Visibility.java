@@ -81,21 +81,21 @@ public class Visibility {
         // visible annotations: RUNTIME
         out.println("  @Retention(RetentionPolicy.RUNTIME)");
         out.println("  @interface A { }");
-        out.println("  void visible() @A { }");
+        out.println("  void visible(@A Test this) { }");
 
         // invisible annotations: CLASS
         out.println("  @Retention(RetentionPolicy.CLASS)");
         out.println("  @interface B { }");
-        out.println("  void invisible() @B { }");
+        out.println("  void invisible(@B Test this) { }");
 
         // source annotations
         out.println("  @Retention(RetentionPolicy.SOURCE)");
         out.println("  @interface C { }");
-        out.println("  void source() @C { }");
+        out.println("  void source(@C Test this) { }");
 
         // default visibility: CLASS
         out.println("  @interface D { }");
-        out.println("  void def() @D { }");
+        out.println("  void def(@D Test this) { }");
         out.println("}");
         out.close();
         return f;

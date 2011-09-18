@@ -64,15 +64,12 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
     // Handle receiver annotations
     // Handle annotations on a qualified identifier list
-    void test2() @C @D throws @A IllegalArgumentException, @B IOException {
+    void test2(@C @D BasicTest this) throws @A IllegalArgumentException, @B IOException {
 
     }
 
     // Handle annotations on a varargs element type
-    void test3(Object @A... objs) {
+    void test3(@B Object @A... objs) { }
 
-    }
-
-    void test4(Class<?> @A ... clz) {
-    }
+    void test4(@B Class<@C ?> @A ... clz) { }
 }
