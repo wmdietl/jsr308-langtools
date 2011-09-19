@@ -25,6 +25,8 @@
 
 package java.lang.reflect;
 
+import java.lang.annotation.Annotation;
+
 /**
  * Type is the common superinterface for all types in the Java
  * programming language. These include raw types, parameterized types,
@@ -32,6 +34,9 @@ package java.lang.reflect;
  *
  * @since 1.5
  */
-
 public interface Type {
+    boolean isTypeAnnotationPresent(Class<? extends Annotation> annotationClass);
+    <T extends Annotation> T getTypeAnnotation(Class<T> annotationClass);
+    Annotation[] getTypeAnnotations();
+    Annotation[] getDeclaredTypeAnnotations();	
 }
