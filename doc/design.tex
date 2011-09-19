@@ -1488,7 +1488,7 @@ class DAG {
 
     // ...
 
-    \NonNull List<\NonNull Vertex> getNeighbors(@Interned @Readonly Vertex v) @Readonly { \label[getNeighbors]\label[InternedAnnotation]
+    \NonNull List<\NonNull Vertex> getNeighbors(@Readonly DAG this, @Interned @Readonly Vertex v) { \label[getNeighbors]\label[InternedAnnotation]
         \NonNull List<\NonNull Vertex> neighbors = new LinkedList<\NonNull Vertex>();
         for (\NonNull Edge e : edges)           \label[eNonNull]
             if (e.from() == v)                  \label[useE1]\label[objectequality]
@@ -1509,7 +1509,7 @@ class DAG {
  5
  6      // ...
  7
- 8      List&lt;Vertex&gt; getNeighbors(@Interned @Readonly Vertex v) @Readonly { <a name="getNeighbors"></a><a name="InternedAnnotation"></a>
+ 8      List&lt;Vertex&gt; getNeighbors(@Readonly DAG this, @Interned @Readonly Vertex v) { <a name="getNeighbors"></a><a name="InternedAnnotation"></a>
  9          List&lt;Vertex&gt; neighbors = new LinkedList&lt;Vertex&gt;();
 10          for (Edge e : edges)                <a name="eNonNull"></a>
 11              if (e.from() == v)              <a name="useE1"></a><a name="objectequality"></a>
@@ -2080,7 +2080,7 @@ annotation, or a return value annotation:
 % As another example, this receiver annotation
 % 
 % \begin{Verbatim}
-%   Dimension getSize() @Readonly { ... }
+%   Dimension getSize(@Readonly MyClass this) { ... }
 % \end{Verbatim}
 % 
 % indicates that \code{getSize} does not modify its receiver.
@@ -2988,7 +2988,7 @@ clients would immediately cast the result of the latter method.)
 % Suppose that a method is declared as:
 % 
 % \begin{Verbatim}
-%   @NonEmpty List<@Interned String> foo(@NonNull List<@Opened File> files) @Readonly {...}
+%   @NonEmpty List<@Interned String> foo(@Readonly MyClass this, @NonNull List<@Opened File> files) {...}
 % \end{Verbatim}
 % 
 % \noindent
