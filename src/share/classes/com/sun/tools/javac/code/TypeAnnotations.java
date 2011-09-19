@@ -324,14 +324,20 @@ public class TypeAnnotations {
                     p.pos = frame.pos;
                     switch (v.getKind()) {
                         case LOCAL_VARIABLE:
-                            p.type = TargetType.LOCAL_VARIABLE; break;
+                            p.type = TargetType.LOCAL_VARIABLE;
+                            break;
                         case FIELD:
-                            p.type = TargetType.FIELD; break;
+                        	p.type = TargetType.FIELD;
+                            break;
                         case PARAMETER:
                             p.type = TargetType.METHOD_PARAMETER;
                             p.parameter_index = methodParamIndex(path, frame);
                             break;
-                        default: throw new AssertionError();
+                        case EXCEPTION_PARAMETER:
+                        	p.type = TargetType.EXCEPTION_PARAMETER;
+                            break;
+                        default:
+                        	throw new AssertionError("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
                     }
                     return p;
 
