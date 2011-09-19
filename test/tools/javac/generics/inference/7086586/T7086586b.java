@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2003, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,20 +21,34 @@
  * questions.
  */
 
-package java.lang.reflect;
-
-import java.lang.annotation.Annotation;
-
-/**
- * Type is the common superinterface for all types in the Java
- * programming language. These include raw types, parameterized types,
- * array types, type variables and primitive types.
+/*
+ * @test
+ * @bug 7086586
  *
- * @since 1.5
+ * @summary Inference producing null type argument
  */
-public interface Type {
-    boolean isTypeAnnotationPresent(Class<? extends Annotation> annotationClass);
-    <T extends Annotation> T getTypeAnnotation(Class<T> annotationClass);
-    Annotation[] getTypeAnnotations();
-    Annotation[] getDeclaredTypeAnnotations();	
+import java.util.List;
+
+public class T7086586b {
+
+    int assertionCount = 0;
+
+    void assertTrue(boolean cond) {
+        if (!cond) {
+            throw new AssertionError();
+        }
+        assertionCount++;
+    }
+
+    <T> void m(List<? super T> dummy) { assertTrue(false); }
+    <T> void m(Object dummy) { assertTrue(true); }
+
+    void test(List<?> l) {
+        m(l);
+        assertTrue(assertionCount == 1);
+    }
+
+    public static void main(String[] args) {
+        new T7086586b().test(null);
+    }
 }

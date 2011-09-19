@@ -104,7 +104,7 @@ class T0x0D {
 
 /** method receiver */
 class T0x06 {
-    void m0x06() @A @DA {}
+    void m0x06(@A @DA T0x06 this) {}
 }
 
 /** method return type generic/array */

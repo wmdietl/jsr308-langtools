@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2003, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,20 +21,8 @@
  * questions.
  */
 
-package java.lang.reflect;
+package p1;
 
-import java.lang.annotation.Annotation;
+/** This is class C1. */
+public class C1 { }
 
-/**
- * Type is the common superinterface for all types in the Java
- * programming language. These include raw types, parameterized types,
- * array types, type variables and primitive types.
- *
- * @since 1.5
- */
-public interface Type {
-    boolean isTypeAnnotationPresent(Class<? extends Annotation> annotationClass);
-    <T extends Annotation> T getTypeAnnotation(Class<T> annotationClass);
-    Annotation[] getTypeAnnotations();
-    Annotation[] getDeclaredTypeAnnotations();	
-}

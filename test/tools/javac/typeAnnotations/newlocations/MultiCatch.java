@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2003, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,20 +21,45 @@
  * questions.
  */
 
-package java.lang.reflect;
-
-import java.lang.annotation.Annotation;
-
-/**
- * Type is the common superinterface for all types in the Java
- * programming language. These include raw types, parameterized types,
- * array types, type variables and primitive types.
- *
- * @since 1.5
+/*
+ * @test
+ * @ignore // syntax not sure yet.
+ * @bug 1234567
+ * @summary new type annotation location: multicatch
+ * @author Werner Dietl
+ * @compile -source 1.8 MultiCatch.java
  */
-public interface Type {
-    boolean isTypeAnnotationPresent(Class<? extends Annotation> annotationClass);
-    <T extends Annotation> T getTypeAnnotation(Class<T> annotationClass);
-    Annotation[] getTypeAnnotations();
-    Annotation[] getDeclaredTypeAnnotations();	
+
+class DefaultScope {
+  void exception01() {
+    try {
+	System.out.println("Hello 1!");
+    } catch (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
+  }
+  void exception02() {
+    try {
+	System.out.println("Hello 2!");
+    } catch @A (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
+  }
 }
+
+class ModifiedVars {
+    /*
+  void exception() {
+    try {
+      arrays();
+    } catch (final @A Exception e) {
+      e.toString();
+    }
+  }
+    */
+}
+
+@interface A { }
+@interface B { }
+@interface C { }
+@interface D { }
