@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
@@ -76,6 +75,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
     private final Target target;
     private final DeferredLintHandler deferredLintHandler;
 
+    private final TypeAnnotations typeAnnotations;
     private final boolean skipAnnotations;
 
     public static MemberEnter instance(Context context) {
@@ -97,6 +97,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         reader = ClassReader.instance(context);
         todo = Todo.instance(context);
         annotate = Annotate.instance(context);
+        typeAnnotations = TypeAnnotations.instance(context);
         types = Types.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
         target = Target.instance(context);
@@ -344,12 +345,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
      *  @param params      The method's value parameters.
      *  @param res             The method's result type,
      *                 null if it is a constructor.
+     *  @param receiver        The method's receiver type,
+     *                 null if none given; TODO: or already set here?
      *  @param thrown      The method's thrown exceptions.
      *  @param env             The method's (local) environment.
      */
     Type signature(List<JCTypeParameter> typarams,
                    List<JCVariableDecl> params,
                    JCTree res,
+                   JCVariableDecl recvparam,
                    List<JCExpression> thrown,
                    Env<AttrContext> env) {
 
@@ -366,6 +370,16 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         // Attribute result type, if one is given.
         Type restype = res == null ? syms.voidType : attr.attribType(res, env);
+        
+        // Attribute receiver type, if one is given.
+        // TODO: is this needed? Maybe for the normal Java type aspect?
+        Type recvtype;
+        if (recvparam!=null) {
+        	memberEnter(recvparam, env);
+        	recvtype = recvparam.vartype.type;
+        } else {
+        	recvtype = null;
+        }        
 
         // Attribute thrown exceptions.
         ListBuffer<Type> thrownbuf = new ListBuffer<Type>();
@@ -375,10 +389,12 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 exc = chk.checkClassType(l.head.pos(), exc);
             thrownbuf.append(exc);
         }
-        Type mtype = new MethodType(argbuf.toList(),
+        MethodType mtype = new MethodType(argbuf.toList(),
                                     restype,
                                     thrownbuf.toList(),
                                     syms.methodClass);
+        mtype.recvtype = recvtype;
+
         return tvars.isEmpty() ? mtype : new ForAll(tvars, mtype);
     }
 
@@ -573,7 +589,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         try {
             // Compute the method type
             m.type = signature(tree.typarams, tree.params,
-                               tree.restype, tree.thrown,
+                               tree.restype, tree.recvparam,
+                               tree.thrown,
                                localEnv);
         } finally {
             chk.setDeferredLintHandler(prevLintHandler);
@@ -947,6 +964,10 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             if (hasDeprecatedAnnotation(tree.mods.annotations))
                 c.flags_field |= DEPRECATED;
             annotateLater(tree.mods.annotations, baseEnv, c);
+            // class type parameters use baseEnv but everything uses env
+            for (JCTypeParameter tp : tree.typarams)
+                tp.accept(new TypeAnnotate(baseEnv));
+            tree.accept(new TypeAnnotate(env));
 
             chk.checkNonCyclicDecl(tree);
 
@@ -1024,10 +1045,95 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
 
-            // commit pending annotations
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
             annotate.flush();
+        } else {
+            annotate.laterOnFlush(typeAnnotations.annotator(tree));
         }
     }
+
+    // A sub-phase that "compiles" annotations in annotated types.
+    private class TypeAnnotate extends TreeScanner {
+        private Env<AttrContext> env;
+        public TypeAnnotate(Env<AttrContext> env) { this.env = env; }
+
+        private void enterTypeAnnotations(List<JCTypeAnnotation> annotations, JCTree tree) {
+            Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
+            if (!skipAnnotations) {
+                for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
+                    JCTypeAnnotation a = al.head;
+                    Attribute.Compound c = annotate.enterAnnotation(a,
+                            syms.annotationType,
+                            env);
+                    if (c == null) continue;
+                    Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, a.annotation_position);
+                    a.attribute_field = tc;
+                    // Note: @Deprecated has no effect on local variables and parameters
+                    if (!annotated.add(a.type.tsym))
+                        log.error(a.pos, "duplicate.annotation");
+                }
+            }
+        }
+
+        // each class (including enclosed inner classes) should be visited
+        // separately through MemberEnter.complete(Symbol)
+        // this flag is used to prevent from visiting inner classes.
+        private boolean isEnclosingClass = false;
+        @Override
+        public void visitClassDef(final JCClassDecl tree) {
+            boolean wasEnclosing = isEnclosingClass;
+            try {
+            	if (isEnclosingClass)
+            		return;
+            	isEnclosingClass = true;
+            	scan(tree.mods);
+            	// type parameter need to be visited with a separate env
+            	// scan(tree.typarams);
+            	scan(tree.extending);
+            	scan(tree.implementing);
+            	scan(tree.defs);
+            } finally {
+            	isEnclosingClass = wasEnclosing;
+            }
+        }
+
+        private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
+            if (annotations.nonEmpty()) {
+                annotate.later(new Annotate.Annotator() {
+                    public String toString() {
+                        return "annotate " + annotations + " onto " + tree;
+                    }
+                    public void enterAnnotation() {
+                        JavaFileObject prev = log.useSource(env.toplevel.sourcefile);
+                        try {
+                            enterTypeAnnotations(annotations, tree);
+                        } finally {
+                            log.useSource(prev);
+                        }
+                    }
+                });
+            }
+        }
+
+        @Override
+        public void visitAnnotatedType(final JCAnnotatedType tree) {
+            annotate(tree, tree.annotations);
+            super.visitAnnotatedType(tree);
+        }
+        @Override
+        public void visitTypeParameter(final JCTypeParameter tree) {
+            annotate(tree, tree.annotations);
+            super.visitTypeParameter(tree);
+        }
+        @Override
+        public void visitNewArray(final JCNewArray tree) {
+            annotate(tree, tree.annotations);
+            for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)
+                annotate(tree, dimAnnos);
+            super.visitNewArray(tree);
+        }
+    }
+
 
     private Env<AttrContext> baseEnv(JCClassDecl tree, Env<AttrContext> env) {
         Scope baseScope = new Scope(tree.sym);

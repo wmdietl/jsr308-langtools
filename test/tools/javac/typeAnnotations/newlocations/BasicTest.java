@@ -27,7 +27,7 @@
  * @bug 6843077
  * @summary random tests for new locations
  * @author Matt Papi
- * @compile/fail/ref=BasicTest.out -XDrawDiagnostics BasicTest.java
+ * @compile -source 1.8 BasicTest.java
  */
 
 import java.util.*;
@@ -37,8 +37,6 @@ import java.io.*;
 @interface B {}
 @interface C {}
 @interface D {}
-
-//308: Test inverted to verify that type annotations can not be parsed yet.
 
 /**
  * Tests basic JSR 308 parser functionality. We don't really care about what
@@ -66,12 +64,12 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
     // Handle receiver annotations
     // Handle annotations on a qualified identifier list
-    void test2() @C @D throws @A IllegalArgumentException, @B IOException {
+    void test2(@C @D BasicTest this) throws @A IllegalArgumentException, @B IOException {
 
     }
 
     // Handle annotations on a varargs element type
-    void test3(Object @A... objs) {
+    void test3(@B Object @A... objs) { }
 
-    }
+    void test4(@B Class<@C ?> @A ... clz) { }
 }
