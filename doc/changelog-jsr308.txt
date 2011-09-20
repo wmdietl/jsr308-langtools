@@ -1,3 +1,15 @@
+Version 1.2.1, 20 Sep 2011
+
+Align jsr308-langtools more with the main langtools.
+The biggest change is that Type's are no longer cloned and that
+Trees.getScope now works correctly.
+
+Small bug fixes and documentation updates.
+
+Base build
+  Updated to OpenJDK 8 langtools as of 19 Sep 2011.
+
+----------------------------------------------------------------------
 Version 1.2.0.1, 4 Sep 2011
 
 A small bug fix release to ensure that the build works
