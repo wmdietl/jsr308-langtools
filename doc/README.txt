@@ -12,9 +12,9 @@ update the jsr308-changes.html file.
   http://types.cs.washington.edu/jsr308/
 
 To update the repository to a newer version of the upstream OpenJDK, do either:
-  hg fetch http://hg.openjdk.java.net/jdk7/tl/langtools
+  hg fetch http://hg.openjdk.java.net/jdk8/tl/langtools
 or:
-  hg fetch http://hg.openjdk.java.net/jdk7/jdk7/langtools
+  hg fetch http://hg.openjdk.java.net/jdk8/jdk8/langtools
 They sometimes contain different changesets.
 
 Also see the instructions at:

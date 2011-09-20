@@ -58,7 +58,7 @@ There is a separate
         </ul></li>
       <li><a href="#tools">Tool support</a>
         <ul>
-          <li><a href="#backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 7?</a></li>
+          <li><a href="#backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 8?</a></li>
           <li><a href="#openjdk">What is the relationship between the Type Annotations compiler and the OpenJDK compiler?</a></li>
           <li><a href="#platforms">Do the Type Annotations tools run on Linux?  MacOS?  Windows?</a></li>
           <li><a href="#eclipse">Do IDEs like Eclipse and IntelliJ IDEA support type annotations?</a></li>
@@ -222,7 +222,8 @@ There is a separate
 <h3 id="inclusion-in-java">Are type annotations part of the Java language?</h3>
 
 <p>
-Type annotations are planned as part of a future version of the Java language.
+Type annotations are planned as part of Java SE 8.
+<!-- a future version of the Java language. -->
 </p>
 
 <p>
@@ -234,24 +235,25 @@ language JSRs are never approved until the last moment before a Java
 language release, just in case they need to change.  (It is very difficult
 to change a language JSR once it has been officially approved.)  
 -->
-  It may be part of Java
-7, or Java 8; and there is no absolute guarantee that it or any other
+There is no absolute guarantee that it or any other
 feature will be included.
 The Type
 Annotations Specification is already quite stable, and explicitly notes the
 few places where expansion or enhancement is needed.
 </p>
 
+<!--
 <p>
 An indication of Oracle's support of type annotations is that
 as of build b64 (publicly released on July 9, 2009), Oracle's OpenJDK supports
 type annotations.
 <a href="http://openjdk.java.net/projects/jdk7/milestones/">M4</a> was the first milestone release that contained this support.
 (The Type Annotations Compiler is a variant of the OpenJDK compiler with
-some extra features for compatibility with non-Java-7 compilers.  It is
+some extra features for compatibility with non-Java-8 compilers.  It is
 distributed <a href="./">standalone</a> or as part of the
 <a href="../checker-framework/">Checker Framework</a>.)
 </p>
+-->
 
 
 <h3 id="checkers-in-java">Is pluggable type-checking (such as supported by the Checker Framework) included in JSR 308 or the Java language?</h3>
@@ -305,7 +307,7 @@ November 5, 2007.
 <h2 id="tools">Tool support</h2>
 
 
-<h3 id="backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 7?</h3>
+<h3 id="backward-compatibility">Can I use type annotations even though my coworkers/boss/users don't use type annotations or Java 8?</h3>
 
 <p>
 You can use type annotations and custom type-checkers even if your
@@ -549,7 +551,7 @@ JCP codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: August 16, 2011.
+Last updated: September 19, 2011.
 </p>
 
 <p>

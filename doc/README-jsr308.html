@@ -66,16 +66,14 @@ pre, blockquote {
 </p>
 
 <p>
-The Type Annotations compiler is a version of the OpenJDK Java 7 compiler
+The Type Annotations compiler is a version of the OpenJDK Java 8 compiler
 that supports some <a href="#openjdk-differences"><b>extra features</b></a>
 for type annotations.
-Since build
-<a href="http://openjdk.java.net/projects/jdk7/milestones/">M4</a>, the
-OpenJDK Java 7 compiler has supported the Type Annotations (JSR 308)
+The OpenJDK Java 8 compiler will support the Type Annotations (JSR 308)
 syntax, which permits annotations to appear on
 types.  The extra features in the Type Annotations compiler
 make it possible for you write (and type-check) type annotations, while
-still permitting your code to be compiled with a Java 4/5/6 compiler.
+still permitting your code to be compiled with a Java 4/5/6/7 compiler.
 </p>
 
 
@@ -187,8 +185,8 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
     <tt>$JSR308</tt>.
     <ol type="a">
       <li>
-	Download a JDK 7 <a
-	href="http://download.java.net/jdk7/binaries/">binary snapshot:
+	Download a JDK 8 <a
+	href="http://download.java.net/jdk8/binaries/">binary snapshot:
 	self-extracting JDK file</a>
 	(choose JDK, not JRE or DEBUG, and choose a binary, not a source
 	distribution).
@@ -205,14 +203,14 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
 	  <li>
 	For <b>Linux</b>:  
 	After installing, your old version of Java remains the default.
-        If you wish to make OpenJDK Java 7 the default, then
+        If you wish to make OpenJDK Java 8 the default, then
 	set your <code>JAVA_HOME</code> environment variable to the top-level
-	directory of the JDK 7 installation <code>/path/to/jdk1.7.0</code>, and
+	directory of the JDK 8 installation <code>/path/to/jdk1.8.0</code>, and
 	augment your <code>PATH</code> with
-	<code>/path/to/jdk1.7.0/bin</code>.  Example:
+	<code>/path/to/jdk1.8.0/bin</code>.  Example:
 <pre>
 export JSR308=$HOME/jsr308
-export JAVA_HOME=$JSR308/jdk1.7.0
+export JAVA_HOME=$JSR308/jdk1.8.0
 export PATH=$JAVA_HOME/bin:$PATH
 </pre>
 	The shell uses the <code>PATH</code> variable to locate <code>java</code>,
@@ -220,14 +218,14 @@ export PATH=$JAVA_HOME/bin:$PATH
 	  </li>
 	  <li>
         For <b>Windows</b>:
-	After installing, the OpenJDK Java 7 (at <code>c:\Program
-	Files\Java\jdk1.7.0\</code>) becomes the default.
+	After installing, the OpenJDK Java 8 (at <code>c:\Program
+	Files\Java\jdk1.8.0\</code>) becomes the default.
 	If you wish to retain an older version of Java as the default, then
 	do the following:
           <ol>
-	    <li>Install Java 7</li>
-	    <li>Copy the <tt>jdk1.7.0</tt> and <tt>jre1.7.0</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
-            <li>Uninstall Java 7</li>
+	    <li>Install Java 8</li>
+	    <li>Copy the <tt>jdk1.8.0</tt> and <tt>jre1.8.0</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
+            <li>Uninstall Java 8</li>
 	    <li>Move the <tt>jdk/jre</tt> directories back to <tt>Program Files\Java\</tt></li>
           </ol>
         If you want to be able to run javac from Cygwin, then set
@@ -238,7 +236,7 @@ export PATH=$JAVA_HOME/bin:$PATH
       <li>
         Verify that your installation is correct: run
 	<code>javac -version</code>, and the output should be <code>javac
-	1.7.0-ea</code>.
+	1.8.0-ea</code>.
       </li>
     </ol>
 
@@ -248,7 +246,7 @@ export PATH=$JAVA_HOME/bin:$PATH
     Download the <a href="http://types.cs.washington.edu/jsr308/#Download">Type
     Annotations compiler</a>, and unpack it to create a
     <code>jsr308-langtools</code> directory.  Do <em>not</em> do this inside the
-    JDK 7 installation (directory <code>jdk1.7.0</code>) that you
+    JDK 8 installation (directory <code>jdk1.8.0</code>) that you
     downloaded in the preceding step.
     Example commands:
 <pre>
@@ -269,7 +267,7 @@ unzip jsr308-langtools.zip
     <p>
     The effect of the above commands is that the <code>javac</code>
     command invokes the Type Annotations Java compiler and the <code>javap</code>
-    command invokes the Type Annotations <code>javap</code>, but the Java 7 OpenJDK
+    command invokes the Type Annotations <code>javap</code>, but the Java 8 OpenJDK
     is used for everything else.
     </p>
   </li>
@@ -279,10 +277,10 @@ unzip jsr308-langtools.zip
 javac -version
 </pre>
     and confirm that the output contains the
-    string <code>jsr308</code>, such as <code>javac 1.7.0-jsr308-1.1.1</code>.
+    string <code>jsr308</code>, such as <code>javac 1.8.0-jsr308-1.1.1</code>.
     <br />
     If the output is does not contain <code>jsr308</code> 
-    (e.g., <code>javac 1.7.0-ea</code>), but you are using the
+    (e.g., <code>javac 1.8.0-ea</code>), but you are using the
     correct <code>javac</code> binary (in <code>jsr308-langtools/dist/bin</code>), 
     then it is possible that
     <code>tools.jar</code> is on your classpath.  You should either remove
@@ -394,24 +392,24 @@ the ability to specify imported packages from the command line.
 
 <!--
 <p>
-The Java 7 language will not require compilers to support this temporary
+The Java 8 language will not require compilers to support this temporary
 mechanism, and Oracle's javac compiler will not do so.
 </p>
 -->
 
 <!--
 javac support for the comment syntax may help to transition users gently to
-the new Java 7 features.  Java programmers delayed adopting Java 5 (e.g.,
+the new Java 8 features.  Java programmers delayed adopting Java 5 (e.g.,
 generics), primarily because of backward compatibility issues:  e.g., their
 coworkers/boss/customers didn't want to use Java 5.  But if we could give
 programmers the benefits of type annotations while not affecting backward
-compatibility, that might help more people adopt Java 7 sooner, thus
+compatibility, that might help more people adopt Java 8 sooner, thus
 increasing its momentum.
 -->
 
 <p>
 Finally, the compiler accepts the <tt>-target 5</tt> command-line option
-even when the <tt>-source</tt> option is 7 or is omitted.  The compiler
+even when the <tt>-source</tt> option is 8 or is omitted.  The compiler
 creates a <tt>.class</tt> file that is compatible with a Java 5 JVM, but
 that contains the type annotations.
 </p>
@@ -510,7 +508,7 @@ href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design
   <li>Any annotation-related problem.
   </li>
   <li>Any problem that occurs with the Type Annotations compiler but does not occur
-      with the OpenJDK Java 7 compiler on which the Type Annotations compiler is based.
+      with the OpenJDK Java 8 compiler on which the Type Annotations compiler is based.
   </li>
 </ul>
 
@@ -518,7 +516,7 @@ href="http://types.cs.washington.edu/jsr308/specification/java-annotation-design
 Whenever you get a message such as
 </p>
 <pre>
-  An exception has occurred in the compiler (1.7.0-jsr308-1.1.5). Please
+  An exception has occurred in the compiler (1.8.0-jsr308-1.2.1). Please
   report this bug so we can fix it.  For instructions, see
   http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#reporting-bugs
 </pre>
@@ -691,8 +689,8 @@ practices.
 
 <!-- TODO: link to the Oracle JDK langtools; but as of now there is no definitive place to link to -->
 <!--
-<p>The OpenJDK Java 7 compiler, which appears in the
-  <a href="http://hg.openjdk.java.net/jdk7/jdk7/langtools">&ldquo;langtools&rdquo;
+<p>The OpenJDK Java 8 compiler, which appears in the
+  <a href="http://hg.openjdk.java.net/jdk8/jdk8/langtools">&ldquo;langtools&rdquo;
 repository</a>.
 -->
 

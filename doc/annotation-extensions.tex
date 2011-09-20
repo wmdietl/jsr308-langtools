@@ -368,7 +368,7 @@ The problem with this proposal is that it requires adding a single method,
 \<getAnnotations>, to two interfaces.  While the changes would not break
 upward binary-compatibility, they would break source-compatibility:
 existing implementations of \<Element> and \<AnnotatedElement> could not
-be re-compiled under Java 7 without adding a \<getAnnotations> method.
+be re-compiled under Java 8 without adding a \<getAnnotations> method.
 Oracle's policy generally frowns upon such changes that break
 source-compatibility, though Oracle sometimes makes them nonetheless.
 % Such changes have to be approved by the CCC (conformance change committee).

@@ -183,12 +183,12 @@ for receiver types.
 \item
   An annotation on a type parameter wildcard appears before the wildcard,
   as in \code{MyClass<@Immutable ? extends Comparable<MyClass>>}.
-\item
-  An annotation on a disjunctive type in a multi-\<catch> clause appears
-  before the opening parenthesis, and is treated as syntactic sugar for
-  writing the type annotation on each disjunct.
-  % In addition, of course, to any explicitly-present annotations on the
-  % disjuncts.
+% \item
+%   An annotation on a disjunctive type in a multi-\<catch> clause appears
+%   before the opening parenthesis, and is treated as syntactic sugar for
+%   writing the type annotation on each disjunct.
+%   % In addition, of course, to any explicitly-present annotations on the
+%   % disjuncts.
 \item
   The annotation on a given array level
   prefixes the brackets that introduce that level.  To declare
@@ -341,13 +341,13 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 \end{tabbing}
 
 
-\item
-Annotations may appear before the parenthesis of a multi-\<catch>:
-
-\begin{tabbing}
-\nt{CatchClause}: \\
-\qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
-\end{tabbing}
+% \item
+% Annotations may appear before the parenthesis of a multi-\<catch>:
+% 
+% \begin{tabbing}
+% \nt{CatchClause}: \\
+% \qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
+% \end{tabbing}
 
 
 \item
@@ -2343,29 +2343,29 @@ caught exception, as in
 In this example case, a tool could warn if any \<@Critical> exception can
 reach the \<catch> clause.
 
-However, special syntax is provided for the disjunctive types that arise
-from a multi-\<catch> clause.
-It is possible to annotate the individual alternatives, as in
-
-\begin{Verbatim}
-  catch ( @A E1 | @A E2 | @A E3 e ) { ... }
-\end{Verbatim}
-
-\noindent
-but it is desirable to annotate the disjunctive type as a whole, since a
-programmer often wants to annotate each disjuct identically.  This code
-desugars to the above:
-% It would be a shame to force a programmer to repeat the annotations, since
-% the multi-\<catch> syntax is intended to reduce code size.
-
-\begin{Verbatim}
-  catch @A ( E1 | E2 | E3 e ) { ... }
-\end{Verbatim}
-
-It is possible to specify both a type annotation on the disjunction and
-also type annotations on (some of) the disjuncts.  Each disjuct is treated
-as containing all the annotations on the disjunct, plus all the annotations
-on itself.
+% However, special syntax is provided for the disjunctive types that arise
+% from a multi-\<catch> clause.
+% It is possible to annotate the individual alternatives, as in
+% 
+% \begin{Verbatim}
+%   catch ( @A E1 | @A E2 | @A E3 e ) { ... }
+% \end{Verbatim}
+% 
+% \noindent
+% but it is desirable to annotate the disjunctive type as a whole, since a
+% programmer often wants to annotate each disjuct identically.  This code
+% desugars to the above:
+% % It would be a shame to force a programmer to repeat the annotations, since
+% % the multi-\<catch> syntax is intended to reduce code size.
+% 
+% \begin{Verbatim}
+%   catch @A ( E1 | E2 | E3 e ) { ... }
+% \end{Verbatim}
+% 
+% It is possible to specify both a type annotation on the disjunction and
+% also type annotations on (some of) the disjuncts.  Each disjuct is treated
+% as containing all the annotations on the disjunct, plus all the annotations
+% on itself.
 
 
 % \subsection{Target meta-annotation for type annotations}
