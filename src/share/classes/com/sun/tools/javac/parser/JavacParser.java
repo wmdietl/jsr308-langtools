@@ -1243,7 +1243,6 @@ public class JavacParser implements Parser {
                         t = toP(F.at(pos1).TypeArray(t));
                         if (annos.nonEmpty())
                             t = toP(F.at(pos).AnnotatedType(annos, t));
-
                         return t;
                     }
                     mode = oldmode;
@@ -1658,11 +1657,9 @@ public class JavacParser implements Parser {
      *                         | Expression "]" {[Annotations]  "[" Expression "]"} BracketsOpt )
      */
     JCExpression arrayCreatorRest(int newpos, JCExpression elemtype) {
-
         List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
         accept(LBRACKET);
-
         if (S.token() == RBRACKET) {
             accept(RBRACKET);
 
@@ -3188,7 +3185,6 @@ public class JavacParser implements Parser {
             mods.flags |= Flags.VARARGS;
             // insert var arg type annotations
             type = insertAnnotationsToMostInner(type, varargsAnnos, true);
-
             S.nextToken();
         } else {
             // if not a var arg, then typeAnnotationsPushedBack should be null
