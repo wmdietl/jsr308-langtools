@@ -26,8 +26,8 @@ package com.sun.tools.javap;
 
 import com.sun.tools.classfile.Attribute;
 import com.sun.tools.classfile.Code_attribute;
-import com.sun.tools.classfile.ExtendedAnnotation;
-import com.sun.tools.classfile.ExtendedAnnotation.Position;
+import com.sun.tools.classfile.TypeAnnotation;
+import com.sun.tools.classfile.TypeAnnotation.Position;
 import com.sun.tools.classfile.Instruction;
 import com.sun.tools.classfile.Method;
 import com.sun.tools.classfile.RuntimeInvisibleTypeAnnotations_attribute;
@@ -49,12 +49,12 @@ import java.util.Map;
 public class TypeAnnotationWriter extends InstructionDetailWriter {
     public enum NoteKind { VISIBLE, INVISIBLE };
     public static class Note {
-        Note(NoteKind kind, ExtendedAnnotation anno) {
+        Note(NoteKind kind, TypeAnnotation anno) {
             this.kind = kind;
             this.anno = anno;
         }
         public final NoteKind kind;
-        public final ExtendedAnnotation anno;
+        public final TypeAnnotation anno;
     }
 
     static TypeAnnotationWriter instance(Context context) {
@@ -82,7 +82,7 @@ public class TypeAnnotationWriter extends InstructionDetailWriter {
         if (attr == null)
             return;
 
-        for (ExtendedAnnotation anno: attr.annotations) {
+        for (TypeAnnotation anno: attr.annotations) {
             Position p = anno.position;
             Note note = null;
             if (p.offset != -1)

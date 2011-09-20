@@ -658,9 +658,9 @@ public class ClassWriter {
                 write(anno, out);
         }
 
-        public void write(ExtendedAnnotation[] annos, ClassOutputStream out) {
+        public void write(TypeAnnotation[] annos, ClassOutputStream out) {
             out.writeShort(annos.length);
-            for (ExtendedAnnotation anno: annos)
+            for (TypeAnnotation anno: annos)
                 write(anno, out);
         }
 
@@ -671,7 +671,7 @@ public class ClassWriter {
                 write(p, out);
         }
 
-        public void write(ExtendedAnnotation anno, ClassOutputStream out) {
+        public void write(TypeAnnotation anno, ClassOutputStream out) {
             write(anno.annotation, out);
             write(anno.position, out);
         }
@@ -714,7 +714,7 @@ public class ClassWriter {
             return null;
         }
 
-        private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
+        private void write(TypeAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
             // type cast

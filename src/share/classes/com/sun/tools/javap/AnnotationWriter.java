@@ -26,7 +26,7 @@
 package com.sun.tools.javap;
 
 import com.sun.tools.classfile.Annotation;
-import com.sun.tools.classfile.ExtendedAnnotation;
+import com.sun.tools.classfile.TypeAnnotation;
 import com.sun.tools.classfile.Annotation.Annotation_element_value;
 import com.sun.tools.classfile.Annotation.Array_element_value;
 import com.sun.tools.classfile.Annotation.Class_element_value;
@@ -77,17 +77,17 @@ public class AnnotationWriter extends BasicWriter {
             print(")");
     }
 
-    public void write(ExtendedAnnotation annot) {
+    public void write(TypeAnnotation annot) {
         write(annot, true, false);
     }
 
-    public void write(ExtendedAnnotation annot, boolean showOffsets, boolean resolveIndices) {
+    public void write(TypeAnnotation annot, boolean showOffsets, boolean resolveIndices) {
         write(annot.annotation, resolveIndices);
         print(": ");
         write(annot.position, showOffsets);
     }
 
-    public void write(ExtendedAnnotation.Position pos, boolean showOffsets) {
+    public void write(TypeAnnotation.Position pos, boolean showOffsets) {
         print(pos.type);
 
         switch (pos.type) {

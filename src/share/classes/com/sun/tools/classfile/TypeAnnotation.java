@@ -31,23 +31,23 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.sun.tools.classfile.ExtendedAnnotation.TargetAttribute.*;
+import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
 
 /**
- * See JSR 308 specification, section 4.1
+ * See JSR 308 specification, section 4.1. TODO update.
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
-public class ExtendedAnnotation {
-    ExtendedAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
+public class TypeAnnotation {
+    TypeAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         annotation = new Annotation(cr);
         position = read_position(cr);
     }
 
-    public ExtendedAnnotation(ConstantPool constant_pool,
+    public TypeAnnotation(ConstantPool constant_pool,
             Annotation annotation, Position position) {
         this.annotation = annotation;
         this.position = position;
