@@ -137,7 +137,7 @@ public enum TargetType {
     /** For annotations on a type argument or nested array of an exception parameter. */
     // TODO: are these allowed? Not for THROWS, so why here?
     EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
-    
+
     /** For annotations in type arguments of object creation expressions. */
     NEW_TYPE_ARGUMENT(0x18, IsLocal),
     NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation, IsLocal),
