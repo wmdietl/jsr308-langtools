@@ -683,7 +683,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCVariableDecl> getParameters() {
             return params;
         }
-        public JCVariableDecl getReceiverVariable() { return recvparam; }
+        public JCVariableDecl getReceiverParameter() { return recvparam; }
         public List<JCExpression> getThrows() {
             return thrown;
         }
