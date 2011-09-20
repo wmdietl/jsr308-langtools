@@ -251,11 +251,11 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCExpression restype = copy(t.restype, p);
         List<JCTypeParameter> typarams = copy(t.typarams, p);
         List<JCVariableDecl> params = copy(t.params, p);
-        List<JCTypeAnnotation> receiver = copy(t.receiverAnnotations, p);
+        JCVariableDecl recvparam = copy(t.recvparam, p);
         List<JCExpression> thrown = copy(t.thrown, p);
         JCBlock body = copy(t.body, p);
         JCExpression defaultValue = copy(t.defaultValue, p);
-        return M.at(t.pos).MethodDef(mods, t.name, restype, typarams, params, receiver, thrown, body, defaultValue);
+        return M.at(t.pos).MethodDef(mods, t.name, restype, typarams, params, recvparam, thrown, body, defaultValue);
     }
 
     public JCTree visitMethodInvocation(MethodInvocationTree node, P p) {

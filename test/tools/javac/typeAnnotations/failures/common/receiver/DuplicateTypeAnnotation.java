@@ -7,7 +7,7 @@
  */
 
 class DuplicateTypeAnnotation {
-  void test() @A @A { }
+  void test(@A @A DuplicateTypeAnnotation this) { }
 }
 
 @interface A { }

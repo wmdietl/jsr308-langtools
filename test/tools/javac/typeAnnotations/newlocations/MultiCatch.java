@@ -23,33 +23,43 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary check that type annotations may appear on all type declarations
- * @author Mahmood Ali
- * @compile -source 1.8 TypeUseTarget.java
+ * @ignore // syntax not sure yet.
+ * @bug 1234567
+ * @summary new type annotation location: multicatch
+ * @author Werner Dietl
+ * @compile -source 1.8 MultiCatch.java
  */
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
-
-@A
-class TypeUseTarget<K extends @A Object> {
-  @A String @A [] field;
-
-  @A String test(@A TypeUseTarget this, @A String param, @A String @A ... vararg) {
-    @A Object o = new @A String @A [3];
-    TypeUseTarget<@A String> target;
-    return (@A String) null;
+class DefaultScope {
+  void exception01() {
+    try {
+	System.out.println("Hello 1!");
+    } catch (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
   }
-
-  <K> @A String genericMethod(K k) { return null; }
+  void exception02() {
+    try {
+	System.out.println("Hello 2!");
+    } catch @A (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
+  }
 }
 
-@A
-interface MyInterface { }
+class ModifiedVars {
+    /*
+  void exception() {
+    try {
+      arrays();
+    } catch (final @A Exception e) {
+      e.toString();
+    }
+  }
+    */
+}
 
-@A
-@interface MyAnnotation { }
-
-@Target(ElementType.TYPE_USE)
 @interface A { }
+@interface B { }
+@interface C { }
+@interface D { }
