@@ -283,6 +283,11 @@ public class TreeTranslator extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        tree.annotations = translate(tree.annotations);
+        List<List<JCTypeAnnotation>> dimAnnos = List.nil();
+        for (List<JCTypeAnnotation> origDimAnnos : tree.dimAnnotations)
+            dimAnnos = dimAnnos.append(translate(origDimAnnos));
+        tree.dimAnnotations = dimAnnos;
         tree.elemtype = translate(tree.elemtype);
         tree.dims = translate(tree.dims);
         tree.elems = translate(tree.elems);
@@ -369,6 +374,7 @@ public class TreeTranslator extends JCTree.Visitor {
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {
+        tree.annotations = translate(tree.annotations);
         tree.bounds = translate(tree.bounds);
         result = tree;
     }
@@ -403,6 +409,12 @@ public class TreeTranslator extends JCTree.Visitor {
     public void visitAnnotation(JCAnnotation tree) {
         tree.annotationType = translate(tree.annotationType);
         tree.args = translate(tree.args);
+        result = tree;
+    }
+
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        tree.annotations = translate(tree.annotations);
+        tree.underlyingType = translate(tree.underlyingType);
         result = tree;
     }
 
