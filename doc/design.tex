@@ -184,9 +184,11 @@ for receiver types.
   An annotation on a type parameter wildcard appears before the wildcard,
   as in \code{MyClass<@Immutable ? extends Comparable<MyClass>>}.
 % \item
-%   An annotation on a disjunctive type in a multi-\<catch> clause appears
-%   before the opening parenthesis, and is treated as syntactic sugar for
-%   writing the type annotation on each disjunct.
+%   An annotation on a disjunctive type (as in a multi-\<catch> clause) or a
+%   conjunctive type (as in an \<extends> clause) appears
+%   at the beginning of the disjunct/conjunct, before an extra \<|> or \<&>
+%   character.  It is treated as syntactic sugar for
+%   writing the type annotation on each disjunct/conjunct.
 %   % In addition, of course, to any explicitly-present annotations on the
 %   % disjuncts.
 \item
@@ -342,12 +344,10 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 
 
 % \item
-% Annotations may appear before the parenthesis of a multi-\<catch>:
+% Annotations may appear at the beginning of a disjunctive type, before a
+% vertical bar, or at the beginning of a conjunctive type, before an ampersand:
 % 
-% \begin{tabbing}
-% \nt{CatchClause}: \\
-% \qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
-% \end{tabbing}
+% \todo{give the grammar rules: catch, extends, others?}
 
 
 \item
@@ -2343,7 +2343,7 @@ caught exception, as in
 In this example case, a tool could warn if any \<@Critical> exception can
 reach the \<catch> clause.
 
-% However, special syntax is provided for the disjunctive types that arise
+% However, special syntax is provided for disjunctive and conjunctive types that arise
 % from a multi-\<catch> clause.
 % It is possible to annotate the individual alternatives, as in
 % 
@@ -2359,13 +2359,13 @@ reach the \<catch> clause.
 % % the multi-\<catch> syntax is intended to reduce code size.
 % 
 % \begin{Verbatim}
-%   catch @A ( E1 | E2 | E3 e ) { ... }
+%   catch ( @A | E1 | E2 | E3 e ) { ... }
 % \end{Verbatim}
 % 
 % It is possible to specify both a type annotation on the disjunction and
 % also type annotations on (some of) the disjuncts.  Each disjuct is treated
 % as containing all the annotations on the disjunct, plus all the annotations
-% on itself.
+% on itself.  Conjuncts are treated analogously.
 
 
 % \subsection{Target meta-annotation for type annotations}
