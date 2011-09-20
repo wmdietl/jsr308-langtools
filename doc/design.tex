@@ -122,8 +122,7 @@ compatible with the original vision for annotations~\cite{JSR175}.
 This document has two parts:  a short normative part and a longer
 non-normative part.
 The normative part specifies the changes to
-the Java language syntax (Section~\ref{syntax}),
-the Java toolset (Section~\ref{mods}), and
+the Java language syntax (Section~\ref{syntax}) and
 the class file format (Section~\ref{class-file}).
 
 The non-normative part
@@ -181,7 +180,7 @@ for receiver types.
   the outer type can be annotated individually, as in \code{@ReadOnly
     Outer. @ReadWrite StaticNested}.
 \item
-  An annotation on a type parameter wildcard appears before the wildcard,
+  An annotation on a wildcard type argument appears before the wildcard,
   as in \code{MyClass<@Immutable ? extends Comparable<MyClass>>}.
 % \item
 %   An annotation on a disjunctive type (as in a multi-\<catch> clause) or a
@@ -483,54 +482,6 @@ compiler issues the error even if no annotation processor is being run.)
 %   If such a meta-annotation is present, the compiler will enforce the
 %   specified usage restriction.
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
-
-
-
-\section{Compiler modifications\label{mods}\label{compiler}}
-
-% This section indicates the tools and specifications that must be modified
-% in order for the Java language and tools to support JSR 308.
-% 
-% 
-% \subsection{Compiler\label{compiler}}
-
-
-When generating \code{.class} files, the compiler must emit the attributes
-described in Section~\ref{class-file}.
-% (The JLS needs to be updated to so state.)
-
-The compiler is required to preserve annotations in the class file.  More
-precisely, if an expression has an annotated type (and the annotation has
-class file or runtime retention), and that expression is represented
-in the compiled class file, then the annotation must be present, in the
-compiled class file, on the type of the compiled representation of the
-expression.  For expressions within a field initializer or a static
-initializer block, the compiled representation might be in an \code{<init>}
-or \code{<clinit>} method, or in a helper method called by them.
-
-If the compiler optimizes away an expression, then it may also
-optimize away the annotation.  (Exception:  when a type cast
-is optimized away without optimizing away its argument, the
-annotation remains on the argument; see Section~\ref{target_type}.)
-
-The compiler sometimes creates new methods that did not appear in the
-source code.  The compiler should annotate these compiler-generated methods
-in an appropriate way.  For example, a bridge method is an implementation
-strategy used when the erased signature of the actual method being invoked
-differs from that of the compile-time method
-declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
-nothing but call an existing method, and in this case, annotations should
-be copied from the method being invoked.
-
-%% Cut this -- too compiler-specific.
-% and
-% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
-
-%% Remarks about javac are not appropriate in a specification.
-% (As of Java SE 6, javac does not copy/transfer any annotations from
-% original methods to the compiler-generated methods; that is probably a bug
-% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
-% should be copied.)
 
 
 \section{Class file format extensions\label{class-file}}
@@ -2819,11 +2770,38 @@ in Sections~\ref{syntax} and~\ref{class-file}.
 
 \subsection{Compiler\label{compiler-mods}}
 
-The syntax extensions described in Section~\ref{syntax}
-require the Java compiler to accept annotations in the proposed
-locations and to add them to the program's AST\@.  The relevant AST node
+The Java compiler must accept type annotations
+and add them to the program's AST\@.  The relevant AST node
 classes must also be modified to store these annotations.
+When generating \code{.class} files, the compiler must emit the attributes
+described in Section~\ref{class-file}.
+% (The JLS needs to be updated to so state.)
 
+Section~\ref{compiler} requires compilers to place certain annotations
+in the class file.  This is consistent with the principle that annotations
+should not affect behavior:  in the absence of an annotation processor, the
+compiler produces the same bytecodes for annotated code as it would have
+for the same code without annotations.  (The class file may differ, since
+the annotations are stored in it, but the bytecode part does not differ.)
+
+The compiler sometimes creates new methods that did not appear in the
+source code.  The compiler should annotate these compiler-generated methods
+in an appropriate way.  For example, a bridge method is an implementation
+strategy used when the erased signature of the actual method being invoked
+differs from that of the compile-time method
+declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
+nothing but call an existing method, and in this case, annotations should
+be copied from the method being invoked.
+
+%% Cut this -- too compiler-specific.
+% and
+% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
+
+%% Remarks about javac are not appropriate in a specification.
+% (As of Java SE 6, javac does not copy/transfer any annotations from
+% original methods to the compiler-generated methods; that is probably a bug
+% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
+% should be copied.)
 
 Javac's \code{-Xprint} functionality reads a \code{.class} file and prints
 the interface (class declarations with signatures of all fields and
@@ -2835,12 +2813,49 @@ This must be updated to print the type annotations as well.
 Also see Section~\ref{class-file-tools}.
 
 
-Section~\ref{compiler} requires compilers to place certain annotations
-in the class file.  This is consistent with the principle that annotations
-should not affect behavior:  in the absence of an annotation processor, the
-compiler produces the same bytecodes for annotated code as it would have
-for the same code without annotations.  (The class file may differ, since
-the annotations are stored in it, but the bytecode part does not differ.)
+
+\subsubsection{Backward and forward compatibility\label{mods-compatibility}}
+
+Java compilers can often produce bytecode for an earlier version of the
+virtual machine, via the \code{-target} command-line option.  For example,
+a programmer could execute a compilation command such as \code{javac
+-source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
+with the same attributes for type annotations as when the target is a
+version 8 JVM\@.  However, the compiler is permitted to also place type
+annotations in declaration attributes.  For instance, the annotation on the
+top level of a return type would also be placed on the method (in the
+method attribute in the class file).  This enables class file analysis
+tools that are written for Java SE 5 to view a subset of the type
+qualifiers (lacking generics, array levels, method receivers, etc.), albeit
+attached to declarations.
+
+A user can use a Java SE 7 compiler to compile a Java class that contains
+type annotations, so long as the type annotations only appear in places
+that are legal in Java SE 7.  Furthermore, the compiler must be provided
+with a definition of the annotation that is meta-annotated not with
+\code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
+does not exist in Java SE 7), but with no meta-annotation or with a
+meta-annotation that permits annotations on any declaration.
+
+
+\subsubsection{Optimizations\label{mods-optimization}}
+
+
+The compiler is required to preserve annotations in the class file.  More
+precisely, if an expression has an annotated type (and the annotation has
+class file or runtime retention), and that expression is represented
+in the compiled class file, then the annotation must be present, in the
+compiled class file, on the type of the compiled representation of the
+expression.  For expressions within a field initializer or a static
+initializer block, the compiled representation might be in an \code{<init>}
+or \code{<clinit>} method, or in a helper method called by them.
+
+If the compiler optimizes away an expression, then it may also
+optimize away the annotation.  (Exception:  when a type cast
+is optimized away without optimizing away its argument, the
+annotation remains on the argument; see Section~\ref{target_type}.)
+
+
 
 This may change the compiler implementation of certain optimizations, such
 as common subexpression elimination, but this restriction on the compiler
@@ -2874,27 +2889,6 @@ have little or no effect on most compiled programs.
 \end{enumerate}
 
 
-
-Java compilers can often produce bytecode for an earlier version of the
-virtual machine, via the \code{-target} command-line option.  For example,
-a programmer could execute a compilation command such as \code{javac
--source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
-with the same attributes for type annotations as when the target is a
-version 8 JVM\@.  However, the compiler is permitted to also place type
-annotations in declaration attributes.  For instance, the annotation on the
-top level of a return type would also be placed on the method (in the
-method attribute in the class file).  This enables class file analysis
-tools that are written for Java SE 5 to view a subset of the type
-qualifiers (lacking generics, array levels, method receivers, etc.), albeit
-attached to declarations.
-
-A user can use a Java SE 7 compiler to compile a Java class that contains
-type annotations, so long as the type annotations only appear in places
-that are legal in Java SE 7.  Furthermore, the compiler must be provided
-with a definition of the annotation that is meta-annotated not with
-\code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
-does not exist in Java SE 7), but with no meta-annotation or with a
-meta-annotation that permits annotations on any declaration.
 
 
 \subsubsection{Annotations in comments\label{annotations-in-comments}}
