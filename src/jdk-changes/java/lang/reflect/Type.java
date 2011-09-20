@@ -38,5 +38,5 @@ public interface Type {
     boolean isTypeAnnotationPresent(Class<? extends Annotation> annotationClass);
     <T extends Annotation> T getTypeAnnotation(Class<T> annotationClass);
     Annotation[] getTypeAnnotations();
-    Annotation[] getDeclaredTypeAnnotations();	
+    Annotation[] getDeclaredTypeAnnotations();
 }
