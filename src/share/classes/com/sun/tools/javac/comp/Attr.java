@@ -3372,12 +3372,16 @@ public class Attr extends JCTree.Visitor {
         }
         public void visitTypeParameter(JCTypeParameter tree) {
             chk.validateTypeAnnotations(tree.annotations, true);
-            // don't call super. skip type annotations
+            // Don't call super. Skip type annotations.
+            // WMD: why can we skip them?
             scan(tree.bounds);
         }
         public void visitMethodDef(JCMethodDecl tree) {
-            // need to check static methods
-            if ((tree.sym.flags() & Flags.STATIC) != 0) {
+            // Static methods cannot have receiver type annotations.
+            // In test case FailOver15.java, the nested method getString has
+            // a null sym, because an unknown class is instantiated.
+            // I would say it's safe to skip.
+            if (tree.sym!=null && (tree.sym.flags() & Flags.STATIC) != 0) {
                 for (JCTypeAnnotation a : tree.receiverAnnotations) {
                     if (chk.isTypeAnnotation(a, false))
                         log.error(a.pos(), "annotation.type.not.applicable");
