@@ -981,7 +981,7 @@ These fields are similar to those of the optional
 Storing local variable annotations in the class file raises certain
 challenges.  For example, live ranges are not isomorphic to local
 variables.  Note that a local variable with no live range might not appear in
-the class file; that is OK, becauuse it is irrelevant to the program.
+the class file; that is OK, because it is irrelevant to the program.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{localvar\_target} appears in the attributes table of a
@@ -2676,7 +2676,7 @@ meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
 \item
   It is legal to write \<@A void foo() { ... }>, where \<@A> is
   meta-annotated with \<@Target({ ElementType.TYPE\_USE, ElementType.METHOD })>
-   or \<@A> has no \<@Target> meta-annotation; in ethier case, the \<@A>
+   or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
   annotation is applied only to the method declaration.  The code construct
   would have been illegal if \<@A> were a type annotation.
 \item
@@ -3322,8 +3322,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  myObject GuardedBy accessLock Goetz JavaCOP signedness Nonnull
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
 % LocalWords:  FormalParameterDecls ForVarControlRest FormalParameterDeclsRest
-% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt
-% LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix
+% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt myVar
+% LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix MyClass
 % LocalWords:  InterfaceMethodDeclaratorRest VoidInterfaceMethodDeclaratorRest
 % LocalWords:  ConstructorDeclaratorRest VariableDeclaratorRest nonnullelements
 % LocalWords:  VariableInitializer ConstantDeclaratorRest VariableDeclaratorId
@@ -3346,5 +3346,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedType toArray localvar methodparam typeparam
-% LocalWords:  typearg ClassFile clinit StackMapTable
+% LocalWords:  QualifiedType toArray localvar methodparam typeparam ReadWrite
+% LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean
+% LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
+% LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
+% LocalWords:  NestedStatic decompiler
