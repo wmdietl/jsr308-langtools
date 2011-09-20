@@ -367,7 +367,7 @@ in the following ways:
 
 <p>
 The Type Annotations compiler allows annotations to
-be written in &ldquo;<code>/* */</code>&ldquo; (C-style) comments, for example:
+be written in &ldquo;<code>/* */</code>&rdquo; (C-style) comments, for example:
 </p>
 <pre>
   List&lt;/*@NonNull*/ String&gt; strings;
@@ -380,9 +380,16 @@ There must be no whitespace within the comment.
 These mechanism allows developers to use type
 annotations while maintaining the ability to compile their code with an
 unmodified Java compiler, including compilers for earlier versions of the
-Java language (such as Java 4, Java 5, or Java 6).
+Java language (such as Java 4, Java 5, Java 6, or Java 7).
 </p>
  
+<p>
+This mechanism permits annotations to be written in comments, but it does
+not permit the new receiver (&ldquo;<tt>this</tt>&rdquo;) syntax to be
+written in comments.  That means that it is not generally possible to write
+annotations on receivers in a forward-compatible way.
+</p>
+
 <p>
 A related mechanism, that also facilitates compatibility with compilers
 that do not support the Type Annotations syntax, is 
