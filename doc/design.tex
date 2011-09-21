@@ -1326,7 +1326,7 @@ wildcard bound                                  & \code{0x14}, \code{0x15} & \S\
 \hline
 local variable                                  & \code{0x16}, \code{0x17} & \S\ref{class-file:ext:ri:localvar} \\
 resource variable                               & \code{0x18}, \code{0x19} & \S\ref{class-file:ext:ri:localvar} \\
-exception parameter                             & \code{0x1A}, \code{0x1B}\rlunused & \S\ref{class-file:ext:ri:localvar} \\
+exception parameter                             & \code{0x1A}, \code{0x1B}\rlunused & \S\ref{class-file:ext:ri:catch} \\
 typecast                                        & \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:typecast} \\
 type test (\code{instanceof})                   & \code{0x1E}, \code{0x1F} & \S\ref{class-file:ext:ri:typecast} \\
 object creation (\code{new})                    & \code{0x20}, \code{0x21} & \S\ref{class-file:ext:ri:typecast} \\
@@ -1516,6 +1516,25 @@ the class file; that is OK, because it is irrelevant to the program.
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{localvar\_target} appears in the attributes table of a
 \code{method\_info} structure.
+
+
+\subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
+
+When the annotation's target is an exception parameter (the exception type
+in a \<catch> statement), then 
+\code{target\_info} indicates an offset in the exception table (which
+appears in the \<exception\_table> slot of the \<Code> attribute).
+
+\begin{Verbatim}
+    catch_target {
+        u2 exception_table_index;
+    };
+\end{Verbatim}
+
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{catch\_target} appears in the attributes table of a
+\code{method\_info} structure.
+
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
@@ -3354,4 +3373,4 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean
 % LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
-% LocalWords:  NestedStatic decompiler
+% LocalWords:  NestedStatic decompiler myLock
