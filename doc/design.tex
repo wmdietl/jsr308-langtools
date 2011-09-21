@@ -430,9 +430,11 @@ An annotation use cannot itself be annotated.  (An annotation \emph{declaration}
 can be annotated by a so-called meta-annotation.)
 For instance, in
 
+\preverbnegspace
 \begin{Verbatim}
   @MyAnnotation Object x;
 \end{Verbatim}
+\preverbnegspace
 
 \noindent
 there is no way to annotate the use of \<MyAnnotation>.
@@ -440,9 +442,11 @@ there is no way to annotate the use of \<MyAnnotation>.
 \paragraph{Class literals}
 It is not permitted to annotate the type name in a class literal, as in
 
+\preverbnegspace
 \begin{Verbatim}
   @Even int.class    // illegal!
 \end{Verbatim}
+\preverbnegspace
 
 \noindent
 This type name refers to a class, not a type.  The expression evaluates to a
@@ -452,9 +456,11 @@ point in being able to write the annotation, which would have no effect.
 \paragraph{Import statement}
 It is not permitted to annotate the type name in an \<import> statement.
 
+\preverbnegspace
 \begin{Verbatim}
   import @NotAllowed java.util.Date;        // illegal!
 \end{Verbatim}
+\preverbnegspace
 
 \noindent
 This use of a type name is not a type use and is more properly viewed as
@@ -465,20 +471,24 @@ a scoping mechanism.
 Static member accesses are preceded by a type name, but that type name may
 not be annotated:
 
+\preverbnegspace
 \begin{Verbatim}
   @Illegal Outer . StaticNestedClass      // illegal!
   @Illegal Outer . staticField            // illegal!
 \end{Verbatim}
+\preverbnegspace
 
 \noindent
 A static member access may itself be a type use, in which case the used
 type may be annotated by annotating the last component of the static member
 access, which is the simple name of the type being used.
 
+\preverbnegspace
 \begin{Verbatim}
   Outer . @Legal StaticNestedClass x = ...;     // legal
   myvar . @Legal StaticNestedClass x = ...;     // legal, but poor style
 \end{Verbatim}
+\preverbnegspace
 
 The type name in front of a static member access is a scoping mechanism,
 not a use of a type --- there's nothing of type \<Outer> in the above
@@ -492,6 +502,7 @@ The syntax for instance (non-static) type member accesses is consistent
 with that for static type member accesses:  the annotation goes on the
 simple name of the type being annotated.  For instance:
 
+\preverbnegspace
 \begin{Verbatim}
   myVar . @Bar NonStaticClass    // legal (on variables and casts only)
 \end{Verbatim}
