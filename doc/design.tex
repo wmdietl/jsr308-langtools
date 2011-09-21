@@ -119,21 +119,20 @@ The proposal merely makes annotations more general --- and thus more useful
 for their current purposes, and also usable for new purposes that are
 compatible with the original vision for annotations~\cite{JSR175}.
 
-This document has two parts:  a short normative part and a longer
+This document has two parts:  a 
+% short
+normative part and a 
+% longer
 non-normative part.
 The normative part specifies the changes to
-the Java language syntax (Section~\ref{syntax}),
-the Java toolset (Section~\ref{mods}), and
+the Java language syntax (Section~\ref{syntax}) and
 the class file format (Section~\ref{class-file}).
-
+%
 The non-normative part
-consists of appendices that
-discuss and explain the specification or deal with logistical issues.
-It motivates annotations on types by presenting one
+motivates annotations on types by presenting one
 possible use, type qualifiers
 (Appendix~\ref{type-qualifiers}).
-It gives examples of and further motivation for the Java
-syntax changes (Appendix~\ref{syntax-discussion}) and lists tools that
+It also lists tools that
 must be updated to accommodate the Java and class file
 modifications (Appendix~\ref{mods-discussion}).
 The document concludes with
@@ -162,7 +161,7 @@ JSR 308 extends Java to allow annotations on any use of a type, and
 on type parameter declarations.  JSR 308 does not extend Java to allow
 annotations on type names that are not type uses, such as the type names
 that appear in \<import> statements, class literals, static member accesses,
-and annotation uses.
+and annotation uses (see Section~\ref{type-names}).
 % (whether explicit or implicit, as in the case of method receivers)
 JSR 308 uses a simple prefix syntax for type annotations, with a special case
 for receiver types.
@@ -176,17 +175,19 @@ for receiver types.
   the package name, if any.
 \item
   For a nested type, the type annotation appears before the type's simple
-  name, as in \code{Outer. @NonNull StaticNested} or \code{myVar. @NonNull
+  name, as in \code{Outer.\ @NonNull StaticNested} or \code{myVar.\ @NonNull
     Inner}.  If the nested type is a static type, then both the nested and
   the outer type can be annotated individually, as in \code{@ReadOnly
-    Outer. @ReadWrite StaticNested}.
+    Outer.\ @ReadWrite StaticNested}.
 \item
-  An annotation on a type parameter wildcard appears before the wildcard,
-  as in \code{MyClass<@Immutable ? extends Comparable<MyClass>>}.
+  An annotation on a wildcard type argument appears before the wildcard,
+  as in \code{MyClass<@Immutable ?\ extends Comparable<MyClass>>}.
 % \item
-%   An annotation on a disjunctive type in a multi-\<catch> clause appears
-%   before the opening parenthesis, and is treated as syntactic sugar for
-%   writing the type annotation on each disjunct.
+%   An annotation on a disjunctive type (as in a multi-\<catch> clause) or a
+%   conjunctive type (as in an \<extends> clause) appears
+%   at the beginning of the disjunct/conjunct, before an extra \<|> or \<&>
+%   character.  It is treated as syntactic sugar for
+%   writing the type annotation on each disjunct/conjunct.
 %   % In addition, of course, to any explicitly-present annotations on the
 %   % disjuncts.
 \item
@@ -208,7 +209,7 @@ for receiver types.
   the receiver type can be
   written as (for example) either \code{Inner} or as \code{Outer.Inner},
   and in the latter case annotations on both parts are possible, as in
-  \code{@ReadOnly Outer . @Mutable Inner}.
+  \code{@ReadOnly Outer .\ @Mutable Inner}.
 
   The optional \code{this} parameter has no effect on execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
@@ -227,11 +228,264 @@ possible on the constructor result.
 Finally, it is also permitted to write an annotation on a type parameter
 declaration.  This appears before the declared name, as in \code{class
   MyClass<@Immutable T> \ttlcb\ ... \ttrcb}.  This is a declaration
-annotation, not a type annotation, but it was an oversight in JSR
-175~\cite{JSR175} and JSR 308 is taking the opportunity to correct it.
+annotation, not a type annotation, but its omission in JSR
+175~\cite{JSR175} was an oversight, and JSR 308 is taking the opportunity to correct it.
 
 
-Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
+% Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
+
+
+\subsubsection{Examples of annotation syntax\label{type-annotation-syntax-examples}}
+
+This section gives examples of the type annotation syntax.
+% This list is not necessarily exhaustive (but if you notice something
+% missing, let us know so that we can add it).
+% Section~\ref{type-annotation-use-cases} motivates annotating these
+% locations by giving the meaning of annotations that need to be applied to
+% these locations.
+
+% Bill Pugh suggests using @Foo and @Bar here, so avoid giving people the
+% impression that we are proposing specific annotations.  But I think that
+% makes the discussion unnecessarily abstract and thus harder to follow.
+
+\newcommand{\preverbnegspace}{\vspace{-5pt}}
+
+% This list should perhaps be given in the same order as figure 1 (and
+% maybe make that explicit in both places).
+
+\begin{itemize}
+
+\item for generic type arguments to parameterized classes:
+\preverbnegspace
+\begin{Verbatim}
+  Map<@NonNull String, @NonEmpty List<@Readonly Document>> files;
+\end{Verbatim}
+
+\item for generic type arguments in a generic method or constructor invocation:
+\preverbnegspace
+\begin{Verbatim}
+  o.<@NonNull String>m("...");
+\end{Verbatim}
+
+\item for type parameter bounds and wildcard bounds:
+\preverbnegspace
+\begin{Verbatim}
+  class Folder<F extends @Existing File> { ... }
+  Collection<? super @Existing File>
+\end{Verbatim}
+
+\item for type parameters:
+\preverbnegspace
+\begin{Verbatim}
+  interface WonderfulList<@Reified E> { ... }
+\end{Verbatim}
+% Niko Matsakis gave another example in email of 
+% Wed, 25 Feb 2009 11:57:37 +0100
+
+\item for class inheritance:
+\preverbnegspace
+\begin{Verbatim}
+  class UnmodifiableList<T> implements @Readonly List<@Readonly T> { ... }
+\end{Verbatim}
+
+\item for \code{throws} clauses:
+\preverbnegspace
+\begin{Verbatim}
+  void monitorTemperature() throws @Critical TemperatureException { ... }
+\end{Verbatim}
+
+\item for method receivers:
+\preverbnegspace
+\begin{Verbatim}
+  public String toString(@Readonly MyClass this) { ... }
+\end{Verbatim}
+
+\item for constructor declaration return types:
+
+\preverbnegspace
+% TODO:  Use a more realistic example.
+\begin{Verbatim}
+  class Invocation {
+    @Immutable Invocation() { ... }
+    ...
+  }
+\end{Verbatim}
+\preverbnegspace
+
+Note that the result of a constructor is different from the receiver.  The
+receiver only exists for inner class constructors.  It is the containing
+object, and in the body of the constructor it is referred to as
+\code{\emph{Supertype}.this}.  In the constructor body, the result is referred to as
+\code{this}.  In any non-constructor, the receiver (if any) is referred to
+as \code{this}.
+
+
+\item for arrays:
+\preverbnegspace
+\begin{Verbatim}
+  @Readonly Document [][] docs1 = new @Readonly Document [2][12]; // array of arrays of read-only documents
+  Document @Readonly [][] docs2 = new Document @Readonly [2][12]; // read-only array of arrays of documents
+  Document[] @Readonly [] docs3 = new Document[2] @Readonly [12]; // array of read-only arrays of documents
+\end{Verbatim}
+
+\preverbnegspace
+This syntax permits independent annotations for each distinct level of
+array, and for the elements.
+% ; see Section~\ref{array-syntax} for alternative syntaxes.
+
+%%% Above this point, the annotations could appear in the signature.
+%%% Below this point, they can appear only in a method (or initializer) body.
+
+\item for typecasts:
+\preverbnegspace
+\begin{Verbatim}
+  myString = (@NonNull String) myObject;
+\end{Verbatim}
+\preverbnegspace
+It is not permitted to omit the Java type, as in
+\code{myString = (@NonNull) myObject;}.
+% ; see Sections~\ref{type-annotation-use-cases}.
+% and~\ref{implicit-java-types-in-casts}.
+
+\item for constructor invocation results:
+
+\preverbnegspace
+\begin{Verbatim}
+  new @Interned MyObject()
+\end{Verbatim}
+\preverbnegspace
+
+For generic constructors (JLS \ahref{\jlsEightEightFourURL}{\S8.8.4}), the
+annotation follows the explicit type arguments (JLS
+\ahref{\jlsFifteenNine}{\S15.9}):
+
+\preverbnegspace
+\begin{Verbatim}
+  new <String> @Interned MyObject()
+\end{Verbatim}
+
+\item for type tests:
+\preverbnegspace
+\begin{Verbatim}
+  boolean isNonNull = myString instanceof @NonNull String;
+\end{Verbatim}
+\preverbnegspace
+It is not permitted to omit the Java type, as in
+\code{myString instanceof @NonNull}.
+% ; see Sections~\ref{type-annotation-use-cases}.
+% and~\ref{implicit-java-types-in-casts}.
+
+\item for object creation:
+\preverbnegspace
+\begin{Verbatim}
+  new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
+\end{Verbatim}
+
+\item for class literals:
+\preverbnegspace
+\begin{Verbatim}
+  Class<@NonNull String> c = @NonNull String.class;
+\end{Verbatim}
+
+% It's rather unfortunate that programmers cannot write the even more useful
+%   List<String>.class
+% because Java 7 didn't permit that.  It should perhaps be fixed.
+
+\item for static class member access:
+\preverbnegspace
+\begin{Verbatim}
+  Map.@NonNull Entry mapEntry;
+\end{Verbatim}
+
+\end{itemize}
+
+
+\subsubsection{Not all type names are annotatable\label{type-names}}
+
+The Java language uses type names in three different ways:  in type
+definitions/declarations; in type uses; and in other contexts that are not
+a type declaration or use.  JSR 308 permits annotations on type uses (and
+also on type parameter declarations).  JSR 308 does not support annotations
+on type names that syntactically look like, but are not, type uses.
+In the JLS grammar, type uses have a non-terminal name ending in
+\emph{Type}.
+% Say something about other uses of type names?  I would need to see the
+% new grammar first.
+
+Here are examples of such type names that are not annotatable.
+
+\paragraph{Annotation uses}
+An annotation use cannot itself be annotated.  (An annotation \emph{declaration}
+can be annotated by a so-called meta-annotation.)
+For instance, in
+
+\begin{Verbatim}
+  @MyAnnotation Object x;
+\end{Verbatim}
+
+\noindent
+there is no way to annotate the use of \<MyAnnotation>.
+
+\paragraph{Class literals}
+It is not permitted to annotate the type name in a class literal, as in
+
+\begin{Verbatim}
+  @Even int.class    // illegal!
+\end{Verbatim}
+
+\noindent
+This type name refers to a class, not a type.  The expression evaluates to a
+\<Class>, which does not reflect the type of the annotation, so there is no
+point in being able to write the annotation, which would have no effect.
+
+\paragraph{Import statement}
+It is not permitted to annotate the type name in an \<import> statement.
+
+\begin{Verbatim}
+  import @NotAllowed java.util.Date;        // illegal!
+\end{Verbatim}
+
+\noindent
+This use of a type name is not a type use and is more properly viewed as
+a scoping mechanism.
+
+\paragraph{Static member accesses}
+
+Static member accesses are preceded by a type name, but that type name may
+not be annotated:
+
+\begin{Verbatim}
+  @Illegal Outer . StaticNestedClass      // illegal!
+  @Illegal Outer . staticField            // illegal!
+\end{Verbatim}
+
+\noindent
+A static member access may itself be a type use, in which case the used
+type may be annotated by annotating the last component of the static member
+access, which is the simple name of the type being used.
+
+\begin{Verbatim}
+  Outer . @Legal StaticNestedClass x = ...;     // legal
+  myvar . @Legal StaticNestedClass x = ...;     // legal, but poor style
+\end{Verbatim}
+
+The type name in front of a static member access is a scoping mechanism,
+not a use of a type --- there's nothing of type \<Outer> in the above
+example.  Furthermore, since there is only one instance of any static
+member, what it is cannot possibly be affected by an annotation on name of
+the class being used to access it.  Affecting the type of that single
+thing, depending on the annotation on the class name being used to access
+it, feels unnatural.
+
+The syntax for instance (non-static) type member accesses is consistent
+with that for static type member accesses:  the annotation goes on the
+simple name of the type being annotated.  For instance:
+
+\begin{Verbatim}
+  myVar . @Bar NonStaticClass    // legal (on variables and casts only)
+\end{Verbatim}
+
+
 
 
 \subsection{Java language grammar changes\label{grammar}}
@@ -287,7 +541,7 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
 \\
 \nt{Resource}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression}
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression} \\
 \\
 \nt{ForVarControl}: \\
 \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
@@ -342,12 +596,10 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 
 
 % \item
-% Annotations may appear before the parenthesis of a multi-\<catch>:
+% Annotations may appear at the beginning of a disjunctive type, before a
+% vertical bar, or at the beginning of a conjunctive type, before an ampersand:
 % 
-% \begin{tabbing}
-% \nt{CatchClause}: \\
-% \qquad        \term{catch} \new{\opt{\nt{Annotations}}} \term{(} \multi{\nt{VariableModifier}} \nt{CatchType} \nt{Identifier} \term{)} \nt{Block}
-% \end{tabbing}
+% \todo{give the grammar rules: catch, extends, others?}
 
 
 \item
@@ -427,6 +679,139 @@ annotation rather than a type annotation:
 
 
 
+\subsubsection{Syntax of array annotations\label{array-syntax}}
+
+As discussed in Section~\ref{type-annotation-use-cases}, it is
+desirable to be able to independently annotate both the base type and
+each distinct level of a nested array.
+Forbidding annotations on arbitrary levels of an array would simplify the
+syntax, but it would reduce expressiveness to an unacceptable degree.
+The syntax of array annotations follows the same general prefix rule as
+other annotations --- it looks slightly different because the syntax
+of array types is different than the syntax of other Java types.
+(Arrays are less commonly used than generics, so even if you don't like the
+array syntax, it need not bother you in most cases.)
+
+Most programmers read the Java type \code{String[][]} as
+``array of arrays of Strings''.  Analogously, the Java expression
+\code{new String[2][5]} is ``new length-2 array of length-5 array of Strings''.
+After \code{a = new String[2][5]}, \code{a} is an array with
+2 elements, and \code{a[1]} is a 5-element array.
+
+In other words, the order in which a programmer reads an array type or
+expression is left-to-right for the
+brackets, \emph{then} left-to-right for the base type.
+
+\begin{Verbatim}
+  type:                       String             []            []
+
+  order of reading:  2------------->  1 ------------------------>
+\end{Verbatim}
+
+% Even Josh Bloch got this wrong when I gave it to him as a Java Puzzler of
+% my own (he thought you would read from right to left), so it's
+% understandable if you didn't realize that this is how Java arrays have
+% always worked.
+
+
+To more fully describe the 2x5 array, a programmer could use the
+type ``length-2 array of length-5 array of Strings'':
+
+\begin{Verbatim}
+  type:                       String  @Length(2) [] @Length(5) []
+
+  order of reading:  2------------->  1 ------------------------>
+\end{Verbatim}
+
+The prefix notation is natural, because the type is read in exactly
+the same order as any Java array type.  As another example, to express
+``non-null array of length-10 arrays of English Strings'' a programmer
+would write
+
+\begin{Verbatim}
+  type:              @English String  @NonNull [] @Length(10) []
+
+  order of reading:  2------------->  1 ----------------------->
+\end{Verbatim}
+
+
+% The prefix notation doesn't really work for people who read the original
+% declaration by starting with the base type and then working
+% \emph{right-to-left}, as ``String array array''.
+
+
+An important property of this syntax is that, in two declarations that
+differ only in the number of array levels, the annotations mean the same
+thing.  For example, \code{var1} has
+the same annotations as the elements of \code{arr2}:
+
+\begin{Verbatim}
+  @NonNull String var1;
+  @NonNull String[] arr2;
+\end{Verbatim}
+
+\noindent
+because in each case \code{@NonNull} refers to the String, not the array.
+This consistency is especially important since the two variables may appear in a single
+declaration:
+
+\begin{Verbatim}
+  @NonNull String var1, arr2[];
+\end{Verbatim}
+
+%% Probably don't bring this up.  It should be possible to infer it anyway.
+% In this (deprecated but legal) syntax, in each component you read
+% left-to-right, like this:
+% 
+%     @English String @NonNull [] [] []  arr1,   arr2 @Length(10) [] [] [];
+%     3-------------> 2--------------->               1------------------>
+
+
+%     For example, \code{arr1} should have the same annotations
+%     as the elements of \code{arr2}:
+% \begin{Verbatim}
+%   @A T[@B] arr1, arr2[@C];
+% \end{Verbatim}
+
+%     By contrast, it would be confusing to have a syntax in which
+% \begin{Verbatim}
+%   @A List<@B Object>          // @A refers to List
+%   @A List<@B Object> @C []    // @A refers to array, @C refers to List
+% \end{Verbatim}
+
+A potential criticism is that a type annotation at the very beginning of a
+declaration does not refer to the full type, even though declaration
+annotations (which also occur at the beginning of
+the declaration) do refer to the entire variable.  As an example, in
+\code{@NonNull String[] arr2;} the variable \code{arr2} is not non-null.
+This is actually a criticism of Java itself, not of the JSR 308
+annotation extension, which is merely consistent with Java.  In a
+declaration \code{String[] arr2;}, the top-level type constructor does not
+appear on the far left.  An annotation on the whole type (the array) should
+appear on the syntax that indicates the array --- that is, on the brackets.
+
+
+Other array syntaxes can be imagined, but they are less consistent with
+Java syntax and therefore harder to read and write.
+Examples include
+making annotations at the beginning of the type refer to the whole type,
+using a postfix syntax rather than a prefix syntax, and postfix syntax
+within angle brackets as for generics.
+
+% The IGJ type system~\cite{ZibinPAAKE2007} has been implemented using both a
+% generics-like syntax and also the JSR 308 annotation syntax.  In a case
+% study, a programmer preferred the JSR 308 syntax to the generics-like
+% syntax~\cite{ZibinPAAKE2007}.
+
+
+%% For a discussion of the two major alternatives for array syntax, see my
+%% email of July 13, 2010 titled "Consistency of array type and expression
+%% annotations" (and subsequent and previous email).
+
+
+
+
+
 \subsection{Target meta-annotations for type annotations\label{target-meta-annotation}}
 
 Java uses the \code{@Target} meta-annotation as a machine-checked way of
@@ -439,8 +824,8 @@ enum.
 \item
 \code{ElementType.TYPE\_PARAMETER} stands for a type parameter --- that is,
 the declaration of a type variable.  Examples are generic class
-declarations \code{class MyClass<T> \ttlcb ... \ttrcb}, generic method
-declarations \code{<T> foo(...) \ttlcb ... \ttrcb}, and wildcards
+declarations \code{class MyClass<T> \ttlcb ...\ \ttrcb}, generic method
+declarations \code{<T> foo(...)\ \ttlcb ...\ \ttrcb}, and wildcards
 \code{List<?>}, which declare an anonymous type variable.
 
 \item
@@ -477,7 +862,7 @@ as applying to either a declaration or a type, as in \<@A int x;>, then
 the compiler applies the annotation to every target that is consistent with
 its meta-annotation.  The order of annotations is not used to disambiguate.
 As in Java SE 7, the compiler issues an error if a programmer places an
-annotation in a location not permitted by its Target meta-annotation.  (The
+annotation in a location not permitted by its \<@Target> meta-annotation.  (The
 compiler issues the error even if no annotation processor is being run.)
 % The Target Javadocs state
 %   If such a meta-annotation is present, the compiler will enforce the
@@ -485,52 +870,197 @@ compiler issues the error even if no annotation processor is being run.)
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
 
+\subsubsection{Discussion:  Disambiguating type and declaration annotations\label{disambiguating}}
 
-\section{Compiler modifications\label{mods}\label{compiler}}
+An annotation before a method declaration annotates either the return type,
+or the method declaration.  There is never any ambiguity regarding the
+programmer intention:  in that location, a type annotation annotates the
+return type, and a declaration annotation annotates the method itself.  The
+\code{@Target} meta-annotation indicates whether an annotation is a type
+annotation.  Field declarations are treated similarly.
 
-% This section indicates the tools and specifications that must be modified
-% in order for the Java language and tools to support JSR 308.
-% 
-% 
-% \subsection{Compiler\label{compiler}}
+
+% This reuse of the annotation location means that there is no need for new
+% syntax for annotations on types in declarations.
+
+Suppose that we have these annotation declarations:
+\begin{Verbatim}
+  @Target(ElementType.TYPE_USE)
+  @interface NonNegative { }
+
+  @Target(ElementType.METHOD)
+  @interface Override { }
+
+  @Target(ElementType.FIELD)
+  @interface GuardedBy { ... }
+\end{Verbatim}
+Then, in
+\begin{Verbatim}
+  @Override
+  @NonNegative int getHeight() { ... }
+\end{Verbatim}
+\code{@Override} applies to the method and \code{@NonNegative} applies
+to the return type.
+Furthermore, in these two field declarations
+\begin{Verbatim}
+  @NonNegative int balance;
+  @GuardedBy("myLock") long lastAccessedTime;
+\end{Verbatim}
+the annotation \code{@NonNegative} applies to the field type \code{int},
+not to the whole variable declaration nor to the variable \code{balance}
+itself.  The annotation \code{@GuardedBy("myLock")} applies to the
+field \code{lastAccessedTime}.
+
+Here are a few facts that follow from the specification.  For brevity, we
+use ``type annotation'' as shorthand for ``an annotation that is
+meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
+\begin{itemize}
+\item
+  A type annotation need not also be meta-annotated with the targets
+  \code{ElementType.TYPE}, \code{ElementType.METHOD}, or
+  \code{ElementType.FIELD} in order to be applied to a class, a method
+  return type, or a field type --- and it generally should \emph{not}
+  contain such a \code{@Target} meta-annotation.
+\item
+  A type annotation may not appear before a void method (a method with no
+  return type).  This also follows from the fact that \code{void} is not a
+  type.
+\item
+  A type annotation may appear before a constructor, in which case it
+  represents the object that the constructor is creating.
+\item
+  As with any other non-static method, a type annotation may
+  appear on the receiver of an inner class constructor.
+\item
+  It is legal to write \<@A void foo() { ... }>, where \<@A> is
+  meta-annotated with \<@Target({ ElementType.TYPE\_USE, ElementType.METHOD })>
+   or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
+  annotation is applied only to the method declaration.  The code construct
+  would have been illegal if \<@A> were a type annotation.
+\item
+  A type annotation may not appear on a package (a package declaration does
+  not contain a use of a type).
+\end{itemize}
 
 
-When generating \code{.class} files, the compiler must emit the attributes
-described in Section~\ref{class-file}.
-% (The JLS needs to be updated to so state.)
+A programmer could write a \code{@Target} meta-annotation indicating that an
+annotation is \emph{both} a type annotation and a declaration annotation.  In
+such a case, the annotation would apply to both the return type and the
+method declaration, and it would exist twice in the class file.  We have
+not found an example where that is desirable; although it is legal, it is
+considered bad style.
 
-The compiler is required to preserve annotations in the class file.  More
-precisely, if an expression has an annotated type (and the annotation has
-class file or runtime retention), and that expression is represented
-in the compiled class file, then the annotation must be present, in the
-compiled class file, on the type of the compiled representation of the
-expression.  For expressions within a field initializer or a static
-initializer block, the compiled representation might be in an \code{<init>}
-or \code{<clinit>} method, or in a helper method called by them.
 
-If the compiler optimizes away an expression, then it may also
-optimize away the annotation.  (Exception:  when a type cast
-is optimized away without optimizing away its argument, the
-annotation remains on the argument; see Section~\ref{target_type}.)
+When an annotation has no \code{@Target} meta-annotation (which is bad
+style!), it is treated as if it applies to all locations.
+%
+For example, if the \code{@Foo} annotation definition lacks a
+\code{@Target} meta-annotation, then in this code:
 
-The compiler sometimes creates new methods that did not appear in the
-source code.  The compiler should annotate these compiler-generated methods
-in an appropriate way.  For example, a bridge method is an implementation
-strategy used when the erased signature of the actual method being invoked
-differs from that of the compile-time method
-declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
-nothing but call an existing method, and in this case, annotations should
-be copied from the method being invoked.
+\begin{Verbatim}
+  @Foo int m() { return 0; }
+\end{Verbatim}
 
-%% Cut this -- too compiler-specific.
-% and
-% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
+\noindent
+the \code{@Foo} annotation applies to both the \code{m} method, and the
+\code{int} data type.  (If it is not intended as a type annotation, it will
+be ignored by any type annotation processor, so it does no harm on the
+\code{int} data type.)  The \code{@Foo} annotation appears twice in the AST
+during annotation processing, and it appears twice in the classfile.
+% In other words, a Java 7 and a Java 8 compiler would
+% produce classfiles with different numbers of annotations.
+A tool that reads a classfile and writes Java-like output, such as Javadoc
+or a decompiler, must take care not to write an annotation twice in the
+decompiled code, as in ``\code{@Foo @Foo int m()}\ldots''.
+This requirement does
+not add extra work when constructing the tool, since the tool already has to handle
+the case where the \<@Target> annotation explicitly included both
+\<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
 
-%% Remarks about javac are not appropriate in a specification.
-% (As of Java SE 6, javac does not copy/transfer any annotations from
-% original methods to the compiler-generated methods; that is probably a bug
-% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
-% should be copied.)
+
+In summary:  for certain syntactic locations, which target (Java construct)
+is being annotated depends on the annotation.
+There is no ambiguity for the compiler:
+the compiler applies the annotation to every
+target that is consistent with its meta-annotation (see
+Section~\ref{target-meta-annotation}).
+In practice, programmers
+have no difficulty in understanding where a given annotation applies.
+
+
+
+% The Target Javadocs state
+%   If such a meta-annotation is present, the compiler will enforce the
+%   specified usage restriction.
+% (See http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html .)
+
+
+
+
+
+% Explain the difference between
+%  * meta-annotating with TYPE.
+%  * not annotating.
+%  * annotating with everything (except ANNOTATION).
+% Explain backward-compatibility with anything that's not meta-annotated.
+
+
+% We want to avoid text like this, in the FindBugs manual:
+% "When this annotation is applied to a method it applies to the method return value."
+% The problem is that it's not machine-checked.
+% (That text is for CheckForNull, but such text does not appear for other
+% annotations such as NonNull and Nullable.)
+
+
+
+%% IMPLEMENTATION NOTE:
+% As noted in Section~\ref{target-meta-annotation},
+% the order of annotations is not used to disambiguate;
+% \code{@NonNull @Override Dimension getSize()} has the same
+% meaning but is poor style.  (An annotation processor could warn about this
+% order, just as tools warn about modifiers --- such as \code{final static}
+% --- that are not written in the order recommended by Oracle.)
+% % The recommended order is:
+% %   public protected private abstract static final transient volatile synchronized native strictfp interface
+
+
+%% ALTERNATIVE DESIGN
+% Different syntaxes are possible, in which declaration and type annotations
+% appear in different locations in the grammar.  Such a syntax is warranted
+% in two circumstances.  (1) If programmers find it confusing to determine
+% which construct an annotation applies to, and the alternate syntax is
+% clearer overall.  (2) If there exist annotations that can apply equally
+% well to both methods and return value types (or to both types and variable
+% declarations, etc.), and that have different semantics in the two
+% situations.  Both circumstances are poor style.  (The only example of an
+% annotation that can go on both locations that we have found is an
+% annotation that is itself actually a collection of other annotations,
+% such as "@MultipleAnnotations" --- which is not even possible to write
+% currently, since an annotation cannot take an arbitrary other annotation
+% as an argument.)  Another argument for the alternate syntax is
+% that the grammar should be maximally flexible to permit unforeseen future
+% uses of such annotations.  This must be traded off against readability and
+% usability for important known common cases.
+
+
+
+% The person who defines the annotation (and writes
+% its annotation processor) decides whether an annotation that appears before
+% the return value applies to the method declaration or to the return type.
+
+
+
+% It is also convenient to use annotations to describe the effect of invoking
+% a method, such as whether it may block, allocate memory, etc.  Such
+% annotations could be placed on either the return value (as is current practice)
+% or the receiver; this semantic decision is up to the person who defines the
+% annotation.
+
+
+
+
+
+
 
 
 \section{Class file format extensions\label{class-file}}
@@ -791,12 +1321,12 @@ field                                           & \code{0x0A}, \code{0x0B} & \S\
 method return type                              & \code{0x0C}, \code{0x0D} & \S\ref{class-file:ext:ri:return} \\
 method receiver                                 & \code{0x0E}, \code{0x0F} & \S\ref{class-file:ext:ri:receiver} \\
 method parameter                                & \code{0x10}, \code{0x11} & \S\ref{class-file:ext:ri:parameters} \\
-exception type in \code{throws}                 & \code{0x12}, \code{0x13}\rlunused & \S\ref{class-file:ext:ri:throws} \\
+exception type in \code{throws}                 & \code{0x12}, \code{0x13} & \S\ref{class-file:ext:ri:throws} \\
 wildcard bound                                  & \code{0x14}, \code{0x15} & \S\ref{class-file:ext:ri:wildcard} \\
 \hline
 local variable                                  & \code{0x16}, \code{0x17} & \S\ref{class-file:ext:ri:localvar} \\
 resource variable                               & \code{0x18}, \code{0x19} & \S\ref{class-file:ext:ri:localvar} \\
-exception parameter                             & \code{0x1A}, \code{0x1B} & \S\ref{class-file:ext:ri:localvar} \\
+exception parameter                             & \code{0x1A}, \code{0x1B}\rlunused & \S\ref{class-file:ext:ri:catch} \\
 typecast                                        & \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:typecast} \\
 type test (\code{instanceof})                   & \code{0x1E}, \code{0x1F} & \S\ref{class-file:ext:ri:typecast} \\
 object creation (\code{new})                    & \code{0x20}, \code{0x21} & \S\ref{class-file:ext:ri:typecast} \\
@@ -981,11 +1511,30 @@ These fields are similar to those of the optional
 Storing local variable annotations in the class file raises certain
 challenges.  For example, live ranges are not isomorphic to local
 variables.  Note that a local variable with no live range might not appear in
-the class file; that is OK, becauuse it is irrelevant to the program.
+the class file; that is OK, because it is irrelevant to the program.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{localvar\_target} appears in the attributes table of a
 \code{method\_info} structure.
+
+
+\subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
+
+When the annotation's target is an exception parameter (the exception type
+in a \<catch> statement), then 
+\code{target\_info} indicates an offset in the exception table (which
+appears in the \<exception\_table> slot of the \<Code> attribute).
+
+\begin{Verbatim}
+    catch_target {
+        u2 exception_table_index;
+    };
+\end{Verbatim}
+
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{catch\_target} appears in the attributes table of a
+\code{method\_info} structure.
+
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
@@ -1390,7 +1939,6 @@ Figure~\ref{tbl:locations} shows some examples.
 
 \label{page:non-normative-start}
 
-\newpage
 \appendix
 
 \section{Example use of type annotations:  Type qualifiers\label{type-qualifiers}}
@@ -1687,181 +2235,6 @@ qualifiers).  The Checker Framework is distributed with a set of example
 type-checkers.  The Checker Framework is built on the Type Annotations (JSR
 308) syntax, though it also permits annotations to be written in comments
 for compatibility with previous versions of Java.
-
-
-
-\section{Discussion of Java language syntax extensions\label{syntax-discussion}}
-
-In Java SE 7, annotations can be written only on method parameters
-and the declarations of packages, classes, methods, fields, and local variables.
-Additional annotations are necessary in order to fully specify Java classes and
-methods.
-
-
-\subsection{Examples of annotation syntax\label{type-annotation-syntax-examples}}
-
-This section gives examples of the annotation syntax specified in
-Sections~\ref{type-annotation-locations} and~\ref{grammar}.
-This list is not necessarily exhaustive (but if you notice something
-missing, let us know so that we can add it).
-Section~\ref{type-annotation-use-cases} motivates annotating these
-locations by giving the meaning of annotations that need to be applied to
-these locations.
-
-% Bill Pugh suggests using @Foo and @Bar here, so avoid giving people the
-% impression that we are proposing specific annotations.  But I think that
-% makes the discussion unnecessarily abstract and thus harder to follow.
-
-\newcommand{\preverbnegspace}{\vspace{-5pt}}
-
-% This list should perhaps be given in the same order as figure 1 (and
-% maybe make that explicit in both places).
-
-\begin{itemize}
-
-\item for generic type arguments to parameterized classes:
-\preverbnegspace
-\begin{Verbatim}
-  Map<@NonNull String, @NonEmpty List<@Readonly Document>> files;
-\end{Verbatim}
-
-\item for generic type arguments in a generic method or constructor invocation:
-\preverbnegspace
-\begin{Verbatim}
-  o.<@NonNull String>m("...");
-\end{Verbatim}
-
-\item for type parameter bounds and wildcard bounds:
-\preverbnegspace
-\begin{Verbatim}
-  class Folder<F extends @Existing File> { ... }
-  Collection<? super @Existing File>
-\end{Verbatim}
-
-\item for type parameters:
-\preverbnegspace
-\begin{Verbatim}
-  interface WonderfulList<@Reified E> { ... }
-\end{Verbatim}
-% Niko Matsakis gave another example in email of 
-% Wed, 25 Feb 2009 11:57:37 +0100
-
-\item for class inheritance:
-\preverbnegspace
-\begin{Verbatim}
-  class UnmodifiableList<T> implements @Readonly List<@Readonly T> { ... }
-\end{Verbatim}
-
-\item for \code{throws} clauses:
-\preverbnegspace
-\begin{Verbatim}
-  void monitorTemperature() throws @Critical TemperatureException { ... }
-\end{Verbatim}
-
-\item for method receivers:
-\preverbnegspace
-\begin{Verbatim}
-  public String toString(@Readonly MyClass this) { ... }
-\end{Verbatim}
-
-\item for constructor declaration return types:
-
-\preverbnegspace
-% TODO:  Use a more realistic example.
-\begin{Verbatim}
-  class Invocation {
-    @Immutable Invocation() { ... }
-    ...
-  }
-\end{Verbatim}
-\preverbnegspace
-
-Note that the result of a constructor is different from the receiver.  The
-receiver only exists for inner class constructors.  It is the containing
-object, and in the body of the constructor it is referred to as
-\code{\emph{Supertype}.this}.  In the constructor body, the result is referred to as
-\code{this}.  In any non-constructor, the receiver (if any) is referred to
-as \code{this}.
-
-
-\item for arrays:
-\preverbnegspace
-\begin{Verbatim}
-  @Readonly Document [][] docs1 = new @Readonly Document [2][12]; // array of arrays of read-only documents
-  Document @Readonly [][] docs2 = new Document @Readonly [2][12]; // read-only array of arrays of documents
-  Document[] @Readonly [] docs3 = new Document[2] @Readonly [12]; // array of read-only arrays of documents
-\end{Verbatim}
-
-\preverbnegspace
-This syntax permits independent annotations for each distinct level of
-array, and for the elements.
-% ; see Section~\ref{array-syntax} for alternative syntaxes.
-
-%%% Above this point, the annotations could appear in the signature.
-%%% Below this point, they can appear only in a method (or initializer) body.
-
-\item for typecasts:
-\preverbnegspace
-\begin{Verbatim}
-  myString = (@NonNull String) myObject;
-\end{Verbatim}
-\preverbnegspace
-It is not permitted to omit the Java type, as in
-\code{myString = (@NonNull) myObject;}; see
-Sections~\ref{type-annotation-use-cases}.
-% and~\ref{implicit-java-types-in-casts}.
-
-\item for constructor invocation results:
-
-\preverbnegspace
-\begin{Verbatim}
-  new @Interned MyObject()
-\end{Verbatim}
-\preverbnegspace
-
-For generic constructors (JLS \ahref{\jlsEightEightFourURL}{\S8.8.4}), the
-annotation follows the explicit type arguments (JLS
-\ahref{\jlsFifteenNine}{\S15.9}):
-
-\preverbnegspace
-\begin{Verbatim}
-  new <String> @Interned MyObject()
-\end{Verbatim}
-
-\item for type tests:
-\preverbnegspace
-\begin{Verbatim}
-  boolean isNonNull = myString instanceof @NonNull String;
-\end{Verbatim}
-\preverbnegspace
-It is not permitted to omit the Java type, as in
-\code{myString instanceof @NonNull}; see
-Sections~\ref{type-annotation-use-cases}.
-% and~\ref{implicit-java-types-in-casts}.
-
-\item for object creation:
-\preverbnegspace
-\begin{Verbatim}
-  new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
-\end{Verbatim}
-
-\item for class literals:
-\preverbnegspace
-\begin{Verbatim}
-  Class<@NonNull String> c = @NonNull String.class;
-\end{Verbatim}
-
-% It's rather unfortunate that programmers cannot write the even more useful
-%   List<String>.class
-% because Java 7 didn't permit that.  It should perhaps be fixed.
-
-\item for static class member access:
-\preverbnegspace
-\begin{Verbatim}
-  Map.@NonNull Entry mapEntry;
-\end{Verbatim}
-
-\end{itemize}
 
 
 \subsection{Uses for annotations on types\label{type-annotation-use-cases}}
@@ -2343,7 +2716,7 @@ caught exception, as in
 In this example case, a tool could warn if any \<@Critical> exception can
 reach the \<catch> clause.
 
-% However, special syntax is provided for the disjunctive types that arise
+% However, special syntax is provided for disjunctive and conjunctive types that arise
 % from a multi-\<catch> clause.
 % It is possible to annotate the individual alternatives, as in
 % 
@@ -2359,13 +2732,28 @@ reach the \<catch> clause.
 % % the multi-\<catch> syntax is intended to reduce code size.
 % 
 % \begin{Verbatim}
-%   catch @A ( E1 | E2 | E3 e ) { ... }
+%   catch ( @A | E1 | E2 | E3 e ) { ... }
 % \end{Verbatim}
 % 
 % It is possible to specify both a type annotation on the disjunction and
 % also type annotations on (some of) the disjuncts.  Each disjuct is treated
 % as containing all the annotations on the disjunct, plus all the annotations
-% on itself.
+% on itself.  Conjuncts are treated analogously.
+
+
+
+%% This appendix has been dispersed, mostly to the normative (non-appendix)
+%% part of the document.
+% \section{Discussion of Java language syntax extensions\label{syntax-discussion}}
+% 
+% In Java SE 7, annotations can be written only on method parameters
+% and the declarations of packages, classes, methods, fields, and local variables.
+% Additional annotations are necessary in order to fully specify Java classes and
+% methods.
+
+
+
+
 
 
 % \subsection{Target meta-annotation for type annotations}
@@ -2402,414 +2790,6 @@ reach the \<catch> clause.
 % \end{Verbatim}
 
 
-\subsection{Not all type names are annotatable\label{type-names}}
-
-The Java language uses type names in three different ways:  in type
-definitions/declarations; in type uses; and in other contexts that are not
-a type declaration or use.  JSR 308 permits annotations on type uses (and
-also on type parameter declarations).  JSR 308 does not support annotations
-on type names that syntactically look like, but are not, type uses.
-In the JLS grammar, type uses have a non-terminal name ending in
-\emph{Type}.
-% Say something about other uses of type names?  I would need to see the
-% new grammar first.
-
-Here are examples of such type names that are not annotatable.
-
-\paragraph{Annotation uses}
-An annotation use cannot itself be annotated.  (An annotation declaration
-can be annotated by a so-called meta-annotation.)
-For instance, in
-
-\begin{Verbatim}
-  @MyAnnotation Object x;
-\end{Verbatim}
-
-\noindent
-there is no way to annotate the use of \<MyAnnotation>.
-
-\paragraph{Class literals}
-It is not permitted to annotate the type name in a class literal, as in
-
-\begin{Verbatim}
-  @Even int.class    // illegal!
-\end{Verbatim}
-
-\noindent
-This type name refers to a class, not a type.  The expression evaluates to a
-\<Class>, which does not reflect the type of the annotation, so there is no
-point in being able to write the annotation, which would have no effect.
-
-\paragraph{Import statement}
-It is not permitted to annotate the type name in an \<import> statement.
-
-\begin{Verbatim}
-  import @NotAllowed java.util.Date;        // illegal!
-\end{Verbatim}
-
-\noindent
-This use of a type name is not a type use and is more properly viewed as
-a scoping mechanism.
-
-\paragraph{Static member accesses}
-
-Static member accesses are preceded by a type name, but that type name may
-not be annotated:
-
-\begin{Verbatim}
-  @Illegal Outer . StaticNestedClass      // illegal!
-  @Illegal Outer . staticField            // illegal!
-\end{Verbatim}
-
-\noindent
-A static member access may itself be a type use, in which cane the used
-type may be annotated by annotating the last component of the static member
-access, which is the simple name of the type being used.
-
-\begin{Verbatim}
-  Outer . @Legal StaticNestedClass x = ...;
-  myvar . @Legal StaticNestedClass x = ...;     // legal, but poor style
-\end{Verbatim}
-
-The type name in front of a static member access is a scoping mechanism,
-not a use of a type --- there's nothing of type \<Outer> in the above
-example.  Furthermore, since there is only one instance of any static
-member, what it is cannot possibly be affected by an annotation on name of
-the class being used to access it.  Affecting the type of that single
-thing, depending on the annotation on the class name being used to access
-it, feels unnatural.
-
-The syntax for instance (non-static) type member accesses is consistent
-with that for static type member accesses:  the annotation goes on the
-simple name of the type being annotated.  For instance:
-
-\begin{Verbatim}
-  myVar . @Bar NonStaticClass    // legal (on variables and casts only)
-\end{Verbatim}
-
-
-\subsection{Syntax of array annotations\label{array-syntax}}
-
-As discussed in Section~\ref{type-annotation-use-cases}, it is
-desirable to be able to independently annotate both the base type and
-each distinct level of a nested array.
-Forbidding annotations on arbitrary levels of an array would simplify the
-syntax, but it would reduce expressiveness to an unacceptable degree.
-The syntax of array annotations follows the same general prefix rule as
-other annotations, though it looks slightly different because the syntax
-of array types is different than the syntax of other Java types.
-(Arrays are less commonly used than generics, so even if you don't like the
-array syntax, it need not bother you in most cases.)
-
-Most programmers read the Java type \code{String[][]} as
-``array of arrays of Strings''.  Analogously, the construct
-\code{new String[2][5]} is ``new length-2 array of length-5 array of Strings''.
-After \code{a = new String[2][5]}, \code{a} is an array with
-2 elements, and \code{a[1]} is a 5-element array.
-
-In other words, the order of reading an array type is left-to-right for the
-brackets, \emph{then} left-to-right for the base type.
-
-\begin{Verbatim}
-  type:                       String             []            []
-
-  order of reading:  2------------->  1 ------------------------>
-\end{Verbatim}
-
-% Even Josh Bloch got this wrong when I gave it to him as a Java Puzzler of
-% my own (he thought you would read from right to left), so it's
-% understandable if you didn't realize that this is how Java arrays have
-% always worked.
-
-
-To more fully describe the 2x5 array, a programmer could use the
-type ``length-2 array of length-5 array of Strings'':
-
-\begin{Verbatim}
-  type:                       String  @Length(2) [] @Length(5) []
-
-  order of reading:  2------------->  1 ------------------------>
-\end{Verbatim}
-
-The prefix notation is natural, because the type is read in exactly
-the same order as any Java array type.  As another example, to express
-``non-null array of length-10 arrays of English Strings'' a programmer
-would write
-
-\begin{Verbatim}
-  type:              @English String  @NonNull [] @Length(10) []
-
-  order of reading:  2------------->  1 ----------------------->
-\end{Verbatim}
-
-
-% The prefix notation doesn't really work for people who read the original
-% declaration by starting with the base type and then working
-% \emph{right-to-left}, as ``String array array''.
-
-
-An important property of this syntax is that, in two declarations that
-differ only in the number of array levels, the annotations mean the same
-thing.  For example, \code{var1} has
-the same annotations as the elements of \code{arr2}:
-
-\begin{Verbatim}
-  @NonNull String var1;
-  @NonNull String[] arr2;
-\end{Verbatim}
-
-\noindent
-because in each case \code{@NonNull} refers to the String, not the array.
-This consistency is especially important since the two variables may appear in a single
-declaration:
-
-\begin{Verbatim}
-  @NonNull String var1, arr2[];
-\end{Verbatim}
-
-%% Probably don't bring this up.  It should be possible to infer it anyway.
-% In this (deprecated but legal) syntax, in each component you read
-% left-to-right, like this:
-% 
-%     @English String @NonNull [] [] []  arr1,   arr2 @Length(10) [] [] [];
-%     3-------------> 2--------------->               1------------------>
-
-
-%     For example, \code{arr1} should have the same annotations
-%     as the elements of \code{arr2}:
-% \begin{Verbatim}
-%   @A T[@B] arr1, arr2[@C];
-% \end{Verbatim}
-
-%     By contrast, it would be confusing to have a syntax in which
-% \begin{Verbatim}
-%   @A List<@B Object>          // @A refers to List
-%   @A List<@B Object> @C []    // @A refers to array, @C refers to List
-% \end{Verbatim}
-
-A potential criticism is that a type annotation at the very beginning of a
-declaration does not refer to the full type, even though declaration
-annotations (which also occur at the beginning of
-the declaration) do refer to the entire variable.  As an example, in
-\code{@NonNull String[] arr2;} the variable \code{arr2} is not non-null.
-This is actually a criticism of Java itself, not of the JSR 308
-annotation extension, which is merely consistent with Java.  In a
-declaration \code{String[] arr2;}, the top-level type constructor does not
-appear on the far left.  An annotation on the whole type (the array) should
-appear on the syntax that indicates the array --- that is, on the brackets.
-
-
-Other array syntaxes can be imagined, but they are less consistent with
-Java syntax and therefore harder to read and write.
-Examples include
-making annotations at the beginning of the type refer to the whole type,
-using a postfix syntax rather than a prefix syntax, and postfix syntax
-within angle brackets as for generics.
-
-% The IGJ type system~\cite{ZibinPAAKE2007} has been implemented using both a
-% generics-like syntax and also the JSR 308 annotation syntax.  In a case
-% study, a programmer preferred the JSR 308 syntax to the generics-like
-% syntax~\cite{ZibinPAAKE2007}.
-
-
-%% For a discussion of the two major alternatives for array syntax, see my
-%% email of July 13, 2010 titled "Consistency of array type and expression
-%% annotations" (and subsequent and previous email).
-
-
-
-\subsection{Disambiguating type and declaration annotations\label{disambiguating}}
-
-An annotation before a method declaration annotates either the return type,
-or the method declaration.  There is never any ambiguity regarding the
-programmer intention:  in that location, a type annotation annotates the
-return type, and a declaration annotation annotates the method itself.  The
-\code{@Target} meta-annotation indicates whether an annotation is a type
-annotation.  Field declarations are treated similarly.
-
-
-% This reuse of the annotation location means that there is no need for new
-% syntax for annotations on types in declarations.
-
-Suppose that we have these annotation declarations:
-\begin{Verbatim}
-  @Target(ElementType.TYPE_USE)
-  @interface NonNegative { }
-
-  @Target(ElementType.METHOD)
-  @interface Override { }
-
-  @Target(ElementType.FIELD)
-  @interface GuardedBy { ... }
-\end{Verbatim}
-Then, in
-\begin{Verbatim}
-  @Override
-  @NonNegative int getHeight() { ... }
-\end{Verbatim}
-\code{@Override} applies to the method and \code{@NonNegative} applies
-to the return type.
-Furthermore, in these two field declarations
-\begin{Verbatim}
-  @NonNegative int balance;
-  @GuardedBy("myLock") long lastAccessedTime;
-\end{Verbatim}
-the annotation \code{@NonNegative} applies to the field type \code{int},
-not to the whole variable declaration nor to the variable \code{balance}
-itself.  The annotation \code{@GuardedBy("accessLock")} applies to the
-field \code{lastAccessedTime}.
-
-Here are a few facts that follow from the specification.  For brevity, we
-use ``type annotation'' as shorthand for ``an annotation that is
-meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
-\begin{itemize}
-\item
-  A type annotation need not also be meta-annotated with the targets
-  \code{ElementType.TYPE}, \code{ElementType.METHOD}, or
-  \code{ElementType.FIELD} in order to be applied to a class, a method
-  return type, or a field type --- and it generally should \emph{not}
-  contain such a \code{@Target} meta-annotation.
-\item
-  A type annotation may not appear before a void method (a method with no
-  return type).  This also follows from the fact that \code{void} is not a
-  type.
-\item
-  It is legal to write \<@A void foo() { ... }>, where \<@A> is
-  meta-annotated with \<@Target({ ElementType.TYPE\_USE, ElementType.METHOD })>
-   or \<@A> has no \<@Target> meta-annotation; in ethier case, the \<@A>
-  annotation is applied only to the method declaration.  The code construct
-  would have been illegal if \<@A> were a type annotation.
-\item
-  A type annotation may not appear on a package (a package declaration does
-  not contain a use of a type).
-\item
-  A type annotation may appear before a constructor, in which case it
-  represents the object that the constructor is creating.
-\item
-  As with any other non-static method, a type annotation may
-  appear on the receiver of an inner class constructor.
-\end{itemize}
-
-
-Strictly speaking, a \code{@Target} meta-annotation could indicate that an
-annotation is \emph{both} a type annotation and a declaration annotation.  In
-such a case, the annotation would apply to both the return type and the
-method declaration, and it would exist twice in the class file.  We have
-not found an example where that is desirable; although it is legal, it is
-considered bad style.
-
-
-When an annotation has no \code{@Target} meta-annotation (which is bad
-style!), it is treated as if it applies to all locations.
-%
-For example, if the \code{@Foo} annotation definition lacks a
-\code{@Target} meta-annotation, then in this code:
-
-\begin{Verbatim}
-  @Foo int m() { return 0; }
-\end{Verbatim}
-
-\noindent
-the \code{@Foo} annotation applies to both the \code{m} method, and the
-\code{int} data type.  (If it is not intended as a type annotation, it will
-be ignored by any type annotation processor, so it does no harm on the
-\code{int} data type.)  The \code{@Foo} annotation appears twice in the AST
-during annotation processing, and it appears twice in the classfile.
-% In other words, a Java 7 and a Java 8 compiler would
-% produce classfiles with different numbers of annotations.
-A tool that reads a classfile and writes Java-like output, such as Javadoc
-or a decompiler, must take care not to write an annotation twice in the
-decompiled code, as in ``\code{@Foo @Foo int m()}\ldots''.
-This requirement does
-not add extra work when constructing the tool, since the tool has to handle
-the case where the \<@Target> annotation explicitly included both
-\<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
-
-
-In summary:  for certain syntactic locations, which target (Java construct)
-is being annotated depends on the annotation.
-There is no ambiguity for the compiler:
-the compiler applies the annotation to every
-target that is consistent with its meta-annotation (see
-Section~\ref{target-meta-annotation}).
-In practice, programmers
-have no difficulty in understanding where a given annotation applies.
-
-
-
-% The Target Javadocs state
-%   If such a meta-annotation is present, the compiler will enforce the
-%   specified usage restriction.
-% (See http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html .)
-
-
-
-
-
-% Explain the difference between
-%  * meta-annotating with TYPE.
-%  * not annotating.
-%  * annotating with everything (except ANNOTATION).
-% Explain backward-compatibility with anything that's not meta-annotated.
-
-
-% We want to avoid text like this, in the FindBugs manual:
-% "When this annotation is applied to a method it applies to the method return value."
-% The problem is that it's not machine-checked.
-% (That text is for CheckForNull, but such text does not appear for other
-% annotations such as NonNull and Nullable.)
-
-
-
-%% IMPLEMENTATION NOTE:
-% As noted in Section~\ref{target-meta-annotation},
-% the order of annotations is not used to disambiguate;
-% \code{@NonNull @Override Dimension getSize()} has the same
-% meaning but is poor style.  (An annotation processor could warn about this
-% order, just as tools warn about modifiers --- such as \code{final static}
-% --- that are not written in the order recommended by Oracle.)
-% % The recommended order is:
-% %   public protected private abstract static final transient volatile synchronized native strictfp interface
-
-
-%% ALTERNATIVE DESIGN
-% Different syntaxes are possible, in which declaration and type annotations
-% appear in different locations in the grammar.  Such a syntax is warranted
-% in two circumstances.  (1) If programmers find it confusing to determine
-% which construct an annotation applies to, and the alternate syntax is
-% clearer overall.  (2) If there exist annotations that can apply equally
-% well to both methods and return value types (or to both types and variable
-% declarations, etc.), and that have different semantics in the two
-% situations.  Both circumstances are poor style.  (The only example of an
-% annotation that can go on both locations that we have found is an
-% annotation that is itself actually a collection of other annotations,
-% such as "@MultipleAnnotations" --- which is not even possible to write
-% currently, since an annotation cannot take an arbitrary other annotation
-% as an argument.)  Another argument for the alternate syntax is
-% that the grammar should be maximally flexible to permit unforeseen future
-% uses of such annotations.  This must be traded off against readability and
-% usability for important known common cases.
-
-
-
-% The person who defines the annotation (and writes
-% its annotation processor) decides whether an annotation that appears before
-% the return value applies to the method declaration or to the return type.
-
-
-
-% It is also convenient to use annotations to describe the effect of invoking
-% a method, such as whether it may block, allocate memory, etc.  Such
-% annotations could be placed on either the return value (as is current practice)
-% or the receiver; this semantic decision is up to the person who defines the
-% annotation.
-
-
-
-
-
-
-
 \section{Discussion of tool modifications\label{mods-discussion}}
 
 This section primarily discusses tool modifications that are consequences
@@ -2819,11 +2799,38 @@ in Sections~\ref{syntax} and~\ref{class-file}.
 
 \subsection{Compiler\label{compiler-mods}}
 
-The syntax extensions described in Section~\ref{syntax}
-require the Java compiler to accept annotations in the proposed
-locations and to add them to the program's AST\@.  The relevant AST node
+The Java compiler must accept type annotations
+and add them to the program's AST\@.  The relevant AST node
 classes must also be modified to store these annotations.
+When generating \code{.class} files, the compiler must emit the attributes
+described in Section~\ref{class-file}.
+% (The JLS needs to be updated to so state.)
 
+Section~\ref{compiler} requires compilers to place certain annotations
+in the class file.  This is consistent with the principle that annotations
+should not affect behavior:  in the absence of an annotation processor, the
+compiler produces the same bytecodes for annotated code as it would have
+for the same code without annotations.  (The class file may differ, since
+the annotations are stored in it, but the bytecode part does not differ.)
+
+The compiler sometimes creates new methods that did not appear in the
+source code.  The compiler should annotate these compiler-generated methods
+in an appropriate way.  For example, a bridge method is an implementation
+strategy used when the erased signature of the actual method being invoked
+differs from that of the compile-time method
+declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
+nothing but call an existing method, and in this case, annotations should
+be copied from the method being invoked.
+
+%% Cut this -- too compiler-specific.
+% and
+% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
+
+%% Remarks about javac are not appropriate in a specification.
+% (As of Java SE 6, javac does not copy/transfer any annotations from
+% original methods to the compiler-generated methods; that is probably a bug
+% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
+% should be copied.)
 
 Javac's \code{-Xprint} functionality reads a \code{.class} file and prints
 the interface (class declarations with signatures of all fields and
@@ -2835,12 +2842,49 @@ This must be updated to print the type annotations as well.
 Also see Section~\ref{class-file-tools}.
 
 
-Section~\ref{compiler} requires compilers to place certain annotations
-in the class file.  This is consistent with the principle that annotations
-should not affect behavior:  in the absence of an annotation processor, the
-compiler produces the same bytecodes for annotated code as it would have
-for the same code without annotations.  (The class file may differ, since
-the annotations are stored in it, but the bytecode part does not differ.)
+
+\subsubsection{Backward and forward compatibility\label{mods-compatibility}}
+
+Java compilers can often produce bytecode for an earlier version of the
+virtual machine, via the \code{-target} command-line option.  For example,
+a programmer could execute a compilation command such as \code{javac
+-source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
+with the same attributes for type annotations as when the target is a
+version 8 JVM\@.  However, the compiler is permitted to also place type
+annotations in declaration attributes.  For instance, the annotation on the
+top level of a return type would also be placed on the method (in the
+method attribute in the class file).  This enables class file analysis
+tools that are written for Java SE 5 to view a subset of the type
+qualifiers (lacking generics, array levels, method receivers, etc.), albeit
+attached to declarations.
+
+A user can use a Java SE 7 compiler to compile a Java class that contains
+type annotations, so long as the type annotations only appear in places
+that are legal in Java SE 7.  Furthermore, the compiler must be provided
+with a definition of the annotation that is meta-annotated not with
+\code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
+does not exist in Java SE 7), but with no meta-annotation or with a
+meta-annotation that permits annotations on any declaration.
+
+
+\subsubsection{Optimizations\label{mods-optimization}}
+
+
+The compiler is required to preserve annotations in the class file.  More
+precisely, if an expression has an annotated type (and the annotation has
+class file or runtime retention), and that expression is represented
+in the compiled class file, then the annotation must be present, in the
+compiled class file, on the type of the compiled representation of the
+expression.  For expressions within a field initializer or a static
+initializer block, the compiled representation might be in an \code{<init>}
+or \code{<clinit>} method, or in a helper method called by them.
+
+If the compiler optimizes away an expression, then it may also
+optimize away the annotation.  (Exception:  when a type cast
+is optimized away without optimizing away its argument, the
+annotation remains on the argument; see Section~\ref{target_type}.)
+
+
 
 This may change the compiler implementation of certain optimizations, such
 as common subexpression elimination, but this restriction on the compiler
@@ -2874,27 +2918,6 @@ have little or no effect on most compiled programs.
 \end{enumerate}
 
 
-
-Java compilers can often produce bytecode for an earlier version of the
-virtual machine, via the \code{-target} command-line option.  For example,
-a programmer could execute a compilation command such as \code{javac
--source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
-with the same attributes for type annotations as when the target is a
-version 8 JVM\@.  However, the compiler is permitted to also place type
-annotations in declaration attributes.  For instance, the annotation on the
-top level of a return type would also be placed on the method (in the
-method attribute in the class file).  This enables class file analysis
-tools that are written for Java SE 5 to view a subset of the type
-qualifiers (lacking generics, array levels, method receivers, etc.), albeit
-attached to declarations.
-
-A user can use a Java SE 7 compiler to compile a Java class that contains
-type annotations, so long as the type annotations only appear in places
-that are legal in Java SE 7.  Furthermore, the compiler must be provided
-with a definition of the annotation that is meta-annotated not with
-\code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
-does not exist in Java SE 7), but with no meta-annotation or with a
-meta-annotation that permits annotations on any declaration.
 
 
 \subsubsection{Annotations in comments\label{annotations-in-comments}}
@@ -3322,8 +3345,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  myObject GuardedBy accessLock Goetz JavaCOP signedness Nonnull
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
 % LocalWords:  FormalParameterDecls ForVarControlRest FormalParameterDeclsRest
-% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt
-% LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix
+% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt myVar
+% LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix MyClass
 % LocalWords:  InterfaceMethodDeclaratorRest VoidInterfaceMethodDeclaratorRest
 % LocalWords:  ConstructorDeclaratorRest VariableDeclaratorRest nonnullelements
 % LocalWords:  VariableInitializer ConstantDeclaratorRest VariableDeclaratorId
@@ -3346,5 +3369,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedType toArray localvar methodparam typeparam
-% LocalWords:  typearg ClassFile clinit StackMapTable
+% LocalWords:  QualifiedType toArray localvar methodparam typeparam ReadWrite
+% LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean
+% LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
+% LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
+% LocalWords:  NestedStatic decompiler myLock
