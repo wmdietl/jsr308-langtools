@@ -251,12 +251,8 @@ It is not permitted to omit the Java type, as in
   new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
 \end{Verbatim}
 
-\item for class literals:
-\preverbnegspace
-\begin{Verbatim}
-  Class<@NonNull String> c = @NonNull String.class;
-\end{Verbatim}
 \end{itemize}
+
 \item
   For a nested type, the type annotation appears before the type's simple
   name, as in \code{Outer.\ @NonNull StaticNested} or \code{myVar.\ @NonNull
@@ -273,6 +269,7 @@ It is not permitted to omit the Java type, as in
 %   Map.@NonNull Entry mapEntry;
 % \end{Verbatim}
 % \end{itemize}
+
 \item
   An annotation on a wildcard type argument appears before the wildcard,
   as in \code{MyClass<@Immutable ?\ extends Comparable<MyClass>>} or
@@ -286,6 +283,7 @@ It is not permitted to omit the Java type, as in
 %   Collection<? super @Existing File>
 % \end{Verbatim}
 % \end{itemize}
+
 % \item
 %   An annotation on a disjunctive type (as in a multi-\<catch> clause) or a
 %   conjunctive type (as in an \<extends> clause) appears
@@ -299,6 +297,7 @@ It is not permitted to omit the Java type, as in
 % \begin{itemize}
 % \item TODO
 % \end{itemize}
+
 \item
   The annotation on a given array level
   prefixes the brackets that introduce that level.  To declare
@@ -322,6 +321,7 @@ This syntax permits independent annotations for each distinct level of
 array, and for the elements.
 % ; see Section~\ref{array-syntax} for alternative syntaxes.
 % \end{itemize}
+
 \item
   An annotation on the type of a method receiver (\code{this}) appears
   on the type of an optional first formal parameter named \code{this}.
@@ -1419,7 +1419,7 @@ type arguments and arrays.
 \subsubsection{Typecasts, type tests, and object creation\label{class-file:ext:ri:typecast}}
 
 When the annotation's target is a typecast, an \code{instanceof}
-expression, a \code{new} expression, or a class literal expression,
+expression, or a \code{new} expression,
 \code{target\_info} contains one \code{offset\_target} which has the
 following structure:
 
@@ -1432,13 +1432,11 @@ following structure:
 The \code{offset} field denotes the offset (i.e., within the bytecodes
 of the containing method) of the \code{checkcast} bytecode emitted for
 the typecast, the \code{instanceof} bytecode emitted for the type tests,
-the \code{new} bytecode emitted for the object creation expression,
-the \code{ldc}(\code{\_w}) bytecode emitted for class literals, or the
-\code{getstatic} bytecode emitted for primitive class literals.
+or the \code{new} bytecode emitted for the object creation expression.
 Typecast annotations are attached to a single bytecode, not a bytecode range
 (or ranges):  the annotation provides information about the type of a
 single value, not about the behavior of a code block.
-A similar explanation applies to type tests, object creation, and class literals.
+A similar explanation applies to type tests and object creation.
 
 For annotated typecasts, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
