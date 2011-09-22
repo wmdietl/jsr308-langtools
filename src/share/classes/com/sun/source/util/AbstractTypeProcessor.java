@@ -200,8 +200,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             if (!elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
 
-            JavaCompiler comp = JavaCompiler.instance(env.getContext());
-            if (comp.errorCount() != 0 || isUnrecoverableError(log)) {
+            if (isUnrecoverableError(log)) {
                 log.reportDeferredDiagnostics();
                 return;
             }
