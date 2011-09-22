@@ -52,5 +52,35 @@ class WithValue {
   <T extends Runnable> void accept(@B("m") WithValue this, T r) throws Exception { }
 }
 
+class WithFinal {
+  void plain(final @B("m") WithValue this) { }
+  <T> void generic(final @B("m") WithValue this) { }
+  void withException(final @B("m") WithValue this) throws Exception { }
+  String nonVoid(final @B("m") WithValue this) { return null; }
+  <T extends Runnable> void accept(final @B("m") WithValue this, T r) throws Exception { }
+}
+
+class WithBody {
+  Object f;
+
+  void plain(@A WithBody this) {
+    this.f = null;
+  }
+}
+
+class Outer {
+  class Inner {
+    void none(Outer.Inner this) {}
+    void outer(@A Outer.Inner this) {}
+    void inner(Outer. @B Inner this) {}
+    void both(@A Outer.@B Inner this) {}
+
+    void innerOnlyNone(Inner this) {}
+    void innerOnly(@A Inner this) {}
+  }
+}
+
+
+
 @interface A {}
 @interface B { String value(); }
