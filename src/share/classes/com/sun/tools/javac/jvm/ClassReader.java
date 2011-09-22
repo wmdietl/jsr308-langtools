@@ -1491,6 +1491,11 @@ public class ClassReader implements Completer {
         case THROWS:
             position.type_index = nextChar();
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+        	// TODO: how do we separate which of the types it is on?
+        	System.out.println("Handle exception parameters!");
+        	break;
         // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:

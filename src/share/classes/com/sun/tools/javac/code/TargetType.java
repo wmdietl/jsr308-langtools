@@ -131,6 +131,13 @@ public enum TargetType {
     // invalid location
     //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
 
+    /** For type annotations on an exception parameter. */
+    EXCEPTION_PARAMETER(0x1A),
+
+    /** For annotations on a type argument or nested array of an exception parameter. */
+    // TODO: are these allowed? Not for THROWS, so why here?
+    EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
+
     /** For annotations in type arguments of object creation expressions. */
     NEW_TYPE_ARGUMENT(0x18, IsLocal),
     NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation, IsLocal),

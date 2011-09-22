@@ -752,6 +752,10 @@ public class Attr extends JCTree.Visitor {
 
             // Check that result type is well-formed.
             chk.validate(tree.restype, localEnv);
+            
+            // Check that receiver type is well-formed.
+            if (tree.recvparam!=null)
+            	attribStat(tree.recvparam, localEnv);
 
             // annotation method checks
             if ((owner.flags() & ANNOTATION) != 0) {
@@ -3062,11 +3066,6 @@ public class Attr extends JCTree.Visitor {
 
     /**
      * Apply the annotations to the particular type.
-     *
-     * This method expects the {@code MethodType} type as argument,
-     * to handle its receiver types.  Note that type annotations
-     * cannot target methods.
-     *
      */
     public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
         if (annotations.isEmpty()) return;
@@ -3074,10 +3073,7 @@ public class Attr extends JCTree.Visitor {
             @Override
             public void enterAnnotation() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
-                if (type instanceof MethodType)
-                    type.asMethodType().receiverTypeAnnotations = compounds;
-                else
-                    type.typeAnnotations = compounds;
+                type.typeAnnotations = compounds;
             }
         });
     }
@@ -3382,9 +3378,9 @@ public class Attr extends JCTree.Visitor {
             // a null sym, because an unknown class is instantiated.
             // I would say it's safe to skip.
             if (tree.sym!=null && (tree.sym.flags() & Flags.STATIC) != 0) {
-                for (JCTypeAnnotation a : tree.receiverAnnotations) {
-                    if (chk.isTypeAnnotation(a, false))
-                        log.error(a.pos(), "annotation.type.not.applicable");
+                if (tree.recvparam != null) {
+                	// TODO: better error message. Is the pos good?
+                	log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
                 }
             }
             super.visitMethodDef(tree);

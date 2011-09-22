@@ -502,6 +502,11 @@
                   tests="${javac.tests}/typeAnnotations ${javap.tests}/typeAnnotations"/>
     </target>
 
+    <target name="jtreg-envtests" depends="build-javac,build-javap,-def-jtreg">
+      <jtreg-tool name="jsr308" samevm="true"
+                  tests="${env.JTREGENVTESTS}"/>
+    </target>
+
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">
         <findbugs-tool name="javac"/>
     </target>

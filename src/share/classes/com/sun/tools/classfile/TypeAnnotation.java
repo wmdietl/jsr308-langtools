@@ -31,23 +31,23 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.sun.tools.classfile.ExtendedAnnotation.TargetAttribute.*;
+import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
 
 /**
- * See JSR 308 specification, section 4.1
+ * See JSR 308 specification, section 4.1. TODO update.
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
-public class ExtendedAnnotation {
-    ExtendedAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
+public class TypeAnnotation {
+    TypeAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         annotation = new Annotation(cr);
         position = read_position(cr);
     }
 
-    public ExtendedAnnotation(ConstantPool constant_pool,
+    public TypeAnnotation(ConstantPool constant_pool,
             Annotation annotation, Position position) {
         this.annotation = annotation;
         this.position = position;
@@ -132,6 +132,11 @@ public class ExtendedAnnotation {
         case THROWS:
             position.type_index = cr.readUnsignedShort();
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+        	// TODO: how do we separate which of the types it is on?
+        	System.out.println("Handle exception parameters!");
+        	break;
         // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
@@ -227,6 +232,11 @@ public class ExtendedAnnotation {
         case THROWS:
             n += 2; // type_index
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+        	// TODO: how do we separate which of the types it is on?
+        	System.out.println("Handle exception parameters!");
+        	break;
         // class literal
         case CLASS_LITERAL:
         case CLASS_LITERAL_GENERIC_OR_ARRAY:
@@ -363,6 +373,11 @@ public class ExtendedAnnotation {
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+            	// TODO: how do we separate which of the types it is on?
+            	System.out.println("Handle exception parameters!");
+            	break;
             // class literal
             case CLASS_LITERAL:
             case CLASS_LITERAL_GENERIC_OR_ARRAY:
@@ -496,6 +511,13 @@ public class ExtendedAnnotation {
 
         // invalid location
         // THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
+
+        /** For type annotations on an exception parameter. */
+        EXCEPTION_PARAMETER(0x1A),
+
+        /** For annotations on a type argument or nested array of an exception parameter. */
+        // TODO: are these allowed? Not for THROWS, so why here?
+        EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
 
         /** For annotations in type arguments of object creation expressions. */
         NEW_TYPE_ARGUMENT(0x18),

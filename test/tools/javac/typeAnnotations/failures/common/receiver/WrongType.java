@@ -23,33 +23,28 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary check that type annotations may appear on all type declarations
- * @author Mahmood Ali
- * @compile -source 1.8 TypeUseTarget.java
+ * @bug 1234567
+ * @summary the receiver parameter has the type of the surrounding class
+ * @author Werner Dietl
+ * @compile -source 1.8 WrongType.java
  */
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+class WrongType {
+  Object f;
 
-@A
-class TypeUseTarget<K extends @A Object> {
-  @A String @A [] field;
-
-  @A String test(@A TypeUseTarget this, @A String param, @A String @A ... vararg) {
-    @A Object o = new @A String @A [3];
-    TypeUseTarget<@A String> target;
-    return (@A String) null;
+  void plain(@A Object this) {
+    this.f = null;
   }
 
-  <K> @A String genericMethod(K k) { return null; }
+  void wow(@A XYZ this) {
+    this.f = null;
+  }
+
+  class Inner {
+    void outerOnly(@A WrongType this) {}
+    void wrongInner(@B Object this) {}
+  }
 }
 
-@A
-interface MyInterface { }
-
-@A
-@interface MyAnnotation { }
-
-@Target(ElementType.TYPE_USE)
-@interface A { }
+@interface A {}
+@interface B { String value(); }
