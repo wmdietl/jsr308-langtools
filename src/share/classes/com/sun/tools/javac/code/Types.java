@@ -89,7 +89,11 @@ public class Types {
         return instance;
     }
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     protected Types(Context context) {
+        uid = ++uidCounter;
         context.put(typesKey, this);
         syms = Symtab.instance(context);
         names = Names.instance(context);
@@ -101,6 +105,11 @@ public class Types {
         chk = Check.instance(context);
         capturedName = names.fromString("<captured wildcard>");
         messages = JavacMessages.instance(context);
+    }
+
+    @Override
+    public String toString() {
+        return "Types#" + uid;
     }
     // </editor-fold>
 
@@ -377,6 +386,10 @@ public class Types {
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
         if (t == s)
+             return true;
+
+        if (t.tag == TYPEVAR && s.tag == TYPEVAR
+            && ((TypeVar)t).tsym == ((TypeVar)s).tsym)
             return true;
 
         if (s.tag >= firstPartialTag)
@@ -409,6 +422,16 @@ public class Types {
                 case BOOLEAN: case VOID:
                     return t.tag == s.tag;
                 case TYPEVAR:
+                    if (t==t.getUpperBound()) {
+                        // XXX
+                        if (s == syms.objectType) {
+                            return true;
+                        }
+                        if ((s instanceof TypeVar) &&
+                            ((TypeVar) s).getUpperBound() == syms.objectType) {
+                            return true;
+                        }
+                    }
                     return isSubtypeNoCapture(t.getUpperBound(), s);
                 case BOT:
                     return
@@ -635,7 +658,9 @@ public class Types {
                 case DOUBLE: case BOOLEAN: case VOID: case BOT: case NONE:
                     return t.tag == s.tag;
                 case TYPEVAR: {
-                    if (s.tag == TYPEVAR) {
+                    if (t.tsym == s.tsym) {
+                        return true;
+                    } else if (s.tag == TYPEVAR) {
                         //type-substitution does not preserve type-var types
                         //check that type var symbols and bounds are indeed the same
                         return t.tsym == s.tsym &&
