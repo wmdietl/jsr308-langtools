@@ -444,7 +444,8 @@ It is not permitted to annotate the type name in a class literal, as in
 
 \preverbnegspace
 \begin{Verbatim}
-  @Even int.class    // illegal!
+  @Even int.class           // illegal!
+  int @NonEmpty [].class    // illegal!
 \end{Verbatim}
 \preverbnegspace
 
@@ -633,15 +634,6 @@ constructors), change ``\multi{\term{[]}}''  to
 
 \begin{tabbing}
 \qquad \= \kill
-\nt{Primary}: \\
-\qquad        ... \\
-\qquad        \basictypename{} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \\
-\\
-%% IdentifierSuffix rule should be updated when JLS typo is fixed
-\nt{IdentifierSuffix}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \term{[} \alt{ \term{]} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \term{.class} \altor{} \nt{Expression} \term{]}} \\
-\qquad        ... \\
-\\
 \nt{VariableDeclaratorRest}: \\
 \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
  \\
