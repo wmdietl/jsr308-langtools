@@ -30,7 +30,7 @@ current version of the specification
 -->
 
   <!-- TODO: update this date! -->
-  <dt><a href="java-annotation-design-20110907.html">7 September 2011</a></dt>
+  <dt><a href="java-annotation-design-20110924.html">24 September 2011</a></dt>
   <dd>
     Annotation syntax changes:
     <ul>
@@ -50,6 +50,9 @@ current version of the specification
  	Syntax for annotations on disjunctive types (found in
         multi-<tt>catch</tt> statements).
       </li>
+      <li>
+        Annotations are not permitted on class literals, nor arrays thereof.
+      </li>
     </ul>
     Classfile changes:
     <ul>
@@ -60,6 +63,9 @@ current version of the specification
 	Add a class file format for annotations on static nested classes.
       </li>
       <li>
+	Add a class file format for exception parameters (catch clauses)
+      </li>
+      <li>
 	Change the <tt>target_type</tt> field of <tt>type_annotation</tt>,
 	and the <tt>wildcard_location_type</tt> field of
 	<tt>wildcard_bound_target</tt>, from <tt>u1</tt> to <tt>u2</tt>, to
@@ -68,6 +74,10 @@ current version of the specification
       </li>
       <li>
 	Renumber all the enumeration constants of <tt>target_type</tt>.
+      </li>
+      <li>
+        Bug fix: Java forbids type parameters are in <tt>catch</tt>, not in
+        <tt>throws</tt>.
       </li>
     </ul>
     Other specification document changes:
@@ -98,6 +108,10 @@ current version of the specification
 	Remove the "Other possible extensions to Java annotations" appendix.
         It will be maintained as a separate document.
 	Also remove the "Logistical matters" appendix (Appendix E).
+	Move all discussion of compiler modifications into an appendix.
+	Eliminate Appendix B (discussion of changes), distributing its parts
+	to section 2 (description of changes) and to Appendix A
+	(motivation).
       </li>
       <li>
 	Change "Java SE 7" to "Java SE 8".
