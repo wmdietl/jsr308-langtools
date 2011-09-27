@@ -164,14 +164,6 @@ public class AnnotationWriter extends BasicWriter {
         	// TODO: how do we separate which of the types it is on?
         	System.out.println("Handle exception parameters!");
         	break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            if (showOffsets) {
-                print(", offset=");
-                print(pos.offset);
-            }
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:

@@ -137,11 +137,6 @@ public class TypeAnnotation {
         	// TODO: how do we separate which of the types it is on?
         	System.out.println("Handle exception parameters!");
         	break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            position.offset = cr.readUnsignedShort();
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -237,11 +232,6 @@ public class TypeAnnotation {
         	// TODO: how do we separate which of the types it is on?
         	System.out.println("Handle exception parameters!");
         	break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            n += 1; // offset
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -378,12 +368,6 @@ public class TypeAnnotation {
             	// TODO: how do we separate which of the types it is on?
             	System.out.println("Handle exception parameters!");
             	break;
-            // class literal
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-                sb.append(", offset = ");
-                sb.append(offset);
-                break;
             // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -528,9 +512,6 @@ public class TypeAnnotation {
 
         WILDCARD_BOUND(0x1C, HasBound),
         WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
-
-        CLASS_LITERAL(0x1E),
-        CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation),
 
         METHOD_TYPE_PARAMETER(0x20, HasParameter),
 

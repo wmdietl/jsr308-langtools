@@ -148,9 +148,6 @@ public enum TargetType {
     WILDCARD_BOUND(0x1C, HasBound),
     WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
 
-    CLASS_LITERAL(0x1E, IsLocal),
-    CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation, IsLocal),
-
     METHOD_TYPE_PARAMETER(0x20, HasParameter),
 
     // invalid location
