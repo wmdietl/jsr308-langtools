@@ -70,6 +70,36 @@ class WithBody {
     this.toString();
   }
 }
+
+class Generic1<X> {
+  void test1(Generic1<X> this) {}
+  void test2(@A Generic1<X> this) {}
+  void test3(Generic1<@A X> this) {}
+  void test4(@A Generic1<@A X> this) {}
+}
+
+class Generic2<@A X> {
+  void test1(Generic2<X> this) {}
+  void test2(@A Generic2<X> this) {}
+  void test3(Generic2<@A X> this) {}
+  void test4(@A Generic2<@A X> this) {}
+}
+
+class Generic3<X extends @A Object> {
+  void test1(Generic3<X> this) {}
+  void test2(@A Generic3<X> this) {}
+  void test3(Generic3<@A X> this) {}
+  void test4(@A Generic3<@A X> this) {}
+}
+
+class Generic4<X extends @A Object> {
+  <Y> void test1(Generic4<X> this) {}
+  <Y> void test2(@A Generic4<X> this) {}
+  <Y> void test3(Generic4<@A X> this) {}
+  <Y> void test4(@A Generic4<@A X> this) {}
+}
+
+
 /*
 class Outer {
   class Inner {
