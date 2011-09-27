@@ -127,7 +127,7 @@ public class Presence {
 
         out.println("  Map<@A String, Map<@A String, @A String>> f1;");
 
-        out.println("  <@A T extends @A List<@A String>>");
+        out.println("  <@A TM extends @A List<@A String>>");
         out.println("  Map<@A String, @A List<@A String>>");
         out.println("  method(@A Test<T> this, List<@A String> @A [] param1, String @A [] @A ... param2)");
         out.println("  throws @A Exception {");
