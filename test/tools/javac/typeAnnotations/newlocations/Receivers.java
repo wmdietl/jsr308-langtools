@@ -63,11 +63,14 @@ class WithFinal {
 class WithBody {
   Object f;
 
-  void plain(@A WithBody this) {
+  void field(@A WithBody this) {
     this.f = null;
   }
+  void meth(@A WithBody this) {
+    this.toString();
+  }
 }
-
+/*
 class Outer {
   class Inner {
     void none(Outer.Inner this) {}
@@ -91,7 +94,7 @@ class GenericOuter<A, B> {
     void innerOnly(@A GenericInner<C, D> this) {}
   }
 }
-
+*/
 
 @interface A {}
 @interface B { String value(); }
