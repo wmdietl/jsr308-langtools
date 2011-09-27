@@ -25,7 +25,7 @@
  * @test
  * @bug 6843077
  * @summary new type annotation location: receivers
- * @author Mahmood Ali
+ * @author Mahmood Ali, Werner Dietl
  * @compile -source 1.8 Receivers.java
  */
 class DefaultUnmodified {
@@ -53,11 +53,11 @@ class WithValue {
 }
 
 class WithFinal {
-  void plain(final @B("m") WithValue this) { }
-  <T> void generic(final @B("m") WithValue this) { }
-  void withException(final @B("m") WithValue this) throws Exception { }
-  String nonVoid(final @B("m") WithValue this) { return null; }
-  <T extends Runnable> void accept(final @B("m") WithValue this, T r) throws Exception { }
+  void plain(final @B("m") WithFinal this) { }
+  <T> void generic(final @B("m") WithFinal this) { }
+  void withException(final @B("m") WithFinal this) throws Exception { }
+  String nonVoid(final @B("m") WithFinal this) { return null; }
+  <T extends Runnable> void accept(final @B("m") WithFinal this, T r) throws Exception { }
 }
 
 class WithBody {
@@ -80,6 +80,17 @@ class Outer {
   }
 }
 
+class GenericOuter<A, B> {
+  class GenericInner<C, D> {
+    void none(GenericOuter<A, B>.GenericInner<C, D> this) {}
+    void outer(@A GenericOuter<A, B>.GenericInner<C, D> this) {}
+    void inner(GenericOuter<A, B>. @B GenericInner<C, D> this) {}
+    void both(@A GenericOuter<A, B>.@B GenericInner<C, D> this) {}
+
+    void innerOnlyNone(GenericInner<C, D> this) {}
+    void innerOnly(@A GenericInner<C, D> this) {}
+  }
+}
 
 
 @interface A {}
