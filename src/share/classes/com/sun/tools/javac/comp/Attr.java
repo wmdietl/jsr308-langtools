@@ -761,15 +761,9 @@ public class Attr extends JCTree.Visitor {
                 Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
                 attribType(tree.recvparam, newEnv);
                 chk.validate(tree.recvparam, newEnv);
-                if (!(tree.recvparam.type == m.owner.type || tree.recvparam.type.toString().equals(m.owner.type.toString()))) {
-                // if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
+                if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
                     // The == covers the common non-generic case, but for generic classes we need isSameType;
                     // note that equals didn't work.
-                    // TODO: test case test/tools/javap/typeAnnotations/Presence.java fails;
-                    // It doesn't seem to be because of the annotations on Test or T itself.
-                    // Looking into isSameType shows that comparing the type arguments fails.
-                    // System.out.println("class: " + m.owner.type.typeAnnotations + " " + m.owner.type);
-                    // System.out.println("recv: " + tree.recvparam.type.typeAnnotations + " " + tree.recvparam.type);
                     // TODO: the error message starts with "arguments="; why?
                     log.error(tree.recvparam.pos(), "incorrect.receiver.type");
                 }
