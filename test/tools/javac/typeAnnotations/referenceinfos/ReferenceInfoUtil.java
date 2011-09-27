@@ -120,20 +120,17 @@ public class ReferenceInfoUtil {
 
         public TAPositionBuilder atOffset(int offset) {
             switch (pos.type) {
-                // type cast
+            // type cast
             case TYPECAST:
             case TYPECAST_GENERIC_OR_ARRAY:
-                // instanceof
+            // instanceof
             case INSTANCEOF:
             case INSTANCEOF_GENERIC_OR_ARRAY:
-                // new expression
+            // new expression
             case NEW:
             case NEW_GENERIC_OR_ARRAY:
-                // class literals
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
                 pos.offset = offset;
-                break;
+            	break;
             default:
                 throw new IllegalArgumentException("invalid field for given type: " + pos.type);
             }
@@ -160,7 +157,7 @@ public class ReferenceInfoUtil {
             // type parameters
             case CLASS_TYPE_PARAMETER:
             case METHOD_TYPE_PARAMETER:
-                // method parameter
+            // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 pos.parameter_index = index;
@@ -205,7 +202,7 @@ public class ReferenceInfoUtil {
             // class extends or implements clauses
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-                // throws
+            // throws
             case THROWS:
                 pos.type_index = index;
                 break;
