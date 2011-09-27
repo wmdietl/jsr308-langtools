@@ -77,13 +77,6 @@ class T0x04 {
     }
 }
 
-/** class literal */
-class T0x1E {
-    void m0x1E() {
-        Class<Object> c = @A Object.class;
-    }
-}
-
 /** local variable */
 class T0x08 {
     void m0x08() {
