@@ -136,7 +136,7 @@ public class TypeAnnotations {
                     ++i;
                 }
                 if (tree.recvparam!=null) {
-                	// TODO: Why is this slightly different from the return type above?
+                	// TODO: make sure there are no declaration annotations.
                 	separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
                 			new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
                 }
@@ -259,15 +259,6 @@ public class TypeAnnotations {
                     } else if (frameMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
                         p.parameter_index = frameMethod.typarams.indexOf(tree);
-                    } else
-                        throw new AssertionError();
-                    return p;
-                }
-                case MEMBER_SELECT: {
-                    JCFieldAccess fieldFrame = (JCFieldAccess)frame;
-                    if ("class".contentEquals(fieldFrame.name)) {
-                        p.type = TargetType.CLASS_LITERAL;
-                        p.pos = TreeInfo.innermostType(fieldFrame.selected).pos;
                     } else
                         throw new AssertionError();
                     return p;
