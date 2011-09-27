@@ -61,4 +61,8 @@ class WrongType {
     void badOuter(@A Outer.Inner this) {}
     void badInner(@A WrongType.XY this) {}
   }
+
+  class Generics<X> {
+    <Y> void m(Generics<Y> this) {}
+  }
 }
