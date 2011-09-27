@@ -754,8 +754,20 @@ public class Attr extends JCTree.Visitor {
             chk.validate(tree.restype, localEnv);
             
             // Check that receiver type is well-formed.
-            if (tree.recvparam!=null)
-            	attribStat(tree.recvparam, localEnv);
+            if (tree.recvparam!=null) {
+                attribType(tree.recvparam, localEnv);
+                chk.validate(tree.recvparam, localEnv);
+                if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
+                	// The == covers the common non-generic case, but for generic classes we need isSameType;
+                	// note that equals didn't work.
+                	// TODO: test case test/tools/javap/typeAnnotations/Presence.java fails;
+                	// It doesn't seem to be because of the annotations on Test or T itself.
+                	// Looking into isSameType shows that comparing the type arguments fails.
+                	// System.out.println("class: " + m.owner.type.typeAnnotations + " " + m.owner.type);
+                	// System.out.println("recv: " + tree.recvparam.type.typeAnnotations + " " + tree.recvparam.type);
+                    log.error(tree.recvparam.pos(), "incorrect.receiver.type");
+                }
+            }
 
             // annotation method checks
             if ((owner.flags() & ANNOTATION) != 0) {
@@ -3362,6 +3374,11 @@ public class Attr extends JCTree.Visitor {
         new TreeScanner() {
         public void visitAnnotation(JCAnnotation tree) {
             if (tree instanceof JCTypeAnnotation) {
+            	// TODO: It seems to WMD as if the annotation in
+            	// parameters, in particular also the recvparam, are never
+            	// of type JCTypeAnnotation and therefore never checked!
+            	// Luckily this check doesn't really do anything that isn't
+            	// also done elsewhere.
                 chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
             }
             super.visitAnnotation(tree);
