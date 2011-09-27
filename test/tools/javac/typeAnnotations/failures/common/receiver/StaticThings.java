@@ -24,41 +24,33 @@
 /*
  * @test
  * @bug 1234567
- * @summary the receiver parameter has the type of the surrounding class
+ * @summary the receiver parameter and static methods/classes
  * @author Werner Dietl
- * @compile/fail/ref=WrongType.out -XDrawDiagnostics -source 1.8 WrongType.java
+ * @compile/fail/ref=StaticThings.out -XDrawDiagnostics -source 1.8 StaticThings.java
  */
+class Test {
+  // bad
+  static void test1(Test this) {}
 
-@interface A {}
+  // bad
+  static Object test2(Test this) { return null; }
 
-class WrongType {
-  Object f;
-
-  void good1(@A WrongType this) {}
-  
-  void good2(@A WrongType this) {
-    this.f = null;
-    Object o = this.f;
+  class Nested1 {
+    // good
+    void test3a(Nested1 this) {}
+    // good
+    void test3b(Test.Nested1 this) {}
+    // No static methods
+    // static void test3c(Nested1 this) {}
   }
-
-  void bad1(@A Object this) {}
-
-  void bad2(@A Object this) {
-    this.f = null;
-    Object o = this.f;
-  }
-
-  void wow(@A XYZ this) {
-    this.f = null;
-  }
-
-  class Inner {
-    void good1(@A Inner this) {}
-    void good2(@A WrongType.Inner this) {}
-    
-    void outerOnly(@A WrongType this) {}
-    void wrongInner(@A Object this) {}
-    void badOuter(@A Outer.Inner this) {}
-    void badInner(@A WrongType.XY this) {}
+  static class Nested2 {
+    // good
+    void test4a(Nested2 this) {}
+    // good
+    void test4b(Test.Nested2 this) {}
+    // bad
+    static void test4c(Nested2 this) {}
+    // bad
+    static void test4d(Test.Nested2 this) {}
   }
 }
