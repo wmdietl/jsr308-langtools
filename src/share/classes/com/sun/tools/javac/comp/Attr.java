@@ -753,6 +753,28 @@ public class Attr extends JCTree.Visitor {
             // Check that result type is well-formed.
             chk.validate(tree.restype, localEnv);
 
+            // Check that receiver type is well-formed.
+            if (tree.recvparam!=null) {
+                // Use a new environment to check the receiver parameter.
+                // Otherwise I get "might not have been initialized" errors.
+                // Is there a better way?
+                Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
+                attribType(tree.recvparam, newEnv);
+                chk.validate(tree.recvparam, newEnv);
+                if (!(tree.recvparam.type == m.owner.type || tree.recvparam.type.toString().equals(m.owner.type.toString()))) {
+                // if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
+                    // The == covers the common non-generic case, but for generic classes we need isSameType;
+                    // note that equals didn't work.
+                    // TODO: test case test/tools/javap/typeAnnotations/Presence.java fails;
+                    // It doesn't seem to be because of the annotations on Test or T itself.
+                    // Looking into isSameType shows that comparing the type arguments fails.
+                    // System.out.println("class: " + m.owner.type.typeAnnotations + " " + m.owner.type);
+                    // System.out.println("recv: " + tree.recvparam.type.typeAnnotations + " " + tree.recvparam.type);
+                    // TODO: the error message starts with "arguments="; why?
+                    log.error(tree.recvparam.pos(), "incorrect.receiver.type");
+                }
+            }
+
             // annotation method checks
             if ((owner.flags() & ANNOTATION) != 0) {
                 // annotation method cannot have throws clause
@@ -3062,11 +3084,6 @@ public class Attr extends JCTree.Visitor {
 
     /**
      * Apply the annotations to the particular type.
-     *
-     * This method expects the {@code MethodType} type as argument,
-     * to handle its receiver types.  Note that type annotations
-     * cannot target methods.
-     *
      */
     public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
         if (annotations.isEmpty()) return;
@@ -3074,10 +3091,7 @@ public class Attr extends JCTree.Visitor {
             @Override
             public void enterAnnotation() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
-                if (type instanceof MethodType)
-                    type.asMethodType().receiverTypeAnnotations = compounds;
-                else
-                    type.typeAnnotations = compounds;
+                type.typeAnnotations = compounds;
             }
         });
     }
@@ -3366,6 +3380,11 @@ public class Attr extends JCTree.Visitor {
         new TreeScanner() {
         public void visitAnnotation(JCAnnotation tree) {
             if (tree instanceof JCTypeAnnotation) {
+            	// TODO: It seems to WMD as if the annotation in
+            	// parameters, in particular also the recvparam, are never
+            	// of type JCTypeAnnotation and therefore never checked!
+            	// Luckily this check doesn't really do anything that isn't
+            	// also done elsewhere.
                 chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
             }
             super.visitAnnotation(tree);
@@ -3382,9 +3401,9 @@ public class Attr extends JCTree.Visitor {
             // a null sym, because an unknown class is instantiated.
             // I would say it's safe to skip.
             if (tree.sym!=null && (tree.sym.flags() & Flags.STATIC) != 0) {
-                for (JCTypeAnnotation a : tree.receiverAnnotations) {
-                    if (chk.isTypeAnnotation(a, false))
-                        log.error(a.pos(), "annotation.type.not.applicable");
+                if (tree.recvparam != null) {
+                	// TODO: better error message. Is the pos good?
+                	log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
                 }
             }
             super.visitMethodDef(tree);

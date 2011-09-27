@@ -23,26 +23,42 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary new type annotation location: class literals
- * @author Mahmood Ali
- * @compile -source 1.8 ClassLiterals.java
+ * @bug 1234567
+ * @summary the receiver parameter has the type of the surrounding class
+ * @author Werner Dietl
+ * @compile/fail/ref=WrongType.out -XDrawDiagnostics -source 1.8 WrongType.java
  */
 
-class ClassLiterals {
+@interface A {}
 
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
+class WrongType {
+  Object f;
 
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
+  void good1(@A WrongType this) {}
+  
+  void good2(@A WrongType this) {
+    this.f = null;
+    Object o = this.f;
+  }
+
+  void bad1(@A Object this) {}
+
+  void bad2(@A Object this) {
+    this.f = null;
+    Object o = this.f;
+  }
+
+  void wow(@A XYZ this) {
+    this.f = null;
+  }
+
+  class Inner {
+    void good1(@A Inner this) {}
+    void good2(@A WrongType.Inner this) {}
+    
+    void outerOnly(@A WrongType this) {}
+    void wrongInner(@A Object this) {}
+    void badOuter(@A Outer.Inner this) {}
+    void badInner(@A WrongType.XY this) {}
   }
 }
-
-@interface A {}
-@interface B { int value(); }
