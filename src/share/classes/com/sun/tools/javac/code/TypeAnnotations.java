@@ -37,7 +37,6 @@ import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Context;
@@ -136,9 +135,9 @@ public class TypeAnnotations {
                     ++i;
                 }
                 if (tree.recvparam!=null) {
-                	// TODO: make sure there are no declaration annotations.
-                	separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
-                			new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
+                    // TODO: make sure there are no declaration annotations.
+                    separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
+                            new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
                 }
             }
             super.visitMethodDef(tree);
