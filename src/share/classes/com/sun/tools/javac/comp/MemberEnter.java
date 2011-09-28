@@ -345,7 +345,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
      *  @param params      The method's value parameters.
      *  @param res             The method's result type,
      *                 null if it is a constructor.
-     *  @param receiver        The method's receiver type,
+     *  @param recvparam       The method's receiver parameter,
      *                 null if none given; TODO: or already set here?
      *  @param thrown      The method's thrown exceptions.
      *  @param env             The method's (local) environment.
@@ -370,16 +370,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         // Attribute result type, if one is given.
         Type restype = res == null ? syms.voidType : attr.attribType(res, env);
-        
+
         // Attribute receiver type, if one is given.
-        // TODO: is this needed? Maybe for the normal Java type aspect?
         Type recvtype;
         if (recvparam!=null) {
-        	memberEnter(recvparam, env);
-        	recvtype = recvparam.vartype.type;
+            memberEnter(recvparam, env);
+            recvtype = recvparam.vartype.type;
         } else {
-        	recvtype = null;
-        }        
+            recvtype = null;
+        }
 
         // Attribute thrown exceptions.
         ListBuffer<Type> thrownbuf = new ListBuffer<Type>();
