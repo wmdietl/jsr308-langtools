@@ -764,7 +764,6 @@ public class Attr extends JCTree.Visitor {
                 if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
                     // The == covers the common non-generic case, but for generic classes we need isSameType;
                     // note that equals didn't work.
-                    // TODO: the error message starts with "arguments="; why?
                     log.error(tree.recvparam.pos(), "incorrect.receiver.type");
                 }
             }
