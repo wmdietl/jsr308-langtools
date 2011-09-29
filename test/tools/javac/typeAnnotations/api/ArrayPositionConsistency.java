@@ -107,7 +107,7 @@ public class ArrayPositionConsistency {
         }
     }
 
-    static int expectedAnnotations = 31;
+    static int expectedAnnotations = 23;
 
     // visited code
     @A String @C [] @B [] field1;
@@ -129,11 +129,6 @@ public class ArrayPositionConsistency {
     void vararg2(@A String @C []    ... arg) {}
     void vararg3(@A String    [] @B ... arg) {}
     void vararg4(   String    [] @B ... arg) {}
-
-    Object classLit1 = @A String @C [] @B [].class;
-    Object classLit2 = @A String @C []    [].class;
-    Object classLit3 = @A String    [] @B [].class;
-    Object classLit4 =    String    [] @B [].class;
 
     @interface A {}
     @interface B {}

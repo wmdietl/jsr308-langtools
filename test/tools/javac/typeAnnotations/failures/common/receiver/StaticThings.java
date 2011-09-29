@@ -23,33 +23,34 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary check that type annotations may appear on all type declarations
- * @author Mahmood Ali
- * @compile -source 1.8 TypeUseTarget.java
+ * @bug 1234567
+ * @summary the receiver parameter and static methods/classes
+ * @author Werner Dietl
+ * @compile/fail/ref=StaticThings.out -XDrawDiagnostics -source 1.8 StaticThings.java
  */
+class Test {
+  // bad
+  static void test1(Test this) {}
 
-import java.lang.annotation.Target;
-import java.lang.annotation.ElementType;
+  // bad
+  static Object test2(Test this) { return null; }
 
-@A
-class TypeUseTarget<K extends @A Object> {
-  @A String @A [] field;
-
-  @A String test(@A TypeUseTarget<K> this, @A String param, @A String @A ... vararg) {
-    @A Object o = new @A String @A [3];
-    TypeUseTarget<@A String> target;
-    return (@A String) null;
+  class Nested1 {
+    // good
+    void test3a(Nested1 this) {}
+    // good
+    void test3b(Test.Nested1 this) {}
+    // No static methods
+    // static void test3c(Nested1 this) {}
   }
-
-  <K> @A String genericMethod(K k) { return null; }
+  static class Nested2 {
+    // good
+    void test4a(Nested2 this) {}
+    // good
+    void test4b(Test.Nested2 this) {}
+    // bad
+    static void test4c(Nested2 this) {}
+    // bad
+    static void test4d(Test.Nested2 this) {}
+  }
 }
-
-@A
-interface MyInterface { }
-
-@A
-@interface MyAnnotation { }
-
-@Target(ElementType.TYPE_USE)
-@interface A { }

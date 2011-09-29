@@ -296,6 +296,7 @@ public class Type implements PrimitiveType {
     public Type              getEnclosingType() { return null; }
     public List<Type>        getParameterTypes() { return List.nil(); }
     public Type              getReturnType()     { return null; }
+    public Type              getReceiverType()   { return null; }
     public List<Type>        getThrownTypes()    { return List.nil(); }
     public Type              getUpperBound()     { return null; }
     public Type              getLowerBound()     { return null; }
@@ -879,7 +880,7 @@ public class Type implements PrimitiveType {
 
         /** The type annotations on the method receiver.
          */
-        public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
+        public Type recvtype;
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -935,6 +936,7 @@ public class Type implements PrimitiveType {
 
         public List<Type>        getParameterTypes() { return argtypes; }
         public Type              getReturnType()     { return restype; }
+        public Type              getReceiverType()   { return recvtype; }
         public List<Type>        getThrownTypes()    { return thrown; }
 
         public boolean isErroneous() {
@@ -963,6 +965,7 @@ public class Type implements PrimitiveType {
             for (List<Type> l = argtypes; l.nonEmpty(); l = l.tail)
                 l.head.complete();
             restype.complete();
+            recvtype.complete();
             for (List<Type> l = thrown; l.nonEmpty(); l = l.tail)
                 l.head.complete();
         }
@@ -1122,6 +1125,7 @@ public class Type implements PrimitiveType {
         public Type getEnclosingType() { return qtype.getEnclosingType(); }
         public List<Type> getParameterTypes() { return qtype.getParameterTypes(); }
         public Type getReturnType() { return qtype.getReturnType(); }
+        public Type getReceiverType() { return qtype.getReceiverType(); }
         public List<Type> getThrownTypes() { return qtype.getThrownTypes(); }
         public List<Type> allparams() { return qtype.allparams(); }
         public Type getUpperBound() { return qtype.getUpperBound(); }
