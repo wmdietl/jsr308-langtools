@@ -1276,6 +1276,12 @@ public class Pretty extends JCTree.Visitor {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
+    	/* TODO: this does not produce the best result for annotated arrays.
+    	 * It prints:
+    	 *   @C() String @B() [][]
+    	 * instead of:
+    	 *   String @C[] @B[]
+    	 */
         try {
             printTypeAnnotations(tree.annotations);
             printExpr(tree.underlyingType);
