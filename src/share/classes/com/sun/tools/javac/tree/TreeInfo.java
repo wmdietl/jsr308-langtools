@@ -904,8 +904,8 @@ public class TreeInfo {
     }
 
     /**
-     * Returns the underlying type of the tree if it is annotated type,
-     * or the tree itself otherwise
+     * Returns the underlying type of the tree if it is an annotated type,
+     * or the tree itself otherwise.
      */
     public static JCExpression typeIn(JCExpression tree) {
         switch (tree.getTag()) {
@@ -918,6 +918,7 @@ public class TreeInfo {
         case JCTree.WILDCARD: /* wild cards */
         case JCTree.TYPEPARAMETER: /* type parameters */
         case JCTree.TYPEAPPLY: /* parameterized types */
+        case JCTree.ERRONEOUS: /* error tree */
             return tree;
         default:
             throw new AssertionError("Unexpected type tree: " + tree);
