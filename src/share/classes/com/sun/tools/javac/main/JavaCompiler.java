@@ -315,9 +315,13 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
      **/
     protected boolean implicitSourceFilesRead;
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /** Construct a new compiler using a shared context.
      */
-    public JavaCompiler(Context context) {
+    public JavaCompiler(final Context context) {
+        uid = ++uidCounter;
         this.context = context;
         context.put(compilerKey, this);
 
@@ -830,6 +834,13 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                     enterTrees(stopIfError(CompileState.PARSE, parseFiles(sourceFileObjects))),
                     classnames);
 
+            delegateCompiler.initProcessAnnotations(JavacProcessingEnvironment.typeProcessorsToInit);
+            for (com.sun.source.util.AbstractTypeProcessor p : JavacProcessingEnvironment.typeProcessorsToInit) {
+                p.init(delegateCompiler.procEnvImpl);
+            }
+            JavacProcessingEnvironment.typeProcessorsToInit.clear();
+            delegateCompiler.taskListener = delegateCompiler.context.get(TaskListener.class);
+
             delegateCompiler.compile2();
             delegateCompiler.close();
             elapsed_msec = delegateCompiler.elapsed_msec;
@@ -1016,7 +1027,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
     }
 
     /**
-     * Process any anotations found in the specifed compilation units.
+     * Process any annotations found in the specified compilation units.
      * @param roots a list of compilation units
      * @return an instance of the compiler in which to complete the compilation
      */
@@ -1644,4 +1655,27 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
        }
 
     }
+
+    @Override
+    public String toString() {
+        return "JavaCompiler#" + uid;
+    }
+
+    public String dump(String varname) {
+        return dump(varname, "");
+    }
+
+    public String dump(String varname, String indent) {
+        StringBuilder sb = new StringBuilder();
+        dump(varname, indent, sb);
+        return sb.toString();
+    }
+
+    public void dump(String varname, String indent, StringBuilder sb) {
+        sb.append(String.format("%s%s = %s%n", indent, varname, this));
+        sb.append(String.format("%s  enter = %s%n", indent, enter));
+        sb.append(String.format("%s  context = %s%n", indent, context));
+        sb.append(String.format("%s  procEnvImpl = %s%n", indent, procEnvImpl));
+    }
+
 }

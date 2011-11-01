@@ -58,6 +58,9 @@ public class ScannerFactory {
     final Names names;
     final Source source;
     final Tokens tokens;
+    final boolean annotationsincomments;
+    final boolean spacesincomments;
+    final boolean debugJSR308;
 
     /** Create a new scanner factory. */
     protected ScannerFactory(Context context) {
@@ -66,6 +69,10 @@ public class ScannerFactory {
         this.names = Names.instance(context);
         this.source = Source.instance(context);
         this.tokens = Tokens.instance(context);
+        this.annotationsincomments = this.source.allowTypeAnnotations();
+        Options options = Options.instance(context);
+        this.spacesincomments = options.get("TA:spacesincomments") != null;
+        this.debugJSR308 = options.get("TA:scanner") != null;
     }
 
     public Scanner newScanner(CharSequence input, boolean keepDocComments) {

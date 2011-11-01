@@ -54,6 +54,7 @@ public class Scanner implements Lexer {
     private Token prevToken;
 
     private JavaTokenizer tokenizer;
+
     /**
      * Create a scanner from the input array.  This method might
      * modify the array.  To avoid copying the input array, ensure
