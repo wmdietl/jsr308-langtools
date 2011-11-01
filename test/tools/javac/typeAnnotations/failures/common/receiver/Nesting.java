@@ -23,26 +23,23 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary new type annotation location: class literals
- * @author Mahmood Ali
- * @compile -source 1.8 ClassLiterals.java
+ * @bug 1234567
+ * @summary Ensure that nested classes/methods work
+ * @author Werner Dietl
+ * @compile -source 1.8 Nesting.java
  */
+@interface A { }
 
-class ClassLiterals {
+class Nesting {
+    void top(@A Nesting this) {}
 
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-  }
+    class B {
+    	void inB(@A B this) {}
+    }
+    
+    void meth(@A Nesting this) {
+        class C {
+            void inMethod(@A C this) {}
+        }
+    }
 }
-
-@interface A {}
-@interface B { int value(); }

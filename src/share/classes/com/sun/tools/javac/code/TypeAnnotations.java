@@ -37,7 +37,6 @@ import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Context;
@@ -61,7 +60,6 @@ public class TypeAnnotations {
 
     private final Symtab syms;
     private final Names names;
-
 
     protected TypeAnnotations(Context context) {
         context.put(key, this);
@@ -135,6 +133,11 @@ public class TypeAnnotations {
                         separateAnnotationsKinds(param.sym, param.sym.type, pos);
                     }
                     ++i;
+                }
+                if (tree.recvparam!=null) {
+                    // TODO: make sure there are no declaration annotations.
+                    separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
+                            new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
                 }
             }
             super.visitMethodDef(tree);
@@ -242,27 +245,19 @@ public class TypeAnnotations {
                     return p;
 
                 case METHOD: {
-                    JCMethodDecl frameMethod = (JCMethodDecl)frame;
+                    JCMethodDecl frameMethod = (JCMethodDecl) frame;
                     p.pos = frame.pos;
-                    if (frameMethod.receiverAnnotations.contains(tree))
+                    if (frameMethod.recvparam == tree) {
+                    	// TODO: is the right tree used above?
                         p.type = TargetType.METHOD_RECEIVER;
-                    else if (frameMethod.thrown.contains(tree)) {
+                    } else if (frameMethod.thrown.contains(tree)) {
                         p.type = TargetType.THROWS;
                         p.type_index = frameMethod.thrown.indexOf(tree);
-                    } else if (((JCMethodDecl)frame).restype == tree) {
+                    } else if (frameMethod.restype == tree) {
                         p.type = TargetType.METHOD_RETURN;
                     } else if (frameMethod.typarams.contains(tree)) {
                         p.type = TargetType.METHOD_TYPE_PARAMETER;
                         p.parameter_index = frameMethod.typarams.indexOf(tree);
-                    } else
-                        throw new AssertionError();
-                    return p;
-                }
-                case MEMBER_SELECT: {
-                    JCFieldAccess fieldFrame = (JCFieldAccess)frame;
-                    if ("class".contentEquals(fieldFrame.name)) {
-                        p.type = TargetType.CLASS_LITERAL;
-                        p.pos = TreeInfo.innermostType(fieldFrame.selected).pos;
                     } else
                         throw new AssertionError();
                     return p;
@@ -319,14 +314,20 @@ public class TypeAnnotations {
                     p.pos = frame.pos;
                     switch (v.getKind()) {
                         case LOCAL_VARIABLE:
-                            p.type = TargetType.LOCAL_VARIABLE; break;
+                            p.type = TargetType.LOCAL_VARIABLE;
+                            break;
                         case FIELD:
-                            p.type = TargetType.FIELD; break;
+                        	p.type = TargetType.FIELD;
+                            break;
                         case PARAMETER:
                             p.type = TargetType.METHOD_PARAMETER;
                             p.parameter_index = methodParamIndex(path, frame);
                             break;
-                        default: throw new AssertionError();
+                        case EXCEPTION_PARAMETER:
+                        	p.type = TargetType.EXCEPTION_PARAMETER;
+                            break;
+                        default:
+                        	throw new AssertionError("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
                     }
                     return p;
 
@@ -417,14 +418,6 @@ public class TypeAnnotations {
         public void visitAnnotatedType(JCAnnotatedType tree) {
             findPosition(tree, peek2(), tree.annotations);
             super.visitAnnotatedType(tree);
-        }
-
-        @Override
-        public void visitMethodDef(JCMethodDecl tree) {
-            super.visitMethodDef(tree);
-            TypeAnnotationPosition p = new TypeAnnotationPosition();
-            p.type = TargetType.METHOD_RECEIVER;
-            setTypeAnnotationPos(tree.receiverAnnotations, p);
         }
 
         @Override
@@ -604,15 +597,23 @@ public class TypeAnnotations {
         sym.attributes_field = declAnnos.toList();
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
         Type atype = typeWithAnnotations(type, typeAnnotations);
+
         if (sym.getKind() == ElementKind.METHOD) {
             sym.type.asMethodType().restype = atype;
-        } else
+        } else {
             sym.type = atype;
-
+        }
+        
         sym.typeAnnotations = sym.typeAnnotations.appendList(typeAnnotations);
         if (sym.getKind() == ElementKind.PARAMETER
-            || sym.getKind() == ElementKind.LOCAL_VARIABLE)
+            || sym.getKind() == ElementKind.LOCAL_VARIABLE) {
             sym.owner.typeAnnotations = sym.owner.typeAnnotations.appendList(typeAnnotations);
+        }
+        
+        if (sym.getKind() == ElementKind.PARAMETER &&
+        		sym.getQualifiedName().equals(names._this)) {
+        	sym.owner.type.asMethodType().recvtype = atype;
+        }
     }
 
     private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
