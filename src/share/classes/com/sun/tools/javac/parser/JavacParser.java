@@ -1109,7 +1109,7 @@ public class JavacParser implements Parser {
 
                 // need to report an error later if LBRACKET is for array
                 // index access rather than array creation level
-                if (!annos.isEmpty() && S.token() != LBRACKET && S.token() != ELLIPSIS)
+                if (!annos.isEmpty() && token.kind != LBRACKET && token.kind != ELLIPSIS)
                     return illegal(annos.head.pos);
                 switch (token.kind) {
                 case LBRACKET:
@@ -2539,7 +2539,7 @@ public class JavacParser implements Parser {
     private final static String JSR308_IMPORTS_ALT = "jsr308_imports";
 
     Collection<JCTree> commandLineImports() {
-        int pos = S.pos();
+        int pos = token.pos;
         String commandImports = System.getProperty(JSR308_IMPORTS);
         if (commandImports == null)
             commandImports = System.getProperty(JSR308_IMPORTS_ALT);
@@ -3136,10 +3136,10 @@ public class JavacParser implements Parser {
         }
 
         if (createNewLevel) {
-            mostInnerType = F.at(S.pos()).TypeArray(mostInnerType);
+            mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
         }
         if (annos.nonEmpty())
-            mostInnerType = F.at(S.pos()).AnnotatedType(annos, mostInnerType);
+            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType);
 
         if (mostInnerArrayType == null) {
             return to(mostInnerType);

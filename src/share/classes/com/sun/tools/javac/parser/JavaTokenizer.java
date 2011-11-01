@@ -92,6 +92,14 @@ public class JavaTokenizer {
      */
     protected boolean deprecatedFlag = false;
 
+    // Flags for extracting annotations from comments.
+    protected boolean magicAt = false;
+    protected boolean magicID = false;
+    protected boolean magic = false;
+    protected boolean annotationsincomments;
+    protected boolean spacesincomments;
+    protected boolean debugJSR308;
+
     /** A character buffer for saved chars.
      */
     protected char[] sbuf = new char[128];
@@ -137,6 +145,9 @@ public class JavaTokenizer {
         allowBinaryLiterals = source.allowBinaryLiterals();
         allowHexFloats = source.allowHexFloats();
         allowUnderscoresInLiterals = source.allowUnderscoresInLiterals();
+        annotationsincomments = fac.annotationsincomments;
+        spacesincomments = fac.spacesincomments;
+        debugJSR308 = fac.debugJSR308;
     }
 
     /** Report an error at the given position using the provided arguments.
@@ -593,6 +604,22 @@ public class JavaTokenizer {
         int pos = 0;
         int endPos = 0;
 
+        if (magicAt) {
+            magicAt = false;
+            magicID = true;
+        }
+        if (magicID && reader.ch == ' ') {
+            while (reader.ch == ' ')
+                reader.scanChar();
+        }
+        if (magicID && reader.ch == '*') {
+            magicID = false;
+            magic = true;
+            reader.scanChar();
+            if (reader.ch != '/') lexError(pos, "invalid.anno.comment.char");
+            reader.scanChar();
+        }
+
         try {
             loop: while (true) {
                 pos = reader.bp;
@@ -720,18 +747,43 @@ public class JavaTokenizer {
                         break;
                     } else if (reader.ch == '*') {
                         reader.scanChar();
+                        if (spacesincomments) {
+                            while (reader.ch == ' ')
+                                reader.scanChar();
+                        }
                         CommentStyle style;
                         if (reader.ch == '*') {
                             style = CommentStyle.JAVADOC;
                             scanDocComment();
+                            if (magicAt) break loop;
+                        } else if (annotationsincomments && reader.bp < reader.buflen && reader.ch == '@'
+                            && (spacesincomments || isCommentWithoutSpaces())) {
+                            reader.scanChar();
+                            while (Character.isWhitespace(reader.ch))
+                                reader.scanChar();
+                            if (!Character.isJavaIdentifierStart(reader.ch)) break;
+                            tk = TokenKind.MONKEYS_AT;
+                            magicAt = true;
+                            break loop;
                         } else {
                             style = CommentStyle.BLOCK;
                             while (reader.bp < reader.buflen) {
                                 if (reader.ch == '*') {
                                     reader.scanChar();
                                     if (reader.ch == '/') break;
+                                } else if (magic && reader.ch == '@') {
+                                    reader.scanChar();
+                                    if (Character.isJavaIdentifierStart(reader.ch)) {
+                                        tk = TokenKind.MONKEYS_AT;
+                                        magicAt = true;
+                                        break loop;
+                                    }
+                                    reader.scanChar();
+                                    if (reader.ch == '/') break;
                                 } else {
                                     scanCommentChar();
+                                    if (!Character.isWhitespace(reader.ch) || reader.ch == '\n')
+                                        magic = false;
                                 }
                             }
                         }
@@ -831,6 +883,27 @@ public class JavaTokenizer {
                                        + "|");
             }
         }
+    }
+
+    private boolean isCommentWithoutSpaces() {
+        assert reader.ch == '@';
+        int parens = 0;
+        int lbp = reader.bp;
+        while (lbp < reader.buflen) {
+            char lch = sbuf[++lbp];
+            if (parens == 0 && Character.isWhitespace(lch))
+                return false;
+            if (lch == '(')
+                parens++;
+            else if (lch == ')')
+                parens--;
+            else if (lch == '*'
+                && lbp + 1 < reader.buflen
+                && sbuf[lbp+1] == '/')
+                return true;
+        }
+        // came to end of file before '*/'
+        return false;
     }
 
     /** Return the position where a lexical error occurred;

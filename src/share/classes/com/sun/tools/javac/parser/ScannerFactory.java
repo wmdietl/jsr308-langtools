@@ -31,6 +31,7 @@ import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
+import com.sun.tools.javac.util.Options;
 
 
 /**
