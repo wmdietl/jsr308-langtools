@@ -3170,7 +3170,7 @@ public class JavacParser implements Parser {
         if (token.kind != RPAREN) {
         	this.allowThisIdent = true;
         	lastParam = formalParameter();
-        	if (lastParam.name.contentEquals(Token.THIS.name)) {
+        	if (lastParam.name.contentEquals(TokenKind.THIS.name)) {
         		this.receiverParam = lastParam;
         	} else {
         		params.append(lastParam);
