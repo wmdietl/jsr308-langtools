@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sun.tools.classfile.ClassFile;
-import com.sun.tools.classfile.ExtendedAnnotation;
-import com.sun.tools.classfile.ExtendedAnnotation.TargetType;
+import com.sun.tools.classfile.TypeAnnotation;
+import com.sun.tools.classfile.TypeAnnotation.TargetType;
 
 public class Driver {
 
@@ -58,7 +58,7 @@ public class Driver {
 
         // Find methods
         for (Method method : clazz.getMethods()) {
-            Map<String, ExtendedAnnotation.Position> expected = expectedOf(method);
+            Map<String, TypeAnnotation.Position> expected = expectedOf(method);
             if (expected == null)
                 continue;
             if (method.getReturnType() != String.class)
@@ -68,7 +68,7 @@ public class Driver {
                 String compact = (String)method.invoke(object);
                 String fullFile = wrap(compact);
                 ClassFile cf = compileAndReturn(fullFile);
-                List<ExtendedAnnotation> actual = ReferenceInfoUtil.extendedAnnotationsOf(cf);
+                List<TypeAnnotation> actual = ReferenceInfoUtil.extendedAnnotationsOf(cf);
                 ReferenceInfoUtil.compare(expected, actual, cf);
                 out.println("PASSED:  " + method.getName());
                 ++passed;
@@ -89,15 +89,15 @@ public class Driver {
             throw new RuntimeException(failed + " tests failed");
     }
 
-    private Map<String, ExtendedAnnotation.Position> expectedOf(Method m) {
+    private Map<String, TypeAnnotation.Position> expectedOf(Method m) {
         TADescription ta = m.getAnnotation(TADescription.class);
         TADescriptions tas = m.getAnnotation(TADescriptions.class);
 
         if (ta == null && tas == null)
             return null;
 
-        Map<String, ExtendedAnnotation.Position> result =
-            new HashMap<String, ExtendedAnnotation.Position>();
+        Map<String, TypeAnnotation.Position> result =
+            new HashMap<String, TypeAnnotation.Position>();
 
         if (ta != null)
             result.putAll(expectedOf(ta));
@@ -110,10 +110,10 @@ public class Driver {
 
         return result;
     }
-    private Map<String, ExtendedAnnotation.Position> expectedOf(TADescription d) {
+    private Map<String, TypeAnnotation.Position> expectedOf(TADescription d) {
         String annoName = d.annotation();
 
-        ExtendedAnnotation.Position p = new ExtendedAnnotation.Position();
+        TypeAnnotation.Position p = new TypeAnnotation.Position();
         p.type = d.type();
         if (d.offset() != NOT_SET)
             p.offset = d.offset();

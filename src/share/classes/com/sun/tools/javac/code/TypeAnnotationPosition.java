@@ -141,12 +141,11 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            sb.append(", offset = ");
-            sb.append(offset);
-            break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+        	// TODO: how do we separate which of the types it is on?
+        	System.out.println("Handle exception parameters!");
+        	break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
