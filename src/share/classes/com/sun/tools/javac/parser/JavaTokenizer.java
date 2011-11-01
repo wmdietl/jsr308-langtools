@@ -890,7 +890,7 @@ public class JavaTokenizer {
         int parens = 0;
         int lbp = reader.bp;
         while (lbp < reader.buflen) {
-            char lch = sbuf[++lbp];
+            char lch = reader.buf[++lbp];
             if (parens == 0 && Character.isWhitespace(lch))
                 return false;
             if (lch == '(')
@@ -899,7 +899,7 @@ public class JavaTokenizer {
                 parens--;
             else if (lch == '*'
                 && lbp + 1 < reader.buflen
-                && sbuf[lbp+1] == '/')
+                && reader.buf[lbp+1] == '/')
                 return true;
         }
         // came to end of file before '*/'
