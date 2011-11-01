@@ -1,3 +1,11 @@
+Version 1.2.3, 1 Nov 2011
+
+Small bug fixes and documentation updates.
+
+Base build
+  Updated to OpenJDK 8 langtools as of 31 Oct 2011.
+
+----------------------------------------------------------------------
 Version 1.2.2, 1 Oct 2011
 
 Be less restrictive about when to start type processing when errors
