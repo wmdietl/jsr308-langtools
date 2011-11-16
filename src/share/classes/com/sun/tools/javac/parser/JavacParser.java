@@ -3037,43 +3037,48 @@ public class JavacParser implements Parser {
                               List<JCTypeParameter> typarams,
                               boolean isInterface, boolean isVoid,
                               String dc) {
-    	this.receiverParam = null;
-    	// Parsing formalParameters sets the receiverParam, if present
-        List<JCVariableDecl> params = formalParameters();
-        if (!isVoid) type = bracketsOpt(type);
-        List<JCExpression> thrown = List.nil();
-        if (token.kind == THROWS) {
-            nextToken();
-            thrown = qualidentList();
-        }
-        JCBlock body = null;
-        JCExpression defaultValue;
-        if (token.kind == LBRACE) {
-            body = block();
-            defaultValue = null;
-        } else {
-            if (token.kind == DEFAULT) {
-                accept(DEFAULT);
-                defaultValue = annotationValue();
-            } else {
-                defaultValue = null;
+        JCVariableDecl prevReceiverParam = this.receiverParam;
+        try {
+            this.receiverParam = null;
+            // Parsing formalParameters sets the receiverParam, if present
+            List<JCVariableDecl> params = formalParameters();
+            if (!isVoid) type = bracketsOpt(type);
+            List<JCExpression> thrown = List.nil();
+            if (token.kind == THROWS) {
+                nextToken();
+                thrown = qualidentList();
             }
-            accept(SEMI);
-            if (token.pos <= errorEndPos) {
-                // error recovery
-                skip(false, true, false, false);
-                if (token.kind == LBRACE) {
-                    body = block();
+            JCBlock body = null;
+            JCExpression defaultValue;
+            if (token.kind == LBRACE) {
+                body = block();
+                defaultValue = null;
+            } else {
+                if (token.kind == DEFAULT) {
+                    accept(DEFAULT);
+                    defaultValue = annotationValue();
+                } else {
+                    defaultValue = null;
+                }
+                accept(SEMI);
+                if (token.pos <= errorEndPos) {
+                    // error recovery
+                    skip(false, true, false, false);
+                    if (token.kind == LBRACE) {
+                        body = block();
+                    }
                 }
             }
-        }
 
-        JCMethodDecl result =
-            toP(F.at(pos).MethodDef(mods, name, type, typarams,
-                                    params, receiverParam, thrown,
-                                    body, defaultValue));
-        attach(result, dc);
-        return result;
+            JCMethodDecl result =
+                    toP(F.at(pos).MethodDef(mods, name, type, typarams,
+                                            params, receiverParam, thrown,
+                                            body, defaultValue));
+            attach(result, dc);
+            return result;
+        } finally {
+            this.receiverParam = prevReceiverParam;
+        }
     }
 
     /** Parses the array levels after the formal parameter list, and appends

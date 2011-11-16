@@ -36,7 +36,7 @@ class Nesting {
     class B {
     	void inB(@A B this) {}
     }
-    
+
     void meth(@A Nesting this) {
         class C {
             void inMethod(@A C this) {}
