@@ -83,7 +83,7 @@ public class TypeAnnotations {
     public void taFillAndLift(List<JCCompilationUnit> trees, boolean visitBodies) {
         for (JCCompilationUnit tree : trees) {
             for (JCTree def : tree.defs) {
-                if (def.getTag() == JCTree.CLASSDEF)
+                if (def.hasTag(JCTree.Tag.CLASSDEF))
                     taFillAndLift((JCClassDecl)def, visitBodies);
             }
         }
@@ -285,10 +285,10 @@ public class TypeAnnotations {
                     List<JCTree> newPath = path.tail;
                     while (true) {
                         JCTree npHead = newPath.tail.head;
-                        if (npHead.getTag() == JCTree.TYPEARRAY) {
+                        if (npHead.hasTag(JCTree.Tag.TYPEARRAY)) {
                             newPath = newPath.tail;
                             index++;
-                        } else if (npHead.getTag() == JCTree.ANNOTATED_TYPE) {
+                        } else if (npHead.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                             newPath = newPath.tail;
                         } else {
                             break;
@@ -299,12 +299,12 @@ public class TypeAnnotations {
                 }
 
                 case TYPE_PARAMETER:
-                    if (path.tail.tail.head.getTag() == JCTree.CLASSDEF) {
+                    if (path.tail.tail.head.hasTag(JCTree.Tag.CLASSDEF)) {
                         JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
                         p.parameter_index = clazz.typarams.indexOf(path.tail.head);
                         p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
-                    } else if (path.tail.tail.head.getTag() == JCTree.METHODDEF) {
+                    } else if (path.tail.tail.head.hasTag(JCTree.Tag.METHODDEF)) {
                         JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
@@ -394,7 +394,7 @@ public class TypeAnnotations {
             int i = dimAnnosCount == 0 ? 0 : dimAnnosCount - 1;
             JCExpression elemType = tree.elemtype;
             while (elemType != null) {
-                if (elemType.getTag() == JCTree.ANNOTATED_TYPE) {
+                if (elemType.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                     JCAnnotatedType at = (JCAnnotatedType)elemType;
                     TypeAnnotationPosition p = new TypeAnnotationPosition();
                     p.type = TargetType.NEW_GENERIC_OR_ARRAY;
@@ -402,7 +402,7 @@ public class TypeAnnotations {
                     p.location = p.location.append(i);
                     setTypeAnnotationPos(at.annotations, p);
                     elemType = at.underlyingType;
-                } else if (elemType.getTag() == JCTree.TYPEARRAY) {
+                } else if (elemType.hasTag(JCTree.Tag.TYPEARRAY)) {
                     ++i;
                     elemType = ((JCArrayTypeTree)elemType).elemtype;
                 } else

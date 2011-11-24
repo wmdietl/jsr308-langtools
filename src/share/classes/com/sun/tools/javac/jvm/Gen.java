@@ -1727,8 +1727,8 @@ public class Gen extends JCTree.Visitor {
            }
        }
 
-       if (code.meth.getKind() != ElementKind.CONSTRUCTOR
-               && code.meth.getKind() != ElementKind.STATIC_INIT)
+       if (code.meth.getKind() != javax.lang.model.element.ElementKind.CONSTRUCTOR
+               && code.meth.getKind() != javax.lang.model.element.ElementKind.STATIC_INIT)
            return;
 
        for (Attribute.TypeCompound ta : meth.owner.typeAnnotations) {

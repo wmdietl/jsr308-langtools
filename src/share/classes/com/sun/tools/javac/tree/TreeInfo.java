@@ -928,6 +928,7 @@ public class TreeInfo {
         case WILDCARD: /* wild cards */
         case TYPEPARAMETER: /* type parameters */
         case TYPEAPPLY: /* parameterized types */
+        case ERRONEOUS: /* error tree TODO: needed for BadCast JSR308 test case. Better way? */
             return tree;
         default:
             throw new AssertionError("Unexpected type tree: " + tree);

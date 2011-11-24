@@ -877,7 +877,7 @@ public class JavacParser implements Parser {
                         }
                         return sbuf;
                     }
-                } else if (tree.hasTag(PLUS)) {
+                } else if (tree.hasTag(JCTree.Tag.PLUS)) {
                     JCBinary op = (JCBinary)tree;
                     if (op.rhs.hasTag(LITERAL)) {
                         JCLiteral lit = (JCLiteral) op.rhs;
@@ -1496,11 +1496,11 @@ public class JavacParser implements Parser {
 
     /** BracketsOpt = [ "[" "]" { [Annotations] "[" "]"} ]
      */
-    private JCArrayTypeTree bracketsOpt(JCExpression t) {
+    private JCExpression bracketsOpt(JCExpression t) {
         return bracketsOpt(t, List.<JCTypeAnnotation>nil());
     }
 
-    private JCArrayTypeTree bracketsOptCont(JCExpression t, int pos,
+    private JCExpression bracketsOptCont(JCExpression t, int pos,
             List<JCTypeAnnotation> annotations) {
         accept(RBRACKET);
         t = bracketsOpt(t);
@@ -2553,7 +2553,7 @@ public class JavacParser implements Parser {
             commandImports = System.getenv(JSR308_IMPORTS_ALT);
         if (commandImports == null)
             return new ListBuffer<JCTree>();
-        String[] importClasses = commandImports.split(File.pathSeparator);
+        String[] importClasses = commandImports.split(java.io.File.pathSeparator);
         ListBuffer<JCTree> imports = new ListBuffer<JCTree>();
         for (String importClass : importClasses) {
             if (importClass == null || importClass.length() == 0)
@@ -3003,18 +3003,18 @@ public class JavacParser implements Parser {
     }
 
     /** Parses the array levels after the format parameters list, and append
-     * them to the return type, while preseving the order of type annotations
+     * them to the return type, while preserving the order of type annotations.
      */
     private JCExpression methodReturnArrayRest(JCExpression type) {
-        if (type.getTag() != JCTree.TYPEARRAY)
+        if (!type.hasTag(TYPEARRAY))
             return bracketsOpt(type);
 
-        JCArrayTypeTree baseArray = (JCArrayTypeTree)type;
+        JCArrayTypeTree baseArray = (JCArrayTypeTree) type;
         while (TreeInfo.typeIn(baseArray.elemtype) instanceof JCArrayTypeTree)
-            baseArray = (JCArrayTypeTree)TreeInfo.typeIn(baseArray.elemtype);
+            baseArray = (JCArrayTypeTree) TreeInfo.typeIn(baseArray.elemtype);
 
-        if (baseArray.elemtype.getTag() == JCTree.ANNOTATED_TYPE) {
-            JCAnnotatedType at = (JCAnnotatedType)baseArray.elemtype;
+        if (baseArray.elemtype.hasTag(ANNOTATED_TYPE)) {
+            JCAnnotatedType at = (JCAnnotatedType) baseArray.elemtype;
             at.underlyingType = bracketsOpt(at.underlyingType);
         } else {
             baseArray.elemtype = bracketsOpt(baseArray.elemtype);
@@ -3134,7 +3134,7 @@ public class JavacParser implements Parser {
             boolean createNewLevel) {
         JCExpression mostInnerType = type;
         JCArrayTypeTree mostInnerArrayType = null;
-        while (TreeInfo.typeIn(mostInnerType).getTag() == JCTree.TYPEARRAY) {
+        while (TreeInfo.typeIn(mostInnerType).hasTag(TYPEARRAY)) {
             mostInnerArrayType = (JCArrayTypeTree)TreeInfo.typeIn(mostInnerType);
             mostInnerType = mostInnerArrayType.elemtype;
         }
