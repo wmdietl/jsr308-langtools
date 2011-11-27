@@ -179,10 +179,6 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
      */
     private final class AttributionTaskListener implements TaskListener {
 
-        /* Was the initial error check already performed?
-         */
-        private boolean initialErrorCheckDone = false;
-        
         @Override
         public void finished(TaskEvent e) {
             Log log = Log.instance(env.getContext());
@@ -202,15 +198,6 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
 
             if (!elements.remove(e.getTypeElement().getQualifiedName()))
                 return;
-
-            // Make sure that no errors exist initially.
-            // Maybe this needs to be strengthened even more to see whether
-            // errors occurred outside typeProcess. 
-            if (!this.initialErrorCheckDone && log.nerrors!=0) {
-                initialErrorCheckDone = true;
-                log.reportDeferredDiagnostics();
-                return;
-            }
 
             if (isUnrecoverableError(log)) {
                 log.reportDeferredDiagnostics();
