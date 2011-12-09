@@ -255,8 +255,8 @@ It is not permitted to omit the Java type, as in
 
 \item
   For a nested type, the type annotation appears before the type's simple
-  name, as in \code{Outer.\ @NonNull StaticNested} or \code{myVar.\ @NonNull
-    Inner}; a concrete example is \code{Map.@NonNull Entry}.
+  name, as in \code{Outer.\ @NonNull StaticNested};
+  a concrete example is \code{Map.@NonNull Entry}.
   %% We don't permit this any more:
   % If the nested type is a static type, then both the nested and
   % the outer type can be annotated individually, as in \code{@ReadOnly
@@ -495,7 +495,6 @@ access, which is the simple name of the type being used.
 \preverbnegspace
 \begin{Verbatim}
   Outer . @Legal StaticNestedClass x = ...;     // legal
-  myvar . @Legal StaticNestedClass x = ...;     // legal, but poor style
 \end{Verbatim}
 \preverbnegspace
 
