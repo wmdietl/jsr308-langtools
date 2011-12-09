@@ -163,8 +163,12 @@ annotations on type names that are not type uses, such as the type names
 that appear in \<import> statements, class literals, static member accesses,
 and annotation uses (see Section~\ref{type-names}).
 % (whether explicit or implicit, as in the case of method receivers)
-JSR 308 uses a simple prefix syntax for type annotations, with a special case
-for receiver types.
+JSR 308 uses a simple prefix syntax for type annotations, as illustrated in
+the below examples, with a special case
+for receiver types (item \#\ref{type-annotation-locations-receiver} below).
+In addition to supporting type annotations, JSR 308 also makes one
+extension to declaration annotations (item
+\#\ref{type-annotation-locations-type-parameter-declaration} below).
 % that is necessitated by
 % non-orthogonality in the Java grammar.
 
@@ -188,10 +192,11 @@ for receiver types.
   o.<@NonNull String>m("...");
 \end{Verbatim}
 
-\item for type parameter bounds:
+\item for type parameter bounds, including wildcard bounds:
 \preverbnegspace
 \begin{Verbatim}
   class Folder<F extends @Existing File> { ... }
+  Collection<? super @Existing File>
 \end{Verbatim}
 
 \item for class inheritance:
@@ -217,11 +222,12 @@ It is not permitted to omit the Java type, as in
 % ; see Sections~\ref{type-annotation-use-cases}.
 % and~\ref{implicit-java-types-in-casts}.
 
-\item for constructor invocation results:
+\item for constructor invocation results (that is, for object creation):
 
 \preverbnegspace
 \begin{Verbatim}
   new @Interned MyObject()
+  new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
 \end{Verbatim}
 \preverbnegspace
 
@@ -245,21 +251,16 @@ It is not permitted to omit the Java type, as in
 % ; see Sections~\ref{type-annotation-use-cases}.
 % and~\ref{implicit-java-types-in-casts}.
 
-\item for object creation:
-\preverbnegspace
-\begin{Verbatim}
-  new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
-\end{Verbatim}
-
 \end{itemize}
 
 \item
   For a nested type, the type annotation appears before the type's simple
   name, as in \code{Outer.\ @NonNull StaticNested} or \code{myVar.\ @NonNull
     Inner}; a concrete example is \code{Map.@NonNull Entry}.
-  If the nested type is a static type, then both the nested and
-  the outer type can be annotated individually, as in \code{@ReadOnly
-    Outer.\ @ReadWrite StaticNested}.
+  %% We don't permit this any more:
+  % If the nested type is a static type, then both the nested and
+  % the outer type can be annotated individually, as in \code{@ReadOnly
+  %   Outer.\ @ReadWrite StaticNested}.
 % %
 %   Here is an example:
 % \begin{itemize}
@@ -270,10 +271,11 @@ It is not permitted to omit the Java type, as in
 % \end{Verbatim}
 % \end{itemize}
 
+% This is separate from regular type arguments, because there is a separate
+% grammar rule for it in the JLS.
 \item
   An annotation on a wildcard type argument appears before the wildcard,
-  as in \code{MyClass<@Immutable ?\ extends Comparable<MyClass>>} or
-  \code{Collection<?\ super @Existing File>}.
+  as in \code{MyClass<@Immutable ?\ extends Comparable<MyClass>>}.
 
 %   Here are examples:
 % \begin{itemize}
@@ -303,7 +305,7 @@ It is not permitted to omit the Java type, as in
   prefixes the brackets that introduce that level.  To declare
   a non-empty array of English-language strings, write \code{@English String
     @NonEmpty []}.
-  The varargs syntax \code{...} is treated analogously to array brackets
+  The varargs syntax ``\code{...}'' is treated analogously to array brackets
   and may also be prefixed by an annotation.
 %
   Here are examples:
@@ -323,6 +325,7 @@ array, and for the elements.
 % \end{itemize}
 
 \item
+  \label{type-annotation-locations-receiver}
   An annotation on the type of a method receiver (\code{this}) appears
   on the type of an optional first formal parameter named \code{this}.
   (Each non-static method has an implicit parameter, \code{this}, which is
@@ -350,9 +353,9 @@ array, and for the elements.
   public String toString(@Readonly MyClass this) { ... }
 \end{Verbatim}
 % \end{itemize}
-\end{enumerate}
 
-Furthermore, a type annotation is permitted in front of a constructor
+\item
+A type annotation is permitted in front of a constructor
 declaration, where declaration annotations are already permitted.  In that
 location, a type annotation is treated as applying to the constructed
 object (which is different than the receiver, if any, of the constructor).
@@ -381,15 +384,20 @@ object, and in the body of the constructor it is referred to as
 as \code{this}.
 % \end{itemize}
 
-Finally, it is also permitted to write an annotation on a type parameter
+\item
+\label{type-annotation-locations-type-parameter-declaration}
+It is permitted to write an annotation on a type parameter
 declaration.  This appears before the declared name, as in
-\code{class MyClass<@Immutable T> \ttlcb\ ... \ttrcb} or
-\code{interface WonderfulList<@Reified E> \ttlcb\ ... \ttrcb}.
+\code{class MyClass<@Immutable T> \ttlcb\ ...\ \ttrcb} or
+\code{interface WonderfulList<@Reified E> \ttlcb\ ...\ \ttrcb}.
 % Niko Matsakis gave another example in email of 
 % Wed, 25 Feb 2009 11:57:37 +0100
 This is a declaration
 annotation, not a type annotation, but its omission in JSR
 175~\cite{JSR175} was an oversight, and JSR 308 is taking the opportunity to correct it.
+
+\end{enumerate}
+
 
 % Section~\ref{type-annotation-syntax-examples} contains examples of the annotation syntax.
 
@@ -494,7 +502,7 @@ access, which is the simple name of the type being used.
 The type name in front of a static member access is a scoping mechanism,
 not a use of a type --- there's nothing of type \<Outer> in the above
 example.  Furthermore, since there is only one instance of any static
-member, what it is cannot possibly be affected by an annotation on name of
+member, what it is cannot possibly be affected by an annotation on the name of
 the class being used to access it.  Affecting the type of that single
 thing, depending on the annotation on the class name being used to access
 it, feels unnatural.
@@ -596,7 +604,7 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 
 
 \item
-Annotations are permitted on any simple name in a static nested class.
+Annotations are permitted on the simple name in a static nested class.
 
 \begin{tabbing}
 \qquad \= \kill
@@ -678,17 +686,21 @@ Annotations may appear on the receiver type by changing the definition of
 \end{tabbing}
 
 
-\end{enumerate}
+\item
+No grammar changes are required to support type annotations on constructor
+result types.
 
-A final change permits annotations to appear on the type parameter
-declaration in a class or method declaration, which is a declaration
-annotation rather than a type annotation:
+\item
+An annotation may appear on the type parameter
+declaration in a class or method declaration.
 
 \begin{tabbing}
 \qquad \= \kill
 \nt{TypeParameter}: \\
 \qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
 \end{tabbing}
+
+\end{enumerate}
 
 
 
@@ -837,9 +849,9 @@ enum.
 \begin{itemize}
 \item
 \code{ElementType.TYPE\_PARAMETER} stands for a type parameter --- that is,
-the declaration of a type variable.  Examples are generic class
-declarations \code{class MyClass<T> \ttlcb ...\ \ttrcb}, generic method
-declarations \code{<T> foo(...)\ \ttlcb ...\ \ttrcb}, and wildcards
+the declaration of a type variable.  Examples are in generic class
+declarations \code{class MyClass<T> \ttlcb...\ttrcb}, generic method
+declarations \code{<T> foo(...)\ \ttlcb...\ttrcb}, and wildcards
 \code{List<?>}, which declare an anonymous type variable.
 
 \item
@@ -883,10 +895,20 @@ compiler issues the error even if no annotation processor is being run.)
 %   specified usage restriction.
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
+As a specal case, a type annotation (one meta-annotated with
+\code{@Target(ElementType.TYPE\_USE)}) is permitted to be written on a 
+a class declaration or a type parameter declaration.  Strictly speaking,
+these are declaration sites, not uses of a type.  However, it is convenient
+to write a type annotation at a type declaration, as shorthand for applying
+it at all uses.  For example, \code{@Interned class MyClass \ttlcb\ ...\ \ttrcb}
+could indicate that all uses of \code{MyClass} are interned, even though
+for other classes some instances may be interned and other instances not
+interned.
+
 
 \subsubsection{Discussion:  Disambiguating type and declaration annotations\label{disambiguating}}
 
-An annotation before a method declaration annotates either the return type,
+An annotation written before a method declaration annotates either the return type,
 or the method declaration.  There is never any ambiguity regarding the
 programmer intention:  in that location, a type annotation annotates the
 return type, and a declaration annotation annotates the method itself.  The
@@ -931,29 +953,31 @@ meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
 \begin{itemize}
 \item
   A type annotation need not also be meta-annotated with the targets
-  \code{ElementType.TYPE}, \code{ElementType.METHOD}, or
-  \code{ElementType.FIELD} in order to be applied to a class, a method
-  return type, or a field type --- and it generally should \emph{not}
+  \code{ElementType.METHOD} or
+  \code{ElementType.FIELD} in order to be applied to a method
+  return type or a field type --- and it generally should \emph{not}
   contain such a \code{@Target} meta-annotation.
 \item
   A type annotation may not appear before a void method (a method with no
   return type).  This also follows from the fact that \code{void} is not a
   type.
 \item
-  A type annotation may appear before a constructor, in which case it
-  represents the object that the constructor is creating.
-\item
-  As with any other non-static method, a type annotation may
-  appear on the receiver of an inner class constructor.
-\item
-  It is legal to write \<@A void foo() { ... }>, where \<@A> is
-  meta-annotated with \<@Target({ ElementType.TYPE\_USE, ElementType.METHOD })>
+  It is legal to write \<@A void foo() \ttlcb\ ...\ \ttrcb>, where \<@A> is
+  meta-annotated with \<@Target(\ttlcb ElementType.TYPE\_USE, ElementType.METHOD\ttrcb)>
    or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
   annotation is applied only to the method declaration.  The code construct
   would have been illegal if \<@A> were a type annotation.
 \item
-  A type annotation may not appear on a package (a package declaration does
-  not contain a use of a type).
+  A type annotation may appear before a constructor, in which case it
+  represents the object that the constructor is creating (which is not the
+  same as the receiver of the constructor).
+\item
+  As with any other non-static method, a type annotation may
+  appear on the receiver of an inner class constructor.
+\item
+  A type annotation may not appear on a package declaration or an import
+  statement, which do
+  not contain a use of a type.
 \end{itemize}
 
 
@@ -977,9 +1001,9 @@ For example, if the \code{@Foo} annotation definition lacks a
 
 \noindent
 the \code{@Foo} annotation applies to both the \code{m} method, and the
-\code{int} data type.  (If it is not intended as a type annotation, it will
+\code{int} return type.  (If it is not intended as a type annotation, it will
 be ignored by any type annotation processor, so it does no harm on the
-\code{int} data type.)  The \code{@Foo} annotation appears twice in the AST
+\code{int} return type.)  The \code{@Foo} annotation appears twice in the AST
 during annotation processing, and it appears twice in the classfile.
 % In other words, a Java 7 and a Java 8 compiler would
 % produce classfiles with different numbers of annotations.
@@ -1203,8 +1227,9 @@ Runtime[In]VisibleTypeAnnotations_attribute {
 A type annotation is stored in a \RuntimeInOrVisibleTypeAnnotations attribute
 on the smallest enclosing class, field, or method.
 
-Type annotations targeting declaration types (e.g., field, method return type)
-appear in the \RuntimeInOrVisibleTypeAnnotations attribute.
+A type annotation written on a declaration's type (e.g., on a field type or
+on a method return type)
+appears in the \RuntimeInOrVisibleTypeAnnotations attribute.
 Section~\ref{disambiguating} discusses disambiguating type and declaration
 annotations.
 
@@ -1219,7 +1244,8 @@ on the stack.
 % and rather tricky, but we'll just copy that format.  There is no public
 % API, just a defined classfile format.
 No changes are made to the Exception table.
-
+Local variable type annotations are stored in the class file, see
+Section~\ref{class-file:ext:ri:localvar}.
 
 
 \paragraph{Backward compatibility}
@@ -1259,22 +1285,27 @@ type_annotation {
         element_value value;
     } element_value_pairs[num_element_value_pairs];
     // New fields in JSR 308:
-    u2 target_type;    // the type of the targeted program element, see Section 4.2
+    u2 target_type;    // the type of the targeted program element, see Section 3.2
     union {
-        offset_target;
-        localvar_target;
-        methodparam_target;
-        field_target;
         typeparam_target;
-        typeparam_bound_target;
-        typearg_target;
         supertype_target;
-        typeindex_target;
-        wildcard_bound_target;
+        typeparam_bound_target;
         empty_target;
-    } target_info;  // uniquely identifies the targeted program element, see Section 4.3
+        methodparam_target;
+        exception_target;
+        wildcard_bound_target;
+        localvar_target;
+        catch_target;
+        offset_target;
+        typearg_target;
+    } target_info;  // uniquely identifies the targeted program element, see Section 3.3
 }
 \end{Verbatim}
+
+% TODO: These are no longer used; is that what I want?
+%%        field_target;
+%%        typeindex_target;
+
 
 We first briefly recap
 the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmY99:CFF5}.
@@ -1319,33 +1350,62 @@ every possible annotation location.
 
 \begin{figure}[thp!]
 \begin{center}
-\begin{tabular}{|l|c|c|}
+\begin{tabular}{|l|l|c|c|}
+\multicolumn{4}{l}{Targets for type parameter declarations (\<ElementType.TYPE\_PARAMETER>):} \\
 \hline
-{\bf Annotation target} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
 %% The canonical location for this information is
 %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
 %% so whenever that is updated, this table should be as well.
-class type parameter                            & \code{0x00}, \code{0x01}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
-method type parameter                           & \code{0x02}, \code{0x03}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
+class type parameter & \code{CLASS\_TYPE\_PARAMETER}
+& \code{0x00}, \code{0x01}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
+method type parameter & \code{METHOD\_TYPE\_PARAMETER}
+& \code{0x02}, \code{0x03}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
 \hline
-class \code{extends}/\code{implements}          & \code{0x04}, \code{0x05} & \S\ref{class-file:ext:ri:extends} \\
-class type parameter bound                      & \code{0x06}, \code{0x07} & \S\ref{class-file:ext:ri:tpbound} \\
-method type parameter bound                     & \code{0x08}, \code{0x09} & \S\ref{class-file:ext:ri:tpbound} \\
-field                                           & \code{0x0A}, \code{0x0B} & \S\ref{class-file:ext:ri:return} \\
-method return type                              & \code{0x0C}, \code{0x0D} & \S\ref{class-file:ext:ri:return} \\
-method receiver                                 & \code{0x0E}, \code{0x0F} & \S\ref{class-file:ext:ri:receiver} \\
-method parameter                                & \code{0x10}, \code{0x11} & \S\ref{class-file:ext:ri:parameters} \\
-exception type in \code{throws}                 & \code{0x12}, \code{0x13} & \S\ref{class-file:ext:ri:throws} \\
-wildcard bound                                  & \code{0x14}, \code{0x15} & \S\ref{class-file:ext:ri:wildcard} \\
+\multicolumn{4}{c}{~} \\
+\multicolumn{4}{l}{Targets for type uses that may be externally visible in
+  classes and members (\<ElementType.TYPE\_USE>):} \\
 \hline
-local variable                                  & \code{0x16}, \code{0x17} & \S\ref{class-file:ext:ri:localvar} \\
-resource variable                               & \code{0x18}, \code{0x19} & \S\ref{class-file:ext:ri:localvar} \\
-exception parameter                             & \code{0x1A}, \code{0x1B}\rlunused & \S\ref{class-file:ext:ri:catch} \\
-typecast                                        & \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:typecast} \\
-type test (\code{instanceof})                   & \code{0x1E}, \code{0x1F} & \S\ref{class-file:ext:ri:typecast} \\
-object creation (\code{new})                    & \code{0x20}, \code{0x21} & \S\ref{class-file:ext:ri:typecast} \\
-type argument in constructor call               & \code{0x22}, \code{0x23} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in method call                    & \code{0x24}, \code{0x25} & \S\ref{class-file:ext:ri:con-typearg} \\
+{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+class \code{extends}/\code{implements} & \code{CLASS\_EXTENDS}
+& \code{0x04}, \code{0x05} & \S\ref{class-file:ext:ri:extends} \\
+class type parameter bound & \code{CLASS\_TYPE\_PARAMETER\_BOUND}
+& \code{0x06}, \code{0x07} & \S\ref{class-file:ext:ri:tpbound} \\
+method type parameter bound & \code{METHOD\_TYPE\_PARAMETER\_BOUND}
+& \code{0x08}, \code{0x09} & \S\ref{class-file:ext:ri:tpbound} \\
+field & \code{FIELD}
+& \code{0x0A}, \code{0x0B} & \S\ref{class-file:ext:ri:return} \\
+method return type & \code{METHOD\_RETURN}
+& \code{0x0C}, \code{0x0D} & \S\ref{class-file:ext:ri:return} \\
+method receiver & \code{METHOD\_RECEIVER}
+& \code{0x0E}, \code{0x0F} & \S\ref{class-file:ext:ri:receiver} \\
+method parameter & \code{METHOD\_PARAMETER}
+& \code{0x10}, \code{0x11} & \S\ref{class-file:ext:ri:parameters} \\
+exception type in \code{throws} & \code{THROWS}
+& \code{0x12}, \code{0x13} & \S\ref{class-file:ext:ri:throws} \\
+wildcard bound & \code{WILDCARD\_BOUND}
+& \code{0x14}, \code{0x15} & \S\ref{class-file:ext:ri:wildcard} \\
+\hline
+\multicolumn{4}{c}{~} \\
+\multicolumn{4}{l}{Targets for type uses that occur only within code blocks (\<ElementType.TYPE\_USE>):} \\
+\hline
+{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+local variable & \code{LOCAL\_VARIABLE}
+& \code{0x16}, \code{0x17} & \S\ref{class-file:ext:ri:localvar} \\
+resource variable & \textbf{TODO}
+& \code{0x18}, \code{0x19} & \S\ref{class-file:ext:ri:localvar} \\
+exception parameter & \textbf{TODO}
+& \code{0x1A}, \code{0x1B}\rlunused & \S\ref{class-file:ext:ri:catch} \\
+typecast & \code{TYPECAST}
+& \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:typecast} \\
+type test (\code{instanceof}) & \code{INSTANCEOF}
+& \code{0x1E}, \code{0x1F} & \S\ref{class-file:ext:ri:typecast} \\
+object creation (\code{new}) & \code{NEW}
+& \code{0x20}, \code{0x21} & \S\ref{class-file:ext:ri:typecast} \\
+type argument in constructor call & \code{NEW\_TYPE\_ARGUMENT}
+& \code{0x22}, \code{0x23} & \S\ref{class-file:ext:ri:con-typearg} \\
+type argument in method call & \code{METHOD\_TYPE\_ARGUMENT}
+& \code{0x24}, \code{0x25} & \S\ref{class-file:ext:ri:con-typearg} \\
 \hline
 \end{tabular}
 \end{center}
@@ -1353,53 +1413,48 @@ type argument in method call                    & \code{0x24}, \code{0x25} & \S\
 \vspace{-10pt}
 %END LATEX
 \caption{\label{tbl:target_types}
-  Values of \code{target\_type} for each possible target of a type
-  annotation.  
-  % Symbolic constants for these values appear in
-  % \code{com.sun.tools.javac.code.TargetType} and
-  % \code{com.sun.tools.classfile.ExtendedAnnotation.TargetType}.
+  Values of \code{target\_type} for each possible target of JSR 308's new
+  annotations.  All of these appear in \extendedannotation attributes
+  in the class file.
+  % By contrast, declaration annotations other than type parameter
+  % declarations appear in in \code{annotation} attributes in the class file.
+  % 
+  % The bottom part of the table contains targets that only appear inside
+  % method bodies, where annotations do not appear in Java SE 7 (not even
+  % local variable annotations written by the programmer).
+  Table elements such as ``field'', ``method parameter'', and ``local
+  variable'' refer to the declaration, not the use, of such elements.
 \newline
   There are two \code{target\_type} values for each annotation target:  one
   for the construct itself, and one for type arguments, array types, or
   nested types that appear at the construct.  The second
   \code{target\_type} has the same structure as the first one, except it
-  adds the fields described in \S\ref{class-file:ext:ri:typearg}.
+  adds the fields described in \S\ref{class-file:ext:ri:typearg} and its
+  symbolic constant name adds the suffix \code{\_GENERIC\_OR\_ARRAY}.
+  The symbolic constants appear in the enums
+  \code{com.sun.tools.javac.code.TargetType} and
+  \code{com.sun.tools.classfile.ExtendedAnnotation.TargetType}.
 \newline
   Enumeration elements marked \unused{} will never appear in a
   \code{target\_type} field, because Java does not permit these constructs;
   see Section~\ref{target_type}.
-\newline
-  The table has three parts.
-  The first part contains targets for type parameter declarations
-  (\<ElementType.TYPE\_PARAMETER>).
-  Other declaration annotations
-  appear in \code{annotation}, not \extendedannotation, attributes
-  in the class file.
-  The second and third parts contain
-  targets for type uses (\<ElementType.TYPE\_USE>).
-  The second part contains targets that are externally visible, such as may
-  appear on classes and members --- places that annotations already appear
-  in the class file in Java SE 7.
-  The bottom half of the table contains targets that only appear inside
-  method bodies, where annotations do not appear in Java SE 7 (not even
-  local variable annotations written by the programmer).
-  Table elements such as field, method parameter, and local variable refer
-  to the declaration, not the use, of such elements.
 }
 \end{figure}
 
 
-Enumeration elements marked \unused{} never appear in a \code{target\_type}
-field.  Sometimes this is because annotations cannot be written in that
-location, such as because Java prohibits writing the location itself.  In
-other cases this is because the annotations were permitted in Java 7, so
-there is already a place to store them in the class file
-% in \RuntimeInOrVisibleAnnotations or
-% \RuntimeInOrVisibleParameterAnnotations
-rather than placing them in the new \RuntimeInOrVisibleTypeAnnotations
-attribute.  The unused enumeration elements are included for completeness.
-%% In what way are they convenient for annotation processors?
-% and convenience for annotation processors.
+%% Commenting out for now; seems out of date, should compare with old
+%% versions of this document.
+% Enumeration elements marked \unused{} never appear in a \code{target\_type}
+% field.  Sometimes this is because annotations cannot be written in that
+% location, such as because Java prohibits writing the location itself.  In
+% other cases this is because the annotations were permitted in Java 7, so
+% there is already a place to store them in the class file
+% % in \RuntimeInOrVisibleAnnotations or
+% % \RuntimeInOrVisibleParameterAnnotations
+% rather than placing them in the new \RuntimeInOrVisibleTypeAnnotations
+% attribute.  The unused enumeration elements are included for completeness.
+% %% In what way are they convenient for annotation processors?
+% % and convenience for annotation processors.
 
 
 \subsection{The \code{target\_info} field\label{class-file:ext:target_info}}
@@ -1418,13 +1473,277 @@ See Section~\ref{class-file:ext:ri:typearg} for handling of generic
 type arguments and arrays.
 
 
+\newcommand{\targetinfocontents}[2]{
+  When the annotation's target is #1, \code{target\_info} contains one
+  \code{#2}:
+%, which has the following structure:
+}
+
+\newcommand{\targetinfocontentspartial}[1]{
+  When the annotation's target is #1, \code{target\_info}}
+
+\newcommand{\attributelocation}[2]{
+A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes table of a \code{#2} structure.}
+
+
+
+
+
+
+\subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
+
+\targetinfocontents{a type parameter of a class or method}{typeparam\_target}
+
+\begin{Verbatim}
+    typeparam_target {
+        u1 param_index;
+    };
+\end{Verbatim}
+
+\code{param\_index} specifies the 0-based index of the type parameter.
+
+%% What was this sentence fragment trying to say?
+% A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+% \code{typeparam\_target} appears in the attributes table of a
+% \code{method\_info} structure if it 
+
+
+\subsubsection{Class \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
+
+\targetinfocontents{a type in an \code{extends} or
+\code{implements} clause}{\code{supertype\_target}}
+
+\begin{Verbatim}
+    supertype_target {
+        u2 type_index;
+    };
+\end{Verbatim}
+
+\code{type\_index} specifies the index of the targeted type in the
+\code{interfaces} array field of the \code{ClassFile} structure;
+simply the value $i$ is used if the annotation is on the $i$th
+superinterface type.
+
+% TODO: handle superclass properly
+\code{-1} (\code{65535}) is used if the annotation is on the superclass type.
+
+\attributelocation{containing a
+\code{supertype\_target}}{ClassFile}
+
+
+\subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
+
+\targetinfocontents{a bound of a type parameter of a class or
+method}{typeparam\_bound\_target}
+
+\begin{Verbatim}
+    typeparam_bound_target {
+        u1 param_index;
+        u1 bound_index;
+    };
+\end{Verbatim}
+
+\code{param\_index} specifies the index of the type parameter, while
+\code{bound\_index} specifies the index of the bound.  Consider the following
+example:
+
+\begin{Verbatim}
+  <T extends @A Object & @B Comparable, U extends @C Cloneable>
+\end{Verbatim}
+
+\noindent
+Here
+\code{@A} has \code{param\_index} 0 and \code{bound\_index} 0,
+\code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
+\code{@C} has \code{param\_index} 1 and \code{bound\_index} 0.
+
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{method\_info} structure if it targets a method type parameter bound,
+otherwise, in the attributes table of a \code{ClassFile} structure if it
+targets a class declaration type parameter bound.
+
+
+\subsubsection{Method return type, receiver, and fields\label{class-file:ext:ri:return}\label{class-file:ext:ri:receiver}}
+
+% TODO: Specify methodorfield_target
+When the type annotation's target is a method return type, a constructor
+result, a receiver type (for an instance method or for an inner class
+constructor or static method), or a field, \code{target\_info} is empty.
+More formally, it contains \code{empty\_target}:
+
+\begin{Verbatim}
+    empty_target {
+    };
+\end{Verbatim}
+
+% TODO: Make the following paragraph consistent with the rest
+\attributelocation{targeting a field type}{field\_info}
+\attributelocation{targeting a method return type, constructor result
+  type, or receiver}{method\_info}
+
+
+\subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
+
+\targetinfocontentspartial{a method parameter type}{contains one \code{methodparam\_target}, which
+indicates which of the method's formal parameters is being annotated:}
+
+\begin{Verbatim}
+    methodparam_target {
+        u1 parameter_index;
+    };
+\end{Verbatim}
+
+\attributelocation{containing a \code{methodparam\_target}}{method\_info}
+
+
+\subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
+
+\targetinfocontents{a type in a \code{throws} clause}{exception\_target}
+
+\begin{Verbatim}
+    exception_target {
+        u2 type_index;
+    };
+\end{Verbatim}
+
+\code{type\_index} specifies the index of the exception type in the
+clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
+simply the value $i$ denotes an annotation on the $i$th exception
+type.
+
+\attributelocation{containing a \code{exception\_target}}{method\_info}
+
+
+\subsubsection{Wildcard bounds\label{class-file:ext:ri:wildcard}}
+
+\targetinfocontents{the bound of a wildcard}{wildcard\_bound\_target}
+
+\begin{Verbatim}
+    wildcard_bound_target {
+        u2 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 3.2)
+        {
+            ...
+        } target_info;  // uniquely identifies the targeted program element, see Section 3.3
+    }
+\end{Verbatim}
+
+Here are examples (see Section~\ref{class-file:ext:ri:typearg} for
+an explanation of \<location\_length> and \<location>):
+
+\noindent
+\code{@A} in \code{void m(List<?\ extends @A String> lst) \ttlcb...\ttrcb} is described as:
+
+\begin{Verbatim}
+   target_type = WILDCARD_BOUND
+   target_info =
+   {
+     wildcard_location_type = METHOD_PARAMETER_GENERIC_OR_ARRAY (0x0D)
+     wildcard_location =
+     {
+       u1 parameter_index = 0;
+       // the first type argument of List
+       location_length = 1;
+       location = { 0 };
+     }
+   }
+\end{Verbatim}
+
+\noindent
+\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \ttlcb...\ttrcb} is described as:
+
+\begin{Verbatim}
+   target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
+   target_info =
+   {
+     // location of wildcard: type argument of the return type
+     wildcard_location_type = RETURN_TYPE_GENERIC_OR_ARRAY;
+     wildcard_location =
+     {
+       // the second type argument of Map
+       location_length = 1;
+       location = { 1 };
+     }
+     // the first type argument of List (the generic information of the annotation itself)
+     location_length = 1;
+     location = { 0 };
+   }
+\end{Verbatim}
+
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{wildcard\_bound\_target} appears in the attributes table of:
+
+\begin{enumerate}
+\item
+a \code{ClassFile} structure, if the annotation appears on the class
+type parameters, a super class, or a super interface type,
+
+\item
+a \code{field\_info}, if the annotation appears on the field type
+arguments, or
+
+\item
+a \code{method\_info}, if the annotation appears on the method type
+parameters, return type, parameter types, exception types, or any type
+in its method body.
+
+\end{enumerate}
+
+
+\subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
+
+\targetinfocontents{a local variable or resource variable}{localvar\_target}
+
+\begin{Verbatim}
+    localvar_target {
+        u2 table_length;
+        {
+            u2 start_pc;
+            u2 length;
+            u2 index;
+        } table[table_length];
+    };
+\end{Verbatim}
+
+The \code{table\_length} field specifies the number of entries in the
+\code{table} array; multiple entries are necessary because a compiler is
+permitted to break a single variable into multiple live ranges with different
+local variable indices.
+The \code{start\_pc} and \code{length} fields specify the variable's
+live range in the bytecodes of the local variable's containing method
+(from offset \code{start\_pc}, inclusive, to offset \code{start\_pc +
+  length}, exclusive).  The
+\code{index} field stores the local variable's index in that method.
+These fields are similar to those of the optional
+\code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmY99:CFF5}.
+
+Storing local variable annotations in the class file raises certain
+challenges.  For example, live ranges are not isomorphic to local
+variables.  Note that a local variable with no live range might not appear in
+the class file; that is OK, because it is irrelevant to the program.
+
+\attributelocation{containing a \code{localvar\_target}}{method\_info}
+
+
+\subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
+
+\targetinfocontentspartial{an exception parameter (the exception type
+in a \<catch> statement)}{indicates an offset in the exception table (which
+appears in the \<exception\_table> slot of the \<Code> attribute).}
+
+\begin{Verbatim}
+    catch_target {
+        u2 exception_table_index;
+    };
+\end{Verbatim}
+
+\attributelocation{containing a \code{catch\_target}}{method\_info}
+
 
 \subsubsection{Typecasts, type tests, and object creation\label{class-file:ext:ri:typecast}}
 
-When the annotation's target is a typecast, an \code{instanceof}
-expression, or a \code{new} expression,
-\code{target\_info} contains one \code{offset\_target} which has the
-following structure:
+\targetinfocontents{a typecast, an \code{instanceof}
+expression, or a \code{new} expression}{offset\_target}
 
 \begin{Verbatim}
     offset_target {
@@ -1467,12 +1786,10 @@ Consider:
 
 \noindent
 The compiler may leave out the upcast, but in that case it must record that
-@A1 is attached to the second type parameter of C, even though it was
-originally attached to the first type parameter of D.
+\<@A1> is attached to the second type argument of \<D>, even though it was
+originally attached to the first type argument of \<C>.
 
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{offset\_target} appears in the attributes table of a
-\code{method\_info} structure.
+\attributelocation{containing a \code{offset\_target}}{method\_info}
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
 % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
@@ -1491,167 +1808,10 @@ A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 % un-annotated type casts.
 
 
-\subsubsection{Local variables\label{class-file:ext:ri:localvar}}
-
-When the annotation's target is a local variable,
-\code{target\_info} contains one \code{localvar\_target}, which has the
-following structure:
-
-\begin{Verbatim}
-    localvar_target {
-        u2 table_length;
-        {
-            u2 start_pc;
-            u2 length;
-            u2 index;
-        } table[table_length];
-    };
-\end{Verbatim}
-
-The \code{table\_length} field specifies the number of entries in the
-\code{table} array; multiple entries are necessary because a compiler is
-permitted to break a single variable into multiple live ranges with different
-local variable indices.
-The \code{start\_pc} and \code{length} fields specify the variable's
-live range in the bytecodes of the local variable's containing method
-(from offset \code{start\_pc}, inclusive, to offset \code{start\_pc +
-  length}, exclusive).  The
-\code{index} field stores the local variable's index in that method.
-These fields are similar to those of the optional
-\code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmY99:CFF5}.
-
-Storing local variable annotations in the class file raises certain
-challenges.  For example, live ranges are not isomorphic to local
-variables.  Note that a local variable with no live range might not appear in
-the class file; that is OK, because it is irrelevant to the program.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{localvar\_target} appears in the attributes table of a
-\code{method\_info} structure.
-
-
-\subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
-
-When the annotation's target is an exception parameter (the exception type
-in a \<catch> statement), then
-\code{target\_info} indicates an offset in the exception table (which
-appears in the \<exception\_table> slot of the \<Code> attribute).
-
-\begin{Verbatim}
-    catch_target {
-        u2 exception_table_index;
-    };
-\end{Verbatim}
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{catch\_target} appears in the attributes table of a
-\code{method\_info} structure.
-
-
-\subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
-
-When the type annotation's target is a method parameter type,
-\code{target\_info} contains one \code{methodparam\_target} which
-indicates which of the method's formal parameters is being annotated:
-
-\begin{Verbatim}
-    methodparam_target {
-        u1 parameter_index;
-    };
-\end{Verbatim}
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{methodparam\_target} appears in the attributes table of a
-\code{method\_info} structure.
-
-\subsubsection{Method receivers\label{class-file:ext:ri:receiver}}
-
-When the annotation's target is a method receiver type (or an inner class
-constructor receiver type), \code{target\_info} is empty.  More formally, it
-contains \code{empty\_target}:
-
-\begin{Verbatim}
-    empty_target {
-    };
-\end{Verbatim}
-
-
-% TODO: Make the following paragraph consistent with the rest
-A \RuntimeInOrVisibleTypeAnnotations attribute targeting
-a method receiver appears in the attributes table of a
-\code{method\_info} structure.
-
-
-\subsubsection{Method return type and fields\label{class-file:ext:ri:return}}
-
-% TODO: Specify methodorfield_target
-When the type annotation's target is a method return type, a constructor
-result, or a field, \code{target\_info} is empty (contains \code{empty\_target}).
-
-% TODO: Make the following paragraph consistent with the rest
-A \RuntimeInOrVisibleTypeAnnotations attribute targeting a field
-type appears in the attributes table of a \code{field\_info} structure.
-A \RuntimeInOrVisibleTypeAnnotations attribute targeting a method return
-type appears in the attributes table of a \code{method\_info} structure.
-
-\subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
-
-When the annotation's target is a type parameter of a class or method,
-\code{target\_info} contains one \code {typeparam\_info} which has the
-following structure:
-
-\begin{Verbatim}
-    typeparam_target {
-        u1 param_index;
-    };
-\end{Verbatim}
-
-\code{param\_index} specifies the 0-based index of the type parameter.
-
-%% What was this sentence fragment trying to say?
-% A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-% \code{typeparam\_target} appears in the attributes table of a
-% \code{method\_info} structure if it 
-
-
-\subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
-
-When the annotation's target is a bound of a type parameter of a class or
-method, \code{target\_info} contains one \code{typeparam\_bound\_target}
-which has the following structure:
-
-\begin{Verbatim}
-    typeparam_bound_target {
-        u1 param_index;
-        u1 bound_index;
-    };
-\end{Verbatim}
-
-\code{param\_index} specifies the index of the type parameter, while
-\code{bound\_index} specifies the index of the bound.  Consider the following
-example:
-
-\begin{Verbatim}
-  <T extends @A Object & @B Comparable, U extends @C Cloneable>
-\end{Verbatim}
-
-\noindent
-Here
-\code{@A} has \code{param\_index} 0 and \code{bound\_index} 0,
-\code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
-\code{@C} has \code{param\_index} 1 and \code{bound\_index} 0.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} appears in the attributes table of a
-\code{method\_info} structure if it targets a method type parameter bound,
-otherwise, in the \code{attributes} of \code{ClassFile} structure if it
-targets a class declaration type parameter bound.
-
 \subsubsection{Constructor and method call type arguments\label{class-file:ext:ri:con-typearg}}
 
-When the annotation's type is a type argument in a constructor call or
-a method call, \code{target\_info} has one \code{typearg\_target}
-which has the following structure:
+\targetinfocontents{a type argument in a constructor call or
+a method call}{typearg\_target}
 
 \begin{Verbatim}
     typearg_target {
@@ -1670,133 +1830,8 @@ annotations are attached to a single bytecode, not a bytecode range.
 \code{type\_index} specifies the index of the type argument in the
 expression.
 
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typearg\_target} appears in the attributes table of a
-\code{method\_info} structure.
+\attributelocation{containing a \code{typearg\_target}}{method\_info}
 
-
-\subsubsection{Class \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
-
-When the annotation's target is a type in an \code{extends} or
-\code{implements} clause, \code{target\_info} has the following
-structure:
-
-\begin{Verbatim}
-    supertype_target {
-        u2 type_index;
-    };
-\end{Verbatim}
-
-\code{type\_index} specifies the index of the targeted type in the
-\code{interfaces} array field of the \code{ClassFile} structure;
-simply the value $i$ is used if the annotation is on the $i$th
-superinterface type.
-
-% TODO: handle superclass properly
-\code{-1} (\code{65535}) is used if the annotation is on the superclass type.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{supertype\_target} appears in the attributes table of a
-\code{ClassFile} structure.
-
-
-\subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
-When the annotation's target is a type in a \code{throws} clause,
-\code{target\_info} contains \code{exception\_target} which has the
-following structure:
-
-\begin{Verbatim}
-    exception_target {
-        u2 type_index;
-    };
-\end{Verbatim}
-
-\code{type\_index} specifies the index of the exception type in the
-clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
-simply the value $i$ denotes an annotation on the $i$th exception
-type.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{exception\_target} appears in the attributes table of a
-\code{method\_info} structure.
-
-
-\subsubsection{Wildcard bounds\label{class-file:ext:ri:wildcard}}
-
-When the annotation's target is the bound of a wildcard,
-\code{target\_info} contains one \code{wildcard\_bound\_target} which
-has the following structure:
-
-\begin{Verbatim}
-    wildcard_bound_target {
-        u2 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 4.2)
-        {
-            ...
-        } target_info;  // uniquely identifies the targeted program element, see Section 4.3
-    }
-\end{Verbatim}
-
-Here are examples:
-
-\noindent
-\code{@A} in \code{void m(List<?\ extends @A String> lst) \{ ... \}} is described as:
-
-\begin{Verbatim}
-   target_type = WILDCARD_BOUND
-   target_info =
-   {
-     wildcard_location_type = METHOD_PARAMETER_GENERIC_OR_ARRAY (0x0D)
-     wildcard_location =
-     {
-       u1 parameter_index = 0;
-       // the first type variable of List
-       location_length = 1;
-       location = { 0 };
-     }
-   }
-\end{Verbatim}
-
-\noindent
-\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \{
-  ... \}} is described as (see Section~\ref{class-file:ext:ri:typearg} for
-an explanation of \<location\_length> and \<location>):
-
-\begin{Verbatim}
-   target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
-   target_info =
-   {
-     // location of wildcard: type argument of the return type
-     wildcard_location_type = RETURN_TYPE_GENERIC_OR_ARRAY;
-     wildcard_location =
-     {
-       // the second type variable
-       location_length = 1;
-       location = { 1 };
-     }
-     // the generic information of the annotation itself
-     location_length = 1;
-     location = { 0 };
-   }
-\end{Verbatim}
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{wildcard\_bound\_target} appears in the attributes table of
-
-\begin{enumerate}
-\item
-a \code{ClassFile} structure, if the annotation appears on the class
-type parameters, a super class, or a super interface type,
-
-\item
-a \code{field\_info}, if the annotation appears on the field type
-arguments, or
-
-\item
-a \code{method\_info}, if the annotation appears on the method type
-parameters, return type, parameter types, exception types, or any type
-in its method body.
-
-\end{enumerate}
 
 \subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
@@ -1886,7 +1921,7 @@ in its method body.
   rather than in the ``location'' array.\label{tbl:locations}}
 \end{figure}
 
-In a parameterized type, array, or nested type, there are multiple places that an
+In a parameterized, array, or nested type, there are multiple places that an
 annotation may appear.  For example, consider the difference among:
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
@@ -1900,13 +1935,12 @@ or the difference among
 \code{Outer . @X Inner}.
 The classfile must distinguish among these locations.
 
-When the annotation's target is within a parameterized type,
-array type, or nested type,
-\code{target\_info} contains what it normally would for a
+\targetinfocontentspartial{within a parameterized type,
+array type, or nested type}{contains what it normally would for a
 non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
 % typecast, see Section~\ref{class-file:ext:ri:typecast}),
-{\em plus} the following fields at the end:
+{\em plus} the following fields at the end:}
 
 \begin{Verbatim}
     u2 location_length;
@@ -2794,7 +2828,7 @@ reach the \<catch> clause.
 % % source alone does not indicate whether the annotation will be rejected by
 % % the compiler.
 % 
-% \begin{Verbatim}[commandchars=\|\[\]]
+% \begin{Verbatim}
 %   @Override                                     // compile-time error
 %   class Window extends Container {
 %     @Override String warningString;             // compile-time error
