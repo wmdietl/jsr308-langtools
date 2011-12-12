@@ -1202,6 +1202,7 @@ public class JavacParser implements Parser {
                             if ((mode & EXPR) != 0) {
                                 mode = EXPR;
                                 JCExpression t1 = term();
+                                if (!annos.isEmpty()) t = illegal(annos.head.pos);
                                 t = to(F.at(pos).Indexed(t, t1));
                             }
                             accept(RBRACKET);
@@ -1211,7 +1212,7 @@ public class JavacParser implements Parser {
                         if ((mode & EXPR) != 0) {
                             mode = EXPR;
                             t = arguments(typeArgs, t);
-                            if (!annos.isEmpty()) t = illegal(annos.head.pos); // WMD TODO check
+                            if (!annos.isEmpty()) t = illegal(annos.head.pos);
                             typeArgs = null;
                         }
                         break loop;
@@ -1370,7 +1371,7 @@ public class JavacParser implements Parser {
                         t = bracketsOpt(t);
                         t = toP(F.at(pos1).TypeArray(t));
                         if (annos.nonEmpty())
-                            t = toP(F.at(pos).AnnotatedType(annos, t));
+                            t = toP(F.at(pos1).AnnotatedType(annos, t));
                         return t;
                     }
                     mode = oldmode;
