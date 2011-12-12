@@ -36,7 +36,7 @@ import static com.sun.tools.javac.util.LayoutCharacters.*;
 
 /** The char reader used by the javac lexer/tokenizer. Returns the sequence of
  * characters contained in the input stream, handling unicode escape accordingly.
- * Additionally, it provide features for saving chars into a buffer and to retrieve
+ * Additionally, it provides features for saving chars into a buffer and to retrieve
  * them at a later stage.
  *
  *  <p><b>This is NOT part of any supported API.
