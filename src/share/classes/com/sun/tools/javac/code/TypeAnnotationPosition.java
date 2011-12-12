@@ -95,7 +95,7 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(", {");
             for (int i = 0; i < lvarOffset.length; ++i) {
                 if (i != 0) sb.append("; ");
-                sb.append(", start_pc = ");
+                sb.append("start_pc = ");
                 sb.append(lvarOffset[i]);
                 sb.append(", length = ");
                 sb.append(lvarLength[i]);
