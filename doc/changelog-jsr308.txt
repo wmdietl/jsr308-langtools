@@ -1,3 +1,9 @@
+Version 1.2.4, 14 Dec 2011
+
+Base build
+  Updated to OpenJDK 8 langtools as of 13 Dec 2011.
+
+----------------------------------------------------------------------
 Version 1.2.3, 1 Nov 2011
 
 Small bug fixes and documentation updates.
