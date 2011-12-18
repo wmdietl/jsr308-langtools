@@ -1359,6 +1359,7 @@ public class JavacParser implements Parser {
         if (typeArgs != null) illegal();
         while (true) {
             int pos1 = token.pos;
+
             final List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
             if (token.kind == LBRACKET) {
@@ -1892,7 +1893,7 @@ public class JavacParser implements Parser {
             dims.append(parseExpression());
             accept(RBRACKET);
             while (token.kind == LBRACKET
-                    || (token.kind == MONKEYS_AT)) {
+                    || token.kind == MONKEYS_AT) {
                 List<JCTypeAnnotation> maybeDimAnnos = typeAnnotationsOpt();
                 int pos = token.pos;
                 nextToken();
