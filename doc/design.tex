@@ -1846,15 +1846,15 @@ expression.
 \begin{tabular}{|l|c|c|}
 \hline
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@A}       & \multicolumn{2}{c|}{N/A} \\
 \code{@B}       & 1     & 0 \\
 \code{@C}       & 1     & 1 \\
 \code{@D}       & 2     & 1, 0 \\
-\code{@E}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@E}       & \multicolumn{2}{c|}{N/A} \\
 \code{@F}       & 1     & 0 \\
 \code{@G}       & 1     & 1 \\
 \code{@H}       & 1     & 2 \\
-\code{@I}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@I}       & \multicolumn{2}{c|}{N/A} \\
 \code{@J}       & 1     & 0 \\
 \code{@K}       & 1     & 1 \\
 \code{@L}       & 1     & 2 \\
@@ -1877,7 +1877,7 @@ expression.
 \begin{tabular}{|l|c|c|}
 \hline
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@A}       & \multicolumn{2}{c|}{N/A} \\
 \code{@B}       & 1     & 0 \\
 \code{@C}       & 3     & 0, 0, 2 \\
 \code{@D}       & 2     & 0, 0 \\
@@ -1903,7 +1903,7 @@ expression.
 \begin{tabular}{|l|c|c|}
 \hline
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@F}       & \multicolumn{2}{c|}{stored elsewhere} \\
+\code{@F}       & \multicolumn{2}{c|}{N/A} \\
 \code{@G}       & 1     & 0 \\
 \code{@H}       & 1     & 1 \\
 \code{@E}       & 1     & 2 \\
@@ -1915,9 +1915,16 @@ expression.
 \end{tabular}
 
 \end{center}
-\caption{Example values of the \code{location\_length} and \code{location}
-  fields.  Top-level annotations are stored elsewhere in the classfile,
-  rather than in the ``location'' array.\label{tbl:locations}}
+\caption{\label{tbl:locations}
+  Example values of the \code{location\_length} and \code{location}
+  fields.  We assume that each annotation is a type annotation.
+  A \code{location} array is used only for type annotations that are not on
+  the main type.  Type annotations on the main type are stored
+  without a \code{location} array.  For example, a type annotation on the
+  outermost array level (\<@E> in the top part of the figure) is not stored
+  as an array level annotation but as a regular type annotation, see
+  Figure~\ref{tbl:target_types}.
+  }
 \end{figure}
 
 In a parameterized, array, or nested type, there are multiple places that an
@@ -1949,10 +1956,12 @@ non-parameterized, non-array type
 The \code{location} field is a list of numbers that represents the annotation
 location among the type arguments, array levels, and type nestings.
 If the type is viewed as a tree, then 
-the \code{location} field can be viewed as a path in that tree, with
-children numbered starting at 0.
-The \code{location\_length} field is the length of the \code{location}
-field, which is also the depth of the annotation in the tree.
+the \code{location} field represents a path in that tree.  The
+\code{location\_length} field is the depth of the annotation in the tree,
+which is also the length of the \code{location} field.  Each element of the
+\code{location} field indicates which child to select at the given depth in
+the tree; the leftmost child is numbered 0.
+
 
 A parameterized, array, or nested type can be viewed as a tree in the
 following way.
