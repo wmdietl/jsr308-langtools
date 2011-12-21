@@ -62,6 +62,9 @@ cpOpt="-classpath '${CLASSPATH:-.}'"
 
 # Any parameters starting with -J are passed to the JVM.
 # All other parameters become parameters of #PROGRAM#.
+# Note that any -J parameters that appear in an argument file (indirectly
+# referenced on the command line with the "@filename" command-line syntax)
+# are sent to #PROGRAM# even though they should be sent to the JVM.
 
 # Separate out -J* options for the JVM
 # Unset IFS and use newline as arg separator to preserve spaces in args
