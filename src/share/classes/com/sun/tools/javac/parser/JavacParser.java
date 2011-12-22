@@ -159,6 +159,7 @@ public class JavacParser implements Parser {
         this.errorTree = F.Erroneous();
         endPosTable = newEndPosTable(keepEndPositions);
         this.debugJSR308 = fac.options.get("TA:parser") != null;
+        this.jsr308_imports = fac.options.get("-jsr308_imports");
     }
 
     protected AbstractEndPosTable newEndPosTable(boolean keepEndPositions) {
@@ -170,6 +171,10 @@ public class JavacParser implements Parser {
     /** Switch: debug output for type-annotations operations
      */
     boolean debugJSR308;
+
+    /** Switch: implicit imports to add to each file
+     */
+    String jsr308_imports;
 
     /** Switch: Should generics be recognized?
      */
@@ -2759,7 +2764,9 @@ public class JavacParser implements Parser {
 
     Collection<JCTree> commandLineImports() {
         int pos = token.pos;
-        String commandImports = System.getProperty(JSR308_IMPORTS);
+        String commandImports = this.jsr308_imports;
+        if (commandImports == null)
+            commandImports = System.getProperty(JSR308_IMPORTS);
         if (commandImports == null)
             commandImports = System.getProperty(JSR308_IMPORTS_ALT);
         if (commandImports == null)
