@@ -349,6 +349,12 @@ public class TreeInfo {
             case POSTINC:
             case POSTDEC:
                 return getStartPos(((JCUnary) tree).arg);
+            case ANNOTATED_TYPE: {
+                JCAnnotatedType node = (JCAnnotatedType) tree;
+                if (node.annotations.nonEmpty())
+                    return getStartPos(node.annotations.head);
+                return getStartPos(node.underlyingType);
+            }
             case NEWCLASS: {
                 JCNewClass node = (JCNewClass)tree;
                 if (node.encl != null)
@@ -452,6 +458,8 @@ public class TreeInfo {
                 return getEndPos(((JCUnary) tree).arg, endPosTable);
             case WHILELOOP:
                 return getEndPos(((JCWhileLoop) tree).body, endPosTable);
+            case ANNOTATED_TYPE:
+                return getEndPos(((JCAnnotatedType) tree).underlyingType, endPosTable);
             case ERRONEOUS: {
                 JCErroneous node = (JCErroneous)tree;
                 if (node.errs != null && node.errs.nonEmpty())
@@ -934,11 +942,13 @@ public class TreeInfo {
     }
 
     /**
-     * Returns the underlying type of the tree if it is annotated type,
-     * or the tree itself otherwise
+     * Returns the underlying type of the tree if it is an annotated type,
+     * or the tree itself otherwise.
      */
     public static JCExpression typeIn(JCExpression tree) {
         switch (tree.getTag()) {
+        case ANNOTATED_TYPE:
+            return ((JCAnnotatedType)tree).underlyingType;
         case IDENT: /* simple names */
         case TYPEIDENT: /* primitive name */
         case SELECT: /* qualified name */
@@ -946,6 +956,7 @@ public class TreeInfo {
         case WILDCARD: /* wild cards */
         case TYPEPARAMETER: /* type parameters */
         case TYPEAPPLY: /* parameterized types */
+        case ERRONEOUS: /* error tree TODO: needed for BadCast JSR308 test case. Better way? */
             return tree;
         default:
             throw new AssertionError("Unexpected type tree: " + tree);
@@ -958,6 +969,8 @@ public class TreeInfo {
             return innermostType(((JCArrayTypeTree)type).elemtype);
         case WILDCARD:
             return innermostType(((JCWildcard)type).inner);
+        case ANNOTATED_TYPE:
+            return innermostType(((JCAnnotatedType)type).underlyingType);
         default:
             return type;
         }

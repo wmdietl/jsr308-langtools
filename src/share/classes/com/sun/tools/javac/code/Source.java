@@ -109,6 +109,12 @@ public enum Source {
     }
 
     public Target requiredTarget() {
+    	/* JSR 308 local change: allow targets starting from 1.5
+    	 * for source from 1.5. This allows the use of type annotations
+    	 * and still generate 1.5 compatible code.
+    	 */
+        if (this.compareTo(JDK1_5) >= 0) return Target.JDK1_5;
+
         if (this.compareTo(JDK1_8) >= 0) return Target.JDK1_8;
         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
         if (this.compareTo(JDK1_6) >= 0) return Target.JDK1_6;
@@ -176,9 +182,6 @@ public enum Source {
     public boolean allowTryWithResources() {
         return compareTo(JDK1_7) >= 0;
     }
-    public boolean allowTypeAnnotations() {
-        return compareTo(JDK1_7) >= 0;
-    }
     public boolean allowBinaryLiterals() {
         return compareTo(JDK1_7) >= 0;
     }
@@ -198,6 +201,9 @@ public enum Source {
         return compareTo(JDK1_8) >= 0;
     }
     public boolean allowMethodReferences() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowTypeAnnotations() {
         return compareTo(JDK1_8) >= 0;
     }
     public static SourceVersion toSourceVersion(Source source) {
