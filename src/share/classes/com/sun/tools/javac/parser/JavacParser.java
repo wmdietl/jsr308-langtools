@@ -544,14 +544,18 @@ public class JavacParser implements Parser {
 }
 
     /**
-     * Qualident = Ident { DOT Ident }
+     * Qualident = Ident { DOT [Annotations] Ident }
      */
     public JCExpression qualident() {
         JCExpression t = toP(F.at(token.pos).Ident(ident()));
         while (token.kind == DOT) {
             int pos = token.pos;
             nextToken();
+            List<JCTypeAnnotation> tyannos = typeAnnotationsOpt();
             t = toP(F.at(pos).Select(t, ident()));
+            if (tyannos!=null && tyannos.nonEmpty()) {
+                t = toP(F.at(pos).AnnotatedType(tyannos, t));
+            }
         }
         return t;
     }
@@ -1017,7 +1021,7 @@ public class JavacParser implements Parser {
                             nextToken();
                             mode = TYPE;                            
                             // TODO WMD: Type annotations here?
-                            // System.out.println("Yup, need TAs here.");     
+                            // System.out.println("Yup, need TAs here.");
                             t = toP(F.at(token.pos).Select(t, ident()));
                             t = typeArgumentsOpt(t);
                         }
@@ -1178,8 +1182,6 @@ public class JavacParser implements Parser {
                     mode &= ~NOPARAMS;
                     typeArgs = typeArgumentsOpt(EXPR);
                     mode = oldmode;
-                    List<JCTypeAnnotation> tyannos = null;
-                    
                     if ((mode & EXPR) != 0) {
                         switch (token.kind) {
                         case CLASS:
@@ -1209,22 +1211,17 @@ public class JavacParser implements Parser {
                             t = innerCreator(pos1, typeArgs, t);
                             typeArgs = null;
                             break loop;
-                        case MONKEYS_AT:
-                            tyannos = typeAnnotationsOpt();
                         }
                     }
-                    if (tyannos!=null && tyannos.nonEmpty()) {
-                        System.out.println("Annos not supported in this location yet.");
-                        /*
-                        JCExpression id = toP(F.at(S.pos()).Ident(ident()));
-                        JCAnnotatedType aterm = toP(F.at(pos).AnnotatedType(annos, id));
-                        t = toP(F.at(pos).Select(t, aterm));*/
-                    } else {
-                        // typeArgs saved for next loop iteration.
-                        t = toP(F.at(pos).Select(t, ident()));
+                    List<JCTypeAnnotation> tyannos = null;
+                    if ((mode & TYPE) != 0 && token.kind==MONKEYS_AT) {
+                        tyannos = typeAnnotationsOpt();
                     }
-                    
-                    // System.out.println("After: " + t);
+                    // typeArgs saved for next loop iteration.
+                    t = toP(F.at(pos).Select(t, ident()));
+                    if (tyannos!=null && tyannos.nonEmpty()) {
+                        t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                    }
                     break;
                 case ELLIPSIS:
                     if (this.permitTypeAnnotationsPushBack) {
@@ -1299,8 +1296,6 @@ public class JavacParser implements Parser {
             } else if (token.kind == DOT) {
                 nextToken();
                 typeArgs = typeArgumentsOpt(EXPR);
-                // Type annos here?
-                // System.out.println("We are at a dot!");
                 if (token.kind == SUPER && (mode & EXPR) != 0) {
                     mode = EXPR;
                     t = to(F.at(pos1).Select(t, names._super));
@@ -1316,7 +1311,15 @@ public class JavacParser implements Parser {
                     t = innerCreator(pos2, typeArgs, t);
                     typeArgs = null;
                 } else {
+                    List<JCTypeAnnotation> tyannos = null;
+                    if ((mode & TYPE) != 0 && token.kind==MONKEYS_AT) {
+                        // is the mode check needed?
+                        tyannos = typeAnnotationsOpt();
+                    }
                     t = toP(F.at(pos1).Select(t, ident()));
+                    if (tyannos!=null && tyannos.nonEmpty()) {
+                        t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                    }
                     t = argumentsOpt(typeArgs, typeArgumentsOpt(t));
                     typeArgs = null;
                 }
@@ -1636,8 +1639,9 @@ public class JavacParser implements Parser {
         default:
         }
         JCExpression t = qualident();
+
         // handle type annotations for non primitive arrays
-        if (!newAnnotations.isEmpty())
+        if (newAnnotations.nonEmpty())
             t = F.AnnotatedType(newAnnotations, t);
 
         int oldmode = mode;
@@ -1650,6 +1654,7 @@ public class JavacParser implements Parser {
             t = typeArguments(t, true);
             diamondFound = (mode & DIAMOND) != 0;
         }
+
         while (token.kind == DOT) {
             if (diamondFound) {
                 //cannot select after a diamond
@@ -1657,7 +1662,13 @@ public class JavacParser implements Parser {
             }
             int pos = token.pos;
             nextToken();
+            List<JCTypeAnnotation> tyannos = typeAnnotationsOpt();
             t = toP(F.at(pos).Select(t, ident()));
+
+            if (tyannos!=null && tyannos.nonEmpty()) {
+                t = toP(F.at(pos).AnnotatedType(tyannos, t));
+            }
+
             if (token.kind == LT) {
                 lastTypeargsPos = token.pos;
                 checkGenerics();
@@ -1704,10 +1715,16 @@ public class JavacParser implements Parser {
         }
     }
 
-    /** InnerCreator = Ident [TypeArguments] ClassCreatorRest
+    /** InnerCreator = [Annotations] Ident [TypeArguments] ClassCreatorRest
      */
     JCExpression innerCreator(int newpos, List<JCExpression> typeArgs, JCExpression encl) {
+        List<JCTypeAnnotation> newAnnotations = typeAnnotationsOpt();
+
         JCExpression t = toP(F.at(token.pos).Ident(ident()));
+
+        if (newAnnotations.nonEmpty())
+            t = F.AnnotatedType(newAnnotations, t);
+
         if (token.kind == LT) {
             int oldmode = mode;
             checkGenerics();
@@ -3215,6 +3232,14 @@ public class JavacParser implements Parser {
      * varargs, e.g. {@code String @A [] @B ...}, as the parser
      * first parses the type {@code String @A []} then inserts
      * a new array level with {@code @B} annotation.
+     * 
+     * For nested types like {@code @A Outer. @B Inner} the type
+     * {@code Outer. @B Inner} is parsed first and then {@code @A} is
+     * inserted to the most inner type, which in this case means
+     * the outermost class, {@code Outer}.
+     * 
+     * The innermost/outermost naming is a bit confusing, it's more the
+     * leftmost type.
      */
     private JCExpression insertAnnotationsToMostInner(
             JCExpression type, List<JCTypeAnnotation> annos,
@@ -3226,11 +3251,40 @@ public class JavacParser implements Parser {
             mostInnerType = mostInnerArrayType.elemtype;
         }
 
-        if (createNewLevel) {
-            mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
+        JCExpression toplevel = mostInnerType;
+        JCFieldAccess lastfieldaccess = null;
+        loop: while (true) {
+            switch (toplevel.getKind()) {
+            case PARAMETERIZED_TYPE:
+                toplevel = ((JCTypeApply)toplevel).clazz;
+                break;
+            case ANNOTATED_TYPE:
+                toplevel = ((JCAnnotatedType) toplevel).underlyingType;
+                break;
+            case MEMBER_SELECT:
+                JCExpression sel = ((JCFieldAccess) toplevel).selected;
+                if (sel==null) {
+                    break loop;
+                }
+                lastfieldaccess = (JCFieldAccess) toplevel;
+                toplevel = sel;
+                break;
+            default:
+                break loop;
+            }
         }
-        if (annos.nonEmpty())
-            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType);
+
+        if (lastfieldaccess!=null && annos.nonEmpty()) {
+            // createNewLevel cannot be true, if lastfieldaccess is non-null, right?
+            lastfieldaccess.selected = F.at(token.pos).AnnotatedType(annos, toplevel);
+        } else {
+            if (createNewLevel) {
+                mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
+            }
+            if (annos.nonEmpty()) {
+                mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType);
+            }
+        }
 
         if (mostInnerArrayType == null) {
             return to(mostInnerType);
