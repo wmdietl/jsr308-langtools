@@ -28,11 +28,11 @@ package com.sun.tools.javac.tree;
 import java.io.*;
 import java.util.*;
 
+import com.sun.source.tree.Tree;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.code.*;
 
-import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.JCTree.*;
 
 import static com.sun.tools.javac.code.Flags.*;
@@ -1283,8 +1283,16 @@ public class Pretty extends JCTree.Visitor {
     	 *   String @C[] @B[]
     	 */
         try {
-            printTypeAnnotations(tree.annotations);
-            printExpr(tree.underlyingType);
+            if((tree.underlyingType.getKind() == Tree.Kind.MEMBER_SELECT)) {
+                JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
+                printExpr(access.selected, TreeInfo.postfixPrec);
+                print(".");
+                printTypeAnnotations(tree.annotations);
+                print(access.name);
+            } else {
+                printTypeAnnotations(tree.annotations);
+                printExpr(tree.underlyingType);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
