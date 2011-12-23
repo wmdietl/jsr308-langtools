@@ -262,6 +262,7 @@ public class TypeAnnotations {
                         throw new AssertionError();
                     return p;
                 }
+
                 case PARAMETERIZED_TYPE: {
                     if (((JCTypeApply)frame).clazz == tree)
                     { } // generic: RAW; noop
