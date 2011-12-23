@@ -1935,17 +1935,17 @@ expression.
 \end{figure}
 
 In a parameterized, array, or nested type, there are multiple places that an
-annotation may appear.  For example, consider the difference among:
+annotation may appear.  For example, consider the difference among
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
-\code{Map<String, @X Object>},
+\code{Map<String, @X Object>};
 or the difference  among 
 \code{@X String [] []},
 \code{String @X [] []}, and
-\code{String [] @X []},
+\code{String [] @X []};
 or the difference among 
-\code{@X Outer . Inner} and
-\code{Outer . @X Inner}.
+\code{@X Outer .\ Inner} and
+\code{Outer .\ @X Inner}.
 The classfile must distinguish among these locations.
 
 \targetinfocontentspartial{within a parameterized type,
