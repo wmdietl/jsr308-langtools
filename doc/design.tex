@@ -1834,7 +1834,7 @@ expression.
 
 \subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
-\begin{figure}[t!]
+\begin{figure}[tp!]
 \begin{center}
 
 \code{@A Map<@B String, @C List<@D Object>>} \hfill 
@@ -1917,7 +1917,14 @@ expression.
 \end{center}
 \caption{\label{tbl:locations}
   Example values of the \code{location\_length} and \code{location}
-  fields.  We assume that each annotation is a type annotation.
+  fields.
+  \newline
+  The top of the figure shows examples of each of parameterized types,
+  array types, and nested types.  The middle shows the interaction between
+  parameterized types and array types.  The bottom shows the interaction
+  between parameterized types and nested types.
+  \newline
+  We assume that each annotation is a type annotation.
   A \code{location} array is used only for type annotations that are not on
   the main type.  Type annotations on the main type are stored
   without a \code{location} array.  For example, a type annotation on the
