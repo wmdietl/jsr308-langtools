@@ -1834,7 +1834,7 @@ expression.
 
 \subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
-\begin{figure}[tp]
+\begin{figure}[t!]
 \begin{center}
 
 \code{@A Map<@B String, @C List<@D Object>>} \hfill 
@@ -2083,7 +2083,6 @@ annotations, namely the creation of type qualifiers.
 % \newcommand{\NonNull}[1]{@NonNull }
 \newcommand{\NonNull}[1]{\relax}
 \begin{Verbatim}[commandchars=\\\[\],numbers=left,numbersep=6pt]
-@DefaultQualifier("NonNull")                    \label[NonNullDefault]
 class DAG {
 
     Set<\NonNull Edge> edges;                   \label[edgesNonNull]
@@ -2104,21 +2103,20 @@ class DAG {
 %END LATEX
 
 \begin{rawhtml}
-<DIV CLASS="center"><PRE CLASS="verbatim"> 1  @DefaultQualifier("NonNull")  <a name="NonNullDefault"></a>
- 2  class DAG {
- 3
- 4      Set&lt;Edge&gt; edges;          <a name="edgesNonNull"></a>
- 5
- 6      // ...
- 7
- 8      List&lt;Vertex&gt; getNeighbors(@Readonly DAG this, @Interned @Readonly Vertex v) { <a name="getNeighbors"></a><a name="InternedAnnotation"></a>
- 9          List&lt;Vertex&gt; neighbors = new LinkedList&lt;Vertex&gt;();
-10          for (Edge e : edges)                <a name="eNonNull"></a>
-11              if (e.from() == v)              <a name="useE1"></a><a name="objectequality"></a>
-12                  neighbors.add(e.to());      <a name="useE2"></a>
-13          return neighbors;
-14      }
-15  }
+<DIV CLASS="center"><PRE CLASS="verbatim"> 1  class DAG {
+ 2
+ 3      Set&lt;Edge&gt; edges;          <a name="edgesNonNull"></a>
+ 4
+ 5      // ...
+ 6
+ 7      List&lt;Vertex&gt; getNeighbors(@Readonly DAG this, @Interned @Readonly Vertex v) { <a name="getNeighbors"></a><a name="InternedAnnotation"></a>
+ 8          List&lt;Vertex&gt; neighbors = new LinkedList&lt;Vertex&gt;();
+ 9          for (Edge e : edges)                <a name="eNonNull"></a>
+10              if (e.from() == v)              <a name="useE1"></a><a name="objectequality"></a>
+11                  neighbors.add(e.to());      <a name="useE2"></a>
+12          return neighbors;
+13      }
+14  }
 </PRE></DIV>
 \end{rawhtml}
 
@@ -2133,15 +2131,15 @@ lines~\cite{PapiACPE2008}, but this example was chosen to illustrate places
 where annotations do appear.
 % Most programs would use only a subset of these annotations.
 \newline
-\textbf{(1)}
-The \code{@DefaultQualifier("NonNull")} annotation (line~\ref{NonNullDefault})
-indicates that no reference in the \code{DAG}
+\textbf{(1) Nullness:}
+The \<@NonNull>annotation is the default, so 
+no reference in the \code{DAG}
 class may be null unless otherwise annotated.  It is equivalent to
 writing line~\ref{edgesNonNull} as ``\code{@NonNull Set<@NonNull Edge> edges;}'',
 for example.
 % The @NonNull annotation on line~\ref{eNonNull}
 This guarantees that the uses
-of \code{edges} on line~\ref{eNonNull}, and \code{e} on lines~\ref{useE1} and~\ref{useE2}, cannot cause
+of \code{edges} on line~\ref{eNonNull}, and of \code{e} on lines~\ref{useE1} and~\ref{useE2}, cannot cause
 a null pointer exception.
 % That annotation is correct because each
 % element of \code{edges} is non-null, as indicated on
@@ -2151,7 +2149,7 @@ is \code{@NonNull}, which
 enables its clients to depend on the fact that it will always return a
 \code{List}, even if \code{v} has no neighbors.
 \newline
-\textbf{(2)}
+\textbf{(2) Immutability:}
 The two \code{@Readonly} annotations on method \code{getNeighbors}
 (line~\ref{getNeighbors}) guarantee to clients that the method does not
 modify, respectively, its \code{Vertex} argument or its \code{DAG} receiver
@@ -2159,12 +2157,12 @@ modify, respectively, its \code{Vertex} argument or its \code{DAG} receiver
 The lack of a \code{@Readonly} annotation on the return value indicates
 that clients are free to modify the returned \code{List}.
 \newline
-\textbf{(3)}
+\textbf{(3) Interning:}
 The \code{@Interned} annotation on line~\ref{InternedAnnotation} (along
 with an \code{@Interned} annotation on the return type in the declaration
 of \code{Edge.from()}, not shown) indicates that
-the use of object equality (\code{==}) on line~\ref{objectequality} is a
-valid optimization.  In the absence of such annotations, use of the
+the use of object equality (\code{==}) on line~\ref{objectequality} is
+valid.  In the absence of such annotations, use of the
 \code{equals} method is preferred to \code{==}.
 % \end{itemize}
 }
@@ -3378,7 +3376,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 
 \end{document}
 
-% LocalWords:  fontsize pt NonNull getNeighbors const Readonly NonNullDefault
+% LocalWords:  fontsize pt NonNull getNeighbors const Readonly
 % LocalWords:  VM toolchain visibleTypeAnnotations JLS checkcast ops op pc anno
 % LocalWords:  LocalVariableTable AbstractProcessor Messager premain javac YY
 % LocalWords:  YYYY localizable unaliased typestate readwrite mpapi annotatable
