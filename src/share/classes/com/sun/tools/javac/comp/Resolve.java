@@ -2131,6 +2131,9 @@ public class Resolve {
                     suffix += hasTypeArgs ? ".params" : "";
                 }
             }
+            // WMD TODO for Nesting test case
+            // System.out.println("err location: " + key + suffix);
+            // new Throwable().printStackTrace(System.out);
             return key + suffix;
         }
         private JCDiagnostic getLocationDiag(Symbol location, Type site) {

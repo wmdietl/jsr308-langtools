@@ -1307,9 +1307,23 @@ public class Pretty extends JCTree.Visitor {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
+    	/* TODO: this does not produce the best result for annotated arrays.
+    	 * It prints:
+    	 *   @C() String @B() [][]
+    	 * instead of:
+    	 *   String @C[] @B[]
+    	 */
         try {
-            printTypeAnnotations(tree.annotations);
-            printExpr(tree.underlyingType);
+            if((tree.underlyingType.getKind() == Tree.Kind.MEMBER_SELECT)) {
+                JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
+                printExpr(access.selected, TreeInfo.postfixPrec);
+                print(".");
+                printTypeAnnotations(tree.annotations);
+                print(access.name);
+            } else {
+                printTypeAnnotations(tree.annotations);
+                printExpr(tree.underlyingType);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
