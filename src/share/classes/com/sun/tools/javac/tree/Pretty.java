@@ -1314,7 +1314,7 @@ public class Pretty extends JCTree.Visitor {
     	 *   String @C[] @B[]
     	 */
         try {
-            if((tree.underlyingType.getKind() == Tree.Kind.MEMBER_SELECT)) {
+            if((tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT)) {
                 JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
                 printExpr(access.selected, TreeInfo.postfixPrec);
                 print(".");

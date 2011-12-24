@@ -1294,8 +1294,16 @@ public class JavacParser implements Parser {
                                 break loop;
                             }
                         }
+
+                        List<JCTypeAnnotation> tyannos = null;
+                        if ((mode & TYPE) != 0 && token.kind==MONKEYS_AT) {
+                            tyannos = typeAnnotationsOpt();
+                        }
                         // typeArgs saved for next loop iteration.
                         t = toP(F.at(pos).Select(t, ident()));
+                        if (tyannos!=null && tyannos.nonEmpty()) {
+                            t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                        }
                         break;
                     case ELLIPSIS:
                         if (this.permitTypeAnnotationsPushBack) {
@@ -1332,14 +1340,6 @@ public class JavacParser implements Parser {
                             }
                             mode = EXPR;
                             return term3Rest(t, typeArgs);
-                        }
-                        break loop;
-                    case ELLIPSIS:
-                        if (this.permitTypeAnnotationsPushBack) {
-                            this.typeAnnotationsPushedBack = annos;
-                        } else if (annos.nonEmpty()) {
-                            // Don't return here -- error recovery attempt
-                            illegal(annos.head.pos);
                         }
                         break loop;
                     default:
@@ -1434,7 +1434,7 @@ public class JavacParser implements Parser {
                     }
                     t = toP(F.at(pos1).Select(t, ident()));
                     if (tyannos!=null && tyannos.nonEmpty()) {
-                        t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                        t = toP(F.at(pos1).AnnotatedType(tyannos, t));
                     }
                     t = argumentsOpt(typeArgs, typeArgumentsOpt(t));
                     typeArgs = null;

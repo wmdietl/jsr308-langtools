@@ -699,7 +699,7 @@ public class TreeInfo {
             return ((JCFieldAccess) tree).sym;
         case TYPEAPPLY:
             return symbol(((JCTypeApply) tree).clazz);
-        case JCTree.ANNOTATED_TYPE:
+        case ANNOTATED_TYPE:
             return symbol(((JCAnnotatedType) tree).underlyingType);
         default:
             return null;
