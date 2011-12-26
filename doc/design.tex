@@ -228,6 +228,7 @@ It is not permitted to omit the Java type, as in
 \begin{Verbatim}
   new @Interned MyObject()
   new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
+  myVar . new @Tainted NestedClass
 \end{Verbatim}
 \preverbnegspace
 
@@ -505,17 +506,6 @@ member, what it is cannot possibly be affected by an annotation on the name of
 the class being used to access it.  Affecting the type of that single
 thing, depending on the annotation on the class name being used to access
 it, feels unnatural.
-
-The syntax for instance (non-static) type member accesses is consistent
-with that for static type member accesses:  the annotation goes on the
-simple name of the type being annotated.  For instance:
-
-\preverbnegspace
-\begin{Verbatim}
-  myVar . @Bar NonStaticClass    // legal (on variables and casts only)
-\end{Verbatim}
-
-
 
 
 \subsection{Java language grammar changes\label{grammar}}
