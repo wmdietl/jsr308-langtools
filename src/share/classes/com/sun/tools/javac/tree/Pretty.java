@@ -466,6 +466,10 @@ public class Pretty extends JCTree.Visitor {
                 print(" " + tree.name);
             }
             print("(");
+            if (tree.recvparam!=null) {
+                printExpr(tree.recvparam);
+                print(", ");
+            }
             printExprs(tree.params);
             print(")");
             if (tree.thrown.nonEmpty()) {
