@@ -42,9 +42,9 @@ class Outer {
             void m2b(Outer.@A Inner.Inner2 p) {}
         }
     }
-    Inner i;
+
     class GInner<X> {
-        class GInner2<Y> {}
+        class GInner2<Y, Z> {}
     }
 
     static class Static {}
@@ -53,11 +53,27 @@ class Outer {
 
 class Test1 {
     MyList<@A Outer . @B Inner. @C Inner2> f;
+    // TODO: check that the A is on Outer in g;
+    @A Outer . @B Inner. @C Inner2 g;
+
+    // TODO: Put @A on the type, not the package, maybe.
+    //MyList<@A java.lang.Object> pkg;
+
+    // Make sure that something like this fails gracefully: 
+    // MyList<java.@B lang.Object> pkg;
+
     @A Outer f1;
     @A Outer . @B Inner f2 = f1.new @B Inner();
     @A Outer . @B GInner<@C Object> f3 = f1.new @B GInner<@C Object>();
 
-    MyList<@A Outer . @B GInner<@C Object>. @D GInner2<@E Integer>> f4;
+    // @A location [0, 3]
+    // @B location [0, 2]
+    // @C location [0, 2, 0]
+    // @D location [0, 2, 0, 0]
+    // @E location [0] 
+    // @F location [0, 0]
+    // @G location [0, 1]
+    MyList<@A Outer . @B GInner<@C MyList<@D Object>>. @E GInner2<@F Integer, @G Object>> f4;
     // MyList<Outer.GInner<Object>.GInner2<Integer>> f4clean;
 
     MyList<@A Outer . @B Static> f5;
@@ -112,6 +128,7 @@ class MyList<K> { }
 @interface D { }
 @interface E { }
 @interface F { }
+@interface G { }
 
 @interface Av { String value(); }
 @interface Bv { String value(); }
