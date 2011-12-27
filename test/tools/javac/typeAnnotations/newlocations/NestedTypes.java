@@ -33,13 +33,15 @@ class Outer {
         class Inner2 {
             // m1a-c all have the same parameter type.
             // How can I ensure this?
-            void m1a(@A Inner2 p) {}
-            void m1b(Inner.@A Inner2 p) {}
-            void m1c(Outer.Inner.@A Inner2 p) {}
+            // TODO: the top-level annotation in m1a and m2a are
+            // in the wrong location, because it sees the expanded type already.
+            void m1a(@A Inner2 p1a) {}
+            void m1b(Inner.@A Inner2 p1b) {}
+            void m1c(Outer.Inner.@A Inner2 p1c) {}
 
             // m2a-b both have the same parameter type.
-            void m2a(@A Inner.Inner2 p) {}
-            void m2b(Outer.@A Inner.Inner2 p) {}
+            void m2a(@A Inner.Inner2 p2a) {}
+            void m2b(Outer.@A Inner.Inner2 p2b) {}
         }
     }
 
@@ -48,13 +50,20 @@ class Outer {
     }
 
     static class Static {}
-    static class GStatic<X, Y> {}
+    static class GStatic<X, Y> {
+        static class GStatic2<Z> {}
+    }
 }
 
 class Test1 {
+    // Outer.GStatic<Object,Object>.GStatic2<Object> gs;
+    Outer.GStatic.@A GStatic2<Object> gsgood;
+    // TODO: add failing test
+    // Outer.@A GStatic.GStatic2<Object> gsbad;
+
     MyList<@A Outer . @B Inner. @C Inner2> f;
-    // TODO: check that the A is on Outer in g;
-    @A Outer . @B Inner. @C Inner2 g;
+    // @A location: [4]
+    @A Outer .GInner<Object>.GInner2<String, Integer> g;
 
     // TODO: Put @A on the type, not the package, maybe.
     //MyList<@A java.lang.Object> pkg;
@@ -64,6 +73,7 @@ class Test1 {
 
     @A Outer f1;
     @A Outer . @B Inner f2 = f1.new @B Inner();
+    // TODO: ensure type annos on new are stored.
     @A Outer . @B GInner<@C Object> f3 = f1.new @B GInner<@C Object>();
 
     // @A location [0, 3]
@@ -76,8 +86,43 @@ class Test1 {
     MyList<@A Outer . @B GInner<@C MyList<@D Object>>. @E GInner2<@F Integer, @G Object>> f4;
     // MyList<Outer.GInner<Object>.GInner2<Integer>> f4clean;
 
+    // @A location [3]
+    // @B location [2]
+    // @C location [2, 0]
+    // @D location [2, 0, 0]
+    // @E on field 
+    // @F location [0]
+    // @G location [1]
+    @A Outer . @B GInner<@C MyList<@D Object>>. @E GInner2<@F Integer, @G Object> f4top;
+
+    // @A location [0, 1, 3]
+    // @B location [0, 1, 2]
+    // @C location [0, 1, 2, 0]
+    // @D location [0, 1, 2, 0, 0, 1]
+    // @E location [0, 1, 2, 0, 0]
+    // @F location [0, 1, 2, 0, 0, 0]
+    // @G location [0, 1]
+    // @H location [0, 1, 0]
+    // @I location [0, 1, 1]
+    // @J location [0]
+    // @K location [0, 0]
+    MyList<@A Outer . @B GInner<@C MyList<@D Object @E[] @F[]>>. @G GInner2<@H Integer, @I Object> @J[] @K[]> f4arr;
+
+    // @A location [1, 3]
+    // @B location [1, 2]
+    // @C location [1, 2, 0]
+    // @D location [1, 2, 0, 0, 1]
+    // @E location [1, 2, 0, 0]
+    // @F location [1, 2, 0, 0, 0]
+    // @G location [1]
+    // @H location [1, 0]
+    // @I location [1, 1]
+    // @J on field
+    // @K location [0]
+    @A Outer . @B GInner<@C MyList<@D Object @E[] @F[]>>. @G GInner2<@H Integer, @I Object> @J[] @K[] f4arrtop;
+
     MyList<@A Outer . @B Static> f5;
-    @A Outer . Static f6;
+    @A Outer . @B Static f6;
     @Av("A") Outer . @Bv("B") GStatic<@Cv("C") String, @Dv("D") Object> f7;
     @A Outer . @Cv("Data") Static f8;
     MyList<@A Outer . @Cv("Data") Static> f9;
@@ -129,6 +174,10 @@ class MyList<K> { }
 @interface E { }
 @interface F { }
 @interface G { }
+@interface H { }
+@interface I { }
+@interface J { }
+@interface K { }
 
 @interface Av { String value(); }
 @interface Bv { String value(); }
