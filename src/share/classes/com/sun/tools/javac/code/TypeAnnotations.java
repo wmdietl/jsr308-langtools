@@ -31,6 +31,7 @@ import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.VOID;
 
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
@@ -393,12 +394,6 @@ public class TypeAnnotations {
                         } else if (npHead.hasTag(JCTree.Tag.TYPEAPPLY)) {
                             JCTypeApply apply = (JCTypeApply) npHead;
                             if( apply.arguments.contains(newPath.head)) {
-                                // We are going up a level!
-                                if (newPath.head.hasTag(JCTree.Tag.TYPEAPPLY)) {
-                                    // The type argument (of which we are a part) has type arguments.
-                                    // Add the size as an offset.
-                                    index += ((JCTypeApply) newPath.head).getTypeArguments().size();
-                                }
                                 break;
                             } else {
                                 // Skip over parameterized types on the same level
@@ -407,6 +402,12 @@ public class TypeAnnotations {
                         } else {
                             break;
                         }
+                    }
+                    // We are going up a level!
+                    if (newPath.head.hasTag(JCTree.Tag.TYPEAPPLY)) {
+                        // The type (of which we are a part) has type arguments.
+                        // Add the size as an offset.
+                        index += ((JCTypeApply) newPath.head).getTypeArguments().size();
                     }
                     p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p);
@@ -429,7 +430,7 @@ public class TypeAnnotations {
             findPosition(tree, tree, tree.annotations);
             int dimAnnosCount = tree.dimAnnotations.size();
 
-            // handle annotations associated with dimentions
+            // handle annotations associated with dimensions
             for (int i = 0; i < dimAnnosCount; ++i) {
                 TypeAnnotationPosition p = new TypeAnnotationPosition();
                 p.pos = tree.pos;
@@ -675,9 +676,42 @@ public class TypeAnnotations {
         }
     }
 
+    // I think this has a similar purpose as 
+    // {@link com.sun.tools.javac.parser.JavacParser.insertAnnotationsToMostInner(JCExpression, List<JCTypeAnnotation>, boolean)}
     private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
-            type.typeAnnotations = annotations;
+            // We start at 0 to account for the numbers of iterations below
+            int index = 0;
+            if (type.isParameterized()) {
+                // The "top-level" generics are an offset for the index
+                index += type.getTypeArguments().size();
+            }
+            Type encl = type;
+            while (encl.getEnclosingType()!=null && encl.getEnclosingType().getKind()!=TypeKind.NONE) {
+                encl = encl.getEnclosingType();
+                if (encl.isErroneous()) {
+                    // For the invalid type "XYZ" in the WrongType test case,
+                    // we have an infinite loop otherwise. What is a nicer way?
+                    break;
+                }
+                if (!encl.isParameterized()) {
+                    // Only count going through a outer class select, don't
+                    // also count parameterized types on the way.
+                    ++index;
+                }
+            }
+            if (encl!=type) {
+                // Only need to change the annotation positions
+                // if they are on an enclosed type.
+                for (TypeCompound a : annotations) {
+                    TypeAnnotationPosition p = a.position;
+                    p.location = p.location.append(index);
+                    p.type = p.type.getGenericComplement();
+                }
+            }
+            // TODO: method receiver type annotations don't work. There is a strange
+            // interaction with arrays.
+            encl.typeAnnotations = annotations;
             return type;
         } else {
             Type.ArrayType arType = (Type.ArrayType) type;
@@ -689,7 +723,7 @@ public class TypeAnnotations {
             arType.elemtype = typeWithAnnotations(arType.elemtype, annotations);
             for (TypeCompound a : annotations) {
                 TypeAnnotationPosition p = a.position;
-                p.location = p.location.append(depth);
+                p.location = p.location.prepend(depth);
                 p.type = p.type.getGenericComplement();
             }
         }
