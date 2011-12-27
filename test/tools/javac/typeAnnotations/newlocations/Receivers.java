@@ -99,32 +99,29 @@ class Generic4<X extends @A Object> {
   <Y> void test4(@A Generic4<@A X> this) {}
 }
 
-
-/*
 class Outer {
   class Inner {
     void none(Outer.Inner this) {}
     void outer(@A Outer.Inner this) {}
-    void inner(Outer. @B Inner this) {}
-    void both(@A Outer.@B Inner this) {}
+    void inner(Outer. @B("i") Inner this) {}
+    void both(@A Outer.@B("i") Inner this) {}
 
     void innerOnlyNone(Inner this) {}
     void innerOnly(@A Inner this) {}
   }
 }
 
-class GenericOuter<A, B> {
-  class GenericInner<C, D> {
-    void none(GenericOuter<A, B>.GenericInner<C, D> this) {}
-    void outer(@A GenericOuter<A, B>.GenericInner<C, D> this) {}
-    void inner(GenericOuter<A, B>. @B GenericInner<C, D> this) {}
-    void both(@A GenericOuter<A, B>.@B GenericInner<C, D> this) {}
+class GenericOuter<S, T> {
+  class GenericInner<U, V> {
+    void none(GenericOuter<S, T>.GenericInner<U, V> this) {}
+    void outer(@A GenericOuter<S, T>.GenericInner<U, V> this) {}
+    void inner(GenericOuter<S, T>. @B("i") GenericInner<U, V> this) {}
+    void both(@A GenericOuter<S, T>.@B("i") GenericInner<U, V> this) {}
 
-    void innerOnlyNone(GenericInner<C, D> this) {}
-    void innerOnly(@A GenericInner<C, D> this) {}
+    void innerOnlyNone(GenericInner<U, V> this) {}
+    void innerOnly(@A GenericInner<U, V> this) {}
   }
 }
-*/
 
 @interface A {}
 @interface B { String value(); }
