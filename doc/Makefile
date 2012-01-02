@@ -226,9 +226,9 @@ ${jsr308_www}/favicon-jsr308.png: favicon-jsr308.png ${jsr308_www}
 # These targets don't work!
 # The "cd ${PLUME_LIB}/.." doesn't work if the directory doesn't exist.
 # Instead, create the directory? Or use /tmp?
- 
+#
 # ${PLUME_LIB}:
-#	cd ${PLUME_LIB}/..; hg clone https://plume-lib.googlecode.com/hg/ plume-lib
+#	cd ${PLUME_LIB}/..; hg clone https://code.google.com/p/plume-lib/ plume-lib
 
 ${PLUME_BIN}: # ${PLUME_LIB}
 
