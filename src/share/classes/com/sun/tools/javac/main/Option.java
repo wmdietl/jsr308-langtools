@@ -150,6 +150,15 @@ public enum Option {
         }
     },
 
+    JSR308_IMPORTS("-jsr308_imports", "jsr308.imports", "opt.arg.imports", STANDARD, BASIC),
+
+    DJSR308_IMPORTS("-Djsr308.imports=", "jsr308.imports", "opt.arg.imports", EXTENDED, BASIC) {
+        @Override
+        public boolean process(OptionHelper helper, String option, String arg) {
+            return super.process(helper, "-jsr308_imports", arg);
+        }
+    },
+
     PROC("-proc:", "opt.proc.none.only", STANDARD, BASIC,  ONEOF, "none", "only"),
 
     PROCESSOR("-processor", "opt.arg.class.list", "opt.processor", STANDARD, BASIC),

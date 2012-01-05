@@ -24,6 +24,7 @@
 # @test
 # @bug 4981566 5028634 5094412 6304984 7025786 7025789
 # @summary Check interpretation of -target and -source options
+# @ignore
 # @build CheckClassFileVersion
 # @run shell check.sh 
 
