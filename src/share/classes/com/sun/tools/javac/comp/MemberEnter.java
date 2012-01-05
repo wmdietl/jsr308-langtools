@@ -347,13 +347,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
      *  @param params      The method's value parameters.
      *  @param res             The method's result type,
      *                 null if it is a constructor.
+     *  @param recvparam       The method's receiver parameter,
+     *                 null if none given; TODO: or already set here?
      *  @param thrown      The method's thrown exceptions.
      *  @param env             The method's (local) environment.
      */
     Type signature(List<JCTypeParameter> typarams,
                    List<JCVariableDecl> params,
                    JCTree res,
-                   List<JCTypeAnnotation> receiverAnnotations,
+                   JCVariableDecl recvparam,
                    List<JCExpression> thrown,
                    Env<AttrContext> env) {
 
@@ -371,6 +373,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         // Attribute result type, if one is given.
         Type restype = res == null ? syms.voidType : attr.attribType(res, env);
 
+        // Attribute receiver type, if one is given.
+        Type recvtype;
+        if (recvparam!=null) {
+            memberEnter(recvparam, env);
+            recvtype = recvparam.vartype.type;
+        } else {
+            recvtype = null;
+        }
+
         // Attribute thrown exceptions.
         ListBuffer<Type> thrownbuf = new ListBuffer<Type>();
         for (List<JCExpression> l = thrown; l.nonEmpty(); l = l.tail) {
@@ -379,11 +390,12 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 exc = chk.checkClassType(l.head.pos(), exc);
             thrownbuf.append(exc);
         }
-        Type mtype = new MethodType(argbuf.toList(),
+        MethodType mtype = new MethodType(argbuf.toList(),
                                     restype,
                                     thrownbuf.toList(),
                                     syms.methodClass);
-        attr.annotateType(mtype, receiverAnnotations);
+        mtype.recvtype = recvtype;
+
         return tvars.isEmpty() ? mtype : new ForAll(tvars, mtype);
     }
 
@@ -578,7 +590,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         try {
             // Compute the method type
             m.type = signature(tree.typarams, tree.params,
-                               tree.restype, tree.receiverAnnotations,
+                               tree.restype, tree.recvparam,
                                tree.thrown,
                                localEnv);
         } finally {
@@ -1120,11 +1132,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)
                 annotate(tree, dimAnnos);
             super.visitNewArray(tree);
-        }
-        @Override
-        public void visitMethodDef(JCMethodDecl tree) {
-            annotate(tree, tree.receiverAnnotations);
-            super.visitMethodDef(tree);
         }
     }
 

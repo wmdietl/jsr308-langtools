@@ -21,7 +21,7 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
+import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test

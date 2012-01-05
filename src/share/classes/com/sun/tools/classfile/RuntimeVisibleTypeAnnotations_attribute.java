@@ -41,12 +41,12 @@ public class RuntimeVisibleTypeAnnotations_attribute extends RuntimeTypeAnnotati
         super(cr, name_index, length);
     }
 
-    public RuntimeVisibleTypeAnnotations_attribute(ConstantPool cp, ExtendedAnnotation[] annotations)
+    public RuntimeVisibleTypeAnnotations_attribute(ConstantPool cp, TypeAnnotation[] annotations)
             throws ConstantPoolException {
         this(cp.getUTF8Index(Attribute.RuntimeVisibleTypeAnnotations), annotations);
     }
 
-    public RuntimeVisibleTypeAnnotations_attribute(int name_index, ExtendedAnnotation[] annotations) {
+    public RuntimeVisibleTypeAnnotations_attribute(int name_index, TypeAnnotation[] annotations) {
         super(name_index, annotations);
     }
 
