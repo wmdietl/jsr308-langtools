@@ -101,7 +101,6 @@ import com.sun.source.tree.ClassTree;
 public abstract class AbstractTypeProcessor extends AbstractProcessor {
     private final Set<Name> elements = new HashSet<Name>();
     private boolean hasInvokedTypeProcessingOver = false;
-    private JavacProcessingEnvironment env;
     private final AttributionTaskListener listener = new AttributionTaskListener();
 
     /**
@@ -115,8 +114,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
     @Override
     public void init(ProcessingEnvironment env) {
         super.init(env);
-        this.env = (JavacProcessingEnvironment)env;
-        prepareContext(this.env.getContext());
+        prepareContext(((JavacProcessingEnvironment)env).getContext());
     }
 
     /**
@@ -181,7 +179,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
 
         @Override
         public void finished(TaskEvent e) {
-            Log log = Log.instance(env.getContext());
+            Log log = Log.instance(((JavacProcessingEnvironment)processingEnv).getContext());
 
             if (!hasInvokedTypeProcessingOver && elements.isEmpty() && log.nerrors == 0) {
                 typeProcessingOver();
@@ -205,7 +203,7 @@ public abstract class AbstractTypeProcessor extends AbstractProcessor {
             }
 
             TypeElement elem = e.getTypeElement();
-            TreePath p = Trees.instance(env).getPath(elem);
+            TreePath p = Trees.instance(processingEnv).getPath(elem);
 
             typeProcess(elem, p);
 
