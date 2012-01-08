@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 6843077
+ * @bug 1234567
  * @summary new type annotation location: nested types
  * @author Werner Dietl
  * @compile -source 1.8 NestedTypes.java
@@ -32,12 +32,11 @@ class Outer {
     class Inner {
         class Inner2 {
             // m1a-c all have the same parameter type.
-            // How can I ensure this?
-            // TODO: the top-level annotation in m1a and m2a are
-            // in the wrong location, because it sees the expanded type already.
             void m1a(@A Inner2 p1a) {}
             void m1b(Inner.@A Inner2 p1b) {}
             void m1c(Outer.Inner.@A Inner2 p1c) {}
+            // notice the difference to m1d
+            void m1d(@A Outer.Inner.Inner2 p1d) {}
 
             // m2a-b both have the same parameter type.
             void m2a(@A Inner.Inner2 p2a) {}

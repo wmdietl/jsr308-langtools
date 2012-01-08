@@ -31,7 +31,6 @@ import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.VOID;
 
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
@@ -123,21 +122,21 @@ public class TypeAnnotations {
             // clear all annotations
             if (!visitBodies) {
                 if (!areAllDecl(tree.sym))
-                    separateAnnotationsKinds(tree.sym, tree.sym.type.getReturnType(),
-                            new TypeAnnotationPosition(TargetType.METHOD_RETURN));
+                    separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
+                            tree.sym, new TypeAnnotationPosition(TargetType.METHOD_RETURN));
                 int i = 0;
                 for (JCVariableDecl param : tree.params) {
                     if (!areAllDecl(param.sym)) {
                         TypeAnnotationPosition pos =
                             new TypeAnnotationPosition(TargetType.METHOD_PARAMETER);
                         pos.parameter_index = i;
-                        separateAnnotationsKinds(param.sym, param.sym.type, pos);
+                        separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
                     }
                     ++i;
                 }
                 if (tree.recvparam!=null) {
                     // TODO: make sure there are no declaration annotations.
-                    separateAnnotationsKinds(tree.recvparam.sym, tree.recvparam.sym.type,
+                    separateAnnotationsKinds(tree.recvparam, tree.recvparam.sym.type, tree.recvparam.sym,
                             new TypeAnnotationPosition(TargetType.METHOD_RECEIVER));
                 }
             }
@@ -148,12 +147,12 @@ public class TypeAnnotations {
         public void visitVarDef(final JCVariableDecl tree) {
             if (!visitBodies && !areAllDecl(tree.sym)) {
                 if (tree.sym.getKind() == ElementKind.FIELD) {
-                    separateAnnotationsKinds(tree.sym, tree.sym.type,
+                    separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym,
                             new TypeAnnotationPosition(TargetType.FIELD));
                 } else if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE) {
                     TypeAnnotationPosition pos = new TypeAnnotationPosition(TargetType.LOCAL_VARIABLE);
                     pos.pos = tree.pos;
-                    separateAnnotationsKinds(tree.sym, tree.sym.type, pos);
+                    separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
                 }
 
             }
@@ -629,7 +628,7 @@ public class TypeAnnotations {
         }
     }
 
-    private void separateAnnotationsKinds(Symbol sym, Type type, TypeAnnotationPosition pos) {
+    private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym, TypeAnnotationPosition pos) {
         List<Compound> annotations = sym.attributes_field;
 
         ListBuffer<Compound> declAnnos = new ListBuffer<Compound>();
@@ -656,7 +655,7 @@ public class TypeAnnotations {
 
         sym.attributes_field = declAnnos.toList();
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
-        Type atype = typeWithAnnotations(type, typeAnnotations);
+        Type atype = typeWithAnnotations(typetree, type, typeAnnotations);
 
         if (sym.getKind() == ElementKind.METHOD) {
             sym.type.asMethodType().restype = atype;
@@ -678,29 +677,43 @@ public class TypeAnnotations {
 
     // I think this has a similar purpose as 
     // {@link com.sun.tools.javac.parser.JavacParser.insertAnnotationsToMostInner(JCExpression, List<JCTypeAnnotation>, boolean)}
-    private Type typeWithAnnotations(Type type, List<TypeCompound> annotations) {
+    private Type typeWithAnnotations(JCTree typetree, Type type, List<TypeCompound> annotations) {
         if (type.tag != TypeTags.ARRAY) {
-            // We start at 0 to account for the numbers of iterations below
-            int index = 0;
+            Type encl = type;
+            JCTree encltree = typetree;
+            boolean seenselect = false;
+
+            // We start at -1 to account for the numbers of iterations below
+            int index = -1;
             if (type.isParameterized()) {
                 // The "top-level" generics are an offset for the index
                 index += type.getTypeArguments().size();
             }
-            Type encl = type;
-            while (encl.getEnclosingType()!=null && encl.getEnclosingType().getKind()!=TypeKind.NONE) {
+            while (encl.getEnclosingType()!=null &&
+                    (encltree.getKind() == JCTree.Kind.MEMBER_SELECT ||
+                     encltree.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
+                     encltree.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
+                // Iterate over the type tree, not just the type: the type is already
+                // completely resolved and we cannot distinguish where the annotation
+                // belongs for a nested type.
                 encl = encl.getEnclosingType();
-                if (encl.isErroneous()) {
-                    // For the invalid type "XYZ" in the WrongType test case,
-                    // we have an infinite loop otherwise. What is a nicer way?
-                    break;
+                if (encltree.getKind() == JCTree.Kind.MEMBER_SELECT) {
+                    encltree = ((JCFieldAccess)encltree).getExpression();
+                    seenselect = true;
+                } else if (encltree.getKind() == JCTree.Kind.PARAMETERIZED_TYPE) {
+                    encltree = ((JCTypeApply)encltree).getType();
+                } else {
+                    // only other option because of while condition
+                    encltree = ((JCAnnotatedType)encltree).getUnderlyingType();
                 }
                 if (!encl.isParameterized()) {
-                    // Only count going through a outer class select, don't
+                    // Only count going through an outer class select, don't
                     // also count parameterized types on the way.
                     ++index;
                 }
             }
-            if (encl!=type) {
+
+            if (seenselect) {
                 // Only need to change the annotation positions
                 // if they are on an enclosed type.
                 for (TypeCompound a : annotations) {
@@ -709,18 +722,22 @@ public class TypeAnnotations {
                     p.type = p.type.getGenericComplement();
                 }
             }
+
             // TODO: method receiver type annotations don't work. There is a strange
             // interaction with arrays.
             encl.typeAnnotations = annotations;
             return type;
         } else {
             Type.ArrayType arType = (Type.ArrayType) type;
+            JCArrayTypeTree arTree = arrayTypeTree(typetree);
+
             int depth = 0;
             while (arType.elemtype.tag == TypeTags.ARRAY) {
                 arType = (Type.ArrayType) arType.elemtype;
+                arTree = arrayTypeTree(arTree.elemtype);
                 depth++;
             }
-            arType.elemtype = typeWithAnnotations(arType.elemtype, annotations);
+            arType.elemtype = typeWithAnnotations(arTree.elemtype, arType.elemtype, annotations);
             for (TypeCompound a : annotations) {
                 TypeAnnotationPosition p = a.position;
                 p.location = p.location.prepend(depth);
@@ -729,6 +746,16 @@ public class TypeAnnotations {
         }
 
         return type;
+    }
+    // where
+    private static JCArrayTypeTree arrayTypeTree(JCTree typetree) {
+        if (typetree.getKind() == JCTree.Kind.ARRAY_TYPE) {
+            return (JCArrayTypeTree) typetree;
+        } else if (typetree.getKind() == JCTree.Kind.ANNOTATED_TYPE) {
+            return (JCArrayTypeTree) ((JCAnnotatedType)typetree).underlyingType;
+        } else {
+            throw new AssertionError("Could not determine array type from type tree: " + typetree); 
+        }
     }
 
     private TypeCompound toTypeCompound(Compound a, TypeAnnotationPosition p) {
