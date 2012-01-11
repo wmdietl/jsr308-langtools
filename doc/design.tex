@@ -760,6 +760,7 @@ differ only in the number of array levels, the annotations mean the same
 thing.  For example, \code{var1} has
 the same annotations as the elements of \code{arr2}:
 
+\preverbnegspace
 \begin{Verbatim}
   @NonNull String var1;
   @NonNull String[] arr2;
@@ -770,6 +771,7 @@ because in each case \code{@NonNull} refers to the String, not the array.
 This consistency is especially important since the two variables may appear in a single
 declaration:
 
+\preverbnegspace
 \begin{Verbatim}
   @NonNull String var1, arr2[];
 \end{Verbatim}
@@ -784,11 +786,13 @@ declaration:
 
 %     For example, \code{arr1} should have the same annotations
 %     as the elements of \code{arr2}:
+% \preverbnegspace
 % \begin{Verbatim}
 %   @A T[@B] arr1, arr2[@C];
 % \end{Verbatim}
 
 %     By contrast, it would be confusing to have a syntax in which
+% \preverbnegspace
 % \begin{Verbatim}
 %   @A List<@B Object>          // @A refers to List
 %   @A List<@B Object> @C []    // @A refers to array, @C refers to List
@@ -882,6 +886,7 @@ As an example, in this declaration:
 % Does not need to be "@Target({ElementType.TYPE_USE})" because when the
 % annotation argument is an array, it is permitted to supply just one
 % element to indicate a singleton array.
+\preverbnegspace
 \begin{Verbatim}
   @Target(ElementType.TYPE_USE)
   public @interface NonNull { ... }
@@ -917,6 +922,7 @@ We have not found an example where such a meta-annotation is desirable;
 although it is legal, it is considered bad style.
 For example, suppose that a programmer wrote 
 
+\preverbnegspace
 \begin{Verbatim}
   @Target({ ElementType.TYPE_USE, ElementType.METHOD })
   public @interface SillyAnnotation { ... }
@@ -1031,6 +1037,7 @@ It would be illegal to write \<@SillyAnnotation> on a \<void> method.
 % For example, if the \code{@Foo} annotation definition lacks a
 % \code{@Target} meta-annotation, then in this code:
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   @Foo int m() { return 0; }
 % \end{Verbatim}
@@ -1242,6 +1249,7 @@ exception: rather than an array of \code{annotation} elements,
 \extendedannotation elements, which are described in
 Section~\ref{class-file:ext}.
 
+\preverbnegspace
 \begin{Verbatim}
 Runtime[In]VisibleTypeAnnotations_attribute {
    u2 attribute_name_index;  // "Runtime[In]VisibleTypeAnnotation"
@@ -1304,6 +1312,7 @@ bytecode (including referring to specific instructions, or bytecode offsets).
 
 The \extendedannotation structure has the following format:
 
+\preverbnegspace
 \begin{Verbatim}
 type_annotation {
     // Original fields from "annotation" structure:
@@ -1523,6 +1532,7 @@ A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes tabl
 
 \targetinfocontents{a type parameter of a class or method}{typeparam\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     typeparam_target {
         u1 param_index;
@@ -1542,6 +1552,7 @@ A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes tabl
 \targetinfocontents{a type in an \code{extends} or
 \code{implements} clause}{\code{supertype\_target}}
 
+\preverbnegspace
 \begin{Verbatim}
     supertype_target {
         u2 type_index;
@@ -1565,6 +1576,7 @@ superinterface type.
 \targetinfocontents{a bound of a type parameter of a class or
 method}{typeparam\_bound\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     typeparam_bound_target {
         u1 param_index;
@@ -1576,6 +1588,7 @@ method}{typeparam\_bound\_target}
 \code{bound\_index} specifies the index of the bound.  Consider the following
 example:
 
+\preverbnegspace
 \begin{Verbatim}
   <T extends @A Object & @B Comparable, U extends @C Cloneable>
 \end{Verbatim}
@@ -1601,6 +1614,7 @@ result, a receiver type (for an instance method or for an inner class
 constructor or static method), or a field, \code{target\_info} is empty.
 More formally, it contains \code{empty\_target}:
 
+\preverbnegspace
 \begin{Verbatim}
     empty_target {
     };
@@ -1617,6 +1631,7 @@ More formally, it contains \code{empty\_target}:
 \targetinfocontentspartial{a method parameter type}{contains one \code{methodparam\_target}, which
 indicates which of the method's formal parameters is being annotated:}
 
+\preverbnegspace
 \begin{Verbatim}
     methodparam_target {
         u1 parameter_index;
@@ -1630,6 +1645,7 @@ indicates which of the method's formal parameters is being annotated:}
 
 \targetinfocontents{a type in a \code{throws} clause}{exception\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     exception_target {
         u2 type_index;
@@ -1648,6 +1664,7 @@ type.
 
 \targetinfocontents{the bound of a wildcard}{wildcard\_bound\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     wildcard_bound_target {
         u2 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 3.2)
@@ -1663,6 +1680,7 @@ an explanation of \<location\_length> and \<location>):
 \noindent
 \code{@A} in \code{void m(List<?\ extends @A String> lst) \ttlcb...\ttrcb} is described as:
 
+\preverbnegspace
 \begin{Verbatim}
    target_type = WILDCARD_BOUND
    target_info =
@@ -1681,6 +1699,7 @@ an explanation of \<location\_length> and \<location>):
 \noindent
 \code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \ttlcb...\ttrcb} is described as:
 
+\preverbnegspace
 \begin{Verbatim}
    target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
    target_info =
@@ -1723,6 +1742,7 @@ in its method body.
 
 \targetinfocontents{a local variable or resource variable}{localvar\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     localvar_target {
         u2 table_length;
@@ -1760,6 +1780,7 @@ the class file; that is OK, because it is irrelevant to the program.
 in a \<catch> statement)}{indicates an offset in the exception table (which
 appears in the \<exception\_table> slot of the \<Code> attribute).}
 
+\preverbnegspace
 \begin{Verbatim}
     catch_target {
         u2 exception_table_index;
@@ -1774,6 +1795,7 @@ appears in the \<exception\_table> slot of the \<Code> attribute).}
 \targetinfocontents{a typecast, an \code{instanceof}
 expression, or a \code{new} expression}{offset\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     offset_target {
         u2 offset;
@@ -1806,6 +1828,7 @@ compiler may need to adjust (the locations of) the annotations, to account
 for the relationship between the expression's type and the casted-to type.
 Consider:
 
+\preverbnegspace
 \begin{Verbatim}
   class C<S, T> { ... }
   class D<A, B> extends C<B, A> { ... }
@@ -1842,6 +1865,7 @@ originally attached to the first type argument of \<C>.
 \targetinfocontents{a type argument in a constructor call or
 a method call}{typearg\_target}
 
+\preverbnegspace
 \begin{Verbatim}
     typearg_target {
         u2 offset;
@@ -1985,6 +2009,7 @@ non-parameterized, non-array type
 % typecast, see Section~\ref{class-file:ext:ri:typecast}),
 {\em plus} the following fields at the end:}
 
+\preverbnegspace
 \begin{Verbatim}
     u2 location_length;
     u1 location[location_length];
@@ -2474,6 +2499,7 @@ annotation on the receiver is a contract regarding what the method may
 
 For example, consider the following method:
 
+\preverbnegspace
 \begin{Verbatim}
   package javax.xml.bind;
   class Marshaller {
@@ -2492,6 +2518,7 @@ but does not modify its first parameter nor its receiver.
 The syntax also permits expressing constraints on the
 generic parameters of the receiver.  Here are some examples:
 
+\preverbnegspace
 \begin{Verbatim}
   class Collection<E> {
     // The elements of the result have the same annotation as the elements
@@ -2515,6 +2542,7 @@ One use case for this is a read-only type system, where you want to
 make the distinction between the outer and inner object.
 This can be specified as
 
+\preverbnegspace
 \begin{Verbatim}
   void m(@ReadOnly Outer.@ReadWrite Inner this) {}
 \end{Verbatim}
@@ -2541,6 +2569,7 @@ annotation, or a return value annotation:
 
 % As another example, this receiver annotation
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   Dimension getSize(@Readonly MyClass this) { ... }
 % \end{Verbatim}
@@ -2599,6 +2628,7 @@ operand expression.  The annotations are preserved, not changed, by the
 cast, and the annotation serves as a reminder of the type of the cast
 expression.  For example, in
 
+\preverbnegspace
 \begin{Verbatim}
   @Readonly Object x;
   ... (@Readonly Date) x ...
@@ -2609,6 +2639,7 @@ the cast preserves the annotation part of the type and changes only the
 Java type.  If a cast could not be annotated, then a cast would remove the
 annotation:
 
+\preverbnegspace
 \begin{Verbatim}
   @Readonly Object x;
   ... (Date) x ...       // annotation processor issues warning due to casting away @Readonly
@@ -2644,6 +2675,7 @@ application program.
 As a trivial example, the following cast changes the annotation but is
 guaranteed to be safe at run time:
 
+\preverbnegspace
 \begin{Verbatim}
   final Object x = new Object();
   ... (@NonNull Object) x ...
@@ -2686,6 +2718,7 @@ Annotation of the type test permits the idiom
   }
 \end{Verbatim}
 \else
+\preverbnegspace
 \begin{Verbatim}[commandchars=\\\[\]]
   if (x instanceof \emph[MyType]) {
     ... (\emph[MyType]) x ...
@@ -2702,6 +2735,7 @@ To prevent confusion caused by incompatible annotations, an annotation
 processor could require the annotation parts of the operand and the type to
 be the same:
 
+\preverbnegspace
 \begin{Verbatim}
   @Readonly Object x;
   if (x instanceof Date) { ... }            // error: incompatible annotations
@@ -2717,6 +2751,8 @@ experience will dictate which is better for users.)
 
 As a consequence of the fact that the annotation is not checked at run
 time, in the following
+
+\preverbnegspace
 \begin{Verbatim}
   if (x instanceof @A1 T) { ... }
   else if (x instanceof @A2 T) { ... }
@@ -2771,6 +2807,7 @@ subtype or supertype of $t$) without using an anonymous class.
 These annotations also provide a convenient way to alias otherwise
 cumbersome types. For instance, a programmer might declare
 
+\preverbnegspace
 \begin{Verbatim}
   final class MyStringMap extends
     @Readonly Map<@NonNull String, @NonEmpty List<@NonNull @Readonly String>> {}
@@ -2797,6 +2834,7 @@ statically checked to ensure that \code{catch} blocks that can catch a
 There is no need for special syntax to permit annotations on the type of a
 caught exception, as in
 
+\preverbnegspace
 \begin{Verbatim}
   catch (@NonCritical Exception e) { ... }
 \end{Verbatim}
@@ -2809,6 +2847,7 @@ reach the \<catch> clause.
 % from a multi-\<catch> clause.
 % It is possible to annotate the individual alternatives, as in
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   catch ( @A E1 | @A E2 | @A E3 e ) { ... }
 % \end{Verbatim}
@@ -2820,6 +2859,7 @@ reach the \<catch> clause.
 % % It would be a shame to force a programmer to repeat the annotations, since
 % % the multi-\<catch> syntax is intended to reduce code size.
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   catch ( @A | E1 | E2 | E3 e ) { ... }
 % \end{Verbatim}
@@ -2859,6 +2899,7 @@ reach the \<catch> clause.
 % \code{@Override} annotation is intended for use only on method
 % declarations, so its definition is written as
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   @Target(ElementType.METHOD)
 %   public @interface Override { }
@@ -2871,6 +2912,7 @@ reach the \<catch> clause.
 % % source alone does not indicate whether the annotation will be rejected by
 % % the compiler.
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   @Override                                     // compile-time error
 %   class Window extends Container {
@@ -3015,9 +3057,13 @@ have little or no effect on most compiled programs.
 To ease the transition from standard Java SE 7 code to code with type
 annotations, the reference implementation recognizes the type
 annotations when surrounded by comment markers:
+
+\preverbnegspace
 \begin{Verbatim}
   List</*@Readonly*/ Object> myList;
 \end{Verbatim}
+
+\noindent
 This permits use of both standard Java SE 7 tools and the new annotations even
 before Java SE 8 is released.  However, it is not part of the proposal;
 that is, it is not required that every Java compiler parses comments.
@@ -3100,6 +3146,7 @@ clients would immediately cast the result of the latter method.)
 % 
 % Suppose that a method is declared as:
 % 
+% \preverbnegspace
 % \begin{Verbatim}
 %   @NonEmpty List<@Interned String> foo(@Readonly MyClass this, @NonNull List<@Opened File> files) {...}
 % \end{Verbatim}
