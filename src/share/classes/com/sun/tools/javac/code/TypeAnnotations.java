@@ -696,20 +696,19 @@ public class TypeAnnotations {
                 // Iterate over the type tree, not just the type: the type is already
                 // completely resolved and we cannot distinguish where the annotation
                 // belongs for a nested type.
-                encl = encl.getEnclosingType();
                 if (encltree.getKind() == JCTree.Kind.MEMBER_SELECT) {
+                    // only change encl in this case.
+                    encl = encl.getEnclosingType();
                     encltree = ((JCFieldAccess)encltree).getExpression();
                     seenselect = true;
+                    // Only count going through an outer class select, don't
+                    // also count parameterized or annotated types on the way.
+                    ++index;
                 } else if (encltree.getKind() == JCTree.Kind.PARAMETERIZED_TYPE) {
                     encltree = ((JCTypeApply)encltree).getType();
                 } else {
                     // only other option because of while condition
                     encltree = ((JCAnnotatedType)encltree).getUnderlyingType();
-                }
-                if (!encl.isParameterized()) {
-                    // Only count going through an outer class select, don't
-                    // also count parameterized types on the way.
-                    ++index;
                 }
             }
 

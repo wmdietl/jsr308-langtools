@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.util.Map;
+
 /*
  * @test
  * @bug 1234567
@@ -41,8 +43,20 @@ class Outer {
             // m2a-b both have the same parameter type.
             void m2a(@A Inner.Inner2 p2a) {}
             void m2b(Outer.@A Inner.Inner2 p2b) {}
+
+            // The location for @A is different in m3a-c 
+            void m3a(@A Outer p3a) {} // no location
+            void m3b(@A Outer.Inner p3b) {} // location [0]
+            void m3c(@A Outer.Inner.Inner2 p3c) {} // location [1]
         }
     }
+
+    void m4a(@A Map p4a) {} // no location
+    void m4b(@A Map.Entry p4b) {} // location [0]
+    void m4c(@A Map.@B Entry p4c) {} // @A location [0]
+    void m4d(@A Map<String,String>.@B Entry<String,String> p4d) {} // @A location [2]
+    void m4e(MyList<@A Map.Entry> p4e) {} // @A location [0,0]
+    void m4f(MyList<@A Map.@B Entry> p4f) {} // @A location [0,0]
 
     class GInner<X> {
         class GInner2<Y, Z> {}
