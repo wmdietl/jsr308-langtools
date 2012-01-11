@@ -844,10 +844,40 @@ declarations \code{<T> foo(...)\ \ttlcb...\ttrcb}, and wildcards
 \code{List<?>}, which declare an anonymous type variable.
 
 \item
-\code{ElementType.TYPE\_USE} stands for all uses of types.
+\code{ElementType.TYPE\_USE} stands for all uses of types, plus two
+two special cases.
+
+\begin{enumerate}
+\item 
+A type annotation (one meta-annotated with
+\code{@Target(ElementType.TYPE\_USE)}) is permitted to be written on a 
+a class declaration or a type parameter declaration.  Strictly speaking,
+these are declaration sites, not uses of a type.  However, it is convenient
+to write a type annotation at a type declaration, as shorthand for applying
+it at all uses.  For example, \code{@Interned class MyClass \ttlcb\ ...\ \ttrcb}
+could indicate that all uses of \code{MyClass} are interned, even though
+for other classes some instances may be interned and other instances not
+interned.
+
+\item
+A type annotation may appear before a constructor, in which case it
+represents the object that the constructor is creating (which is not the
+same as the receiver of the constructor).
+\end{enumerate}
+
 \end{itemize}
 
-For example, in this declaration:
+\code{ElementType.TYPE\_PARAMETER} and \code{ElementType.TYPE\_USE} are
+distinct from the existing \code{ElementType.TYPE} enum element
+of Java SE 7, which indicates that an annotation may appear on a type
+declaration (a class, interface, or enum declaration).  The program elements
+denoted by \code{ElementType.TYPE\_PARAMETER},
+\code{ElementType.TYPE\_USE}, and \code{ElementType.TYPE} are disjoint
+(except for the special cases about class and type parameter declarations,
+noted above).
+
+
+As an example, in this declaration:
 
 % Does not need to be "@Target({ElementType.TYPE_USE})" because when the
 % annotation argument is an array, it is permitted to supply just one
@@ -861,21 +891,18 @@ For example, in this declaration:
 the \code{@Target(ElementType.TYPE\_USE)} meta-annotation indicates that
 \code{@NonNull} may appear on any use of a type.
 
-\code{ElementType.TYPE\_PARAMETER} and \code{ElementType.TYPE\_USE} are
-distinct from the existing \code{ElementType.TYPE} enum element
-of Java SE 7, which indicates that an annotation may appear on a type
-declaration (a class, interface, or enum declaration).  The locations
-denoted by \code{ElementType.TYPE\_PARAMETER},
-\code{ElementType.TYPE\_USE}, and \code{ElementType.TYPE} are disjoint.
-
 If an annotation is not meta-annotated with \<@Target> (which would be poor
-style), then the compiler treats the annotation as if it is
-meta-annotated with all of the \code{ElementType} enum constants.
+style!), then the compiler treats the annotation as if it is
+meta-annotated with all of the \code{ElementType} enum constants
+that appear in Java 7: \<ANNOTATION\_TYPE>, \<CONSTRUCTOR>, \<FIELD>,
+\<LOCAL\_VARIABLE>, \<METHOD>, \<PACKAGE>, \<PARAMETER>, and \<TYPE>.
+% , but not \<TYPE_PARAMETER>, \<TYPE_USE>, or any other constants that may
+% be added to \<ElementType> in the future.
 
-If an annotation appears at a source location where it could be interpreted
-as applying to either a declaration or a type, as in \<@A int x;>, then
-the compiler applies the annotation to every target that is consistent with
-its meta-annotation.  The order of annotations is not used to disambiguate.
+% If an annotation appears at a source location where it could be interpreted
+% as applying to either a declaration or a type, as in \<@A int x;>, then
+% the compiler applies the annotation to every target that is consistent with
+% its meta-annotation.  The order of annotations is not used to disambiguate.
 As in Java SE 7, the compiler issues an error if a programmer places an
 annotation in a location not permitted by its \<@Target> meta-annotation.  (The
 compiler issues the error even if no annotation processor is being run.)
@@ -884,209 +911,224 @@ compiler issues the error even if no annotation processor is being run.)
 %   specified usage restriction.
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
-As a specal case, a type annotation (one meta-annotated with
-\code{@Target(ElementType.TYPE\_USE)}) is permitted to be written on a 
-a class declaration or a type parameter declaration.  Strictly speaking,
-these are declaration sites, not uses of a type.  However, it is convenient
-to write a type annotation at a type declaration, as shorthand for applying
-it at all uses.  For example, \code{@Interned class MyClass \ttlcb\ ...\ \ttrcb}
-could indicate that all uses of \code{MyClass} are interned, even though
-for other classes some instances may be interned and other instances not
-interned.
-
-
-\subsubsection{Discussion:  Disambiguating type and declaration annotations\label{disambiguating}}
-
-An annotation written before a method declaration annotates either the return type,
-or the method declaration.  There is never any ambiguity regarding the
-programmer intention:  in that location, a type annotation annotates the
-return type, and a declaration annotation annotates the method itself.  The
-\code{@Target} meta-annotation indicates whether an annotation is a type
-annotation.  Field declarations are treated similarly.
-
-
-% This reuse of the annotation location means that there is no need for new
-% syntax for annotations on types in declarations.
-
-Suppose that we have these annotation declarations:
-\begin{Verbatim}
-  @Target(ElementType.TYPE_USE)
-  @interface NonNegative { }
-
-  @Target(ElementType.METHOD)
-  @interface Override { }
-
-  @Target(ElementType.FIELD)
-  @interface GuardedBy { ... }
-\end{Verbatim}
-Then, in
-\begin{Verbatim}
-  @Override
-  @NonNegative int getHeight() { ... }
-\end{Verbatim}
-\code{@Override} applies to the method and \code{@NonNegative} applies
-to the return type.
-Furthermore, in these two field declarations
-\begin{Verbatim}
-  @NonNegative int balance;
-  @GuardedBy("myLock") long lastAccessedTime;
-\end{Verbatim}
-the annotation \code{@NonNegative} applies to the field type \code{int},
-not to the whole variable declaration nor to the variable \code{balance}
-itself.  The annotation \code{@GuardedBy("myLock")} applies to the
-field \code{lastAccessedTime}.
-
-Here are a few facts that follow from the specification.  For brevity, we
-use ``type annotation'' as shorthand for ``an annotation that is
-meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
-\begin{itemize}
-\item
-  A type annotation need not also be meta-annotated with the targets
-  \code{ElementType.METHOD} or
-  \code{ElementType.FIELD} in order to be applied to a method
-  return type or a field type --- and it generally should \emph{not}
-  contain such a \code{@Target} meta-annotation.
-\item
-  A type annotation may not appear before a void method (a method with no
-  return type).  This also follows from the fact that \code{void} is not a
-  type.
-\item
-  It is legal to write \<@A void foo() \ttlcb\ ...\ \ttrcb>, where \<@A> is
-  meta-annotated with \<@Target(\ttlcb ElementType.TYPE\_USE, ElementType.METHOD\ttrcb)>
-   or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
-  annotation is applied only to the method declaration.  The code construct
-  would have been illegal if \<@A> were a type annotation.
-\item
-  A type annotation may appear before a constructor, in which case it
-  represents the object that the constructor is creating (which is not the
-  same as the receiver of the constructor).
-\item
-  As with any other non-static method, a type annotation may
-  appear on the receiver of an inner class constructor.
-\item
-  A type annotation may not appear on a package declaration or an import
-  statement, which do
-  not contain a use of a type.
-\end{itemize}
-
-
 A programmer could write a \code{@Target} meta-annotation indicating that an
-annotation is \emph{both} a type annotation and a declaration annotation.  In
-such a case, the annotation would apply to both the return type and the
-method declaration, and it would exist twice in the class file.  We have
-not found an example where that is desirable; although it is legal, it is
-considered bad style.
-
-
-When an annotation has no \code{@Target} meta-annotation (which is bad
-style!), it is treated as if it applies to all locations.
-%
-For example, if the \code{@Foo} annotation definition lacks a
-\code{@Target} meta-annotation, then in this code:
+annotation is \emph{both} a type annotation and a declaration annotation.
+We have not found an example where such a meta-annotation is desirable;
+although it is legal, it is considered bad style.
+For example, suppose that a programmer wrote 
 
 \begin{Verbatim}
-  @Foo int m() { return 0; }
+  @Target({ ElementType.TYPE_USE, ElementType.METHOD })
+  public @interface SillyAnnotation { ... }
 \end{Verbatim}
 
 \noindent
-the \code{@Foo} annotation applies to both the \code{m} method, and the
-\code{int} return type.  (If it is not intended as a type annotation, it will
-be ignored by any type annotation processor, so it does no harm on the
-\code{int} return type.)  The \code{@Foo} annotation appears twice in the AST
+If \<@SillyAnnotation> were written before a non-\<void> method, then
+the annotation would apply to both the return type and the
+method declaration.  The annotation appears twice in the AST
 during annotation processing, and it appears twice in the classfile.
 % In other words, a Java 7 and a Java 8 compiler would
 % produce classfiles with different numbers of annotations.
 A tool that reads a classfile and writes Java-like output, such as Javadoc
 or a decompiler, must take care not to write an annotation twice in the
-decompiled code, as in ``\code{@Foo @Foo int m()}\ldots''.
-This requirement does
-not add extra work when constructing the tool, since the tool already has to handle
-the case where the \<@Target> annotation explicitly included both
-\<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
-
-
-In summary:  for certain syntactic locations, which target (Java construct)
-is being annotated depends on the annotation.
-There is no ambiguity for the compiler:
-the compiler applies the annotation to every
-target that is consistent with its meta-annotation (see
-Section~\ref{target-meta-annotation}).
-In practice, programmers
-have no difficulty in understanding where a given annotation applies.
+decompiled code, as in ``\code{@SillyAnnotation @SillyAnnotation int m()}\ldots''.
+% Is this rule a good idea??  Or should we use this rule:
+%   It is legal to write \<@A void foo() \ttlcb\ ...\ \ttrcb>, where \<@A> is
+%   meta-annotated with \<@Target(\ttlcb ElementType.TYPE\_USE, ElementType.METHOD\ttrcb)>
+%    or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
+%   annotation is applied only to the method declaration.  The code construct
+%   would have been illegal if \<@A> were a type annotation.
+It would be illegal to write \<@SillyAnnotation> on a \<void> method.
 
 
 
-% The Target Javadocs state
-%   If such a meta-annotation is present, the compiler will enforce the
-%   specified usage restriction.
-% (See http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html .)
-
-
-
-
-
-% Explain the difference between
-%  * meta-annotating with TYPE.
-%  * not annotating.
-%  * annotating with everything (except ANNOTATION).
-% Explain backward-compatibility with anything that's not meta-annotated.
-
-
-% We want to avoid text like this, in the FindBugs manual:
-% "When this annotation is applied to a method it applies to the method return value."
-% The problem is that it's not machine-checked.
-% (That text is for CheckForNull, but such text does not appear for other
-% annotations such as NonNull and Nullable.)
-
-
-
-%% IMPLEMENTATION NOTE:
-% As noted in Section~\ref{target-meta-annotation},
-% the order of annotations is not used to disambiguate;
-% \code{@NonNull @Override Dimension getSize()} has the same
-% meaning but is poor style.  (An annotation processor could warn about this
-% order, just as tools warn about modifiers --- such as \code{final static}
-% --- that are not written in the order recommended by Oracle.)
-% % The recommended order is:
-% %   public protected private abstract static final transient volatile synchronized native strictfp interface
-
-
-%% ALTERNATIVE DESIGN
-% Different syntaxes are possible, in which declaration and type annotations
-% appear in different locations in the grammar.  Such a syntax is warranted
-% in two circumstances.  (1) If programmers find it confusing to determine
-% which construct an annotation applies to, and the alternate syntax is
-% clearer overall.  (2) If there exist annotations that can apply equally
-% well to both methods and return value types (or to both types and variable
-% declarations, etc.), and that have different semantics in the two
-% situations.  Both circumstances are poor style.  (The only example of an
-% annotation that can go on both locations that we have found is an
-% annotation that is itself actually a collection of other annotations,
-% such as "@MultipleAnnotations" --- which is not even possible to write
-% currently, since an annotation cannot take an arbitrary other annotation
-% as an argument.)  Another argument for the alternate syntax is
-% that the grammar should be maximally flexible to permit unforeseen future
-% uses of such annotations.  This must be traded off against readability and
-% usability for important known common cases.
-
-
-
-% The person who defines the annotation (and writes
-% its annotation processor) decides whether an annotation that appears before
-% the return value applies to the method declaration or to the return type.
-
-
-
-% It is also convenient to use annotations to describe the effect of invoking
-% a method, such as whether it may block, allocate memory, etc.  Such
-% annotations could be placed on either the return value (as is current practice)
-% or the receiver; this semantic decision is up to the person who defines the
-% annotation.
-
-
-
-
-
+% \subsubsection{Discussion:  Disambiguating type and declaration annotations\label{disambiguating}}
+% 
+% An annotation written before a method declaration annotates either the return type,
+% or the method declaration.  There is never any ambiguity regarding the
+% programmer intention:  in that location, a type annotation annotates the
+% return type, and a declaration annotation annotates the method itself.  The
+% \code{@Target} meta-annotation indicates whether an annotation is a type
+% annotation.  Field declarations are treated similarly.
+% 
+% 
+% % This reuse of the annotation location means that there is no need for new
+% % syntax for annotations on types in declarations.
+% 
+% Suppose that we have these annotation declarations:
+% \begin{Verbatim}
+%   @Target(ElementType.TYPE_USE)
+%   @interface NonNegative { }
+% 
+%   @Target(ElementType.METHOD)
+%   @interface Override { }
+% 
+%   @Target(ElementType.FIELD)
+%   @interface GuardedBy { ... }
+% \end{Verbatim}
+% Then, in
+% \begin{Verbatim}
+%   @Override
+%   @NonNegative int getHeight() { ... }
+% \end{Verbatim}
+% \code{@Override} applies to the method and \code{@NonNegative} applies
+% to the return type.
+% Furthermore, in these two field declarations
+% \begin{Verbatim}
+%   @NonNegative int balance;
+%   @GuardedBy("myLock") long lastAccessedTime;
+% \end{Verbatim}
+% the annotation \code{@NonNegative} applies to the field type \code{int},
+% not to the whole variable declaration nor to the variable \code{balance}
+% itself.  The annotation \code{@GuardedBy("myLock")} applies to the
+% field \code{lastAccessedTime}.
+% 
+% Here are a few facts that follow from the specification.  For brevity, we
+% use ``type annotation'' as shorthand for ``an annotation that is
+% meta-annotated with \code{@Target(ElementType.TYPE\_USE)}''.
+% \begin{itemize}
+% \item
+%   A type annotation need not also be meta-annotated with the targets
+%   \code{ElementType.METHOD} or
+%   \code{ElementType.FIELD} in order to be applied to a method
+%   return type or a field type --- and it generally should \emph{not}
+%   contain such a \code{@Target} meta-annotation.
+% \item
+%   A type annotation may not appear before a void method (a method with no
+%   return type).  This also follows from the fact that \code{void} is not a
+%   type.
+% \item
+%   It is legal to write \<@A void foo() \ttlcb\ ...\ \ttrcb>, where \<@A> is
+%   meta-annotated with \<@Target(\ttlcb ElementType.TYPE\_USE, ElementType.METHOD\ttrcb)>
+%    or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
+%   annotation is applied only to the method declaration.  The code construct
+%   would have been illegal if \<@A> were a type annotation.
+% \item
+%   A type annotation may appear before a constructor, in which case it
+%   represents the object that the constructor is creating (which is not the
+%   same as the receiver of the constructor).
+% \item
+%   As with any other non-static method, a type annotation may
+%   appear on the receiver of an inner class constructor.
+% \item
+%   A type annotation may not appear on a package declaration or an import
+%   statement, which do
+%   not contain a use of a type.
+% \end{itemize}
+% 
+% 
+% A programmer could write a \code{@Target} meta-annotation indicating that an
+% annotation is \emph{both} a type annotation and a declaration annotation.  In
+% such a case, the annotation would apply to both the return type and the
+% method declaration, and it would exist twice in the class file.  We have
+% not found an example where that is desirable; although it is legal, it is
+% considered bad style.
+% 
+% 
+% When an annotation has no \code{@Target} meta-annotation (which is bad
+% style!), it is treated as if it applies to all locations.
+% %
+% For example, if the \code{@Foo} annotation definition lacks a
+% \code{@Target} meta-annotation, then in this code:
+% 
+% \begin{Verbatim}
+%   @Foo int m() { return 0; }
+% \end{Verbatim}
+% 
+% \noindent
+% the \code{@Foo} annotation applies to both the \code{m} method, and the
+% \code{int} return type.  (If it is not intended as a type annotation, it will
+% be ignored by any type annotation processor, so it does no harm on the
+% \code{int} return type.)  The \code{@Foo} annotation appears twice in the AST
+% during annotation processing, and it appears twice in the classfile.
+% % In other words, a Java 7 and a Java 8 compiler would
+% % produce classfiles with different numbers of annotations.
+% A tool that reads a classfile and writes Java-like output, such as Javadoc
+% or a decompiler, must take care not to write an annotation twice in the
+% decompiled code, as in ``\code{@Foo @Foo int m()}\ldots''.
+% This requirement does
+% not add extra work when constructing the tool, since the tool already has to handle
+% the case where the \<@Target> annotation explicitly included both
+% \<ElementType.METHOD> and \<ElementType.TYPE\_USE>.
+% 
+% 
+% In summary:  for certain syntactic locations, which target (Java construct)
+% is being annotated depends on the annotation.
+% There is no ambiguity for the compiler:
+% the compiler applies the annotation to every
+% target that is consistent with its meta-annotation (see
+% Section~\ref{target-meta-annotation}).
+% In practice, programmers
+% have no difficulty in understanding where a given annotation applies.
+% 
+% 
+% 
+% % The Target Javadocs state
+% %   If such a meta-annotation is present, the compiler will enforce the
+% %   specified usage restriction.
+% % (See http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Target.html .)
+% 
+% 
+% 
+% 
+% 
+% % Explain the difference between
+% %  * meta-annotating with TYPE.
+% %  * not annotating.
+% %  * annotating with everything (except ANNOTATION).
+% % Explain backward-compatibility with anything that's not meta-annotated.
+% 
+% 
+% % We want to avoid text like this, in the FindBugs manual:
+% % "When this annotation is applied to a method it applies to the method return value."
+% % The problem is that it's not machine-checked.
+% % (That text is for CheckForNull, but such text does not appear for other
+% % annotations such as NonNull and Nullable.)
+% 
+% 
+% 
+% %% IMPLEMENTATION NOTE:
+% % As noted in Section~\ref{target-meta-annotation},
+% % the order of annotations is not used to disambiguate;
+% % \code{@NonNull @Override Dimension getSize()} has the same
+% % meaning but is poor style.  (An annotation processor could warn about this
+% % order, just as tools warn about modifiers --- such as \code{final static}
+% % --- that are not written in the order recommended by Oracle.)
+% % % The recommended order is:
+% % %   public protected private abstract static final transient volatile synchronized native strictfp interface
+% 
+% 
+% %% ALTERNATIVE DESIGN
+% % Different syntaxes are possible, in which declaration and type annotations
+% % appear in different locations in the grammar.  Such a syntax is warranted
+% % in two circumstances.  (1) If programmers find it confusing to determine
+% % which construct an annotation applies to, and the alternate syntax is
+% % clearer overall.  (2) If there exist annotations that can apply equally
+% % well to both methods and return value types (or to both types and variable
+% % declarations, etc.), and that have different semantics in the two
+% % situations.  Both circumstances are poor style.  (The only example of an
+% % annotation that can go on both locations that we have found is an
+% % annotation that is itself actually a collection of other annotations,
+% % such as "@MultipleAnnotations" --- which is not even possible to write
+% % currently, since an annotation cannot take an arbitrary other annotation
+% % as an argument.)  Another argument for the alternate syntax is
+% % that the grammar should be maximally flexible to permit unforeseen future
+% % uses of such annotations.  This must be traded off against readability and
+% % usability for important known common cases.
+% 
+% 
+% 
+% % The person who defines the annotation (and writes
+% % its annotation processor) decides whether an annotation that appears before
+% % the return value applies to the method declaration or to the return type.
+% 
+% 
+% 
+% % It is also convenient to use annotations to describe the effect of invoking
+% % a method, such as whether it may block, allocate memory, etc.  Such
+% % annotations could be placed on either the return value (as is current practice)
+% % or the receiver; this semantic decision is up to the person who defines the
+% % annotation.
 
 
 
@@ -3373,7 +3415,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 
 \end{document}
 
-% LocalWords:  fontsize pt NonNull getNeighbors const Readonly
+% LocalWords:  fontsize pt NonNull getNeighbors const Readonly WonderfulList
 % LocalWords:  VM toolchain visibleTypeAnnotations JLS checkcast ops op pc anno
 % LocalWords:  LocalVariableTable AbstractProcessor Messager premain javac YY
 % LocalWords:  YYYY localizable unaliased typestate readwrite mpapi annotatable
@@ -3395,7 +3437,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  myObject GuardedBy accessLock Goetz JavaCOP signedness Nonnull
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
 % LocalWords:  FormalParameterDecls ForVarControlRest FormalParameterDeclsRest
-% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt myVar
+% LocalWords:  FormalParameters VoidMethodDeclaratorRest BracketsOpt myVar 2x5
 % LocalWords:  QualifiedTypeList MethodDeclaratorRest IdentifierSuffix MyClass
 % LocalWords:  InterfaceMethodDeclaratorRest VoidInterfaceMethodDeclaratorRest
 % LocalWords:  ConstructorDeclaratorRest VariableDeclaratorRest nonnullelements
@@ -3420,7 +3462,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
 % LocalWords:  QualifiedType toArray localvar methodparam typeparam ReadWrite
-% LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean
+% LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean var1
 % LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
-% LocalWords:  NestedStatic decompiler myLock
+% LocalWords:  NestedStatic decompiler myLock Reified arr2 syntaxes TargetType
+% LocalWords:  SillyAnnotation
