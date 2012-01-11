@@ -31,7 +31,6 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
  */
 public class MethodParameters {
 
-    // Method returns
     @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0)
     public String methodParamAsPrimitive() {
         return "void test(@TA int a) { }";

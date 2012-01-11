@@ -31,7 +31,7 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
  */
 public class Fields {
 
-    // field returns
+    // field types
     @TADescription(annotation = "TA", type = FIELD)
     public String fieldAsPrimitive() {
         return "@TA int test;";
