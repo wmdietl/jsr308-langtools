@@ -326,36 +326,6 @@ array, and for the elements.
 % \end{itemize}
 
 \item
-  \label{type-annotation-locations-receiver}
-  An annotation on the type of a method receiver (\code{this}) appears
-  on the type of an optional first formal parameter named \code{this}.
-  (Each non-static method has an implicit parameter, \code{this}, which is
-  called the \emph{receiver}.)  Only the first formal parameter may be
-  named \code{this}, and such a parameter is only permitted on an instance
-  method, or on a static method or constructor of an inner class.  The type
-  of the \code{this} parameter must be the same as the class that contains
-  the method and may include type arguments.  In a method in an inner type,
-  the receiver type can be
-  written as (for example) either \code{Inner} or as \code{Outer.Inner},
-  and in the latter case annotations on both parts are possible, as in
-  \code{@ReadOnly Outer .\ @Mutable Inner}.
-
-  The optional \code{this} parameter has no effect on execution --- it only
-  serves as a place to write annotations on the receiver.  The compiler
-  generates the same bytecodes, and reflection returns the same results
-  regarding number of method parameters, whether or not the optional
-  \code{this} parameter is present.
-
-  Here is an example:
-% \begin{itemize}
-% \item for method receivers:
-\preverbnegspace
-\begin{Verbatim}
-  public String toString(@Readonly MyClass this) { ... }
-\end{Verbatim}
-% \end{itemize}
-
-\item
 A type annotation is permitted in front of a constructor
 declaration, where declaration annotations are already permitted.  In that
 location, a type annotation is treated as applying to the constructed
@@ -376,14 +346,76 @@ possible on the constructor result.
 \end{Verbatim}
 \preverbnegspace
 
-\noindent
-Note that the result of a constructor is different from the receiver.  The
-receiver only exists for inner class constructors.  It is the containing
+(Note that the result of a constructor is different from the receiver.  The
+receiver only exists for inner class constructors, as in
+\code{theReceiver.new InnerClass()}.  The receiver is the containing
 object, and in the body of the constructor it is referred to as
 \code{\emph{Supertype}.this}.  In the constructor body, the result is referred to as
 \code{this}.  In any non-constructor, the receiver (if any) is referred to
-as \code{this}.
+as \code{this}.)
 % \end{itemize}
+
+\item
+  \label{type-annotation-locations-receiver}
+  It is permitted to explicitly declare the method receiver as the first
+  formal parameter.
+  (Each non-static method has an implicit parameter, \code{this}, which is
+  called the \emph{receiver}.)
+  Then, no special
+  syntax is needed for expressing the receiver annotation:  it is simply an
+  annotation on the type of the \code{this} parameter.
+
+  Only the first formal parameter may be
+  named \code{this}, and such a parameter is only permitted on an instance
+  method, or on a static method or constructor of an inner class.  The type
+  of the \code{this} parameter must be the same as the class that contains
+  the method and should include type arguments if that class has any.
+  In a method in an inner type,
+  the receiver type can be
+  written as (for example) either \code{Inner} or as \code{Outer.Inner},
+  and in the latter case annotations on both parts are possible, as in
+  \code{@ReadOnly Outer .\ @Mutable Inner}.
+
+  The optional \code{this} parameter has no effect on execution --- it only
+  serves as a place to write annotations on the receiver.  The compiler
+  generates the same bytecodes, and reflection returns the same results
+  regarding number of method parameters, whether or not the optional
+  \code{this} parameter is present.
+
+  As an example, here are the standard definitions for \code{toString} and \code{equals}:
+\preverbnegspace
+\begin{Verbatim}
+  class MyClass {
+    ...
+    public String toString() { ... }
+    public boolean equals(Object other) { ... }
+  }
+\end{Verbatim}
+
+\noindent
+It is equivalent to write instead
+
+\preverbnegspace
+\begin{Verbatim}
+  class MyClass {
+    ...
+    public String toString(MyClass this) { ... }
+    public boolean equals(MyClass this, Object other) { ... }
+  }
+\end{Verbatim}
+
+\noindent
+and then it would be possible to annotate the receiver's type:
+
+\preverbnegspace
+\begin{Verbatim}
+  class MyClass {
+    ...
+    public String toString(@Readonly MyClass this) { ... }
+    public boolean equals(@Readonly MyClass this, @Readonly Object other) { ... }
+  }
+\end{Verbatim}
+
 
 \item
 \label{type-annotation-locations-type-parameter-declaration}
@@ -661,8 +693,15 @@ Annotations may also appear on varargs (\code{...}):
 
 
 \item
-Annotations may appear on the receiver type by changing the definition of 
-``\nt{FormalParameters}'':
+No grammar changes are required to support type annotations on constructor
+result types.
+
+
+\item
+The receiver may be expressed explicitly, by changing the definition of 
+``\nt{FormalParameters}''.
+Then, annotations appear on the receiver type in the normal way.
+If the receiver is not expressed explicitly, then its type cannot be annotated.
 
 \begin{tabbing}
 \qquad \= \kill
@@ -674,10 +713,6 @@ Annotations may appear on the receiver type by changing the definition of
 \qquad        \nt{FormalParameterDecls}
 \end{tabbing}
 
-
-\item
-No grammar changes are required to support type annotations on constructor
-result types.
 
 \item
 An annotation may appear on the type parameter
@@ -3460,7 +3495,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 
 \end{document}
 
-% LocalWords:  fontsize pt NonNull getNeighbors const Readonly WonderfulList
+% LocalWords:  fontsize pt NonNull getNeighbors const Readonly WonderfulList A1
 % LocalWords:  VM toolchain visibleTypeAnnotations JLS checkcast ops op pc anno
 % LocalWords:  LocalVariableTable AbstractProcessor Messager premain javac YY
 % LocalWords:  YYYY localizable unaliased typestate readwrite mpapi annotatable
@@ -3477,7 +3512,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  Inv isibleLocalVariableAnnotations JCP doclet javadoc JBuilder
 % LocalWords:  jEdit NetBeans javacc BCEL nonobvious li href isibleType EE arr
 % LocalWords:  SuppressWarnings dArray Kuleshov ClassFileFormat pdf num Dietl
-% LocalWords:  DefaultAnnotation strictfp saveenumi ReadOnly ArrayAnnots roa
+% LocalWords:  DefaultAnnotation strictfp saveenumi ReadOnly ArrayAnnots roa O2
 % LocalWords:  ArrayAnnot MyAnnotation ReadonlyDims Vitek LNCS Potanin myString
 % LocalWords:  myObject GuardedBy accessLock Goetz JavaCOP signedness Nonnull
 % LocalWords:  NotNull JavaCOP's TypeArguments BasicType ForVarControl nullness
@@ -3508,7 +3543,11 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
 % LocalWords:  QualifiedType toArray localvar methodparam typeparam ReadWrite
 % LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean var1
-% LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
+% LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver 2x5
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
 % LocalWords:  NestedStatic decompiler myLock Reified arr2 syntaxes TargetType
-% LocalWords:  SillyAnnotation
+% LocalWords:  SillyAnnotation 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08
+% LocalWords:  0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 0x11 0x12 0x13 0x14 0x15
+% LocalWords:  0x16 0x17 0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22
+% LocalWords:  0x23 0x24 0x25 308's casted useE1 useE2 pack200 unpack200
+% LocalWords:  Mahmood
