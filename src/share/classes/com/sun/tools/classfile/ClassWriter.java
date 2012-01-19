@@ -742,6 +742,7 @@ public class ClassWriter {
                 break;
             // method receiver
             case METHOD_RECEIVER:
+            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
                 // Do nothing
                 break;
             // type parameters
@@ -773,9 +774,9 @@ public class ClassWriter {
                 break;
             // exception parameter
             case EXCEPTION_PARAMETER:
-            	// TODO: how do we separate which of the types it is on?
-            	System.out.println("Handle exception parameters!");
-            	break;
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters!");
+                break;
             // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
