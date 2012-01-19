@@ -112,7 +112,7 @@ public class AnnotationWriter extends BasicWriter {
             for (int i = 0; i < pos.lvarOffset.length; ++i) {
                 if (i != 0) print("; ");
                 if (showOffsets) {
-                    print(", start_pc=");
+                    print("start_pc=");
                     print(pos.lvarOffset[i]);
                 }
                 print(", length=");
@@ -124,6 +124,7 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -161,9 +162,9 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-        	// TODO: how do we separate which of the types it is on?
-        	System.out.println("Handle exception parameters!");
-        	break;
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
+            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
