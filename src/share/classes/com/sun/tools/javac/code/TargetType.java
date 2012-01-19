@@ -71,8 +71,12 @@ public enum TargetType {
     /** For annotations on the method receiver. */
     METHOD_RECEIVER(0x06),
 
-    // invalid location
-    //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+    /** For annotations on a type argument or outer type of the method receiver. */
+    // TODO: ensure correct usage!
+    // TODO: instead of following the common naming scheme, should we name
+    // this METHOD_RECEIVER_GENERIC_OR_NESTED, as a receiver can never
+    // be an array?
+    METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
     /** For annotations on local variables. */
     LOCAL_VARIABLE(0x08, IsLocal),
