@@ -63,11 +63,12 @@ public class Driver {
                 continue;
             if (method.getReturnType() != String.class)
                 throw new IllegalArgumentException("Test method needs to return a string: " + method);
+            String testClass = testClassOf(method);
 
             try {
                 String compact = (String)method.invoke(object);
                 String fullFile = wrap(compact);
-                ClassFile cf = compileAndReturn(fullFile);
+                ClassFile cf = compileAndReturn(fullFile, testClass);
                 List<TypeAnnotation> actual = ReferenceInfoUtil.extendedAnnotationsOf(cf);
                 ReferenceInfoUtil.compare(expected, actual, cf);
                 out.println("PASSED:  " + method.getName());
@@ -110,6 +111,7 @@ public class Driver {
 
         return result;
     }
+
     private Map<String, TypeAnnotation.Position> expectedOf(TADescription d) {
         String annoName = d.annotation();
 
@@ -143,9 +145,18 @@ public class Driver {
         return list;
     }
 
-    private ClassFile compileAndReturn(String fullFile) throws Exception {
+    private String testClassOf(Method m) {
+        TestClass tc = m.getAnnotation(TestClass.class);
+        if (tc != null) {
+            return tc.value();
+        } else {
+            return "Test";
+        }
+    }
+
+    private ClassFile compileAndReturn(String fullFile, String testClass) throws Exception {
         File source = writeTestFile(fullFile);
-        File clazzFile = compileTestFile(source);
+        File clazzFile = compileTestFile(source, testClass);
         return ClassFile.read(clazzFile);
     }
 
@@ -157,12 +168,18 @@ public class Driver {
         return f;
     }
 
-    protected File compileTestFile(File f) {
+    protected File compileTestFile(File f, String testClass) {
         int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.8", "-g", f.getPath() });
         if (rc != 0)
             throw new Error("compilation failed. rc=" + rc);
-        String path = f.getPath();
-        return new File(path.substring(0, path.length() - 5) + ".class");
+        String path;
+        if (f.getParent() != null) {
+            path = f.getParent();
+        } else {
+            path = "";
+        }
+
+        return new File(path + testClass + ".class");
     }
 
     private String wrap(String compact) {
@@ -241,4 +258,14 @@ public class Driver {
 @Target(ElementType.METHOD)
 @interface TADescriptions {
     TADescription[] value() default {};
+}
+
+/**
+ * The name of the class that should be analyzed.
+ * Should only need to be provided when analyzing inner classes.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface TestClass {
+    String value() default "Test";
 }
