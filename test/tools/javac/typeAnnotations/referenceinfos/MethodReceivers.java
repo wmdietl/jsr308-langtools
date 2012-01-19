@@ -50,4 +50,28 @@ public class MethodReceivers {
     public String regularWithThrows() {
         return "class Test { void test(@TA Test this) throws Exception { } }";
     }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RECEIVER_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+        @TADescription(annotation = "TB", type = METHOD_RECEIVER)
+    })
+    @TestClass("TestOuter$TestInner")
+    public String nestedtypes1() {
+        return "class TestOuter { class TestInner { void test(@TA TestOuter. @TB TestInner this) { } } }";
+    }
+
+    @TADescription(annotation = "TA", type = METHOD_RECEIVER_GENERIC_OR_ARRAY,
+            genericLocation = {0})
+    @TestClass("TestOuter$TestInner")
+    public String nestedtypes2() {
+        return "class TestOuter { class TestInner { void test(@TA TestOuter.TestInner this) { } } }";
+    }
+
+    @TADescription(annotation = "TB", type = METHOD_RECEIVER)
+    @TestClass("TestOuter$TestInner")
+    public String nestedtypes3() {
+        return "class TestOuter { class TestInner { void test(TestOuter. @TB TestInner this) { } } }";
+    }
+
 }

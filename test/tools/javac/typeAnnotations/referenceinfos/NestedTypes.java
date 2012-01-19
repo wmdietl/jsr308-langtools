@@ -31,13 +31,15 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
  */
 public class NestedTypes {
 
+    // method parameters
+
     @TADescriptions({
         // TODO: should the raw type arguments of Entry be counted???
         @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = {0}, paramIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_PARAMETER, paramIndex = 0)
     })
-    public String test1() {
+    public String testParam1() {
         return "void test(@TA Map.@TB Entry a) { }";
     }
 
@@ -46,7 +48,7 @@ public class NestedTypes {
                 genericLocation = {2}, paramIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_PARAMETER, paramIndex = 0)
     })
-    public String test2() {
+    public String testParam2() {
         return "void test(@TA Map<String,String>.@TB Entry<String,String> a) { }";
     }
 
@@ -73,7 +75,7 @@ public class NestedTypes {
         @TADescription(annotation = "TK", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = {0}, paramIndex = 0)
     })
-    public String test3() {
+    public String testParam3() {
         return "class Outer {\n" +
                 " class GInner<X> {\n" +
                 "  class GInner2<Y, Z> {}\n" +
@@ -107,7 +109,7 @@ public class NestedTypes {
         @TADescription(annotation = "TK", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
                 genericLocation = {0, 0}, paramIndex = 0)
     })
-    public String test4() {
+    public String testParam4() {
         return "class Outer {\n" +
                 " class GInner<X> {\n" +
                 "  class GInner2<Y, Z> {}\n" +
@@ -116,4 +118,324 @@ public class NestedTypes {
                 " void test(List<@TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[]> a) { }\n" +
                 "}";
     }
+
+
+    // Local variables
+
+    @TADescriptions({
+        // TODO: should the raw type arguments of Entry be counted???
+        @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0},
+                        lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
+    })
+    public String testLocal1a() {
+        return "void test() { @TA Map.@TB Entry a = null; }";
+    }
+
+    // TODO: should the raw type arguments of Entry be counted???
+    @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+            genericLocation = {0},
+                    lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
+    public String testLocal1b() {
+        return "void test() { @TA Map.Entry a = null; }";
+    }
+
+    @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
+            lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
+    public String testLocal1c() {
+        return "void test() { Map.@TB Entry a = null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {2},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
+    })
+    public String testLocal2() {
+        return "void test() { @TA Map<String,String>.@TB Entry<String,String> a = null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+        		genericLocation = {1, 3},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TB", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TC", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TD", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 1},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TE", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TF", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 0},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TG", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TH", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 0},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TI", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {1, 1},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TJ", type = LOCAL_VARIABLE,
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TK", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0},
+                lvarOffset = {5}, lvarLength = {1}, lvarIndex = {1})
+    })
+    public String testLocal3() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " void test() { @TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[] a = null; }\n" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+        		genericLocation = {0, 1, 3},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TB", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TC", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TD", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 1},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TE", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TF", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TG", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TH", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TI", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 1},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TJ", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
+        @TADescription(annotation = "TK", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
+                genericLocation = {0, 0},
+                lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
+    })
+    public String testLocal4() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " void test() { List<@TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[]> a = null; }\n" +
+                "}";
+    }
+
+
+    // fields
+
+    @TADescriptions({
+        // TODO: should the raw type arguments of Entry be counted???
+        @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+        @TADescription(annotation = "TB", type = FIELD)
+    })
+    public String testField1a() {
+        return "@TA Map.@TB Entry a;";
+    }
+
+    // TODO: should the raw type arguments of Entry be counted???
+    @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
+            genericLocation = {0})
+    public String testField1b() {
+        return "@TA Map.Entry a;";
+    }
+
+    @TADescription(annotation = "TB", type = FIELD)
+    public String testField1c() {
+        return "Map.@TB Entry a;";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {2}),
+        @TADescription(annotation = "TB", type = FIELD)
+    })
+    public String testField2() {
+        return "@TA Map<String,String>.@TB Entry<String,String> a;";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
+        		genericLocation = {1, 3}),
+        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2}),
+        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0}),
+        @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 1}),
+        @TADescription(annotation = "TE", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0}),
+        @TADescription(annotation = "TF", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 0}),
+        @TADescription(annotation = "TG", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1}),
+        @TADescription(annotation = "TH", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 0}),
+        @TADescription(annotation = "TI", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {1, 1}),
+        @TADescription(annotation = "TJ", type = FIELD),
+        @TADescription(annotation = "TK", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0})
+    })
+    public String testField3() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " @TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[] a;\n" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
+        		genericLocation = {0, 1, 3}),
+        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2}),
+        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0}),
+        @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 1}),
+        @TADescription(annotation = "TE", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0}),
+        @TADescription(annotation = "TF", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 0}),
+        @TADescription(annotation = "TG", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1}),
+        @TADescription(annotation = "TH", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 0}),
+        @TADescription(annotation = "TI", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 1}),
+        @TADescription(annotation = "TJ", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+        @TADescription(annotation = "TK", type = FIELD_GENERIC_OR_ARRAY,
+                genericLocation = {0, 0})
+    })
+    public String testField4() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " List<@TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[]> a;\n" +
+                "}";
+    }
+
+
+    // return types
+
+    @TADescriptions({
+        // TODO: should the raw type arguments of Entry be counted???
+        @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+        @TADescription(annotation = "TB", type = METHOD_RETURN)
+    })
+    public String testReturn1() {
+        return "@TA Map.@TB Entry test() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {2}),
+        @TADescription(annotation = "TB", type = METHOD_RETURN)
+    })
+    public String testReturn2() {
+        return "@TA Map<String,String>.@TB Entry<String,String> test() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+        		genericLocation = {1, 3}),
+        @TADescription(annotation = "TB", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2}),
+        @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0}),
+        @TADescription(annotation = "TD", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 1}),
+        @TADescription(annotation = "TE", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0}),
+        @TADescription(annotation = "TF", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 2, 0, 0, 0}),
+        @TADescription(annotation = "TG", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1}),
+        @TADescription(annotation = "TH", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 0}),
+        @TADescription(annotation = "TI", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {1, 1}),
+        @TADescription(annotation = "TJ", type = METHOD_RETURN),
+        @TADescription(annotation = "TK", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0})
+    })
+    public String testReturn3() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " @TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[] test() { return null; }\n" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+        		genericLocation = {0, 1, 3}),
+        @TADescription(annotation = "TB", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2}),
+        @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0}),
+        @TADescription(annotation = "TD", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 1}),
+        @TADescription(annotation = "TE", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0}),
+        @TADescription(annotation = "TF", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 0}),
+        @TADescription(annotation = "TG", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1}),
+        @TADescription(annotation = "TH", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 0}),
+        @TADescription(annotation = "TI", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 1}),
+        @TADescription(annotation = "TJ", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+        @TADescription(annotation = "TK", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 0})
+    })
+    public String testReturn4() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " List<@TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[]> test() { return null; }\n" +
+                "}";
+    }
+
 }
