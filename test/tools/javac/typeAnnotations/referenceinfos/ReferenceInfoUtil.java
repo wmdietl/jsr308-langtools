@@ -105,7 +105,9 @@ public class ReferenceInfoUtil {
     }
 
     /////////////////// TA Position Builder ///////////////////////
-    public static class TAPositionBuilder {
+    /* TODO: comment out this dead code. Was this unfinished code that was
+     * supposed to be used somewhere? The tests pass without this.
+    private static class TAPositionBuilder {
         private TypeAnnotation.Position pos = new TypeAnnotation.Position();
 
         private TAPositionBuilder() { }
@@ -233,7 +235,7 @@ public class ReferenceInfoUtil {
             pos.type = pos.type.getGenericComplement();
             return this;
         }
-    }
+    }*/
 
     /////////////////////// Equality testing /////////////////////
     private static boolean areEquals(int a, int b) {
@@ -289,8 +291,8 @@ public class ReferenceInfoUtil {
             List<TypeAnnotation> actualAnnos, ClassFile cf) throws InvalidIndex, UnexpectedEntry {
         if (actualAnnos.size() != expectedAnnos.size()) {
             throw new ComparisionException("Wrong number of annotations",
-                    expectedAnnos.size() + " annotations",
-                    actualAnnos.size() + " annotations");
+                    expectedAnnos,
+                    actualAnnos);
         }
 
         for (Map.Entry<String, TypeAnnotation.Position> e : expectedAnnos.entrySet()) {
@@ -300,9 +302,13 @@ public class ReferenceInfoUtil {
             if (actual == null)
                 throw new ComparisionException("Expected annotation not found: " + aName);
 
+            // TODO: you currently get an exception if the test case does not use all necessary
+            // annotation attributes, e.g. forgetting the offset for a local variable.
+            // It would be nicer to give an understandable warning instead.
             if (!areEquals(expected, actual.position)) {
-                throw new ComparisionException("Unexpected position for annotation : " + aName,
-                        expected.toString(), actual.position.toString());
+                throw new ComparisionException("Unexpected position for annotation : " + aName +
+                        "\n  Expected: " + expected.toString() +
+                        "\n  Found: " + actual.position.toString());
             }
         }
         return true;
@@ -312,14 +318,14 @@ public class ReferenceInfoUtil {
 class ComparisionException extends RuntimeException {
     private static final long serialVersionUID = -3930499712333815821L;
 
-    public final String expected;
-    public final String found;
+    public final Map<String, TypeAnnotation.Position> expected;
+    public final List<TypeAnnotation> found;
 
     public ComparisionException(String message) {
         this(message, null, null);
     }
 
-    public ComparisionException(String message, String expected, String found) {
+    public ComparisionException(String message, Map<String, TypeAnnotation.Position> expected, List<TypeAnnotation> found) {
         super(message);
         this.expected = expected;
         this.found = found;
@@ -328,7 +334,9 @@ class ComparisionException extends RuntimeException {
     public String toString() {
         String str = super.toString();
         if (expected != null && found != null) {
-            str += "\n\tExpected: " + expected + "; but found: " + found;
+            str += "\n\tExpected: " + expected.size() + " annotations; but found: " + found.size() + " annotations\n" +
+                   "  Expected: " + expected +
+                   "\n  Found: " + found;
         }
         return str;
     }
