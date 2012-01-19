@@ -106,6 +106,7 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -143,9 +144,9 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-        	// TODO: how do we separate which of the types it is on?
-        	System.out.println("Handle exception parameters!");
-        	break;
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
+            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -171,7 +172,7 @@ public class TypeAnnotationPosition implements Cloneable {
         case UNKNOWN:
             break;
         default:
-            //                throw new AssertionError("unknown type: " + type);
+            throw new AssertionError("Unknown target type: " + type);
         }
 
         // Append location data for generics/arrays.
