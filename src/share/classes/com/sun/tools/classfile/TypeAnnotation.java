@@ -43,12 +43,14 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
  */
 public class TypeAnnotation {
     TypeAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
+        constant_pool = cr.getConstantPool();
         annotation = new Annotation(cr);
         position = read_position(cr);
     }
 
     public TypeAnnotation(ConstantPool constant_pool,
             Annotation annotation, Position position) {
+        this.constant_pool = constant_pool;
         this.annotation = annotation;
         this.position = position;
     }
@@ -59,6 +61,18 @@ public class TypeAnnotation {
         return n;
     }
 
+    @Override
+    public String toString() {
+        try {
+            return "@" + constant_pool.getUTF8Value(annotation.type_index).toString().substring(1) +
+                    " pos: " + position.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+    }
+
+    public final ConstantPool constant_pool;
     public final Annotation annotation;
     public final Position position;
 
@@ -100,6 +114,7 @@ public class TypeAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -134,9 +149,9 @@ public class TypeAnnotation {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-        	// TODO: how do we separate which of the types it is on?
-        	System.out.println("Handle exception parameters!");
-        	break;
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
+            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -159,7 +174,7 @@ public class TypeAnnotation {
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("Cannot be here");
+            throw new AssertionError("Unknown target type: " + type);
         }
 
         if (type.hasLocation()) {
@@ -198,6 +213,7 @@ public class TypeAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -229,9 +245,9 @@ public class TypeAnnotation {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-        	// TODO: how do we separate which of the types it is on?
-        	System.out.println("Handle exception parameters!");
-        	break;
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
+            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -254,6 +270,7 @@ public class TypeAnnotation {
         case UNKNOWN:
             break;
         default:
+            throw new AssertionError("Unknown target type: " + pos.type);
         }
 
         if (pos.type.hasLocation()) {
@@ -317,7 +334,7 @@ public class TypeAnnotation {
                 sb.append(", {");
                 for (int i = 0; i < lvarOffset.length; ++i) {
                     if (i != 0) sb.append("; ");
-                    sb.append(", start_pc = ");
+                    sb.append("start_pc = ");
                     sb.append(lvarOffset[i]);
                     sb.append(", length = ");
                     sb.append(lvarLength[i]);
@@ -328,6 +345,7 @@ public class TypeAnnotation {
                 break;
             // method receiver
             case METHOD_RECEIVER:
+            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
                 // Do nothing
                 break;
             // type parameter
@@ -365,9 +383,9 @@ public class TypeAnnotation {
                 break;
             // exception parameter
             case EXCEPTION_PARAMETER:
-            	// TODO: how do we separate which of the types it is on?
-            	System.out.println("Handle exception parameters!");
-            	break;
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters!");
+                break;
             // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
@@ -436,8 +454,9 @@ public class TypeAnnotation {
         /** For annotations on the method receiver. */
         METHOD_RECEIVER(0x06),
 
-        // invalid location
-        // METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+        /** For annotations on a type argument or outer type of the method receiver. */
+        // TODO: ensure correct usage!
+        METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
         /** For annotations on local variables. */
         LOCAL_VARIABLE(0x08),
