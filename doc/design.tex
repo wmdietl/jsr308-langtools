@@ -2956,6 +2956,78 @@ reach the \<catch> clause.
 % \end{Verbatim}
 
 
+\section{Interactions with other Java SE 8 language changes}
+
+This section discusses the interactions between type annotations and other
+language changes in Java SE 8.
+
+\paragraph{Lambda}
+There are two different syntaxes for a lambda argument list: normal and
+compact.
+\begin{itemize}
+\item
+The compact form does not explicitly specify a type, so no type
+annotation is possible.  An example of this syntax is \<\#{ x -> x.toString }>.
+\item
+The normal form permits type annotations; a programmer who wants to write
+type annotations must write the normal form.
+\end{itemize}
+
+No annotations are permitted on the lambda expression itself, because it is
+an expression, not a type.
+
+Annotations cannot be written on the lambda's type, because the lambda's
+type cannot be written:  lambda expressions are always immediately
+SAM-converted.
+
+% [For example, these potential annotations one might want to write are
+% facts about execution, rather than type annotations:
+%  * non-blocking
+%  * WCET
+%  * parallelizable, moveable across nodes]
+
+%      inferred parameter types for lambda -- like diamond (same issues), so
+%        benign from the point of view of type annotations
+
+%% A Java 7 issue:
+%      diamonds: when doing type inference to infer what should go in the
+%        diamond, also need to copy over annotations (this is not a Checker
+%        Framework task, but a JSR 308 compiler task)
+
+
+\paragraph{Modules}
+The modules specification states that modules cannot be annotated.
+
+
+\paragraph{Extension methods}
+It might be desirable to annotate signatures for defaults.
+The syntax and semantics are still being worked out; when those are
+finalized, we will revisit the semantics of annotations on extension
+methods
+
+
+\paragraph{Other Java SE 8 features}
+Other new features do not raise any new interactions with type annotations.
+
+% no Coin 2, which is deferred to JDK 9
+
+It may be desirable to write an annotation that should should apply to all
+the disjuncts in a disjunctive union type, such as those in a multi-catch
+statement.  Here is a possibility, though it is not currently part of the
+specification:
+
+\begin{Verbatim}
+  catch ( @A | @B NullPointerException | @C IllegalArgumentException e) {
+\end{Verbatim}
+
+An annotation before the first \<|> is treated as applying to every
+disjunct, so the above would be equivalent to (but shorter than)
+
+\begin{Verbatim}
+  catch ( @A | @B NullPointerException | @C IllegalArgumentException e) {
+\end{Verbatim}
+
+
 \section{Discussion of tool modifications\label{mods-discussion}}
 
 This section primarily discusses tool modifications that are consequences
@@ -3550,4 +3622,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 0x11 0x12 0x13 0x14 0x15
 % LocalWords:  0x16 0x17 0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22
 % LocalWords:  0x23 0x24 0x25 308's casted useE1 useE2 pack200 unpack200
-% LocalWords:  Mahmood
+% LocalWords:  Mahmood theReceiver 2x5 foo 0x00 0x01 0x02 0x03 0x04 0x05
+% LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10
+% LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B
+% LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's
