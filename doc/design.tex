@@ -1503,7 +1503,7 @@ type argument in method call & \code{METHOD\_TYPE\_ARGUMENT}
   nested types that appear at the construct.  The second
   \code{target\_type} has the same structure as the first one, except it
   adds the fields described in \S\ref{class-file:ext:ri:typearg} and its
-  symbolic constant name adds the suffix \code{\_GENERIC\_OR\_ARRAY}.
+  symbolic constant name adds the suffix \code{\_COMPONENT}.
   The symbolic constants appear in the enums
   \code{com.sun.tools.javac.code.TargetType} and
   \code{com.sun.tools.classfile.ExtendedAnnotation.TargetType}.
@@ -1720,7 +1720,7 @@ an explanation of \<location\_length> and \<location>):
    target_type = WILDCARD_BOUND
    target_info =
    {
-     wildcard_location_type = METHOD_PARAMETER_GENERIC_OR_ARRAY (0x0D)
+     wildcard_location_type = METHOD_PARAMETER_COMPONENT (0x0D)
      wildcard_location =
      {
        u1 parameter_index = 0;
@@ -1736,11 +1736,11 @@ an explanation of \<location\_length> and \<location>):
 
 \preverbnegspace
 \begin{Verbatim}
-   target_type = WILDCARD_BOUND_GENERIC_OR_ARRAY
+   target_type = WILDCARD_BOUND_COMPONENT
    target_info =
    {
      // location of wildcard: type argument of the return type
-     wildcard_location_type = RETURN_TYPE_GENERIC_OR_ARRAY;
+     wildcard_location_type = RETURN_TYPE_COMPONENT;
      wildcard_location =
      {
        // the second type argument of Map
