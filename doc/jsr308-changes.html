@@ -29,20 +29,21 @@ current version of the specification
 <!-- See Makefile for documentation of how to compute a new changelog entry.
 -->
 
-  <dt><a href="java-annotation-design-20111101.html">1 November 2011</a></dt>
+  <dt><a href="java-annotation-design-20120122.html">22 January 2012</a></dt>
   <dd>
     Annotation syntax changes:
     <ul>
       <li>
-	New receiver annotation syntax.  An annotation on the type of a method
-	receiver (<tt>this</tt>) appears on the type of an optional first formal
-	parameter named <tt>this</tt>, that has no run-time effect nor any
-        purpose other than serving as a place for the receiver annotation.
+	New receiver syntax.  It is permitted to write an explicit first
+        formal parameter for the method receiver (<tt>this</tt>), which has
+        no run-time effect nor any purpose other than serving as a place
+        for the receiver annotation.  Then, no special case for receiver
+        annotations is needed.
         For example, what was previously written as
 	<pre>  public String toString() @Readonly { ... }</pre>
 	is now written as
 	<pre>  public String toString(@Readonly MyClass this) { ... }</pre>
-	The syntax allows type parameter annotations, annotation of outer
+	The syntax enables annotations on type parameters, outer
 	<tt>this</tt> types, etc.
       </li>
       <li>
@@ -51,6 +52,10 @@ current version of the specification
       </li>
       <li>
         Annotations are not permitted on class literals, nor arrays thereof.
+      </li>
+      <li>
+	If an annotation has no @Target meta-annotation, then it applies
+	only to the ElementTypes that were supported in Java SE	5.
       </li>
     </ul>
     Classfile changes:
@@ -102,6 +107,9 @@ current version of the specification
       <li>
 	Improve discussion of compiler optimizations that remove an
         annotated cast. 
+      </li>
+      <li>
+	Remove two instances of illegal inner class syntax.
       </li>
       <li>
 	Remove the "Other possible extensions to Java annotations" appendix.
