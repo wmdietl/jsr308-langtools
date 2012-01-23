@@ -2081,12 +2081,23 @@ there is only one child, which is a non-array.
 
 % Really ought to say exactly where...
 
+Figure~\ref{tbl:locations} shows some examples.
+
+
 The numbering in the class file is with respect to the full type, not the
 source code representation.  In the source code, a type can be abbreviated
 or partially written out, such as a nested type written without the outer
 type or a raw type written without the type arguments.
 
-Figure~\ref{tbl:locations} shows some examples.
+In the class file, all annotations on the full type appear.  For example,
+the classfile would record the type in this \<new> expression as
+\<@A Outer. @B Inner>:
+
+\preverbnegspace
+\begin{Verbatim}
+  @A Outer f1 = ...
+  ... f1.new @B Inner() ...
+\end{Verbatim}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
