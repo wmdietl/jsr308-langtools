@@ -1663,8 +1663,8 @@ More formally, it contains \code{empty\_target}:
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
-\targetinfocontentspartial{a method parameter type}{contains one \code{methodparam\_target}, which
-indicates which of the method's formal parameters is being annotated:}
+\targetinfocontentspartial{a method parameter type} contains one \code{methodparam\_target}, which
+indicates which of the method's formal parameters is being annotated:
 
 \preverbnegspace
 \begin{Verbatim}
@@ -1812,8 +1812,8 @@ the class file; that is OK, because it is irrelevant to the program.
 \subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
 
 \targetinfocontentspartial{an exception parameter (the exception type
-in a \<catch> statement)}{indicates an offset in the exception table (which
-appears in the \<exception\_table> slot of the \<Code> attribute).}
+in a \<catch> statement)} indicates an offset in the exception table (which
+appears in the \<exception\_table> slot of the \<Code> attribute).
 
 \preverbnegspace
 \begin{Verbatim}
@@ -2038,11 +2038,11 @@ or the difference among
 The classfile must distinguish among these locations.
 
 \targetinfocontentspartial{within a parameterized type,
-array type, or nested type}{contains what it normally would for a
+array type, or nested type} contains what it normally would for a
 non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
 % typecast, see Section~\ref{class-file:ext:ri:typecast}),
-{\em plus} the following fields at the end:}
+{\em plus} the following fields at the end:
 
 \preverbnegspace
 \begin{Verbatim}
@@ -2080,6 +2080,11 @@ for the last one which is a non-array type.  For a 1-dimensional array,
 there is only one child, which is a non-array.
 
 % Really ought to say exactly where...
+
+The numbering in the class file is with respect to the full type, not the
+source code representation.  In the source code, a type can be abbreviated
+or partially written out, such as a nested type written without the outer
+type or a raw type written without the type arguments.
 
 Figure~\ref{tbl:locations} shows some examples.
 
