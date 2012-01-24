@@ -150,9 +150,9 @@ public enum Option {
         }
     },
 
-    JSR308_IMPORTS("-jsr308_imports", "jsr308.imports", "opt.arg.imports", STANDARD, BASIC),
+    JSR308_IMPORTS("-jsr308_imports", "opt.arg.imports", "opt.jsr308_imports", STANDARD, BASIC),
 
-    DJSR308_IMPORTS("-Djsr308.imports=", "jsr308.imports", "opt.arg.imports", EXTENDED, BASIC) {
+    DJSR308_IMPORTS("-Djsr308.imports=", "opt.arg.imports", "opt.jsr308_imports", EXTENDED, BASIC) {
         @Override
         public boolean process(OptionHelper helper, String option, String arg) {
             return super.process(helper, "-jsr308_imports", arg);
