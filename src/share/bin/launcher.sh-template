@@ -49,7 +49,7 @@ if [ "$LANGTOOLS_USE_BOOTCLASSPATH" != "no" ]; then
    cp=`unzip -c "$mylib/#PROGRAM#.jar" META-INF/MANIFEST.MF |
        grep "Class-Path:" |
        sed -e 's|\r||' -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1#PS#|g'`
-   bcp="$mylib/#PROGRAM#.jar#PS#$cp#PS#$CLASSPATH"
+   bcp="$mylib/#PROGRAM#.jar#PS#$cp"
 fi
 
 # tools currently assumes that assertions are enabled in the launcher
