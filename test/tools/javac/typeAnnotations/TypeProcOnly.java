@@ -74,7 +74,7 @@ public class TypeProcOnly extends AbstractTypeProcessor {
         if (bytes.toString().trim().equals(INDICATOR)) {
             System.out.println("PASSED");
         } else {
-            throw new Exception("processor did not run");
+            throw new Exception("Processor did not run correctly. Output: " + bytes);
         }
     }
 }
