@@ -1213,11 +1213,14 @@ public class Pretty extends JCTree.Visitor {
             elem = tree.elemtype;
             if (elem.hasTag(ANNOTATED_TYPE)) {
                 JCAnnotatedType atype = (JCAnnotatedType) elem;
-                printTypeAnnotations(atype.annotations);
                 elem = atype.underlyingType;
+                if (!elem.hasTag(TYPEARRAY)) break;
+                if (atype.onRightType) {
+                    printTypeAnnotations(atype.annotations);
+                }
             }
-            print("[]");
             if (!elem.hasTag(TYPEARRAY)) break;
+            print("[]");
             tree = (JCArrayTypeTree) elem;
         }
     }
@@ -1311,19 +1314,20 @@ public class Pretty extends JCTree.Visitor {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
-    	/* TODO: this does not produce the best result for annotated arrays.
-    	 * It prints:
-    	 *   @C() String @B() [][]
-    	 * instead of:
-    	 *   String @C[] @B[]
-    	 */
         try {
-            if((tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT)) {
+            if (tree.onRightType &&
+                    tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT) {
                 JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
                 printExpr(access.selected, TreeInfo.postfixPrec);
                 print(".");
                 printTypeAnnotations(tree.annotations);
                 print(access.name);
+            } else if (tree.underlyingType.getKind() == JCTree.Kind.ARRAY_TYPE) {
+                JCArrayTypeTree array = (JCArrayTypeTree) tree.underlyingType;
+                printBaseElementType(tree);
+                printTypeAnnotations(tree.annotations);
+                print("[]");
+                printBrackets(array);
             } else {
                 printTypeAnnotations(tree.annotations);
                 printExpr(tree.underlyingType);

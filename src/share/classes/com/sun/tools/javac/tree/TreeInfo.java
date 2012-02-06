@@ -965,16 +965,35 @@ public class TreeInfo {
         }
     }
 
+    /* Return the inner-most type of a type tree.
+     * For an array that contains an annotated type, return that annotated type.
+     * TODO: currently only used by Pretty. Describe behavior better.
+     */
     public static JCTree innermostType(JCTree type) {
-        switch (type.getTag()) {
-        case TYPEARRAY:
-            return innermostType(((JCArrayTypeTree)type).elemtype);
-        case WILDCARD:
-            return innermostType(((JCWildcard)type).inner);
-        case ANNOTATED_TYPE:
-            return innermostType(((JCAnnotatedType)type).underlyingType);
-        default:
-            return type;
+        JCTree lastAnnotatedType = null;
+        JCTree cur = type;
+        loop: while (true) {
+            switch (cur.getTag()) {
+            case TYPEARRAY:
+                lastAnnotatedType = null;
+                cur = ((JCArrayTypeTree)cur).elemtype;
+                break;
+            case WILDCARD:
+                lastAnnotatedType = null;
+                cur = ((JCWildcard)cur).inner;
+                break;
+            case ANNOTATED_TYPE:
+                lastAnnotatedType = cur;
+                cur = ((JCAnnotatedType)cur).underlyingType;
+                break;
+            default:
+                break loop;
+            }
+        }
+        if (lastAnnotatedType!=null) {
+            return lastAnnotatedType;
+        } else {
+            return cur;
         }
     }
 }
