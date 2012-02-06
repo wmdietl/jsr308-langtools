@@ -1,7 +1,11 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.2.5.1, 06 Feb 2012
 
+Compile release with JDK 6 to work on both JDK 6 and JDK 7.
+
+----------------------------------------------------------------------
 Version 1.2.5, 3 Feb 2012
 
 Base build
