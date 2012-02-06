@@ -79,19 +79,19 @@ public class TypeAnnotationPosition implements Cloneable {
         switch (type) {
         // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
+        case TYPECAST_COMPONENT:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             sb.append(", offset = ");
             sb.append(offset);
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             sb.append(", {");
             for (int i = 0; i < lvarOffset.length; ++i) {
                 if (i != 0) sb.append("; ");
@@ -106,7 +106,7 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -117,9 +117,9 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             sb.append(", bound_index = ");
@@ -127,13 +127,13 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // wildcard bound
         case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND_COMPONENT:
             sb.append(", wild_card = ");
             sb.append(wildcard_position);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
@@ -149,15 +149,15 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        case METHOD_PARAMETER_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
         // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             sb.append(", offset = ");
             sb.append(offset);
             sb.append(", type_index = ");
@@ -165,9 +165,9 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
@@ -196,7 +196,7 @@ public class TypeAnnotationPosition implements Cloneable {
      */
     public boolean emitToClassfile() {
         if (type == TargetType.WILDCARD_BOUND
-            || type == TargetType.WILDCARD_BOUND_GENERIC_OR_ARRAY)
+            || type == TargetType.WILDCARD_BOUND_COMPONENT)
             return wildcard_position.emitToClassfile();
         else
             return !type.isLocal() || isValidOffset;

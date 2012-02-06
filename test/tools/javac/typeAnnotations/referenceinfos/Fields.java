@@ -44,11 +44,11 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
                 genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
                 genericLocation = { 1, 0 })
     })
     public String fieldAsParametrized() {
@@ -57,9 +57,9 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
                 genericLocation = { 1 })
     })
     public String fieldAsArray() {
@@ -89,11 +89,11 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
                 genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
                 genericLocation = { 1, 0 })
     })
     public String interfacefieldAsParametrized() {
@@ -103,11 +103,11 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
                 genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
                 genericLocation = { 1, 0 })
     })
     public String staticFieldAsParametrized() {

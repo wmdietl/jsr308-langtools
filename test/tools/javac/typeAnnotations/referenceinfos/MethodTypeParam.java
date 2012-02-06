@@ -44,10 +44,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularClassParameterized() {
@@ -67,10 +67,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String abstractClassParameterized() {
@@ -90,10 +90,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "A", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "B", type = METHOD_TYPE_PARAMETER, paramIndex = 1)

@@ -550,7 +550,7 @@ public class TypeAnnotations {
                 if (i == 0) {
                     p.type = TargetType.NEW;
                 } else {
-                    p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                    p.type = TargetType.NEW_COMPONENT;
                     p.location = p.location.append(i - 1);
                 }
 
@@ -564,7 +564,7 @@ public class TypeAnnotations {
                 if (elemType.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                     JCAnnotatedType at = (JCAnnotatedType)elemType;
                     TypeAnnotationPosition p = new TypeAnnotationPosition();
-                    p.type = TargetType.NEW_GENERIC_OR_ARRAY;
+                    p.type = TargetType.NEW_COMPONENT;
                     p.pos = tree.pos;
                     p.location = p.location.append(i);
                     setTypeAnnotationPos(at.annotations, p);

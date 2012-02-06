@@ -52,7 +52,7 @@ public class MethodReceivers {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RECEIVER_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TA", type = METHOD_RECEIVER_COMPONENT,
                 genericLocation = {0}),
         @TADescription(annotation = "TB", type = METHOD_RECEIVER)
     })
@@ -61,7 +61,7 @@ public class MethodReceivers {
         return "class TestOuter { class TestInner { void test(@TA TestOuter. @TB TestInner this) { } } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_RECEIVER_GENERIC_OR_ARRAY,
+    @TADescription(annotation = "TA", type = METHOD_RECEIVER_COMPONENT,
             genericLocation = {0})
     @TestClass("TestOuter$TestInner")
     public String nestedtypes2() {

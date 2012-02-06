@@ -41,9 +41,9 @@ public class ClassExtends {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = -1,
+        @TADescription(annotation = "TA", type = CLASS_EXTENDS_COMPONENT, typeIndex = -1,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TB", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = 1,
+        @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
                 genericLocation  = { 1 })
     })
     public String regularClassExtendsParametrized() {
@@ -60,9 +60,9 @@ public class ClassExtends {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = -1,
+        @TADescription(annotation = "TA", type = CLASS_EXTENDS_COMPONENT, typeIndex = -1,
                 genericLocation = { 0 }),
-        @TADescription(annotation = "TB", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = 1,
+        @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
                 genericLocation  = { 1 })
     })
     public String abstractClassExtendsParametrized() {
@@ -74,7 +74,7 @@ public class ClassExtends {
         return "interface Test extends Cloneable, @TB Runnable { }";
     }
 
-    @TADescription(annotation = "TB", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = 1,
+    @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
             genericLocation  = { 1 })
     public String regularInterfaceExtendsParametrized() {
         return "interface Test extends Cloneable, Map<String, @TB String>{ } ";
@@ -85,7 +85,7 @@ public class ClassExtends {
         return "enum Test implements Cloneable, @TB Runnable { TEST; public void run() { } }";
     }
 
-    @TADescription(annotation = "TB", type = CLASS_EXTENDS_GENERIC_OR_ARRAY, typeIndex = 1,
+    @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
             genericLocation  = { 0 })
     public String regularEnumExtendsParametrized() {
         return

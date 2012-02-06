@@ -50,13 +50,13 @@ public enum TargetType {
     TYPECAST(0x00, IsLocal),
 
     /** For annotations on a type argument or nested array of a typecast. */
-    TYPECAST_GENERIC_OR_ARRAY(0x01, HasLocation, IsLocal),
+    TYPECAST_COMPONENT(0x01, HasLocation, IsLocal),
 
     /** For annotations on type tests. */
     INSTANCEOF(0x02, IsLocal),
 
     /** For annotations on a type argument or nested array of a type test. */
-    INSTANCEOF_GENERIC_OR_ARRAY(0x03, HasLocation, IsLocal),
+    INSTANCEOF_COMPONENT(0x03, HasLocation, IsLocal),
 
     /** For annotations on object creation expressions. */
     NEW(0x04, IsLocal),
@@ -65,7 +65,7 @@ public enum TargetType {
      * For annotations on a type argument or nested array of an object creation
      * expression.
      */
-    NEW_GENERIC_OR_ARRAY(0x05, HasLocation, IsLocal),
+    NEW_COMPONENT(0x05, HasLocation, IsLocal),
 
 
     /** For annotations on the method receiver. */
@@ -76,13 +76,13 @@ public enum TargetType {
     // TODO: instead of following the common naming scheme, should we name
     // this METHOD_RECEIVER_GENERIC_OR_NESTED, as a receiver can never
     // be an array?
-    METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+    METHOD_RECEIVER_COMPONENT(0x07, HasLocation),
 
     /** For annotations on local variables. */
     LOCAL_VARIABLE(0x08, IsLocal),
 
     /** For annotations on a type argument or nested array of a local. */
-    LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation, IsLocal),
+    LOCAL_VARIABLE_COMPONENT(0x09, HasLocation, IsLocal),
 
     /** For type annotations on a method return type. */
     METHOD_RETURN(0x0A),
@@ -91,19 +91,19 @@ public enum TargetType {
      * For annotations on a type argument or nested array of a method return
      * type.
      */
-    METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
+    METHOD_RETURN_COMPONENT(0x0B, HasLocation),
 
     /** For type annotations on a method parameter. */
     METHOD_PARAMETER(0x0C),
 
     /** For annotations on a type argument or nested array of a method parameter. */
-    METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
+    METHOD_PARAMETER_COMPONENT(0x0D, HasLocation),
 
     /** For type annotations on a field. */
     FIELD(0x0E),
 
     /** For annotations on a type argument or nested array of a field. */
-    FIELD_GENERIC_OR_ARRAY(0x0F, HasLocation),
+    FIELD_COMPONENT(0x0F, HasLocation),
 
     /** For annotations on a bound of a type parameter of a class. */
     CLASS_TYPE_PARAMETER_BOUND(0x10, HasBound, HasParameter),
@@ -112,7 +112,7 @@ public enum TargetType {
      * For annotations on a type argument or nested array of a bound of a type
      * parameter of a class.
      */
-    CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x11, HasBound, HasLocation, HasParameter),
+    CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x11, HasBound, HasLocation, HasParameter),
 
     /** For annotations on a bound of a type parameter of a method. */
     METHOD_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
@@ -121,46 +121,46 @@ public enum TargetType {
      * For annotations on a type argument or nested array of a bound of a type
      * parameter of a method.
      */
-    METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x13, HasBound, HasLocation, HasParameter),
+    METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
 
     /** For annotations on the type of an "extends" or "implements" clause. */
     CLASS_EXTENDS(0x14),
 
     /** For annotations on the inner type of an "extends" or "implements" clause. */
-    CLASS_EXTENDS_GENERIC_OR_ARRAY(0x15, HasLocation),
+    CLASS_EXTENDS_COMPONENT(0x15, HasLocation),
 
     /** For annotations on a throws clause in a method declaration. */
     THROWS(0x16),
 
     // invalid location
-    //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
+    //@Deprecated THROWS_COMPONENT(0x17, HasLocation),
 
     /** For type annotations on an exception parameter. */
     EXCEPTION_PARAMETER(0x1A),
 
     /** For annotations on a type argument or nested array of an exception parameter. */
     // TODO: are these allowed? Not for THROWS, so why here?
-    EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
+    EXCEPTION_PARAMETER_COMPONENT(0x1B, HasLocation),
 
     /** For annotations in type arguments of object creation expressions. */
     NEW_TYPE_ARGUMENT(0x18, IsLocal),
-    NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation, IsLocal),
+    NEW_TYPE_ARGUMENT_COMPONENT(0x19, HasLocation, IsLocal),
 
     METHOD_TYPE_ARGUMENT(0x1A, IsLocal),
-    METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x1B, HasLocation, IsLocal),
+    METHOD_TYPE_ARGUMENT_COMPONENT(0x1B, HasLocation, IsLocal),
 
     WILDCARD_BOUND(0x1C, HasBound),
-    WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
+    WILDCARD_BOUND_COMPONENT(0x1D, HasBound, HasLocation),
 
     METHOD_TYPE_PARAMETER(0x20, HasParameter),
 
     // invalid location
-    //@Deprecated METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, HasLocation, HasParameter),
+    //@Deprecated METHOD_TYPE_PARAMETER_COMPONENT(0x21, HasLocation, HasParameter),
 
     CLASS_TYPE_PARAMETER(0x22, HasParameter),
 
     // invalid location
-    //@Deprecated CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, HasLocation, HasParameter),
+    //@Deprecated CLASS_TYPE_PARAMETER_COMPONENT(0x23, HasLocation, HasParameter),
 
     /** For annotations with an unknown target. */
     UNKNOWN(-1);

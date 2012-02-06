@@ -38,9 +38,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectArray() {
@@ -51,9 +51,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnPrimArray() {
@@ -70,9 +70,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectArray() {
@@ -83,9 +83,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initPrimArray() {
@@ -102,9 +102,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectArray() {
@@ -115,9 +115,9 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestPrimArray() {

@@ -44,10 +44,10 @@ public class ClassTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularClassParameterized() {
@@ -67,10 +67,10 @@ public class ClassTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String abstractClassParameterized() {
@@ -90,10 +90,10 @@ public class ClassTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
         @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularInterfaceParameterized() {

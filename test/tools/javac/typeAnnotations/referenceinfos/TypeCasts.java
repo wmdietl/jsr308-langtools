@@ -38,9 +38,9 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = TYPECAST_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectArray() {
@@ -49,7 +49,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectGeneric() {
@@ -63,7 +63,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnPrimArray() {
@@ -77,7 +77,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectArray() {
@@ -86,7 +86,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectGeneric() {
@@ -100,7 +100,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initPrimArray() {
@@ -114,7 +114,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectArray() {
@@ -123,7 +123,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectGeneric() {
@@ -138,7 +138,7 @@ public class TypeCasts {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = TYPECAST, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = TYPECAST_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = TYPECAST_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestPrimArray() {

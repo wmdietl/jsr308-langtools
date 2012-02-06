@@ -90,18 +90,18 @@ public class TypeAnnotation {
         switch (type) {
         // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
+        case TYPECAST_COMPONENT:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             position.offset = cr.readUnsignedShort();
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             int table_length = cr.readUnsignedShort();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -114,7 +114,7 @@ public class TypeAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -124,20 +124,20 @@ public class TypeAnnotation {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
         // wildcard bound
         case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND_COMPONENT:
             position.wildcard_position = read_position(cr);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             int in = cr.readUnsignedShort();
             if (in == 0xFFFF)
                 in = -1;
@@ -154,22 +154,22 @@ public class TypeAnnotation {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        case METHOD_PARAMETER_COMPONENT:
             position.parameter_index = cr.readUnsignedByte();
             break;
         // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             position.offset = cr.readUnsignedShort();
             position.type_index = cr.readUnsignedByte();
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
@@ -193,18 +193,18 @@ public class TypeAnnotation {
         switch (pos.type) {
         // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
+        case TYPECAST_COMPONENT:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             n += 2;
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             n += 2; // table_length;
             int table_length = pos.lvarOffset.length;
             n += 2 * table_length; // offset
@@ -213,7 +213,7 @@ public class TypeAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -223,20 +223,20 @@ public class TypeAnnotation {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             n += 1; // parameter_index
             n += 1; // bound_index
             break;
         // wildcard bound
         case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND_COMPONENT:
             n += position_length(pos.wildcard_position);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             n += 2; // type_index
             break;
         // throws
@@ -250,22 +250,22 @@ public class TypeAnnotation {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        case METHOD_PARAMETER_COMPONENT:
             n += 1; // parameter_index
             break;
         // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             n += 2; // offset
             n += 1; // type index
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
@@ -318,19 +318,19 @@ public class TypeAnnotation {
             switch (type) {
             // type cast
             case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
+            case TYPECAST_COMPONENT:
             // instanceof
             case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
+            case INSTANCEOF_COMPONENT:
             // new expression
             case NEW:
-            case NEW_GENERIC_OR_ARRAY:
+            case NEW_COMPONENT:
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
             // local variable
             case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            case LOCAL_VARIABLE_COMPONENT:
                 sb.append(", {");
                 for (int i = 0; i < lvarOffset.length; ++i) {
                     if (i != 0) sb.append("; ");
@@ -345,7 +345,7 @@ public class TypeAnnotation {
                 break;
             // method receiver
             case METHOD_RECEIVER:
-            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+            case METHOD_RECEIVER_COMPONENT:
                 // Do nothing
                 break;
             // type parameter
@@ -356,9 +356,9 @@ public class TypeAnnotation {
                 break;
             // type parameter bound
             case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
             case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 sb.append(", bound_index = ");
@@ -366,13 +366,13 @@ public class TypeAnnotation {
                 break;
             // wildcard bound
             case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            case WILDCARD_BOUND_COMPONENT:
                 sb.append(", wild_card = ");
                 sb.append(wildcard_position);
                 break;
             // class extends or implements clause
             case CLASS_EXTENDS:
-            case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            case CLASS_EXTENDS_COMPONENT:
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
@@ -388,15 +388,15 @@ public class TypeAnnotation {
                 break;
             // method parameter
             case METHOD_PARAMETER:
-            case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            case METHOD_PARAMETER_COMPONENT:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 break;
             // method/constructor type argument
             case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case NEW_TYPE_ARGUMENT_COMPONENT:
             case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_ARGUMENT_COMPONENT:
                 sb.append(", offset = ");
                 sb.append(offset);
                 sb.append(", type_index = ");
@@ -404,9 +404,9 @@ public class TypeAnnotation {
                 break;
             // We don't need to worry about these
             case METHOD_RETURN:
-            case METHOD_RETURN_GENERIC_OR_ARRAY:
+            case METHOD_RETURN_COMPONENT:
             case FIELD:
-            case FIELD_GENERIC_OR_ARRAY:
+            case FIELD_COMPONENT:
                 break;
             case UNKNOWN:
                 break;
@@ -433,13 +433,13 @@ public class TypeAnnotation {
         TYPECAST(0x00),
 
         /** For annotations on a type argument or nested array of a typecast. */
-        TYPECAST_GENERIC_OR_ARRAY(0x01, HasLocation),
+        TYPECAST_COMPONENT(0x01, HasLocation),
 
         /** For annotations on type tests. */
         INSTANCEOF(0x02),
 
         /** For annotations on a type argument or nested array of a type test. */
-        INSTANCEOF_GENERIC_OR_ARRAY(0x03, HasLocation),
+        INSTANCEOF_COMPONENT(0x03, HasLocation),
 
         /** For annotations on object creation expressions. */
         NEW(0x04),
@@ -448,7 +448,7 @@ public class TypeAnnotation {
          * For annotations on a type argument or nested array of an object creation
          * expression.
          */
-        NEW_GENERIC_OR_ARRAY(0x05, HasLocation),
+        NEW_COMPONENT(0x05, HasLocation),
 
 
         /** For annotations on the method receiver. */
@@ -456,13 +456,13 @@ public class TypeAnnotation {
 
         /** For annotations on a type argument or outer type of the method receiver. */
         // TODO: ensure correct usage!
-        METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+        METHOD_RECEIVER_COMPONENT(0x07, HasLocation),
 
         /** For annotations on local variables. */
         LOCAL_VARIABLE(0x08),
 
         /** For annotations on a type argument or nested array of a local. */
-        LOCAL_VARIABLE_GENERIC_OR_ARRAY(0x09, HasLocation),
+        LOCAL_VARIABLE_COMPONENT(0x09, HasLocation),
 
         /** For type annotations on a method return. */
         METHOD_RETURN(0x0A),
@@ -471,19 +471,19 @@ public class TypeAnnotation {
          * For annotations on a type argument or nested array of a method return
          * type.
          */
-        METHOD_RETURN_GENERIC_OR_ARRAY(0x0B, HasLocation),
+        METHOD_RETURN_COMPONENT(0x0B, HasLocation),
 
         /** For type annotations on a method parameter. */
         METHOD_PARAMETER(0x0C),
 
         /** For annotations on a type argument or nested array of a method parameter. */
-        METHOD_PARAMETER_GENERIC_OR_ARRAY(0x0D, HasLocation),
+        METHOD_PARAMETER_COMPONENT(0x0D, HasLocation),
 
         /** For type annotations on a field. */
         FIELD(0x0E),
 
         /** For annotations on a type argument or nested array of a field. */
-        FIELD_GENERIC_OR_ARRAY(0x0F, HasLocation),
+        FIELD_COMPONENT(0x0F, HasLocation),
 
         /** For annotations on a bound of a type parameter of a class. */
         CLASS_TYPE_PARAMETER_BOUND(0x10, HasBound, HasParameter),
@@ -492,7 +492,7 @@ public class TypeAnnotation {
          * For annotations on a type argument or nested array of a bound of a type
          * parameter of a class.
          */
-        CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x11, HasBound, HasLocation, HasParameter),
+        CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x11, HasBound, HasLocation, HasParameter),
 
         /** For annotations on a bound of a type parameter of a method. */
         METHOD_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
@@ -501,46 +501,46 @@ public class TypeAnnotation {
          * For annotations on a type argument or nested array of a bound of a type
          * parameter of a method.
          */
-        METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY(0x13, HasBound, HasLocation, HasParameter),
+        METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
 
         /** For annotations on the type of an "extends" or "implements" clause. */
         CLASS_EXTENDS(0x14),
 
         /** For annotations on the inner type of an "extends" or "implements" clause. */
-        CLASS_EXTENDS_GENERIC_OR_ARRAY(0x15, HasLocation),
+        CLASS_EXTENDS_COMPONENT(0x15, HasLocation),
 
         /** For annotations on a throws clause in a method declaration. */
         THROWS(0x16),
 
         // invalid location
-        // THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
+        // THROWS_COMPONENT(0x17, HasLocation),
 
         /** For type annotations on an exception parameter. */
         EXCEPTION_PARAMETER(0x1A),
 
         /** For annotations on a type argument or nested array of an exception parameter. */
         // TODO: are these allowed? Not for THROWS, so why here?
-        EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
+        EXCEPTION_PARAMETER_COMPONENT(0x1B, HasLocation),
 
         /** For annotations in type arguments of object creation expressions. */
         NEW_TYPE_ARGUMENT(0x18),
-        NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation),
+        NEW_TYPE_ARGUMENT_COMPONENT(0x19, HasLocation),
 
         METHOD_TYPE_ARGUMENT(0x1A),
-        METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x1B, HasLocation),
+        METHOD_TYPE_ARGUMENT_COMPONENT(0x1B, HasLocation),
 
         WILDCARD_BOUND(0x1C, HasBound),
-        WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
+        WILDCARD_BOUND_COMPONENT(0x1D, HasBound, HasLocation),
 
         METHOD_TYPE_PARAMETER(0x20, HasParameter),
 
         // invalid location
-        // METHOD_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x21, HasLocation, HasParameter),
+        // METHOD_TYPE_PARAMETER_COMPONENT(0x21, HasLocation, HasParameter),
 
         CLASS_TYPE_PARAMETER(0x22, HasParameter),
 
         // invalid location
-        // CLASS_TYPE_PARAMETER_GENERIC_OR_ARRAY(0x23, HasLocation, HasParameter),
+        // CLASS_TYPE_PARAMETER_COMPONENT(0x23, HasLocation, HasParameter),
 
         /** For annotations with an unknown target. */
         UNKNOWN(-1);

@@ -124,13 +124,13 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // type cast
             case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
+            case TYPECAST_COMPONENT:
             // instanceof
             case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
+            case INSTANCEOF_COMPONENT:
             // new expression
             case NEW:
-            case NEW_GENERIC_OR_ARRAY:
+            case NEW_COMPONENT:
                 pos.offset = offset;
             	break;
             default:
@@ -143,7 +143,7 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // local variable
             case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            case LOCAL_VARIABLE_COMPONENT:
                 pos.lvarOffset = new int[] { offset };
                 pos.lvarLength = new int[] { length };
                 pos.lvarIndex  = new int[] { index  };
@@ -161,7 +161,7 @@ public class ReferenceInfoUtil {
             case METHOD_TYPE_PARAMETER:
             // method parameter
             case METHOD_PARAMETER:
-            case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            case METHOD_PARAMETER_COMPONENT:
                 pos.parameter_index = index;
                 break;
             default:
@@ -174,9 +174,9 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // type parameters bounds
             case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
             case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
                 pos.parameter_index = param;
                 pos.bound_index = bound;
                 break;
@@ -190,7 +190,7 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // wildcards
             case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+            case WILDCARD_BOUND_COMPONENT:
                 pos.wildcard_position = pos;
                 break;
             default:
@@ -203,7 +203,7 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // class extends or implements clauses
             case CLASS_EXTENDS:
-            case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            case CLASS_EXTENDS_COMPONENT:
             // throws
             case THROWS:
                 pos.type_index = index;
@@ -218,9 +218,9 @@ public class ReferenceInfoUtil {
             switch (pos.type) {
             // method type argument: wasn't specified
             case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case NEW_TYPE_ARGUMENT_COMPONENT:
             case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_ARGUMENT_COMPONENT:
                 pos.offset = offset;
                 pos.type_index = index;
                 break;

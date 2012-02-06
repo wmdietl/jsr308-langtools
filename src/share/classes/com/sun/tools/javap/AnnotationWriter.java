@@ -93,13 +93,13 @@ public class AnnotationWriter extends BasicWriter {
         switch (pos.type) {
         // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
+        case TYPECAST_COMPONENT:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -107,7 +107,7 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             print(", {");
             for (int i = 0; i < pos.lvarOffset.length; ++i) {
                 if (i != 0) print("; ");
@@ -124,7 +124,7 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -135,9 +135,9 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             print(", param_index=");
             print(pos.parameter_index);
             print(", bound_index=");
@@ -145,13 +145,13 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // wildcard bound
         case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND_COMPONENT:
             print(", wild_card=");
             print(pos.wildcard_position);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             print(", type_index=");
             print(pos.type_index);
             break;
@@ -167,15 +167,15 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        case METHOD_PARAMETER_COMPONENT:
             print(", param_index=");
             print(pos.parameter_index);
             break;
         // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -185,9 +185,9 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
