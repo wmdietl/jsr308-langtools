@@ -547,7 +547,7 @@ public class Type implements PrimitiveType {
 
         /** The enclosing type of this type. If this is the type of an inner
          *  class, outer_field refers to the type of its enclosing
-         *  instance class, in all other cases it referes to noType.
+         *  instance class, in all other cases it refers to noType.
          */
         private Type outer_field;
 
