@@ -26,7 +26,7 @@
 package com.sun.tools.javap;
 
 import com.sun.tools.classfile.Annotation;
-import com.sun.tools.classfile.ExtendedAnnotation;
+import com.sun.tools.classfile.TypeAnnotation;
 import com.sun.tools.classfile.Annotation.Annotation_element_value;
 import com.sun.tools.classfile.Annotation.Array_element_value;
 import com.sun.tools.classfile.Annotation.Class_element_value;
@@ -77,17 +77,17 @@ public class AnnotationWriter extends BasicWriter {
             print(")");
     }
 
-    public void write(ExtendedAnnotation annot) {
+    public void write(TypeAnnotation annot) {
         write(annot, true, false);
     }
 
-    public void write(ExtendedAnnotation annot, boolean showOffsets, boolean resolveIndices) {
+    public void write(TypeAnnotation annot, boolean showOffsets, boolean resolveIndices) {
         write(annot.annotation, resolveIndices);
         print(": ");
         write(annot.position, showOffsets);
     }
 
-    public void write(ExtendedAnnotation.Position pos, boolean showOffsets) {
+    public void write(TypeAnnotation.Position pos, boolean showOffsets) {
         print(pos.type);
 
         switch (pos.type) {
@@ -112,7 +112,7 @@ public class AnnotationWriter extends BasicWriter {
             for (int i = 0; i < pos.lvarOffset.length; ++i) {
                 if (i != 0) print("; ");
                 if (showOffsets) {
-                    print(", start_pc=");
+                    print("start_pc=");
                     print(pos.lvarOffset[i]);
                 }
                 print(", length=");
@@ -124,6 +124,7 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -159,13 +160,10 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            if (showOffsets) {
-                print(", offset=");
-                print(pos.offset);
-            }
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:

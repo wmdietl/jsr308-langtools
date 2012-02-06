@@ -6,7 +6,7 @@
  * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics -source 1.8 DuplicateAnnotationValue.java
  */
 class DuplicateAnnotationValue {
-  void test() @A(value = 2, value = 1) { }
+  void test(@A(value = 2, value = 1) DuplicateAnnotationValue this) { }
 }
 
 @interface A { int value(); }

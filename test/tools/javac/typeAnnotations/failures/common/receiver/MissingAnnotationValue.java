@@ -6,7 +6,7 @@
  * @compile/fail/ref=MissingAnnotationValue.out -XDrawDiagnostics -source 1.8 MissingAnnotationValue.java
  */
 class MissingAnnotationValue {
-  void test() @A { }
+  void test(@A MissingAnnotationValue this) { }
 }
 
 @interface A { int field(); }

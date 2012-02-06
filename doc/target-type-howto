@@ -18,9 +18,9 @@ system.
    - Update the asmx classfile parser to read the new attribute:
        annotations/asmx/src/org/objectweb/asm/ClassReader.java
    - Writing to classfile for extended annotations only requires modifying
-       annotations/asmx/src/org/objectweb/asm/ExtendedAnnotationWriter.java
+       annotations/asmx/src/org/objectweb/asm/TypeAnnotationWriter.java
    - Modify the asmx extended annotation interface:
-       annotations/asmx/src/org/objectweb/asm/ExtendedAnnotationVisitor.java
+       annotations/asmx/src/org/objectweb/asm/TypeAnnotationVisitor.java
        Making this change will reveal all the remaining places where other
        changes might be necessary.
    - Update the annotator (.jaif -> .java) to understand the new type:

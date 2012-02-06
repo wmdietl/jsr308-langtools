@@ -195,7 +195,13 @@ public abstract class ExecutableMemberDocImpl
     }
 
     public AnnotationDesc[] receiverAnnotations() {
-        List<? extends Compound> typeAnnos = sym.type.asMethodType().receiverTypeAnnotations;
+        // TODO: change how receiver annotations are output!
+        Type recvtype = sym.type.asMethodType().recvtype;
+        if (recvtype==null) {
+            return new AnnotationDesc[0];
+        }
+
+        List<? extends Compound> typeAnnos = recvtype.typeAnnotations;
         AnnotationDesc result[] = new AnnotationDesc[typeAnnos.length()];
         int i = 0;
         for (Attribute.Compound a : typeAnnos) {

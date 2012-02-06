@@ -31,24 +31,26 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static com.sun.tools.classfile.ExtendedAnnotation.TargetAttribute.*;
+import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
 
 /**
- * See JSR 308 specification, section 4.1
+ * See JSR 308 specification, section 4.1. TODO update.
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
-public class ExtendedAnnotation {
-    ExtendedAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
+public class TypeAnnotation {
+    TypeAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
+        constant_pool = cr.getConstantPool();
         annotation = new Annotation(cr);
         position = read_position(cr);
     }
 
-    public ExtendedAnnotation(ConstantPool constant_pool,
+    public TypeAnnotation(ConstantPool constant_pool,
             Annotation annotation, Position position) {
+        this.constant_pool = constant_pool;
         this.annotation = annotation;
         this.position = position;
     }
@@ -59,6 +61,18 @@ public class ExtendedAnnotation {
         return n;
     }
 
+    @Override
+    public String toString() {
+        try {
+            return "@" + constant_pool.getUTF8Value(annotation.type_index).toString().substring(1) +
+                    " pos: " + position.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return e.toString();
+        }
+    }
+
+    public final ConstantPool constant_pool;
     public final Annotation annotation;
     public final Position position;
 
@@ -100,6 +114,7 @@ public class ExtendedAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -132,10 +147,10 @@ public class ExtendedAnnotation {
         case THROWS:
             position.type_index = cr.readUnsignedShort();
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            position.offset = cr.readUnsignedShort();
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
@@ -159,7 +174,7 @@ public class ExtendedAnnotation {
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("Cannot be here");
+            throw new AssertionError("Unknown target type: " + type);
         }
 
         if (type.hasLocation()) {
@@ -198,6 +213,7 @@ public class ExtendedAnnotation {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -227,10 +243,10 @@ public class ExtendedAnnotation {
         case THROWS:
             n += 2; // type_index
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            n += 1; // offset
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
@@ -254,6 +270,7 @@ public class ExtendedAnnotation {
         case UNKNOWN:
             break;
         default:
+            throw new AssertionError("Unknown target type: " + pos.type);
         }
 
         if (pos.type.hasLocation()) {
@@ -317,7 +334,7 @@ public class ExtendedAnnotation {
                 sb.append(", {");
                 for (int i = 0; i < lvarOffset.length; ++i) {
                     if (i != 0) sb.append("; ");
-                    sb.append(", start_pc = ");
+                    sb.append("start_pc = ");
                     sb.append(lvarOffset[i]);
                     sb.append(", length = ");
                     sb.append(lvarLength[i]);
@@ -328,6 +345,7 @@ public class ExtendedAnnotation {
                 break;
             // method receiver
             case METHOD_RECEIVER:
+            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
                 // Do nothing
                 break;
             // type parameter
@@ -363,11 +381,10 @@ public class ExtendedAnnotation {
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
-            // class literal
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-                sb.append(", offset = ");
-                sb.append(offset);
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters!");
                 break;
             // method parameter
             case METHOD_PARAMETER:
@@ -437,8 +454,9 @@ public class ExtendedAnnotation {
         /** For annotations on the method receiver. */
         METHOD_RECEIVER(0x06),
 
-        // invalid location
-        // METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+        /** For annotations on a type argument or outer type of the method receiver. */
+        // TODO: ensure correct usage!
+        METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
         /** For annotations on local variables. */
         LOCAL_VARIABLE(0x08),
@@ -497,6 +515,13 @@ public class ExtendedAnnotation {
         // invalid location
         // THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
 
+        /** For type annotations on an exception parameter. */
+        EXCEPTION_PARAMETER(0x1A),
+
+        /** For annotations on a type argument or nested array of an exception parameter. */
+        // TODO: are these allowed? Not for THROWS, so why here?
+        EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
+
         /** For annotations in type arguments of object creation expressions. */
         NEW_TYPE_ARGUMENT(0x18),
         NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation),
@@ -506,9 +531,6 @@ public class ExtendedAnnotation {
 
         WILDCARD_BOUND(0x1C, HasBound),
         WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
-
-        CLASS_LITERAL(0x1E),
-        CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation),
 
         METHOD_TYPE_PARAMETER(0x20, HasParameter),
 

@@ -1462,6 +1462,7 @@ public class ClassReader implements Completer {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -1491,10 +1492,10 @@ public class ClassReader implements Completer {
         case THROWS:
             position.type_index = nextChar();
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            position.offset = nextChar();
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
@@ -1531,6 +1532,7 @@ public class ClassReader implements Completer {
 
         return position;
     }
+
     Attribute readAttributeValue() {
         char c = (char) buf[bp++];
         switch (c) {

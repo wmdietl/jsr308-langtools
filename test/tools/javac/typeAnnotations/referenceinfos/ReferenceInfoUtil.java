@@ -28,7 +28,7 @@ import java.util.Map;
 
 import com.sun.tools.classfile.Attribute;
 import com.sun.tools.classfile.ClassFile;
-import com.sun.tools.classfile.ExtendedAnnotation;
+import com.sun.tools.classfile.TypeAnnotation;
 import com.sun.tools.classfile.Field;
 import com.sun.tools.classfile.Method;
 import com.sun.tools.classfile.RuntimeTypeAnnotations_attribute;
@@ -39,14 +39,14 @@ public class ReferenceInfoUtil {
 
     public static final int IGNORE_VALUE = -321;
 
-    public static List<ExtendedAnnotation> extendedAnnotationsOf(ClassFile cf) {
-        List<ExtendedAnnotation> annos = new ArrayList<ExtendedAnnotation>();
+    public static List<TypeAnnotation> extendedAnnotationsOf(ClassFile cf) {
+        List<TypeAnnotation> annos = new ArrayList<TypeAnnotation>();
         findAnnotations(cf, annos);
         return annos;
     }
 
     /////////////////// Extract type annotations //////////////////
-    private static void findAnnotations(ClassFile cf, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, List<TypeAnnotation> annos) {
         findAnnotations(cf, Attribute.RuntimeVisibleTypeAnnotations, annos);
         findAnnotations(cf, Attribute.RuntimeInvisibleTypeAnnotations, annos);
 
@@ -58,19 +58,19 @@ public class ReferenceInfoUtil {
         }
     }
 
-    private static void findAnnotations(ClassFile cf, Method m, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, Method m, List<TypeAnnotation> annos) {
         findAnnotations(cf, m, Attribute.RuntimeVisibleTypeAnnotations, annos);
         findAnnotations(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, annos);
     }
 
-    private static void findAnnotations(ClassFile cf, Field m, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, Field m, List<TypeAnnotation> annos) {
         findAnnotations(cf, m, Attribute.RuntimeVisibleTypeAnnotations, annos);
         findAnnotations(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, annos);
     }
 
     // test the result of Attributes.getIndex according to expectations
     // encoded in the method's name
-    private static void findAnnotations(ClassFile cf, String name, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, String name, List<TypeAnnotation> annos) {
         int index = cf.attributes.getIndex(cf.constant_pool, name);
         if (index != -1) {
             Attribute attr = cf.attributes.get(index);
@@ -82,7 +82,7 @@ public class ReferenceInfoUtil {
 
     // test the result of Attributes.getIndex according to expectations
     // encoded in the method's name
-    private static void findAnnotations(ClassFile cf, Method m, String name, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, Method m, String name, List<TypeAnnotation> annos) {
         int index = m.attributes.getIndex(cf.constant_pool, name);
         if (index != -1) {
             Attribute attr = m.attributes.get(index);
@@ -94,7 +94,7 @@ public class ReferenceInfoUtil {
 
     // test the result of Attributes.getIndex according to expectations
     // encoded in the method's name
-    private static void findAnnotations(ClassFile cf, Field m, String name, List<ExtendedAnnotation> annos) {
+    private static void findAnnotations(ClassFile cf, Field m, String name, List<TypeAnnotation> annos) {
         int index = m.attributes.getIndex(cf.constant_pool, name);
         if (index != -1) {
             Attribute attr = m.attributes.get(index);
@@ -105,14 +105,16 @@ public class ReferenceInfoUtil {
     }
 
     /////////////////// TA Position Builder ///////////////////////
-    public static class TAPositionBuilder {
-        private ExtendedAnnotation.Position pos = new ExtendedAnnotation.Position();
+    /* TODO: comment out this dead code. Was this unfinished code that was
+     * supposed to be used somewhere? The tests pass without this.
+    private static class TAPositionBuilder {
+        private TypeAnnotation.Position pos = new TypeAnnotation.Position();
 
         private TAPositionBuilder() { }
 
-        public ExtendedAnnotation.Position build() { return pos; }
+        public TypeAnnotation.Position build() { return pos; }
 
-        public static TAPositionBuilder ofType(ExtendedAnnotation.TargetType type) {
+        public static TAPositionBuilder ofType(TypeAnnotation.TargetType type) {
             TAPositionBuilder builder = new TAPositionBuilder();
             builder.pos.type = type;
             return builder;
@@ -120,20 +122,17 @@ public class ReferenceInfoUtil {
 
         public TAPositionBuilder atOffset(int offset) {
             switch (pos.type) {
-                // type cast
+            // type cast
             case TYPECAST:
             case TYPECAST_GENERIC_OR_ARRAY:
-                // instanceof
+            // instanceof
             case INSTANCEOF:
             case INSTANCEOF_GENERIC_OR_ARRAY:
-                // new expression
+            // new expression
             case NEW:
             case NEW_GENERIC_OR_ARRAY:
-                // class literals
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
                 pos.offset = offset;
-                break;
+            	break;
             default:
                 throw new IllegalArgumentException("invalid field for given type: " + pos.type);
             }
@@ -160,7 +159,7 @@ public class ReferenceInfoUtil {
             // type parameters
             case CLASS_TYPE_PARAMETER:
             case METHOD_TYPE_PARAMETER:
-                // method parameter
+            // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_GENERIC_OR_ARRAY:
                 pos.parameter_index = index;
@@ -187,7 +186,7 @@ public class ReferenceInfoUtil {
             return this;
         }
 
-        public TAPositionBuilder atWildcardPosition(ExtendedAnnotation.Position pos) {
+        public TAPositionBuilder atWildcardPosition(TypeAnnotation.Position pos) {
             switch (pos.type) {
             // wildcards
             case WILDCARD_BOUND:
@@ -205,7 +204,7 @@ public class ReferenceInfoUtil {
             // class extends or implements clauses
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-                // throws
+            // throws
             case THROWS:
                 pos.type_index = index;
                 break;
@@ -236,7 +235,7 @@ public class ReferenceInfoUtil {
             pos.type = pos.type.getGenericComplement();
             return this;
         }
-    }
+    }*/
 
     /////////////////////// Equality testing /////////////////////
     private static boolean areEquals(int a, int b) {
@@ -260,7 +259,7 @@ public class ReferenceInfoUtil {
         return true;
     }
 
-    public static boolean areEquals(ExtendedAnnotation.Position p1, ExtendedAnnotation.Position p2) {
+    public static boolean areEquals(TypeAnnotation.Position p1, TypeAnnotation.Position p2) {
         if (p1 == p2)
             return true;
         if (p1 == null || p2 == null)
@@ -278,9 +277,9 @@ public class ReferenceInfoUtil {
                 && areEquals(p1.wildcard_position, p2.wildcard_position));
     }
 
-    private static ExtendedAnnotation findAnnotation(String name, List<ExtendedAnnotation> annotations, ClassFile cf) throws InvalidIndex, UnexpectedEntry {
+    private static TypeAnnotation findAnnotation(String name, List<TypeAnnotation> annotations, ClassFile cf) throws InvalidIndex, UnexpectedEntry {
         String properName = "L" + name + ";";
-        for (ExtendedAnnotation anno : annotations) {
+        for (TypeAnnotation anno : annotations) {
             String actualName = cf.constant_pool.getUTF8Value(anno.annotation.type_index);
             if (properName.equals(actualName))
                 return anno;
@@ -288,24 +287,28 @@ public class ReferenceInfoUtil {
         return null;
     }
 
-    public static boolean compare(Map<String, ExtendedAnnotation.Position> expectedAnnos,
-            List<ExtendedAnnotation> actualAnnos, ClassFile cf) throws InvalidIndex, UnexpectedEntry {
+    public static boolean compare(Map<String, TypeAnnotation.Position> expectedAnnos,
+            List<TypeAnnotation> actualAnnos, ClassFile cf) throws InvalidIndex, UnexpectedEntry {
         if (actualAnnos.size() != expectedAnnos.size()) {
             throw new ComparisionException("Wrong number of annotations",
-                    expectedAnnos.size() + " annotations",
-                    actualAnnos.size() + " annotations");
+                    expectedAnnos,
+                    actualAnnos);
         }
 
-        for (Map.Entry<String, ExtendedAnnotation.Position> e : expectedAnnos.entrySet()) {
+        for (Map.Entry<String, TypeAnnotation.Position> e : expectedAnnos.entrySet()) {
             String aName = e.getKey();
-            ExtendedAnnotation.Position expected = e.getValue();
-            ExtendedAnnotation actual = findAnnotation(aName, actualAnnos, cf);
+            TypeAnnotation.Position expected = e.getValue();
+            TypeAnnotation actual = findAnnotation(aName, actualAnnos, cf);
             if (actual == null)
                 throw new ComparisionException("Expected annotation not found: " + aName);
 
+            // TODO: you currently get an exception if the test case does not use all necessary
+            // annotation attributes, e.g. forgetting the offset for a local variable.
+            // It would be nicer to give an understandable warning instead.
             if (!areEquals(expected, actual.position)) {
-                throw new ComparisionException("Unexpected position for annotation : " + aName,
-                        expected.toString(), actual.position.toString());
+                throw new ComparisionException("Unexpected position for annotation : " + aName +
+                        "\n  Expected: " + expected.toString() +
+                        "\n  Found: " + actual.position.toString());
             }
         }
         return true;
@@ -315,14 +318,14 @@ public class ReferenceInfoUtil {
 class ComparisionException extends RuntimeException {
     private static final long serialVersionUID = -3930499712333815821L;
 
-    public final String expected;
-    public final String found;
+    public final Map<String, TypeAnnotation.Position> expected;
+    public final List<TypeAnnotation> found;
 
     public ComparisionException(String message) {
         this(message, null, null);
     }
 
-    public ComparisionException(String message, String expected, String found) {
+    public ComparisionException(String message, Map<String, TypeAnnotation.Position> expected, List<TypeAnnotation> found) {
         super(message);
         this.expected = expected;
         this.found = found;
@@ -331,7 +334,9 @@ class ComparisionException extends RuntimeException {
     public String toString() {
         String str = super.toString();
         if (expected != null && found != null) {
-            str += "\n\tExpected: " + expected + "; but found: " + found;
+            str += "\n\tExpected: " + expected.size() + " annotations; but found: " + found.size() + " annotations\n" +
+                   "  Expected: " + expected +
+                   "\n  Found: " + found;
         }
         return str;
     }

@@ -658,9 +658,9 @@ public class ClassWriter {
                 write(anno, out);
         }
 
-        public void write(ExtendedAnnotation[] annos, ClassOutputStream out) {
+        public void write(TypeAnnotation[] annos, ClassOutputStream out) {
             out.writeShort(annos.length);
-            for (ExtendedAnnotation anno: annos)
+            for (TypeAnnotation anno: annos)
                 write(anno, out);
         }
 
@@ -671,7 +671,7 @@ public class ClassWriter {
                 write(p, out);
         }
 
-        public void write(ExtendedAnnotation anno, ClassOutputStream out) {
+        public void write(TypeAnnotation anno, ClassOutputStream out) {
             write(anno.annotation, out);
             write(anno.position, out);
         }
@@ -714,7 +714,7 @@ public class ClassWriter {
             return null;
         }
 
-        private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
+        private void write(TypeAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
             // type cast
@@ -742,6 +742,7 @@ public class ClassWriter {
                 break;
             // method receiver
             case METHOD_RECEIVER:
+            case METHOD_RECEIVER_GENERIC_OR_ARRAY:
                 // Do nothing
                 break;
             // type parameters
@@ -771,10 +772,10 @@ public class ClassWriter {
             case THROWS:
                 out.writeByte(p.type_index);
                 break;
-            // class literal
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-                out.writeShort(p.offset);
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters!");
                 break;
             // method parameter
             case METHOD_PARAMETER:

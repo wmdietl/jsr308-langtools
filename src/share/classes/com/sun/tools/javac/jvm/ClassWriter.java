@@ -73,11 +73,11 @@ public class ClassWriter extends ClassFile {
      */
     private boolean verbose;
 
-    /** Switch: scrable private names.
+    /** Switch: scramble private field names.
      */
     private boolean scramble;
 
-    /** Switch: scrable private names.
+    /** Switch: scramble all field names.
      */
     private boolean scrambleAll;
 
@@ -93,7 +93,7 @@ public class ClassWriter extends ClassFile {
      */
     private boolean genCrt;
 
-    /** Switch: describe the generated stackmap
+    /** Switch: describe the generated stackmap.
      */
     boolean debugstackmap;
 
@@ -111,7 +111,7 @@ public class ClassWriter extends ClassFile {
     private Types types;
 
     /** The initial sizes of the data and constant pool buffers.
-     *  sizes are increased when buffers get full.
+     *  Sizes are increased when buffers get full.
      */
     static final int DATA_BUF_SIZE = 0x0fff0;
     static final int POOL_BUF_SIZE = 0x1fff0;
@@ -926,6 +926,7 @@ public class ClassWriter extends ClassFile {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_GENERIC_OR_ARRAY:
             // Do nothing
             break;
         // type parameter
@@ -955,10 +956,10 @@ public class ClassWriter extends ClassFile {
         case THROWS:
             databuf.appendChar(p.type_index);
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            databuf.appendChar(p.offset);
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:

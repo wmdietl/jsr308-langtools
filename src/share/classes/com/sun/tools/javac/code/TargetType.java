@@ -71,8 +71,12 @@ public enum TargetType {
     /** For annotations on the method receiver. */
     METHOD_RECEIVER(0x06),
 
-    // invalid location
-    //@Deprecated METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
+    /** For annotations on a type argument or outer type of the method receiver. */
+    // TODO: ensure correct usage!
+    // TODO: instead of following the common naming scheme, should we name
+    // this METHOD_RECEIVER_GENERIC_OR_NESTED, as a receiver can never
+    // be an array?
+    METHOD_RECEIVER_GENERIC_OR_ARRAY(0x07, HasLocation),
 
     /** For annotations on local variables. */
     LOCAL_VARIABLE(0x08, IsLocal),
@@ -131,6 +135,13 @@ public enum TargetType {
     // invalid location
     //@Deprecated THROWS_GENERIC_OR_ARRAY(0x17, HasLocation),
 
+    /** For type annotations on an exception parameter. */
+    EXCEPTION_PARAMETER(0x1A),
+
+    /** For annotations on a type argument or nested array of an exception parameter. */
+    // TODO: are these allowed? Not for THROWS, so why here?
+    EXCEPTION_PARAMETER_GENERIC_OR_ARRAY(0x1B, HasLocation),
+
     /** For annotations in type arguments of object creation expressions. */
     NEW_TYPE_ARGUMENT(0x18, IsLocal),
     NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY(0x19, HasLocation, IsLocal),
@@ -140,9 +151,6 @@ public enum TargetType {
 
     WILDCARD_BOUND(0x1C, HasBound),
     WILDCARD_BOUND_GENERIC_OR_ARRAY(0x1D, HasBound, HasLocation),
-
-    CLASS_LITERAL(0x1E, IsLocal),
-    CLASS_LITERAL_GENERIC_OR_ARRAY(0x1F, HasLocation, IsLocal),
 
     METHOD_TYPE_PARAMETER(0x20, HasParameter),
 

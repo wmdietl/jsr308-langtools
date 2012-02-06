@@ -445,6 +445,8 @@ public class TransTypes extends TreeTranslator {
     }
 
     public void visitClassDef(JCClassDecl tree) {
+        // TODO: why is this done in a class that's supposedly about converting
+        // generic Java to plain Java?
         typeAnnotations.taFillAndLift(tree, true);
         translateClass(tree.sym);
         result = tree;
@@ -452,13 +454,13 @@ public class TransTypes extends TreeTranslator {
 
     JCMethodDecl currentMethod = null;
     public void visitMethodDef(JCMethodDecl tree) {
-        tree.sym.typeAnnotations = tree.sym.typeAnnotations;
         JCMethodDecl previousMethod = currentMethod;
         try {
             currentMethod = tree;
             tree.restype = translate(tree.restype, null);
             tree.typarams = List.nil();
             tree.params = translateVarDefs(tree.params);
+            tree.recvparam = translate(tree.recvparam, null);
             tree.thrown = translate(tree.thrown, null);
             tree.body = translate(tree.body, tree.sym.erasure(types).getReturnType());
             tree.type = erasure(tree.type);
