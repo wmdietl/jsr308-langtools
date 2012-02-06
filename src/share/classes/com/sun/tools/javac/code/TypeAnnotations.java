@@ -34,9 +34,11 @@ import javax.lang.model.element.ElementKind;
 
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Context;
@@ -368,6 +370,56 @@ public class TypeAnnotations {
                     return p;
 
                 case ANNOTATED_TYPE: {
+                    JCAnnotatedType atypetree = (JCAnnotatedType) frame;
+                    // TODO: when is the underlying type null? Happens in NestedTypes test case.
+                    if (!atypetree.onRightType && atypetree.underlyingType.type!=null) {
+                        final Type utype = atypetree.underlyingType.type;
+                        Symbol tsym = utype.tsym;
+                        // The number of "steps" to get from the full type to the
+                        // left-most outer type.
+                        int steps = 0;
+                        {
+                            Symbol encl = tsym.getEnclosingElement();
+                            while (encl!=null && encl.getKind()!=ElementKind.PACKAGE) {
+                                tsym = encl;
+                                encl = encl.getEnclosingElement();
+                                ++steps;
+                            }
+                        }
+                        if (steps>=0) {
+                            JCTree realframe = frame;
+                            for (int i=0; i<steps; ++i) {
+                                switch (realframe.getKind()) {
+                                case MEMBER_SELECT:
+                                    realframe = ((JCFieldAccess)realframe).selected;
+                                    break;
+                                case ANNOTATED_TYPE:
+                                    realframe = ((JCAnnotatedType)realframe).underlyingType;
+                                    // Going through an annotated type doesn't count.
+                                    --i;
+                                    break;
+                                case PARAMETERIZED_TYPE:
+                                    realframe = ((JCTypeApply)realframe).getType();
+                                    // Going through a parameterized type doesn't count.
+                                    --i;
+                                    break;
+                                default:
+                                    System.out.println("unhandled frame: " + realframe + " kind: " + realframe.getKind());
+                                }
+                            }
+                            if (isWithin(tree, realframe)) {
+                                List<TypeSymbol> typeparams = utype.asElement().getTypeParameters();
+                                if (typeparams.nonEmpty()) {
+                                    // The "top-level" generics are an offset for the index
+                                    steps += typeparams.size();
+                                }
+                                // Take off one initial step.
+                                --steps;
+                                p.location = p.location.prepend(steps);
+                            }
+                        }
+                    }
+
                     List<JCTree> newPath = path.tail;
                     TypeAnnotationPosition rec = resolveFrame(newPath.head, newPath.tail.head,
                             newPath, p, names);
@@ -430,6 +482,11 @@ public class TypeAnnotations {
                         // The type (of which we are a part) has type arguments.
                         // Add the size as an offset.
                         index += ((JCTypeApply) newPath.head).getTypeArguments().size();
+                    } else if (newPath.head.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
+                        JCExpression under = ((JCAnnotatedType) newPath.head).getUnderlyingType();
+                        if (under.hasTag(JCTree.Tag.TYPEAPPLY)) {
+                            index += ((JCTypeApply) under).getTypeArguments().size();
+                        }
                     }
                     p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p, names);
@@ -438,6 +495,40 @@ public class TypeAnnotations {
                     throw new AssertionError("Unresolved frame: " + frame + " of kind: " + frame.getKind() +
                             "\n    Looking for tree: " + tree);
             }
+        }
+
+        /** Determine whether we can reach frame from tree.
+         * 
+         * @param tree the "inner" tree
+         * @param frame the "framing" tree
+         * @return true, iff tree is within frame
+         */
+        private boolean isWithin(JCTree tree, JCTree frame) {
+            boolean lastWasUp = false;
+            loop: while (true) {
+                if (tree == frame) {
+                    return lastWasUp;
+                }
+                switch (tree.getKind()) {
+                case ANNOTATED_TYPE:
+                    if (!((JCAnnotatedType)tree).onRightType) {
+                        return true;
+                    }
+                    tree = ((JCAnnotatedType)tree).underlyingType;
+                    break;
+                case MEMBER_SELECT:
+                    lastWasUp = false;
+                    tree = ((JCFieldAccess)tree).selected;
+                    break;
+                case PARAMETERIZED_TYPE:
+                    lastWasUp = true;
+                    tree = ((JCTypeApply)tree).clazz;
+                    break;
+                default:
+                    break loop;
+                }
+            }
+            return false;
         }
 
         private static void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
@@ -492,7 +583,9 @@ public class TypeAnnotations {
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            findPosition(tree, peek2(), tree.annotations);
+            push(tree);
+            findPosition(tree, tree, tree.annotations);
+            pop();
             super.visitAnnotatedType(tree);
         }
 
@@ -725,9 +818,12 @@ public class TypeAnnotations {
 
             // We start at -1 to account for the numbers of iterations below
             int index = -1;
-            if (type.isParameterized()) {
-                // The "top-level" generics are an offset for the index
-                index += type.getTypeArguments().size();
+            {
+                List<TypeSymbol> typeparams = type.asElement().getTypeParameters();
+                if (typeparams.nonEmpty()) {
+                    // The "top-level" generics are an offset for the index
+                    index += typeparams.size();
+                }
             }
             while (encl.getEnclosingType()!=null &&
                     (encltree.getKind() == JCTree.Kind.MEMBER_SELECT ||
