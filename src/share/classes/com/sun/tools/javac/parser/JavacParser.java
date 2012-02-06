@@ -593,12 +593,15 @@ public class JavacParser implements Parser {
     /**
      * Qualident = Ident { DOT [Annotations] Ident }
      */
-    public JCExpression qualident() {
+    public JCExpression qualident(boolean allowAnnos) {
         JCExpression t = toP(F.at(token.pos).Ident(ident()));
         while (token.kind == DOT) {
             int pos = token.pos;
             nextToken();
-            List<JCTypeAnnotation> tyannos = typeAnnotationsOpt();
+            List<JCTypeAnnotation> tyannos = null;
+            if (allowAnnos) {
+                tyannos = typeAnnotationsOpt();
+            }
             t = toP(F.at(pos).Select(t, ident()));
             if (tyannos!=null && tyannos.nonEmpty()) {
                 t = toP(F.at(pos).AnnotatedType(tyannos, t));
@@ -1871,7 +1874,7 @@ public class JavacParser implements Parser {
             break;
         default:
         }
-        JCExpression t = qualident();
+        JCExpression t = qualident(true);
 
         // handle type annotations for non primitive arrays
         if (newAnnotations.nonEmpty())
@@ -2618,7 +2621,7 @@ public class JavacParser implements Parser {
         if (kind == AnnotationKind.TYPE_ANNO) {
             checkTypeAnnotations();
         }
-        JCTree ident = qualident();
+        JCTree ident = qualident(false);
         List<JCExpression> fieldValues = annotationFieldValuesOpt();
         JCAnnotation ann;
         if (kind == AnnotationKind.DEFAULT_ANNO) {
@@ -2826,7 +2829,7 @@ public class JavacParser implements Parser {
                 mods = null;
             }
             nextToken();
-            pid = qualident();
+            pid = qualident(false);
             accept(SEMI);
         }
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
@@ -3342,17 +3345,17 @@ public class JavacParser implements Parser {
 
         List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
         if (!typeAnnos.isEmpty())
-            ts.append(F.AnnotatedType(typeAnnos, qualident()));
+            ts.append(F.AnnotatedType(typeAnnos, qualident(true)));
         else
-            ts.append(qualident());
+            ts.append(qualident(true));
         while (token.kind == COMMA) {
             nextToken();
 
             typeAnnos = typeAnnotationsOpt();
             if (!typeAnnos.isEmpty())
-                ts.append(F.AnnotatedType(typeAnnos, qualident()));
+                ts.append(F.AnnotatedType(typeAnnos, qualident(true)));
             else
-                ts.append(qualident());
+                ts.append(qualident(true));
         }
         return ts.toList();
     }
@@ -3465,11 +3468,16 @@ public class JavacParser implements Parser {
      * varargs, e.g. {@code String @A [] @B ...}, as the parser
      * first parses the type {@code String @A []} then inserts
      * a new array level with {@code @B} annotation.
-     * 
-     * For nested types like {@code @A Outer. @B Inner} the type
-     * {@code Outer. @B Inner} is parsed first and then {@code @A} is
-     * inserted to the most inner type, which in this case means
-     * the outermost class, {@code Outer}.
+     *
+     * For nested types like {@code @A java.lang.Outer. @B Inner} the type
+     * {@code java.lang.Outer. @B Inner} is parsed first, but we cannot yet
+     * decide that {@code java.lang} represents a package prefix.
+     * Therefore, we create an JCAnnotatedType that has {@code @A} as annotation
+     * and {@code java.lang.Outer. @B Inner} as underlying type and resolve the
+     * position for {@code @A} later; this is similar to "top-level" annotations
+     * for parameter types, which are also resolved later.
+     * For an array {@code @A java.lang.Outer. @B Inner[][]} we attach {@code @A}
+     * to the innermost non-array type.
      * 
      * The innermost/outermost naming is a bit confusing, it's more the
      * leftmost type.
@@ -3484,39 +3492,12 @@ public class JavacParser implements Parser {
             mostInnerType = mostInnerArrayType.elemtype;
         }
 
-        JCExpression toplevel = mostInnerType;
-        JCFieldAccess lastfieldaccess = null;
-        loop: while (true) {
-            switch (toplevel.getKind()) {
-            case PARAMETERIZED_TYPE:
-                toplevel = ((JCTypeApply)toplevel).clazz;
-                break;
-            case ANNOTATED_TYPE:
-                toplevel = ((JCAnnotatedType) toplevel).underlyingType;
-                break;
-            case MEMBER_SELECT:
-                JCExpression sel = ((JCFieldAccess) toplevel).selected;
-                if (sel==null) {
-                    break loop;
-                }
-                lastfieldaccess = (JCFieldAccess) toplevel;
-                toplevel = sel;
-                break;
-            default:
-                break loop;
-            }
+        if (createNewLevel) {
+            mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
         }
 
-        if (lastfieldaccess!=null && annos.nonEmpty()) {
-            // createNewLevel cannot be true, if lastfieldaccess is non-null, right?
-            lastfieldaccess.selected = F.at(token.pos).AnnotatedType(annos, toplevel);
-        } else {
-            if (createNewLevel) {
-                mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
-            }
-            if (annos.nonEmpty()) {
-                mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType);
-            }
+        if (annos.nonEmpty()) {
+            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType, false);
         }
 
         if (mostInnerArrayType == null) {
