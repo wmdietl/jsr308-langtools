@@ -1,10 +1,11 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6840638
+ * @bug 6939620 7020044
  *
- * @summary  Project Coin: Improved Type Inference for Generic Instance Creation (aka 'diamond')
+ * @summary  Check that diamond fails when inference violates declared bounds
+ *           (test with local class, qualified/simple type expressions)
  * @author mcimadamore
- * @compile/fail/ref=Neg04.out Neg04.java -source 1.7 -XDrawDiagnostics
+ * @compile/fail/ref=Neg04.out Neg04.java -XDrawDiagnostics
  *
  */
 
@@ -15,24 +16,14 @@ class Neg04 {
             Foo(V x) {}
             <Z> Foo(V x, Z z) {}
         }
-        Foo<String> n1 = new Foo<>(""); //new Foo<Integer> created
-        Foo<? extends String> n2 = new Foo<>(""); //new Foo<Integer> created
-        Foo<?> n3 = new Foo<>(""); //new Foo<Object> created
-        Foo<? super String> n4 = new Foo<>(""); //new Foo<Object> created
+        Foo<String> n1 = new Foo<>("");
+        Foo<? extends String> n2 = new Foo<>("");
+        Foo<?> n3 = new Foo<>("");
+        Foo<? super String> n4 = new Foo<>("");
 
-        Foo<String> n5 = new Foo<>(""){}; //new Foo<Integer> created
-        Foo<? extends String> n6 = new Foo<>(""){}; //new Foo<Integer> created
-        Foo<?> n7 = new Foo<>(""){}; //new Foo<Object> created
-        Foo<? super String> n8 = new Foo<>(""){}; //new Foo<Object> created
-
-        Foo<String> n9 = new Foo<>("", ""); //new Foo<Integer> created
-        Foo<? extends String> n10 = new Foo<>("", ""); //new Foo<Integer> created
-        Foo<?> n11 = new Foo<>("", ""); //new Foo<Object> created
-        Foo<? super String> n12 = new Foo<>("", ""); //new Foo<Object> created
-
-        Foo<String> n13 = new Foo<>("", ""){}; //new Foo<Integer> created
-        Foo<? extends String> n14 = new Foo<>("", ""){}; //new Foo<Integer> created
-        Foo<?> n15 = new Foo<>("", ""){}; //new Foo<Object> created
-        Foo<? super String> n16 = new Foo<>("", ""){}; //new Foo<Object> created
+        Foo<String> n5 = new Foo<>("", "");
+        Foo<? extends String> n6 = new Foo<>("", "");
+        Foo<?> n7 = new Foo<>("", "");
+        Foo<? super String> n8 = new Foo<>("", "");
     }
 }

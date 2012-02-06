@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.classfile;
@@ -31,7 +31,10 @@ import com.sun.tools.classfile.ConstantPool.CONSTANT_Fieldref_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_Float_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_Integer_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_InterfaceMethodref_info;
+import com.sun.tools.classfile.ConstantPool.CONSTANT_InvokeDynamic_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_Long_info;
+import com.sun.tools.classfile.ConstantPool.CONSTANT_MethodHandle_info;
+import com.sun.tools.classfile.ConstantPool.CONSTANT_MethodType_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_Methodref_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_NameAndType_info;
 import com.sun.tools.classfile.ConstantPool.CONSTANT_String_info;
@@ -42,8 +45,8 @@ import java.util.Map;
 /**
  * Rewrites a class file using a map of translations.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -304,6 +307,20 @@ public class ClassTranslator
         return info;
     }
 
+    public CPInfo visitInvokeDynamic(CONSTANT_InvokeDynamic_info info, Map<Object, Object> translations) {
+        CONSTANT_InvokeDynamic_info info2 = (CONSTANT_InvokeDynamic_info) translations.get(info);
+        if (info2 == null) {
+            ConstantPool cp2 = translate(info.cp, translations);
+            if (cp2 == info.cp) {
+                info2 = info;
+            } else {
+                info2 = new CONSTANT_InvokeDynamic_info(cp2, info.bootstrap_method_attr_index, info.name_and_type_index);
+            }
+            translations.put(info, info2);
+        }
+        return info;
+    }
+
     public CPInfo visitLong(CONSTANT_Long_info info, Map<Object, Object> translations) {
         CONSTANT_Long_info info2 = (CONSTANT_Long_info) translations.get(info);
         if (info2 == null) {
@@ -334,6 +351,34 @@ public class ClassTranslator
                 info2 = info;
             else
                 info2 = new CONSTANT_Methodref_info(cp2, info.class_index, info.name_and_type_index);
+            translations.put(info, info2);
+        }
+        return info;
+    }
+
+    public CPInfo visitMethodHandle(CONSTANT_MethodHandle_info info, Map<Object, Object> translations) {
+        CONSTANT_MethodHandle_info info2 = (CONSTANT_MethodHandle_info) translations.get(info);
+        if (info2 == null) {
+            ConstantPool cp2 = translate(info.cp, translations);
+            if (cp2 == info.cp) {
+                info2 = info;
+            } else {
+                info2 = new CONSTANT_MethodHandle_info(cp2, info.reference_kind, info.reference_index);
+            }
+            translations.put(info, info2);
+        }
+        return info;
+    }
+
+    public CPInfo visitMethodType(CONSTANT_MethodType_info info, Map<Object, Object> translations) {
+        CONSTANT_MethodType_info info2 = (CONSTANT_MethodType_info) translations.get(info);
+        if (info2 == null) {
+            ConstantPool cp2 = translate(info.cp, translations);
+            if (cp2 == info.cp) {
+                info2 = info;
+            } else {
+                info2 = new CONSTANT_MethodType_info(cp2, info.descriptor_index);
+            }
             translations.put(info, info2);
         }
         return info;

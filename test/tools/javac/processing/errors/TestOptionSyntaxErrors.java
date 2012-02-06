@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,13 +26,15 @@
  * @bug 6406212
  * @summary Test that annotation processor options with illegal syntax are rejected
  * @author  Joseph D. Darcy
+ * @library ../../lib
+ * @build JavacTestingAbstractProcessor CompileFail
  * @compile TestOptionSyntaxErrors.java
- * @compile/fail -A TestOptionSyntaxErrors.java
- * @compile/fail -A8adOption TestOptionSyntaxErrors.java
- * @compile/fail -A8adOption=1worseOption TestOptionSyntaxErrors.java
- * @compile/fail -processor TestOptionSyntaxErrors -proc:only -A TestOptionSyntaxErrors.java
- * @compile/fail -processor TestOptionSyntaxErrors -proc:only -A8adOption TestOptionSyntaxErrors.java
- * @compile/fail -processor TestOptionSyntaxErrors -proc:only -A8adOption=1worseOption TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -A TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -A8adOption TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -A8adOption=1worseOption TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -processor TestOptionSyntaxErrors -proc:only -A TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -processor TestOptionSyntaxErrors -proc:only -A8adOption TestOptionSyntaxErrors.java
+ * @run main CompileFail CMDERR -processor TestOptionSyntaxErrors -proc:only -A8adOption=1worseOption TestOptionSyntaxErrors.java
  */
 
 import java.util.Set;
@@ -46,14 +48,9 @@ import static javax.tools.Diagnostic.Kind.*;
 /**
  * No-op processor; should not be run.
  */
-@SupportedAnnotationTypes("*")
-public class TestOptionSyntaxErrors extends AbstractProcessor {
+public class TestOptionSyntaxErrors extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnvironment) {
         return true;
-    }
-
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latest();
     }
 }

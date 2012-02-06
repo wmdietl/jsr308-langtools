@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -39,7 +39,6 @@ import static javax.lang.model.util.ElementFilter.*;
 
 
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_7 )
 public class T6439826 extends AbstractProcessor {
     public static void main(String... args) {
         String testSrc = System.getProperty("test.src", ".");
@@ -49,8 +48,7 @@ public class T6439826 extends AbstractProcessor {
         StandardJavaFileManager fm = tool.getStandardFileManager(dl, null, null);
         Iterable<? extends JavaFileObject> files =
             fm.getJavaFileObjectsFromFiles(Arrays.asList(new File(testSrc, T6439826.class.getName()+".java")));
-        Iterable<String> opts = Arrays.asList("-source","1.6",
-                                              "-proc:only",
+        Iterable<String> opts = Arrays.asList("-proc:only",
                                               "-processor", "T6439826",
                                               "-processorpath", testClasses);
         StringWriter out = new StringWriter();
@@ -74,6 +72,11 @@ public class T6439826 extends AbstractProcessor {
                 writeBadFile();
         }
         return false;
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latest();
     }
 
     private void writeBadFile() {

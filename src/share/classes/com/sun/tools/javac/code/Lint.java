@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.code;
@@ -39,8 +39,8 @@ import static com.sun.tools.javac.code.Flags.*;
 /**
  * A class for handling -Xlint suboptions and @SuppresssWarnings.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -119,6 +119,7 @@ public class Lint
         this.suppressedValues = other.suppressedValues.clone();
     }
 
+    @Override
     public String toString() {
         return "Lint:[values" + values + " suppressedValues" + suppressedValues + "]";
     }
@@ -131,6 +132,11 @@ public class Lint
          * Warn about use of unnecessary casts.
          */
         CAST("cast"),
+
+        /**
+         * Warn about issues related to classfile contents
+         */
+        CLASSFILE("classfile"),
 
         /**
          * Warn about use of deprecated items.
@@ -164,6 +170,11 @@ public class Lint
         FINALLY("finally"),
 
         /**
+         * Warn about issues relating to use of command line options
+         */
+        OPTIONS("options"),
+
+        /**
          * Warn about issues regarding method overrides.
          */
         OVERRIDES("overrides"),
@@ -181,9 +192,29 @@ public class Lint
         PROCESSING("processing"),
 
         /**
+         * Warn about unchecked operations on raw types.
+         */
+        RAW("rawtypes"),
+
+        /**
          * Warn about Serializable classes that do not provide a serial version ID.
          */
         SERIAL("serial"),
+
+        /**
+         * Warn about issues relating to use of statics
+         */
+        STATIC("static"),
+
+        /**
+         * Warn about proprietary API that may be removed in a future release.
+         */
+        SUNAPI("sunapi", true),
+
+        /**
+         * Warn about issues relating to use of try blocks (i.e. try-with-resources)
+         */
+        TRY("try"),
 
         /**
          * Warn about unchecked operations on raw types.
@@ -191,14 +222,9 @@ public class Lint
         UNCHECKED("unchecked"),
 
         /**
-         * Warn about unchecked operations on raw types.
+         * Warn about potentially unsafe vararg methods
          */
-        RAW("rawtypes"),
-
-        /**
-         * Warn about Sun proprietary API that may be removed in a future release.
-         */
-        SUNAPI("sunapi", true);
+        VARARGS("varargs");
 
         LintCategory(String option) {
             this(option, false);

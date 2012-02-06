@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,16 +18,13 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package javax.lang.model.util;
 
-import java.lang.annotation.Annotation;
-import java.lang.annotation.AnnotationTypeMismatchException;
-import java.lang.annotation.IncompleteAnnotationException;
 import java.util.List;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
@@ -84,7 +81,7 @@ public interface Types {
      * @return {@code true} if and only if the first type is a subtype
      *          of the second
      * @throws IllegalArgumentException if given an executable or package type
-     * @jls3 4.10 Subtyping
+     * @jls 4.10 Subtyping
      */
     boolean isSubtype(TypeMirror t1, TypeMirror t2);
 
@@ -96,7 +93,7 @@ public interface Types {
      * @return {@code true} if and only if the first type is assignable
      *          to the second
      * @throws IllegalArgumentException if given an executable or package type
-     * @jls3 5.2 Assignment Conversion
+     * @jls 5.2 Assignment Conversion
      */
     boolean isAssignable(TypeMirror t1, TypeMirror t2);
 
@@ -107,7 +104,7 @@ public interface Types {
      * @param t2  the second type
      * @return {@code true} if and only if the first type contains the second
      * @throws IllegalArgumentException if given an executable or package type
-     * @jls3 4.5.1.1 Type Argument Containment and Equivalence
+     * @jls 4.5.1.1 Type Argument Containment and Equivalence
      */
     boolean contains(TypeMirror t1, TypeMirror t2);
 
@@ -119,7 +116,7 @@ public interface Types {
      * @param m2  the second method
      * @return {@code true} if and only if the first signature is a
      *          subsignature of the second
-     * @jls3 8.4.2 Method Signature
+     * @jls 8.4.2 Method Signature
      */
     boolean isSubsignature(ExecutableType m1, ExecutableType m2);
 
@@ -139,7 +136,7 @@ public interface Types {
      * @param t  the type to be erased
      * @return the erasure of the given type
      * @throws IllegalArgumentException if given a package type
-     * @jls3 4.6 Type Erasure
+     * @jls 4.6 Type Erasure
      */
     TypeMirror erasure(TypeMirror t);
 
@@ -149,7 +146,7 @@ public interface Types {
      *
      * @param p  the primitive type to be converted
      * @return the class of a boxed value of type {@code p}
-     * @jls3 5.1.7 Boxing Conversion
+     * @jls 5.1.7 Boxing Conversion
      */
     TypeElement boxedClass(PrimitiveType p);
 
@@ -161,7 +158,7 @@ public interface Types {
      * @return the type of an unboxed value of type {@code t}
      * @throws IllegalArgumentException if the given type has no
      *          unboxing conversion
-     * @jls3 5.1.8 Unboxing Conversion
+     * @jls 5.1.8 Unboxing Conversion
      */
     PrimitiveType unboxedType(TypeMirror t);
 
@@ -171,7 +168,7 @@ public interface Types {
      * @param t  the type to be converted
      * @return the result of applying capture conversion
      * @throws IllegalArgumentException if given an executable or package type
-     * @jls3 5.1.10 Capture Conversion
+     * @jls 5.1.10 Capture Conversion
      */
     TypeMirror capture(TypeMirror t);
 
@@ -301,115 +298,4 @@ public interface Types {
      *          for the given type
      */
     TypeMirror asMemberOf(DeclaredType containing, Element element);
-
-    /**
-     * Returns the annotations targeting the type
-     *
-     * @param type  the targeted type
-     * @return the type annotations targeting the type
-     */
-    List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type);
-
-    /**
-     * Returns the type's annotation for the specified type if
-     * such an annotation is present, else {@code null}.  The
-     * annotation has to be directly present on this
-     * element.
-     *
-     * <p> The annotation returned by this method could contain an element
-     * whose value is of type {@code Class}.
-     * This value cannot be returned directly:  information necessary to
-     * locate and load a class (such as the class loader to use) is
-     * not available, and the class might not be loadable at all.
-     * Attempting to read a {@code Class} object by invoking the relevant
-     * method on the returned annotation
-     * will result in a {@link MirroredTypeException},
-     * from which the corresponding {@link TypeMirror} may be extracted.
-     * Similarly, attempting to read a {@code Class[]}-valued element
-     * will result in a {@link MirroredTypesException}.
-     *
-     * <blockquote>
-     * <i>Note:</i> This method is unlike others in this and related
-     * interfaces.  It operates on runtime reflective information &mdash;
-     * representations of annotation types currently loaded into the
-     * VM &mdash; rather than on the representations defined by and used
-     * throughout these interfaces.  Consequently, calling methods on
-     * the returned annotation object can throw many of the exceptions
-     * that can be thrown when calling methods on an annotation object
-     * returned by core reflection.  This method is intended for
-     * callers that are written to operate on a known, fixed set of
-     * annotation types.
-     * </blockquote>
-     *
-     * @param <A>  the annotation type
-     * @param type  the targeted type
-     * @param annotationType  the {@code Class} object corresponding to
-     *          the annotation type
-     * @return the type's annotation for the specified annotation
-     *         type if present on the type, else {@code null}
-     *
-     * @see #getAnnotationMirrors()
-     * @see EnumConstantNotPresentException
-     * @see AnnotationTypeMismatchException
-     * @see IncompleteAnnotationException
-     * @see MirroredTypeException
-     * @see MirroredTypesException
-     */
-    <A extends Annotation> A typeAnnotationOf(TypeMirror type, Class<A> annotationType);
-
-    /**
-     * Returns the annotations targeting the method receiver type
-     *
-     * @param type  the targeted type
-     * @return the type annotations targeting the type
-     */
-    List<? extends AnnotationMirror> receiverTypeAnnotationsOf(ExecutableType type);
-
-    /**
-     * Returns the type's annotation for the specified executable type
-     * receiver if such an annotation is present, else {@code null}.  The
-     * annotation has to be directly present on this
-     * element.
-     *
-     * <p> The annotation returned by this method could contain an element
-     * whose value is of type {@code Class}.
-     * This value cannot be returned directly:  information necessary to
-     * locate and load a class (such as the class loader to use) is
-     * not available, and the class might not be loadable at all.
-     * Attempting to read a {@code Class} object by invoking the relevant
-     * method on the returned annotation
-     * will result in a {@link MirroredTypeException},
-     * from which the corresponding {@link TypeMirror} may be extracted.
-     * Similarly, attempting to read a {@code Class[]}-valued element
-     * will result in a {@link MirroredTypesException}.
-     *
-     * <blockquote>
-     * <i>Note:</i> This method is unlike others in this and related
-     * interfaces.  It operates on runtime reflective information &mdash;
-     * representations of annotation types currently loaded into the
-     * VM &mdash; rather than on the representations defined by and used
-     * throughout these interfaces.  Consequently, calling methods on
-     * the returned annotation object can throw many of the exceptions
-     * that can be thrown when calling methods on an annotation object
-     * returned by core reflection.  This method is intended for
-     * callers that are written to operate on a known, fixed set of
-     * annotation types.
-     * </blockquote>
-     *
-     * @param <A>  the annotation type
-     * @param type  the method type
-     * @param annotationType  the {@code Class} object corresponding to
-     *          the annotation type
-     * @return the type's annotation for the specified annotation
-     *         type if present on the type, else {@code null}
-     *
-     * @see #getAnnotationMirrors()
-     * @see EnumConstantNotPresentException
-     * @see AnnotationTypeMismatchException
-     * @see IncompleteAnnotationException
-     * @see MirroredTypeException
-     * @see MirroredTypesException
-     */
-    <A extends Annotation> A receiverTypeAnnotationOf(ExecutableType type, Class<A> annotationType);
-
 }

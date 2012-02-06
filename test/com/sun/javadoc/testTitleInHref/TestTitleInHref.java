@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -38,13 +38,13 @@ public class TestTitleInHref extends JavadocTester {
 
     private static final String[][] TEST = {
         //Test to make sure that the title shows up in a class link.
-        {BUG_ID + FS + "pkg" + FS + "Links.html", "<A HREF=\"../pkg/Class.html\" title=\"class in pkg\">"},
+        {BUG_ID + FS + "pkg" + FS + "Links.html", "<a href=\"../pkg/Class.html\" title=\"class in pkg\">"},
 
         //Test to make sure that the title shows up in an interface link.
-        {BUG_ID + FS + "pkg" + FS + "Links.html", "<A HREF=\"../pkg/Interface.html\" title=\"interface in pkg\">"},
+        {BUG_ID + FS + "pkg" + FS + "Links.html", "<a href=\"../pkg/Interface.html\" title=\"interface in pkg\">"},
 
         //Test to make sure that the title shows up in cross link shows up
-        {BUG_ID + FS + "pkg" + FS + "Links.html", "<A HREF=\"http://java.sun.com/j2se/1.4/docs/api/java/io/File.html?is-external=true\" title=\"class or interface in java.io\"><CODE>This is a cross link to class File</CODE></A>"},
+        {BUG_ID + FS + "pkg" + FS + "Links.html", "<a href=\"http://java.sun.com/j2se/1.4/docs/api/java/io/File.html?is-external=true\" title=\"class or interface in java.io\"><code>This is a cross link to class File</code></a>"},
 
     };
 

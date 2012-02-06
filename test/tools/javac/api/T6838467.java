@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -33,6 +33,7 @@ import java.util.zip.*;
 import javax.tools.*;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.util.Context;
+import com.sun.tools.javac.util.Options;
 
 public class T6838467 {
     boolean fileSystemIsCaseSignificant = !new File("a").equals(new File("A"));
@@ -176,33 +177,11 @@ public class T6838467 {
         return fm;
     }
 
-    JavacFileManager createFileManager(boolean useJavaUtilZip) {
-        // javac should really not be using system properties like this
-        // -- it should really be using (hidden) options -- but until then
-        // take care to leave system properties as we find them, so as not
-        // to adversely affect other tests that might follow.
-        String prev = System.getProperty("useJavaUtilZip");
-        boolean resetProperties = false;
-        try {
-            if (useJavaUtilZip) {
-                System.setProperty("useJavaUtilZip", "true");
-                resetProperties = true;
-            } else if (System.getProperty("useJavaUtilZip") != null) {
-                System.getProperties().remove("useJavaUtilZip");
-                resetProperties = true;
-            }
-
-            Context c = new Context();
-            return new JavacFileManager(c, false, null);
-        } finally {
-            if (resetProperties) {
-                if (prev == null) {
-                    System.getProperties().remove("useJavaUtilZip");
-                } else {
-                    System.setProperty("useJavaUtilZip", prev);
-                }
-            }
-        }
+    JavacFileManager createFileManager(boolean useOptimizedZip) {
+        Context ctx = new Context();
+        Options options = Options.instance(ctx);
+        options.put("useOptimizedZip", Boolean.toString(useOptimizedZip));
+        return new JavacFileManager(ctx, false, null);
     }
 
     // create a directory containing a given set of paths

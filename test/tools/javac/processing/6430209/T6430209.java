@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,16 +16,17 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
  * @bug 6441871
  * @summary spurious compiler error elicited by packageElement.getEnclosedElements()
- * @build b6341534
+ * @library ../../lib
+ * @build JavacTestingAbstractProcessor b6341534
  * @run main T6430209
  */
 
@@ -54,7 +55,7 @@ public class T6430209 {
         // run annotation processor b6341534 so we can check diagnostics
         // -proc:only -processor b6341534 -cp . ./src/*.java
         String testSrc = System.getProperty("test.src", ".");
-        String testClasses = System.getProperty("test.classes");
+        String testClasses = System.getProperty("test.classes") + System.getProperty("path.separator") + "../../lib";
         JavacTool tool = JavacTool.create();
         MyDiagListener dl = new MyDiagListener();
         StandardJavaFileManager fm = tool.getStandardFileManager(dl, null, null);
@@ -63,7 +64,6 @@ public class T6430209 {
             new File(testSrc, "test0.java"), new File(testSrc, "test1.java")));
         Iterable<String> opts = Arrays.asList("-proc:only",
                                               "-processor", "b6341534",
-                                              "-source", "1.6",
                                               "-processorpath", testClasses);
         StringWriter out = new StringWriter();
         JavacTask task = tool.getTask(out, fm, dl, opts, null, files);

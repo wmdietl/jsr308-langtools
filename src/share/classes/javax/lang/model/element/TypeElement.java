@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package javax.lang.model.element;
@@ -61,7 +61,12 @@ import javax.lang.model.util.*;
  */
 public interface TypeElement extends Element, Parameterizable, QualifiedNameable {
     /**
-     * {@inheritDoc}
+     * Returns the fields, methods, constructors, and member types
+     * that are directly declared in this class or interface.
+     *
+     * This includes any (implicit) default constructor and
+     * the implicit {@code values} and {@code valueOf} methods of an
+     * enum type.
      *
      * <p> Note that as a particular instance of the {@linkplain
      * javax.lang.model.element general accuracy requirements} and the
@@ -75,6 +80,7 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      *
      * @return the enclosed elements in proper order, or an empty list if none
      */
+    @Override
     List<? extends Element> getEnclosedElements();
 
     /**
@@ -101,9 +107,22 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      * an empty name if none
      *
      * @see Elements#getBinaryName
-     * @jls3 6.7 Fully Qualified Names and Canonical Names
+     * @jls 6.7 Fully Qualified Names and Canonical Names
      */
     Name getQualifiedName();
+
+
+    /**
+     * Returns the simple name of this type element.
+     *
+     * For an anonymous class, an empty name is returned.
+     *
+     * @return the simple name of this class or interface,
+     * an empty name for an anonymous class
+     *
+     */
+    @Override
+    Name getSimpleName();
 
     /**
      * Returns the direct superclass of this type element.
@@ -132,4 +151,16 @@ public interface TypeElement extends Element, Parameterizable, QualifiedNameable
      * if there are none
      */
     List<? extends TypeParameterElement> getTypeParameters();
+
+
+    /**
+     * Returns the package of a top-level type and returns the
+     * immediately lexically enclosing element for a {@linkplain
+     * NestingKind#isNested nested} type.
+     *
+     * @return the package of a top-level type, the immediately
+     * lexically enclosing element for a nested type
+     */
+    @Override
+    Element getEnclosingElement();
 }

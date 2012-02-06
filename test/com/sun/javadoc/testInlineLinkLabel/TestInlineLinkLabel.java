@@ -1,5 +1,5 @@
 /*
- * Copyright 2002 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -37,10 +37,10 @@ public class TestInlineLinkLabel extends JavadocTester {
     private static final String BUG_ID = "4524136";
     private static final String[][] TEST = {
         //Search for the label to the package link.
-        {BUG_ID + FS + "pkg" + FS + "C1.html" , "<A HREF=\"../pkg/package-summary.html\"><CODE>Here is a link to a package</CODE></A>"},
+        {BUG_ID + FS + "pkg" + FS + "C1.html" , "<a href=\"../pkg/package-summary.html\"><code>Here is a link to a package</code></a>"},
 
         //Search for the label to the class link
-        {BUG_ID + FS + "pkg" + FS + "C1.html" , "<A HREF=\"../pkg/C2.html\" title=\"class in pkg\"><CODE>Here is a link to a class</CODE></A>"}
+        {BUG_ID + FS + "pkg" + FS + "C1.html" , "<a href=\"../pkg/C2.html\" title=\"class in pkg\"><code>Here is a link to a class</code></a>"}
     };
     private static final String[][] NEGATED_TEST = NO_TEST;
     private static final String[] ARGS =

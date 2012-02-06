@@ -1,12 +1,12 @@
 /*
- * Copyright 1997-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javadoc;
@@ -57,23 +57,23 @@ public class Messager extends Log implements DocErrorReporter {
         return (Messager)instance;
     }
 
-    public static void preRegister(final Context context,
+    public static void preRegister(Context context,
                                    final String programName) {
         context.put(logKey, new Context.Factory<Log>() {
-            public Log make() {
-                return new Messager(context,
+            public Log make(Context c) {
+                return new Messager(c,
                                     programName);
             }
         });
     }
-    public static void preRegister(final Context context,
+    public static void preRegister(Context context,
                                    final String programName,
                                    final PrintWriter errWriter,
                                    final PrintWriter warnWriter,
                                    final PrintWriter noticeWriter) {
         context.put(logKey, new Context.Factory<Log>() {
-            public Log make() {
-                return new Messager(context,
+            public Log make(Context c) {
+                return new Messager(c,
                                     programName,
                                     errWriter,
                                     warnWriter,
@@ -86,7 +86,7 @@ public class Messager extends Log implements DocErrorReporter {
         private static final long serialVersionUID = 0;
     }
 
-    private final String programName;
+    final String programName;
 
     private ResourceBundle messageRB = null;
 
@@ -121,6 +121,16 @@ public class Messager extends Log implements DocErrorReporter {
         this.programName = programName;
     }
 
+    @Override
+    protected int getDefaultMaxErrors() {
+        return Integer.MAX_VALUE;
+    }
+
+    @Override
+    protected int getDefaultMaxWarnings() {
+        return Integer.MAX_VALUE;
+    }
+
     /**
      * Reset resource bundle, eg. locale has changed.
      */
@@ -133,11 +143,9 @@ public class Messager extends Log implements DocErrorReporter {
      * if needed.
      */
     private String getString(String key) {
-        ResourceBundle messageRB = this.messageRB;
         if (messageRB == null) {
             try {
-                this.messageRB = messageRB =
-                    ResourceBundle.getBundle(
+                messageRB = ResourceBundle.getBundle(
                           "com.sun.tools.javadoc.resources.javadoc");
             } catch (MissingResourceException e) {
                 throw new Error("Fatal: Resource for javadoc is missing");
@@ -231,11 +239,13 @@ public class Messager extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printError(SourcePosition pos, String msg) {
-        String prefix = (pos == null) ? programName : pos.toString();
-        errWriter.println(prefix + ": " + getText("javadoc.error") + " - " + msg);
-        errWriter.flush();
-        prompt();
-        nerrors++;
+        if (nerrors < MaxErrors) {
+            String prefix = (pos == null) ? programName : pos.toString();
+            errWriter.println(prefix + ": " + getText("javadoc.error") + " - " + msg);
+            errWriter.flush();
+            prompt();
+            nerrors++;
+        }
     }
 
     /**
@@ -256,10 +266,12 @@ public class Messager extends Log implements DocErrorReporter {
      * @param msg message to print
      */
     public void printWarning(SourcePosition pos, String msg) {
-        String prefix = (pos == null) ? programName : pos.toString();
-        warnWriter.println(prefix +  ": " + getText("javadoc.warning") +" - " + msg);
-        warnWriter.flush();
-        nwarnings++;
+        if (nwarnings < MaxWarnings) {
+            String prefix = (pos == null) ? programName : pos.toString();
+            warnWriter.println(prefix +  ": " + getText("javadoc.warning") +" - " + msg);
+            warnWriter.flush();
+            nwarnings++;
+        }
     }
 
     /**
@@ -442,8 +454,6 @@ public class Messager extends Log implements DocErrorReporter {
      * Print exit message.
      */
     public void exitNotice() {
-        int nerrors = nerrors();
-        int nwarnings = nwarnings();
         if (nerrors > 0) {
             notice((nerrors > 1) ? "main.errors" : "main.error",
                    "" + nerrors);

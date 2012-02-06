@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2009, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 
@@ -39,6 +39,8 @@ public class T6729471
     }
 
     void run() {
+        File testClasses = new File(System.getProperty("test.classes"));
+
         // simple class
         verify("java.util.Map",
                 "public abstract boolean containsKey(java.lang.Object)");
@@ -48,11 +50,11 @@ public class T6729471
                 "public abstract K getKey()");
 
         // file name
-        verify("../classes/tools/javap/T6729471.class",
+        verify(new File(testClasses, "T6729471.class").getPath(),
                 "public static void main(java.lang.String...)");
 
         // file url
-        verify("file:../classes/tools/javap/T6729471.class",
+        verify(new File(testClasses, "T6729471.class").toURI().toString(),
                 "public static void main(java.lang.String...)");
 
         // jar url: rt.jar

@@ -1,12 +1,12 @@
 /*
- * Copyright 2007-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,15 +18,14 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javap;
 
 import com.sun.tools.classfile.Annotation;
-import com.sun.tools.classfile.ExtendedAnnotation;
 import com.sun.tools.classfile.Annotation.Annotation_element_value;
 import com.sun.tools.classfile.Annotation.Array_element_value;
 import com.sun.tools.classfile.Annotation.Class_element_value;
@@ -40,8 +39,8 @@ import com.sun.tools.classfile.Descriptor.InvalidDescriptor;
 /**
  *  A writer for writing annotations as text.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -75,132 +74,6 @@ public class AnnotationWriter extends BasicWriter {
         }
         if (showParens)
             print(")");
-    }
-
-    public void write(ExtendedAnnotation annot) {
-        write(annot, true, false);
-    }
-
-    public void write(ExtendedAnnotation annot, boolean showOffsets, boolean resolveIndices) {
-        write(annot.annotation, resolveIndices);
-        print(": ");
-        write(annot.position, showOffsets);
-    }
-
-    public void write(ExtendedAnnotation.Position pos, boolean showOffsets) {
-        print(pos.type);
-
-        switch (pos.type) {
-        // type case
-        case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
-        // object creation
-        case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
-        // new expression
-        case NEW:
-        case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
-            if (showOffsets) {
-                print(", offset=");
-                print(pos.offset);
-            }
-            break;
-         // local variable
-        case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-            print(", {");
-            for (int i = 0; i < pos.lvarOffset.length; ++i) {
-                if (i != 0) print("; ");
-                if (showOffsets) {
-                    print(", start_pc=");
-                    print(pos.lvarOffset[i]);
-                }
-                print(", length=");
-                print(pos.lvarLength[i]);
-                print(", index=");
-                print(pos.lvarIndex[i]);
-            }
-            print("}");
-            break;
-         // method receiver
-        case METHOD_RECEIVER:
-            // Do nothing
-            break;
-        // type parameters
-        case CLASS_TYPE_PARAMETER:
-        case METHOD_TYPE_PARAMETER:
-            print(", param_index=");
-            print(pos.parameter_index);
-            break;
-        // type parameters bound
-        case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-        case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-            print(", param_index=");
-            print(pos.parameter_index);
-            print(", bound_index=");
-            print(pos.bound_index);
-            break;
-         // wildcard
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
-            print(", wild_card=");
-            print(pos.wildcard_position);
-            break;
-         // Class extends and implements clauses
-        case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-            print(", type_index=");
-            print(pos.type_index);
-            break;
-        // throws
-        case THROWS:
-            print(", type_index=");
-            print(pos.type_index);
-            break;
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            if (showOffsets) {
-                print(", offset=");
-                print(pos.offset);
-            }
-            break;
-        // method parameter: not specified
-        case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
-            print(", param_index=");
-            print(pos.parameter_index);
-            break;
-        // method type argument: wasn't specified
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
-            if (showOffsets) {
-                print(", offset=");
-                print(pos.offset);
-            }
-            print(", type_index=");
-            print(pos.type_index);
-            break;
-        // We don't need to worry abut these
-        case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
-        case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
-            break;
-        case UNKNOWN:
-            break;
-        default:
-            throw new AssertionError("unknown type: " + pos.type);
-        }
-
-        // Append location data for generics/arrays.
-        if (pos.type.hasLocation()) {
-            print(", location=");
-            print(pos.location);
-        }
     }
 
     public void write(Annotation.element_value_pair pair) {

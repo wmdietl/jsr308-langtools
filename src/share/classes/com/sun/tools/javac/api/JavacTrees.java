@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.api;
@@ -34,20 +34,24 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 
+import com.sun.source.tree.CatchTree;
 import com.sun.source.tree.CompilationUnitTree;
 import com.sun.source.tree.Scope;
 import com.sun.source.tree.Tree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
+import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
 import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Symbol;
+import com.sun.tools.javac.code.Type.UnionClassType;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Enter;
@@ -55,13 +59,14 @@ import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.comp.MemberEnter;
 import com.sun.tools.javac.comp.Resolve;
 import com.sun.tools.javac.model.JavacElements;
-import com.sun.tools.javac.processing.JavacMessager;
+import com.sun.tools.javac.parser.EndPosTable;
 import com.sun.tools.javac.processing.JavacProcessingEnvironment;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.TreeCopier;
 import com.sun.tools.javac.tree.TreeInfo;
 import com.sun.tools.javac.tree.TreeMaker;
+import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.JCDiagnostic;
 import com.sun.tools.javac.util.List;
@@ -71,7 +76,7 @@ import com.sun.tools.javac.util.Pair;
 /**
  * Provides an implementation of Trees.
  *
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own
  * risk.  This code and its internal interfaces are subject to change
  * or deletion without notice.</b></p>
@@ -80,14 +85,15 @@ import com.sun.tools.javac.util.Pair;
  */
 public class JavacTrees extends Trees {
 
-    private final Resolve resolve;
-    private final Enter enter;
-    private final Log log;
-    private final MemberEnter memberEnter;
-    private final Attr attr;
-    private final TreeMaker treeMaker;
-    private final JavacElements elements;
-    private final JavacTaskImpl javacTaskImpl;
+    // in a world of a single context per compilation, these would all be final
+    private Resolve resolve;
+    private Enter enter;
+    private Log log;
+    private MemberEnter memberEnter;
+    private Attr attr;
+    private TreeMaker treeMaker;
+    private JavacElements elements;
+    private JavacTaskImpl javacTaskImpl;
 
     public static JavacTrees instance(JavaCompiler.CompilationTask task) {
         if (!(task instanceof JavacTaskImpl))
@@ -110,6 +116,14 @@ public class JavacTrees extends Trees {
 
     private JavacTrees(Context context) {
         context.put(JavacTrees.class, this);
+        init(context);
+    }
+
+    public void updateContext(Context context) {
+        init(context);
+    }
+
+    private void init(Context context) {
         attr = Attr.instance(context);
         enter = Enter.instance(context);
         elements = JavacElements.instance(context);
@@ -127,8 +141,8 @@ public class JavacTrees extends Trees {
                 }
 
                 public long getEndPosition(CompilationUnitTree file, Tree tree) {
-                    Map<JCTree,Integer> endPositions = ((JCCompilationUnit) file).endPositions;
-                    return TreeInfo.getEndPos((JCTree) tree, endPositions);
+                    EndPosTable endPosTable = ((JCCompilationUnit) file).endPositions;
+                    return TreeInfo.getEndPos((JCTree) tree, endPosTable);
                 }
             };
     }
@@ -189,8 +203,24 @@ public class JavacTrees extends Trees {
     }
 
     public Element getElement(TreePath path) {
-        Tree t = path.getLeaf();
-        return TreeInfo.symbolFor((JCTree) t);
+        JCTree tree = (JCTree) path.getLeaf();
+        Symbol sym = TreeInfo.symbolFor(tree);
+        if (sym == null && TreeInfo.isDeclaration(tree)) {
+            for (TreePath p = path; p != null; p = p.getParentPath()) {
+                JCTree t = (JCTree) p.getLeaf();
+                if (t.hasTag(JCTree.Tag.CLASSDEF)) {
+                    JCClassDecl ct = (JCClassDecl) t;
+                    if (ct.sym != null) {
+                        if ((ct.sym.flags_field & Flags.UNATTRIBUTED) != 0) {
+                            attr.attribClass(ct.pos(), ct.sym);
+                            sym = TreeInfo.symbolFor(tree);
+                        }
+                        break;
+                    }
+                }
+            }
+        }
+        return sym;
     }
 
     public TypeMirror getTypeMirror(TreePath path) {
@@ -202,10 +232,21 @@ public class JavacTrees extends Trees {
         return new JavacScope(getAttrContext(path));
     }
 
+    public String getDocComment(TreePath path) {
+        CompilationUnitTree t = path.getCompilationUnit();
+        if (t instanceof JCTree.JCCompilationUnit) {
+            JCCompilationUnit cu = (JCCompilationUnit) t;
+            if (cu.docComments != null) {
+                return cu.docComments.get(path.getLeaf());
+            }
+        }
+        return null;
+    }
+
     public boolean isAccessible(Scope scope, TypeElement type) {
         if (scope instanceof JavacScope && type instanceof ClassSymbol) {
             Env<AttrContext> env = ((JavacScope) scope).env;
-            return resolve.isAccessible(env, (ClassSymbol)type);
+            return resolve.isAccessible(env, (ClassSymbol)type, true);
         } else
             return false;
     }
@@ -215,7 +256,7 @@ public class JavacTrees extends Trees {
                 && member instanceof Symbol
                 && type instanceof com.sun.tools.javac.code.Type) {
             Env<AttrContext> env = ((JavacScope) scope).env;
-            return resolve.isAccessible(env, (com.sun.tools.javac.code.Type)type, (Symbol)member);
+            return resolve.isAccessible(env, (com.sun.tools.javac.code.Type)type, (Symbol)member, true);
         } else
             return false;
     }
@@ -224,9 +265,10 @@ public class JavacTrees extends Trees {
         if (!(path.getLeaf() instanceof JCTree))  // implicit null-check
             throw new IllegalArgumentException();
 
-        // if we're being invoked via from a JSR199 client, we need to make sure
-        // all the classes have been entered; if we're being invoked from JSR269,
-        // then the classes will already have been entered.
+        // if we're being invoked from a Tree API client via parse/enter/analyze,
+        // we need to make sure all the classes have been entered;
+        // if we're being invoked from JSR 199 or JSR 269, then the classes
+        // will already have been entered.
         if (javacTaskImpl != null) {
             try {
                 javacTaskImpl.enter(null);
@@ -257,7 +299,10 @@ public class JavacTrees extends Trees {
 //                    System.err.println("COMP: " + ((JCCompilationUnit)tree).sourcefile);
                     env = enter.getTopLevelEnv((JCCompilationUnit)tree);
                     break;
+                case ANNOTATION_TYPE:
                 case CLASS:
+                case ENUM:
+                case INTERFACE:
 //                    System.err.println("CLASS: " + ((JCClassDecl)tree).sym.getSimpleName());
                     env = enter.getClassEnv(((JCClassDecl)tree).sym);
                     break;
@@ -271,10 +316,19 @@ public class JavacTrees extends Trees {
                     break;
                 case BLOCK: {
 //                    System.err.println("BLOCK: ");
-                    if (method != null)
-                        env = memberEnter.getMethodEnv(method, env);
-                    JCTree body = copier.copy((JCTree)tree, (JCTree) path.getLeaf());
-                    env = attribStatToTree(body, env, copier.leafCopy);
+                    if (method != null) {
+                        try {
+                            Assert.check(method.body == tree);
+                            method.body = copier.copy((JCBlock)tree, (JCTree) path.getLeaf());
+                            env = memberEnter.getMethodEnv(method, env);
+                            env = attribStatToTree(method.body, env, copier.leafCopy);
+                        } finally {
+                            method.body = (JCBlock) tree;
+                        }
+                    } else {
+                        JCBlock body = copier.copy((JCBlock)tree, (JCTree) path.getLeaf());
+                        env = attribStatToTree(body, env, copier.leafCopy);
+                    }
                     return env;
                 }
                 default:
@@ -287,7 +341,7 @@ public class JavacTrees extends Trees {
                     }
             }
         }
-        return field != null ? memberEnter.getInitEnv(field, env) : env;
+        return (field != null) ? memberEnter.getInitEnv(field, env) : env;
     }
 
     private Env<AttrContext> attribStatToTree(JCTree stat, Env<AttrContext>env, JCTree tree) {
@@ -318,6 +372,7 @@ public class JavacTrees extends Trees {
             super(M);
         }
 
+        @Override
         public <T extends JCTree> T copy(T t, JCTree leaf) {
             T t2 = super.copy(t, leaf);
             if (t == leaf)
@@ -387,6 +442,18 @@ public class JavacTrees extends Trees {
         } finally {
             if (oldSource != null)
                 log.useSource(oldSource);
+        }
+    }
+
+    @Override
+    public TypeMirror getLub(CatchTree tree) {
+        JCCatch ct = (JCCatch) tree;
+        JCVariableDecl v = ct.param;
+        if (v.type != null && v.type.getKind() == TypeKind.UNION) {
+            UnionClassType ut = (UnionClassType) v.type;
+            return ut.getLub();
+        } else {
+            return v.type;
         }
     }
 }

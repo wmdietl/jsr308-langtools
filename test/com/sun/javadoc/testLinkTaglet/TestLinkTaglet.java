@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2004, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,16 +16,16 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @bug      4732864 6280605
+ * @bug      4732864 6280605 7064544
  * @summary  Make sure that you can link from one member to another using
- *           non-qualified name.
+ *           non-qualified name, furthermore, ensure the right one is linked.
  * @author   jamieh
  * @library  ../lib/
  * @build    JavadocTester
@@ -36,7 +36,7 @@
 public class TestLinkTaglet extends JavadocTester {
 
     //Test information.
-    private static final String BUG_ID = "4732864-6280605";
+    private static final String BUG_ID = "4732864-6280605-7064544";
 
     //Javadoc arguments.
     private static final String[] ARGS = new String[] {
@@ -46,20 +46,22 @@ public class TestLinkTaglet extends JavadocTester {
     //Input for string search tests.
     private static final String[][] TEST = {
         {BUG_ID + FS + "pkg" + FS + "C.html",
-            "Qualified Link: <A HREF=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><CODE>C.InnerC</CODE></A>.<br/>\n" +
-            " Unqualified Link1: <A HREF=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><CODE>C.InnerC</CODE></A>.<br/>\n" +
-            " Unqualified Link2: <A HREF=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><CODE>C.InnerC</CODE></A>.<br/>\n" +
-            " Qualified Link: <A HREF=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><CODE>method(pkg.C.InnerC, pkg.C.InnerC2)</CODE></A>.<br/>\n" +
-            " Unqualified Link: <A HREF=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><CODE>method(C.InnerC, C.InnerC2)</CODE></A>.<br/>\n" +
-            " Unqualified Link: <A HREF=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><CODE>method(InnerC, InnerC2)</CODE></A>.<br/>"
+            "Qualified Link: <a href=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><code>C.InnerC</code></a>.<br/>\n" +
+            " Unqualified Link1: <a href=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><code>C.InnerC</code></a>.<br/>\n" +
+            " Unqualified Link2: <a href=\"../pkg/C.InnerC.html\" title=\"class in pkg\"><code>C.InnerC</code></a>.<br/>\n" +
+            " Qualified Link: <a href=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><code>method(pkg.C.InnerC, pkg.C.InnerC2)</code></a>.<br/>\n" +
+            " Unqualified Link: <a href=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><code>method(C.InnerC, C.InnerC2)</code></a>.<br/>\n" +
+            " Unqualified Link: <a href=\"../pkg/C.html#method(pkg.C.InnerC, pkg.C.InnerC2)\"><code>method(InnerC, InnerC2)</code></a>.<br/>"
         },
         {BUG_ID + FS + "pkg" + FS + "C.InnerC.html",
-            "Link to member in outer class: <A HREF=\"../pkg/C.html#MEMBER\"><CODE>C.MEMBER</CODE></A> <br/>\n" +
-            " Link to member in inner class: <A HREF=\"../pkg/C.InnerC2.html#MEMBER2\"><CODE>C.InnerC2.MEMBER2</CODE></A> <br/>\n" +
-            " Link to another inner class: <A HREF=\"../pkg/C.InnerC2.html\" title=\"class in pkg\"><CODE>C.InnerC2</CODE></A>"
+            "Link to member in outer class: <a href=\"../pkg/C.html#MEMBER\"><code>C.MEMBER</code></a> <br/>\n" +
+            " Link to member in inner class: <a href=\"../pkg/C.InnerC2.html#MEMBER2\"><code>C.InnerC2.MEMBER2</code></a> <br/>\n" +
+            " Link to another inner class: <a href=\"../pkg/C.InnerC2.html\" title=\"class in pkg\"><code>C.InnerC2</code></a>"
         },
         {BUG_ID + FS + "pkg" + FS + "C.InnerC2.html",
-            "Enclosing class:</STRONG></DT><DD><A HREF=\"../pkg/C.html\" title=\"class in pkg\">C</A>"
+            "<dl>" + NL + "<dt>Enclosing class:</dt>" + NL +
+            "<dd><a href=\"../pkg/C.html\" title=\"class in pkg\">C</a></dd>" + NL +
+            "</dl>"
         },
     };
     private static final String[][] NEGATED_TEST = {

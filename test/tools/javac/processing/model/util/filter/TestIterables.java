@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,6 +26,8 @@
  * @bug 6406164
  * @summary Test that ElementFilter iterable methods behave properly.
  * @author  Joseph D. Darcy
+ * @library ../../../../lib
+ * @build JavacTestingAbstractProcessor
  * @compile TestIterables.java
  * @compile -processor TestIterables -proc:only Foo1.java
  * @compile Foo1.java
@@ -51,9 +53,8 @@ import static javax.lang.model.util.ElementFilter.*;
  * results.
  */
 @SupportedAnnotationTypes("ExpectedElementCounts")
-@ExpectedElementCounts(methods=3)
-public class TestIterables extends AbstractProcessor {
-
+@ExpectedElementCounts(methods=2)
+public class TestIterables extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnv) {
         if (!roundEnv.processingOver()) {
@@ -118,10 +119,4 @@ public class TestIterables extends AbstractProcessor {
 
         return count1;
     }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latest();
-    }
-
 }

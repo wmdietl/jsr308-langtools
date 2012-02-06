@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 // These tests exercise the various compile policies available via
@@ -35,7 +35,7 @@
  * @summary provide variable policies for javac operation
  *              Default compile policy is now "by file" (reverted to "todo" for 6382700)
  *              Because of attr errors in B, no code should be generated
- * @compile/fail/ref=bytodo.ABD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy A.java B.java D.java
+ * @compile/fail/ref=bytodo.ABD.out -XDrawDiagnostics -XDverboseCompilePolicy A.java B.java D.java
  */
 
 /*
@@ -43,7 +43,7 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Generate code for A, A1, A2, B
- * @compile/fail/ref=bytodo.ABD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=bytodo A.java B.java D.java
+ * @compile/fail/ref=bytodo.ABD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=bytodo A.java B.java D.java
  */
 
 /*
@@ -51,7 +51,7 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Because of attr errors in B, no code should be generated
- * @compile/fail/ref=simple.ABD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=simple A.java B.java D.java
+ * @compile/fail/ref=simple.ABD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=simple A.java B.java D.java
  */
 
 /*
@@ -59,7 +59,7 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Because of attr errors in B, no code should be generated
- * @compile/fail/ref=byfile.ABD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=byfile A.java B.java D.java
+ * @compile/fail/ref=byfile.ABD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=byfile A.java B.java D.java
  */
 
 
@@ -71,7 +71,7 @@
  * @summary provide variable policies for javac operation
  *              Default compile policy is now "by file" (reverted to "todo" for 6382700)
  *              Generate code for A, A1, A2, but because of flow errors in C, no more code should be generated
- * @compile/fail/ref=bytodo.ACD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy A.java C.java D.java
+ * @compile/fail/ref=bytodo.ACD.out -XDrawDiagnostics -XDverboseCompilePolicy A.java C.java D.java
  */
 
 /*
@@ -79,7 +79,7 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Generate code for A, A1, A2, C
- * @compile/fail/ref=bytodo.ACD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=bytodo A.java C.java D.java
+ * @compile/fail/ref=bytodo.ACD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=bytodo A.java C.java D.java
  */
 
 /*
@@ -87,7 +87,7 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Because of flow errors in C, no code should be generated
- * @compile/fail/ref=simple.ACD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=simple A.java C.java D.java
+ * @compile/fail/ref=simple.ACD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=simple A.java C.java D.java
  */
 
 /*
@@ -95,5 +95,5 @@
  * @bug 6260188
  * @summary provide variable policies for javac operation
  *              Generate code for A, A1, A2, but because of flow errors in C, no more code should be generated
- * @compile/fail/ref=byfile.ACD.out -XDstdout -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=byfile A.java C.java D.java
+ * @compile/fail/ref=byfile.ACD.out -XDrawDiagnostics -XDverboseCompilePolicy -XDcompilePolicy=byfile A.java C.java D.java
  */

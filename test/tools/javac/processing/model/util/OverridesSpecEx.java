@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,6 +26,8 @@
  * @bug     6453386
  * @summary Verify that example code in Elements.overrides works as spec'ed.
  * @author  Scott Seligman
+ * @library ../../../lib
+ * @build JavacTestingAbstractProcessor
  * @compile -g OverridesSpecEx.java
  * @compile -processor OverridesSpecEx -proc:only OverridesSpecEx.java
  */
@@ -39,20 +41,7 @@ import javax.lang.model.util.*;
 
 import static javax.lang.model.util.ElementFilter.*;
 
-
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes("*")
-public class OverridesSpecEx extends AbstractProcessor {
-
-    Elements elements;
-    Types types;
-
-    public void init(ProcessingEnvironment penv) {
-        super.init(penv);
-        elements = penv.getElementUtils();
-        types =  penv.getTypeUtils();
-    }
-
+public class OverridesSpecEx extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> annoTypes,
                            RoundEnvironment round) {
         if (!round.processingOver())
@@ -109,9 +98,7 @@ public class OverridesSpecEx extends AbstractProcessor {
             throw new AssertionError("Bogus result");
     }
 
-
     // Fodder for the processor
-
     class A {
         public void m() {}
     }

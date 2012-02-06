@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,17 +16,18 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @bug 6350057
+ * @bug 6350057 7025809
  * @summary Test that parameters on implicit enum methods have the right kind
  * @author  Joseph D. Darcy
- * @compile T6350057.java
+ * @library ../../lib
+ * @build   JavacTestingAbstractProcessor T6350057
  * @compile -processor T6350057 -proc:only TestEnum.java
  */
 
@@ -38,9 +39,8 @@ import javax.lang.model.element.*;
 import javax.lang.model.util.*;
 import static javax.tools.Diagnostic.Kind.*;
 
-@SupportedAnnotationTypes("*")
-public class T6350057 extends AbstractProcessor {
-    static class LocalVarAllergy extends ElementKindVisitor6<Boolean, Void> {
+public class T6350057 extends JavacTestingAbstractProcessor {
+    static class LocalVarAllergy extends ElementKindVisitor<Boolean, Void> {
         @Override
         public Boolean visitTypeAsEnum(TypeElement e, Void v) {
             System.out.println("visitTypeAsEnum: " + e.getSimpleName().toString());

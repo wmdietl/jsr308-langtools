@@ -1,12 +1,12 @@
 /*
- * Copyright 2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.internal.toolkit;
@@ -36,67 +36,80 @@ import com.sun.javadoc.*;
  * Do not use it as an API
  *
  * @author Jamie Ho
+ * @author Bhavesh Patel (Modified)
  * @since 1.5
  */
 
 public interface EnumConstantWriter {
 
     /**
-     * Write the header for the enum constant documentation.
+     * Get the enum constants details tree header.
      *
-     * @param classDoc the class that the enum constants belong to.
-     * @param header the header to write.
+     * @param classDoc the class being documented
+     * @param memberDetailsTree the content tree representing member details
+     * @return content tree for the enum constants details header
      */
-    public void writeHeader(ClassDoc classDoc, String header);
+    public Content getEnumConstantsDetailsTreeHeader(ClassDoc classDoc,
+            Content memberDetailsTree);
 
     /**
-     * Write the enum constant header for the given enum constant.
+     * Get the enum constants documentation tree header.
      *
-     * @param enumConstant the enum constant being documented.
-     * @param isFirst the flag to indicate whether or not the enum constant is
-     *                the first to be documented.
+     * @param enumConstant the enum constant being documented
+     * @param enumConstantDetailsTree the content tree representing enum constant details
+     * @return content tree for the enum constant documentation header
      */
-    public void writeEnumConstantHeader(FieldDoc enumConstant, boolean isFirst);
+    public Content getEnumConstantsTreeHeader(FieldDoc enumConstant,
+            Content enumConstantsDetailsTree);
 
     /**
-     * Write the signature for the given enum constant.
+     * Get the signature for the given enum constant.
      *
-     * @param enumConstant the enum constant being documented.
+     * @param enumConstant the enum constant being documented
+     * @return content tree for the enum constant signature
      */
-    public void writeSignature(FieldDoc enumConstant);
+    public Content getSignature(FieldDoc enumConstant);
 
     /**
-     * Write the deprecated output for the given enum constant.
+     * Add the deprecated output for the given enum constant.
      *
-     * @param enumConstant the enum constant being documented.
+     * @param enumConstant the enum constant being documented
+     * @param enumConstantsTree content tree to which the deprecated information will be added
      */
-    public void writeDeprecated(FieldDoc enumConstant);
+    public void addDeprecated(FieldDoc enumConstant, Content enumConstantsTree);
 
     /**
-     * Write the comments for the given enum constant.
+     * Add the comments for the given enum constant.
      *
-     * @param enumConstant the enum constant being documented.
+     * @param enumConstant the enum constant being documented
+     * @param enumConstantsTree the content tree to which the comments will be added
      */
-    public void writeComments(FieldDoc enumConstant);
+    public void addComments(FieldDoc enumConstant, Content enumConstantsTree);
 
     /**
-     * Write the tag output for the given enum constant.
+     * Add the tags for the given enum constant.
      *
-     * @param enumConstant the enum constant being documented.
+     * @param enumConstant the enum constant being documented
+     * @param enumConstantsTree the content tree to which the tags will be added
      */
-    public void writeTags(FieldDoc enumConstant);
+    public void addTags(FieldDoc enumConstant, Content enumConstantsTree);
 
     /**
-     * Write the enum constant footer.
+     * Get the enum constants details tree.
+     *
+     * @param memberDetailsTree the content tree representing member details
+     * @return content tree for the enum constant details
      */
-    public void writeEnumConstantFooter();
+    public Content getEnumConstantsDetails(Content memberDetailsTree);
 
     /**
-     * Write the footer for the enum constant documentation.
+     * Get the enum constants documentation.
      *
-     * @param classDoc the class that the enum constant belong to.
+     * @param enumConstantsTree the content tree representing enum constants documentation
+     * @param isLastContent true if the content to be added is the last content
+     * @return content tree for the enum constants documentation
      */
-    public void writeFooter(ClassDoc classDoc);
+    public Content getEnumConstants(Content enumConstantsTree, boolean isLastContent);
 
     /**
      * Close the writer.

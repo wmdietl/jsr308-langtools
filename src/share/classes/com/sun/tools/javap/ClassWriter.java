@@ -1,12 +1,12 @@
 /*
- * Copyright 2007-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javap;
@@ -48,14 +48,21 @@ import com.sun.tools.classfile.Signature;
 import com.sun.tools.classfile.Signature_attribute;
 import com.sun.tools.classfile.SourceFile_attribute;
 import com.sun.tools.classfile.Type;
+import com.sun.tools.classfile.Type.ArrayType;
+import com.sun.tools.classfile.Type.ClassSigType;
+import com.sun.tools.classfile.Type.ClassType;
+import com.sun.tools.classfile.Type.MethodType;
+import com.sun.tools.classfile.Type.SimpleType;
+import com.sun.tools.classfile.Type.TypeParamType;
+import com.sun.tools.classfile.Type.WildcardType;
 
 import static com.sun.tools.classfile.AccessFlags.*;
 
 /*
  *  The main javap class to write the contents of a class file as text.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -166,8 +173,10 @@ public class ClassWriter extends BasicWriter {
             // use info from class file header
             if (classFile.isClass() && classFile.super_class != 0 ) {
                 String sn = getJavaSuperclassName(cf);
-                print(" extends ");
-                print(sn);
+                if (!sn.equals("java.lang.Object")) {
+                    print(" extends ");
+                    print(sn);
+                }
             }
             for (int i = 0; i < classFile.interfaces.length; i++) {
                 print(i == 0 ? (classFile.isClass() ? " implements " : " extends ") : ",");
@@ -176,13 +185,14 @@ public class ClassWriter extends BasicWriter {
         } else {
             try {
                 Type t = sigAttr.getParsedSignature().getType(constant_pool);
+                JavaTypePrinter p = new JavaTypePrinter(classFile.isInterface());
                 // The signature parser cannot disambiguate between a
                 // FieldType and a ClassSignatureType that only contains a superclass type.
-                if (t instanceof Type.ClassSigType)
-                    print(getJavaName(t.toString()));
-                else {
+                if (t instanceof Type.ClassSigType) {
+                    print(p.print(t));
+                } else if (options.verbose || !t.isObject()) {
                     print(" extends ");
-                    print(getJavaName(t.toString()));
+                    print(p.print(t));
                 }
             } catch (ConstantPoolException e) {
                 print(report(e));
@@ -210,6 +220,124 @@ public class ClassWriter extends BasicWriter {
         indent(-1);
         println("}");
     }
+    // where
+        class JavaTypePrinter implements Type.Visitor<StringBuilder,StringBuilder> {
+            boolean isInterface;
+
+            JavaTypePrinter(boolean isInterface) {
+                this.isInterface = isInterface;
+            }
+
+            String print(Type t) {
+                return t.accept(this, new StringBuilder()).toString();
+            }
+
+            public StringBuilder visitSimpleType(SimpleType type, StringBuilder sb) {
+                sb.append(getJavaName(type.name));
+                return sb;
+            }
+
+            public StringBuilder visitArrayType(ArrayType type, StringBuilder sb) {
+                append(sb, type.elemType);
+                sb.append("[]");
+                return sb;
+            }
+
+            public StringBuilder visitMethodType(MethodType type, StringBuilder sb) {
+                appendIfNotEmpty(sb, "<", type.typeParamTypes, "> ");
+                append(sb, type.returnType);
+                append(sb, " (", type.paramTypes, ")");
+                appendIfNotEmpty(sb, " throws ", type.throwsTypes, "");
+                return sb;
+            }
+
+            public StringBuilder visitClassSigType(ClassSigType type, StringBuilder sb) {
+                appendIfNotEmpty(sb, "<", type.typeParamTypes, ">");
+                if (isInterface) {
+                    appendIfNotEmpty(sb, " extends ", type.superinterfaceTypes, "");
+                } else {
+                    if (type.superclassType != null
+                            && (options.verbose || !type.superclassType.isObject())) {
+                        sb.append(" extends ");
+                        append(sb, type.superclassType);
+                    }
+                    appendIfNotEmpty(sb, " implements ", type.superinterfaceTypes, "");
+                }
+                return sb;
+            }
+
+            public StringBuilder visitClassType(ClassType type, StringBuilder sb) {
+                if (type.outerType != null) {
+                    append(sb, type.outerType);
+                    sb.append(".");
+                }
+                sb.append(getJavaName(type.name));
+                appendIfNotEmpty(sb, "<", type.typeArgs, ">");
+                return sb;
+            }
+
+            public StringBuilder visitTypeParamType(TypeParamType type, StringBuilder sb) {
+                sb.append(type.name);
+                String sep = " extends ";
+                if (type.classBound != null
+                        && (options.verbose || !type.classBound.isObject())) {
+                    sb.append(sep);
+                    append(sb, type.classBound);
+                    sep = " & ";
+                }
+                if (type.interfaceBounds != null) {
+                    for (Type bound: type.interfaceBounds) {
+                        sb.append(sep);
+                        append(sb, bound);
+                        sep = " & ";
+                    }
+                }
+                return sb;
+            }
+
+            public StringBuilder visitWildcardType(WildcardType type, StringBuilder sb) {
+                switch (type.kind) {
+                    case UNBOUNDED:
+                        sb.append("?");
+                        break;
+                    case EXTENDS:
+                        sb.append("? extends ");
+                        append(sb, type.boundType);
+                        break;
+                    case SUPER:
+                        sb.append("? super ");
+                        append(sb, type.boundType);
+                        break;
+                    default:
+                        throw new AssertionError();
+                }
+                return sb;
+            }
+
+            private void append(StringBuilder sb, Type t) {
+                t.accept(this, sb);
+            }
+
+            private void append(StringBuilder sb, String prefix, List<? extends Type> list, String suffix) {
+                sb.append(prefix);
+                String sep = "";
+                for (Type t: list) {
+                    sb.append(sep);
+                    append(sb, t);
+                    sep = ", ";
+                }
+                sb.append(suffix);
+            }
+
+            private void appendIfNotEmpty(StringBuilder sb, String prefix, List<? extends Type> list, String suffix) {
+                if (!isEmpty(list))
+                    append(sb, prefix, list, suffix);
+            }
+
+            private boolean isEmpty(List<? extends Type> list) {
+                return (list == null || list.isEmpty());
+            }
+        }
 
     protected void writeFields() {
         for (Field f: classFile.fields) {
@@ -225,15 +353,15 @@ public class ClassWriter extends BasicWriter {
         writeModifiers(flags.getFieldModifiers());
         Signature_attribute sigAttr = getSignature(f.attributes);
         if (sigAttr == null)
-            print(getFieldType(f.descriptor));
+            print(getJavaFieldType(f.descriptor));
         else {
             try {
                 Type t = sigAttr.getParsedSignature().getType(constant_pool);
-                print(t);
+                print(getJavaName(t.toString()));
             } catch (ConstantPoolException e) {
                 // report error?
                 // fall back on non-generic descriptor
-                print(getFieldType(f.descriptor));
+                print(getJavaFieldType(f.descriptor));
             }
         }
         print(" ");
@@ -298,7 +426,7 @@ public class ClassWriter extends BasicWriter {
             try {
                 methodType = (Type.MethodType) methodSig.getType(constant_pool);
                 methodExceptions = methodType.throwsTypes;
-                if (methodExceptions != null && methodExceptions.size() == 0)
+                if (methodExceptions != null && methodExceptions.isEmpty())
                     methodExceptions = null;
             } catch (ConstantPoolException e) {
                 // report error?
@@ -314,14 +442,14 @@ public class ClassWriter extends BasicWriter {
         }
         if (getName(m).equals("<init>")) {
             print(getJavaName(classFile));
-            print(getParameterTypes(d, flags));
+            print(getJavaParameterTypes(d, flags));
         } else if (getName(m).equals("<clinit>")) {
             print("{}");
         } else {
-            print(getReturnType(d));
+            print(getJavaReturnType(d));
             print(" ");
             print(getName(m));
-            print(getParameterTypes(d, flags));
+            print(getJavaParameterTypes(d, flags));
         }
 
         Attribute e_attr = m.attributes.get(Attribute.Exceptions);
@@ -460,9 +588,9 @@ public class ClassWriter extends BasicWriter {
         }
     }
 
-    String getFieldType(Descriptor d) {
+    String getJavaFieldType(Descriptor d) {
         try {
-            return d.getFieldType(constant_pool);
+            return getJavaName(d.getFieldType(constant_pool));
         } catch (ConstantPoolException e) {
             return report(e);
         } catch (DescriptorException e) {
@@ -470,9 +598,9 @@ public class ClassWriter extends BasicWriter {
         }
     }
 
-    String getReturnType(Descriptor d) {
+    String getJavaReturnType(Descriptor d) {
         try {
-            return d.getReturnType(constant_pool);
+            return getJavaName(d.getReturnType(constant_pool));
         } catch (ConstantPoolException e) {
             return report(e);
         } catch (DescriptorException e) {
@@ -480,9 +608,9 @@ public class ClassWriter extends BasicWriter {
         }
     }
 
-    String getParameterTypes(Descriptor d, AccessFlags flags) {
+    String getJavaParameterTypes(Descriptor d, AccessFlags flags) {
         try {
-            return adjustVarargs(flags, d.getParameterTypes(constant_pool));
+            return getJavaName(adjustVarargs(flags, d.getParameterTypes(constant_pool)));
         } catch (ConstantPoolException e) {
             return report(e);
         } catch (DescriptorException e) {

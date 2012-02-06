@@ -1,5 +1,5 @@
 /*
- * Copyright 2003-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -27,8 +27,7 @@
  * @summary  Verify that spaces do not appear in hrefs and anchors.
  * @author   jamieh
  * @library  ../lib/
- * @build    JavadocTester
- * @build    TestHref
+ * @build    JavadocTester TestHref
  * @run main TestHref
  */
 
@@ -47,37 +46,41 @@ public class TestHref extends JavadocTester {
     private static final String[][] TEST = {
         //External link.
         {BUG_ID + FS + "pkg" + FS + "C1.html",
-            "HREF=\"http://java.sun.com/j2se/1.4/docs/api/java/lang/Object.html?is-external=true#wait(long, int)\""
+            "href=\"http://java.sun.com/j2se/1.4/docs/api/java/lang/Object.html?is-external=true#wait(long, int)\""
         },
         //Member summary table link.
         {BUG_ID + FS + "pkg" + FS + "C1.html",
-            "HREF=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\""
+            "href=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\""
         },
         //Anchor test.
         {BUG_ID + FS + "pkg" + FS + "C1.html",
-            "<A NAME=\"method(int, int, java.util.ArrayList)\"><!-- --></A>"
+            "<a name=\"method(int, int, java.util.ArrayList)\">" + NL +
+            "<!--   -->" + NL +
+            "</a>"
         },
         //Backward compatibility anchor test.
         {BUG_ID + FS + "pkg" + FS + "C1.html",
-            "<A NAME=\"method(int, int, java.util.ArrayList)\"><!-- --></A>"
+            "<a name=\"method(int, int, java.util.ArrayList)\">" + NL +
+            "<!--   -->" + NL +
+            "</a>"
         },
         //{@link} test.
         {BUG_ID + FS + "pkg" + FS + "C2.html",
-            "Link: <A HREF=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\">"
+            "Link: <a href=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\">"
         },
         //@see test.
         {BUG_ID + FS + "pkg" + FS + "C2.html",
-            "See Also:</STRONG></DT><DD><A HREF=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\">"
+            "See Also:</span></dt><dd><a href=\"../pkg/C1.html#method(int, int, java.util.ArrayList)\">"
         },
 
         //Header does not link to the page itself.
         {BUG_ID + FS + "pkg" + FS + "C4.html",
-            "Class C4&lt;E extends C4&lt;E&gt;&gt;</H2>"
+            "Class C4&lt;E extends C4&lt;E&gt;&gt;</h2>"
         },
 
         //Signature does not link to the page itself.
         {BUG_ID + FS + "pkg" + FS + "C4.html",
-            "public abstract class <STRONG>C4&lt;E extends C4&lt;E&gt;&gt;</STRONG>"
+            "public abstract class <span class=\"strong\">C4&lt;E extends C4&lt;E&gt;&gt;</span>"
         },
     };
     private static final String[][] NEGATED_TEST =

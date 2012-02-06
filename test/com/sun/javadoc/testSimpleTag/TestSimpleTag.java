@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2004 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -42,13 +42,13 @@ public class TestSimpleTag extends JavadocTester {
     private static final String[][] TEST =
         new String[][] {
             {"./" + BUG_ID + "/C.html",
-                "<STRONG>Todo:</STRONG>"},
+                "<span class=\"strong\">Todo:</span>"},
             {"./" + BUG_ID + "/C.html",
-                "<STRONG>EJB Beans:</STRONG>"},
+                "<span class=\"strong\">EJB Beans:</span>"},
             {"./" + BUG_ID + "/C.html",
-                "<STRONG>Regular Tag:</STRONG>"},
+                "<span class=\"strong\">Regular Tag:</span>"},
             {"./" + BUG_ID + "/C.html",
-                "<STRONG>Back-Slash-Tag:</STRONG>"},
+                "<span class=\"strong\">Back-Slash-Tag:</span>"},
         };
 
     private static final String[] ARGS = new String[] {

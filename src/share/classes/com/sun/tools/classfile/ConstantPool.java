@@ -1,12 +1,12 @@
 /*
- * Copyright 2007-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.classfile;
@@ -31,16 +31,16 @@ import java.io.OutputStream;
 import java.util.Iterator;
 
 /**
- * See JVMS3, section 4.5.
+ * See JVMS, section 4.5.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
 public class ConstantPool {
 
-    public class InvalidIndex extends ConstantPoolException {
+    public static class InvalidIndex extends ConstantPoolException {
         private static final long serialVersionUID = -4350294289300939730L;
         InvalidIndex(int index) {
             super(index);
@@ -53,7 +53,7 @@ public class ConstantPool {
         }
     }
 
-    public class UnexpectedEntry extends ConstantPoolException {
+    public static class UnexpectedEntry extends ConstantPoolException {
         private static final long serialVersionUID = 6986335935377933211L;
         UnexpectedEntry(int index, int expected_tag, int found_tag) {
             super(index);
@@ -71,7 +71,7 @@ public class ConstantPool {
         public final int found_tag;
     }
 
-    public class InvalidEntry extends ConstantPoolException {
+    public static class InvalidEntry extends ConstantPoolException {
         private static final long serialVersionUID = 1000087545585204447L;
         InvalidEntry(int index, int tag) {
             super(index);
@@ -87,7 +87,7 @@ public class ConstantPool {
         public final int tag;
     }
 
-    public class EntryNotFound extends ConstantPoolException {
+    public static class EntryNotFound extends ConstantPoolException {
         private static final long serialVersionUID = 2885537606468581850L;
         EntryNotFound(Object value) {
             super(-1);
@@ -114,6 +114,54 @@ public class ConstantPool {
     public static final int CONSTANT_Methodref = 10;
     public static final int CONSTANT_InterfaceMethodref = 11;
     public static final int CONSTANT_NameAndType = 12;
+    public static final int CONSTANT_MethodHandle = 15;
+    public static final int CONSTANT_MethodType = 16;
+    public static final int CONSTANT_InvokeDynamic = 18;
+
+    public static enum RefKind {
+        REF_getField(1, "getfield"),
+        REF_getStatic(2, "getstatic"),
+        REF_putField(3, "putfield"),
+        REF_putStatic(4, "putstatic"),
+        REF_invokeVirtual(5, "invokevirtual"),
+        REF_invokeStatic(6, "invokestatic"),
+        REF_invokeSpecial(7, "invokespecial"),
+        REF_newInvokeSpecial(8, "newinvokespecial"),
+        REF_invokeInterface(9, "invokeinterface");
+
+        public final int tag;
+        public final String name;
+
+        RefKind(int tag, String name) {
+            this.tag = tag;
+            this.name = name;
+        }
+
+        static RefKind getRefkind(int tag) {
+            switch(tag) {
+                case 1:
+                    return REF_getField;
+                case 2:
+                    return REF_getStatic;
+                case 3:
+                    return REF_putField;
+                case 4:
+                    return REF_putStatic;
+                case 5:
+                    return REF_invokeVirtual;
+                case 6:
+                    return REF_invokeStatic;
+                case 7:
+                    return REF_invokeSpecial;
+                case 8:
+                    return REF_newInvokeSpecial;
+                case 9:
+                    return REF_invokeInterface;
+                default:
+                    return null;
+            }
+        }
+    }
 
     ConstantPool(ClassReader cr) throws IOException, InvalidEntry {
         int count = cr.readUnsignedShort();
@@ -146,9 +194,21 @@ public class ConstantPool {
                 pool[i] = new CONSTANT_InterfaceMethodref_info(this, cr);
                 break;
 
+            case CONSTANT_InvokeDynamic:
+                pool[i] = new CONSTANT_InvokeDynamic_info(this, cr);
+                break;
+
             case CONSTANT_Long:
                 pool[i] = new CONSTANT_Long_info(cr);
                 i++;
+                break;
+
+            case CONSTANT_MethodHandle:
+                pool[i] = new CONSTANT_MethodHandle_info(this, cr);
+                break;
+
+            case CONSTANT_MethodType:
+                pool[i] = new CONSTANT_MethodType_info(this, cr);
                 break;
 
             case CONSTANT_Methodref:
@@ -279,9 +339,12 @@ public class ConstantPool {
         R visitFloat(CONSTANT_Float_info info, P p);
         R visitInteger(CONSTANT_Integer_info info, P p);
         R visitInterfaceMethodref(CONSTANT_InterfaceMethodref_info info, P p);
+        R visitInvokeDynamic(CONSTANT_InvokeDynamic_info info, P p);
         R visitLong(CONSTANT_Long_info info, P p);
         R visitNameAndType(CONSTANT_NameAndType_info info, P p);
         R visitMethodref(CONSTANT_Methodref_info info, P p);
+        R visitMethodHandle(CONSTANT_MethodHandle_info info, P p);
+        R visitMethodType(CONSTANT_MethodType_info info, P p);
         R visitString(CONSTANT_String_info info, P p);
         R visitUtf8(CONSTANT_Utf8_info info, P p);
     }
@@ -548,6 +611,44 @@ public class ConstantPool {
         }
     }
 
+    public static class CONSTANT_InvokeDynamic_info extends CPInfo {
+        CONSTANT_InvokeDynamic_info(ConstantPool cp, ClassReader cr) throws IOException {
+            super(cp);
+            bootstrap_method_attr_index = cr.readUnsignedShort();
+            name_and_type_index = cr.readUnsignedShort();
+        }
+
+        public CONSTANT_InvokeDynamic_info(ConstantPool cp, int bootstrap_method_index, int name_and_type_index) {
+            super(cp);
+            this.bootstrap_method_attr_index = bootstrap_method_index;
+            this.name_and_type_index = name_and_type_index;
+        }
+
+        public int getTag() {
+            return CONSTANT_InvokeDynamic;
+        }
+
+        public int byteLength() {
+            return 5;
+        }
+
+        @Override
+        public String toString() {
+            return "CONSTANT_InvokeDynamic_info[bootstrap_method_index: " + bootstrap_method_attr_index + ", name_and_type_index: " + name_and_type_index + "]";
+        }
+
+        public <R, D> R accept(Visitor<R, D> visitor, D data) {
+            return visitor.visitInvokeDynamic(this, data);
+        }
+
+        public CONSTANT_NameAndType_info getNameAndTypeInfo() throws ConstantPoolException {
+            return cp.getNameAndTypeInfo(name_and_type_index);
+        }
+
+        public final int bootstrap_method_attr_index;
+        public final int name_and_type_index;
+    }
+
     public static class CONSTANT_Long_info extends CPInfo {
         CONSTANT_Long_info(ClassReader cr) throws IOException {
             value = cr.readLong();
@@ -580,6 +681,87 @@ public class ConstantPool {
         }
 
         public final long value;
+    }
+
+    public static class CONSTANT_MethodHandle_info extends CPInfo {
+        CONSTANT_MethodHandle_info(ConstantPool cp, ClassReader cr) throws IOException {
+            super(cp);
+            reference_kind =  RefKind.getRefkind(cr.readUnsignedByte());
+            reference_index = cr.readUnsignedShort();
+        }
+
+        public CONSTANT_MethodHandle_info(ConstantPool cp, RefKind ref_kind, int member_index) {
+            super(cp);
+            this.reference_kind = ref_kind;
+            this.reference_index = member_index;
+        }
+
+        public int getTag() {
+            return CONSTANT_MethodHandle;
+        }
+
+        public int byteLength() {
+            return 4;
+        }
+
+        @Override
+        public String toString() {
+            return "CONSTANT_MethodHandle_info[ref_kind: " + reference_kind + ", member_index: " + reference_index + "]";
+        }
+
+        public <R, D> R accept(Visitor<R, D> visitor, D data) {
+            return visitor.visitMethodHandle(this, data);
+        }
+
+        public CPRefInfo getCPRefInfo() throws ConstantPoolException {
+            int expected = CONSTANT_Methodref;
+            int actual = cp.get(reference_index).getTag();
+            // allow these tag types also:
+            switch (actual) {
+                case CONSTANT_Fieldref:
+                case CONSTANT_InterfaceMethodref:
+                    expected = actual;
+            }
+            return (CPRefInfo) cp.get(reference_index, expected);
+        }
+
+        public final RefKind reference_kind;
+        public final int reference_index;
+    }
+
+    public static class CONSTANT_MethodType_info extends CPInfo {
+        CONSTANT_MethodType_info(ConstantPool cp, ClassReader cr) throws IOException {
+            super(cp);
+            descriptor_index = cr.readUnsignedShort();
+        }
+
+        public CONSTANT_MethodType_info(ConstantPool cp, int signature_index) {
+            super(cp);
+            this.descriptor_index = signature_index;
+        }
+
+        public int getTag() {
+            return CONSTANT_MethodType;
+        }
+
+        public int byteLength() {
+            return 3;
+        }
+
+        @Override
+        public String toString() {
+            return "CONSTANT_MethodType_info[signature_index: " + descriptor_index + "]";
+        }
+
+        public <R, D> R accept(Visitor<R, D> visitor, D data) {
+            return visitor.visitMethodType(this, data);
+        }
+
+        public String getType() throws ConstantPoolException {
+            return cp.getUTF8Value(descriptor_index);
+        }
+
+        public final int descriptor_index;
     }
 
     public static class CONSTANT_Methodref_info extends CPRefInfo {
@@ -694,7 +876,7 @@ public class ConstantPool {
         public int byteLength() {
             class SizeOutputStream extends OutputStream {
                 @Override
-                public void write(int b) throws IOException {
+                public void write(int b) {
                     size++;
                 }
                 int size;
@@ -728,6 +910,5 @@ public class ConstantPool {
 
         public final String value;
     }
-
 
 }

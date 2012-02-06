@@ -1,12 +1,12 @@
 /*
- * Copyright 1997-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.tools.doclets.formats.html;
 
@@ -110,7 +110,10 @@ public class HtmlDoclet extends AbstractDoclet {
         String configstylefile = configuration.stylesheetfile;
         performCopy(configdestdir, confighelpfile);
         performCopy(configdestdir, configstylefile);
-        Util.copyResourceFile(configuration, "inherit.gif", false);
+        Util.copyResourceFile(configuration, "background.gif", false);
+        Util.copyResourceFile(configuration, "tab.gif", false);
+        Util.copyResourceFile(configuration, "titlebar.gif", false);
+        Util.copyResourceFile(configuration, "titlebar_end.gif", false);
         // do early to reduce memory footprint
         if (configuration.classuse) {
             ClassUseWriter.generate(configuration, classtree);
@@ -144,8 +147,12 @@ public class HtmlDoclet extends AbstractDoclet {
             !configuration.nohelp) {
             HelpWriter.generate(configuration);
         }
+        // If a stylesheet file is not specified, copy the default stylesheet
+        // and replace newline with platform-specific newline.
         if (configuration.stylesheetfile.length() == 0) {
-            StylesheetWriter.generate(configuration);
+            Util.copyFile(configuration, "stylesheet.css", Util.RESOURCESDIR,
+                    (configdestdir.isEmpty()) ?
+                        System.getProperty("user.dir") : configdestdir, false, true);
         }
     }
 
@@ -194,23 +201,27 @@ public class HtmlDoclet extends AbstractDoclet {
             PackageIndexFrameWriter.generate(configuration);
         }
         PackageDoc prev = null, next;
-        for(int i = 0; i < packages.length; i++) {
-            PackageFrameWriter.generate(configuration, packages[i]);
-            next = (i + 1 < packages.length && packages[i+1].name().length() > 0) ?
-                packages[i+1] : null;
-            //If the next package is unnamed package, skip 2 ahead if possible
-            next = (i + 2 < packages.length && next == null) ?
-                packages[i+2]: next;
-            AbstractBuilder packageSummaryBuilder = configuration.
-                getBuilderFactory().getPackageSummaryBuilder(
-                packages[i], prev, next);
-            packageSummaryBuilder.build();
-            if (configuration.createtree) {
-                PackageTreeWriter.generate(configuration,
-                        packages[i], prev, next,
-                        configuration.nodeprecated);
+        for (int i = 0; i < packages.length; i++) {
+            // if -nodeprecated option is set and the package is marked as
+            // deprecated, do not generate the package-summary.html, package-frame.html
+            // and package-tree.html pages for that package.
+            if (!(configuration.nodeprecated && Util.isDeprecated(packages[i]))) {
+                PackageFrameWriter.generate(configuration, packages[i]);
+                next = (i + 1 < packages.length &&
+                        packages[i + 1].name().length() > 0) ? packages[i + 1] : null;
+                //If the next package is unnamed package, skip 2 ahead if possible
+                next = (i + 2 < packages.length && next == null) ? packages[i + 2] : next;
+                AbstractBuilder packageSummaryBuilder =
+                        configuration.getBuilderFactory().getPackageSummaryBuilder(
+                        packages[i], prev, next);
+                packageSummaryBuilder.build();
+                if (configuration.createtree) {
+                    PackageTreeWriter.generate(configuration,
+                            packages[i], prev, next,
+                            configuration.nodeprecated);
+                }
+                prev = packages[i];
             }
-            prev = packages[i];
         }
     }
 

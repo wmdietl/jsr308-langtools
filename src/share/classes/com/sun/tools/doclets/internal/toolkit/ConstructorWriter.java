@@ -1,12 +1,12 @@
 /*
- * Copyright 2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.internal.toolkit;
@@ -36,67 +36,80 @@ import com.sun.javadoc.*;
  * Do not use it as an API
  *
  * @author Jamie Ho
+ * @author Bhavesh Patel (Modified)
  * @since 1.5
  */
 
 public interface ConstructorWriter {
 
     /**
-     * Write the header for the constructor documentation.
+     * Get the constructor details tree header.
      *
-     * @param classDoc the class that the constructors belong to.
-     * @param header the header to write.
+     * @param classDoc the class being documented
+     * @param memberDetailsTree the content tree representing member details
+     * @return content tree for the constructor details header
      */
-    public void writeHeader(ClassDoc classDoc, String header);
+    public Content getConstructorDetailsTreeHeader(ClassDoc classDoc,
+            Content memberDetailsTree);
 
     /**
-     * Write the constructor header for the given constructor.
+     * Get the constructor documentation tree header.
      *
-     * @param constructor the constructor being documented.
-     * @param isFirst the flag to indicate whether or not the constructor is the
-     *        first to be documented.
+     * @param constructor the constructor being documented
+     * @param constructorDetailsTree the content tree representing constructor details
+     * @return content tree for the constructor documentation header
      */
-    public void writeConstructorHeader(ConstructorDoc constructor, boolean isFirst);
+    public Content getConstructorDocTreeHeader(ConstructorDoc constructor,
+            Content constructorDetailsTree);
 
     /**
-     * Write the signature for the given constructor.
+     * Get the signature for the given constructor.
      *
-     * @param constructor the constructor being documented.
+     * @param constructor the constructor being documented
+     * @return content tree for the constructor signature
      */
-    public void writeSignature(ConstructorDoc constructor);
+    public Content getSignature(ConstructorDoc constructor);
 
     /**
-     * Write the deprecated output for the given constructor.
+     * Add the deprecated output for the given constructor.
      *
-     * @param constructor the constructor being documented.
+     * @param constructor the constructor being documented
+     * @param constructorDocTree content tree to which the deprecated information will be added
      */
-    public void writeDeprecated(ConstructorDoc constructor);
+    public void addDeprecated(ConstructorDoc constructor, Content constructorDocTree);
 
     /**
-     * Write the comments for the given constructor.
+     * Add the comments for the given constructor.
      *
-     * @param constructor the constructor being documented.
+     * @param constructor the constructor being documented
+     * @param constructorDocTree the content tree to which the comments will be added
      */
-    public void writeComments(ConstructorDoc constructor);
+    public void addComments(ConstructorDoc constructor, Content constructorDocTree);
 
     /**
-     * Write the tag output for the given constructor.
+     * Add the tags for the given constructor.
      *
-     * @param constructor the constructor being documented.
+     * @param constructor the constructor being documented
+     * @param constructorDocTree the content tree to which the tags will be added
      */
-    public void writeTags(ConstructorDoc constructor);
+    public void addTags(ConstructorDoc constructor, Content constructorDocTree);
 
     /**
-     * Write the constructor footer.
+     * Get the constructor details tree.
+     *
+     * @param memberDetailsTree the content tree representing member details
+     * @return content tree for the constructor details
      */
-    public void writeConstructorFooter();
+    public Content getConstructorDetails(Content memberDetailsTree);
 
     /**
-     * Write the footer for the constructor documentation.
+     * Get the constructor documentation.
      *
-     * @param classDoc the class that the constructors belong to.
+     * @param constructorDocTree the content tree representing constructor documentation
+     * @param isLastContent true if the content to be added is the last content
+     * @return content tree for the constructor documentation
      */
-    public void writeFooter(ClassDoc classDoc);
+    public Content getConstructorDoc(Content constructorDocTree, boolean isLastContent);
 
     /**
      * Let the writer know whether a non public constructor was found.

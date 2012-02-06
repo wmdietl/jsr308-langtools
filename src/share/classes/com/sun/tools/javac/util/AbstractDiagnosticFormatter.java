@@ -1,12 +1,12 @@
 /*
- * Copyright 2008-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.tools.javac.util;
 
@@ -38,6 +38,7 @@ import com.sun.tools.javac.api.DiagnosticFormatter.Configuration.DiagnosticPart;
 import com.sun.tools.javac.api.DiagnosticFormatter.Configuration.MultilineLimit;
 import com.sun.tools.javac.api.DiagnosticFormatter.PositionKind;
 import com.sun.tools.javac.api.Formattable;
+import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Printer;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Type;
@@ -57,7 +58,7 @@ import static com.sun.tools.javac.util.JCDiagnostic.DiagnosticType.*;
  *  <li> Provides the formatting logic for rendering the arguments of a JCDiagnostic object.
  * <ul>
  *
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own risk.
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
@@ -116,7 +117,7 @@ public abstract class AbstractDiagnosticFormatter implements DiagnosticFormatter
     protected abstract String formatDiagnostic(JCDiagnostic d, Locale locale);
 
     public String formatPosition(JCDiagnostic d, PositionKind pk,Locale l) {
-        assert (d.getPosition() != Position.NOPOS);
+        Assert.check(d.getPosition() != Position.NOPOS);
         return String.valueOf(getPosition(d, pk));
     }
     //where
@@ -283,6 +284,13 @@ public abstract class AbstractDiagnosticFormatter implements DiagnosticFormatter
             buf.append(indent("^", nSpaces));
         }
         return buf.toString();
+    }
+
+    protected String formatLintCategory(JCDiagnostic d, Locale l) {
+        LintCategory lc = d.getLintCategory();
+        if (lc == null)
+            return "";
+        return localize(l, "compiler.warn.lintOption", lc.option);
     }
 
     /**

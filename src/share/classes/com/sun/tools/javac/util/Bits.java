@@ -1,12 +1,12 @@
 /*
- * Copyright 1999-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,17 +18,17 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.util;
 
 /** A class for extensible, mutable bit sets.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -85,7 +85,7 @@ public class Bits {
     /** Include x in this set.
      */
     public void incl(int x) {
-        assert x >= 0;
+        Assert.check(x >= 0);
         sizeTo((x >>> wordshift) + 1);
         bits[x >>> wordshift] = bits[x >>> wordshift] |
             (1 << (x & wordmask));
@@ -101,10 +101,19 @@ public class Bits {
                 (1 << (x & wordmask));
     }
 
+    /** Exclude [start...end] from this set.
+     */
+    public void excludeFrom(int start) {
+        Bits temp = new Bits();
+        temp.sizeTo(bits.length);
+        temp.inclRange(0, start);
+        andSet(temp);
+    }
+
     /** Exclude x from this set.
      */
     public void excl(int x) {
-        assert x >= 0;
+        Assert.check(x >= 0);
         sizeTo((x >>> wordshift) + 1);
         bits[x >>> wordshift] = bits[x >>> wordshift] &
             ~(1 << (x & wordmask));
@@ -160,7 +169,7 @@ public class Bits {
      *  Delight" by Henry S. Warren Jr. (figure 5-13)
      */
     private static int trailingZeroBits(int x) {
-        assert wordlen == 32;
+        Assert.check(wordlen == 32);
         if (x == 0) return 32;
         int n = 1;
         if ((x & 0xffff) == 0) { n += 16; x >>>= 16; }

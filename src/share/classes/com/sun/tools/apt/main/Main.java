@@ -1,12 +1,12 @@
 /*
- * Copyright 2004-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2004, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.apt.main;
@@ -56,10 +56,12 @@ import com.sun.tools.apt.comp.UsageMessageNeededException;
 import com.sun.tools.apt.util.Bark;
 import com.sun.mirror.apt.AnnotationProcessorFactory;
 
+import static com.sun.tools.javac.file.Locations.pathToURLs;
+
 /** This class provides a commandline interface to the apt build-time
  *  tool.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.
+ *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own
  *  risk.  This code and its internal interfaces are subject to change
  *  or deletion without notice.</b>
@@ -203,7 +205,7 @@ public class Main {
             String s = "  " + helpSynopsis();
             out.print(s);
             for (int j = s.length(); j < 29; j++) out.print(" ");
-            Bark.printLines(out, getLocalizedString(descrKey));
+            Bark.printRawLines(out, getLocalizedString(descrKey));
         }
 
     }
@@ -225,7 +227,7 @@ public class Main {
             String s = "  " + helpSynopsis();
             out.print(s);
             for (int j = s.length(); j < 29; j++) out.print(" ");
-            Bark.printLines(out, getLocalizedString(descrKey));
+            Bark.printRawLines(out, getLocalizedString(descrKey));
         }
 
     }
@@ -257,7 +259,7 @@ public class Main {
             String s = "  " + helpSynopsis();
             out.print(s);
             for (int j = s.length(); j < 29; j++) out.print(" ");
-            Log.printLines(out, getLocalizedString(descrKey));
+            Log.printRawLines(out, getLocalizedString(descrKey));
         }
     };
 
@@ -419,7 +421,7 @@ public class Main {
         },
         new AptOption("-version",               "opt.version") {
             boolean process(String option) {
-                Bark.printLines(out, ownName + " " + JavaCompiler.version());
+                Bark.printRawLines(out, ownName + " " + AptJavaCompiler.version());
                 return super.process(option);
             }
         },
@@ -658,11 +660,11 @@ public class Main {
     /** Print a string that explains usage.
      */
     void help() {
-        Bark.printLines(out, getLocalizedString("msg.usage.header", ownName));
+        Bark.printRawLines(out, getLocalizedString("msg.usage.header", ownName));
         for (int i=0; i < recognizedOptions.length; i++) {
             recognizedOptions[i].help();
         }
-        Bark.printLines(out, getLocalizedString("msg.usage.footer"));
+        Bark.printRawLines(out, getLocalizedString("msg.usage.footer"));
         out.println();
     }
 
@@ -673,7 +675,7 @@ public class Main {
             recognizedOptions[i].xhelp();
         }
         out.println();
-        Bark.printLines(out, getLocalizedString("msg.usage.nonstandard.footer"));
+        Bark.printRawLines(out, getLocalizedString("msg.usage.nonstandard.footer"));
     }
 
     /** Report a usage error.
@@ -686,7 +688,7 @@ public class Main {
     /** Report a warning.
      */
     void warning(String key, Object... args) {
-        Bark.printLines(out, ownName + ": "
+        Bark.printRawLines(out, ownName + ": "
                        + getLocalizedString(key, args));
     }
 
@@ -794,7 +796,7 @@ public class Main {
             origFilenames = processArgs((args=CommandLine.parse(args)));
 
             if (options.get("suppress-tool-api-removal-message") == null) {
-                Bark.printLines(out, getLocalizedString("misc.Deprecation"));
+                Bark.printRawLines(out, getLocalizedString("misc.Deprecation"));
             }
 
             if (origFilenames == null) {
@@ -806,7 +808,7 @@ public class Main {
                     return EXIT_OK;
             }
         } catch (java.io.FileNotFoundException e) {
-            Bark.printLines(out, ownName + ": " +
+            Bark.printRawLines(out, ownName + ": " +
                            getLocalizedString("err.file.not.found",
                                               e.getMessage()));
             return EXIT_SYSERR;
@@ -1109,11 +1111,11 @@ public class Main {
         }
         int exitCode = EXIT_OK;
 
-        JavaCompiler comp = null;
+        AptJavaCompiler comp = null;
         try {
             context.put(Bark.outKey, out);
 
-            comp = JavaCompiler.instance(context);
+            comp = AptJavaCompiler.instance(context);
             if (comp == null)
                 return EXIT_SYSERR;
 
@@ -1181,42 +1183,42 @@ public class Main {
     /** Print a message reporting an internal error.
      */
     void bugMessage(Throwable ex) {
-        Bark.printLines(out, getLocalizedString("msg.bug",
-                                               JavaCompiler.version()));
+        Bark.printRawLines(out, getLocalizedString("msg.bug",
+                                               AptJavaCompiler.version()));
         ex.printStackTrace(out);
     }
 
     /** Print a message reporting an fatal error.
      */
     void apMessage(AnnotationProcessingError ex) {
-        Bark.printLines(out, getLocalizedString("misc.Problem"));
+        Bark.printRawLines(out, getLocalizedString("misc.Problem"));
         ex.getCause().printStackTrace(out);
     }
 
     /** Print a message about sun.misc.Service problem.
      */
     void sceMessage(sun.misc.ServiceConfigurationError ex) {
-        Bark.printLines(out, getLocalizedString("misc.SunMiscService"));
+        Bark.printRawLines(out, getLocalizedString("misc.SunMiscService"));
         ex.printStackTrace(out);
     }
 
     /** Print a message reporting an fatal error.
      */
     void feMessage(Throwable ex) {
-        Bark.printLines(out, ex.toString());
+        Bark.printRawLines(out, ex.toString());
     }
 
     /** Print a message reporting an input/output error.
      */
     void ioMessage(Throwable ex) {
-        Bark.printLines(out, getLocalizedString("msg.io"));
+        Bark.printRawLines(out, getLocalizedString("msg.io"));
         ex.printStackTrace(out);
     }
 
     /** Print a message reporting an out-of-resources error.
      */
     void resourceMessage(Throwable ex) {
-        Bark.printLines(out, getLocalizedString("msg.resource"));
+        Bark.printRawLines(out, getLocalizedString("msg.resource"));
         ex.printStackTrace(out);
     }
 
@@ -1274,61 +1276,6 @@ public class Main {
                     + "arguments={1}, {2}";
                 return MessageFormat.format(msg, (Object[]) args);
             }
-        }
-    }
-
-    // Borrowed from DocletInvoker
-    /**
-     * Utility method for converting a search path string to an array
-     * of directory and JAR file URLs.
-     *
-     * @param path the search path string
-     * @return the resulting array of directory and JAR file URLs
-     */
-    static URL[] pathToURLs(String path) {
-        StringTokenizer st = new StringTokenizer(path, File.pathSeparator);
-        URL[] urls = new URL[st.countTokens()];
-        int count = 0;
-        while (st.hasMoreTokens()) {
-            URL url = fileToURL(new File(st.nextToken()));
-            if (url != null) {
-                urls[count++] = url;
-            }
-        }
-        if (urls.length != count) {
-            URL[] tmp = new URL[count];
-            System.arraycopy(urls, 0, tmp, 0, count);
-            urls = tmp;
-        }
-        return urls;
-    }
-
-    /**
-     * Returns the directory or JAR file URL corresponding to the specified
-     * local file name.
-     *
-     * @param file the File object
-     * @return the resulting directory or JAR file URL, or null if unknown
-     */
-    static URL fileToURL(File file) {
-        String name;
-        try {
-            name = file.getCanonicalPath();
-        } catch (IOException e) {
-            name = file.getAbsolutePath();
-        }
-        name = name.replace(File.separatorChar, '/');
-        if (!name.startsWith("/")) {
-            name = "/" + name;
-        }
-        // If the file does not exist, then assume that it's a directory
-        if (!file.isFile()) {
-            name = name + "/";
-        }
-        try {
-            return new URL("file", "", name);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("file");
         }
     }
 }

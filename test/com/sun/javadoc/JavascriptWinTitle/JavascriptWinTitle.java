@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -90,44 +90,34 @@ public class JavascriptWinTitle {
     private static final String[][] testArray = {
 
             // Test the javascript "type" attribute is present:
-            {  "<SCRIPT type=\"text/javascript\">",
+            {  "<script type=\"text/javascript\">",
+                     TMPDEST_DIR1 + "overview-summary.html"  },
+
+            // Test onload is absent:
+            {  "<body>",
                      TMPDEST_DIR1 + "overview-summary.html"  },
 
             // Test onload is present:
-            {  "onload=\"windowTitle();\"",
-                     TMPDEST_DIR1 + "overview-summary.html"  },
-
-            // Test onload is present:
-            {  "onload=\"windowTitle();\"",
+            {  "<body>",
                      TMPDEST_DIR1 + FS + "p1" + FS + "package-summary.html"  },
 
-            // Test onload is present:
-            {  "onload=\"windowTitle();\"",
-                     TMPDEST_DIR1 + FS + "p1" + FS + "C.html"  },
-
             // Test that "onload" is not present in BODY tag:
-            {   "<BODY BGCOLOR=\"white\">",
+            {   "<body>",
                      TMPDEST_DIR1 + "overview-frame.html"  },
 
             // Test that "onload" is not present in BODY tag:
-            {   "<BODY BGCOLOR=\"white\">",
+            {   "<body>",
                      TMPDEST_DIR1 + "allclasses-frame.html"  },
 
             // Test that "onload" is not present in BODY tag:
-            {   "<BODY BGCOLOR=\"white\">",
+            {   "<body>",
                      TMPDEST_DIR1 + FS + "p1" + FS + "package-frame.html"  },
 
             // Test that win title javascript is followed by NOSCRIPT code.
-            {"<SCRIPT type=\"text/javascript\">" + LS +
-                    "function windowTitle()" + LS +
-                    "{" + LS +
-                    "    if (location.href.indexOf('is-external=true') == -1) {" + LS +
-                    "        parent.document.title=\"C (Window Title)\";" + LS +
-                    "    }" + LS +
-                    "}" + LS +
-             "</SCRIPT>" + LS +
-             "<NOSCRIPT>" + LS +
-             "</NOSCRIPT>",
+            {"<script type=\"text/javascript\"><!--" + LS +
+                     "    if (location.href.indexOf('is-external=true') == -1) {" + LS +
+                     "        parent.document.title=\"C (Window Title)\";" + LS +
+                     "    }" + LS + "//-->" + LS + "</script>",
              TMPDEST_DIR1 + FS + "p1" + FS + "C.html"
             }
 

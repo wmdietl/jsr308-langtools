@@ -1,12 +1,12 @@
 /*
- * Copyright 1999-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.code;
@@ -49,8 +49,8 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *  types, packages. Each subclass is represented as a static inner class
  *  inside Symbol.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -81,8 +81,7 @@ public abstract class Symbol implements Element {
      *  method to make sure that the class symbol is loaded.
      */
     public List<Attribute.Compound> getAnnotationMirrors() {
-        assert attributes_field != null;
-        return attributes_field;
+        return Assert.checkNonNull(attributes_field);
     }
 
     /** Fetch a particular annotation from a symbol. */
@@ -99,17 +98,6 @@ public abstract class Symbol implements Element {
     /** The type of this symbol.
      */
     public Type type;
-
-    /** The type annotations targeted to a tree directly owned by this symbol
-     */
-    // type annotations are stored here for two purposes:
-    //  - convenient location to store annotations for generation after erasure
-    //  - a private interface for accessing type annotations parsed from
-    //    classfiles
-    //  the field is populated for the following declaration only
-    //  class, field, variable and type parameters
-    //
-    public List<Attribute.TypeCompound> typeAnnotations;
 
     /** The owner of this symbol.
      */
@@ -133,7 +121,6 @@ public abstract class Symbol implements Element {
         this.completer = null;
         this.erasure_field = null;
         this.attributes_field = List.nil();
-        this.typeAnnotations = List.nil();
         this.name = name;
     }
 
@@ -162,7 +149,8 @@ public abstract class Symbol implements Element {
      * the default package; otherwise, the owner symbol is returned
      */
     public Symbol location() {
-        if (owner.name == null || (owner.name.isEmpty() && owner.kind != PCK)) {
+        if (owner.name == null || (owner.name.isEmpty() &&
+                (owner.flags() & BLOCK) == 0 && owner.kind != PCK && owner.kind != TYP)) {
             return null;
         }
         return owner;
@@ -214,6 +202,16 @@ public abstract class Symbol implements Element {
         return (flags() & INTERFACE) != 0;
     }
 
+    /** Recognize if this symbol was marked @PolymorphicSignature in the source. */
+    public boolean isPolymorphicSignatureGeneric() {
+        return (flags() & (POLYMORPHIC_SIGNATURE | HYPOTHETICAL)) == POLYMORPHIC_SIGNATURE;
+    }
+
+    /** Recognize if this symbol was split from a @PolymorphicSignature symbol in the source. */
+    public boolean isPolymorphicSignatureInstance() {
+        return (flags() & (POLYMORPHIC_SIGNATURE | HYPOTHETICAL)) == (POLYMORPHIC_SIGNATURE | HYPOTHETICAL);
+    }
+
     /** Is this symbol declared (directly or indirectly) local
      *  to a method or variable initializer?
      *  Also includes fields of inner classes which are in
@@ -223,6 +221,13 @@ public abstract class Symbol implements Element {
         return
             (owner.kind & (VAR | MTH)) != 0 ||
             (owner.kind == TYP && owner.isLocal());
+    }
+
+    /** Has this symbol an empty name? This includes anonymous
+     *  inner classses.
+     */
+    public boolean isAnonymous() {
+        return name.isEmpty();
     }
 
     /** Is this symbol a constructor?
@@ -572,6 +577,9 @@ public abstract class Symbol implements Element {
 
         public java.util.List<Symbol> getEnclosedElements() {
             List<Symbol> list = List.nil();
+            if (kind == TYP && type.tag == TYPEVAR) {
+                return list;
+            }
             for (Scope.Entry e = members().elems; e != null; e = e.sibling) {
                 if (e.sym != null && (e.sym.flags() & SYNTHETIC) == 0 && e.sym.owner == this)
                     list = list.prepend(e.sym);
@@ -588,7 +596,7 @@ public abstract class Symbol implements Element {
         }
 
         public <R, P> R accept(ElementVisitor<R, P> v, P p) {
-            assert type.tag == TYPEVAR; // else override will be invoked
+            Assert.check(type.tag == TYPEVAR); // else override will be invoked
             return v.visitTypeParameter(this, p);
         }
 
@@ -657,8 +665,12 @@ public abstract class Symbol implements Element {
 
         public List<Attribute.Compound> getAnnotationMirrors() {
             if (completer != null) complete();
-            assert attributes_field != null;
-            return attributes_field;
+            if (package_info != null && package_info.completer != null) {
+                package_info.complete();
+                if (attributes_field.isEmpty())
+                    attributes_field = package_info.attributes_field;
+            }
+            return Assert.checkNonNull(attributes_field);
         }
 
         /** A package "exists" if a type or package that exists has
@@ -714,6 +726,11 @@ public abstract class Symbol implements Element {
          */
         public JavaFileObject classfile;
 
+        /** the list of translated local classes (used for generating
+         * InnerClasses attribute)
+         */
+        public List<ClassSymbol> trans_local;
+
         /** the constant pool of the class
          */
         public Pool pool;
@@ -755,8 +772,7 @@ public abstract class Symbol implements Element {
 
         public List<Attribute.Compound> getAnnotationMirrors() {
             if (completer != null) complete();
-            assert attributes_field != null;
-            return attributes_field;
+            return Assert.checkNonNull(attributes_field);
         }
 
         public Type erasure(Types types) {
@@ -817,6 +833,8 @@ public abstract class Symbol implements Element {
                 ClassType t = (ClassType)type;
                 if (t.interfaces_field == null) // FIXME: shouldn't be null
                     t.interfaces_field = List.nil();
+                if (t.all_interfaces_field != null)
+                    return Type.getModelTypes(t.all_interfaces_field);
                 return t.interfaces_field;
             } else {
                 return List.nil();
@@ -832,7 +850,7 @@ public abstract class Symbol implements Element {
                 // An interface has no superclass; its supertype is Object.
                 return t.isInterface()
                     ? Type.noType
-                    : t.supertype_field;
+                    : t.supertype_field.getModelType();
             } else {
                 return Type.noType;
             }
@@ -935,6 +953,8 @@ public abstract class Symbol implements Element {
                 return ElementKind.ENUM_CONSTANT;
             } else if (owner.kind == TYP || owner.kind == ERR) {
                 return ElementKind.FIELD;
+            } else if (isResourceVariable()) {
+                return ElementKind.RESOURCE_VARIABLE;
             } else {
                 return ElementKind.LOCAL_VARIABLE;
             }
@@ -949,22 +969,12 @@ public abstract class Symbol implements Element {
         }
 
         public void setLazyConstValue(final Env<AttrContext> env,
-                                      final Log log,
                                       final Attr attr,
                                       final JCTree.JCExpression initializer)
         {
             setData(new Callable<Object>() {
                 public Object call() {
-                    JavaFileObject source = log.useSource(env.toplevel.sourcefile);
-                    try {
-                        Type itype = attr.attribExpr(initializer, env, type);
-                        if (itype.constValue() != null)
-                            return attr.coerce(itype, type).constValue();
-                        else
-                            return null;
-                    } finally {
-                        log.useSource(source);
-                    }
+                    return attr.attribLazyConstantValue(env, initializer, type);
                 }
             });
         }
@@ -981,12 +991,17 @@ public abstract class Symbol implements Element {
             return data == ElementKind.EXCEPTION_PARAMETER;
         }
 
+        public boolean isResourceVariable() {
+            return data == ElementKind.RESOURCE_VARIABLE;
+        }
+
         public Object getConstValue() {
             // TODO: Consider if getConstValue and getConstantValue can be collapsed
-            if (data == ElementKind.EXCEPTION_PARAMETER) {
+            if (data == ElementKind.EXCEPTION_PARAMETER ||
+                data == ElementKind.RESOURCE_VARIABLE) {
                 return null;
             } else if (data instanceof Callable<?>) {
-                // In this case, this is final a variable, with an as
+                // In this case, this is a final variable, with an as
                 // yet unevaluated initializer.
                 Callable<?> eval = (Callable<?>)data;
                 data = null; // to make sure we don't evaluate this twice.
@@ -1000,7 +1015,7 @@ public abstract class Symbol implements Element {
         }
 
         public void setData(Object data) {
-            assert !(data instanceof Env<?>) : this;
+            Assert.check(!(data instanceof Env<?>), this);
             this.data = data;
         }
 
@@ -1032,7 +1047,7 @@ public abstract class Symbol implements Element {
          */
         public MethodSymbol(long flags, Name name, Type type, Symbol owner) {
             super(MTH, flags, name, type, owner);
-            assert owner.type.tag != TYPEVAR : owner + "." + name;
+            if (owner.type.tag == TYPEVAR) Assert.error(owner + "." + name);
         }
 
         /** Clone this symbol with new owner.
@@ -1071,18 +1086,24 @@ public abstract class Symbol implements Element {
                  impl == null && is.nonEmpty();
                  is = is.tail) {
                 TypeSymbol i = is.head.tsym;
-                for (Scope.Entry e = i.members().lookup(name);
-                     impl == null && e.scope != null;
-                     e = e.next()) {
-                    if (this.overrides(e.sym, (TypeSymbol)owner, types, true) &&
-                        // FIXME: I suspect the following requires a
-                        // subst() for a parametric return type.
-                        types.isSameType(type.getReturnType(),
-                                         types.memberType(owner.type, e.sym).getReturnType())) {
-                        impl = e.sym;
-                    }
-                    if (impl == null)
-                        impl = implemented(i, types);
+                impl = implementedIn(i, types);
+                if (impl == null)
+                    impl = implemented(i, types);
+            }
+            return impl;
+        }
+
+        public Symbol implementedIn(TypeSymbol c, Types types) {
+            Symbol impl = null;
+            for (Scope.Entry e = c.members().lookup(name);
+                 impl == null && e.scope != null;
+                 e = e.next()) {
+                if (this.overrides(e.sym, (TypeSymbol)owner, types, true) &&
+                    // FIXME: I suspect the following requires a
+                    // subst() for a parametric return type.
+                    types.isSameType(type.getReturnType(),
+                                     types.memberType(owner.type, e.sym).getReturnType())) {
+                    impl = e.sym;
                 }
             }
             return impl;
@@ -1173,7 +1194,7 @@ public abstract class Symbol implements Element {
         }
 
         private boolean isOverridableIn(TypeSymbol origin) {
-            // JLS3 8.4.6.1
+            // JLS 8.4.6.1
             switch ((int)(flags_field & Flags.AccessFlags)) {
             case Flags.PRIVATE:
                 return false;
@@ -1197,7 +1218,18 @@ public abstract class Symbol implements Element {
          *  as possible implementations.
          */
         public MethodSymbol implementation(TypeSymbol origin, Types types, boolean checkResult) {
-            MethodSymbol res = types.implementation(this, origin, types, checkResult);
+            return implementation(origin, types, checkResult, implementation_filter);
+        }
+        // where
+            private static final Filter<Symbol> implementation_filter = new Filter<Symbol>() {
+                public boolean accepts(Symbol s) {
+                    return s.kind == Kinds.MTH &&
+                            (s.flags() & SYNTHETIC) == 0;
+                }
+            };
+
+        public MethodSymbol implementation(TypeSymbol origin, Types types, boolean checkResult, Filter<Symbol> implFilter) {
+            MethodSymbol res = types.implementation(this, origin, checkResult, implFilter);
             if (res != null)
                 return res;
             // if origin is derived from a raw type, we might have missed
@@ -1273,8 +1305,15 @@ public abstract class Symbol implements Element {
                 return ElementKind.CONSTRUCTOR;
             else if (name == name.table.names.clinit)
                 return ElementKind.STATIC_INIT;
+            else if ((flags() & BLOCK) != 0)
+                return isStatic() ? ElementKind.STATIC_INIT : ElementKind.INSTANCE_INIT;
             else
                 return ElementKind.METHOD;
+        }
+
+        public boolean isStaticOrInstanceInit() {
+            return getKind() == ElementKind.STATIC_INIT ||
+                    getKind() == ElementKind.INSTANCE_INIT;
         }
 
         public Attribute getDefaultValue() {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,6 +26,9 @@
  * @bug 6403459
  * @summary Test that generating programs with syntax errors is a fatal condition
  * @author  Joseph D. Darcy
+ * @library ../../lib
+ * @build JavacTestingAbstractProcessor
+ * @compile TestReturnCode.java
  * @compile TestFatalityOfParseErrors.java
  * @compile/fail -XprintRounds -processor TestFatalityOfParseErrors -proc:only TestFatalityOfParseErrors.java
  */
@@ -45,11 +48,8 @@ import java.io.IOException;
  * Write out an incomplete source file and observe that the next round
  * is marked as an error.
  */
-@SupportedAnnotationTypes("*")
-public class TestFatalityOfParseErrors extends AbstractProcessor {
+public class TestFatalityOfParseErrors extends JavacTestingAbstractProcessor {
     int round = 0;
-    Messager messager;
-    Filer filer;
 
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnvironment) {
@@ -86,15 +86,5 @@ public class TestFatalityOfParseErrors extends AbstractProcessor {
             throw new RuntimeException(ioException);
         }
         return true;
-    }
-
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latest();
-    }
-
-    public void init(ProcessingEnvironment processingEnv) {
-        super.init(processingEnv);
-        messager = processingEnv.getMessager();
-        filer    = processingEnv.getFiler();
     }
 }

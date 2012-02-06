@@ -1,12 +1,12 @@
 /*
- * Copyright 2003 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.internal.toolkit;
@@ -36,67 +36,79 @@ import com.sun.javadoc.*;
  * Do not use it as an API
  *
  * @author Jamie Ho
+ * @author Bhavesh Patel (Modified)
  * @since 1.5
  */
 
 public interface AnnotationTypeRequiredMemberWriter {
 
     /**
-     * Write the header for the member documentation.
+     * Add the annotation type details tree header.
      *
-     * @param classDoc the annotation type that the members belong to.
-     * @param header the header to write.
+     * @param classDoc the annotation type being documented
+     * @param memberDetailsTree the content tree representing member details
      */
-    public void writeHeader(ClassDoc classDoc, String header);
+    public void addAnnotationDetailsTreeHeader(ClassDoc classDoc,
+            Content memberDetailsTree);
 
     /**
-     * Write the member header for the given member.
+     * Get the annotation type documentation tree header.
      *
-     * @param member the member being documented.
-     * @param isFirst the flag to indicate whether or not the member is
-     *                the first to be documented.
+     * @param member the annotation type being documented
+     * @param annotationDetailsTree the content tree representing annotation type details
+     * @return content tree for the annotation type documentation header
      */
-    public void writeMemberHeader(MemberDoc member, boolean isFirst);
+    public Content getAnnotationDocTreeHeader(MemberDoc member,
+            Content annotationDetailsTree);
 
     /**
-     * Write the signature for the given member.
+     * Get the annotation type details tree.
      *
-     * @param member the member being documented.
+     * @param annotationDetailsTree the content tree representing annotation type details
+     * @return content tree for the annotation type details
      */
-    public void writeSignature(MemberDoc member);
+    public Content getAnnotationDetails(Content annotationDetailsTree);
 
     /**
-     * Write the deprecated output for the given member.
+     * Get the annotation type documentation.
      *
-     * @param member the member being documented.
+     * @param annotationDocTree the content tree representing annotation type documentation
+     * @param isLastContent true if the content to be added is the last content
+     * @return content tree for the annotation type documentation
      */
-    public void writeDeprecated(MemberDoc member);
+    public Content getAnnotationDoc(Content annotationDocTree, boolean isLastContent);
 
     /**
-     * Write the comments for the given member.
+     * Get the signature for the given member.
      *
-     * @param member the member being documented.
+     * @param member the member being documented
+     * @return content tree for the annotation type signature
      */
-    public void writeComments(MemberDoc member);
+    public Content getSignature(MemberDoc member);
 
     /**
-     * Write the tag output for the given member.
+     * Add the deprecated output for the given member.
      *
-     * @param member the member being documented.
+     * @param member the member being documented
+     * @param annotationDocTree content tree to which the deprecated information will be added
      */
-    public void writeTags(MemberDoc member);
+    public void addDeprecated(MemberDoc member, Content annotationDocTree);
 
     /**
-     * Write the member footer.
+     * Add the comments for the given member.
+     *
+     * @param member the member being documented
+     * @param annotationDocTree the content tree to which the comments will be added
      */
-    public void writeMemberFooter();
+    public void addComments(MemberDoc member, Content annotationDocTree);
 
     /**
-     * Write the footer for the member documentation.
+     * Add the tags for the given member.
      *
-     * @param classDoc the class that the member belong to.
+     * @param member the member being documented
+     * @param annotationDocTree the content tree to which the tags will be added
      */
-    public void writeFooter(ClassDoc classDoc);
+    public void addTags(MemberDoc member, Content annotationDocTree);
 
     /**
      * Close the writer.

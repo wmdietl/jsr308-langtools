@@ -1,12 +1,12 @@
 /*
- * Copyright 2008-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,15 +18,16 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.tools.javac.util;
 
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Locale;
+import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.api.DiagnosticFormatter.Configuration.*;
 import com.sun.tools.javac.api.Formattable;
@@ -41,7 +42,7 @@ import static com.sun.tools.javac.api.DiagnosticFormatter.PositionKind.*;
  * or not the source name and position are set. This formatter provides a standardized, localize-independent
  * implementation of a diagnostic formatter; as such, this formatter is best suited for testing purposes.
  *
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own risk.
  * This code and its internal interfaces are subject to change or
  * deletion without notice.</b>
@@ -62,7 +63,7 @@ public final class RawDiagnosticFormatter extends AbstractDiagnosticFormatter {
     //provide common default formats
     public String formatDiagnostic(JCDiagnostic d, Locale l) {
         try {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             if (d.getPosition() != Position.NOPOS) {
                 buf.append(formatSource(d, false, null));
                 buf.append(':');
@@ -71,16 +72,22 @@ public final class RawDiagnosticFormatter extends AbstractDiagnosticFormatter {
                 buf.append(formatPosition(d, COLUMN, null));
                 buf.append(':');
             }
+            else if (d.getSource() != null && d.getSource().getKind() == JavaFileObject.Kind.CLASS) {
+                buf.append(formatSource(d, false, null));
+                buf.append(":-:-:");
+            }
             else
                 buf.append('-');
             buf.append(' ');
             buf.append(formatMessage(d, null));
-            if (displaySource(d))
-                buf.append("\n" + formatSourceLine(d, 0));
+            if (displaySource(d)) {
+                buf.append("\n");
+                buf.append(formatSourceLine(d, 0));
+            }
             return buf.toString();
         }
         catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             return null;
         }
     }
@@ -96,7 +103,9 @@ public final class RawDiagnosticFormatter extends AbstractDiagnosticFormatter {
                 buf.append(",{");
                 for (String sub : formatSubdiagnostics(d, null)) {
                     buf.append(sep);
-                    buf.append("(" + sub + ")");
+                    buf.append("(");
+                    buf.append(sub);
+                    buf.append(")");
                     sep = ",";
                 }
                 buf.append('}');

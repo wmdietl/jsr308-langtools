@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,16 +16,18 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @bug     6418666 6423973 6453386
+ * @bug     6418666 6423973 6453386 7025809
  * @summary Test the NoTypes: VOID, PACKAGE, NONE
  * @author  Scott Seligman
+ * @library ../../../lib
+ * @build JavacTestingAbstractProcessor
  * @compile -g NoTypes.java
  * @compile -processor NoTypes -proc:only NoTypes.java
  */
@@ -39,20 +41,7 @@ import javax.lang.model.util.*;
 
 import static javax.lang.model.type.TypeKind.*;
 
-
-@SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes("*")
-public class NoTypes extends AbstractProcessor {
-
-    Elements elements;
-    Types types;
-
-    public void init(ProcessingEnvironment penv) {
-        super.init(penv);
-        elements = penv.getElementUtils();
-        types =  penv.getTypeUtils();
-    }
-
+public class NoTypes extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> annoTypes,
                            RoundEnvironment round) {
         if (!round.processingOver())
@@ -86,7 +75,7 @@ public class NoTypes extends AbstractProcessor {
         verifyKind(NONE, types.getNoType(NONE));
 
         // The return type of a constructor or void method is VOID.
-        class Scanner extends ElementScanner6<Void, Void> {
+        class Scanner extends ElementScanner<Void, Void> {
             @Override
             public Void visitExecutable(ExecutableElement e, Void p) {
                 verifyKind(VOID, e.getReturnType());
@@ -100,11 +89,11 @@ public class NoTypes extends AbstractProcessor {
     }
 
     /**
-     * Verify that a NoType instance is of a particular kind,
-     * and that TypeKindVisitor6 properly dispatches on it.
+     * Verify that a NoType instance is of a particular kind, and that
+     * the latest TypeKindVisitor properly dispatches on it.
      */
     private void verifyKind(TypeKind kind, TypeMirror type) {
-        class Vis extends TypeKindVisitor6<TypeKind, Void> {
+        class Vis extends TypeKindVisitor<TypeKind, Void> {
             @Override
             public TypeKind visitNoTypeAsVoid(NoType t, Void p) {
                 return VOID;
@@ -122,9 +111,7 @@ public class NoTypes extends AbstractProcessor {
             throw new AssertionError();
     }
 
-
     // Fodder for the tests
-
     interface I {
     }
 

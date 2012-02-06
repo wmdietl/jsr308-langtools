@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 
@@ -45,10 +45,10 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.SimpleTypeVisitor6;
+import javax.lang.model.util.SimpleTypeVisitor8;
 
 /*
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own
  * risk.  This code and its internal interfaces are subject to change
  * or deletion without notice.</b></p>
@@ -74,16 +74,21 @@ public class LLNI extends Gen {
     }
 
     protected void write(OutputStream o, TypeElement clazz) throws Util.Exit {
-        String cname     = mangleClassName(clazz.getQualifiedName().toString());
-        PrintWriter pw   = wrapWriter(o);
-        fields = ElementFilter.fieldsIn(clazz.getEnclosedElements());
-        methods = ElementFilter.methodsIn(clazz.getEnclosedElements());
-        generateDeclsForClass(pw, clazz, cname);
-        // FIXME check if errors occurred on the PrintWriter and throw exception if so
+        try {
+            String cname     = mangleClassName(clazz.getQualifiedName().toString());
+            PrintWriter pw   = wrapWriter(o);
+            fields = ElementFilter.fieldsIn(clazz.getEnclosedElements());
+            methods = ElementFilter.methodsIn(clazz.getEnclosedElements());
+            generateDeclsForClass(pw, clazz, cname);
+            // FIXME check if errors occurred on the PrintWriter and throw exception if so
+        } catch (TypeSignature.SignatureException e) {
+            util.error("llni.sigerror", e.getMessage());
+        }
     }
 
     protected void generateDeclsForClass(PrintWriter pw,
-            TypeElement clazz, String cname) throws Util.Exit {
+            TypeElement clazz, String cname)
+            throws TypeSignature.SignatureException, Util.Exit {
         doneHandleTypes  = new HashSet<String>();
         /* The following handle types are predefined in "typedefs.h". Suppress
            inclusion in the output by generating them "into the blue" here. */
@@ -127,7 +132,8 @@ public class LLNI extends Gen {
             .replace(innerDelim, '_');
     }
 
-    protected void forwardDecls(PrintWriter pw, TypeElement clazz) {
+    protected void forwardDecls(PrintWriter pw, TypeElement clazz)
+            throws TypeSignature.SignatureException {
         TypeElement object = elems.getTypeElement("java.lang.Object");
         if (clazz.equals(object))
             return;
@@ -403,7 +409,7 @@ public class LLNI extends Gen {
 
     protected void methodSectionForClass(PrintWriter pw,
             TypeElement clazz, String cname)
-            throws Util.Exit {
+            throws TypeSignature.SignatureException, Util.Exit {
         String methods = methodDecls(clazz, cname);
 
         if (methods.length() != 0) {
@@ -418,7 +424,8 @@ public class LLNI extends Gen {
         }
     }
 
-    protected String methodDecls(TypeElement clazz, String cname) throws Util.Exit {
+    protected String methodDecls(TypeElement clazz, String cname)
+            throws TypeSignature.SignatureException, Util.Exit {
 
         String res = "";
         for (ExecutableElement method: methods) {
@@ -430,7 +437,7 @@ public class LLNI extends Gen {
 
     protected String methodDecl(ExecutableElement method,
                                 TypeElement clazz, String cname)
-    throws Util.Exit {
+            throws TypeSignature.SignatureException, Util.Exit {
         String res = null;
 
         TypeMirror retType = types.erasure(method.getReturnType());
@@ -474,7 +481,8 @@ public class LLNI extends Gen {
     }
 
     protected final String jniMethodName(ExecutableElement method, String cname,
-                                         boolean longName) {
+                                         boolean longName)
+                throws TypeSignature.SignatureException {
         String res = "Java_" + cname + "_" + method.getSimpleName();
 
         if (longName) {
@@ -620,7 +628,7 @@ public class LLNI extends Gen {
     }
 
     protected final boolean isLongOrDouble(TypeMirror t) {
-        TypeVisitor<Boolean,Void> v = new SimpleTypeVisitor6<Boolean,Void>() {
+        TypeVisitor<Boolean,Void> v = new SimpleTypeVisitor8<Boolean,Void>() {
             public Boolean defaultAction(TypeMirror t, Void p){
                 return false;
             }

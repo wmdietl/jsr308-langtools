@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,22 +18,23 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.util;
 
-import com.sun.tools.javac.main.OptionName;
 import java.util.*;
+import com.sun.tools.javac.main.Option;
+import static com.sun.tools.javac.main.Option.*;
 
 /** A table of all command-line options.
  *  If an option has an argument, the option name is mapped to the argument.
  *  If a set option has no argument, it is mapped to itself.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -60,20 +61,84 @@ public class Options {
         context.put(optionsKey, this);
     }
 
+    /**
+     * Get the value for an undocumented option.
+     */
     public String get(String name) {
         return values.get(name);
     }
 
-    public String get(OptionName name) {
-        return values.get(name.optionName);
+    /**
+     * Get the value for an option.
+     */
+    public String get(Option option) {
+        return values.get(option.text);
+    }
+
+    /**
+     * Get the boolean value for an option, patterned after Boolean.getBoolean,
+     * essentially will return true, iff the value exists and is set to "true".
+     */
+    public boolean getBoolean(String name) {
+        return getBoolean(name, false);
+    }
+
+    /**
+     * Get the boolean with a default value if the option is not set.
+     */
+    public boolean getBoolean(String name, boolean defaultValue) {
+        String value = get(name);
+        return (value == null) ? defaultValue : Boolean.parseBoolean(value);
+    }
+
+    /**
+     * Check if the value for an undocumented option has been set.
+     */
+    public boolean isSet(String name) {
+        return (values.get(name) != null);
+    }
+
+    /**
+     * Check if the value for an option has been set.
+     */
+    public boolean isSet(Option option) {
+        return (values.get(option.text) != null);
+    }
+
+    /**
+     * Check if the value for a choice option has been set to a specific value.
+     */
+    public boolean isSet(Option option, String value) {
+        return (values.get(option.text + value) != null);
+    }
+
+    /**
+     * Check if the value for an undocumented option has not been set.
+     */
+    public boolean isUnset(String name) {
+        return (values.get(name) == null);
+    }
+
+    /**
+     * Check if the value for an option has not been set.
+     */
+    public boolean isUnset(Option option) {
+        return (values.get(option.text) == null);
+    }
+
+    /**
+     * Check if the value for a choice option has not been set to a specific value.
+     */
+    public boolean isUnset(Option option, String value) {
+        return (values.get(option.text + value) == null);
     }
 
     public void put(String name, String value) {
         values.put(name, value);
     }
 
-    public void put(OptionName name, String value) {
-        values.put(name.optionName, value);
+    public void put(Option option, String value) {
+        values.put(option.text, value);
     }
 
     public void putAll(Options options) {
@@ -92,7 +157,18 @@ public class Options {
         return values.size();
     }
 
-    static final String LINT = "-Xlint";
+    // light-weight notification mechanism
+
+    private List<Runnable> listeners = List.nil();
+
+    public void addListener(Runnable listener) {
+        listeners = listeners.prepend(listener);
+    }
+
+    public void notifyListeners() {
+        for (Runnable r: listeners)
+            r.run();
+    }
 
     /** Check for a lint suboption. */
     public boolean lint(String s) {
@@ -100,8 +176,8 @@ public class Options {
         // they are all enabled without the specific one being
         // disabled
         return
-            get(LINT + ":" + s)!=null ||
-            (get(LINT)!=null || get(LINT + ":all")!=null) &&
-                get(LINT+":-"+s)==null;
+            isSet(XLINT_CUSTOM, s) ||
+            (isSet(XLINT) || isSet(XLINT_CUSTOM, "all")) &&
+                isUnset(XLINT_CUSTOM, "-" + s);
     }
 }

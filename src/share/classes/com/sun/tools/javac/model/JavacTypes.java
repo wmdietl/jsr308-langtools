@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,20 +18,18 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.model;
 
-import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Set;
 import java.util.EnumSet;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
-
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.util.*;
@@ -39,7 +37,7 @@ import com.sun.tools.javac.util.*;
 /**
  * Utility methods for operating on types.
  *
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own
  * risk.  This code and its internal interfaces are subject to change
  * or deletion without notice.</b></p>
@@ -49,41 +47,40 @@ public class JavacTypes implements javax.lang.model.util.Types {
     private Symtab syms;
     private Types types;
 
-    private static final Context.Key<JavacTypes> KEY =
-            new Context.Key<JavacTypes>();
-
     public static JavacTypes instance(Context context) {
-        JavacTypes instance = context.get(KEY);
-        if (instance == null) {
+        JavacTypes instance = context.get(JavacTypes.class);
+        if (instance == null)
             instance = new JavacTypes(context);
-            context.put(KEY, instance);
-        }
         return instance;
     }
 
     /**
      * Public for use only by JavacProcessingEnvironment
      */
-    // TODO JavacTypes constructor should be protected
-    public JavacTypes(Context context) {
+    protected JavacTypes(Context context) {
         setContext(context);
     }
 
     /**
      * Use a new context.  May be called from outside to update
      * internal state for a new annotation-processing round.
-     * This instance is *not* then registered with the new context.
      */
     public void setContext(Context context) {
+        context.put(JavacTypes.class, this);
         syms = Symtab.instance(context);
         types = Types.instance(context);
     }
 
     public Element asElement(TypeMirror t) {
-        Type type = cast(Type.class, t);
-        if (type.tag != TypeTags.CLASS && type.tag != TypeTags.TYPEVAR)
-            return null;
-        return type.asElement();
+        switch (t.getKind()) {
+            case DECLARED:
+            case ERROR:
+            case TYPEVAR:
+                Type type = cast(Type.class, t);
+                return type.asElement();
+            default:
+                return null;
+        }
     }
 
     public boolean isSameType(TypeMirror t1, TypeMirror t2) {
@@ -105,7 +102,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
     public boolean contains(TypeMirror t1, TypeMirror t2) {
         validateTypeNotIn(t1, EXEC_OR_PKG);
         validateTypeNotIn(t2, EXEC_OR_PKG);
-        return ((Type) t1).contains((Type) t2);
+        return types.containsType((Type) t1, (Type) t2);
     }
 
     public boolean isSubsignature(ExecutableType m1, ExecutableType m2) {
@@ -303,26 +300,4 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(o.toString());
         return clazz.cast(o);
     }
-
-    public List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type) {
-        return ((Type)type).typeAnnotations;
-    }
-
-    public <A extends Annotation> A typeAnnotationOf(TypeMirror type,
-            Class<A> annotationType) {
-        return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
-    }
-
-    public List<? extends AnnotationMirror> receiverTypeAnnotationsOf(
-            ExecutableType type) {
-        return ((Type)type).asMethodType().receiverTypeAnnotations;
-    }
-
-    public <A extends Annotation> A receiverTypeAnnotationOf(
-            ExecutableType type, Class<A> annotationType) {
-        return JavacElements.getAnnotation(
-                ((Type)type).asMethodType().receiverTypeAnnotations,
-                annotationType);
-    }
-
 }

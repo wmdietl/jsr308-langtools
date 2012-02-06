@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -31,10 +31,14 @@
  */
 
 import com.sun.tools.javac.api.JavacTaskImpl;
-import com.sun.tools.javac.parser.*; // XXX
-import com.sun.tools.javac.util.*; // XXX
+import com.sun.tools.javac.parser.*;
+import com.sun.tools.javac.parser.Tokens.Token;
+import com.sun.tools.javac.util.*;
 import java.io.*;
+import java.net.*;
 import java.nio.*;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -42,6 +46,10 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.*;
+
+import static javax.tools.StandardLocation.CLASS_PATH;
+import static javax.tools.StandardLocation.SOURCE_PATH;
+import static javax.tools.StandardLocation.CLASS_OUTPUT;
 
 public class TestJavacTaskScanner extends ToolTester {
 
@@ -56,8 +64,9 @@ public class TestJavacTaskScanner extends ToolTester {
     TestJavacTaskScanner(File file) {
         final Iterable<? extends JavaFileObject> compilationUnits =
             fm.getJavaFileObjects(new File[] {file});
+        StandardJavaFileManager fm = getLocalFileManager(tool, null, null);
         task = (JavacTaskImpl)tool.getTask(null, fm, null, null, null, compilationUnits);
-        task.getContext().put(Scanner.Factory.scannerFactoryKey,
+        task.getContext().put(ScannerFactory.scannerFactoryKey,
                 new MyScanner.Factory(task.getContext(), this));
         elements = task.getElements();
         types = task.getTypes();
@@ -83,9 +92,9 @@ public class TestJavacTaskScanner extends ToolTester {
         System.out.println("#parseTypeElements: " + numParseTypeElements);
         System.out.println("#allMembers: " + numAllMembers);
 
-        check(numTokens, "#Tokens", 891);
+        check(numTokens, "#Tokens", 1222);
         check(numParseTypeElements, "#parseTypeElements", 136);
-        check(numAllMembers, "#allMembers", 67);
+        check(numAllMembers, "#allMembers", 52);
     }
 
     void check(int value, String name, int expected) {
@@ -117,45 +126,89 @@ public class TestJavacTaskScanner extends ToolTester {
             numAllMembers++;
         }
     }
+
+    /* Similar to ToolTester.getFileManager, except that this version also ensures
+     * javac classes will be available on the classpath.  The javac classes are assumed
+     * to be on the classpath used to run this test (this is true when using jtreg).
+     * The classes are found by obtaining the URL for a sample javac class, using
+     * getClassLoader().getResource(), and then deconstructing the URL to find the
+     * underlying directory or jar file to place on the classpath.
+     */
+    public StandardJavaFileManager getLocalFileManager(JavaCompiler tool,
+                                                        DiagnosticListener<JavaFileObject> dl,
+                                                        Charset encoding) {
+        File javac_classes;
+        try {
+            final String javacMainClass = "com/sun/tools/javac/Main.class";
+            URL url = getClass().getClassLoader().getResource(javacMainClass);
+            if (url == null)
+                throw new Error("can't locate javac classes");
+            URI uri = url.toURI();
+            String scheme = uri.getScheme();
+            String ssp = uri.getSchemeSpecificPart();
+            if (scheme.equals("jar")) {
+                javac_classes = new File(new URI(ssp.substring(0, ssp.indexOf("!/"))));
+            } else if (scheme.equals("file")) {
+                javac_classes = new File(ssp.substring(0, ssp.indexOf(javacMainClass)));
+            } else
+                throw new Error("unknown URL: " + url);
+        } catch (URISyntaxException e) {
+            throw new Error(e);
+        }
+        System.err.println("javac_classes: " + javac_classes);
+
+        StandardJavaFileManager fm = tool.getStandardFileManager(dl, null, encoding);
+        try {
+            fm.setLocation(SOURCE_PATH,  Arrays.asList(test_src));
+            fm.setLocation(CLASS_PATH,   Arrays.asList(test_classes, javac_classes));
+            fm.setLocation(CLASS_OUTPUT, Arrays.asList(test_classes));
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+        return fm;
+    }
 }
 
 class MyScanner extends Scanner {
 
-    public static class Factory extends Scanner.Factory {
+    public static class Factory extends ScannerFactory {
         public Factory(Context context, TestJavacTaskScanner test) {
             super(context);
             this.test = test;
         }
 
         @Override
-        public Scanner newScanner(CharSequence input) {
+        public Scanner newScanner(CharSequence input, boolean keepDocComments) {
+            assert !keepDocComments;
             if (input instanceof CharBuffer) {
                 return new MyScanner(this, (CharBuffer)input, test);
             } else {
                 char[] array = input.toString().toCharArray();
-                return newScanner(array, array.length);
+                return newScanner(array, array.length, keepDocComments);
             }
         }
 
         @Override
-        public Scanner newScanner(char[] input, int inputLength) {
+        public Scanner newScanner(char[] input, int inputLength, boolean keepDocComments) {
+            assert !keepDocComments;
             return new MyScanner(this, input, inputLength, test);
         }
 
         private TestJavacTaskScanner test;
     }
-    protected MyScanner(Factory fac, CharBuffer buffer, TestJavacTaskScanner test) {
+    protected MyScanner(ScannerFactory fac, CharBuffer buffer, TestJavacTaskScanner test) {
         super(fac, buffer);
         this.test = test;
     }
-    protected MyScanner(Factory fac, char[] input, int inputLength, TestJavacTaskScanner test) {
+    protected MyScanner(ScannerFactory fac, char[] input, int inputLength, TestJavacTaskScanner test) {
         super(fac, input, inputLength);
         this.test = test;
     }
 
     public void nextToken() {
         super.nextToken();
-        System.err.format("Saw token %s (%s)%n", token(), name());
+        Token tk = token();
+        System.err.format("Saw token %s %n", tk.kind);
         test.numTokens++;
     }
 

@@ -1,13 +1,13 @@
 
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -19,9 +19,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.classfile;
@@ -41,8 +41,8 @@ import static com.sun.tools.classfile.StackMapTable_attribute.verification_type_
 /**
  * Write a ClassFile data structure to a file or stream.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -267,6 +267,12 @@ public class ClassWriter {
             return 1;
         }
 
+        public Integer visitInvokeDynamic(CONSTANT_InvokeDynamic_info info, ClassOutputStream out) {
+            out.writeShort(info.bootstrap_method_attr_index);
+            out.writeShort(info.name_and_type_index);
+            return 1;
+        }
+
         public Integer visitLong(CONSTANT_Long_info info, ClassOutputStream out) {
             out.writeLong(info.value);
             return 2;
@@ -275,6 +281,17 @@ public class ClassWriter {
         public Integer visitNameAndType(CONSTANT_NameAndType_info info, ClassOutputStream out) {
             out.writeShort(info.name_index);
             out.writeShort(info.type_index);
+            return 1;
+        }
+
+        public Integer visitMethodHandle(CONSTANT_MethodHandle_info info, ClassOutputStream out) {
+            out.writeByte(info.reference_kind.tag);
+            out.writeShort(info.reference_index);
+            return 1;
+        }
+
+        public Integer visitMethodType(CONSTANT_MethodType_info info, ClassOutputStream out) {
+            out.writeShort(info.descriptor_index);
             return 1;
         }
 
@@ -329,6 +346,19 @@ public class ClassWriter {
 
         public Void visitAnnotationDefault(AnnotationDefault_attribute attr, ClassOutputStream out) {
             annotationWriter.write(attr.default_value, out);
+            return null;
+        }
+
+        public Void visitBootstrapMethods(BootstrapMethods_attribute attr, ClassOutputStream out) {
+            out.writeShort(attr.bootstrap_method_specifiers.length);
+            for (BootstrapMethods_attribute.BootstrapMethodSpecifier bsm : attr.bootstrap_method_specifiers) {
+                out.writeShort(bsm.bootstrap_method_ref);
+                int bsm_args_count = bsm.bootstrap_arguments.length;
+                out.writeShort(bsm_args_count);
+                for (int i : bsm.bootstrap_arguments) {
+                    out.writeShort(i);
+                }
+            }
             return null;
         }
 
@@ -455,16 +485,6 @@ public class ClassWriter {
         }
 
         public Void visitRuntimeInvisibleAnnotations(RuntimeInvisibleAnnotations_attribute attr, ClassOutputStream out) {
-            annotationWriter.write(attr.annotations, out);
-            return null;
-        }
-
-        public Void visitRuntimeVisibleTypeAnnotations(RuntimeVisibleTypeAnnotations_attribute attr, ClassOutputStream out) {
-            annotationWriter.write(attr.annotations, out);
-            return null;
-        }
-
-        public Void visitRuntimeInvisibleTypeAnnotations(RuntimeInvisibleTypeAnnotations_attribute attr, ClassOutputStream out) {
             annotationWriter.write(attr.annotations, out);
             return null;
         }
@@ -628,22 +648,11 @@ public class ClassWriter {
                 write(anno, out);
         }
 
-        public void write(ExtendedAnnotation[] annos, ClassOutputStream out) {
-            out.writeShort(annos.length);
-            for (ExtendedAnnotation anno: annos)
-                write(anno, out);
-        }
-
         public void write(Annotation anno, ClassOutputStream out) {
             out.writeShort(anno.type_index);
             out.writeShort(anno.element_value_pairs.length);
             for (element_value_pair p: anno.element_value_pairs)
                 write(p, out);
-        }
-
-        public void write(ExtendedAnnotation anno, ClassOutputStream out) {
-            write(anno.annotation, out);
-            write(anno.position, out);
         }
 
         public void write(element_value_pair pair, ClassOutputStream out) {
@@ -684,98 +693,5 @@ public class ClassWriter {
             return null;
         }
 
-        private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
-            out.writeByte(p.type.targetTypeValue());
-            switch (p.type) {
-            // type case
-            case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
-            // object creation
-            case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
-            // new expression
-            case NEW:
-            case NEW_GENERIC_OR_ARRAY:
-                out.writeShort(p.offset);
-                break;
-             // local variable
-            case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
-                int table_length = p.lvarOffset.length;
-                out.writeShort(table_length);
-                for (int i = 0; i < table_length; ++i) {
-                    out.writeShort(1);  // for table length
-                    out.writeShort(p.lvarOffset[i]);
-                    out.writeShort(p.lvarLength[i]);
-                    out.writeShort(p.lvarIndex[i]);
-                }
-                break;
-             // method receiver
-            case METHOD_RECEIVER:
-                // Do nothing
-                break;
-            // type parameters
-            case CLASS_TYPE_PARAMETER:
-            case METHOD_TYPE_PARAMETER:
-                out.writeByte(p.parameter_index);
-                break;
-            // type parameters bounds
-            case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-            case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
-                out.writeByte(p.parameter_index);
-                out.writeByte(p.bound_index);
-                break;
-             // wildcards
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
-                write(p.wildcard_position, out);
-                break;
-            // Class extends and implements clauses
-            case CLASS_EXTENDS:
-            case CLASS_EXTENDS_GENERIC_OR_ARRAY:
-                out.writeByte(p.type_index);
-                break;
-            // throws
-            case THROWS:
-                out.writeByte(p.type_index);
-                break;
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-                out.writeShort(p.offset);
-                break;
-            // method parameter: not specified
-            case METHOD_PARAMETER:
-            case METHOD_PARAMETER_GENERIC_OR_ARRAY:
-                out.writeByte(p.parameter_index);
-                break;
-            // method type argument: wasn't specified
-            case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
-            case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
-                out.writeShort(p.offset);
-                out.writeByte(p.type_index);
-                break;
-            // We don't need to worry abut these
-            case METHOD_RETURN:
-            case METHOD_RETURN_GENERIC_OR_ARRAY:
-            case FIELD:
-            case FIELD_GENERIC_OR_ARRAY:
-                break;
-            case UNKNOWN:
-                break;
-            default:
-                throw new AssertionError("unknown type: " + p);
-            }
-
-            // Append location data for generics/arrays.
-            if (p.type.hasLocation()) {
-                out.writeShort(p.location.size());
-                for (int i : p.location)
-                    out.writeByte((byte)i);
-            }
-        }
     }
 }

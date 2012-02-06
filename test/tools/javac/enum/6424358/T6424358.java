@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,17 +16,18 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @bug     6424358
+ * @bug     6424358 7025809
  * @summary Synthesized static enum method values() is final
  * @author  Peter von der Ah\u00e9
- * @compile T6424358.java
+ * @library ../../lib
+ * @build   JavacTestingAbstractProcessor T6424358
  * @compile -processor T6424358 -proc:only T6424358.java
  */
 
@@ -34,14 +35,12 @@ import java.util.Set;
 import javax.annotation.processing.*;
 import javax.lang.model.element.*;
 import javax.lang.model.util.*;
+import javax.lang.model.SourceVersion;
 import static javax.tools.Diagnostic.Kind.*;
-import static javax.lang.model.SourceVersion.RELEASE_6;
 
 @interface TestMe {}
 
-@SupportedAnnotationTypes("*")
-@SupportedSourceVersion(RELEASE_6)
-public class T6424358 extends AbstractProcessor {
+public class T6424358 extends JavacTestingAbstractProcessor {
     @TestMe enum Test { FOO; }
 
     public boolean process(Set<? extends TypeElement> annotations,
@@ -49,7 +48,7 @@ public class T6424358 extends AbstractProcessor {
         final Messager log = processingEnv.getMessager();
         final Elements elements = processingEnv.getElementUtils();
         final TypeElement testMe = elements.getTypeElement("TestMe");
-        class Scan extends ElementScanner6<Void,Void> {
+        class Scan extends ElementScanner<Void,Void> {
             @Override
             public Void visitExecutable(ExecutableElement e, Void p) {
                 System.err.println("Looking at " + e);

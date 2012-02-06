@@ -1,12 +1,12 @@
 /*
- * Copyright 2003-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.comp;
@@ -31,12 +31,14 @@ import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 
+import static com.sun.tools.javac.tree.JCTree.Tag.*;
+
 /** Enter annotations on symbols.  Annotations accumulate in a queue,
  *  which is processed at the top level of any set of recursive calls
  *  requesting it be processed.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -81,14 +83,9 @@ public class Annotate {
     private int enterCount = 0;
 
     ListBuffer<Annotator> q = new ListBuffer<Annotator>();
-    ListBuffer<Annotator> flushQ = new ListBuffer<Annotator>();
 
     public void later(Annotator a) {
         q.append(a);
-    }
-
-    public void laterOnFlush(Annotator a) {
-        flushQ.append(a);
     }
 
     public void earlier(Annotator a) {
@@ -112,8 +109,6 @@ public class Annotate {
         try {
             while (q.nonEmpty())
                 q.next().enterAnnotation();
-            while (flushQ.nonEmpty())
-                flushQ.next().enterAnnotation();
         } finally {
             enterCount--;
         }
@@ -155,7 +150,7 @@ public class Annotate {
             return new Attribute.Compound(a.type, List.<Pair<MethodSymbol,Attribute>>nil());
         }
         List<JCExpression> args = a.args;
-        if (args.length() == 1 && args.head.getTag() != JCTree.ASSIGN) {
+        if (args.length() == 1 && !args.head.hasTag(ASSIGN)) {
             // special case: elided "value=" assumed
             args.head = make.at(args.head.pos).
                 Assign(make.Ident(names.value), args.head);
@@ -164,22 +159,22 @@ public class Annotate {
             new ListBuffer<Pair<MethodSymbol,Attribute>>();
         for (List<JCExpression> tl = args; tl.nonEmpty(); tl = tl.tail) {
             JCExpression t = tl.head;
-            if (t.getTag() != JCTree.ASSIGN) {
+            if (!t.hasTag(ASSIGN)) {
                 log.error(t.pos(), "annotation.value.must.be.name.value");
                 continue;
             }
             JCAssign assign = (JCAssign)t;
-            if (assign.lhs.getTag() != JCTree.IDENT) {
+            if (!assign.lhs.hasTag(IDENT)) {
                 log.error(t.pos(), "annotation.value.must.be.name.value");
                 continue;
             }
             JCIdent left = (JCIdent)assign.lhs;
             Symbol method = rs.resolveQualifiedMethod(left.pos(),
-                                                      env,
-                                                      a.type,
-                                                      left.name,
-                                                      List.<Type>nil(),
-                                                      null);
+                                                          env,
+                                                          a.type,
+                                                          left.name,
+                                                          List.<Type>nil(),
+                                                          null);
             left.sym = method;
             left.type = method.type;
             if (method.owner != a.type.tsym)
@@ -189,6 +184,7 @@ public class Annotate {
             if (!method.type.isErroneous())
                 buf.append(new Pair<MethodSymbol,Attribute>
                            ((MethodSymbol)method, value));
+            t.type = result;
         }
         return new Attribute.Compound(a.type, buf.toList());
     }
@@ -196,6 +192,15 @@ public class Annotate {
     Attribute enterAttributeValue(Type expected,
                                   JCExpression tree,
                                   Env<AttrContext> env) {
+        //first, try completing the attribution value sym - if a completion
+        //error is thrown, we should recover gracefully, and display an
+        //ordinary resolution diagnostic.
+        try {
+            expected.tsym.complete();
+        } catch(CompletionFailure e) {
+            log.error(tree.pos(), "cant.resolve", Kinds.kindName(e.sym), e.sym);
+            return new Attribute.Error(expected);
+        }
         if (expected.isPrimitive() || types.isSameType(expected, syms.stringType)) {
             Type result = attr.attribExpr(tree, env, expected);
             if (result.isErroneous())
@@ -219,14 +224,14 @@ public class Annotate {
                                        (((JCFieldAccess) tree).selected).type);
         }
         if ((expected.tsym.flags() & Flags.ANNOTATION) != 0) {
-            if (tree.getTag() != JCTree.ANNOTATION) {
+            if (!tree.hasTag(ANNOTATION)) {
                 log.error(tree.pos(), "annotation.value.must.be.annotation");
                 expected = syms.errorType;
             }
             return enterAnnotation((JCAnnotation)tree, expected, env);
         }
         if (expected.tag == TypeTags.ARRAY) { // should really be isArray()
-            if (tree.getTag() != JCTree.NEWARRAY) {
+            if (!tree.hasTag(NEWARRAY)) {
                 tree = make.at(tree.pos).
                     NewArray(null, List.<JCExpression>nil(), List.of(tree));
             }
@@ -241,6 +246,7 @@ public class Annotate {
                                                l.head,
                                                env));
             }
+            na.type = expected;
             return new Attribute.
                 Array(expected, buf.toArray(new Attribute[buf.length()]));
         }

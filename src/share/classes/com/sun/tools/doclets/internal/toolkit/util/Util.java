@@ -1,12 +1,12 @@
 /*
- * Copyright 1999-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.internal.toolkit.util;
@@ -49,6 +49,11 @@ public class Util {
      */
     public static final String[][] HTML_ESCAPE_CHARS =
     {{"&", "&amp;"}, {"<", "&lt;"}, {">", "&gt;"}};
+
+    /**
+     * Name of the resource directory.
+     */
+    public static final String RESOURCESDIR = "resources";
 
     /**
      * Return array of class members whose documentation is to be generated.
@@ -170,8 +175,9 @@ public class Util {
     }
 
     /**
-     * According to the Java Language Specifications, all the outer classes
-     * and static inner classes are core classes.
+     * According to
+     * <cite>The Java&trade; Language Specification</cite>,
+     * all the outer classes and static inner classes are core classes.
      */
     public static boolean isCoreClass(ClassDoc cd) {
         return cd.containingClass() == null || cd.isStatic();
@@ -206,14 +212,14 @@ public class Util {
         try {
             while ((len = input.read(bytearr)) != -1) {
                 output.write(bytearr, 0, len);
-            }
+                }
         } catch (FileNotFoundException exc) {
         } catch (SecurityException exc) {
-        } finally {
+            } finally {
             input.close();
             output.close();
+            }
         }
-    }
 
     /**
      * Copy the given directory contents from the source package directory
@@ -236,8 +242,8 @@ public class Util {
         String destname = configuration.docFileDestDirName;
         File srcdir = new File(path + dir);
         if (destname.length() > 0 && !destname.endsWith(
-               DirectoryManager.URL_FILE_SEPERATOR)) {
-            destname += DirectoryManager.URL_FILE_SEPERATOR;
+               DirectoryManager.URL_FILE_SEPARATOR)) {
+            destname += DirectoryManager.URL_FILE_SEPARATOR;
         }
         String dest = destname + dir;
         try {
@@ -263,7 +269,7 @@ public class Util {
                         && ! configuration.shouldExcludeDocFileDir(
                           srcfile.getName())){
                         copyDocFiles(configuration, path, dir +
-                                    DirectoryManager.URL_FILE_SEPERATOR + srcfile.getName(),
+                                    DirectoryManager.URL_FILE_SEPARATOR + srcfile.getName(),
                                 overwrite);
                     }
                 }
@@ -322,28 +328,64 @@ public class Util {
      *                       it already exists.
      */
     public static void copyResourceFile(Configuration configuration,
-            String resourcefile,
-            boolean overwrite) {
-        String destdir = configuration.destDirName;
-        String destresourcesdir = destdir + "resources";
-        DirectoryManager.createDirectory(configuration, destresourcesdir);
-        File destfile = new File(destresourcesdir, resourcefile);
+            String resourcefile, boolean overwrite) {
+        String destresourcesdir = configuration.destDirName + RESOURCESDIR;
+        copyFile(configuration, resourcefile, RESOURCESDIR, destresourcesdir,
+                overwrite, false);
+    }
+
+    /**
+     * Copy a file from a source directory to a destination directory
+     * (if it is not there already). If <code>overwrite</code> is true and
+     * the destination file already exists, overwrite it.
+     *
+     * @param configuration Holds the error message
+     * @param file The name of the file to copy
+     * @param source The source directory
+     * @param destination The destination directory where the file needs to be copied
+     * @param overwrite A flag to indicate whether the file in the
+     *                  destination directory will be overwritten if
+     *                  it already exists.
+     * @param replaceNewLine true if the newline needs to be replaced with platform-
+     *                  specific newline.
+     */
+    public static void copyFile(Configuration configuration, String file, String source,
+            String destination, boolean overwrite, boolean replaceNewLine) {
+        DirectoryManager.createDirectory(configuration, destination);
+        File destfile = new File(destination, file);
         if(destfile.exists() && (! overwrite)) return;
         try {
-
             InputStream in = Configuration.class.getResourceAsStream(
-                "resources/" + resourcefile);
-
+                    source + DirectoryManager.URL_FILE_SEPARATOR + file);
             if(in==null) return;
-
             OutputStream out = new FileOutputStream(destfile);
-            byte[] buf = new byte[2048];
-            int n;
-            while((n = in.read(buf))>0) out.write(buf,0,n);
-
-            in.close();
-            out.close();
-        } catch(Throwable t) {}
+            try {
+                if (!replaceNewLine) {
+                    byte[] buf = new byte[2048];
+                    int n;
+                    while((n = in.read(buf))>0) out.write(buf,0,n);
+                } else {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(out));
+                    try {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            writer.write(line);
+                            writer.write(DocletConstants.NL);
+                        }
+                    } finally {
+                        reader.close();
+                        writer.close();
+                    }
+                }
+            } finally {
+                in.close();
+                out.close();
+            }
+        } catch (IOException ie) {
+            ie.printStackTrace(System.err);
+            throw new DocletAbortException();
+        }
     }
 
     /**
@@ -357,13 +399,13 @@ public class Util {
         try{
             String pkgPath = DirectoryManager.getDirectoryPath(pkgDoc);
             String completePath = new SourcePath(configuration.sourcepath).
-                getDirectory(pkgPath) + DirectoryManager.URL_FILE_SEPERATOR;
-            //Make sure that both paths are using the same seperators.
+                getDirectory(pkgPath) + DirectoryManager.URL_FILE_SEPARATOR;
+            //Make sure that both paths are using the same separators.
             completePath = Util.replaceText(completePath, File.separator,
-                    DirectoryManager.URL_FILE_SEPERATOR);
+                    DirectoryManager.URL_FILE_SEPARATOR);
             pkgPath = Util.replaceText(pkgPath, File.separator,
-                    DirectoryManager.URL_FILE_SEPERATOR);
-            return completePath.substring(0, completePath.indexOf(pkgPath));
+                    DirectoryManager.URL_FILE_SEPARATOR);
+            return completePath.substring(0, completePath.lastIndexOf(pkgPath));
         } catch (Exception e){
             return "";
         }
@@ -428,21 +470,15 @@ public class Util {
         //Try walking the tree.
         addAllInterfaceTypes(results,
             superType,
-            interfaceTypesOf(superType),
+            superType instanceof ClassDoc ?
+                ((ClassDoc) superType).interfaceTypes() :
+                ((ParameterizedType) superType).interfaceTypes(),
             false, configuration);
         List<Type> resultsList = new ArrayList<Type>(results.values());
         if (sort) {
                 Collections.sort(resultsList, new TypeComparator());
         }
         return resultsList;
-    }
-
-    private static Type[] interfaceTypesOf(Type type) {
-        if (type instanceof AnnotatedType)
-            type = ((AnnotatedType)type).underlyingType();
-        return type instanceof ClassDoc ?
-                ((ClassDoc)type).interfaceTypes() :
-                ((ParameterizedType)type).interfaceTypes();
     }
 
     public static List<Type> getAllInterfaces(Type type, Configuration configuration) {
@@ -455,7 +491,9 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                interfaceTypesOf(superType),
+                superType instanceof ClassDoc ?
+                ((ClassDoc) superType).interfaceTypes() :
+                ((ParameterizedType) superType).interfaceTypes(),
                 raw, configuration);
     }
 
@@ -465,7 +503,9 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                interfaceTypesOf(superType),
+                superType instanceof ClassDoc ?
+                ((ClassDoc) superType).interfaceTypes() :
+                ((ParameterizedType) superType).interfaceTypes(),
                 false, configuration);
     }
 
@@ -489,24 +529,12 @@ public class Util {
                 results.put(superInterface.asClassDoc(), superInterface);
             }
         }
-        if (type instanceof AnnotatedType)
-            type = ((AnnotatedType)type).underlyingType();
-
         if (type instanceof ParameterizedType)
             findAllInterfaceTypes(results, (ParameterizedType) type, configuration);
         else if (((ClassDoc) type).typeParameters().length == 0)
             findAllInterfaceTypes(results, (ClassDoc) type, raw, configuration);
         else
             findAllInterfaceTypes(results, (ClassDoc) type, true, configuration);
-    }
-
-
-    public static <T extends ProgramElementDoc> List<T> asList(T[] members) {
-        List<T> list = new ArrayList<T>();
-        for (int i = 0; i < members.length; i++) {
-            list.add(members[i]);
-        }
-        return list;
     }
 
     /**
@@ -547,14 +575,7 @@ public class Util {
         if (oldStr == null || newStr == null || oldStr.equals(newStr)) {
             return originalStr;
         }
-        StringBuffer result = new StringBuffer(originalStr);
-        int startIndex = 0;
-        while ((startIndex = result.indexOf(oldStr, startIndex)) != -1) {
-            result = result.replace(startIndex, startIndex + oldStr.length(),
-                    newStr);
-            startIndex += newStr.length();
-        }
-        return result.toString();
+        return originalStr.replace(oldStr, newStr);
     }
 
     /**
@@ -574,6 +595,24 @@ public class Util {
                     HTML_ESCAPE_CHARS[i][0], HTML_ESCAPE_CHARS[i][1]);
         }
         return result;
+    }
+
+    /**
+     * Given a string, strips all html characters and
+     * return the result.
+     *
+     * @param rawString The string to check.
+     * @return the original string with all of the HTML characters
+     * stripped.
+     *
+     */
+    public static String stripHtml(String rawString) {
+        // remove HTML tags
+        rawString = rawString.replaceAll("\\<.*?>", " ");
+        // consolidate multiple spaces between a word to a single space
+        rawString = rawString.replaceAll("\\b\\s{2,}\\b", " ");
+        // remove extra whitespaces
+        return rawString.trim();
     }
 
     /**
@@ -779,19 +818,17 @@ public class Util {
      * @param tabLength the length of each tab.
      * @param s the String to scan.
      */
-    public static void replaceTabs(int tabLength, StringBuffer s) {
-        int index, col;
-        StringBuffer whitespace;
-        while ((index = s.indexOf("\t")) != -1) {
-            whitespace = new StringBuffer();
-            col = index;
-            do {
-                whitespace.append(" ");
-                col++;
-            } while ((col%tabLength) != 0);
-            s.replace(index, index+1, whitespace.toString());
+    public static void replaceTabs(int tabLength, StringBuilder s) {
+        if (whitespace == null || whitespace.length() < tabLength)
+            whitespace = String.format("%" + tabLength + "s", " ");
+        int index = 0;
+        while ((index = s.indexOf("\t", index)) != -1) {
+            int spaceCount = tabLength - index % tabLength;
+            s.replace(index, index+1, whitespace.substring(0, spaceCount));
+            index += spaceCount;
         }
     }
+    private static String whitespace;
 
     /**
      * The documentation for values() and valueOf() in Enums are set by the
@@ -824,11 +861,15 @@ public class Util {
      * @param doc the Doc to check.
      * @return true if the given Doc is deprecated.
      */
-    public static boolean isDeprecated(ProgramElementDoc doc) {
+    public static boolean isDeprecated(Doc doc) {
         if (doc.tags("deprecated").length > 0) {
             return true;
         }
-        AnnotationDesc[] annotationDescList = doc.annotations();
+        AnnotationDesc[] annotationDescList;
+        if (doc instanceof PackageDoc)
+            annotationDescList = ((PackageDoc)doc).annotations();
+        else
+            annotationDescList = ((ProgramElementDoc)doc).annotations();
         for (int i = 0; i < annotationDescList.length; i++) {
             if (annotationDescList[i].annotationType().qualifiedName().equals(
                    java.lang.Deprecated.class.getName())){

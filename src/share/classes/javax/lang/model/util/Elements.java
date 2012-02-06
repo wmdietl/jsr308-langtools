@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2006, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package javax.lang.model.util;
@@ -95,7 +95,7 @@ public interface Elements {
      * @param e  the element being examined
      * @return the documentation comment of the element, or {@code null}
      *          if there is none
-     * @jls3 3.6 White Space
+     * @jls 3.6 White Space
      */
     String getDocComment(Element e);
 
@@ -114,7 +114,7 @@ public interface Elements {
      * @return the binary name
      *
      * @see TypeElement#getQualifiedName
-     * @jls3 13.1 The Form of a Binary
+     * @jls 13.1 The Form of a Binary
      */
     Name getBinaryName(TypeElement type);
 
@@ -210,8 +210,8 @@ public interface Elements {
      * @param type   the type of which the first method is a member
      * @return {@code true} if and only if the first method overrides
      *          the second
-     * @jls3 8.4.8 Inheritance, Overriding, and Hiding
-     * @jls3 9.4.1 Inheritance and Overriding
+     * @jls 8.4.8 Inheritance, Overriding, and Hiding
+     * @jls 9.4.1 Inheritance and Overriding
      */
     boolean overrides(ExecutableElement overrider, ExecutableElement overridden,
                       TypeElement type);

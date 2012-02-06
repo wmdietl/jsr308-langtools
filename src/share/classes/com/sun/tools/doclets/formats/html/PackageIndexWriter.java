@@ -1,12 +1,12 @@
 /*
- * Copyright 1997-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1997, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,17 +18,19 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.formats.html;
 
-import com.sun.tools.doclets.internal.toolkit.util.*;
-import com.sun.javadoc.*;
 import java.io.*;
 import java.util.*;
+import com.sun.javadoc.*;
+import com.sun.tools.doclets.internal.toolkit.*;
+import com.sun.tools.doclets.internal.toolkit.util.*;
+import com.sun.tools.doclets.formats.html.markup.*;
 
 /**
  * Generate the package index page "overview-summary.html" for the right-hand
@@ -83,7 +85,7 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
         String filename = "overview-summary.html";
         try {
             packgen = new PackageIndexWriter(configuration, filename);
-            packgen.generatePackageIndexFile("doclet.Window_Overview_Summary", true);
+            packgen.buildPackageIndexFile("doclet.Window_Overview_Summary", true);
             packgen.close();
         } catch (IOException exc) {
             configuration.standardmessage.error(
@@ -94,124 +96,142 @@ public class PackageIndexWriter extends AbstractPackageIndexWriter {
     }
 
     /**
-     * Print each package in separate rows in the index table. Generate link
-     * to each package.
-     *
-     * @param pkg Package to which link is to be generated.
-     */
-    protected void printIndexRow(PackageDoc pkg) {
-        if(pkg != null && pkg.name().length() > 0) {
-            trBgcolorStyle("white", "TableRowColor");
-            summaryRow(20);
-            strong();
-            printPackageLink(pkg, Util.getPackageName(pkg), false);
-            strongEnd();
-            summaryRowEnd();
-            summaryRow(0);
-            printSummaryComment(pkg);
-            summaryRowEnd();
-            trEnd();
-       }
-    }
-
-    /**
-     * Depending upon the grouping information and their titles, generate
+     * Depending upon the grouping information and their titles, add
      * separate table indices for each package group.
+     *
+     * @param body the documentation tree to which the index will be added
      */
-    protected void generateIndex() {
+    protected void addIndex(Content body) {
         for (int i = 0; i < groupList.size(); i++) {
         String groupname = groupList.get(i);
         List<PackageDoc> list = groupPackageMap.get(groupname);
             if (list != null && list.size() > 0) {
-                printIndexContents(list.toArray(new PackageDoc[list.size()]),
-                        groupname,
-                        configuration.getText("doclet.Member_Table_Summary",
-                        groupname,
-                        configuration.getText("doclet.packages")));
+                addIndexContents(list.toArray(new PackageDoc[list.size()]),
+                        groupname, configuration.getText("doclet.Member_Table_Summary",
+                        groupname, configuration.getText("doclet.packages")), body);
             }
         }
     }
 
     /**
-     * Print the overview summary comment for this documentation. Print one line
+     * {@inheritDoc}
+     */
+    protected void addPackagesList(PackageDoc[] packages, String text,
+            String tableSummary, Content body) {
+        Content table = HtmlTree.TABLE(HtmlStyle.overviewSummary, 0, 3, 0, tableSummary,
+                getTableCaption(text));
+        table.addContent(getSummaryTableHeader(packageTableHeader, "col"));
+        Content tbody = new HtmlTree(HtmlTag.TBODY);
+        addPackagesList(packages, tbody);
+        table.addContent(tbody);
+        Content div = HtmlTree.DIV(HtmlStyle.contentContainer, table);
+        body.addContent(div);
+    }
+
+    /**
+     * Adds list of packages in the index table. Generate link to each package.
+     *
+     * @param packages Packages to which link is to be generated
+     * @param tbody the documentation tree to which the list will be added
+     */
+    protected void addPackagesList(PackageDoc[] packages, Content tbody) {
+        for (int i = 0; i < packages.length; i++) {
+            if (packages[i] != null && packages[i].name().length() > 0) {
+                if (configuration.nodeprecated && Util.isDeprecated(packages[i]))
+                    continue;
+                Content packageLinkContent = getPackageLink(packages[i],
+                        getPackageName(packages[i]));
+                Content tdPackage = HtmlTree.TD(HtmlStyle.colFirst, packageLinkContent);
+                HtmlTree tdSummary = new HtmlTree(HtmlTag.TD);
+                tdSummary.addStyle(HtmlStyle.colLast);
+                addSummaryComment(packages[i], tdSummary);
+                HtmlTree tr = HtmlTree.TR(tdPackage);
+                tr.addContent(tdSummary);
+                if (i%2 == 0)
+                    tr.addStyle(HtmlStyle.altColor);
+                else
+                    tr.addStyle(HtmlStyle.rowColor);
+                tbody.addContent(tr);
+            }
+        }
+    }
+
+    /**
+     * Adds the overview summary comment for this documentation. Add one line
      * summary at the top of the page and generate a link to the description,
-     * which is generated at the end of this page.
+     * which is added at the end of this page.
+     *
+     * @param body the documentation tree to which the overview header will be added
      */
-    protected void printOverviewHeader() {
+    protected void addOverviewHeader(Content body) {
         if (root.inlineTags().length > 0) {
-            printSummaryComment(root);
-            p();
-            strong(configuration.getText("doclet.See"));
-            br();
-            printNbsps();
-            printHyperLink("", "overview_description",
-                configuration.getText("doclet.Description"), true);
-            p();
+            HtmlTree subTitleDiv = new HtmlTree(HtmlTag.DIV);
+            subTitleDiv.addStyle(HtmlStyle.subTitle);
+            addSummaryComment(root, subTitleDiv);
+            Content div = HtmlTree.DIV(HtmlStyle.header, subTitleDiv);
+            Content see = seeLabel;
+            see.addContent(" ");
+            Content descPara = HtmlTree.P(see);
+            Content descLink = getHyperLink("", "overview_description",
+                descriptionLabel, "", "");
+            descPara.addContent(descLink);
+            div.addContent(descPara);
+            body.addContent(div);
         }
     }
 
     /**
-     * Print Html tags for the table for this package index.
-     */
-    protected void printIndexHeader(String text, String tableSummary) {
-        tableIndexSummary(tableSummary);
-        tableCaptionStart();
-        print(text);
-        tableCaptionEnd();
-        summaryTableHeader(packageTableHeader, "col");
-    }
-
-    /**
-     * Print Html closing tags for the table for this package index.
-     */
-    protected void printIndexFooter() {
-        tableEnd();
-        p();
-        space();
-    }
-
-    /**
-     * Print the overview comment as provided in the file specified by the
+     * Adds the overview comment as provided in the file specified by the
      * "-overview" option on the command line.
+     *
+     * @param htmltree the documentation tree to which the overview comment will
+     *                 be added
      */
-    protected void printOverviewComment() {
+    protected void addOverviewComment(Content htmltree) {
         if (root.inlineTags().length > 0) {
-            anchor("overview_description");
-            p();
-            printInlineComment(root);
-            p();
+            htmltree.addContent(getMarkerAnchor("overview_description"));
+            HtmlTree div = new HtmlTree(HtmlTag.DIV);
+            div.addStyle(HtmlStyle.subTitle);
+            addInlineComment(root, div);
+            htmltree.addContent(div);
         }
     }
 
     /**
-     * Call {@link #printOverviewComment()} and then genrate the tag information
-     * as provided in the file specified by the "-overview" option on the
-     * command line.
+     * Adds the tag information as provided in the file specified by the
+     * "-overview" option on the command line.
+     *
+     * @param body the documentation tree to which the overview will be added
      */
-    protected void printOverview() throws IOException {
-        printOverviewComment();
-        printTags(root);
+    protected void addOverview(Content body) throws IOException {
+        HtmlTree div = new HtmlTree(HtmlTag.DIV);
+        div.addStyle(HtmlStyle.footer);
+        addOverviewComment(div);
+        addTagsInfo(root, div);
+        body.addContent(div);
     }
 
     /**
-     * Print the top text (from the -top option), the upper
+     * Adds the top text (from the -top option), the upper
      * navigation bar, and then the title (from the"-title"
      * option), at the top of page.
+     *
+     * @body the documentation tree to which the navigation bar header will be added
      */
-    protected void printNavigationBarHeader() {
-        printTop();
-        navLinks(true);
-        hr();
-        printConfigurationTitle();
+    protected void addNavigationBarHeader(Content body) {
+        addTop(body);
+        addNavLinks(true, body);
+        addConfigurationTitle(body);
     }
 
     /**
-     * Print the lower navigation bar and the bottom text
+     * Adds the lower navigation bar and the bottom text
      * (from the -bottom option) at the bottom of page.
+     *
+     * @param the documentation tree to which the navigation bar footer will be added
      */
-    protected void printNavigationBarFooter() {
-        hr();
-        navLinks(false);
-        printBottom();
+    protected void addNavigationBarFooter(Content body) {
+        addNavLinks(false, body);
+        addBottom(body);
     }
 }

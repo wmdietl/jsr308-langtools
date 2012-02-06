@@ -1,12 +1,12 @@
 /*
- * Copyright 1999-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,15 +18,16 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.code;
 
+import java.util.Collections;
+
 import com.sun.tools.javac.util.*;
-import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Symbol.*;
 
 import javax.lang.model.type.*;
@@ -57,14 +58,14 @@ import static com.sun.tools.javac.code.TypeTags.*;
  *  the error type (tag: ERROR, class: ErrorType).
  *  </pre>
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  *
  *  @see TypeTags
  */
-public class Type implements PrimitiveType, Cloneable {
+public class Type implements PrimitiveType {
 
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
@@ -84,8 +85,6 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public TypeSymbol tsym;
 
-    public List<Compound> typeAnnotations = List.nil();
-
     /**
      * The constant value of this type, null if this type does not
      * have a constant value attribute. Only primitive types and
@@ -94,6 +93,22 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public Object constValue() {
         return null;
+    }
+
+    /**
+     * Get the representation of this type used for modelling purposes.
+     * By default, this is itself. For ErrorType, a different value
+     * may be provided,
+     */
+    public Type getModelType() {
+        return this;
+    }
+
+    public static List<Type> getModelTypes(List<Type> ts) {
+        ListBuffer<Type> lb = new ListBuffer<Type>();
+        for (Type t: ts)
+            lb.append(t.getModelType());
+        return lb.toList();
     }
 
     public <R,S> R accept(Type.Visitor<R,S> v, S s) { return v.visitType(this, s); }
@@ -141,7 +156,7 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public Type constType(Object constValue) {
         final Object value = constValue;
-        assert tag <= BOOLEAN;
+        Assert.check(tag <= BOOLEAN);
         return new Type(tag, tsym) {
                 @Override
                 public Object constValue() {
@@ -193,7 +208,7 @@ public class Type implements PrimitiveType, Cloneable {
         if (ts.isEmpty()) {
             return "";
         } else {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append(ts.head.toString());
             for (List<Type> l = ts.tail; l.nonEmpty(); l = l.tail)
                 buf.append(",").append(l.head.toString());
@@ -205,13 +220,13 @@ public class Type implements PrimitiveType, Cloneable {
      * The constant value of this type, converted to String
      */
     public String stringValue() {
-        assert constValue() != null;
+        Object cv = Assert.checkNonNull(constValue());
         if (tag == BOOLEAN)
-            return ((Integer) constValue()).intValue() == 0 ? "false" : "true";
+            return ((Integer) cv).intValue() == 0 ? "false" : "true";
         else if (tag == CHAR)
-            return String.valueOf((char) ((Integer) constValue()).intValue());
+            return String.valueOf((char) ((Integer) cv).intValue());
         else
-            return constValue().toString();
+            return cv.toString();
     }
 
     /**
@@ -248,7 +263,7 @@ public class Type implements PrimitiveType, Cloneable {
     public String argtypes(boolean varargs) {
         List<Type> args = getParameterTypes();
         if (!varargs) return args.toString();
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         while (args.tail.nonEmpty()) {
             buf.append(args.head);
             args = args.tail;
@@ -272,10 +287,6 @@ public class Type implements PrimitiveType, Cloneable {
     public List<Type>        getThrownTypes()    { return List.nil(); }
     public Type              getUpperBound()     { return null; }
     public Type              getLowerBound()     { return null; }
-
-    public void setThrown(List<Type> ts) {
-        throw new AssertionError();
-    }
 
     /** Navigation methods, these will work for classes, type variables,
      *  foralls, but will return null for arrays and methods.
@@ -331,6 +342,10 @@ public class Type implements PrimitiveType, Cloneable {
         return (tsym.flags() & INTERFACE) != 0;
     }
 
+    public boolean isFinal() {
+        return (tsym.flags() & FINAL) != 0;
+    }
+
     public boolean isPrimitive() {
         return tag < VOID;
     }
@@ -350,12 +365,28 @@ public class Type implements PrimitiveType, Cloneable {
         return false;
     }
 
-    /** Does this type contain an occurrence of some type in `elems'?
+    /** Does this type contain an occurrence of some type in 'ts'?
      */
-    public boolean containsSome(List<Type> ts) {
-        for (List<Type> l = ts; l.nonEmpty(); l = l.tail)
-            if (this.contains(ts.head)) return true;
+    public boolean containsAny(List<Type> ts) {
+        for (Type t : ts)
+            if (this.contains(t)) return true;
         return false;
+    }
+
+    public static boolean containsAny(List<Type> ts1, List<Type> ts2) {
+        for (Type t : ts1)
+            if (t.containsAny(ts2)) return true;
+        return false;
+    }
+
+    public static List<Type> filter(List<Type> ts, Filter<Type> tf) {
+        ListBuffer<Type> buf = ListBuffer.lb();
+        for (Type t : ts) {
+            if (tf.accepts(t)) {
+                buf.append(t);
+            }
+        }
+        return buf.toList();
     }
 
     public boolean isSuperBound() { return false; }
@@ -370,14 +401,6 @@ public class Type implements PrimitiveType, Cloneable {
     /** Complete loading all classes in this type.
      */
     public void complete() {}
-
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError(e);
-        }
-    }
 
     public TypeSymbol asElement() {
         return tsym;
@@ -421,9 +444,8 @@ public class Type implements PrimitiveType, Cloneable {
 
         public WildcardType(Type type, BoundKind kind, TypeSymbol tsym) {
             super(WILDCARD, tsym);
-            assert(type != null);
+            this.type = Assert.checkNonNull(type);
             this.kind = kind;
-            this.type = type;
         }
         public WildcardType(WildcardType t, TypeVar bound) {
             this(t.type, t.kind, t.tsym, bound);
@@ -432,6 +454,10 @@ public class Type implements PrimitiveType, Cloneable {
         public WildcardType(Type type, BoundKind kind, TypeSymbol tsym, TypeVar bound) {
             this(type, kind, tsym);
             this.bound = bound;
+        }
+
+        public boolean contains(Type t) {
+            return kind != UNBOUND && type.contains(t);
         }
 
         public boolean isSuperBound() {
@@ -456,7 +482,7 @@ public class Type implements PrimitiveType, Cloneable {
 
         boolean isPrintingBound = false;
         public String toString() {
-            StringBuffer s = new StringBuffer();
+            StringBuilder s = new StringBuilder();
             s.append(kind.toString());
             if (kind != UNBOUND)
                 s.append(type);
@@ -530,6 +556,10 @@ public class Type implements PrimitiveType, Cloneable {
          */
         public List<Type> interfaces_field;
 
+        /** All the interfaces of this class, including missing ones.
+         */
+        public List<Type> all_interfaces_field;
+
         public ClassType(Type outer, List<Type> typarams, TypeSymbol tsym) {
             super(CLASS, tsym);
             this.outer_field = outer;
@@ -570,7 +600,7 @@ public class Type implements PrimitiveType, Cloneable {
         /** The Java source which this type represents.
          */
         public String toString() {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             if (getEnclosingType().tag == CLASS && tsym.owner.kind == TYP) {
                 buf.append(getEnclosingType().toString());
                 buf.append(".");
@@ -588,7 +618,7 @@ public class Type implements PrimitiveType, Cloneable {
 //where
             private String className(Symbol sym, boolean longform) {
                 if (sym.name.isEmpty() && (sym.flags() & COMPOUND) != 0) {
-                    StringBuffer s = new StringBuffer(supertype_field.toString());
+                    StringBuilder s = new StringBuilder(supertype_field.toString());
                     for (List<Type> is=interfaces_field; is.nonEmpty(); is = is.tail) {
                         s.append("&");
                         s.append(is.head.toString());
@@ -684,7 +714,9 @@ public class Type implements PrimitiveType, Cloneable {
             return
                 elem == this
                 || (isParameterized()
-                    && (getEnclosingType().contains(elem) || contains(getTypeArguments(), elem)));
+                    && (getEnclosingType().contains(elem) || contains(getTypeArguments(), elem)))
+                || (isCompound()
+                    && (supertype_field.contains(elem) || contains(interfaces_field, elem)));
         }
 
         public void complete() {
@@ -708,6 +740,38 @@ public class Type implements PrimitiveType, Cloneable {
         @Override
         public boolean hasErasedSupertypes() {
             return true;
+        }
+    }
+
+    // a clone of a ClassType that knows about the alternatives of a union type.
+    public static class UnionClassType extends ClassType implements UnionType {
+        final List<? extends Type> alternatives_field;
+
+        public UnionClassType(ClassType ct, List<? extends Type> alternatives) {
+            super(ct.outer_field, ct.typarams_field, ct.tsym);
+            allparams_field = ct.allparams_field;
+            supertype_field = ct.supertype_field;
+            interfaces_field = ct.interfaces_field;
+            all_interfaces_field = ct.interfaces_field;
+            alternatives_field = alternatives;
+        }
+
+        public Type getLub() {
+            return tsym.type;
+        }
+
+        public java.util.List<? extends TypeMirror> getAlternatives() {
+            return Collections.unmodifiableList(alternatives_field);
+        }
+
+        @Override
+        public TypeKind getKind() {
+            return TypeKind.UNION;
+        }
+
+        @Override
+        public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+            return v.visitUnion(this, p);
         }
     }
 
@@ -741,6 +805,10 @@ public class Type implements PrimitiveType, Cloneable {
             return (ARRAY << 5) + elemtype.hashCode();
         }
 
+        public boolean isVarargs() {
+            return false;
+        }
+
         public List<Type> allparams() { return elemtype.allparams(); }
 
         public boolean isErroneous() {
@@ -753,6 +821,15 @@ public class Type implements PrimitiveType, Cloneable {
 
         public boolean isRaw() {
             return elemtype.isRaw();
+        }
+
+        public ArrayType makeVarargs() {
+            return new ArrayType(elemtype, tsym) {
+                @Override
+                public boolean isVarargs() {
+                    return true;
+                }
+            };
         }
 
         public Type map(Mapping f) {
@@ -782,13 +859,11 @@ public class Type implements PrimitiveType, Cloneable {
         }
     }
 
-    public static class MethodType extends Type
-                    implements Cloneable, ExecutableType {
+    public static class MethodType extends Type implements ExecutableType {
 
         public List<Type> argtypes;
         public Type restype;
         public List<Type> thrown;
-        public List<Compound> receiverTypeAnnotations = List.nil();
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -845,10 +920,6 @@ public class Type implements PrimitiveType, Cloneable {
         public List<Type>        getParameterTypes() { return argtypes; }
         public Type              getReturnType()     { return restype; }
         public List<Type>        getThrownTypes()    { return thrown; }
-
-        public void setThrown(List<Type> t) {
-            thrown = t;
-        }
 
         public boolean isErroneous() {
             return
@@ -923,7 +994,7 @@ public class Type implements PrimitiveType, Cloneable {
 
     public static class TypeVar extends Type implements TypeVariable {
 
-        /** The bound of this type variable; set from outside.
+        /** The upper bound of this type variable; set from outside.
          *  Must be nonempty once it is set.
          *  For a bound, `bound' is the bound type itself.
          *  Multiple bounds are expressed as a single class type which has the
@@ -934,6 +1005,12 @@ public class Type implements PrimitiveType, Cloneable {
          *  points to the first class or interface bound.
          */
         public Type bound = null;
+
+        /** The lower bound of this type variable.
+         *  TypeVars don't normally have a lower bound, so it is normally set
+         *  to syms.botType.
+         *  Subtypes, such as CapturedType, may provide a different value.
+         */
         public Type lower;
 
         public TypeVar(Name name, Symbol owner, Type lower) {
@@ -953,14 +1030,12 @@ public class Type implements PrimitiveType, Cloneable {
             return v.visitTypeVar(this, s);
         }
 
-        public Type getUpperBound() {
-            if ((bound == null || bound.tag == NONE) && this != tsym.type)
-                bound = tsym.type.getUpperBound();
-            return bound;
-        }
+        @Override
+        public Type getUpperBound() { return bound; }
 
         int rank_field = -1;
 
+        @Override
         public Type getLowerBound() {
             return lower;
         }
@@ -984,7 +1059,6 @@ public class Type implements PrimitiveType, Cloneable {
      */
     public static class CapturedType extends TypeVar {
 
-        public Type lower;
         public WildcardType wildcard;
 
         public CapturedType(Name name,
@@ -993,19 +1067,14 @@ public class Type implements PrimitiveType, Cloneable {
                             Type lower,
                             WildcardType wildcard) {
             super(name, owner, lower);
-            assert lower != null;
+            this.lower = Assert.checkNonNull(lower);
             this.bound = upper;
-            this.lower = lower;
             this.wildcard = wildcard;
         }
 
         @Override
         public <R,S> R accept(Type.Visitor<R,S> v, S s) {
             return v.visitCapturedType(this, s);
-        }
-
-        public Type getLowerBound() {
-            return lower;
         }
 
         @Override
@@ -1036,12 +1105,10 @@ public class Type implements PrimitiveType, Cloneable {
         public List<Type> getThrownTypes() { return qtype.getThrownTypes(); }
         public List<Type> allparams() { return qtype.allparams(); }
         public Type getUpperBound() { return qtype.getUpperBound(); }
-        public Object clone() { DelegatedType t = (DelegatedType)super.clone(); t.qtype = (Type)qtype.clone(); return t; }
         public boolean isErroneous() { return qtype.isErroneous(); }
     }
 
-    public static class ForAll extends DelegatedType
-            implements Cloneable, ExecutableType {
+    public static class ForAll extends DelegatedType implements ExecutableType {
         public List<Type> tvars;
 
         public ForAll(List<Type> tvars, Type qtype) {
@@ -1059,16 +1126,6 @@ public class Type implements PrimitiveType, Cloneable {
         }
 
         public List<Type> getTypeArguments()   { return tvars; }
-
-        public void setThrown(List<Type> t) {
-            qtype.setThrown(t);
-        }
-
-        public Object clone() {
-            ForAll result = (ForAll)super.clone();
-            result.qtype = (Type)result.qtype.clone();
-            return result;
-        }
 
         public boolean isErroneous()  {
             return qtype.isErroneous();

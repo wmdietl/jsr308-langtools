@@ -1,12 +1,12 @@
 /*
- * Copyright 1999-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,14 +18,16 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.code;
 
 import java.util.*;
+import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.element.ElementVisitor;
 
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
@@ -42,8 +44,8 @@ import static com.sun.tools.javac.code.Flags.*;
  *  fields. This makes it possible to work in multiple concurrent
  *  projects, which might use different class files for library classes.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -93,6 +95,10 @@ public class Symtab {
      */
     public final ClassSymbol errSymbol;
 
+    /** The unknown symbol.
+     */
+    public final ClassSymbol unknownSymbol;
+
     /** A value for the errType, with a originalType of noType */
     public final Type errType;
 
@@ -120,9 +126,10 @@ public class Symtab {
     public final Type cloneableType;
     public final Type serializableType;
     public final Type methodHandleType;
-    public final Type invokeDynamicType;
+    public final Type polymorphicSignatureType;
     public final Type throwableType;
     public final Type errorType;
+    public final Type interruptedExceptionType;
     public final Type illegalArgumentExceptionType;
     public final Type exceptionType;
     public final Type runtimeExceptionType;
@@ -147,6 +154,8 @@ public class Symtab {
     public final Type inheritedType;
     public final Type proprietaryType;
     public final Type systemType;
+    public final Type autoCloseableType;
+    public final Type trustMeType;
 
     /** The symbol representing the length field of an array.
      */
@@ -157,6 +166,9 @@ public class Symtab {
 
     /** The symbol representing the final finalize method on enums */
     public final MethodSymbol enumFinalFinalize;
+
+    /** The symbol representing the close method on TWR AutoCloseable type */
+    public final MethodSymbol autoCloseableClose;
 
     /** The predefined type that belongs to a tag.
      */
@@ -291,24 +303,6 @@ public class Symtab {
         }
     }
 
-    public void synthesizeMHTypeIfMissing(final Type type) {
-        final Completer completer = type.tsym.completer;
-        if (completer != null) {
-            type.tsym.completer = new Completer() {
-                public void complete(Symbol sym) throws CompletionFailure {
-                    try {
-                        completer.complete(sym);
-                    } catch (CompletionFailure e) {
-                        sym.flags_field |= (PUBLIC | ABSTRACT);
-                        ((ClassType) sym.type).supertype_field = objectType;
-                        // do not bother to create MH.type if not visibly declared
-                        // this sym just accumulates invoke(...) methods
-                    }
-                }
-            };
-        }
-    }
-
     public void synthesizeBoxTypeIfMissing(final Type type) {
         ClassSymbol sym = reader.enterClass(boxedName[type.tag]);
         final Completer completer = sym.completer;
@@ -352,7 +346,12 @@ public class Symtab {
         target = Target.instance(context);
 
         // Create the unknown type
-        unknownType = new Type(TypeTags.UNKNOWN, null);
+        unknownType = new Type(TypeTags.UNKNOWN, null) {
+            @Override
+            public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+                return v.visitUnknown(this, p);
+            }
+        };
 
         // create the basic builtin symbols
         rootPackage = new PackageSymbol(names.empty, null);
@@ -362,12 +361,20 @@ public class Symtab {
                     return messages.getLocalizedString("compiler.misc.unnamed.package");
                 }
             };
-        noSymbol = new TypeSymbol(0, names.empty, Type.noType, rootPackage);
+        noSymbol = new TypeSymbol(0, names.empty, Type.noType, rootPackage) {
+            public <R, P> R accept(ElementVisitor<R, P> v, P p) {
+                return v.visitUnknown(this, p);
+            }
+        };
         noSymbol.kind = Kinds.NIL;
 
         // create the error symbols
         errSymbol = new ClassSymbol(PUBLIC|STATIC|ACYCLIC, names.any, null, rootPackage);
         errType = new ErrorType(errSymbol, Type.noType);
+
+        unknownSymbol = new ClassSymbol(PUBLIC|STATIC|ACYCLIC, names.fromString("<any?>"), null, rootPackage);
+        unknownSymbol.members_field = new Scope.ErrorScope(unknownSymbol);
+        unknownSymbol.type = unknownType;
 
         // initialize builtin types
         initType(byteType, "byte", "Byte");
@@ -381,16 +388,18 @@ public class Symtab {
         initType(voidType, "void", "Void");
         initType(botType, "<nulltype>");
         initType(errType, errSymbol);
-        initType(unknownType, "<any?>");
+        initType(unknownType, unknownSymbol);
 
         // the builtin class of all arrays
         arrayClass = new ClassSymbol(PUBLIC|ACYCLIC, names.Array, noSymbol);
 
         // VGJ
         boundClass = new ClassSymbol(PUBLIC|ACYCLIC, names.Bound, noSymbol);
+        boundClass.members_field = new Scope.ErrorScope(boundClass);
 
         // the builtin class of all methods
         methodClass = new ClassSymbol(PUBLIC|ACYCLIC, names.Method, noSymbol);
+        methodClass.members_field = new Scope.ErrorScope(boundClass);
 
         // Create class to hold all predefined constants and operations.
         predefClass = new ClassSymbol(PUBLIC|ACYCLIC, names.empty, rootPackage);
@@ -425,10 +434,11 @@ public class Symtab {
         cloneableType = enterClass("java.lang.Cloneable");
         throwableType = enterClass("java.lang.Throwable");
         serializableType = enterClass("java.io.Serializable");
-        methodHandleType = enterClass("java.dyn.MethodHandle");
-        invokeDynamicType = enterClass("java.dyn.InvokeDynamic");
+        methodHandleType = enterClass("java.lang.invoke.MethodHandle");
+        polymorphicSignatureType = enterClass("java.lang.invoke.MethodHandle$PolymorphicSignature");
         errorType = enterClass("java.lang.Error");
         illegalArgumentExceptionType = enterClass("java.lang.IllegalArgumentException");
+        interruptedExceptionType = enterClass("java.lang.InterruptedException");
         exceptionType = enterClass("java.lang.Exception");
         runtimeExceptionType = enterClass("java.lang.RuntimeException");
         classNotFoundExceptionType = enterClass("java.lang.ClassNotFoundException");
@@ -460,16 +470,23 @@ public class Symtab {
         suppressWarningsType = enterClass("java.lang.SuppressWarnings");
         inheritedType = enterClass("java.lang.annotation.Inherited");
         systemType = enterClass("java.lang.System");
+        autoCloseableType = enterClass("java.lang.AutoCloseable");
+        autoCloseableClose = new MethodSymbol(PUBLIC,
+                             names.close,
+                             new MethodType(List.<Type>nil(), voidType,
+                                            List.of(exceptionType), methodClass),
+                             autoCloseableType.tsym);
+        trustMeType = enterClass("java.lang.SafeVarargs");
 
+        synthesizeEmptyInterfaceIfMissing(autoCloseableType);
         synthesizeEmptyInterfaceIfMissing(cloneableType);
         synthesizeEmptyInterfaceIfMissing(serializableType);
-        synthesizeMHTypeIfMissing(methodHandleType);
-        synthesizeMHTypeIfMissing(invokeDynamicType);
+        synthesizeEmptyInterfaceIfMissing(polymorphicSignatureType);
         synthesizeBoxTypeIfMissing(doubleType);
         synthesizeBoxTypeIfMissing(floatType);
         synthesizeBoxTypeIfMissing(voidType);
 
-        // Enter a synthetic class that is used to mark Sun
+        // Enter a synthetic class that is used to mark internal
         // proprietary classes in ct.sym.  This class does not have a
         // class file.
         ClassType proprietaryType = (ClassType)enterClass("sun.Proprietary+Annotation");

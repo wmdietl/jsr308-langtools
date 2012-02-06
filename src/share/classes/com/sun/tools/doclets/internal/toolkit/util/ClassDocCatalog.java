@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,15 +18,16 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.internal.toolkit.util;
 
-import com.sun.javadoc.*;
 import java.util.*;
+import com.sun.javadoc.*;
+import com.sun.tools.doclets.internal.toolkit.Configuration;
 
 /**
  * This class acts as an artificial PackageDoc for classes specified
@@ -88,13 +89,16 @@ import java.util.*;
       */
      private Map<String,Set<ClassDoc>> interfaces;
 
+     private Configuration configuration;
+
      /**
       * Construct a new ClassDocCatalog.
       *
       * @param classdocs the array of ClassDocs to catalog
       */
-     public ClassDocCatalog (ClassDoc[] classdocs) {
+     public ClassDocCatalog (ClassDoc[] classdocs, Configuration config) {
          init();
+         this.configuration = config;
          for (int i = 0; i < classdocs.length; i++) {
              addClassDoc(classdocs[i]);
          }
@@ -151,9 +155,10 @@ import java.util.*;
       private void addClass(ClassDoc classdoc, Map<String,Set<ClassDoc>> map) {
 
           PackageDoc pkg = classdoc.containingPackage();
-          if (pkg.isIncluded()) {
-              //No need to catalog this class since it's package is
-              //included on the command line
+          if (pkg.isIncluded() || (configuration.nodeprecated && Util.isDeprecated(pkg))) {
+              //No need to catalog this class if it's package is
+              //included on the command line or if -nodeprecated option is set
+              // and the containing package is marked as deprecated.
               return;
           }
           String key = Util.getPackageName(pkg);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -31,6 +31,8 @@ import java.io.*;
 import java.util.*;
 import javax.tools.*;
 import com.sun.tools.javac.file.*;
+import com.sun.tools.javac.file.ZipArchive.ZipFileObject;
+import com.sun.tools.javac.file.ZipFileIndexArchive.ZipFileIndexFileObject;
 
 public class T6705935 {
     public static void main(String... args) throws Exception {
@@ -43,11 +45,22 @@ public class T6705935 {
             java_home = java_home.getParentFile();
 
         JavaCompiler c = ToolProvider.getSystemJavaCompiler();
-        JavaFileManager fm = c.getStandardFileManager(null, null, null);
+        StandardJavaFileManager fm = c.getStandardFileManager(null, null, null);
+        //System.err.println("platform class path: " + asList(fm.getLocation(StandardLocation.PLATFORM_CLASS_PATH)));
+
         for (JavaFileObject fo: fm.list(StandardLocation.PLATFORM_CLASS_PATH,
                                         "java.lang",
                                         Collections.singleton(JavaFileObject.Kind.CLASS),
                                         false)) {
+            test++;
+
+            if (!(fo instanceof ZipFileObject || fo instanceof ZipFileIndexFileObject)) {
+                System.out.println("Skip " + fo.getClass().getSimpleName() + " " + fo.getName());
+                skip++;
+                continue;
+            }
+
+            //System.err.println(fo.getName());
             String p = fo.getName();
             int bra = p.indexOf("(");
             int ket = p.indexOf(")");
@@ -61,5 +74,26 @@ public class T6705935 {
                 throw new Exception("bad path: " + p);
 
         }
+
+        if (test == 0)
+            throw new Exception("no files found");
+
+        if (skip == 0)
+            System.out.println(test + " files found");
+        else
+            System.out.println(test + " files found, " + skip + " files skipped");
+
+        if (test == skip)
+            System.out.println("Warning: all files skipped; no platform classes found in zip files.");
     }
+
+    private <T> List<T> asList(Iterable<? extends T> items) {
+        List<T> list = new ArrayList<T>();
+        for (T item: items)
+            list.add(item);
+        return list;
+     }
+
+    private int skip;
+    private int test;
 }

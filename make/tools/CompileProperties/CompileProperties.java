@@ -1,12 +1,12 @@
 /*
- * Copyright 2002-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 import java.io.BufferedWriter;
@@ -101,7 +101,7 @@ public class CompileProperties {
         boolean ok = true;
         /* Original usage */
         if (args.length == 2 && args[0].charAt(0) != '-' ) {
-            ok = createFile(args[0], args[1], "ListResourceBundle");
+            ok = createFile(args[0], args[1], "java.util.ListResourceBundle");
         } else if (args.length == 3) {
             ok = createFile(args[0], args[1], args[2]);
         } else if (args.length == 0) {
@@ -222,13 +222,13 @@ public class CompileProperties {
                 sortedKeys.add((String)key);
             }
             Collections.sort(sortedKeys);
-            Iterator keys = sortedKeys.iterator();
+            Iterator<String> keys = sortedKeys.iterator();
 
             StringBuffer data = new StringBuffer();
 
             while (keys.hasNext()) {
-                Object key = keys.next();
-                data.append("            { \"" + escape((String)key) + "\", \"" +
+                String key = keys.next();
+                data.append("            { \"" + escape(key) + "\", \"" +
                         escape((String)p.get(key)) + "\" },\n");
             }
 
@@ -285,9 +285,9 @@ public class CompileProperties {
         log.info("    java CompileProperties {-compile path_to_properties_file path_to_java_output_file super_class} -or- -optionsfile filename");
         log.info("");
         log.info("Example:");
-        log.info("    java CompileProperties -compile test.properties test.java ListResourceBundle");
+        log.info("    java CompileProperties -compile test.properties test.java java.util.ListResourceBundle");
         log.info("    java CompileProperties -optionsfile option_file");
-        log.info("option_file contains: -compile test.properties test.java ListResourceBundle");
+        log.info("option_file contains: -compile test.properties test.java java.util.ListResourceBundle");
     }
 
     private static String escape(String theString) {
@@ -379,7 +379,6 @@ public class CompileProperties {
 
     private static final String FORMAT =
             "{0}" +
-            "import java.util.ListResourceBundle;\n\n" +
             "public final class {1} extends {2} '{'\n" +
             "    protected final Object[][] getContents() '{'\n" +
             "        return new Object[][] '{'\n" +

@@ -1,12 +1,12 @@
 /*
- * Copyright 2003-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.code;
@@ -29,12 +29,12 @@ import com.sun.tools.javac.util.*;
 
 /** A type annotation position.
 *
-*  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
-*  you write code that depends on this, you do so at your own risk.
+*  <p><b>This is NOT part of any supported API.
+*  If you write code that depends on this, you do so at your own risk.
 *  This code and its internal interfaces are subject to change or
 *  deletion without notice.</b>
 */
-public class TypeAnnotationPosition implements Cloneable {
+public class TypeAnnotationPosition {
 
     public TargetType type = TargetType.UNKNOWN;
 
@@ -65,11 +65,6 @@ public class TypeAnnotationPosition implements Cloneable {
     // For wildcards
     public TypeAnnotationPosition wildcard_position = null;
 
-    public TypeAnnotationPosition() { }
-    public TypeAnnotationPosition(TargetType type) {
-        this.type = type;
-    }
-
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -86,6 +81,8 @@ public class TypeAnnotationPosition implements Cloneable {
             // new expression
         case NEW:
         case NEW_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
             sb.append(offset);
             break;
@@ -147,13 +144,11 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(offset);
             break;
             // method parameter: not specified
-        case METHOD_PARAMETER:
         case METHOD_PARAMETER_GENERIC_OR_ARRAY:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            // method type argument: wasn't specified
         case METHOD_TYPE_ARGUMENT:
         case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
             sb.append(", offset = ");
@@ -162,9 +157,7 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(type_index);
             break;
             // We don't need to worry abut these
-        case METHOD_RETURN:
         case METHOD_RETURN_GENERIC_OR_ARRAY:
-        case FIELD:
         case FIELD_GENERIC_OR_ARRAY:
             break;
         case UNKNOWN:
@@ -198,13 +191,5 @@ public class TypeAnnotationPosition implements Cloneable {
             return wildcard_position.isValidOffset;
         else
             return !type.isLocal() || isValidOffset;
-    }
-
-    public TypeAnnotationPosition clone() {
-        try {
-            return (TypeAnnotationPosition)super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("This not cloneable");
-        }
     }
 }

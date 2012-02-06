@@ -1,5 +1,5 @@
 /*
- * Copyright 2004-2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2004, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,14 +16,14 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @bug      4665566 4855876
+ * @bug      4665566 4855876 7025314
  * @summary  Verify that the output has the right javascript.
  * @author   jamieh
  * @library  ../lib/
@@ -45,11 +45,11 @@ public class TestJavascript extends JavadocTester {
     //Input for string search tests.
     private static final String[][] TEST = {
         {BUG_ID + FS + "pkg" + FS + "C.html",
-            "<A HREF=\"../index.html?pkg/C.html\" target=\"_top\"><STRONG>FRAMES</STRONG></A>"},
+            "<a href=\"../index.html?pkg/C.html\" target=\"_top\">Frames</a>"},
         {BUG_ID + FS + "TestJavascript.html",
-            "<A HREF=\"index.html?TestJavascript.html\" target=\"_top\"><STRONG>FRAMES</STRONG></A>"},
+            "<a href=\"index.html?TestJavascript.html\" target=\"_top\">Frames</a>"},
         {BUG_ID + FS + "index.html",
-            "<SCRIPT type=\"text/javascript\">" + NL +
+            "<script type=\"text/javascript\">" + NL +
                         "    targetPage = \"\" + window.location.search;" + NL +
             "    if (targetPage != \"\" && targetPage != \"undefined\")" + NL +
             "        targetPage = targetPage.substring(1);" + NL +
@@ -59,7 +59,7 @@ public class TestJavascript extends JavadocTester {
             "        if (targetPage != \"\" && targetPage != \"undefined\")" + NL +
             "             top.classFrame.location = top.targetPage;" + NL +
             "    }" + NL +
-            "</SCRIPT>"},
+            "</script>"},
 
         //Make sure title javascript only runs if is-external is not true
         {BUG_ID + FS + "pkg" + FS + "C.html",

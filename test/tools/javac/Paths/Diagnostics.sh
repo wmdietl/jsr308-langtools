@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# Copyright 2003-2006 Sun Microsystems, Inc.  All Rights Reserved.
+# Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
 #
 # This code is free software; you can redistribute it and/or modify it
@@ -18,9 +18,9 @@
 # 2 along with this work; if not, write to the Free Software Foundation,
 # Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
 #
-# Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
-# CA 95054 USA or visit www.sun.com if you need additional information or
-# have any questions.
+# Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+# or visit www.oracle.com if you need additional information or have any
+# questions.
 #
 
 #
@@ -182,12 +182,12 @@ No Warning "$javac" ${TESTTOOLVMOPTS} -Xlint      -classpath   classesRefRef.jar
 No Warning "$javac" ${TESTTOOLVMOPTS} -Xlint -Xbootclasspath/p:classesRefRef.jar Main.java
 
 #----------------------------------------------------------------
-# Class-Path attribute ignored in extdirs or endorseddirs
+# Class-Path attribute followed in extdirs or endorseddirs
 #----------------------------------------------------------------
 Sys mkdir jars
 Sys cp -p classesRefRef.jar jars/.
-No Warning "$javac" ${TESTTOOLVMOPTS} -Xlint -extdirs      jars Main.java
-No Warning "$javac" ${TESTTOOLVMOPTS} -Xlint -endorseddirs jars Main.java
+   Warning "$javac" ${TESTTOOLVMOPTS} -Xlint -extdirs      jars Main.java
+   Warning "$javac" ${TESTTOOLVMOPTS} -Xlint -endorseddirs jars Main.java
 
 #----------------------------------------------------------------
 # Bad Jar file in extdirs and endorseddirs should not be ignored

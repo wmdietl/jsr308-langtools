@@ -1,5 +1,5 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,27 +16,27 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
- * @compile/ref=byfile.AB.out -XDstdout -XDverboseCompilePolicy -XDcompile.policy=byfile A.java B.java
+ * @compile/ref=byfile.AB.out -XDverboseCompilePolicy -XDcompile.policy=byfile A.java B.java
  */
 
 /*
  * @test
- * @compile/ref=byfile.BA.out -XDstdout -XDverboseCompilePolicy -XDcompile.policy=byfile B.java A.java
+ * @compile/ref=byfile.BA.out -XDverboseCompilePolicy -XDcompile.policy=byfile B.java A.java
  */
 
 /*
  * @test
- * @compile/ref=bytodo.AB.out -XDstdout -XDverboseCompilePolicy -XDcompile.policy=bytodo A.java B.java
+ * @compile/ref=bytodo.AB.out -XDverboseCompilePolicy -XDcompile.policy=bytodo A.java B.java
  */
 
 /*
  * @test
- * @compile/ref=bytodo.BA.out -XDstdout -XDverboseCompilePolicy -XDcompile.policy=bytodo B.java A.java
+ * @compile/ref=bytodo.BA.out -XDverboseCompilePolicy -XDcompile.policy=bytodo B.java A.java
  */

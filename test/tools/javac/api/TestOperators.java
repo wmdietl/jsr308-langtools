@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,7 +26,8 @@
  * @bug     6338064 6346249 6340951 6392177
  * @summary Tree API: can't determine kind of operator
  * @author  Peter von der Ah\u00e9
- * @compile TestOperators.java
+ * @library ../lib
+ * @build JavacTestingAbstractProcessor TestOperators
  * @compile -processor TestOperators -proc:only TestOperators.java
  */
 
@@ -46,7 +47,7 @@ import static com.sun.source.tree.Tree.Kind.*;
 }
 
 @SupportedAnnotationTypes("TestMe")
-public class TestOperators extends AbstractProcessor {
+public class TestOperators extends JavacTestingAbstractProcessor {
 
     @TestMe(POSTFIX_INCREMENT)
     public int test_POSTFIX_INCREMENT(int i) {
@@ -299,7 +300,7 @@ public class TestOperators extends AbstractProcessor {
         final Trees trees = Trees.instance(processingEnv);
         final Messager log = processingEnv.getMessager();
         final Elements elements = processingEnv.getElementUtils();
-        class Scan extends ElementScanner6<Void,Void> {
+        class Scan extends ElementScanner<Void,Void> {
             @Override
             public Void visitExecutable(ExecutableElement e, Void p) {
                 Object debug = e; // info for exception handler
@@ -343,5 +344,4 @@ public class TestOperators extends AbstractProcessor {
         }
         return true;
     }
-
 }

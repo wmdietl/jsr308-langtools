@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.jvm;
@@ -31,13 +31,14 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.parser.EndPosTable;
 
 /** This class contains the CharacterRangeTable for some method
  *  and the hashtable for mapping trees or lists of trees to their
  *  ending positions.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -54,9 +55,9 @@ implements CRTFlags {
      */
     private Map<Object,SourceRange> positions = new HashMap<Object,SourceRange>();
 
-    /** The hashtable for ending positions stored in the parser.
+    /** The object for ending positions stored in the parser.
      */
-    private Map<JCTree, Integer> endPositions;
+    private EndPosTable endPosTable;
 
     /** The tree of the method this table is intended for.
      *  We should traverse this tree to get source ranges.
@@ -65,9 +66,9 @@ implements CRTFlags {
 
     /** Constructor
      */
-    public CRTable(JCTree.JCMethodDecl tree, Map<JCTree, Integer> endPositions) {
+    public CRTable(JCTree.JCMethodDecl tree, EndPosTable endPosTable) {
         this.methodTree = tree;
-        this.endPositions = endPositions;
+        this.endPosTable = endPosTable;
     }
 
     /** Create a new CRTEntry and add it to the entries.
@@ -101,7 +102,7 @@ implements CRTFlags {
                 continue;
 
             SourceRange pos = positions.get(entry.tree);
-            assert pos != null : "CRT: tree source positions are undefined";
+            Assert.checkNonNull(pos, "CRT: tree source positions are undefined");
             if ((pos.startPos == Position.NOPOS) || (pos.endPos == Position.NOPOS))
                 continue;
 
@@ -325,6 +326,7 @@ implements CRTFlags {
 
         public void visitTry(JCTry tree) {
             SourceRange sr = new SourceRange(startPos(tree), endPos(tree));
+            sr.mergeWith(csp(tree.resources));
             sr.mergeWith(csp(tree.body));
             sr.mergeWith(cspCatchers(tree.catchers));
             sr.mergeWith(csp(tree.finalizer));
@@ -516,7 +518,7 @@ implements CRTFlags {
         }
 
         public void visitTree(JCTree tree) {
-            assert false;
+            Assert.error();
         }
 
         /** The start position of given tree.
@@ -531,12 +533,9 @@ implements CRTFlags {
          */
         public int endPos(JCTree tree) {
             if (tree == null) return Position.NOPOS;
-            if (tree.getTag() == JCTree.BLOCK)
+            if (tree.hasTag(JCTree.Tag.BLOCK))
                 return ((JCBlock) tree).endpos;
-            Integer endpos = endPositions.get(tree);
-            if (endpos != null)
-                return endpos.intValue();
-            return Position.NOPOS;
+            return endPosTable.getEndPos(tree);
         }
     }
 

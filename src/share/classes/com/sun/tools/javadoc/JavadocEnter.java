@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javadoc;
@@ -31,7 +31,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.comp.Enter;
-import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.*;
 import javax.tools.JavaFileObject;
 
@@ -48,10 +47,10 @@ public class JavadocEnter extends Enter {
         return (JavadocEnter)instance;
     }
 
-    public static void preRegister(final Context context) {
+    public static void preRegister(Context context) {
         context.put(enterKey, new Context.Factory<Enter>() {
-               public Enter make() {
-                   return new JavadocEnter(context);
+               public Enter make(Context c) {
+                   return new JavadocEnter(c);
                }
         });
     }
@@ -65,6 +64,7 @@ public class JavadocEnter extends Enter {
     final Messager messager;
     final DocEnv docenv;
 
+    @Override
     public void main(List<JCCompilationUnit> trees) {
         // count all Enter errors as warnings.
         int nerrors = messager.nerrors;
@@ -73,6 +73,7 @@ public class JavadocEnter extends Enter {
         messager.nerrors = nerrors;
     }
 
+    @Override
     public void visitTopLevel(JCCompilationUnit tree) {
         super.visitTopLevel(tree);
         if (tree.sourcefile.isNameCompatible("package-info", JavaFileObject.Kind.SOURCE)) {
@@ -81,10 +82,11 @@ public class JavadocEnter extends Enter {
         }
     }
 
+    @Override
     public void visitClassDef(JCClassDecl tree) {
         super.visitClassDef(tree);
-        if (tree.sym != null && tree.sym.kind == Kinds.TYP) {
-            if (tree.sym == null) return;
+        if (tree.sym == null) return;
+        if (tree.sym.kind == Kinds.TYP || tree.sym.kind == Kinds.ERR) {
             String comment = env.toplevel.docComments.get(tree);
             ClassSymbol c = tree.sym;
             docenv.makeClassDoc(c, comment, tree, env.toplevel.lineMap);
@@ -92,6 +94,7 @@ public class JavadocEnter extends Enter {
     }
 
     /** Don't complain about a duplicate class. */
+    @Override
     protected void duplicateClass(DiagnosticPosition pos, ClassSymbol c) {}
 
 }

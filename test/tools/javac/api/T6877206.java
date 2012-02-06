@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -63,12 +63,12 @@ public class T6877206 {
         test(createFileManager(), createDir("dir", entries), "p", entries.length);
         test(createFileManager(), createDir("a b/dir", entries), "p", entries.length);
 
-        for (boolean useJavaUtilZip: new boolean[] { false, true }) {
-            test(createFileManager(useJavaUtilZip), createJar("jar", entries), "p", entries.length);
-            test(createFileManager(useJavaUtilZip), createJar("jar jar", entries), "p", entries.length);
+        for (boolean useOptimizedZip: new boolean[] { false, true }) {
+            test(createFileManager(useOptimizedZip), createJar("jar", entries), "p", entries.length);
+            test(createFileManager(useOptimizedZip), createJar("jar jar", entries), "p", entries.length);
 
             for (boolean useSymbolFile: new boolean[] { false, true }) {
-                test(createFileManager(useJavaUtilZip, useSymbolFile), rt_jar, "java.lang.ref", -1);
+                test(createFileManager(useOptimizedZip, useSymbolFile), rt_jar, "java.lang.ref", -1);
             }
         }
 
@@ -161,42 +161,18 @@ public class T6877206 {
         return createFileManager(false, false);
     }
 
-    JavacFileManager createFileManager(boolean useJavaUtilZip) {
-        return createFileManager(useJavaUtilZip, false);
+    JavacFileManager createFileManager(boolean useOptimizedZip) {
+        return createFileManager(useOptimizedZip, false);
     }
 
-    JavacFileManager createFileManager(boolean useJavaUtilZip, boolean useSymbolFile) {
-        // javac should really not be using system properties like this
-        // -- it should really be using (hidden) options -- but until then
-        // take care to leave system properties as we find them, so as not
-        // to adversely affect other tests that might follow.
-        String prev = System.getProperty("useJavaUtilZip");
-        boolean resetProperties = false;
-        try {
-            if (useJavaUtilZip) {
-                System.setProperty("useJavaUtilZip", "true");
-                resetProperties = true;
-            } else if (System.getProperty("useJavaUtilZip") != null) {
-                System.getProperties().remove("useJavaUtilZip");
-                resetProperties = true;
-            }
-
-            Context c = new Context();
-            if (!useSymbolFile) {
-                Options options = Options.instance(c);
-                options.put("ignore.symbol.file", "true");
-            }
-
-            return new JavacFileManager(c, false, null);
-        } finally {
-            if (resetProperties) {
-                if (prev == null) {
-                    System.getProperties().remove("useJavaUtilZip");
-                } else {
-                    System.setProperty("useJavaUtilZip", prev);
-                }
-            }
+    JavacFileManager createFileManager(boolean useOptimizedZip, boolean useSymbolFile) {
+        Context ctx = new Context();
+        Options options = Options.instance(ctx);
+        options.put("useOptimizedZip", Boolean.toString(useOptimizedZip));
+        if (!useSymbolFile) {
+            options.put("ignore.symbol.file", "true");
         }
+        return new JavacFileManager(ctx, false, null);
     }
 
     File createDir(String name, String... entries) throws Exception {

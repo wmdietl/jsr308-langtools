@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,24 +26,26 @@
  * @bug 6403468
  * @summary Test that an erroneous return code results from raising an error.
  * @author  Joseph D. Darcy
+ * @library ../../lib
+ * @build JavacTestingAbstractProcessor CompileFail
  * @compile TestReturnCode.java
  *
- * @compile      -processor TestReturnCode -proc:only                                                                   Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                                                    -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                                      -AErrorOnLast                Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                                      -AErrorOnLast -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                   -AExceptionOnFirst                              Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                   -AExceptionOnFirst               -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                   -AExceptionOnFirst -AErrorOnLast                Foo.java
- * @compile/fail -processor TestReturnCode -proc:only                   -AExceptionOnFirst -AErrorOnLast -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast                                                 Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast                                  -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast                    -AErrorOnLast                Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast                    -AErrorOnLast -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst                              Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst               -AErrorOnFirst Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst -AErrorOnLast                Foo.java
- * @compile/fail -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst -AErrorOnLast -AErrorOnFirst Foo.java
+ * @compile                     -processor TestReturnCode -proc:only                                                                   Foo.java
+ * @run main CompileFail ERROR  -processor TestReturnCode -proc:only                                                    -AErrorOnFirst Foo.java
+ * @run main CompileFail ERROR  -processor TestReturnCode -proc:only                                      -AErrorOnLast                Foo.java
+ * @run main CompileFail ERROR  -processor TestReturnCode -proc:only                                      -AErrorOnLast -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only                   -AExceptionOnFirst                              Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only                   -AExceptionOnFirst               -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only                   -AExceptionOnFirst -AErrorOnLast                Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only                   -AExceptionOnFirst -AErrorOnLast -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast                                                 Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast                                  -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast                    -AErrorOnLast                Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast                    -AErrorOnLast -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst                              Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst               -AErrorOnFirst Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst -AErrorOnLast                Foo.java
+ * @run main CompileFail SYSERR -processor TestReturnCode -proc:only -AExceptionOnLast -AExceptionOnFirst -AErrorOnLast -AErrorOnFirst Foo.java
  */
 
 import java.util.Set;
@@ -60,19 +62,16 @@ import static javax.tools.Diagnostic.Kind.*;
  * This processor raises errors or throws exceptions on different
  * rounds to allow the return code to be test.
  */
-@SupportedAnnotationTypes("*")
 @SupportedOptions({"ErrorOnFirst",
                    "ErrorOnLast",
                    "ExceptionOnFirst",
                    "ExceptionOnLast"})
-public class TestReturnCode extends AbstractProcessor {
+public class TestReturnCode extends JavacTestingAbstractProcessor {
 
     private boolean errorOnFirst;
     private boolean errorOnLast;
     private boolean exceptionOnFirst;
     private boolean exceptionOnLast;
-
-    private Messager messager;
 
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnv) {
@@ -103,11 +102,5 @@ public class TestReturnCode extends AbstractProcessor {
         errorOnLast     = keySet.contains("ErrorOnLast");
         exceptionOnFirst  = keySet.contains("ExceptionOnFirst");
         exceptionOnLast = keySet.contains("ExceptionOnLast");
-        messager = processingEnv.getMessager();
-    }
-
-    @Override
-    public SourceVersion getSupportedSourceVersion() {
-        return SourceVersion.latest();
     }
 }

@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package javax.lang.model.util;
@@ -76,6 +76,9 @@ import javax.lang.model.SourceVersion;
  * @author Joseph D. Darcy
  * @author Scott Seligman
  * @author Peter von der Ah&eacute;
+ *
+ * @see ElementKindVisitor7
+ * @see ElementKindVisitor8
  * @since 1.6
  */
 @SupportedSourceVersion(RELEASE_6)
@@ -197,7 +200,8 @@ public class ElementKindVisitor6<R, P>
      * Visits a variable element, dispatching to the visit method for
      * the specific {@linkplain ElementKind kind} of variable, {@code
      * ENUM_CONSTANT}, {@code EXCEPTION_PARAMETER}, {@code FIELD},
-     * {@code LOCAL_VARIABLE}, or {@code PARAMETER}.
+     * {@code LOCAL_VARIABLE}, {@code PARAMETER}, or {@code RESOURCE_VARIABLE}.
+     *
      * @param e {@inheritDoc}
      * @param p {@inheritDoc}
      * @return  the result of the kind-specific visit method
@@ -221,10 +225,12 @@ public class ElementKindVisitor6<R, P>
         case PARAMETER:
             return visitVariableAsParameter(e, p);
 
+        case RESOURCE_VARIABLE:
+            return visitVariableAsResourceVariable(e, p);
+
         default:
             throw new AssertionError("Bad kind " + k + " for VariableElement" + e);
         }
-
     }
 
     /**
@@ -285,6 +291,20 @@ public class ElementKindVisitor6<R, P>
      */
     public R visitVariableAsParameter(VariableElement e, P p) {
         return defaultAction(e, p);
+    }
+
+    /**
+     * Visits a {@code RESOURCE_VARIABLE} variable element by calling
+     * {@code visitUnknown}.
+     *
+     * @param e the element to visit
+     * @param p a visitor-specified parameter
+     * @return  the result of {@code visitUnknown}
+     *
+     * @since 1.7
+     */
+    public R visitVariableAsResourceVariable(VariableElement e, P p) {
+        return visitUnknown(e, p);
     }
 
     /**

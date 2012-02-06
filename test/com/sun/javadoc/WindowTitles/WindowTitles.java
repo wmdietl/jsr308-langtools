@@ -1,5 +1,5 @@
 /*
- * Copyright 2002-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -94,52 +94,52 @@ public class WindowTitles
      */
     private static final String[][] testArray = {
 
-            { "<TITLE>" + LS + "Overview" + LS + "</TITLE>",
+            { "<title>Overview</title>",
                     TMPDIR_STRING1 + "overview-summary.html"                  },
 
-            { "<TITLE>" + LS + "Class Hierarchy" + LS + "</TITLE>",
+            { "<title>Class Hierarchy</title>",
                     TMPDIR_STRING1 + "overview-tree.html"                     },
 
-            { "<TITLE>" + LS + "Overview List" + LS + "</TITLE>",
+            { "<title>Overview List</title>",
                     TMPDIR_STRING1 + "overview-frame.html"                    },
 
-            { "<TITLE>" + LS + "p1" + LS + "</TITLE>",
+            { "<title>p1</title>",
                     TMPDIR_STRING1 + "p1" + FS + "package-summary.html"       },
 
-            { "<TITLE>" + LS + "p1" + LS + "</TITLE>",
+            { "<title>p1</title>",
                     TMPDIR_STRING1 + "p1" + FS + "package-frame.html"         },
 
-            { "<TITLE>" + LS + "p1 Class Hierarchy" + LS + "</TITLE>",
+            { "<title>p1 Class Hierarchy</title>",
                     TMPDIR_STRING1 + "p1" + FS + "package-tree.html"          },
 
-            { "<TITLE>" + LS + "Uses of Package p1" + LS + "</TITLE>",
+            { "<title>Uses of Package p1</title>",
                     TMPDIR_STRING1 + "p1" + FS + "package-use.html"           },
 
-            { "<TITLE>" + LS + "C1" + LS + "</TITLE>",
+            { "<title>C1</title>",
                     TMPDIR_STRING1 + "p1" + FS + "C1.html"                    },
 
-            { "<TITLE>" + LS + "All Classes" + LS + "</TITLE>",
+            { "<title>All Classes</title>",
                     TMPDIR_STRING1 + "allclasses-frame.html"                  },
 
-            { "<TITLE>" + LS + "All Classes" + LS + "</TITLE>",
+            { "<title>All Classes</title>",
                     TMPDIR_STRING1 + "allclasses-noframe.html"                },
 
-            { "<TITLE>" + LS + "Constant Field Values" + LS + "</TITLE>",
+            { "<title>Constant Field Values</title>",
                     TMPDIR_STRING1 + "constant-values.html"                   },
 
-            { "<TITLE>" + LS + "Deprecated List" + LS + "</TITLE>",
+            { "<title>Deprecated List</title>",
                     TMPDIR_STRING1 + "deprecated-list.html"                   },
 
-            { "<TITLE>" + LS + "Serialized Form" + LS + "</TITLE>",
+            { "<title>Serialized Form</title>",
                     TMPDIR_STRING1 + "serialized-form.html"                   },
 
-            { "<TITLE>" + LS + "API Help" + LS + "</TITLE>",
+            { "<title>API Help</title>",
                     TMPDIR_STRING1 + "help-doc.html"                          },
 
-            { "<TITLE>" + LS + "Index" + LS + "</TITLE>",
+            { "<title>Index</title>",
                     TMPDIR_STRING1 + "index-all.html"                         },
 
-            { "<TITLE>" + LS + "Uses of Class p1.C1" + LS + "</TITLE>",
+            { "<title>Uses of Class p1.C1</title>",
                     TMPDIR_STRING1 + "p1" + FS + "class-use" + FS + "C1.html" },
         };
 
@@ -147,7 +147,7 @@ public class WindowTitles
      * Assign value for [ stringToFind, filename ] for split index page
      */
     private static final String[][] testSplitIndexArray = {
-            { "<TITLE>" + LS + "C-Index" + LS + "</TITLE>",
+            { "<title>C-Index</title>",
                     TMPDIR_STRING2 + "index-files" + FS + "index-1.html"       },
         };
 

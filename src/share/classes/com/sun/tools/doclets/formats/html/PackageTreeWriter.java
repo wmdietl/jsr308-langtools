@@ -1,12 +1,12 @@
 /*
- * Copyright 1998-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.formats.html;
@@ -29,12 +29,15 @@ import java.io.*;
 
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
+import com.sun.tools.doclets.formats.html.markup.*;
+import com.sun.tools.doclets.internal.toolkit.*;
 
 /**
  * Class to generate Tree page for a package. The name of the file generated is
  * "package-tree.html" and it is generated in the respective package directory.
  *
  * @author Atul M Dambalkar
+ * @author Bhavesh Patel (Modified)
  */
 public class PackageTreeWriter extends AbstractTreeWriter {
 
@@ -107,94 +110,96 @@ public class PackageTreeWriter extends AbstractTreeWriter {
      * Generate a separate tree file for each package.
      */
     protected void generatePackageTreeFile() throws IOException {
-        printHtmlHeader(packagedoc.name() + " "
-            + configuration.getText("doclet.Window_Class_Hierarchy"), null, true);
-
-        printPackageTreeHeader();
-
+        Content body = getPackageTreeHeader();
+        Content headContent = getResource("doclet.Hierarchy_For_Package",
+                Util.getPackageName(packagedoc));
+        Content heading = HtmlTree.HEADING(HtmlConstants.TITLE_HEADING, false,
+                HtmlStyle.title, headContent);
+        Content div = HtmlTree.DIV(HtmlStyle.header, heading);
         if (configuration.packages.length > 1) {
-            printLinkToMainTree();
+            addLinkToMainTree(div);
         }
-
-        generateTree(classtree.baseclasses(), "doclet.Class_Hierarchy");
-        generateTree(classtree.baseinterfaces(), "doclet.Interface_Hierarchy");
-        generateTree(classtree.baseAnnotationTypes(), "doclet.Annotation_Type_Hierarchy");
-        generateTree(classtree.baseEnums(), "doclet.Enum_Hierarchy");
-
-        printPackageTreeFooter();
-        printBottom();
-        printBodyHtmlEnd();
+        body.addContent(div);
+        HtmlTree divTree = new HtmlTree(HtmlTag.DIV);
+        divTree.addStyle(HtmlStyle.contentContainer);
+        addTree(classtree.baseclasses(), "doclet.Class_Hierarchy", divTree);
+        addTree(classtree.baseinterfaces(), "doclet.Interface_Hierarchy", divTree);
+        addTree(classtree.baseAnnotationTypes(), "doclet.Annotation_Type_Hierarchy", divTree);
+        addTree(classtree.baseEnums(), "doclet.Enum_Hierarchy", divTree);
+        body.addContent(divTree);
+        addNavLinks(false, body);
+        addBottom(body);
+        printHtmlDocument(null, true, body);
     }
 
     /**
-     * Print the navigation bar header for the package tree file.
+     * Get the package tree header.
+     *
+     * @return a content tree for the header
      */
-    protected void printPackageTreeHeader() {
-        printTop();
-        navLinks(true);
-        hr();
-        center();
-        h2(configuration.getText("doclet.Hierarchy_For_Package",
-            Util.getPackageName(packagedoc)));
-        centerEnd();
+    protected Content getPackageTreeHeader() {
+        String title = packagedoc.name() + " " +
+                configuration.getText("doclet.Window_Class_Hierarchy");
+        Content bodyTree = getBody(true, getWindowTitle(title));
+        addTop(bodyTree);
+        addNavLinks(true, bodyTree);
+        return bodyTree;
     }
 
     /**
-     * Generate a link to the tree for all the packages.
+     * Add a link to the tree for all the packages.
+     *
+     * @param div the content tree to which the link will be added
      */
-    protected void printLinkToMainTree() {
-        dl();
-        dt();
-        strongText("doclet.Package_Hierarchies");
-        dtEnd();
-        dd();
-        navLinkMainTree(configuration.getText("doclet.All_Packages"));
-        ddEnd();
-        dlEnd();
-        hr();
+    protected void addLinkToMainTree(Content div) {
+        Content span = HtmlTree.SPAN(HtmlStyle.strong,
+                getResource("doclet.Package_Hierarchies"));
+        div.addContent(span);
+        HtmlTree ul = new HtmlTree (HtmlTag.UL);
+        ul.addStyle(HtmlStyle.horizontal);
+        ul.addContent(getNavLinkMainTree(configuration.getText("doclet.All_Packages")));
+        div.addContent(ul);
     }
 
     /**
-     * Print the navigation bar footer for the package tree file.
+     * Get link for the previous package tree file.
+     *
+     * @return a content tree for the link
      */
-    protected void printPackageTreeFooter() {
-        hr();
-        navLinks(false);
-    }
-
-    /**
-     * Link for the previous package tree file.
-     */
-    protected void navLinkPrevious() {
+    protected Content getNavLinkPrevious() {
         if (prev == null) {
-            navLinkPrevious(null);
+            return getNavLinkPrevious(null);
         } else {
             String path = DirectoryManager.getRelativePath(packagedoc.name(),
-                                                           prev.name());
-            navLinkPrevious(path + "package-tree.html");
+                    prev.name());
+            return getNavLinkPrevious(path + "package-tree.html");
         }
     }
 
     /**
-     * Link for the next package tree file.
+     * Get link for the next package tree file.
+     *
+     * @return a content tree for the link
      */
-    protected void navLinkNext() {
+    protected Content getNavLinkNext() {
         if (next == null) {
-            navLinkNext(null);
+            return getNavLinkNext(null);
         } else {
             String path = DirectoryManager.getRelativePath(packagedoc.name(),
-                                                           next.name());
-            navLinkNext(path + "package-tree.html");
+                    next.name());
+            return getNavLinkNext(path + "package-tree.html");
         }
     }
 
     /**
-     * Link to the package summary page for the package of this tree.
+     * Get link to the package summary page for the package of this tree.
+     *
+     * @return a content tree for the package link
      */
-    protected void navLinkPackage() {
-        navCellStart();
-        printHyperLink("package-summary.html", "", configuration.getText("doclet.Package"),
-                        true, "NavBarFont1");
-        navCellEnd();
+    protected Content getNavLinkPackage() {
+        Content linkContent = getHyperLink("package-summary.html", "",
+                packageLabel);
+        Content li = HtmlTree.LI(linkContent);
+        return li;
     }
 }

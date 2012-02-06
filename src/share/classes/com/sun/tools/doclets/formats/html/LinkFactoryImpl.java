@@ -1,12 +1,12 @@
 /*
- * Copyright 2003-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,14 +18,12 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.formats.html;
-
-import java.util.List;
 
 import com.sun.tools.doclets.internal.toolkit.util.links.*;
 import com.sun.javadoc.*;
@@ -71,9 +69,6 @@ public class LinkFactoryImpl extends LinkFactory {
         StringBuffer label = new StringBuffer(
             classLinkInfo.getClassLinkLabel(m_writer.configuration));
         classLinkInfo.displayLength += label.length();
-        if (noLabel && classLinkInfo.excludeTypeParameterLinks) {
-            label.append(getTypeParameterLinks(linkInfo).toString());
-        }
         Configuration configuration = ConfigurationImpl.getInstance();
         LinkOutputImpl linkOutput = new LinkOutputImpl();
         if (classDoc.isIncluded()) {
@@ -81,7 +76,7 @@ public class LinkFactoryImpl extends LinkFactory {
                 String filename = pathString(classLinkInfo);
                 if (linkInfo.linkToSelf ||
                                 !(linkInfo.classDoc.name() + ".html").equals(m_writer.filename)) {
-                        linkOutput.append(m_writer.getHyperLink(filename,
+                        linkOutput.append(m_writer.getHyperLinkString(filename,
                             classLinkInfo.where, label.toString(),
                             classLinkInfo.isStrong, classLinkInfo.styleName,
                             title, classLinkInfo.target));
@@ -124,43 +119,6 @@ public class LinkFactoryImpl extends LinkFactory {
         typeLinkInfo.linkToSelf = linkInfo.linkToSelf;
         LinkOutput output = getLinkOutput(typeLinkInfo);
         ((LinkInfoImpl) linkInfo).displayLength += typeLinkInfo.displayLength;
-        return output;
-    }
-
-    protected LinkOutput getTypeAnnotationLink(LinkInfo linkInfo,
-            AnnotationDesc annotation) {
-        throw new RuntimeException("Not implemented yet!");
-    }
-
-    public LinkOutput getTypeAnnotationLinks(LinkInfo linkInfo) {
-        LinkOutput output = getOutputInstance();
-        AnnotationDesc[] annotations;
-        if (linkInfo.type instanceof AnnotatedType) {
-            annotations = linkInfo.type.asAnnotatedType().annotations();
-        } else if (linkInfo.type instanceof TypeVariable) {
-            annotations = linkInfo.type.asTypeVariable().annotations();
-        } else {
-            return output;
-        }
-
-        if (annotations.length == 0)
-            return output;
-
-        List<String> annos = m_writer.getAnnotations(0, annotations, false);
-
-        boolean isFirst = true;
-        for (String anno : annos) {
-            if (!isFirst) {
-                linkInfo.displayLength += 1;
-                output.append(" ");
-                isFirst = false;
-            }
-            linkInfo.displayLength += anno.length();
-            output.append(anno);
-        }
-        linkInfo.displayLength += 1;
-        output.append(" ");
-
         return output;
     }
 

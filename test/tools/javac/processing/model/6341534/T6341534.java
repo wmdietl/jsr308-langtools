@@ -1,5 +1,5 @@
 /*
- * Copyright 2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2006, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /**
@@ -27,6 +27,8 @@
  * @summary PackageElement.getEnclosedElements results in NullPointerException from parse(JavaCompiler.java:429)
  * @author  Steve Sides
  * @author  Peter von der Ahe
+ * @library ../../../lib
+ * @build   JavacTestingAbstractProcessor
  * @compile T6341534.java
  * @compile -proc:only -processor T6341534 dir/package-info.java
  * @compile -processor T6341534 dir/package-info.java
@@ -40,20 +42,11 @@ import java.util.*;
 import java.util.Set;
 import static javax.tools.Diagnostic.Kind.*;
 
-@SupportedAnnotationTypes("*")
-public class T6341534 extends AbstractProcessor {
-    Elements elements;
-    Messager messager;
-    public void init(ProcessingEnvironment penv)  {
-        super.init(penv);
-        elements = penv.getElementUtils();
-        messager = processingEnv.getMessager();
-    }
-
+public class T6341534 extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> tes, RoundEnvironment renv)  {
         messager.printMessage(NOTE,
-                              String.valueOf(elements.getPackageElement("no.such.package")));
-        PackageElement dir = elements.getPackageElement("dir");
+                              String.valueOf(eltUtils.getPackageElement("no.such.package")));
+        PackageElement dir = eltUtils.getPackageElement("dir");
         messager.printMessage(NOTE, dir.getQualifiedName().toString());
         for (Element e : dir.getEnclosedElements())
             messager.printMessage(NOTE, e.toString());

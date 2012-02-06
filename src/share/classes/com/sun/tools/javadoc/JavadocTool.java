@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javadoc;
@@ -39,7 +39,6 @@ import javax.tools.StandardLocation;
 
 import com.sun.tools.javac.code.Symbol.CompletionFailure;
 import com.sun.tools.javac.comp.Annotate;
-import com.sun.tools.javac.parser.DocCommentScanner;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
@@ -106,9 +105,6 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
 
             // force the use of Messager as a Log
             messager = Messager.instance0(context);
-
-            // force the use of the scanner that captures Javadoc comments
-            DocCommentScanner.Factory.preRegister(context);
 
             return new JavadocTool(context);
         } catch (CompletionFailure ex) {
@@ -260,24 +256,15 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
         for (String p: excludedPackages)
             includedPackages.put(p, false);
 
-        if (docenv.fileManager.hasLocation(StandardLocation.SOURCE_PATH)) {
-            searchSubPackages(subPackages,
-                    includedPackages,
-                    packages, packageFiles,
-                    StandardLocation.SOURCE_PATH,
-                    EnumSet.of(JavaFileObject.Kind.SOURCE));
-            searchSubPackages(subPackages,
-                    includedPackages,
-                    packages, packageFiles,
-                    StandardLocation.CLASS_PATH,
-                    EnumSet.of(JavaFileObject.Kind.CLASS));
-        } else {
-            searchSubPackages(subPackages,
-                    includedPackages,
-                    packages, packageFiles,
-                    StandardLocation.CLASS_PATH,
-                    EnumSet.of(JavaFileObject.Kind.SOURCE, JavaFileObject.Kind.CLASS));
-        }
+        StandardLocation path = docenv.fileManager.hasLocation(StandardLocation.SOURCE_PATH)
+                ? StandardLocation.SOURCE_PATH : StandardLocation.CLASS_PATH;
+
+        searchSubPackages(subPackages,
+                includedPackages,
+                packages, packageFiles,
+                path,
+                EnumSet.of(JavaFileObject.Kind.SOURCE));
+
         return packageFiles;
     }
 
@@ -432,7 +419,7 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
         ListBuffer<JCClassDecl> result = new ListBuffer<JCClassDecl>();
         for (JCCompilationUnit t : trees) {
             for (JCTree def : t.defs) {
-                if (def.getTag() == JCTree.CLASSDEF)
+                if (def.hasTag(JCTree.Tag.CLASSDEF))
                     result.append((JCClassDecl)def);
             }
         }

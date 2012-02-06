@@ -1,12 +1,12 @@
 /*
- * Copyright 2005-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javac.model;
@@ -48,12 +48,13 @@ import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.Name;
 
+import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 /**
  * Utility methods for operating on program elements.
  *
- * <p><b>This is NOT part of any API supported by Sun Microsystems.
+ * <p><b>This is NOT part of any supported API.
  * If you write code that depends on this, you do so at your own
  * risk.  This code and its internal interfaces are subject to change
  * or deletion without notice.</b></p>
@@ -66,32 +67,26 @@ public class JavacElements implements Elements {
     private Types types;
     private Enter enter;
 
-    private static final Context.Key<JavacElements> KEY =
-            new Context.Key<JavacElements>();
-
     public static JavacElements instance(Context context) {
-        JavacElements instance = context.get(KEY);
-        if (instance == null) {
+        JavacElements instance = context.get(JavacElements.class);
+        if (instance == null)
             instance = new JavacElements(context);
-            context.put(KEY, instance);
-        }
         return instance;
     }
 
     /**
      * Public for use only by JavacProcessingEnvironment
      */
-    // TODO JavacElements constructor should be protected
-    public JavacElements(Context context) {
+    protected JavacElements(Context context) {
         setContext(context);
     }
 
     /**
      * Use a new context.  May be called from outside to update
      * internal state for a new annotation-processing round.
-     * This instance is *not* then registered with the new context.
      */
     public void setContext(Context context) {
+        context.put(JavacElements.class, this);
         javaCompiler = JavaCompiler.instance(context);
         syms = Symtab.instance(context);
         names = Names.instance(context);
@@ -99,27 +94,20 @@ public class JavacElements implements Elements {
         enter = Enter.instance(context);
     }
 
-    /**
-     * An internal-use utility that creates a reified annotation.
-     */
-    public static <A extends Annotation> A getAnnotation(List<Attribute.Compound> annotations,
-            Class<A> annoType) {
-        if (!annoType.isAnnotation())
-            throw new IllegalArgumentException("Not an annotation type: "
-                                               + annoType);
-        String name = annoType.getName();
-        for (Attribute.Compound anno : annotations)
-            if (name.equals(anno.type.tsym.flatName().toString()))
-                return AnnotationProxyMaker.generateAnnotation(anno, annoType);
-        return null;
-    }
 
     /**
      * An internal-use utility that creates a reified annotation.
      */
     public static <A extends Annotation> A getAnnotation(Symbol annotated,
                                                          Class<A> annoType) {
-        return getAnnotation(annotated.getAnnotationMirrors(), annoType);
+        if (!annoType.isAnnotation())
+            throw new IllegalArgumentException("Not an annotation type: "
+                                               + annoType);
+        String name = annoType.getName();
+        for (Attribute.Compound anno : annotated.getAnnotationMirrors())
+            if (name.equals(anno.type.tsym.flatName().toString()))
+                return AnnotationProxyMaker.generateAnnotation(anno, annoType);
+        return null;
     }
 
     /**
@@ -301,7 +289,7 @@ public class JavacElements implements Elements {
                 }
             }
             public void visitArray(Attribute.Array array) {
-                if (tree.getTag() == JCTree.NEWARRAY &&
+                if (tree.hasTag(NEWARRAY) &&
                         types.elemtype(array.type).tsym == findme.type.tsym) {
                     List<JCExpression> elems = ((JCNewArray) tree).elems;
                     for (Attribute value : array.values) {
@@ -340,7 +328,7 @@ public class JavacElements implements Elements {
                     scan(t.args);
             }
             public void visitAssign(JCAssign t) {
-                if (t.lhs.getTag() == JCTree.IDENT) {
+                if (t.lhs.hasTag(IDENT)) {
                     JCIdent ident = (JCIdent) t.lhs;
                     if (ident.sym == sym)
                         result = t.rhs;

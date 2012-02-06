@@ -1,12 +1,12 @@
 /*
- * Copyright 2007-2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javap;
@@ -34,8 +34,8 @@ import static com.sun.tools.classfile.ConstantPool.*;
 /*
  *  Write a constant pool entry.
  *
- *  <p><b>This is NOT part of any API supported by Sun Microsystems.  If
- *  you write code that depends on this, you do so at your own risk.
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
@@ -97,6 +97,13 @@ public class ConstantWriter extends BasicWriter {
                 return 1;
             }
 
+            public Integer visitInvokeDynamic(CONSTANT_InvokeDynamic_info info, Void p) {
+                print("#" + info.bootstrap_method_attr_index + ":#" + info.name_and_type_index);
+                tab();
+                println("//  " + stringValue(info));
+                return 1;
+            }
+
             public Integer visitLong(CONSTANT_Long_info info, Void p) {
                 println(stringValue(info));
                 return 2;
@@ -111,6 +118,20 @@ public class ConstantWriter extends BasicWriter {
 
             public Integer visitMethodref(CONSTANT_Methodref_info info, Void p) {
                 print("#" + info.class_index + ".#" + info.name_and_type_index);
+                tab();
+                println("//  " + stringValue(info));
+                return 1;
+            }
+
+            public Integer visitMethodHandle(CONSTANT_MethodHandle_info info, Void p) {
+                print("#" + info.reference_kind.tag + ":#" + info.reference_index);
+                tab();
+                println("//  " + stringValue(info));
+                return 1;
+            }
+
+            public Integer visitMethodType(CONSTANT_MethodType_info info, Void p) {
+                print("#" + info.descriptor_index);
                 tab();
                 println("//  " + stringValue(info));
                 return 1;
@@ -201,14 +222,20 @@ public class ConstantWriter extends BasicWriter {
                 return "String";
             case CONSTANT_Fieldref:
                 return "Field";
+            case CONSTANT_MethodHandle:
+                return "MethodHandle";
+            case CONSTANT_MethodType:
+                return "MethodType";
             case CONSTANT_Methodref:
                 return "Method";
             case CONSTANT_InterfaceMethodref:
                 return "InterfaceMethod";
+            case CONSTANT_InvokeDynamic:
+                return "InvokeDynamic";
             case CONSTANT_NameAndType:
                 return "NameAndType";
             default:
-                return "(unknown tag)";
+                return "(unknown tag " + tag + ")";
         }
     }
 
@@ -264,6 +291,15 @@ public class ConstantWriter extends BasicWriter {
             return visitRef(info, p);
         }
 
+        public String visitInvokeDynamic(CONSTANT_InvokeDynamic_info info, Void p) {
+            try {
+                String callee = stringValue(info.getNameAndTypeInfo());
+                return "#" + info.bootstrap_method_attr_index + ":" + callee;
+            } catch (ConstantPoolException e) {
+                return report(e);
+            }
+        }
+
         public String visitLong(CONSTANT_Long_info info, Void p) {
             return info.value + "l";
         }
@@ -281,6 +317,22 @@ public class ConstantWriter extends BasicWriter {
         }
 
         String getType(CONSTANT_NameAndType_info info) {
+            try {
+                return info.getType();
+            } catch (ConstantPoolException e) {
+                return report(e);
+            }
+        }
+
+        public String visitMethodHandle(CONSTANT_MethodHandle_info info, Void p) {
+            try {
+                return info.reference_kind.name + " " + stringValue(info.getCPRefInfo());
+            } catch (ConstantPoolException e) {
+                return report(e);
+            }
+        }
+
+        public String visitMethodType(CONSTANT_MethodType_info info, Void p) {
             try {
                 return info.getType();
             } catch (ConstantPoolException e) {
@@ -346,7 +398,6 @@ public class ConstantWriter extends BasicWriter {
             }
         }
     }
-
 
     /* If name is a valid binary name, return it; otherwise quote it. */
     private static String checkName(String name) {

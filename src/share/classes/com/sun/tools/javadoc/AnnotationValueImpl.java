@@ -1,12 +1,12 @@
 /*
- * Copyright 2003-2004 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javadoc;
@@ -30,7 +30,6 @@ import com.sun.javadoc.*;
 
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTags;
 
 
@@ -114,6 +113,7 @@ public class AnnotationValueImpl implements AnnotationValue {
      * @return the text of a Java language annotation value expression
      *          whose value is the value of this annotation type element.
      */
+    @Override
     public String toString() {
         ToStringVisitor tv = new ToStringVisitor();
         attr.accept(tv);
@@ -121,8 +121,9 @@ public class AnnotationValueImpl implements AnnotationValue {
     }
 
     private class ToStringVisitor implements Attribute.Visitor {
-        private final StringBuffer sb = new StringBuffer();
+        private final StringBuilder sb = new StringBuilder();
 
+        @Override
         public String toString() {
             return sb.toString();
         }

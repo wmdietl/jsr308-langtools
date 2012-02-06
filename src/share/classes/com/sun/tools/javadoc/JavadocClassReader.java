@@ -1,12 +1,12 @@
 /*
- * Copyright 2001-2009 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2001, 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.javadoc;
@@ -35,7 +35,7 @@ import com.sun.tools.javac.util.Context;
 /** Javadoc uses an extended class reader that records package.html entries
  *  @author Neal Gafter
  */
-class JavadocClassReader extends ClassReader {
+public class JavadocClassReader extends ClassReader {
 
     public static JavadocClassReader instance0(Context context) {
         ClassReader instance = context.get(classReaderKey);
@@ -44,10 +44,10 @@ class JavadocClassReader extends ClassReader {
         return (JavadocClassReader)instance;
     }
 
-    public static void preRegister(final Context context) {
+    public static void preRegister(Context context) {
         context.put(classReaderKey, new Context.Factory<ClassReader>() {
-            public ClassReader make() {
-                return new JavadocClassReader(context);
+            public ClassReader make(Context c) {
+                return new JavadocClassReader(c);
             }
         });
     }
@@ -59,9 +59,10 @@ class JavadocClassReader extends ClassReader {
     private EnumSet<JavaFileObject.Kind> noSource = EnumSet.of(JavaFileObject.Kind.CLASS,
                                                                JavaFileObject.Kind.HTML);
 
-    private JavadocClassReader(Context context) {
+    public JavadocClassReader(Context context) {
         super(context, true);
         docenv = DocEnv.instance(context);
+        preferSource = true;
     }
 
     /**

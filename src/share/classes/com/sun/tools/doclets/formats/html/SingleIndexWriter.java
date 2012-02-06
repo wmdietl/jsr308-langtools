@@ -1,12 +1,12 @@
 /*
- * Copyright 1998-2005 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 1998, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,16 +18,17 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 package com.sun.tools.doclets.formats.html;
 
-import com.sun.tools.doclets.internal.toolkit.util.*;
-
 import java.io.*;
+import com.sun.tools.doclets.internal.toolkit.util.*;
+import com.sun.tools.doclets.formats.html.markup.*;
+import com.sun.tools.doclets.internal.toolkit.*;
 
 /**
  * Generate only one index file for all the Member Names with Indexing in
@@ -36,6 +37,7 @@ import java.io.*;
  *
  * @see java.lang.Character
  * @author Atul M Dambalkar
+ * @author Bhavesh Patel (Modified)
  */
 public class SingleIndexWriter extends AbstractIndexWriter {
 
@@ -82,34 +84,35 @@ public class SingleIndexWriter extends AbstractIndexWriter {
      * Member Field, Method and Constructor Description.
      */
     protected void generateIndexFile() throws IOException {
-        printHtmlHeader(configuration.getText("doclet.Window_Single_Index"),
-            null, true);
-        printTop();
-        navLinks(true);
-        printLinksForIndexes();
-
-        hr();
-
+        String title = configuration.getText("doclet.Window_Single_Index");
+        Content body = getBody(true, getWindowTitle(title));
+        addTop(body);
+        addNavLinks(true, body);
+        HtmlTree divTree = new HtmlTree(HtmlTag.DIV);
+        divTree.addStyle(HtmlStyle.contentContainer);
+        addLinksForIndexes(divTree);
         for (int i = 0; i < indexbuilder.elements().length; i++) {
             Character unicode = (Character)((indexbuilder.elements())[i]);
-            generateContents(unicode, indexbuilder.getMemberList(unicode));
+            addContents(unicode, indexbuilder.getMemberList(unicode), divTree);
         }
-
-        printLinksForIndexes();
-        navLinks(false);
-
-        printBottom();
-        printBodyHtmlEnd();
+        addLinksForIndexes(divTree);
+        body.addContent(divTree);
+        addNavLinks(false, body);
+        addBottom(body);
+        printHtmlDocument(null, true, body);
     }
 
     /**
-     * Print Links for all the Index Files per unicode character.
+     * Add links for all the Index Files per unicode character.
+     *
+     * @param contentTree the content tree to which the links for indexes will be added
      */
-    protected void printLinksForIndexes() {
+    protected void addLinksForIndexes(Content contentTree) {
         for (int i = 0; i < indexbuilder.elements().length; i++) {
             String unicode = (indexbuilder.elements())[i].toString();
-            printHyperLink("#_" + unicode + "_", unicode);
-            print(' ');
+            contentTree.addContent(
+                    getHyperLink("#_" + unicode + "_", new StringContent(unicode)));
+            contentTree.addContent(getSpace());
         }
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright 2005-2006 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2005, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,9 +16,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
@@ -26,6 +26,8 @@
  * @bug     6341173 6341072
  * @summary Test presence of Messager methods
  * @author  Joseph D. Darcy
+ * @library ../../lib
+ * @build   JavacTestingAbstractProcessor
  * @compile MessagerBasics.java
  * @compile -processor MessagerBasics -proc:only MessagerBasics.java
  * @compile/fail -processor MessagerBasics -proc:only -AfinalError MessagerBasics.java
@@ -39,18 +41,16 @@ import javax.lang.model.element.*;
 import javax.lang.model.util.*;
 import static javax.tools.Diagnostic.Kind.*;
 
-@SupportedAnnotationTypes("*")
 @SupportedOptions("finalError")
-public class MessagerBasics extends AbstractProcessor {
+public class MessagerBasics extends JavacTestingAbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations,
                            RoundEnvironment roundEnv) {
-        Messager m = processingEnv.getMessager();
         if (roundEnv.processingOver()) {
             if (processingEnv.getOptions().containsKey("finalError"))
-                m.printMessage(ERROR,   "Does not compute");
+                messager.printMessage(ERROR,   "Does not compute");
             else {
-                m.printMessage(NOTE,    "Post no bills");
-                m.printMessage(WARNING, "Beware the ides of March!");
+                messager.printMessage(NOTE,    "Post no bills");
+                messager.printMessage(WARNING, "Beware the ides of March!");
             }
         }
         return true;

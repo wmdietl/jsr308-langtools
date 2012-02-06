@@ -1,5 +1,5 @@
 /*
- * Copyright 2002 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2002, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -16,15 +16,15 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 
 /*
  * @test
  * @bug      4637604 4775148
- * @summary  Test the tables for summary=""
+ * @summary  Test the tables for summary attribute
  * @author   dkramer
  * @library  ../lib/
  * @build    JavadocTester
@@ -44,15 +44,15 @@ public class AccessSummary extends JavadocTester {
 
         // Test that the summary attribute appears
         { OUTPUT_DIR1 + "overview-summary.html",
-                 "SUMMARY=\"\"" },
+                 "summary=\"Packages table, listing packages, and an explanation\"" },
 
         // Test that the summary attribute appears
         { OUTPUT_DIR1 + "p1" + FS + "C1.html",
-                 "SUMMARY=\"\"" },
+                 "summary=\"Constructor Summary table, listing constructors, and an explanation\"" },
 
         // Test that the summary attribute appears
         { OUTPUT_DIR1 + "constant-values.html",
-                 "SUMMARY=\"\"" }
+                 "summary=\"Constant Field Values table, listing constant fields, and values\"" }
     };
 
     // First test with -header only
