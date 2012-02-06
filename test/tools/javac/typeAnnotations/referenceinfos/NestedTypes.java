@@ -34,13 +34,65 @@ public class NestedTypes {
     // method parameters
 
     @TADescriptions({
-        // TODO: should the raw type arguments of Entry be counted???
+        // The raw type arguments of Entry still count!
         @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
-                genericLocation = {0}, paramIndex = 0),
+                genericLocation = {2}, paramIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_PARAMETER, paramIndex = 0)
     })
     public String testParam1() {
         return "void test(@TA Map.@TB Entry a) { }";
+    }
+
+    @TADescriptions({
+        // The raw type arguments of Entry still count!
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2}, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0)
+    })
+    public String testParam1b() {
+        return "void test(List<@TA Map.@TB Entry> a) { }";
+    }
+
+    // The raw type arguments of Entry still count!
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+            genericLocation = {2}, paramIndex = 0)
+    public String testParam1c() {
+        return "void test(@TA java.util.Map.Entry a) { }";
+    }
+
+    @TADescriptions({
+        // The raw type arguments of Entry still count!
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {2}, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER, paramIndex = 0)
+    })
+    public String testParam1d() {
+        return "void test(@TA java.util.Map.@TB Entry a) { }";
+    }
+
+    // The raw type arguments of Entry still count!
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+            genericLocation = {0, 2}, paramIndex = 0)
+    public String testParam1e() {
+        return "void test(List<@TA java.util.Map.Entry> a) { }";
+    }
+
+    @TADescriptions({
+        // The raw type arguments of Entry still count!
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2}, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0)
+    })
+    public String testParam1f() {
+        return "void test(List<@TA java.util.Map. @TB Entry> a) { }";
+    }
+
+    @TADescription(annotation = "TB", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+           genericLocation = {0}, paramIndex = 0)
+    public String testParam1g() {
+        return "void test(List<java.util.Map. @TB Entry> a) { }";
     }
 
     @TADescriptions({
@@ -50,6 +102,16 @@ public class NestedTypes {
     })
     public String testParam2() {
         return "void test(@TA Map<String,String>.@TB Entry<String,String> a) { }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2}, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0)
+    })
+    public String testParam2b() {
+        return "void test(List<@TA Map<String,String>.@TB Entry<String,String>> a) { }";
     }
 
     @TADescriptions({
@@ -123,9 +185,9 @@ public class NestedTypes {
     // Local variables
 
     @TADescriptions({
-        // TODO: should the raw type arguments of Entry be counted???
+        // The raw type arguments of Entry still count!
         @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
-                genericLocation = {0},
+                genericLocation = {2},
                         lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1}),
         @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
                 lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
@@ -134,9 +196,9 @@ public class NestedTypes {
         return "void test() { @TA Map.@TB Entry a = null; }";
     }
 
-    // TODO: should the raw type arguments of Entry be counted???
+    // The raw type arguments of Entry still count!
     @TADescription(annotation = "TA", type = LOCAL_VARIABLE_GENERIC_OR_ARRAY,
-            genericLocation = {0},
+            genericLocation = {2},
                     lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
     public String testLocal1b() {
         return "void test() { @TA Map.Entry a = null; }";
@@ -252,18 +314,18 @@ public class NestedTypes {
     // fields
 
     @TADescriptions({
-        // TODO: should the raw type arguments of Entry be counted???
+        // The raw type arguments of Entry still count!
         @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
-                genericLocation = {0}),
+                genericLocation = {2}),
         @TADescription(annotation = "TB", type = FIELD)
     })
     public String testField1a() {
         return "@TA Map.@TB Entry a;";
     }
 
-    // TODO: should the raw type arguments of Entry be counted???
+    // The raw type arguments of Entry still count!
     @TADescription(annotation = "TA", type = FIELD_GENERIC_OR_ARRAY,
-            genericLocation = {0})
+            genericLocation = {2})
     public String testField1b() {
         return "@TA Map.Entry a;";
     }
@@ -353,9 +415,9 @@ public class NestedTypes {
     // return types
 
     @TADescriptions({
-        // TODO: should the raw type arguments of Entry be counted???
+        // The raw type arguments of Entry still count!
         @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
-                genericLocation = {0}),
+                genericLocation = {2}),
         @TADescription(annotation = "TB", type = METHOD_RETURN)
     })
     public String testReturn1() {
@@ -438,4 +500,35 @@ public class NestedTypes {
                 "}";
     }
 
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3}),
+        @TADescription(annotation = "TB", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 0}),
+        @TADescription(annotation = "TC", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 1}),
+        @TADescription(annotation = "TD", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 1, 0}),
+        @TADescription(annotation = "TE", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2}),
+        @TADescription(annotation = "TF", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0}),
+        @TADescription(annotation = "TG", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0, 1}),
+        @TADescription(annotation = "TH", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0}),
+        @TADescription(annotation = "TI", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0, 0}),
+        @TADescription(annotation = "TJ", type = METHOD_RETURN_GENERIC_OR_ARRAY,
+                genericLocation = {0}),
+    })
+    public String testReturn5() {
+        return "class GOuter<A, B> {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " List<@TA GOuter<@TB String, @TC List<@TD Object>> . @TE GInner<@TF List<@TG Object @TH[] @TI[]>>. @TJ GInner2<String, String>> test() { return null; }\n" +
+                "}";
+    }
 }
