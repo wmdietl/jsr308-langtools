@@ -531,4 +531,124 @@ public class NestedTypes {
                 " List<@TA GOuter<@TB String, @TC List<@TD Object>> . @TE GInner<@TF List<@TG Object @TH[] @TI[]>>. @TJ GInner2<String, String>> test() { return null; }\n" +
                 "}";
     }
+
+
+    // type parameters
+
+    @TADescriptions({
+        // The raw type arguments of Entry still count!
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
+                paramIndex = 0, boundIndex = 0)
+    })
+    public String testTypeparam1() {
+        return "<X extends @TA Map.@TB Entry> X test() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
+                paramIndex = 0, boundIndex = 0)
+    })
+    public String testTypeparam2() {
+        return "<X extends @TA Map<String,String>.@TB Entry<String,String>> X test() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+        		genericLocation = {3}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2, 0, 0, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {2, 0, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND,
+                paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {1}, paramIndex = 0, boundIndex = 0),
+    })
+    public String testTypeparam3() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " <X extends @TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object>> X test() { return null; }\n" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+        		genericLocation = {0, 1, 3}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 1, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TJ", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TK", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 0}, paramIndex = 0, boundIndex = 0)
+    })
+    public String testTypeparam4() {
+        return "class Outer {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " <X extends List<@TA Outer . @TB GInner<@TC List<@TD Object @TE[] @TF[]>>. @TG GInner2<@TH Integer, @TI Object> @TJ[] @TK[]>> X test() { return null; }\n" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 3, 1, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TJ", type = METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY,
+                genericLocation = {0}, paramIndex = 0, boundIndex = 0),
+    })
+    public String testTypeparam5() {
+        return "class GOuter<A, B> {\n" +
+                " class GInner<X> {\n" +
+                "  class GInner2<Y, Z> {}\n" +
+                "}}\n\n" +
+                "class Test {\n" +
+                " <X extends List<@TA GOuter<@TB String, @TC List<@TD Object>> . @TE GInner<@TF List<@TG Object @TH[] @TI[]>>. @TJ GInner2<String, String>>> X test() { return null; }\n" +
+                "}";
+    }
 }
