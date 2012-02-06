@@ -1787,7 +1787,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
 
     /**
      * Selects through packages and classes
-     * @param selected selected Tree hierarchie
+     * @param selected selected Tree hierarchy
      * @param selector name of field to select thru
      * @param sym symbol of the selected class
      */
@@ -2231,9 +2231,22 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     public static class JCAnnotatedType extends JCExpression implements com.sun.source.tree.AnnotatedTypeTree {
         public List<JCTypeAnnotation> annotations;
         public JCExpression underlyingType;
-        protected JCAnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
+
+        /* True, iff the annotation should be associated with the underlying type.
+         * False, iff the annotation should be associated with the outer-most component
+         * of the underlying type.
+         * Usually, this should be true.
+         * In a nested type "@A java.lang.Outer. @B Inner" we have two JCAnnotatedTypes:
+         * @A with underlying type "java.lang.Outer.@B Inner" and onRightType false;
+         * @B with underlying type "java.lang.Outer.Inner" and onRightType true.
+         */
+        public boolean onRightType;
+
+        protected JCAnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType,
+                boolean onRightType) {
             this.annotations = annotations;
             this.underlyingType = underlyingType;
+            this.onRightType = onRightType;
         }
         @Override
         public void accept(Visitor v) { v.visitAnnotatedType(this); }

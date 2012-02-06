@@ -518,7 +518,12 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
-        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType);
+        return this.AnnotatedType(annotations, underlyingType, true);
+    }
+
+    public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType,
+            boolean onRightType) {
+        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType, onRightType);
         tree.pos = pos;
         return tree;
     }

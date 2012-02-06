@@ -75,7 +75,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCAnnotatedType t = (JCAnnotatedType) node;
         List<JCTypeAnnotation> annotations = copy(t.annotations, p);
         JCExpression underlyingType = copy(t.underlyingType, p);
-        return M.at(t.pos).AnnotatedType(annotations, underlyingType);
+        return M.at(t.pos).AnnotatedType(annotations, underlyingType, t.onRightType);
     }
 
     public JCTree visitAnnotation(AnnotationTree node, P p) {
