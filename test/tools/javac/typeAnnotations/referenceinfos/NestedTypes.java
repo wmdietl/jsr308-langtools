@@ -651,4 +651,83 @@ public class NestedTypes {
                 " <X extends List<@TA GOuter<@TB String, @TC List<@TD Object>> . @TE GInner<@TF List<@TG Object @TH[] @TI[]>>. @TJ GInner2<String, String>>> X test() { return null; }\n" +
                 "}";
     }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0})
+    public String testUses1a() {
+        return "class Test { class Inner {}    List<@TA Inner> f; }";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 0})
+    public String testUses1b() {
+        return "class Test { class Inner {}    List<@TA Test.Inner> f; }";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0})
+    @TestClass("Test$Inner")
+    public String testUses2a() {
+        return "class Test { class Inner { class Inner2{}    List<@TA Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 0})
+    @TestClass("Test$Inner")
+    public String testUses2b() {
+        return "class Test { class Inner { class Inner2{}    List<@TA Inner.Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0})
+    @TestClass("Test$Inner")
+    public String testUses2c() {
+        return "class Test { class Inner { class Inner2{}    List<Inner.@TA Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 1})
+    @TestClass("Test$Inner")
+    public String testUses2d() {
+        return "class Test{ class Inner { class Inner2{}    List<@TA Test.Inner.Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 0})
+    @TestClass("Test$Inner")
+    public String testUses2e() {
+        return "class Test { class Inner { class Inner2{}    List<Test.@TA Inner.Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0})
+    @TestClass("Test$Inner")
+    public String testUses2f() {
+        return "class Test { class Inner { class Inner2{}    List<Test.Inner.@TA Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0})
+    @TestClass("Test$Inner")
+    public String testUses3a() {
+        return "class Test { class Inner<A, B> { class Inner2<C, D>{}\n" +
+                "    List<Test.Inner.@TA Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 2})
+    @TestClass("Test$Inner")
+    public String testUses3b() {
+        return "class Test { class Inner<A, B> { class Inner2<C, D>{}\n" +
+                "    List<Test.@TA Inner.Inner2> f; }}";
+    }
+
+    @TADescription(annotation = "TA", type = FIELD_COMPONENT,
+            genericLocation = {0, 2, 1})
+    @TestClass("Test$Inner")
+    public String testUses3c() {
+        return "class Test { class Inner<A, B> { class Inner2<C, D>{}\n" +
+                "    List<Test.Inner<String, @TA Object>.Inner2<Test, Test>> f; }}";
+    }
+
 }
