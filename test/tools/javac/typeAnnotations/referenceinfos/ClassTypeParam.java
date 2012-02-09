@@ -99,4 +99,26 @@ public class ClassTypeParam {
     public String regularInterfaceParameterized() {
         return "interface Test<K extends @TA Map<String, @TB String>, V extends @TF Object & @TC List<@TD List<@TE Object>>> { }";
     }
+
+    @TADescription(annotation = "TA", type = METHOD_RETURN)
+    public String useInReturn1() {
+        return "class Test<T> { @TA T m() { throw new RuntimeException(); } }";
+    }
+
+    @TADescription(annotation = "TA", type = METHOD_RETURN_COMPONENT, genericLocation = {0})
+    public String useInReturn2() {
+        return "class Test<T> { Class<@TA T> m() { throw new RuntimeException(); } }";
+    }
+
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER_COMPONENT,
+            paramIndex = 0, genericLocation = {0})
+    public String useInParam1() {
+        return "class Test<T> { void m(Class<@TA T> p) { throw new RuntimeException(); } }";
+    }
+
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER_COMPONENT,
+            paramIndex = 0, genericLocation = {0})
+    public String useInParam2() {
+        return "class Test { void m(Class<@TA Object> p) { throw new RuntimeException(); } }";
+    }
 }
