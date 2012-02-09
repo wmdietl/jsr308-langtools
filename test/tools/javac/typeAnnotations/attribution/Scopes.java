@@ -30,8 +30,8 @@
  */
 class Scopes {
 
-  void test() @A(VALUE) { }
-  void test1() @A(value=VALUE) { }
+  void test(@A(VALUE) Scopes this) { }
+  void test1(@A(value=VALUE) Scopes this) { }
 
   private static final int VALUE = 1;
   @interface A { int value(); }
