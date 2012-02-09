@@ -39,6 +39,7 @@ import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
+import com.sun.tools.javac.tree.JCTree.JCTypeApply;
 import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Context;
@@ -371,24 +372,34 @@ public class TypeAnnotations {
 
                 case ANNOTATED_TYPE: {
                     JCAnnotatedType atypetree = (JCAnnotatedType) frame;
-                    // TODO: when is the underlying type null? Happens in NestedTypes test case.
-                    if (!atypetree.onRightType && atypetree.underlyingType.type!=null) {
+                    if (!atypetree.onRightType &&
+                            // TODO: when is the underlying type null? Happens in
+                            // referenceinfos/NestedTypes test case.
+                            atypetree.underlyingType.type!=null) {
+
                         final Type utype = atypetree.underlyingType.type;
                         Symbol tsym = utype.tsym;
                         // The number of "steps" to get from the full type to the
                         // left-most outer type.
                         int steps = 0;
-                        {
-                            Symbol encl = tsym.getEnclosingElement();
+                        Symbol encl = tsym.getEnclosingElement();
+                        if (tsym.getKind().equals(ElementKind.TYPE_PARAMETER)) {
+                            // Type parameters have the declaring class/method as enclosing elements.
+                            // There is actually nothing to do for them.
+                            steps = -1;
+                        } else {
                             while (encl!=null && encl.getKind()!=ElementKind.PACKAGE) {
                                 tsym = encl;
                                 encl = encl.getEnclosingElement();
                                 ++steps;
                             }
                         }
-                        if (steps>=0) {
+
+                        if (steps>0) {
+                            // Now we go up the actual AST and see how many steps we can take.
                             JCTree realframe = frame;
-                            for (int i=0; i<steps; ++i) {
+                            int tooksteps;
+                            loop: for (tooksteps = 0; tooksteps<steps; ++tooksteps) {
                                 switch (realframe.getKind()) {
                                 case MEMBER_SELECT:
                                     realframe = ((JCFieldAccess)realframe).selected;
@@ -396,26 +407,34 @@ public class TypeAnnotations {
                                 case ANNOTATED_TYPE:
                                     realframe = ((JCAnnotatedType)realframe).underlyingType;
                                     // Going through an annotated type doesn't count.
-                                    --i;
+                                    --tooksteps;
                                     break;
                                 case PARAMETERIZED_TYPE:
                                     realframe = ((JCTypeApply)realframe).getType();
                                     // Going through a parameterized type doesn't count.
-                                    --i;
+                                    --tooksteps;
                                     break;
+                                case IDENTIFIER:
+                                    // We already reached the end of the AST. This happens when a short name is used
+                                    // for a nested class. E.g. for type "Outer.Inner" we have "@A Inner"
+                                    break loop;
                                 default:
                                     System.out.println("unhandled frame: " + realframe + " kind: " + realframe.getKind());
+                                    System.out.println("    tsym: " + tsym + " kind: " + tsym.getKind());
                                 }
                             }
-                            if (isWithin(tree, realframe)) {
+
+                            if (tooksteps>=0 && isWithin(tree, realframe)) {
                                 List<TypeSymbol> typeparams = utype.asElement().getTypeParameters();
                                 if (typeparams.nonEmpty()) {
                                     // The "top-level" generics are an offset for the index
-                                    steps += typeparams.size();
+                                    tooksteps += typeparams.size();
                                 }
                                 // Take off one initial step.
-                                --steps;
-                                p.location = p.location.prepend(steps);
+                                --tooksteps;
+                                if (tooksteps>=0) {
+                                    p.location = p.location.prepend(tooksteps);
+                                }
                             }
                         }
                     }
@@ -477,17 +496,21 @@ public class TypeAnnotations {
                             break;
                         }
                     }
+
                     // We are going up a level!
                     if (newPath.head.hasTag(JCTree.Tag.TYPEAPPLY)) {
                         // The type (of which we are a part) has type arguments.
-                        // Add the size as an offset.
-                        index += ((JCTypeApply) newPath.head).getTypeArguments().size();
+                        // Add the size as an offset. Go to element to account for raw types!
+                        index += ((JCTypeApply) newPath.head).type.tsym.getTypeParameters().size();
                     } else if (newPath.head.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                         JCExpression under = ((JCAnnotatedType) newPath.head).getUnderlyingType();
                         if (under.hasTag(JCTree.Tag.TYPEAPPLY)) {
-                            index += ((JCTypeApply) under).getTypeArguments().size();
+                            index += ((JCTypeApply) under).type.tsym.getTypeParameters().size();
                         }
+                    } else if (newPath.head.hasTag(JCTree.Tag.SELECT)) {
+                        index += ((JCFieldAccess) newPath.head).type.tsym.getTypeParameters().size();
                     }
+
                     p.location = p.location.prepend(index);
                     return resolveFrame(newPath.head, newPath.tail.head, newPath, p, names);
                 }
