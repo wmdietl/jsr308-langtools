@@ -224,6 +224,7 @@ public class Driver {
         sb.append("\n@Target(ElementType.TYPE_USE) @interface TI {}");
         sb.append("\n@Target(ElementType.TYPE_USE) @interface TJ {}");
         sb.append("\n@Target(ElementType.TYPE_USE) @interface TK {}");
+        sb.append("\n@Target(ElementType.TYPE_USE) @interface TL {}");
 
         sb.append("\n@Target(value={ElementType.TYPE,ElementType.FIELD,ElementType.METHOD,ElementType.PARAMETER,ElementType.CONSTRUCTOR,ElementType.LOCAL_VARIABLE})");
         sb.append("\n@interface Decl {}");
