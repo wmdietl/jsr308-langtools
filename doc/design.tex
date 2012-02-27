@@ -1298,7 +1298,7 @@ on the smallest enclosing class, field, or method.
 
 A type annotation written on a declaration's type (e.g., on a field type or
 on a method return type)
-appears in the \RuntimeInOrVisibleTypeAnnotations attribute.
+appears in the \RuntimeInOrVisibleTypeAnnotations attribute of that declaration.
 
 
 No changes are made to the StackMapTable that stores the types of elements
@@ -1410,7 +1410,7 @@ every possible annotation location.
 
 \def\unused{\ensuremath{*}}
 \ifhevea
-  \def\rlapunused{\relax}
+  \def\rlunused{\unused}
 \else
   \def\rlunused{\rlap{\unused}}
 \fi
@@ -1450,7 +1450,7 @@ method receiver & \code{METHOD\_RECEIVER}
 method parameter & \code{METHOD\_PARAMETER}
 & \code{0x10}, \code{0x11} & \S\ref{class-file:ext:ri:parameters} \\
 exception type in \code{throws} & \code{THROWS}
-& \code{0x12}, \code{0x13} & \S\ref{class-file:ext:ri:throws} \\
+& \code{0x12}, \code{0x13}\rlunused & \S\ref{class-file:ext:ri:throws} \\
 wildcard bound & \code{WILDCARD\_BOUND}
 & \code{0x14}, \code{0x15} & \S\ref{class-file:ext:ri:wildcard} \\
 \hline
