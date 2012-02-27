@@ -57,14 +57,8 @@
 
 \hyphenation{Pecht-chan-ski}
 
-\newcommand{\jlsURL}{http://java.sun.com/docs/books/jls/third_edition/html/}
-\urldef{\jlsEightEightFourURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/classes.html#8.8.4}
-\urldef{\jlsNineSixURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/interfaces.html#9.6}
-\urldef{\jlsNineSixOneThreeURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/interfaces.html#9.6.1.3}
-\urldef{\jlsNineSevenURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/interfaces.html#9.7}
-\urldef{\jlsFifteenNine}\url{http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.9}
-\urldef{\jlsFifteenNineFiveOneURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.9.5.1}
-\urldef{\jlsFifteenTwelveFourFiveURL}\url{http://java.sun.com/docs/books/jls/third_edition/html/expressions.html#15.12.4.5}
+\urldef{\jlsEightEightFourURL}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.8.4}
+\urldef{\jlsFifteenNine}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.9}
 
 
 
@@ -520,7 +514,14 @@ not be annotated:
 \end{Verbatim}
 \preverbnegspace
 
-\noindent
+The type name in front of a static member access is a scoping mechanism,
+not a use of a type --- there's nothing of type \<Outer> in the above
+examples.  Furthermore, since there is only one instance of any static
+member, the static member cannot be affected by an annotation on the name of
+the class being used to access it.  Affecting the type of that single
+thing, depending on the annotation on the class name being used to access
+it, feels unnatural.
+
 A static member access may itself be a type use, in which case the used
 type may be annotated by annotating the last component of the static member
 access, which is the simple name of the type being used.
@@ -531,20 +532,12 @@ access, which is the simple name of the type being used.
 \end{Verbatim}
 \preverbnegspace
 
-The type name in front of a static member access is a scoping mechanism,
-not a use of a type --- there's nothing of type \<Outer> in the above
-example.  Furthermore, since there is only one instance of any static
-member, what it is cannot possibly be affected by an annotation on the name of
-the class being used to access it.  Affecting the type of that single
-thing, depending on the annotation on the class name being used to access
-it, feels unnatural.
-
 
 \subsection{Java language grammar changes\label{grammar}}
 
 This section
-gives changes to the \ahref{http://java.sun.com/docs/books/jls/third_edition/html/syntax.html}{grammar} of the Java
-language~\cite[ch.~18]{GoslingJSBB2011}, organized in the same way as
+gives changes to the \ahref{http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html}{grammar} of the Java
+language~\cite[ch.~18]{GoslingJSBB2012}, organized in the same way as
 the rules of Section~\ref{type-annotation-locations}.
 Additions are \underline{underlined}.
 % , and deletions \sout{crossed out}.
@@ -556,7 +549,8 @@ version attempts to minimize changes to existing grammar productions.
 
 
 % The original grammar appears at
-% http://java.sun.com/docs/books/jls/third_edition/html/syntax.html
+% http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html
+% (older: http://java.sun.com/docs/books/jls/third_edition/html/syntax.html)
 
 % The BNF for the spec does not have to be the same as the BNF for the
 % implementation.  An example is that the BNF does not address the ">>" issue
@@ -698,10 +692,10 @@ result types.
 
 
 \item
-The receiver may be expressed explicitly, by changing the definition of 
-``\nt{FormalParameters}''.
+The receiver may be expressed explicitly.
 Then, annotations appear on the receiver type in the normal way.
 If the receiver is not expressed explicitly, then its type cannot be annotated.
+% The receiver \<this> is implicitly \<final>.
 
 \begin{tabbing}
 \qquad \= \kill
@@ -709,7 +703,7 @@ If the receiver is not expressed explicitly, then its type cannot be annotated.
 \qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
 \\
 \new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{Type} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
 \qquad        \nt{FormalParameterDecls}
 \end{tabbing}
 
@@ -838,10 +832,10 @@ declaration does not refer to the full type, even though declaration
 annotations (which also occur at the beginning of
 the declaration) do refer to the entire variable.  As an example, in
 \code{@NonNull String[] arr2;} the variable \code{arr2} is not non-null.
-This is actually a criticism of Java itself, not of the JSR 308
-annotation extension, which is merely consistent with Java.  In a
-declaration \code{String[] arr2;}, the top-level type constructor does not
-appear on the far left.  An annotation on the whole type (the array) should
+This is actually a criticism of the fact that in a Java declaration such as
+\code{String[] arr2;}, the top-level type constructor does not appear on
+the far left.
+An annotation on the whole type (the array) should
 appear on the syntax that indicates the array --- that is, on the brackets.
 
 
@@ -884,13 +878,14 @@ declarations \code{<T> foo(...)\ \ttlcb...\ttrcb}, and wildcards
 
 \item
 \code{ElementType.TYPE\_USE} stands for all uses of types, plus two
-two special cases.
+special cases.
 
 \begin{enumerate}
 \item 
 A type annotation (one meta-annotated with
-\code{@Target(ElementType.TYPE\_USE)}) is permitted to be written on a 
-a class declaration or a type parameter declaration.  Strictly speaking,
+\code{@Target(ElementType.TYPE\_USE)}) is permitted to be written anywhere 
+\code{@Target(ElementType.TYPE)} or \code{@Target(ElementType.TYPE\_PARAMETER)} would permit --- that is, on
+a class, interface, or enum declaration, or on a type parameter declaration.  Strictly speaking,
 these are declaration sites, not uses of a type.  However, it is convenient
 to write a type annotation at a type declaration, as shorthand for applying
 it at all uses.  For example, \code{@Interned class MyClass \ttlcb\ ...\ \ttrcb}
@@ -1502,7 +1497,7 @@ type argument in method call & \code{METHOD\_TYPE\_ARGUMENT}
   for the construct itself, and one for type arguments, array types, or
   nested types that appear at the construct.  The second
   \code{target\_type} has the same structure as the first one, except it
-  adds the fields described in \S\ref{class-file:ext:ri:typearg} and its
+  adds the fields described in Section \ref{class-file:ext:ri:typearg} and its
   symbolic constant name adds the suffix \code{\_COMPONENT}.
   The symbolic constants appear in the enums
   \code{com.sun.tools.javac.code.TargetType} and
@@ -1576,10 +1571,11 @@ A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes tabl
 
 \code{param\_index} specifies the 0-based index of the type parameter.
 
-%% What was this sentence fragment trying to say?
-% A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-% \code{typeparam\_target} appears in the attributes table of a
-% \code{method\_info} structure if it 
+A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{method\_info} structure if it targets a method type parameter bound,
+otherwise, in the attributes table of a \code{ClassFile} structure if it
+targets a class declaration type parameter bound.
 
 
 \subsubsection{Class \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
