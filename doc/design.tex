@@ -974,7 +974,9 @@ decompiled code, as in ``\code{@SillyAnnotation @SillyAnnotation int m()}\ldots'
 %    or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
 %   annotation is applied only to the method declaration.  The code construct
 %   would have been illegal if \<@A> were a type annotation.
-It would be illegal to write \<@SillyAnnotation> on a \<void> method.
+If you write \<@SillyAnnotation> on a \<void>-returning method, then
+it applies only to the declaration, because it is not written in a type
+annotaton position.
 
 
 
