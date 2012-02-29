@@ -134,6 +134,15 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
         }
     }
 
+    protected void addReceiverAnnotations(ExecutableMemberDoc member,
+            Content tree) {
+        if (member.receiverAnnotations().length > 0) {
+            tree.addContent(writer.getSpace());
+            writer.addReceiverAnnotationInfo(member, tree);
+        }
+    }
+
+
     /**
      * Add all the parameters for the executable member.
      *
