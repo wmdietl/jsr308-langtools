@@ -23,26 +23,43 @@
 
 /*
  * @test
- * @bug 6843077
- * @summary new type annotation location: class literals
- * @author Mahmood Ali
- * @compile -source 1.8 ClassLiterals.java
+ * @ignore // syntax not sure yet.
+ * @bug 1234567
+ * @summary new type annotation location: multicatch
+ * @author Werner Dietl
+ * @compile -source 1.8 MultiCatch.java
  */
 
-class ClassLiterals {
-
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
+class DefaultScope {
+  void exception01() {
+    try {
+	System.out.println("Hello 1!");
+    } catch (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
+  }
+  void exception02() {
+    try {
+	System.out.println("Hello 2!");
+    } catch @A (@B NullPointerException | @C IllegalArgumentException e) {
+      e.toString();
+    }
   }
 }
 
-@interface A {}
-@interface B { int value(); }
+class ModifiedVars {
+    /*
+  void exception() {
+    try {
+      arrays();
+    } catch (final @A Exception e) {
+      e.toString();
+    }
+  }
+    */
+}
+
+@interface A { }
+@interface B { }
+@interface C { }
+@interface D { }
