@@ -838,7 +838,6 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 p.init(delegateCompiler.procEnvImpl);
             }
             JavacProcessingEnvironment.typeProcessorsToInit.clear();
-            delegateCompiler.taskListener = delegateCompiler.context.get(TaskListener.class);
 
             delegateCompiler.compile2();
             delegateCompiler.close();
