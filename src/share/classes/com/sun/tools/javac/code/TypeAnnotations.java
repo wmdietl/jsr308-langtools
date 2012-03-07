@@ -30,7 +30,9 @@ import static com.sun.tools.javac.code.Flags.PARAMETER;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.VOID;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
@@ -835,39 +837,49 @@ public class TypeAnnotations {
         // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s)%n",
         //         typetree, type, annotations);
         if (type.tag != TypeTags.ARRAY) {
-            Type encl = type;
-            JCTree encltree = typetree;
-            boolean seenselect = false;
+            Type enclTy = type;
+            Element enclEl = type.asElement();
+            JCTree enclTr = typetree;
 
-            // We start at -1 to account for the numbers of iterations below
+            // The genericLocation for the annotation.
+            // Start at -1 to adjust for the numbers of iterations below.
             int index = -1;
             {
                 List<TypeSymbol> typeparams = type.asElement().getTypeParameters();
                 if (typeparams.nonEmpty()) {
-                    // The "top-level" generics are an offset for the index
+                    // The "top-level" generics are an offset for the index.
                     index += typeparams.size();
                 }
             }
-            while (encl.getEnclosingType()!=null &&
-                    (encltree.getKind() == JCTree.Kind.MEMBER_SELECT ||
-                     encltree.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
-                     encltree.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
-                // Iterate over the type tree, not just the type: the type is already
+            // Whether we've seen an appropriate member select and therefore
+            // whether to make the annotation generic or not.
+            boolean seenselect = false;
+            while (enclEl!=null &&
+                   enclEl.getKind() != ElementKind.PACKAGE &&
+                   enclTy != null &&
+                   enclTy.getKind() != TypeKind.NONE &&
+                    (enclTr.getKind() == JCTree.Kind.MEMBER_SELECT ||
+                     enclTr.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
+                     enclTr.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
+                // Iterate also over the type tree, not just the type: the type is already
                 // completely resolved and we cannot distinguish where the annotation
                 // belongs for a nested type.
-                if (encltree.getKind() == JCTree.Kind.MEMBER_SELECT) {
+                if (enclTr.getKind() == JCTree.Kind.MEMBER_SELECT) {
                     // only change encl in this case.
-                    encl = encl.getEnclosingType();
-                    encltree = ((JCFieldAccess)encltree).getExpression();
-                    seenselect = true;
+                    enclTy = enclTy.getEnclosingType();
+                    enclEl = enclEl.getEnclosingElement();
+                    enclTr = ((JCFieldAccess)enclTr).getExpression();
                     // Only count going through an outer class select, don't
-                    // also count parameterized or annotated types on the way.
-                    ++index;
-                } else if (encltree.getKind() == JCTree.Kind.PARAMETERIZED_TYPE) {
-                    encltree = ((JCTypeApply)encltree).getType();
+                    // also count parameterized, packages, or annotated types on the way.
+                    if (enclEl.getKind() != ElementKind.PACKAGE) {
+                        ++index;
+                        seenselect = true;
+                    }
+                } else if (enclTr.getKind() == JCTree.Kind.PARAMETERIZED_TYPE) {
+                    enclTr = ((JCTypeApply)enclTr).getType();
                 } else {
                     // only other option because of while condition
-                    encltree = ((JCAnnotatedType)encltree).getUnderlyingType();
+                    enclTr = ((JCAnnotatedType)enclTr).getUnderlyingType();
                 }
             }
 
@@ -883,7 +895,7 @@ public class TypeAnnotations {
 
             // TODO: method receiver type annotations don't work. There is a strange
             // interaction with arrays.
-            encl.typeAnnotations = annotations;
+            enclTy.typeAnnotations = annotations;
             return type;
         } else {
             Type.ArrayType arType = (Type.ArrayType) type;
