@@ -1453,8 +1453,6 @@ method parameter type & \code{METHOD\_PARAMETER}
 & \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:parameters} \\
 exception type in \code{throws} & \code{THROWS}
 & \code{0x1E}, \code{0x1F}\rlunused & \S\ref{class-file:ext:ri:throws} \\
-wildcard bound & \code{WILDCARD\_BOUND}
-& \code{0x20}, \code{0x21} & \S\ref{class-file:ext:ri:wildcard} \\
 \hline
 \multicolumn{4}{c}{~} \\
 \multicolumn{4}{l}{Targets for type uses that occur only within code blocks (\<ElementType.TYPE\_USE>):} \\
@@ -1496,7 +1494,7 @@ type argument in method call & \code{METHOD\_TYPE\_ARGUMENT}
   % variable'' refer to the declaration, not the use, of such elements.
 \newline
   There are two \code{target\_type} values for each annotation target:  one
-  for the construct itself, and one for type arguments, array types, or
+  for the construct itself, and one for type arguments, wildcard bounds, array types, or
   nested types that appear at the construct.  The second
   \code{target\_type} has the same structure as the first one, except it
   adds the fields described in Section \ref{class-file:ext:ri:typearg} and its
@@ -1692,84 +1690,6 @@ type.
 \attributelocation{containing a \code{exception\_target}}{method\_info}
 
 
-\subsubsection{Wildcard bounds\label{class-file:ext:ri:wildcard}}
-
-\targetinfocontents{the bound of a wildcard}{wildcard\_bound\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    wildcard_bound_target {
-        u2 wildcard_location_type;   // The location of the wildcard, values as for target_type (Section 3.2)
-        {
-            ...
-        } target_info;  // uniquely identifies the targeted program element, see Section 3.3
-    }
-\end{Verbatim}
-
-Here are examples (see Section~\ref{class-file:ext:ri:typearg} for
-an explanation of \<location\_length> and \<location>):
-
-\noindent
-\code{@A} in \code{void m(List<?\ extends @A String> lst) \ttlcb...\ttrcb} is described as:
-
-\preverbnegspace
-\begin{Verbatim}
-   target_type = WILDCARD_BOUND
-   target_info =
-   {
-     wildcard_location_type = METHOD_PARAMETER_COMPONENT (0x0D)
-     wildcard_location =
-     {
-       u1 parameter_index = 0;
-       // the first type argument of List
-       location_length = 1;
-       location = { 0 };
-     }
-   }
-\end{Verbatim}
-
-\noindent
-\code{@B} in \code{Map<Object, ?\ extends List<@B String>> newMap() \ttlcb...\ttrcb} is described as:
-
-\preverbnegspace
-\begin{Verbatim}
-   target_type = WILDCARD_BOUND_COMPONENT
-   target_info =
-   {
-     // location of wildcard: type argument of the return type
-     wildcard_location_type = RETURN_TYPE_COMPONENT;
-     wildcard_location =
-     {
-       // the second type argument of Map
-       location_length = 1;
-       location = { 1 };
-     }
-     // the first type argument of List (the generic information of the annotation itself)
-     location_length = 1;
-     location = { 0 };
-   }
-\end{Verbatim}
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{wildcard\_bound\_target} appears in the attributes table of:
-
-\begin{enumerate}
-\item
-a \code{ClassFile} structure, if the annotation appears on the class
-type parameter bound, a super class, or a super interface type,
-
-\item
-a \code{field\_info}, if the annotation appears on the field type
-arguments, or
-
-\item
-a \code{method\_info}, if the annotation appears on the method type
-parameter bound, return type, parameter types, exception types, or any type
-in its method body.
-
-\end{enumerate}
-
-
 \subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
 
 \targetinfocontents{a local variable or resource variable}{localvar\_target}
@@ -1923,9 +1843,20 @@ expression.
 \begin{figure}[tp!]
 \begin{center}
 
-\code{@A Map<@B String, @C List<@D Object>>} \hfill 
-\code{@H String @E [] @F [] @G []} \hfill
-\code{@L O1.@K O2.@J O3.@I NestedStatic}
+\ifhevea
+  \def\locationexampleone{\code{@A Map<@B ? extends @C String, @D List<@E Object>>}}
+  \def\myhfill{\\}
+\else
+  \def\locationexampleone{\begin{minipage}{1.7in}{\code{@A Map<@B ? extends @C String, \\ \strut~~~~~~~@D List<@E Object>>}}\end{minipage}}
+  \def\myhfill{\hfill}
+\fi
+
+
+\locationexampleone
+\myhfill 
+\code{@I String @F [] @G [] @H []}
+\myhfill
+\code{@M O1.@L O2.@K O3.@J NestedStatic}
 
 \resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
 
@@ -1934,16 +1865,17 @@ expression.
 \bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
 \code{@A}       & \multicolumn{2}{c|}{N/A} \\
 \code{@B}       & 1     & 0 \\
-\code{@C}       & 1     & 1 \\
-\code{@D}       & 2     & 1, 0 \\
-\code{@E}       & \multicolumn{2}{c|}{N/A} \\
-\code{@F}       & 1     & 0 \\
-\code{@G}       & 1     & 1 \\
-\code{@H}       & 1     & 2 \\
-\code{@I}       & \multicolumn{2}{c|}{N/A} \\
-\code{@J}       & 1     & 0 \\
-\code{@K}       & 1     & 1 \\
-\code{@L}       & 1     & 2 \\
+\code{@C}       & 2     & 0, 0 \\
+\code{@D}       & 1     & 1 \\
+\code{@E}       & 2     & 1, 0 \\
+\code{@F}       & \multicolumn{2}{c|}{N/A} \\   
+\code{@G}       & 1     & 0 \\                  
+\code{@H}       & 1     & 1 \\                  
+\code{@I}       & 1     & 2 \\                  
+\code{@J}       & \multicolumn{2}{c|}{N/A} \\   
+\code{@K}       & 1     & 0 \\                  
+\code{@L}       & 1     & 1 \\                  
+\code{@M}       & 1     & 2 \\                  
 \hline
 \end{tabular}
 
@@ -2014,7 +1946,7 @@ expression.
   A \code{location} array is used only for type annotations that are not on
   the main type.  Type annotations on the main type are stored
   without a \code{location} array.  For example, a type annotation on the
-  outermost array level (\<@E> in the top part of the figure) is not stored
+  outermost array level (\<@F> in the top part of the figure) is not stored
   as an array level annotation but as a regular type annotation, see
   Figure~\ref{tbl:target_types}.
   }
@@ -2025,7 +1957,10 @@ annotation may appear.  For example, consider the difference among
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
 \code{Map<String, @X Object>};
-or the difference  among 
+or the difference among
+\code{Foo<@X ? extends T>} and
+\code{Foo<? extends @X T>};
+or the difference among 
 \code{@X String [] []},
 \code{String @X [] []}, and
 \code{String [] @X []};
@@ -2034,7 +1969,7 @@ or the difference among
 \code{Outer .\ @X Inner}.
 The classfile must distinguish among these locations.
 
-\targetinfocontentspartial{within a parameterized type,
+\targetinfocontentspartial{within a parameterized type, wildcard bound,
 array type, or nested type} contains what it normally would for a
 non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
@@ -2048,7 +1983,7 @@ non-parameterized, non-array type
 \end{Verbatim}
 
 The \code{location} field is a list of numbers that represents the annotation
-location among the type arguments, array levels, and type nestings.
+location among the type arguments, wildcard bounds, array levels, and type nestings.
 If the type is viewed as a tree, then 
 the \code{location} field represents a path in that tree.  The
 \code{location\_length} field is the depth of the annotation in the tree,
@@ -2057,11 +1992,13 @@ which is also the length of the \code{location} field.  Each element of the
 the tree; the leftmost child is numbered 0.
 
 
-A parameterized, array, or nested type can be viewed as a tree in the
+A parameterized, wildcard, array, or nested type can be viewed as a tree in the
 following way.
 %
 For a parameterized type, the children of the parameterized type are the
 type arguments, numbered from the left.
+%
+For a wildcard type, the wildcard has up to one child, which is its bound.
 %
 For a nested type, the children are the type arguments (if any), followed
 by the outer types, numbered from innermost to outermost.
@@ -2088,7 +2025,7 @@ type or a raw type written without the type arguments.
 
 In the class file, all annotations on the full type appear.  For example,
 the classfile would record the type in this \<new> expression as
-\<@A Outer. @B Inner>:
+\<@A Outer.\ @B Inner>:
 
 \preverbnegspace
 \begin{Verbatim}
