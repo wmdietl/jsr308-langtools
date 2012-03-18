@@ -1076,7 +1076,8 @@
                source="${boot.javac.source}"
                target="${boot.javac.target}"
                executable="${boot.java.home}/bin/javac"
-               srcdir="${make.tools.dir}/CompileProperties"
+               srcdir="${make.tools.dir}"
+               includes="compileproperties/* anttasks/CompileProperties*"
                destdir="${build.toolclasses.dir}/"
                classpath="${ant.core.lib}"
                bootclasspath="${boot.java.home}/jre/lib/rt.jar"
@@ -1084,7 +1085,7 @@
             <compilerarg line="${javac.lint.opts}"/>
         </javac>
         <taskdef name="pcompile"
-                 classname="CompilePropertiesTask"
+                 classname="anttasks.CompilePropertiesTask"
                  classpath="${build.toolclasses.dir}/"/>
     </target>
 
@@ -1094,7 +1095,8 @@
                source="${boot.javac.source}"
                target="${boot.javac.target}"
                executable="${boot.java.home}/bin/javac"
-               srcdir="${make.tools.dir}/GenStubs"
+               srcdir="${make.tools.dir}"
+               includes="genstubs/* anttasks/GenStubs*"
                destdir="${build.toolclasses.dir}/"
                classpath="${ant.core.lib}"
                includeantruntime="false">
@@ -1102,7 +1104,7 @@
             <compilerarg line="${javac.lint.opts}"/>
         </javac>
         <taskdef name="genstubs"
-                 classname="GenStubs$$Ant"
+                 classname="anttasks.GenStubsTask"
                  classpath="${build.toolclasses.dir}/"/>
     </target>
 
