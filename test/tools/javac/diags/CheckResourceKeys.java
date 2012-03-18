@@ -198,6 +198,7 @@ public class CheckResourceKeys {
 
 
     Set<String> needToInvestigate = new TreeSet<String>(Arrays.asList(
+        "compiler.misc.fatal.err.cant.close.loader",        // Supressed by JSR308
         "compiler.err.cant.read.file",                      // UNUSED
         "compiler.err.illegal.self.ref",                    // UNUSED
         "compiler.err.io.exception",                        // UNUSED
@@ -268,6 +269,9 @@ public class CheckResourceKeys {
             // -XD option names
             "process.packages",
             "ignore.symbol.file",
+            // type annotations extensions
+            "jsr308.imports",
+            "invalid.anno.comment.char",
             // prefix/embedded strings
             "compiler.",
             "compiler.misc.",
