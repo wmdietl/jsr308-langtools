@@ -3497,7 +3497,9 @@ public class JavacParser implements Parser {
         }
 
         if (annos.nonEmpty()) {
-            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType, false);
+            // If createNewLevel is true, the annotations are already on the right type.
+            // Otherwise, they might not be and will need to get adjustments.
+            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType, createNewLevel);
         }
 
         if (mostInnerArrayType == null) {

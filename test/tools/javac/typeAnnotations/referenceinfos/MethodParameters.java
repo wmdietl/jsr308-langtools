@@ -65,6 +65,28 @@ public class MethodParameters {
         return "void test(Object b, @TC String @TA [] @TB [] a) { }";
     }
 
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 0 }, paramIndex = 1),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1 }, paramIndex = 1)
+    })
+    public String methodParamAsVararg() {
+        return "void test(Object b, @TC String @TA [] @TB ... a) { }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 0 }, paramIndex = 1),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1 }, paramIndex = 1)
+    })
+    public String methodParamAsFQVararg() {
+        return "void test(Object b, @TC java.lang.String @TA [] @TB ... a) { }";
+    }
+
     @TADescriptions({})
     public String methodWithDeclarationAnnotatin() {
         return "void test(@Decl String a) { }";
