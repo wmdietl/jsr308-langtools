@@ -47,6 +47,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import static javax.tools.StandardLocation.*;
 
+import com.sun.source.util.AbstractTypeProcessor;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.tools.javac.api.JavacTaskImpl;
@@ -115,6 +116,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     private DiscoveredProcessors discoveredProcs;
 
     /**
+     * Type processors, which should have Processor.init called later in
+     * compilation than declaration processors.
+     */
+    public static java.util.List<AbstractTypeProcessor> typeProcessorsToInit = new java.util.ArrayList<AbstractTypeProcessor>();
+
+    /**
      * Map of processor-specific options.
      */
     private final Map<String, String> processorOptions;
@@ -157,7 +164,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private Context context;
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     public JavacProcessingEnvironment(Context context, Iterable<? extends Processor> processors) {
+        uid = ++uidCounter;
+        options = Options.instance(context);
         this.context = context;
         log = Log.instance(context);
         source = Source.instance(context);
@@ -462,7 +474,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
      * State about how a processor has been used by the tool.  If a
      * processor has been used on a prior round, its process method is
      * called on all subsequent rounds, perhaps with an empty set of
-     * annotations to process.  The {@code annotatedSupported} method
+     * annotations to process.  The {@code annotationSupported} method
      * caches the supported annotation information from the first (and
      * only) getSupportedAnnotationTypes call to the processor.
      */
@@ -477,7 +489,11 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             contributed = false;
 
             try {
-                processor.init(env);
+                if (processor instanceof AbstractTypeProcessor) {
+                    typeProcessorsToInit.add((AbstractTypeProcessor) processor);
+                } else {
+                    processor.init(env);
+                }
 
                 checkSourceVersionCompatibility(source, log);
 
@@ -682,6 +698,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             }
 
             if (matchedNames.size() > 0 || ps.contributed) {
+                foundTypeProcessors = foundTypeProcessors || (ps.processor instanceof AbstractTypeProcessor);
                 boolean processingResult = callProcessor(ps.processor, typeElements, renv);
                 ps.contributed = true;
                 ps.removeSupportedOptions(unmatchedProcessorOptions);
@@ -1470,7 +1487,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     }
 
     public String toString() {
-        return "javac ProcessingEnvironment";
+        return "JavacProcessingEnvironment#" + uid;
     }
 
     public static boolean isValidOptionName(String optionName) {

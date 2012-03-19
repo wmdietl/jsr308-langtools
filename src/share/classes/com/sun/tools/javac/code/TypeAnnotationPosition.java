@@ -34,7 +34,7 @@ import com.sun.tools.javac.util.*;
 *  This code and its internal interfaces are subject to change or
 *  deletion without notice.</b>
 */
-public class TypeAnnotationPosition {
+public class TypeAnnotationPosition implements Cloneable {
 
     public TargetType type = TargetType.UNKNOWN;
 
@@ -65,6 +65,11 @@ public class TypeAnnotationPosition {
     // For wildcards
     public TypeAnnotationPosition wildcard_position = null;
 
+    public TypeAnnotationPosition() { }
+    public TypeAnnotationPosition(TargetType type) {
+        this.type = type;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -72,27 +77,25 @@ public class TypeAnnotationPosition {
         sb.append(type);
 
         switch (type) {
-        // type case
+        // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
-            // object creation
+        case TYPECAST_COMPONENT:
+        // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
-            // new expression
+        case INSTANCEOF_COMPONENT:
+        // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             sb.append(", offset = ");
             sb.append(offset);
             break;
-            // local variable
+        // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             sb.append(", {");
             for (int i = 0; i < lvarOffset.length; ++i) {
                 if (i != 0) sb.append("; ");
-                sb.append(", start_pc = ");
+                sb.append("start_pc = ");
                 sb.append(lvarOffset[i]);
                 sb.append(", length = ");
                 sb.append(lvarLength[i]);
@@ -101,69 +104,75 @@ public class TypeAnnotationPosition {
             }
             sb.append("}");
             break;
-            // method receiver
+        // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
-            // type parameters
+        // type parameter
         case CLASS_TYPE_PARAMETER:
         case METHOD_TYPE_PARAMETER:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-            // type parameters bound
+        // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             sb.append(", bound_index = ");
             sb.append(bound_index);
             break;
-            // wildcard
+        // wildcard bound
         case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
+        case WILDCARD_BOUND_COMPONENT:
             sb.append(", wild_card = ");
             sb.append(wildcard_position);
             break;
-            // Class extends and implements clauses
+        // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-            // throws
+        // throws
         case THROWS:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            sb.append(", offset = ");
-            sb.append(offset);
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
-            // method parameter: not specified
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        // method parameter
+        case METHOD_PARAMETER:
+        case METHOD_PARAMETER_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-            // method type argument: wasn't specified
+        // method/constructor type argument
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             sb.append(", offset = ");
             sb.append(offset);
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
-            // We don't need to worry abut these
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
-        case FIELD_GENERIC_OR_ARRAY:
+        // We don't need to worry about these
+        case METHOD_RETURN:
+        case METHOD_RETURN_COMPONENT:
+        case FIELD:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
         default:
-            //                throw new AssertionError("unknown type: " + type);
+            throw new AssertionError("Unknown target type: " + type);
         }
 
         // Append location data for generics/arrays.
@@ -187,9 +196,17 @@ public class TypeAnnotationPosition {
      */
     public boolean emitToClassfile() {
         if (type == TargetType.WILDCARD_BOUND
-            || type == TargetType.WILDCARD_BOUND_GENERIC_OR_ARRAY)
-            return wildcard_position.isValidOffset;
+            || type == TargetType.WILDCARD_BOUND_COMPONENT)
+            return wildcard_position.emitToClassfile();
         else
             return !type.isLocal() || isValidOffset;
+    }
+
+    public TypeAnnotationPosition clone() {
+        try {
+            return (TypeAnnotationPosition)super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError("This not cloneable");
+        }
     }
 }
