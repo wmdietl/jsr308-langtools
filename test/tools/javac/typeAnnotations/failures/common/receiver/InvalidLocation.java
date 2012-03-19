@@ -7,7 +7,7 @@
  */
 
 class InvalidLocation {
-  void test() @A {
+  void test(@A InvalidLocation this) {
   }
 }
 

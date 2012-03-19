@@ -361,9 +361,9 @@ public interface Types {
      * Returns the annotations targeting the method receiver type.
      *
      * @param type the targeted type
-     * @return the type annotations targeting the type
+     * @return the receiver type of the executable type
      */
-    List<? extends AnnotationMirror> receiverTypeAnnotationsOf(ExecutableType type);
+    TypeMirror receiverTypeOf(ExecutableType type);
 
     /**
      * Returns the type's annotation for the specified executable type
@@ -410,6 +410,7 @@ public interface Types {
      * @see MirroredTypeException
      * @see MirroredTypesException
      */
-    <A extends Annotation> A receiverTypeAnnotationOf(ExecutableType type, Class<A> annotationType);
+    // TODO: no longer needed?
+    // <A extends Annotation> A receiverTypeAnnotationOf(ExecutableType type, Class<A> annotationType);
 
 }
