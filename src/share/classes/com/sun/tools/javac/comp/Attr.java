@@ -1664,7 +1664,7 @@ public class Attr extends JCTree.Visitor {
             Type encltype = chk.checkRefType(tree.encl.pos(),
                                              attribExpr(tree.encl, env));
             // TODO 308: in <expr>.new C, do we also want to add the type annotations
-            // from expr to the combined type, or not?
+            // from expr to the combined type, or not? Yes, do this.
             clazzid1 = make.at(clazz.pos).Select(make.Type(encltype),
                                                  ((JCIdent) clazzid).name);
 

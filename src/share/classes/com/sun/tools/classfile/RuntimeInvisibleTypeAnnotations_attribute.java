@@ -28,7 +28,7 @@ package com.sun.tools.classfile;
 import java.io.IOException;
 
 /**
- * See JSR 308 specification, section 4.1
+ * See JSR 308 specification, Section 3.
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.

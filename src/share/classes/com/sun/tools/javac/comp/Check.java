@@ -2412,7 +2412,7 @@ public class Check {
             validateAnnotation(a, s);
     }
 
-    /** Check the type annotations
+    /** Check the type annotations.
      */
     public void validateTypeAnnotations(List<JCTypeAnnotation> annotations, boolean isTypeParameter) {
         if (skipAnnotations) return;
@@ -2461,7 +2461,7 @@ public class Check {
         return false;
     }
 
-    /** Is the annotation applicable to type annotations */
+    /** Is the annotation applicable to type annotations? */
     boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);

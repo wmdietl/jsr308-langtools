@@ -2625,9 +2625,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
     }
 
     /**
-     * add the annotation types of the executable receiver.
+     * Add the annotation types of the executable receiver.
      *
-     * @param method the executable to write the receiver annotations for
+     * @param method the executable to write the receiver annotations for.
      * @param htmltree the documentation tree to which the annotation info will be
      *        added
      */

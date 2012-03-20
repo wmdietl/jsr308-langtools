@@ -125,6 +125,7 @@ class T0x10<T extends @A @DA Cloneable> {
 
 class T0x10A<T extends @A @DA Object> {
 }
+
 /** method type parameter bound */
 class T0x12<T> {
     <T extends @A @DA Cloneable> void m0x12() {}
@@ -133,7 +134,6 @@ class T0x12<T> {
 /** class type parameter bound generic/array */
 class T0x11<T extends List<@A @DA T>> {
 }
-
 
 /** method type parameter bound generic/array */
 class T0x13 {

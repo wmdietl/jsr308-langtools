@@ -115,8 +115,10 @@ public class JavacParser implements Parser {
     // already been read to be stored for later use.  Alternate
     // implementations are possible but would cause much larger changes to
     // the parser.
+
     /** Type annotations that have already been read but have not yet been used. **/
     private List<JCTypeAnnotation> typeAnnotationsPushedBack = List.nil();
+
     /**
      * If the parser notices extra annotations, then it either immediately
      * issues an error (if this variable is false) or places the extra
@@ -1388,7 +1390,6 @@ public class JavacParser implements Parser {
         if (typeArgs != null) illegal();
         while (true) {
             int pos1 = token.pos;
-
             final List<JCTypeAnnotation> annos = typeAnnotationsOpt();
 
             if (token.kind == LBRACKET) {
@@ -1890,7 +1891,6 @@ public class JavacParser implements Parser {
             t = typeArguments(t, true);
             diamondFound = (mode & DIAMOND) != 0;
         }
-
         while (token.kind == DOT) {
             if (diamondFound) {
                 //cannot select after a diamond

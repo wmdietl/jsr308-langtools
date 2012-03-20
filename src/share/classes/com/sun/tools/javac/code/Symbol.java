@@ -108,8 +108,8 @@ public abstract class Symbol implements Element {
     //  - convenient location to store annotations for generation after erasure
     //  - a private interface for accessing type annotations parsed from
     //    classfiles
-    // The field is populated for the following declaration only
-    // class, field, variable and type parameters
+    // The field is populated for the following declarations only:
+    // class, field, variable, and type parameters.
     //
     public List<Attribute.TypeCompound> typeAnnotations;
 

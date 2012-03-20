@@ -468,6 +468,7 @@ public class Pretty extends JCTree.Visitor {
             print("(");
             if (tree.recvparam!=null) {
                 printExpr(tree.recvparam);
+                // TODO 308: only output if there are parameters following.
                 print(", ");
             }
             printExprs(tree.params);
