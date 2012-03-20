@@ -34,6 +34,7 @@ import com.sun.tools.javac.util.*;
 *  This code and its internal interfaces are subject to change or
 *  deletion without notice.</b>
 */
+// Code duplicated in com.sun.tools.classfile.TypeAnnotation.Position
 public class TypeAnnotationPosition implements Cloneable {
 
     public TargetType type = TargetType.UNKNOWN;

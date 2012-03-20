@@ -281,7 +281,7 @@ public class TypeAnnotation {
         return n;
     }
 
-    // Code duplicated from com.sun.tools.javac.code.TypeAnnotations.Position
+    // Code duplicated from com.sun.tools.javac.code.TypeAnnotationPosition
     public static class Position {
 
         public TargetType type = TargetType.UNKNOWN;
