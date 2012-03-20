@@ -44,6 +44,7 @@ import java.util.Set;
  *  This code and its internal interfaces are subject to change or
  *  deletion without notice.</b>
  */
+// Code duplicated in com.sun.tools.classfile.TypeAnnotation.TargetType
 public enum TargetType {
 
     // Some target types are commented out, because Java doesn't permit such

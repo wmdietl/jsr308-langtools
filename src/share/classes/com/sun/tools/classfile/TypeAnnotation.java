@@ -426,70 +426,70 @@ public class TypeAnnotation {
         }
     }
 
-    // Code duplicated from com.sun.tools.javac.comp.TargetType
+    // Code duplicated from com.sun.tools.javac.code.TargetType
+    // Except for the IsLocal flag, which can be removed here.
     public enum TargetType {
 
-        /** For annotations on typecasts. */
+        // Some target types are commented out, because Java doesn't permit such
+        // targets.  They are included here to confirm that their omission is
+        // intentional and not accidental.
+
+        // The term "component" is used for type arguments, nested arrays, and
+        // outer class types, whichever are legal in the current context.
+
+        /** For annotations on a typecast. */
         TYPECAST(0x00),
 
-        /** For annotations on a type argument or nested array of a typecast. */
+        /** For annotations on a component of a typecast. */
         TYPECAST_COMPONENT(0x01, HasLocation),
 
-        /** For annotations on type tests. */
+        /** For annotations on a type test. */
         INSTANCEOF(0x02),
 
-        /** For annotations on a type argument or nested array of a type test. */
+        /** For annotations on a component of a type test. */
         INSTANCEOF_COMPONENT(0x03, HasLocation),
 
-        /** For annotations on object creation expressions. */
+        /** For annotations on an object creation expression. */
         NEW(0x04),
 
-        /**
-         * For annotations on a type argument or nested array of an object creation
-         * expression.
-         */
+        /** For annotations on a component of an object creation expression. */
         NEW_COMPONENT(0x05, HasLocation),
-
 
         /** For annotations on the method receiver. */
         METHOD_RECEIVER(0x06),
 
-        /** For annotations on a type argument or outer type of the method receiver. */
-        // TODO: ensure correct usage!
+        /** For annotations on a component of the method receiver. */
         METHOD_RECEIVER_COMPONENT(0x07, HasLocation),
 
-        /** For annotations on local variables. */
+        /** For annotations on a local variable. */
         LOCAL_VARIABLE(0x08),
 
-        /** For annotations on a type argument or nested array of a local. */
+        /** For annotations on a component of a local variable. */
         LOCAL_VARIABLE_COMPONENT(0x09, HasLocation),
 
-        /** For type annotations on a method return. */
+        /** For annotations on a method return type. */
         METHOD_RETURN(0x0A),
 
-        /**
-         * For annotations on a type argument or nested array of a method return
-         * type.
-         */
+        /** For annotations on a component of a method return type. */
         METHOD_RETURN_COMPONENT(0x0B, HasLocation),
 
-        /** For type annotations on a method parameter. */
+        /** For annotations on a method parameter. */
         METHOD_PARAMETER(0x0C),
 
-        /** For annotations on a type argument or nested array of a method parameter. */
+        /** For annotations on a component of a method parameter. */
         METHOD_PARAMETER_COMPONENT(0x0D, HasLocation),
 
-        /** For type annotations on a field. */
+        /** For annotations on a field. */
         FIELD(0x0E),
 
-        /** For annotations on a type argument or nested array of a field. */
+        /** For annotations on a component of a field. */
         FIELD_COMPONENT(0x0F, HasLocation),
 
         /** For annotations on a bound of a type parameter of a class. */
         CLASS_TYPE_PARAMETER_BOUND(0x10, HasBound, HasParameter),
 
         /**
-         * For annotations on a type argument or nested array of a bound of a type
+         * For annotations on a component of a bound of a type
          * parameter of a class.
          */
         CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x11, HasBound, HasLocation, HasParameter),
@@ -498,7 +498,7 @@ public class TypeAnnotation {
         METHOD_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
 
         /**
-         * For annotations on a type argument or nested array of a bound of a type
+         * For annotations on a component of a bound of a type
          * parameter of a method.
          */
         METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
@@ -506,40 +506,49 @@ public class TypeAnnotation {
         /** For annotations on the type of an "extends" or "implements" clause. */
         CLASS_EXTENDS(0x14),
 
-        /** For annotations on the inner type of an "extends" or "implements" clause. */
+        /** For annotations on the component of an "extends" or "implements" clause. */
         CLASS_EXTENDS_COMPONENT(0x15, HasLocation),
 
         /** For annotations on a throws clause in a method declaration. */
         THROWS(0x16),
 
-        // invalid location
+        // Invalid location.
         // THROWS_COMPONENT(0x17, HasLocation),
 
-        /** For type annotations on an exception parameter. */
+        /** For annotations on an exception parameter. */
         EXCEPTION_PARAMETER(0x1A),
 
-        /** For annotations on a type argument or nested array of an exception parameter. */
-        // TODO: are these allowed? Not for THROWS, so why here?
-        EXCEPTION_PARAMETER_COMPONENT(0x1B, HasLocation),
+        // Invalid location.
+        // EXCEPTION_PARAMETER_COMPONENT(0x1B, HasLocation),
 
-        /** For annotations in type arguments of object creation expressions. */
+        /** For annotations on a type argument of an object creation expression. */
         NEW_TYPE_ARGUMENT(0x18),
+
+        /** For annotations on the component of a type argument of an object creation expression. */
         NEW_TYPE_ARGUMENT_COMPONENT(0x19, HasLocation),
 
+        /** For annotations on a type argument of a method call. */
         METHOD_TYPE_ARGUMENT(0x1A),
+
+        /** For annotations on the component of a type argument of a method call. */
         METHOD_TYPE_ARGUMENT_COMPONENT(0x1B, HasLocation),
 
+        /** For annotations on a wildcard bound. */
         WILDCARD_BOUND(0x1C, HasBound),
+
+        /** For annotations on the component of a wildcard bound. */
         WILDCARD_BOUND_COMPONENT(0x1D, HasBound, HasLocation),
 
+        /** For annotations on a method type parameter declaration. */
         METHOD_TYPE_PARAMETER(0x20, HasParameter),
 
-        // invalid location
+        // Invalid location.
         // METHOD_TYPE_PARAMETER_COMPONENT(0x21, HasLocation, HasParameter),
 
+        /** For annotations on a class type parameter declaration. */
         CLASS_TYPE_PARAMETER(0x22, HasParameter),
 
-        // invalid location
+        // Invalid location.
         // CLASS_TYPE_PARAMETER_COMPONENT(0x23, HasLocation, HasParameter),
 
         /** For annotations with an unknown target. */
