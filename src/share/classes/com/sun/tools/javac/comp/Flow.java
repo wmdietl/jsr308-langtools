@@ -1746,31 +1746,6 @@ public class Flow {
             tree.underlyingType.accept(this);
         }
 
-        public void visitTypeCast(JCTypeCast tree) {
-            super.visitTypeCast(tree);
-            if (!tree.type.isErroneous()
-                && lint.isEnabled(Lint.LintCategory.CAST)
-                && types.isSameType(tree.expr.type, tree.clazz.type)
-                && !(ignoreAnnotatedCasts && containsTypeAnnotation(tree.clazz))
-                && !is292targetTypeCast(tree)) {
-                log.warning(Lint.LintCategory.CAST,
-                        tree.pos(), "redundant.cast", tree.expr.type);
-            }
-        }
-        //where
-        private boolean is292targetTypeCast(JCTypeCast tree) {
-            boolean is292targetTypeCast = false;
-            JCExpression expr = TreeInfo.skipParens(tree.expr);
-            if (expr.hasTag(APPLY)) {
-                JCMethodInvocation apply = (JCMethodInvocation)expr;
-                Symbol sym = TreeInfo.symbol(apply.meth);
-                is292targetTypeCast = sym != null &&
-                    sym.kind == MTH &&
-                    (sym.flags() & POLYMORPHIC_SIGNATURE) != 0;
-            }
-            return is292targetTypeCast;
-        }
-
         public void visitTopLevel(JCCompilationUnit tree) {
             // Do nothing for TopLevel since each class is visited individually
         }
