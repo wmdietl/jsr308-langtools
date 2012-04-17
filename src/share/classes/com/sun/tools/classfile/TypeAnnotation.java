@@ -78,7 +78,7 @@ public class TypeAnnotation {
 
     private static Position read_position(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         // Copied from ClassReader
-        int tag = (byte)cr.readUnsignedByte();  // cast to introduce signedness
+        int tag = (char)cr.readUnsignedShort();  // cast to introduce signedness
         if (!TargetType.isValidTargetTypeValue(tag))
             throw new Annotation.InvalidAnnotation("invalid type annotation target type value: " + tag);
 
@@ -189,7 +189,7 @@ public class TypeAnnotation {
 
     private static int position_length(Position pos) {
         int n = 0;
-        n += 1; // target_type
+        n += 2; // target_type
         switch (pos.type) {
         // type cast
         case TYPECAST:
@@ -437,133 +437,141 @@ public class TypeAnnotation {
         // The term "component" is used for type arguments, nested arrays, and
         // outer class types, whichever are legal in the current context.
 
-        /** For annotations on a typecast. */
-        TYPECAST(0x00),
+        /** For annotations on a class type parameter declaration. */
+        CLASS_TYPE_PARAMETER(0x00, HasParameter),
 
-        /** For annotations on a component of a typecast. */
-        TYPECAST_COMPONENT(0x01, HasLocation),
+        // Invalid location.
+        // CLASS_TYPE_PARAMETER_COMPONENT(0x01, HasLocation, HasParameter),
 
-        /** For annotations on a type test. */
-        INSTANCEOF(0x02),
+        /** For annotations on a method type parameter declaration. */
+        METHOD_TYPE_PARAMETER(0x02, HasParameter),
 
-        /** For annotations on a component of a type test. */
-        INSTANCEOF_COMPONENT(0x03, HasLocation),
+        // Invalid location.
+        // METHOD_TYPE_PARAMETER_COMPONENT(0x03, HasLocation, HasParameter),
 
-        /** For annotations on an object creation expression. */
-        NEW(0x04),
+        /** For annotations on the type of an "extends" or "implements" clause. */
+        CLASS_EXTENDS(0x10),
 
-        /** For annotations on a component of an object creation expression. */
-        NEW_COMPONENT(0x05, HasLocation),
-
-        /** For annotations on the method receiver. */
-        METHOD_RECEIVER(0x06),
-
-        /** For annotations on a component of the method receiver. */
-        METHOD_RECEIVER_COMPONENT(0x07, HasLocation),
-
-        /** For annotations on a local variable. */
-        LOCAL_VARIABLE(0x08),
-
-        /** For annotations on a component of a local variable. */
-        LOCAL_VARIABLE_COMPONENT(0x09, HasLocation),
-
-        /** For annotations on a method return type. */
-        METHOD_RETURN(0x0A),
-
-        /** For annotations on a component of a method return type. */
-        METHOD_RETURN_COMPONENT(0x0B, HasLocation),
-
-        /** For annotations on a method parameter. */
-        METHOD_PARAMETER(0x0C),
-
-        /** For annotations on a component of a method parameter. */
-        METHOD_PARAMETER_COMPONENT(0x0D, HasLocation),
-
-        /** For annotations on a field. */
-        FIELD(0x0E),
-
-        /** For annotations on a component of a field. */
-        FIELD_COMPONENT(0x0F, HasLocation),
+        /** For annotations on the component of an "extends" or "implements" clause. */
+        CLASS_EXTENDS_COMPONENT(0x11, HasLocation),
 
         /** For annotations on a bound of a type parameter of a class. */
-        CLASS_TYPE_PARAMETER_BOUND(0x10, HasBound, HasParameter),
+        CLASS_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
 
         /**
          * For annotations on a component of a bound of a type
          * parameter of a class.
          */
-        CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x11, HasBound, HasLocation, HasParameter),
+        CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
 
         /** For annotations on a bound of a type parameter of a method. */
-        METHOD_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
+        METHOD_TYPE_PARAMETER_BOUND(0x14, HasBound, HasParameter),
 
         /**
          * For annotations on a component of a bound of a type
          * parameter of a method.
          */
-        METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
+        METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x15, HasBound, HasLocation, HasParameter),
 
-        /** For annotations on the type of an "extends" or "implements" clause. */
-        CLASS_EXTENDS(0x14),
+        /** For annotations on a field. */
+        FIELD(0x16),
 
-        /** For annotations on the component of an "extends" or "implements" clause. */
-        CLASS_EXTENDS_COMPONENT(0x15, HasLocation),
+        /** For annotations on a component of a field. */
+        FIELD_COMPONENT(0x17, HasLocation),
+
+        /** For annotations on a method return type. */
+        METHOD_RETURN(0x18),
+
+        /** For annotations on a component of a method return type. */
+        METHOD_RETURN_COMPONENT(0x19, HasLocation),
+
+        /** For annotations on the method receiver. */
+        METHOD_RECEIVER(0x1A),
+
+        /** For annotations on a component of the method receiver. */
+        METHOD_RECEIVER_COMPONENT(0x1B, HasLocation),
+
+        /** For annotations on a method parameter. */
+        METHOD_PARAMETER(0x1C),
+
+        /** For annotations on a component of a method parameter. */
+        METHOD_PARAMETER_COMPONENT(0x1D, HasLocation),
 
         /** For annotations on a throws clause in a method declaration. */
-        THROWS(0x16),
+        THROWS(0x1E),
 
         // Invalid location.
-        // THROWS_COMPONENT(0x17, HasLocation),
+        // THROWS_COMPONENT(0x1F, HasLocation),
+
+        /** For annotations on a local variable. */
+        LOCAL_VARIABLE(0x80),
+
+        /** For annotations on a component of a local variable. */
+        LOCAL_VARIABLE_COMPONENT(0x81, HasLocation),
+
+        /** For annotations on a resource variable. */
+        RESOURCE_VARIABLE(0x82),
+
+        /** For annotations on a component of a resource variable. */
+        RESOURCE_VARIABLE_COMPONENT(0x83, HasLocation),
 
         /** For annotations on an exception parameter. */
-        EXCEPTION_PARAMETER(0x1A),
+        EXCEPTION_PARAMETER(0x84),
 
         // Invalid location.
-        // EXCEPTION_PARAMETER_COMPONENT(0x1B, HasLocation),
+        // EXCEPTION_PARAMETER_COMPONENT(0x85, HasLocation),
+
+        /** For annotations on a typecast. */
+        TYPECAST(0x86),
+
+        /** For annotations on a component of a typecast. */
+        TYPECAST_COMPONENT(0x87, HasLocation),
+
+        /** For annotations on a type test. */
+        INSTANCEOF(0x88),
+
+        /** For annotations on a component of a type test. */
+        INSTANCEOF_COMPONENT(0x89, HasLocation),
+
+        /** For annotations on an object creation expression. */
+        NEW(0x8A),
+
+        /** For annotations on a component of an object creation expression. */
+        NEW_COMPONENT(0x8B, HasLocation),
 
         /** For annotations on a type argument of an object creation expression. */
-        NEW_TYPE_ARGUMENT(0x18),
+        NEW_TYPE_ARGUMENT(0x8C),
 
         /** For annotations on the component of a type argument of an object creation expression. */
-        NEW_TYPE_ARGUMENT_COMPONENT(0x19, HasLocation),
+        NEW_TYPE_ARGUMENT_COMPONENT(0x8D, HasLocation),
 
         /** For annotations on a type argument of a method call. */
-        METHOD_TYPE_ARGUMENT(0x1A),
+        METHOD_TYPE_ARGUMENT(0x8E),
 
         /** For annotations on the component of a type argument of a method call. */
-        METHOD_TYPE_ARGUMENT_COMPONENT(0x1B, HasLocation),
+        METHOD_TYPE_ARGUMENT_COMPONENT(0x8F, HasLocation),
 
         /** For annotations on a wildcard bound. */
-        WILDCARD_BOUND(0x1C, HasBound),
+        // TODO remove
+        WILDCARD_BOUND(0x98, HasBound),
 
         /** For annotations on the component of a wildcard bound. */
-        WILDCARD_BOUND_COMPONENT(0x1D, HasBound, HasLocation),
-
-        /** For annotations on a method type parameter declaration. */
-        METHOD_TYPE_PARAMETER(0x20, HasParameter),
-
-        // Invalid location.
-        // METHOD_TYPE_PARAMETER_COMPONENT(0x21, HasLocation, HasParameter),
-
-        /** For annotations on a class type parameter declaration. */
-        CLASS_TYPE_PARAMETER(0x22, HasParameter),
-
-        // Invalid location.
-        // CLASS_TYPE_PARAMETER_COMPONENT(0x23, HasLocation, HasParameter),
+        // TODO remove
+        WILDCARD_BOUND_COMPONENT(0x99, HasBound, HasLocation),
 
         /** For annotations with an unknown target. */
-        UNKNOWN(-1);
+        UNKNOWN(0xFFFF);
 
-        static final int MAXIMUM_TARGET_TYPE_VALUE = 0x22;
+        private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x9A;
 
         private final int targetTypeValue;
         private Set<TargetAttribute> flags;
 
         TargetType(int targetTypeValue, TargetAttribute... attrs) {
-            if (targetTypeValue < Byte.MIN_VALUE
-                || targetTypeValue > Byte.MAX_VALUE)
-                throw new AssertionError("attribute type value needs to be a byte: " + targetTypeValue);
-            this.targetTypeValue = (byte)targetTypeValue;
+            if (targetTypeValue < Character.MIN_VALUE
+                || targetTypeValue > Character.MAX_VALUE)
+                throw new AssertionError("Attribute type value needs to be a char: " + targetTypeValue);
+            this.targetTypeValue = (char)targetTypeValue;
             this.flags = EnumSet.noneOf(TargetAttribute.class);
             for (TargetAttribute attr : attrs)
                 this.flags.add(attr);
@@ -619,7 +627,7 @@ public class TypeAnnotation {
             TargetType[] targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
             TargetType[] alltargets = values();
             for (TargetType target : alltargets)
-                if (target.targetTypeValue >= 0)
+                if (target.targetTypeValue != UNKNOWN.targetTypeValue)
                     targets[target.targetTypeValue] = target;
             for (int i = 0; i <= MAXIMUM_TARGET_TYPE_VALUE; ++i)
                 if (targets[i] == null)
@@ -631,7 +639,7 @@ public class TypeAnnotation {
             if (targets == null)
                 targets = buildTargets();
 
-            if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+            if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
                 return true;
 
             return (tag >= 0 && tag < targets.length);
@@ -641,7 +649,7 @@ public class TypeAnnotation {
             if (targets == null)
                 targets = buildTargets();
 
-            if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+            if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
                 return UNKNOWN;
 
             if (tag < 0 || tag >= targets.length)
