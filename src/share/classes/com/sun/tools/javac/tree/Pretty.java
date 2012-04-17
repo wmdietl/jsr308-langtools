@@ -1220,8 +1220,8 @@ public class Pretty extends JCTree.Visitor {
                     printTypeAnnotations(atype.annotations);
                 }
             }
-            if (!elem.hasTag(TYPEARRAY)) break;
             print("[]");
+            if (!elem.hasTag(TYPEARRAY)) break;
             tree = (JCArrayTypeTree) elem;
         }
     }
@@ -1328,7 +1328,10 @@ public class Pretty extends JCTree.Visitor {
                 printBaseElementType(tree);
                 printTypeAnnotations(tree.annotations);
                 print("[]");
-                printBrackets(array);
+                JCExpression elem = array.elemtype;
+                if (elem.hasTag(TYPEARRAY)) {
+                    printBrackets((JCArrayTypeTree) elem);
+                }
             } else {
                 printTypeAnnotations(tree.annotations);
                 printExpr(tree.underlyingType);
