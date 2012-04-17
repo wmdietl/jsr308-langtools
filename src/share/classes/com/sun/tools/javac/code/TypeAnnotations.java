@@ -744,7 +744,7 @@ public class TypeAnnotations {
                 /* TODO: separateAnnotationsKinds is never called for local variables.
                  * The call in com.sun.tools.javac.code.TypeAnnotations.AnnotationsKindSeparator.visitVarDef(JCVariableDecl)
                  * is in dead code.
-                 * This leads to annotations on local variables to not be GENERIC_OR_ARRAY for nested types.
+                 * This leads to annotations on local variables to not be XXX_COMPONENT for nested types.
                  * When I tried enabling the code in AnnotationsKindSeparator I ran into problems with
                  * duplicate annotations. For now use typeWithAnnotations here and try to understand
                  * the overall picture better later.
