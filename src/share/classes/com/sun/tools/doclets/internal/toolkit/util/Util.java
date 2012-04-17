@@ -706,7 +706,7 @@ public class Util {
      * {@code elemType} element type.
      *
      * @param annotationDoc the annotationDoc to check
-     * @param elemType  the targetted elemType
+     * @param elemType  the targeted elemType
      * @return true if annotationDoc is a declaration annotation
      */
     public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc, ElementType elemType) {
