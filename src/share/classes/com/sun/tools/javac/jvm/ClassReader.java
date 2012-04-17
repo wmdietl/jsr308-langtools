@@ -1411,7 +1411,7 @@ public class ClassReader implements Completer {
     }
 
     TypeAnnotationPosition readPosition() {
-        byte tag = nextByte();
+        char tag = nextChar();
 
         if (!TargetType.isValidTargetTypeValue(tag))
             throw this.badClassFile("bad.type.annotation.value", tag);

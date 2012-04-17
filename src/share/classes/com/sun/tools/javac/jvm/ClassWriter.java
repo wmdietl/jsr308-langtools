@@ -893,7 +893,7 @@ public class ClassWriter extends ClassFile {
     }
 
     void writePosition(TypeAnnotationPosition p) {
-        databuf.appendByte(p.type.targetTypeValue());
+        databuf.appendChar(p.type.targetTypeValue());
         switch (p.type) {
         // type cast
         case TYPECAST:
