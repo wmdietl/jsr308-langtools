@@ -676,7 +676,7 @@ public class Util {
     }
 
     private static boolean isDeclarationTarget(AnnotationDesc targetAnno, ElementType elemType) {
-        assert elemType != null && elemType != ElementType.TYPE_USE;
+        assert elemType != null && elemType != getElementTypeTypeUse();
         // The error recovery steps here are analogous to TypeAnnotations
         ElementValuePair[] elems = targetAnno.elementValues();
         if (elems == null
@@ -710,7 +710,7 @@ public class Util {
      * @return true if annotationDoc is a declaration annotation
      */
     public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc, ElementType elemType) {
-        if (elemType == null || elemType == ElementType.TYPE_USE)
+        if (elemType == null || elemType == getElementTypeTypeUse())
             return false;
         AnnotationDesc[] annotationDescList = annotationDoc.annotations();
         for (int i = 0; i < annotationDescList.length; i++) {
@@ -720,7 +720,7 @@ public class Util {
             }
         }
         // Annotations with no target are treated as declaration as well
-        return elemType == ElementType.TYPE_USE ? false : true;
+        return elemType == getElementTypeTypeUse() ? false : true;
     }
 
     /**
@@ -932,5 +932,17 @@ public class Util {
             }
         }
         return false;
+    }
+
+    /**
+     * Reflectively return the ElementType.TYPE_USE constant.
+     * This is necessary to prevent a bootstrap problem.
+     *
+     * @return ElementType.TYPE_USE
+     * @since 1.8
+     */
+    public static ElementType getElementTypeTypeUse() {
+        // return ElementType.TYPE_USE;
+        return ElementType.valueOf("TYPE_USE");
     }
 }
