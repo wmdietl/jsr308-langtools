@@ -41,19 +41,30 @@ mylib="$mydir/../lib"
 # Assume that the jar file being invoked lists all the necessary langtools
 # jar files in its Class-Path manifest entry, so there is no need to search
 # dependent jar files for additional dependencies.
+# Also add the current classpath (at the end).  This permits finding classes
+# used by annotation processors, for example.  It doesn't work to just put
+# these in the regular classpath.
 
 if [ "$LANGTOOLS_USE_BOOTCLASSPATH" != "no" ]; then
    cp=`unzip -c "$mylib/#PROGRAM#.jar" META-INF/MANIFEST.MF |
        grep "Class-Path:" |
-       sed -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1#PS#|g'`
+       sed -e 's|\r||' -e 's|Class-Path: *||' -e 's|\([a-z]*\.jar\) *|'"$mylib"'/\1#PS#|g'`
    bcp="$mylib/#PROGRAM#.jar#PS#$cp"
 fi
 
 # tools currently assumes that assertions are enabled in the launcher
 ea=-ea:com.sun.tools...
 
+# If user supplies no explicit -cp argument, use this, after the -jar
+# option (i.e., as an option to #PROGRAM# and not to java).
+# Otherwise, #PROGRAM# can't find classes on the classpath.
+cpOpt="-classpath '${CLASSPATH:-.}'"
+
 # Any parameters starting with -J are passed to the JVM.
 # All other parameters become parameters of #PROGRAM#.
+# Note that any -J parameters that appear in an argument file (indirectly
+# referenced on the command line with the "@filename" command-line syntax)
+# are sent to #PROGRAM# even though they should be sent to the JVM.
 
 # Separate out -J* options for the JVM
 # Unset IFS and use newline as arg separator to preserve spaces in args
@@ -64,12 +75,20 @@ nl='
 for i in "$@" ; do
    IFS=
    case $i in
-   -J* )       javaOpts=$javaOpts$nl`echo $i | sed -e 's/^-J//'` ;;
-   *   )       toolOpts=$toolOpts$nl$i ;;
+   -Xbootclasspath/p:* ) bcp=`echo $i | sed -e 's/^-Xbootclasspath.p://'`:${bcp} ;;
+   -J-Xbootclasspath/p:* ) bcp=`echo $i | sed -e 's/^-J-Xbootclasspath.p://'`:${bcp} ;;
+   -J* )       javaOpts=$javaOpts$nl"'"`echo $i | sed -e 's/^-J//'`"'" ;;
+   *   )       toolOpts=$toolOpts$nl"'"$i"'" ;;
    esac
+   if [ "$i" = "-cp" ]; then
+     cpOpt="";
+   fi
+   if [ "$i" = "-classpath" ]; then
+     cpOpt="";
+   fi
    IFS="$saveIFS"
 done
 unset DUALCASE
 
 IFS=$nl
-"#TARGET_JAVA#" "${bcp:+-Xbootclasspath/p:"$bcp"}" ${ea} ${javaOpts} -jar "${mylib}/#PROGRAM#.jar" ${toolOpts}
+eval "#TARGET_JAVA#" "${bcp:+-Xbootclasspath/p:"$bcp"}" ${ea} ${javaOpts} -jar "${mylib}/#PROGRAM#.jar" ${cpOpt} ${toolOpts}
