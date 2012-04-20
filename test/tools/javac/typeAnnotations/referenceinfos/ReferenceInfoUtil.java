@@ -273,8 +273,7 @@ public class ReferenceInfoUtil {
                 && areEquals(p1.lvarIndex, p2.lvarIndex)
                 && areEquals(p1.bound_index, p2.bound_index)
                 && areEquals(p1.parameter_index, p2.parameter_index)
-                && areEquals(p1.type_index, p2.type_index)
-                && areEquals(p1.wildcard_position, p2.wildcard_position));
+                && areEquals(p1.type_index, p2.type_index));
     }
 
     private static TypeAnnotation findAnnotation(String name, List<TypeAnnotation> annotations, ClassFile cf) throws InvalidIndex, UnexpectedEntry {

@@ -63,9 +63,6 @@ public class TypeAnnotationPosition implements Cloneable {
     // For class extends, implements, and throws classes
     public int type_index = Integer.MIN_VALUE;
 
-    // For wildcards
-    public TypeAnnotationPosition wildcard_position = null;
-
     public TypeAnnotationPosition() { }
     public TypeAnnotationPosition(TargetType type) {
         this.type = type;
@@ -125,12 +122,6 @@ public class TypeAnnotationPosition implements Cloneable {
             sb.append(parameter_index);
             sb.append(", bound_index = ");
             sb.append(bound_index);
-            break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            sb.append(", wild_card = ");
-            sb.append(wildcard_position);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
@@ -196,11 +187,7 @@ public class TypeAnnotationPosition implements Cloneable {
      * @return true if the target has not been optimized away
      */
     public boolean emitToClassfile() {
-        if (type == TargetType.WILDCARD_BOUND
-            || type == TargetType.WILDCARD_BOUND_COMPONENT)
-            return wildcard_position.emitToClassfile();
-        else
-            return !type.isLocal() || isValidOffset;
+        return !type.isLocal() || isValidOffset;
     }
 
     public TypeAnnotationPosition clone() {

@@ -143,12 +143,6 @@ public class AnnotationWriter extends BasicWriter {
             print(", bound_index=");
             print(pos.bound_index);
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            print(", wild_card=");
-            print(pos.wildcard_position);
-            break;
         // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:

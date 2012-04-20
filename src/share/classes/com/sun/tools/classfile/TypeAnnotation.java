@@ -130,12 +130,6 @@ public class TypeAnnotation {
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            position.wildcard_position = read_position(cr);
-            break;
-        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:
             int in = cr.readUnsignedShort();
@@ -229,11 +223,6 @@ public class TypeAnnotation {
             n += 1; // parameter_index
             n += 1; // bound_index
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            n += position_length(pos.wildcard_position);
-            break;
         // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:
@@ -306,9 +295,6 @@ public class TypeAnnotation {
         // For class extends, implements, and throws classes
         public int type_index = Integer.MIN_VALUE;
 
-        // For wildcards
-        public Position wildcard_position = null;
-
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
@@ -363,12 +349,6 @@ public class TypeAnnotation {
                 sb.append(parameter_index);
                 sb.append(", bound_index = ");
                 sb.append(bound_index);
-                break;
-            // wildcard bound
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_COMPONENT:
-                sb.append(", wild_card = ");
-                sb.append(wildcard_position);
                 break;
             // class extends or implements clause
             case CLASS_EXTENDS:
@@ -550,14 +530,6 @@ public class TypeAnnotation {
 
         /** For annotations on the component of a type argument of a method call. */
         METHOD_TYPE_ARGUMENT_COMPONENT(0x8F, HasLocation),
-
-        /** For annotations on a wildcard bound. */
-        // TODO remove
-        WILDCARD_BOUND(0x98, HasBound),
-
-        /** For annotations on the component of a wildcard bound. */
-        // TODO remove
-        WILDCARD_BOUND_COMPONENT(0x99, HasBound, HasLocation),
 
         /** For annotations with an unknown target. */
         UNKNOWN(0xFFFF);

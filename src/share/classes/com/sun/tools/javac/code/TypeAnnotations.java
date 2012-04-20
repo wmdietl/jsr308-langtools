@@ -460,17 +460,10 @@ public class TypeAnnotations {
 
                 case EXTENDS_WILDCARD:
                 case SUPER_WILDCARD: {
-                    p.type = TargetType.WILDCARD_BOUND;
+                    // Annotations in wildcard bounds always add a 0
+                    p.location = p.location.prepend(0);
                     List<JCTree> newPath = path.tail;
-
-                    TypeAnnotationPosition wildcard =
-                        resolveFrame(newPath.head, newPath.tail.head, newPath,
-                                new TypeAnnotationPosition(), names);
-                    if (!wildcard.location.isEmpty())
-                        wildcard.type = wildcard.type.getGenericComplement();
-                    p.wildcard_position = wildcard;
-                    p.pos = frame.pos;
-                    return p;
+                    return resolveFrame(newPath.head, newPath.tail.head, newPath, p, names);
                 }
 
                 case MEMBER_SELECT: {

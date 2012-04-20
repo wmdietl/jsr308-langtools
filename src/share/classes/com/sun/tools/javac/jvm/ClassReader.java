@@ -1465,11 +1465,6 @@ public class ClassReader implements Completer {
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            position.wildcard_position = readPosition();
-            break;
         // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:

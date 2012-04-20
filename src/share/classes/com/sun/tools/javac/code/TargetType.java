@@ -168,14 +168,6 @@ public enum TargetType {
     /** For annotations on the component of a type argument of a method call. */
     METHOD_TYPE_ARGUMENT_COMPONENT(0x8F, HasLocation, IsLocal),
 
-    /** For annotations on a wildcard bound. */
-    // TODO remove
-    WILDCARD_BOUND(0x98, HasBound),
-
-    /** For annotations on the component of a wildcard bound. */
-    // TODO remove
-    WILDCARD_BOUND_COMPONENT(0x99, HasBound, HasLocation),
-
     /** For annotations with an unknown target. */
     UNKNOWN(0xFFFF);
 

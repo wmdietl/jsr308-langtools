@@ -55,6 +55,33 @@ public class MethodParameters {
     }
 
     @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 0 }, paramIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 0, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1 }, paramIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0, 0, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0, 0, 0, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0, 0, 1 }, paramIndex = 0),
+        @TADescription(annotation = "TJ", type = METHOD_PARAMETER_COMPONENT,
+                genericLocation = { 1, 0, 0, 1, 0 }, paramIndex = 0)
+    })
+    public String methodParamAsWildcard() {
+        return "void test(@TA Map<@TB ? extends @TC String," +
+                "                 @TD List<@TE ? extends @TF Map<@TG ? super @TH String," +
+                "                                                @TI ? extends @TJ Object>>> a) { }";
+    }
+
+    @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
                 genericLocation = { 0 }, paramIndex = 1),

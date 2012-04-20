@@ -1951,13 +1951,10 @@ public class Code {
             return;
         for (Attribute.TypeCompound ta : lv.sym.typeAnnotations) {
             TypeAnnotationPosition p = ta.position;
-            while (p != null) {
-                p.lvarOffset = new int[] { (int)lv.start_pc };
-                p.lvarLength = new int[] { (int)lv.length };
-                p.lvarIndex = new int[] { (int)lv.reg };
-                p.isValidOffset = true;
-                p = p.wildcard_position;
-            }
+            p.lvarOffset = new int[] { (int)lv.start_pc };
+            p.lvarLength = new int[] { (int)lv.length };
+            p.lvarIndex = new int[] { (int)lv.reg };
+            p.isValidOffset = true;
         }
     }
 

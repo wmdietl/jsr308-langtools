@@ -758,11 +758,6 @@ public class ClassWriter {
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
-            // wildcard bound
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_COMPONENT:
-                write(p.wildcard_position, out);
-                break;
             // class extends or implements clause
             case CLASS_EXTENDS:
             case CLASS_EXTENDS_COMPONENT:

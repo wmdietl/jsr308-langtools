@@ -934,11 +934,6 @@ public class ClassWriter extends ClassFile {
             databuf.appendByte(p.parameter_index);
             databuf.appendByte(p.bound_index);
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_COMPONENT:
-            writePosition(p.wildcard_position);
-            break;
         // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:
