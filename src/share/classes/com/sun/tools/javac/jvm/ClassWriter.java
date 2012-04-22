@@ -970,7 +970,7 @@ public class ClassWriter extends ClassFile {
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("unknown position: " + p);
+            throw new AssertionError("Unknown target type for position: " + p);
         }
 
         // Append location data for generics/arrays.

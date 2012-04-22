@@ -391,7 +391,7 @@ public class TypeAnnotation {
             case UNKNOWN:
                 break;
             default:
-                throw new AssertionError("unknown type: " + type);
+                throw new AssertionError("Unknown target type: " + type);
             }
 
             // Append location data for generics/arrays.

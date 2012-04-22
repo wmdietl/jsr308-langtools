@@ -186,7 +186,7 @@ public class AnnotationWriter extends BasicWriter {
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("unknown type: " + pos.type);
+            throw new AssertionError("Unknown target type for position: " + pos);
         }
 
         // Append location data for generics/arrays.
