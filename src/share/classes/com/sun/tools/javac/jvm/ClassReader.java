@@ -1414,7 +1414,7 @@ public class ClassReader implements Completer {
         char tag = nextChar();
 
         if (!TargetType.isValidTargetTypeValue(tag))
-            throw this.badClassFile("bad.type.annotation.value", tag);
+            throw this.badClassFile("bad.type.annotation.value", "0x" + Integer.toHexString(tag));
 
         TypeAnnotationPosition position = new TypeAnnotationPosition();
         TargetType type = TargetType.fromTargetTypeValue(tag);
@@ -1501,7 +1501,7 @@ public class ClassReader implements Completer {
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("unknown type: " + position);
+            throw new AssertionError("Unknown target type for position: " + position);
         }
 
         if (type.hasLocation()) {
