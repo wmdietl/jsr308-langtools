@@ -333,11 +333,19 @@ public class TypeAnnotations {
                         p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
                         p.parameter_index = clazz.typarams.indexOf(path.tail.head);
                         p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
+                        if (((JCTypeParameter)frame).bounds.get(0).type.isInterface()) {
+                            // Account for an implicit Object as bound 0
+                            p.bound_index += 1;
+                        }
                     } else if (path.tail.tail.head.hasTag(JCTree.Tag.METHODDEF)) {
                         JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
                         p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
                         p.parameter_index = method.typarams.indexOf(path.tail.head);
                         p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
+                        if (((JCTypeParameter)frame).bounds.get(0).type.isInterface()) {
+                            // Account for an implicit Object as bound 0
+                            p.bound_index += 1;
+                        }
                     } else {
                         throw new AssertionError("Could not determine position of tree " + tree +
                                 " within frame " + frame);

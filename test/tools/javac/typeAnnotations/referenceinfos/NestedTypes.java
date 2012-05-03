@@ -538,9 +538,9 @@ public class NestedTypes {
     @TADescriptions({
         // The raw type arguments of Entry still count!
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {2}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {2}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
-                paramIndex = 0, boundIndex = 0)
+                paramIndex = 0, boundIndex = 1)
     })
     public String testTypeparam1() {
         return "<X extends @TA Map.@TB Entry> X test() { return null; }";
@@ -548,9 +548,9 @@ public class NestedTypes {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {2}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {2}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
-                paramIndex = 0, boundIndex = 0)
+                paramIndex = 0, boundIndex = 1)
     })
     public String testTypeparam2() {
         return "<X extends @TA Map<String,String>.@TB Entry<String,String>> X test() { return null; }";
@@ -588,27 +588,27 @@ public class NestedTypes {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 3}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 3}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 2}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 2}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 2, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 2, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 2, 0, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 2, 0, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TI", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 1, 1}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 1, 1}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TJ", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TK", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 0}, paramIndex = 0, boundIndex = 0)
+                genericLocation = {0, 0}, paramIndex = 0, boundIndex = 1)
     })
     public String testTypeparam4() {
         return "class Outer {\n" +
@@ -622,25 +622,25 @@ public class NestedTypes {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 3}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 3}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 3, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 3, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 3, 1}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 3, 1}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 3, 1, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 3, 1, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 2}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 2}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 2, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 2, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 2, 0, 0, 1}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 2, 0, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 2, 0, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TI", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0, 2, 0, 0, 0}, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TJ", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT,
-                genericLocation = {0}, paramIndex = 0, boundIndex = 0),
+                genericLocation = {0}, paramIndex = 0, boundIndex = 1),
     })
     public String testTypeparam5() {
         return "class GOuter<A, B> {\n" +

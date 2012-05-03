@@ -39,19 +39,29 @@ public class MethodTypeParam {
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularClass() {
-        return "<@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> void test() { }";
+        return "<@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> void test() { }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "A", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "C", type = METHOD_TYPE_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
+    })
+    public String regularClass2() {
+        return "<@A K extends @TB Date, @C V extends @TE Cloneable> void test() { }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularClassParameterized() {
-        return "<K extends @TA Map<String, @TB String>, V extends @TF Object& @TC List<@TD List<@TE Object>>> void test() { }";
+        return "<K extends @TA Map<String, @TB String>, V extends @TF Object & @TC List<@TD List<@TE Object>>> void test() { }";
     }
 
     @TADescriptions({
@@ -62,19 +72,31 @@ public class MethodTypeParam {
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String abstractClass() {
-        return "abstract class Test { abstract <@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> void test(); }";
+        return "abstract class Test { abstract <@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> void test(); }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
-        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0)
     })
     public String abstractClassParameterized() {
-        return "abstract class Test { abstract <K extends @TA Map<String, @TB String>, V extends @TF Object& @TC List<@TD List<@TE Object>>> void test(); }";
+        return "abstract class Test { abstract <K extends @TG Object & @TA Map<String, @TB String>, V extends @TF Object & @TC List<@TD List<@TE Object>>> void test(); }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0})
+    })
+    public String abstractClassParameterized2() {
+        return "abstract class Test { abstract <K extends @TA Map<String, @TB String>, V extends @TC List<@TD List<@TE Object>>> void test(); }";
     }
 
     @TADescriptions({
@@ -85,21 +107,35 @@ public class MethodTypeParam {
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularInterface() {
-        return "interface Test { <@A K extends @TB Date, @C V extends @TD Object& @TE Cloneable> void test(); }";
+        return "interface Test { <@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> void test(); }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 0, genericLocation = {1}),
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
         @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
         @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "A", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "B", type = METHOD_TYPE_PARAMETER, paramIndex = 1)
     })
     public String regularInterfaceParameterized() {
-        return "interface Test { <@A K extends @TA Map<String, @TB String>, @B V extends @TF Object& @TC List<@TD List<@TE Object>>> void test(); }";
+        return "interface Test { <@A K extends @TG Object & @TA Map<String, @TB String>, @B V extends @TF Object & @TC List<@TD List<@TE Object>>> void test(); }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "A", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "B", type = METHOD_TYPE_PARAMETER, paramIndex = 1)
+    })
+    public String regularInterfaceParameterized2() {
+        return "interface Test { <@A K extends @TA Map<String, @TB String>, @B V extends @TC List<@TD List<@TE Object>>> void test(); }";
     }
 
     @TADescription(annotation = "TA", type = METHOD_RETURN)
