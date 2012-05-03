@@ -27,7 +27,7 @@
  * @bug 6843077
  * @summary random tests for new locations
  * @author Matt Papi
- * @compile/fail/ref=BasicTest.out -XDrawDiagnostics BasicTest.java
+ * @compile -source 1.8 BasicTest.java
  */
 
 import java.util.*;
@@ -38,8 +38,6 @@ import java.io.*;
 @interface C {}
 @interface D {}
 
-//308: Test inverted to verify that type annotations can not be parsed yet.
-
 /**
  * Tests basic JSR 308 parser functionality. We don't really care about what
  * the parse tree looks like, just that these annotations can be parsed.
@@ -48,8 +46,7 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
     void test() {
 
-        // Handle annotated class literals/cast types
-        Class<?> c = @A String.class;
+        // Handle annotated cast types
         Object o = (@A Object) "foo";
 
         // Handle annotated "new" expressions (except arrays; see ArrayTest)
@@ -57,21 +54,23 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
         boolean b = o instanceof @A Object;
 
-
         @A Map<@B List<@C String>, @D String> map =
             new @A HashMap<@B List<@C String>, @D String>();
 
-        Class<? extends @A String> c2 = @A String.class;
+        Class<? extends @A String> c2 = null;
     }
 
     // Handle receiver annotations
     // Handle annotations on a qualified identifier list
-    void test2() @C @D throws @A IllegalArgumentException, @B IOException {
+    void test2(@C @D BasicTest<T> this) throws @A IllegalArgumentException, @B IOException {
 
     }
 
     // Handle annotations on a varargs element type
-    void test3(Object @A... objs) {
+    void test3(@B Object @A... objs) { }
 
-    }
+    void test4(@B Class<@C ?> @A ... clz) { }
+    
+    
+    // TODO: add more tests... nested classes, etc.
 }

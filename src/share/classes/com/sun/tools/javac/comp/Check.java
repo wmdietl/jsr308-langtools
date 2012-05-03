@@ -579,6 +579,7 @@ public class Check {
         if (!tree.type.isErroneous() &&
             (env.info.lint == null || env.info.lint.isEnabled(Lint.LintCategory.CAST))
             && types.isSameType(tree.expr.type, tree.clazz.type)
+            && !(ignoreAnnotatedCasts && containsTypeAnnotation(tree.clazz))
             && !is292targetTypeCast(tree)) {
             log.warning(Lint.LintCategory.CAST,
                     tree.pos(), "redundant.cast", tree.expr.type);
@@ -598,9 +599,24 @@ public class Check {
                 return is292targetTypeCast;
             }
 
+            /* Utility methods for ignoring type-annotated casts lint checking. */
+            private static final boolean ignoreAnnotatedCasts = true;
 
+            private static class AnnotationFinder extends TreeScanner {
+                public boolean foundTypeAnno = false;
+                public void visitAnnotation(JCAnnotation tree) {
+                    foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
+                }
+            }
 
-//where
+            private boolean containsTypeAnnotation(JCTree e) {
+                AnnotationFinder finder = new AnnotationFinder();
+                finder.scan(e);
+                return finder.foundTypeAnno;
+            }
+            /* End utility methods for ignoring type-annotated casts. */
+
+        //where
         /** Is type a type variable, or a (possibly multi-dimensional) array of
          *  type variables?
          */
@@ -1298,10 +1314,19 @@ public class Check {
                 // looking at a static member type.  However, the
                 // qualifying expression is parameterized.
                 log.error(tree.pos(), "cant.select.static.class.from.param.type");
+            } else if (tree.selected.type.tsym.isStatic() &&
+                tree.selected.type.typeAnnotations.nonEmpty()) {
+                // Enclosing static classes cannot have type annotations.
+                log.error(tree.pos(), "cant.annotate.static.class");
             } else {
                 // otherwise validate the rest of the expression
                 tree.selected.accept(this);
             }
+        }
+
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            tree.underlyingType.accept(this);
         }
 
         /** Default visitor method: do nothing.
@@ -2479,6 +2504,14 @@ public class Check {
             validateAnnotation(a, s);
     }
 
+    /** Check the type annotations.
+     */
+    public void validateTypeAnnotations(List<JCTypeAnnotation> annotations, boolean isTypeParameter) {
+        if (skipAnnotations) return;
+        for (JCTypeAnnotation a : annotations)
+            validateTypeAnnotation(a, isTypeParameter);
+    }
+
     /** Check an annotation of a symbol.
      */
     public void validateAnnotation(JCAnnotation a, Symbol s) {
@@ -2491,6 +2524,15 @@ public class Check {
             if (!isOverrider(s))
                 log.error(a.pos(), "method.does.not.override.superclass");
         }
+    }
+
+    public void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
+        if (a.type == null)
+            throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
+        validateAnnotationTree(a);
+
+        if (!isTypeAnnotation(a, isTypeParameter))
+            log.error(a.pos(), "annotation.type.not.applicable");
     }
 
     /** Is s a method symbol that overrides a method in a superclass? */
@@ -2507,6 +2549,25 @@ public class Check {
                 if (!e.sym.isStatic() && m.overrides(e.sym, owner, types, true))
                     return true;
             }
+        }
+        return false;
+    }
+
+    /** Is the annotation applicable to type annotations? */
+    boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
+        Attribute.Compound atTarget =
+            a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
+        if (atTarget == null) return true;
+        Attribute atValue = atTarget.member(names.value);
+        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
+        Attribute.Array arr = (Attribute.Array) atValue;
+        for (Attribute app : arr.values) {
+            if (!(app instanceof Attribute.Enum)) return true; // recovery
+            Attribute.Enum e = (Attribute.Enum) app;
+            if (!isTypeParameter && e.value.name == names.TYPE_USE)
+                return true;
+            else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
+                return true;
         }
         return false;
     }
