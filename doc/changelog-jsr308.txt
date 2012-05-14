@@ -1,6 +1,11 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.2.7, 14 May 2012
+
+No changes in functionality.
+
+----------------------------------------------------------------------
 Version 1.2.6, 18 Mar 2012
 
 Use the newly added multiple task listeners.
