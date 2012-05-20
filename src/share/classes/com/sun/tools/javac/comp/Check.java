@@ -2612,7 +2612,8 @@ public class Check {
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
-                       s.type.getReturnType().tag != VOID))
+                       s.type.getReturnType().tag != VOID) ||
+                      (s.kind == MTH && s.isConstructor()))
                     return true;
                 }
             else if (e.value.name == names.TYPE_PARAMETER)
