@@ -100,6 +100,14 @@ public class MethodTypeParam {
     }
 
     @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
+    })
+    public String abstractClassParameterized3() {
+        return "abstract class Test { abstract <K extends @TA List<String>, V extends @TB List<Object>> void test(); }";
+    }
+
+    @TADescriptions({
         @TADescription(annotation = "A", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "C", type = METHOD_TYPE_PARAMETER, paramIndex = 1),
@@ -158,5 +166,51 @@ public class MethodTypeParam {
             paramIndex = 0, genericLocation = {0})
     public String useInParam2() {
         return "class Test { void m(Class<@TA Object> p) { throw new RuntimeException(); } }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 2),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
+    })
+    public String useInParam3() {
+        return "interface IA {} " +
+               "interface IB<XB> {} " +
+               "interface IC<XC> {} " +
+               "class Test { <T extends @TA IB<IA> & @TB IC<IA>> void m(@TC T p) { throw new RuntimeException(); } }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 2),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
+    })
+    public String useInParam4() {
+        return "class Test {" +
+               "  interface IA {} " +
+               "  interface IB<XB> {} " +
+               "  interface IC<XC> {} " +
+               "  <T extends @TA IB<IA> & @TB IC<IA>> void m(@TC T p) { throw new RuntimeException(); } }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 2,
+                genericLocation = {1}),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 2,
+                genericLocation = {0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 3),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 3,
+                genericLocation = {1}),
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 3,
+                genericLocation = {0})
+    })
+    public String useInParam5() {
+        return "class Test {" +
+               "  interface IA {} " +
+               "  interface IB<XB> {} " +
+               "  interface IC<XC> {} " +
+               "  interface ID<XD> {} " +
+               "  <T extends Test. @TA IB<IA> & @TB Test.IC<@TC IA> & @TD Test. @TE ID<@TF IA>> void m(T p) { throw new RuntimeException(); } }";
     }
 }
