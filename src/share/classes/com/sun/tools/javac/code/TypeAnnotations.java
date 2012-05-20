@@ -434,7 +434,9 @@ public class TypeAnnotations {
                                 }
                             }
 
-                            if (tooksteps>=0 && isWithin(tree, realframe)) {
+                            if (tooksteps>0 && isWithin(tree, realframe)) {
+                                // If tooksteps==0, the annotation is on an inner class, but no
+                                // outer class is specified. Therefore, nothing is to do.
                                 List<TypeSymbol> typeparams = utype.asElement().getTypeParameters();
                                 if (typeparams.nonEmpty()) {
                                     // The "top-level" generics are an offset for the index
