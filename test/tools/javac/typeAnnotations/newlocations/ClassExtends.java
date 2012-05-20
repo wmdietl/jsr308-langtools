@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @bug 6843077
@@ -36,5 +38,8 @@ interface MyInterface extends @A ParameterizedInterface<@A String>,
 
 class ParameterizedClass<K> {}
 interface ParameterizedInterface<K> {}
+
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B {}

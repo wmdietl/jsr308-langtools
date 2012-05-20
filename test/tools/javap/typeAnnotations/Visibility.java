@@ -75,25 +75,31 @@ public class Visibility {
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+        out.println("import java.lang.annotation.ElementType;");
         out.println("import java.lang.annotation.Retention;");
         out.println("import java.lang.annotation.RetentionPolicy;");
+        out.println("import java.lang.annotation.Target;");
         out.println("abstract class Test { ");
         // visible annotations: RUNTIME
         out.println("  @Retention(RetentionPolicy.RUNTIME)");
+        out.println("  @Target(ElementType.TYPE_USE)");
         out.println("  @interface A { }");
         out.println("  void visible(@A Test this) { }");
 
         // invisible annotations: CLASS
         out.println("  @Retention(RetentionPolicy.CLASS)");
+        out.println("  @Target(ElementType.TYPE_USE)");
         out.println("  @interface B { }");
         out.println("  void invisible(@B Test this) { }");
 
         // source annotations
         out.println("  @Retention(RetentionPolicy.SOURCE)");
+        out.println("  @Target(ElementType.TYPE_USE)");
         out.println("  @interface C { }");
         out.println("  void source(@C Test this) { }");
 
         // default visibility: CLASS
+        out.println("  @Target(ElementType.TYPE_USE)");
         out.println("  @interface D { }");
         out.println("  void def(@D Test this) { }");
         out.println("}");

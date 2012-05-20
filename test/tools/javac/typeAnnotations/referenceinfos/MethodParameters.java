@@ -119,7 +119,7 @@ public class MethodParameters {
         return "void test(@Decl String a) { }";
     }
 
-    @TADescription(annotation = "A", type = METHOD_PARAMETER, paramIndex = 0)
+    @TADescriptions({})
     public String methodWithNoTargetAnno() {
         return "void test(@A String a) { }";
     }

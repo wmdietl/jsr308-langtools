@@ -21,6 +21,7 @@
  * questions.
  */
 
+import java.lang.annotation.*;
 import java.util.Map;
 
 /*
@@ -180,22 +181,39 @@ class Test4 {
 class MyList<K> { }
 
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface C { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface D { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface E { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface F { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface G { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface H { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface I { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface J { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface K { }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Av { String value(); }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Bv { String value(); }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Cv { String value(); }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Dv { String value(); }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Ev { String value(); }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface Fv { String value(); }
 

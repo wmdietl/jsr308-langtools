@@ -947,7 +947,9 @@ public class TypeAnnotations {
     private AnnotationType annotationType(Compound a, Symbol s) {
         Attribute.Compound atTarget =
             a.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return inferTargetMetaInfo(a, s);
+        if (atTarget == null) {
+            return inferTargetMetaInfo(a, s);
+        }
         Attribute atValue = atTarget.member(names.value);
         if (!(atValue instanceof Attribute.Array)) {
             System.out.printf("Bad @Target argument %s (%s)%n", atValue, atValue.getClass());
@@ -991,7 +993,8 @@ public class TypeAnnotations {
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
-                       s.type.getReturnType().tag != VOID))
+                       s.type.getReturnType().tag != VOID) ||
+                      (s.kind == MTH && s.isConstructor()))
                     isType = true;
                 }
             else if (e.value.name == names.TYPE_PARAMETER)
@@ -1012,13 +1015,11 @@ public class TypeAnnotations {
             return isType ? AnnotationType.TYPE : AnnotationType.DECLARATION;
     }
 
-    private AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
-        if (s.kind == TYP || s.kind == VAR
-            || (s.kind == MTH && !s.isConstructor() &&
-                    s.type.getReturnType().tag != VOID))
-            return AnnotationType.BOTH;
-        else
-            return AnnotationType.DECLARATION;
+    /** Infer the target annotation kind, if none is give.
+     * We only infer declaration annotations.
+     */
+    private static AnnotationType inferTargetMetaInfo(Compound a, Symbol s) {
+        return AnnotationType.DECLARATION;
     }
 
 }

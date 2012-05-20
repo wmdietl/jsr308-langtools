@@ -30,12 +30,17 @@
  * @compile -source 1.8 BasicTest.java
  */
 
+import java.lang.annotation.*;
 import java.util.*;
 import java.io.*;
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface C {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface D {}
 
 /**

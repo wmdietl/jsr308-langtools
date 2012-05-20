@@ -213,18 +213,18 @@ public class Driver {
 
         // create TA ... TF proper type annotations
         sb.append("\n");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TA {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TB {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TC {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TD {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TE {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TF {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TG {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TH {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TI {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TJ {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TK {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TL {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TA {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TB {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TC {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TD {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TE {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TF {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TG {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TH {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TI {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TJ {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TK {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TL {}");
 
         sb.append("\n@Target(value={ElementType.TYPE,ElementType.FIELD,ElementType.METHOD,ElementType.PARAMETER,ElementType.CONSTRUCTOR,ElementType.LOCAL_VARIABLE})");
         sb.append("\n@interface Decl {}");

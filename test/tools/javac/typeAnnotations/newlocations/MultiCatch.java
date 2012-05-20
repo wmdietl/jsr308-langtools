@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @ignore // syntax not sure yet.
@@ -59,7 +61,11 @@ class ModifiedVars {
     */
 }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface C { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface D { }

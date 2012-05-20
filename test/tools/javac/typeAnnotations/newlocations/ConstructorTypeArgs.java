@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @bug 6843077
@@ -51,5 +53,7 @@ class ConstructorTypeArgs {
 class MyList<E> { }
 class MyMap<K, V> { }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { int value(); }

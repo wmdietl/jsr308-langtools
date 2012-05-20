@@ -32,7 +32,7 @@ import com.sun.tools.classfile.*;
 /*
  * @test NoTargetAnnotations
  * @summary test that annotations with no Target meta type is emitted
- *          twice: once as type annotation, and once as declaration annotation
+ *          only once as declaration annotation
  */
 public class NoTargetAnnotations {
 
@@ -190,7 +190,7 @@ public class NoTargetAnnotations {
 
     /*********************** Test class *************************/
     static int expected_invisibles = 0;
-    static int expected_visibles = 1;
+    static int expected_visibles = 0;
     static int expected_decl = 1;
 
     static class Test {

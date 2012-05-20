@@ -135,11 +135,13 @@ public class PresenceInner {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
 
+        out.println("import java.lang.annotation.*;");
         out.println("class Test {");
         out.println("  void method() {");
         out.println("    class Inner<T extends @A Object> { }");
         out.println("  }");
         out.println("}");
+        out.println("@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})");
         out.println("@interface A { }");
         out.close();
         System.out.println(f.getAbsolutePath());

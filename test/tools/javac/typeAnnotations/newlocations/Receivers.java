@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @bug 6843077
@@ -123,5 +125,7 @@ class GenericOuter<S, T> {
   }
 }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { String value(); }

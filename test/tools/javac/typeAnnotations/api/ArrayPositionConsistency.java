@@ -28,6 +28,7 @@
  */
 
 import com.sun.tools.javac.api.JavacTool;
+import java.lang.annotation.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -130,8 +131,11 @@ public class ArrayPositionConsistency {
     void vararg3(@A String    [] @B ... arg) {}
     void vararg4(   String    [] @B ... arg) {}
 
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface B {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface C {}
 
 }

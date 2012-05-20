@@ -1,3 +1,5 @@
+import java.lang.annotation.*;
+
 /*
  * @test /nodynamiccopyright/
  * @bug 6843077
@@ -8,4 +10,5 @@
 class MissingAnnotationValue<K extends @A Object> {
 }
 
+@Target(ElementType.TYPE_USE)
 @interface A { int field(); }

@@ -29,6 +29,7 @@
 
 import com.sun.tools.javac.api.JavacTool;
 import com.sun.tools.javac.tree.JCTree.JCNewArray;
+import java.lang.annotation.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -114,6 +115,8 @@ public class ArrayCreationTree {
         }
 
         private int arrayLength(Tree tree) {
+            // TODO: the tree is null when called with node.getType(). Why?
+            if (tree==null) return -1;
             switch (tree.getKind()) {
             case ARRAY_TYPE:
                 return 1 + arrayLength(((ArrayTypeTree)tree).getType());
@@ -139,8 +142,11 @@ public class ArrayCreationTree {
     Object b3 = new @A Object    [2] @B [ ];
     Object c3 = new @A Object    [ ] @B [ ] { };
 
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface B {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface C {}
 
 }

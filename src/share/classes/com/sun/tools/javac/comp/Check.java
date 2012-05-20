@@ -95,6 +95,9 @@ public class Check {
         context.put(checkKey, this);
 
         names = Names.instance(context);
+        dfltTargetMeta = new Name[] { names.PACKAGE, names.TYPE,
+            names.FIELD, names.METHOD, names.CONSTRUCTOR,
+            names.ANNOTATION_TYPE, names.LOCAL_VARIABLE, names.PARAMETER};
         log = Log.instance(context);
         rs = Resolve.instance(context);
         syms = Symtab.instance(context);
@@ -2557,13 +2560,23 @@ public class Check {
     boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return true;
+        if (atTarget == null) {
+            // An annotation without @Target is not a type annotation.
+            return false;
+        }
+
         Attribute atValue = atTarget.member(names.value);
-        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
+        if (!(atValue instanceof Attribute.Array)) {
+            return false; // error recovery
+        }
+
         Attribute.Array arr = (Attribute.Array) atValue;
         for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return true; // recovery
+            if (!(app instanceof Attribute.Enum)) {
+                return false; // recovery
+            }
             Attribute.Enum e = (Attribute.Enum) app;
+
             if (!isTypeParameter && e.value.name == names.TYPE_USE)
                 return true;
             else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
@@ -2576,39 +2589,54 @@ public class Check {
     boolean annotationApplicable(JCAnnotation a, Symbol s) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return true;
-        Attribute atValue = atTarget.member(names.value);
-        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
-        Attribute.Array arr = (Attribute.Array) atValue;
-        for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return true; // recovery
-            Attribute.Enum e = (Attribute.Enum) app;
-            if (e.value.name == names.TYPE)
+        Name[] targets;
+
+        if (atTarget == null) {
+            targets = defaultTargetMetaInfo(a, s);
+        } else {
+            Attribute atValue = atTarget.member(names.value);
+            if (!(atValue instanceof Attribute.Array)) {
+                return true; // error recovery
+            }
+            Attribute[] arr = ((Attribute.Array) atValue).values;
+            // TODO: can we optimize this?
+            targets = new Name[arr.length];
+            for (int i=0; i<arr.length; ++i) {
+                Attribute app = arr[i];
+                if (!(app instanceof Attribute.Enum)) {
+                    return true; // recovery
+                }
+                Attribute.Enum e = (Attribute.Enum) app;
+                targets[i] = e.value.name;
+            }
+        }
+        for (Name target : targets) {
+            if (target == names.TYPE)
                 { if (s.kind == TYP) return true; }
-            else if (e.value.name == names.FIELD)
+            else if (target == names.FIELD)
                 { if (s.kind == VAR && s.owner.kind != MTH) return true; }
-            else if (e.value.name == names.METHOD)
+            else if (target == names.METHOD)
                 { if (s.kind == MTH && !s.isConstructor()) return true; }
-            else if (e.value.name == names.PARAMETER)
+            else if (target == names.PARAMETER)
                 { if (s.kind == VAR &&
                       s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) != 0)
                     return true;
                 }
-            else if (e.value.name == names.CONSTRUCTOR)
+            else if (target == names.CONSTRUCTOR)
                 { if (s.kind == MTH && s.isConstructor()) return true; }
-            else if (e.value.name == names.LOCAL_VARIABLE)
+            else if (target == names.LOCAL_VARIABLE)
                 { if (s.kind == VAR && s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) == 0)
                     return true;
                 }
-            else if (e.value.name == names.ANNOTATION_TYPE)
+            else if (target == names.ANNOTATION_TYPE)
                 { if (s.kind == TYP && (s.flags() & ANNOTATION) != 0)
                     return true;
                 }
-            else if (e.value.name == names.PACKAGE)
+            else if (target == names.PACKAGE)
                 { if (s.kind == PCK) return true; }
-            else if (e.value.name == names.TYPE_USE)
+            else if (target == names.TYPE_USE)
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
@@ -2616,7 +2644,7 @@ public class Check {
                       (s.kind == MTH && s.isConstructor()))
                     return true;
                 }
-            else if (e.value.name == names.TYPE_PARAMETER)
+            else if (target == names.TYPE_PARAMETER)
                 { if (s.kind == TYP && s.type.tag == TYPEVAR)
                     return true;
                 }
@@ -2624,6 +2652,11 @@ public class Check {
                 return true; // recovery
         }
         return false;
+    }
+
+    private final Name[] dfltTargetMeta;
+    private Name[] defaultTargetMetaInfo(JCAnnotation a, Symbol s) {
+        return dfltTargetMeta;
     }
 
     /** Check an annotation value.

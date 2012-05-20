@@ -22,6 +22,8 @@
  */
 
 import java.io.*;
+import java.lang.annotation.ElementType;
+
 import com.sun.tools.classfile.*;
 
 /*
@@ -122,7 +124,10 @@ public class Presence {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
         out.println("import java.util.*;");
+        out.println("import java.lang.annotation.*;");
+
         out.println("class Test<@Test.A T extends @Test.A List<@Test.A String>> { ");
+        out.println("  @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})");
         out.println("  @interface A { }");
 
         out.println("  Map<@A String, Map<@A String, @A String>> f1;");

@@ -32,24 +32,24 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 public class ClassTypeParam {
 
     @TADescriptions({
-        @TADescription(annotation = "A", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularClass() {
-        return "class Test<@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> { }";
+        return "class Test<@TA K extends @TB Date, @TC V extends @TD Object & @TE Cloneable> { }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "A", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularClass2() {
-        return "class Test<@A K extends @TB Date, @C V extends @TE Cloneable> { }";
+        return "class Test<@TA K extends @TB Date, @TC V extends @TE Cloneable> { }";
     }
 
     @TADescriptions({
@@ -77,14 +77,14 @@ public class ClassTypeParam {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "A", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String abstractClass() {
-        return "abstract class Test<@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> { }";
+        return "abstract class Test<@TA K extends @TB Date, @TC V extends @TD Object & @TE Cloneable> { }";
     }
 
     @TADescriptions({
@@ -100,14 +100,14 @@ public class ClassTypeParam {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "A", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
-        @TADescription(annotation = "C", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TC", type = CLASS_TYPE_PARAMETER, paramIndex = 1),
         @TADescription(annotation = "TD", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "TE", type = CLASS_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1)
     })
     public String regularInterface() {
-        return "interface Test<@A K extends @TB Date, @C V extends @TD Object & @TE Cloneable> { }";
+        return "interface Test<@TA K extends @TB Date, @TC V extends @TD Object & @TE Cloneable> { }";
     }
 
     @TADescriptions({

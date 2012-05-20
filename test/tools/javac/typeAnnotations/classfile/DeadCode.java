@@ -21,6 +21,7 @@
  * questions.
  */
 
+import java.lang.annotation.*;
 import java.io.*;
 import java.net.URL;
 import java.util.List;
@@ -161,6 +162,7 @@ public class DeadCode {
     static int expected_invisibles = 1;
     static int expected_visibles = 0;
     static class Test {
+        @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
         @interface A {}
 
         void test() {
