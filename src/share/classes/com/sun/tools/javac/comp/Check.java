@@ -2615,6 +2615,10 @@ public class Check {
                        s.type.getReturnType().tag != VOID))
                     return true;
                 }
+            else if (e.value.name == names.TYPE_PARAMETER)
+                { if (s.kind == TYP && s.type.tag == TYPEVAR)
+                    return true;
+                }
             else
                 return true; // recovery
         }
