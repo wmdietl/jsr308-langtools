@@ -46,6 +46,8 @@ public interface Tree {
      */
     public enum Kind {
 
+        ANNOTATED_TYPE(AnnotatedTypeTree.class),
+
         /**
          * Used for instances of {@link AnnotationTree}.
          */
