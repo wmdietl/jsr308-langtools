@@ -28,7 +28,7 @@ package com.sun.tools.classfile;
 import java.io.IOException;
 
 /**
- * See JSR 308 specification, section 4.1
+ * See JSR 308 specification, Section 3.
  *
  *  <p><b>This is NOT part of any supported API.
  *  If you write code that depends on this, you do so at your own risk.
@@ -41,12 +41,12 @@ public class RuntimeVisibleTypeAnnotations_attribute extends RuntimeTypeAnnotati
         super(cr, name_index, length);
     }
 
-    public RuntimeVisibleTypeAnnotations_attribute(ConstantPool cp, ExtendedAnnotation[] annotations)
+    public RuntimeVisibleTypeAnnotations_attribute(ConstantPool cp, TypeAnnotation[] annotations)
             throws ConstantPoolException {
         this(cp.getUTF8Index(Attribute.RuntimeVisibleTypeAnnotations), annotations);
     }
 
-    public RuntimeVisibleTypeAnnotations_attribute(int name_index, ExtendedAnnotation[] annotations) {
+    public RuntimeVisibleTypeAnnotations_attribute(int name_index, TypeAnnotation[] annotations) {
         super(name_index, annotations);
     }
 

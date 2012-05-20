@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1138,7 +1138,8 @@ public class ClassReader implements Completer {
                 }
             },
 
-            // v51 attributes
+            // TODO: v51 attributes or something specific to 1.8?
+            // JSR 308 local change: keep compatible with 1.5.
             new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
@@ -1339,10 +1340,6 @@ public class ClassReader implements Completer {
                     sym.flags_field |= PROPRIETARY;
                 else
                     proxies.append(proxy);
-                if (majorVersion >= V51.major &&
-                    proxy.type.tsym == syms.polymorphicSignatureType.tsym) {
-                    sym.flags_field |= POLYMORPHIC_SIGNATURE;
-                }
             }
             annotate.later(new AnnotationCompleter(sym, proxies.toList()));
         }
@@ -1424,10 +1421,10 @@ public class ClassReader implements Completer {
     }
 
     TypeAnnotationPosition readPosition() {
-        byte tag = nextByte();
+        char tag = nextChar();
 
         if (!TargetType.isValidTargetTypeValue(tag))
-            throw this.badClassFile("bad.type.annotation.value", tag);
+            throw this.badClassFile("bad.type.annotation.value", "0x" + Integer.toHexString(tag));
 
         TypeAnnotationPosition position = new TypeAnnotationPosition();
         TargetType type = TargetType.fromTargetTypeValue(tag);
@@ -1437,18 +1434,18 @@ public class ClassReader implements Completer {
         switch (type) {
         // type cast
         case TYPECAST:
-        case TYPECAST_GENERIC_OR_ARRAY:
+        case TYPECAST_COMPONENT:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_GENERIC_OR_ARRAY:
+        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_GENERIC_OR_ARRAY:
+        case NEW_COMPONENT:
             position.offset = nextChar();
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+        case LOCAL_VARIABLE_COMPONENT:
             int table_length = nextChar();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -1462,6 +1459,7 @@ public class ClassReader implements Completer {
             break;
         // method receiver
         case METHOD_RECEIVER:
+        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -1471,54 +1469,49 @@ public class ClassReader implements Completer {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
             break;
-        // wildcard bound
-        case WILDCARD_BOUND:
-        case WILDCARD_BOUND_GENERIC_OR_ARRAY:
-            position.wildcard_position = readPosition();
-            break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+        case CLASS_EXTENDS_COMPONENT:
             position.type_index = nextChar();
             break;
         // throws
         case THROWS:
             position.type_index = nextChar();
             break;
-        // class literal
-        case CLASS_LITERAL:
-        case CLASS_LITERAL_GENERIC_OR_ARRAY:
-            position.offset = nextChar();
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+        case METHOD_PARAMETER_COMPONENT:
             position.parameter_index = nextByte();
             break;
         // method/constructor type argument
         case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
         case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
             position.offset = nextChar();
             position.type_index = nextByte();
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_GENERIC_OR_ARRAY:
+        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_GENERIC_OR_ARRAY:
+        case FIELD_COMPONENT:
             break;
         case UNKNOWN:
             break;
         default:
-            throw new AssertionError("unknown type: " + position);
+            throw new AssertionError("Unknown target type for position: " + position);
         }
 
         if (type.hasLocation()) {
@@ -1531,6 +1524,7 @@ public class ClassReader implements Completer {
 
         return position;
     }
+
     Attribute readAttributeValue() {
         char c = (char) buf[bp++];
         switch (c) {

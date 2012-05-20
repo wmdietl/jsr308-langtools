@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,28 +21,12 @@
  * questions.
  */
 
-/*
- * @test
- * @bug 6843077
- * @summary new type annotation location: class literals
- * @author Mahmood Ali
- * @compile -source 1.8 ClassLiterals.java
- */
+// key: compiler.err.cant.apply.symbol.1
+// key: compiler.misc.inferred.do.not.conform.to.upper.bounds
 
-class ClassLiterals {
+import java.util.*;
 
-  public static void main(String[] args) {
-    if (String.class != @A String.class) throw new Error();
-    if (@A int.class != int.class) throw new Error();
-    if (@A int.class != Integer.TYPE) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-
-    if (String[].class != @A String[].class) throw new Error();
-    if (String[].class != String @A [].class) throw new Error();
-    if (@A int[].class != int[].class) throw new Error();
-    if (@A int @B(0) [].class != int[].class) throw new Error();
-  }
+class InferredDoNotConformToUpper {
+    <X> void m(X x, List<? super X> lx) {}
+    { this.m("", Arrays.asList(1)); }
 }
-
-@interface A {}
-@interface B { int value(); }

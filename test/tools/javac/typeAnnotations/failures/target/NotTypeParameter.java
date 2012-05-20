@@ -1,7 +1,7 @@
 /*
  * @test /nodynamiccopyright/
  * @bug 6843077
- * @summary test invalid location of TypeUse
+ * @summary test invalid location of TypeUse and TypeParameter
  * @author Mahmood Ali
  * @compile/fail/ref=NotTypeParameter.out -XDrawDiagnostics -source 1.8 NotTypeParameter.java
  */
@@ -15,3 +15,11 @@ class VoidMethod<@A K> {
 
 @Target(ElementType.TYPE_USE)
 @interface A { }
+
+class TypeVariable<T> {
+  @B T test1() { return null; }
+  void test2(@B T p) {}
+}
+
+@Target(ElementType.TYPE_PARAMETER)
+@interface B { }

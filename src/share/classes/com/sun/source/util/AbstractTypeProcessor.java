@@ -93,6 +93,8 @@ import com.sun.source.tree.ClassTree;
  * is called during the declaration annotation phase before classes are analyzed.
  *
  * @author Mahmood Ali
+ * @author Werner Dietl
+ *
  * @since 1.8
  */
 public abstract class AbstractTypeProcessor extends AbstractProcessor {

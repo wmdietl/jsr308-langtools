@@ -25,31 +25,102 @@
  * @test
  * @bug 6843077
  * @summary new type annotation location: receivers
- * @author Mahmood Ali
+ * @author Mahmood Ali, Werner Dietl
  * @compile -source 1.8 Receivers.java
  */
 class DefaultUnmodified {
-  void plain() @A { }
-  <T> void generic() @A { }
-  void withException() @A throws Exception { }
-  String nonVoid() @A { return null; }
-  <T extends Runnable> void accept(T r) @A throws Exception { }
+  void plain(@A DefaultUnmodified this) { }
+  <T> void generic(@A DefaultUnmodified this) { }
+  void withException(@A DefaultUnmodified this) throws Exception { }
+  String nonVoid(@A DefaultUnmodified this) { return null; }
+  <T extends Runnable> void accept(@A DefaultUnmodified this, T r) throws Exception { }
 }
 
 class PublicModified {
-  public final void plain() @A { }
-  public final <T> void generic() @A { }
-  public final void withException() @A throws Exception { }
-  public final String nonVoid() @A { return null; }
-  public final <T extends Runnable> void accept(T r) @A throws Exception { }
+  public final void plain(@A PublicModified this) { }
+  public final <T> void generic(@A PublicModified this) { }
+  public final void withException(@A PublicModified this) throws Exception { }
+  public final String nonVoid(@A PublicModified this) { return null; }
+  public final <T extends Runnable> void accept(@A PublicModified this, T r) throws Exception { }
 }
 
 class WithValue {
-  void plain() @B("m") { }
-  <T> void generic() @B("m") { }
-  void withException() @B("m") throws Exception { }
-  String nonVoid() @B("m") { return null; }
-  <T extends Runnable> void accept(T r) @B("m") throws Exception { }
+  void plain(@B("m") WithValue this) { }
+  <T> void generic(@B("m") WithValue this) { }
+  void withException(@B("m") WithValue this) throws Exception { }
+  String nonVoid(@B("m") WithValue this) { return null; }
+  <T extends Runnable> void accept(@B("m") WithValue this, T r) throws Exception { }
+}
+
+class WithFinal {
+  void plain(final @B("m") WithFinal this) { }
+  <T> void generic(final @B("m") WithFinal this) { }
+  void withException(final @B("m") WithFinal this) throws Exception { }
+  String nonVoid(final @B("m") WithFinal this) { return null; }
+  <T extends Runnable> void accept(final @B("m") WithFinal this, T r) throws Exception { }
+}
+
+class WithBody {
+  Object f;
+
+  void field(@A WithBody this) {
+    this.f = null;
+  }
+  void meth(@A WithBody this) {
+    this.toString();
+  }
+}
+
+class Generic1<X> {
+  void test1(Generic1<X> this) {}
+  void test2(@A Generic1<X> this) {}
+  void test3(Generic1<@A X> this) {}
+  void test4(@A Generic1<@A X> this) {}
+}
+
+class Generic2<@A X> {
+  void test1(Generic2<X> this) {}
+  void test2(@A Generic2<X> this) {}
+  void test3(Generic2<@A X> this) {}
+  void test4(@A Generic2<@A X> this) {}
+}
+
+class Generic3<X extends @A Object> {
+  void test1(Generic3<X> this) {}
+  void test2(@A Generic3<X> this) {}
+  void test3(Generic3<@A X> this) {}
+  void test4(@A Generic3<@A X> this) {}
+}
+
+class Generic4<X extends @A Object> {
+  <Y> void test1(Generic4<X> this) {}
+  <Y> void test2(@A Generic4<X> this) {}
+  <Y> void test3(Generic4<@A X> this) {}
+  <Y> void test4(@A Generic4<@A X> this) {}
+}
+
+class Outer {
+  class Inner {
+    void none(Outer.Inner this) {}
+    void outer(@A Outer.Inner this) {}
+    void inner(Outer. @B("i") Inner this) {}
+    void both(@A Outer.@B("i") Inner this) {}
+
+    void innerOnlyNone(Inner this) {}
+    void innerOnly(@A Inner this) {}
+  }
+}
+
+class GenericOuter<S, T> {
+  class GenericInner<U, V> {
+    void none(GenericOuter<S, T>.GenericInner<U, V> this) {}
+    void outer(@A GenericOuter<S, T>.GenericInner<U, V> this) {}
+    void inner(GenericOuter<S, T>. @B("i") GenericInner<U, V> this) {}
+    void both(@A GenericOuter<S, T>.@B("i") GenericInner<U, V> this) {}
+
+    void innerOnlyNone(GenericInner<U, V> this) {}
+    void innerOnly(@A GenericInner<U, V> this) {}
+  }
 }
 
 @interface A {}
