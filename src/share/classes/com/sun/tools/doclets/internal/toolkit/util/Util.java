@@ -26,9 +26,11 @@
 package com.sun.tools.doclets.internal.toolkit.util;
 
 import java.io.*;
+import java.lang.annotation.ElementType;
 import java.util.*;
 
 import com.sun.javadoc.*;
+import com.sun.javadoc.AnnotationDesc.ElementValuePair;
 import com.sun.tools.doclets.internal.toolkit.*;
 
 /**
@@ -470,15 +472,21 @@ public class Util {
         //Try walking the tree.
         addAllInterfaceTypes(results,
             superType,
-            superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+            interfaceTypesOf(superType),
             false, configuration);
         List<Type> resultsList = new ArrayList<Type>(results.values());
         if (sort) {
                 Collections.sort(resultsList, new TypeComparator());
         }
         return resultsList;
+    }
+
+    private static Type[] interfaceTypesOf(Type type) {
+        if (type instanceof AnnotatedType)
+            type = ((AnnotatedType)type).underlyingType();
+        return type instanceof ClassDoc ?
+                ((ClassDoc)type).interfaceTypes() :
+                ((ParameterizedType)type).interfaceTypes();
     }
 
     public static List<Type> getAllInterfaces(Type type, Configuration configuration) {
@@ -491,9 +499,7 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+                interfaceTypesOf(superType),
                 raw, configuration);
     }
 
@@ -503,9 +509,7 @@ public class Util {
         if (superType == null)
             return;
         addAllInterfaceTypes(results, superType,
-                superType instanceof ClassDoc ?
-                ((ClassDoc) superType).interfaceTypes() :
-                ((ParameterizedType) superType).interfaceTypes(),
+                interfaceTypesOf(superType),
                 false, configuration);
     }
 
@@ -529,6 +533,9 @@ public class Util {
                 results.put(superInterface.asClassDoc(), superInterface);
             }
         }
+        if (type instanceof AnnotatedType)
+            type = ((AnnotatedType)type).underlyingType();
+
         if (type instanceof ParameterizedType)
             findAllInterfaceTypes(results, (ParameterizedType) type, configuration);
         else if (((ClassDoc) type).typeParameters().length == 0)
@@ -666,6 +673,54 @@ public class Util {
             }
         }
         return false;
+    }
+
+    private static boolean isDeclarationTarget(AnnotationDesc targetAnno, ElementType elemType) {
+        assert elemType != null && elemType != getElementTypeTypeUse();
+        // The error recovery steps here are analogous to TypeAnnotations
+        ElementValuePair[] elems = targetAnno.elementValues();
+        if (elems == null
+            || elems.length != 1
+            || !"value".equals(elems[0].element().name())
+            || !(elems[0].value().value() instanceof AnnotationValue[]))
+            return true;    // error recovery
+
+        AnnotationValue[] values = (AnnotationValue[])elems[0].value().value();
+        for (int i = 0; i < values.length; i++) {
+            Object value = values[i].value();
+            if (!(value instanceof FieldDoc))
+                return true; // error recovery
+
+            FieldDoc eValue = (FieldDoc)value;
+            if (elemType.name().equals(eValue.name())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns true if the {@code annotationDoc} is to be treated
+     * as a declaration annotation, when targeting the
+     * {@code elemType} element type.
+     *
+     * @param annotationDoc the annotationDoc to check
+     * @param elemType  the targeted elemType
+     * @return true if annotationDoc is a declaration annotation
+     */
+    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc, ElementType elemType) {
+        if (elemType == null || elemType == getElementTypeTypeUse())
+            return false;
+        AnnotationDesc[] annotationDescList = annotationDoc.annotations();
+        for (int i = 0; i < annotationDescList.length; i++) {
+            if (annotationDescList[i].annotationType().qualifiedName().equals(
+                    java.lang.annotation.Target.class.getName())) {
+                return isDeclarationTarget(annotationDescList[i], elemType);
+            }
+        }
+        // Annotations with no target are treated as declaration as well
+        return elemType == getElementTypeTypeUse() ? false : true;
     }
 
     /**
@@ -877,5 +932,17 @@ public class Util {
             }
         }
         return false;
+    }
+
+    /**
+     * Reflectively return the ElementType.TYPE_USE constant.
+     * This is necessary to prevent a bootstrap problem.
+     *
+     * @return ElementType.TYPE_USE
+     * @since 1.8
+     */
+    public static ElementType getElementTypeTypeUse() {
+        // return ElementType.TYPE_USE;
+        return ElementType.valueOf("TYPE_USE");
     }
 }
