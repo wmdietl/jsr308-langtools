@@ -1640,7 +1640,8 @@ targets a class declaration type parameter bound.
 
 % TODO: Specify methodorfield_target
 When the type annotation's target is a method return type, a constructor
-result, a receiver type (for an instance method or for an inner class
+result (which is stored in the same place, using the \code{METHOD\_RETURN}
+enum of \code{TargetType}), a receiver type (for an instance method or for an inner class
 constructor or static method), or a field, \code{target\_info} is empty.
 More formally, it contains \code{empty\_target}:
 
