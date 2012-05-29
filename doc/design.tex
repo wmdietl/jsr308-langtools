@@ -324,8 +324,10 @@ A type annotation is permitted in front of a constructor
 declaration, where declaration annotations are already permitted.  In that
 location, a type annotation is treated as applying to the constructed
 object (which is different than the receiver, if any, of the constructor).
-Generic type parameter annotations and outer class annotations are not
+Generic type parameter annotations are not
 possible on the constructor result.
+(Outer class annotations for a constructor result must be identical to
+those on the receiver, so can be inferred from the annotations on the receiver.)
 %
   Here is an example:
 % \begin{itemize}
@@ -1363,7 +1365,6 @@ type_annotation {
         empty_target;
         methodparam_target;
         exception_target;
-        wildcard_bound_target;
         localvar_target;
         catch_target;
         offset_target;
@@ -1839,7 +1840,7 @@ expression.
 \attributelocation{containing a \code{typearg\_target}}{method\_info}
 
 
-\subsubsection{Type arguments, array element types, and static nested types\label{class-file:ext:ri:typearg}}
+\subsubsection{Type arguments, wildcard bounds, array element types, and static nested types\label{class-file:ext:ri:typearg}}
 
 \begin{figure}[tp!]
 \begin{center}
@@ -2818,7 +2819,7 @@ statically checked to ensure that \code{catch} blocks that can catch a
 % depending on how that error is fixed.
 
 There is no need for special syntax to permit annotations on the type of a
-caught exception, as in
+caught exception; it is already permitted, as in
 
 \preverbnegspace
 \begin{Verbatim}
