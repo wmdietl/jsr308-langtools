@@ -29,102 +29,125 @@ current version of the specification
 <!-- See Makefile for documentation of how to compute a new changelog entry.
 -->
 
-  <dt><a href="java-annotation-design-20120122.html">22 January 2012</a></dt>
+  <!-- TODO: Constructor result annotations -->
+
+  <dt><a href="java-annotation-design-20120529.html">29 May 2012</a></dt>
   <dd>
     Annotation syntax changes:
     <ul>
       <li>
-	New receiver syntax.  It is permitted to write an explicit first
+        New receiver syntax.  It is permitted to write an explicit first
         formal parameter for the method receiver (<tt>this</tt>), which has
         no run-time effect nor any purpose other than serving as a place
         for the receiver annotation.  Then, no special case for receiver
         annotations is needed.
         For example, what was previously written as
-	<pre>  public String toString() @Readonly { ... }</pre>
-	is now written as
-	<pre>  public String toString(@Readonly MyClass this) { ... }</pre>
-	The syntax enables annotations on type parameters, outer
-	<tt>this</tt> types, etc.
+        <pre>  public String toString() @Readonly { ... }</pre>
+        is now written as
+        <pre>  public String toString(@Readonly MyClass this) { ... }</pre>
+        The syntax enables annotations on type parameters, outer
+        <tt>this</tt> types, etc.
       </li>
       <li>
- 	Syntax for annotations on disjunctive types (found in
+        Syntax for annotations on disjunctive types (found in
         multi-<tt>catch</tt> statements).
       </li>
       <li>
         Annotations are not permitted on class literals, nor arrays thereof.
       </li>
       <li>
-	If an annotation has no @Target meta-annotation, then it applies
-	only to the ElementTypes that were supported in Java SE	5.
+        If an annotation has no @Target meta-annotation, then it applies
+        only to the ElementTypes that were supported in Java SE 5.
+        An annotation that is applicable to both types and declarations
+        (which would be bad style) is permitted to be written on a
+        <tt>void</tt>-returning method.
       </li>
     </ul>
     Classfile changes:
     <ul>
       <li>
-	Rename <tt>extended_annotation</tt> to <tt>type_annotation</tt>.
+        Rename <tt>extended_annotation</tt> to <tt>type_annotation</tt>.
       </li>
       <li>
-	Add a class file format for annotations on static nested classes.
+        Add a class file format for annotations on static nested classes.
       </li>
       <li>
-	Change the class file format for exception parameters (catch clauses)
+        Change the class file format for exception parameters (catch clauses).
       </li>
       <li>
-	Change the <tt>target_type</tt> field of <tt>type_annotation</tt>,
-	and the <tt>wildcard_location_type</tt> field of
-	<tt>wildcard_bound_target</tt>, from <tt>u1</tt> to <tt>u2</tt>, to
-	permit future expansion and to improve word-alignment of the
-	classfile.
+        Change the <tt>target_type</tt> field of <tt>type_annotation</tt>
+        from <tt>u1</tt> to <tt>u2</tt>, to
+        permit future expansion and to improve word-alignment of the
+        classfile.
       </li>
       <li>
-	Renumber all the enumeration constants of <tt>target_type</tt>.
+        Remove wildcard_bound TargetType and wildcard_location_type.
+        Wildcards are instead expressed in the location array used for type
+        arguments, array element types, and static nested types.
       </li>
       <li>
-        Bug fix: Java forbids type parameters are in <tt>catch</tt>, not in
+        Renumber all the enumeration constants of <tt>target_type</tt>.
+      </li>
+      <li>
+        Bug fix: Java forbids type parameters in <tt>catch</tt>, not in
         <tt>throws</tt>.
+      </li>
+    </ul>
+    Specification clarifications:
+    <ul>
+      <li>
+        Clarify the difference between type uses and other type names that
+        appear in Java code.  Examples of type names that are not type uses
+        are <tt>import</tt> statements and class constants such as
+        <tt>int.class</tt>.  Type annotations cannot be written on these
+        type names.  This distinction now appears in the Java Language
+        Specification as well.
+      </li>
+      <li>
+        Clarify that for a constructor result, there is no source code
+        syntax for annotating its type parameters.  Constructor result
+        annotations are stored in the classfile the same place as method
+        return type annotations, using the METHOD_RESULT TargetType.
+      </li>
+      <li>
+        Improve discussion of compiler optimizations that remove an
+        annotated cast. 
+      </li>
+      <li>
+        The classfile representation of annotations does not depend on the
+        source code representation.  Annotations that are implicit in
+        the source code are present in the classfile.  Classfile
+        indexing is with respect to the complete type, regardless of
+        abbreviated types written in source code.  Classfile indexing
+        assumes that all optional <tt>extends Object</tt> clauses are present.
       </li>
     </ul>
     Other specification document changes:
     <ul>
       <li>
-	Change grammar productions to be compatible with the grammar in
-        chapter 18 of the forthcoming Java Language Specification, Java SE
+        Change grammar productions to be compatible with the grammar in
+        chapter 18 of the Java Language Specification, Java SE
         7 version.  Remove section 5, merging the two lists of
-	grammar changes into one list.  Separate the declaration annotation
-	on type parameters from the list of type annotations.
+        grammar changes into one list.  Separate the declaration annotation
+        on type parameters from the list of type annotations.
       </li>
       <li>
-	Clarify the difference between type uses and other type names that
-	appear in Java code.  Examples of type names that are not type uses
-	are <tt>import</tt> statements and class constants such as
-	<tt>int.class</tt>.  Type annotations cannot be written on these
-	type names.
+        Remove two incorrect examples of inner class syntax.
       </li>
       <li>
-	Clarify that for a constructor result, there is no syntax for annotating
-	its type parameters nor any outer class.
+        Add an appendix "Interactions with other Java SE 8 language changes".
       </li>
       <li>
-	Improve discussion of compiler optimizations that remove an
-        annotated cast. 
-      </li>
-      <li>
-	Remove two incorrect examples of inner class syntax.
-      </li>
-      <li>
-	Add an appendix "Interactions with other Java SE 8 language changes".
-      </li>
-      <li>
-	Remove the "Other possible extensions to Java annotations" appendix.
+        Remove the "Other possible extensions to Java annotations" appendix.
         It will be maintained as a separate document.
-	Also remove the "Logistical matters" appendix (Appendix E).
-	Move all discussion of compiler modifications into an appendix.
-	Eliminate Appendix B (discussion of changes), distributing its parts
-	to section 2 (description of changes) and to Appendix A
-	(motivation).
+        Also remove the "Logistical matters" appendix (Appendix E).
+        Move all discussion of compiler modifications into an appendix.
+        Eliminate Appendix B (discussion of changes), distributing its parts
+        to section 2 (description of changes) and to Appendix A
+        (motivation).
       </li>
       <li>
-	Change "Java SE 7" to "Java SE 8".
+        Change "Java SE 7" to "Java SE 8".
         Change "Sun" to "Oracle".
         Update URLs.
       </li>
@@ -132,8 +155,8 @@ current version of the specification
     FAQ:
     <ul>
       <li>
-	Add section "What is the relationship between the Type Annotations
-	compiler and the OpenJDK compiler?"
+        Add section "What is the relationship between the Type Annotations
+        compiler and the OpenJDK compiler?"
       </li>
     </ul>
   </dd>    
@@ -151,22 +174,22 @@ current version of the specification
         Permit annotations on types in throws clause.
       </li>
       <li>
-	If an annotation has no @Target meta-annotation, then it applies
-	everywhere, not just the ElementTypes that were supported in Java SE
-	6.
+        If an annotation has no @Target meta-annotation, then it applies
+        everywhere, not just the ElementTypes that were supported in Java SE
+        6.
       </li>
       <li>
         Changes to classfile format:
         <ul>
-	  <li>
-	    Change extends/implements from using u1 to u2.
-	  </li>
-	  <li>
-	    Rename reference_info to target_info.
+          <li>
+            Change extends/implements from using u1 to u2.
+          </li>
+          <li>
+            Rename reference_info to target_info.
             Introduce names for each variant.
           </li>
-	  <li>
-	    Clarify where attributes appear (on what element in the class file).
+          <li>
+            Clarify where attributes appear (on what element in the class file).
           </li>
         </ul>
       </li>
@@ -175,14 +198,14 @@ current version of the specification
         (such as bridge methods).  Cut compiler-specific discussion.
       </li>
       <li>
-	The grammar summary in Section 2.1 now separates type parameter
+        The grammar summary in Section 2.1 now separates type parameter
         declarations from type uses.
       </li>
     </ul>
     Changes to non-normative section:
     <ul>
       <li>
-	Add new section "Annotations on receiver type parameters" as a
+        Add new section "Annotations on receiver type parameters" as a
         potential future extension to the syntax. 
       </li>
     </ul>
@@ -194,28 +217,28 @@ current version of the specification
     Changes to normative section:
     <ul>
       <li>
-	Use terminology 'declaration annotation' for old Java SE 5/6
+        Use terminology 'declaration annotation' for old Java SE 5/6
         annotations.
       </li>
       <li>
-	An annotation with no @Target meta-annotation is
-	treated as a declaration annotation, compatibly with the current
-	behavior of Java SE 6.
+        An annotation with no @Target meta-annotation is
+        treated as a declaration annotation, compatibly with the current
+        behavior of Java SE 6.
       </li>
       <li>
         Classfile format changes:
         <ul>
         <li>
-	  In classfile, put declaration annotations and type annotations in
-	  different places.
-	</li>
-	<li>
-	  Better specification of array locations, which were only specified
-	  by example before.
-	</li>
-	<li>
-	  Specify the reference_info for annotations on class literals.
-	</li>
+          In classfile, put declaration annotations and type annotations in
+          different places.
+        </li>
+        <li>
+          Better specification of array locations, which were only specified
+          by example before.
+        </li>
+        <li>
+          Specify the reference_info for annotations on class literals.
+        </li>
         </ul>
       </li>
     </ul>
@@ -226,25 +249,25 @@ current version of the specification
     Changes to non-normative section:
     <ul>
       <li>
-	Expand discussion of subtyping/inheritance among annotations.
+        Expand discussion of subtyping/inheritance among annotations.
       </li>
       <li>
-	Expand discussion of duplicate annotations at a location.
+        Expand discussion of duplicate annotations at a location.
       </li>
       <li>
-	Mention OpenJDK support for type annotations, since build M4.
+        Mention OpenJDK support for type annotations, since build M4.
       </li>
       <li>
-	Update URLs to reflect that the JSR 308 webpages have moved.
+        Update URLs to reflect that the JSR 308 webpages have moved.
       </li>
       <li>
-	Clarify license terms.
+        Clarify license terms.
       </li>
     </ul>
     Changes to FAQ:
     <ul>
       <li>
-	Move pluggable types questions into their own FAQ.
+        Move pluggable types questions into their own FAQ.
       </li>
     </ul>
   </dd>    
@@ -294,8 +317,8 @@ current version of the specification
         Allow annotations on type parameters.
       </li>
       <li>
-	Clarify target_type for locations where Java 5 already allowed
-	annotations:  method return type, method parameter, field.
+        Clarify target_type for locations where Java 5 already allowed
+        annotations:  method return type, method parameter, field.
       </li>
     </ul>
     Changes to non-normative section:
@@ -312,7 +335,7 @@ current version of the specification
     Changes to non-normative section:
     <ul>
       <li>
-	Improve the discussion of repeated annotations and annotation
+        Improve the discussion of repeated annotations and annotation
         inheritance, both adding new technical material and new motivating
         examples.  (Thanks to Niko Matsakis, Jonathan Aldrich, and others
         for the raw material.)
@@ -323,7 +346,7 @@ current version of the specification
         vs. extending/implementing interfaces.
       </li>
       <li>
-	Mention two low-priority proposals for further annotation changes:
+        Mention two low-priority proposals for further annotation changes:
         nullable annotation fields and optional/default fields in annotations.
       </li>
       <li>
