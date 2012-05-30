@@ -1620,7 +1620,13 @@ method}{typeparam\_bound\_target}
 \end{Verbatim}
 
 \code{param\_index} specifies the index of the type parameter, while
-\code{bound\_index} specifies the index of the bound.  Consider the following
+\code{bound\_index} specifies the index of the bound.  Indexes start at 0.
+Bound index 0 is always a class, not interface, type.
+If the programmer-supplied upper bound of the type variable is an
+interface, it is treated as the second bound, and the implicit first bound
+is \code{java.lang.Object}.
+
+Consider the following
 example:
 
 \preverbnegspace
@@ -1632,7 +1638,7 @@ example:
 Here
 \code{@A} has \code{param\_index} 0 and \code{bound\_index} 0,
 \code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
-\code{@C} has \code{param\_index} 1 and \code{bound\_index} 0.
+\code{@C} has \code{param\_index} 1 and \code{bound\_index} 1.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{typeparam\_bound\_target} appears in the attributes table of a

@@ -75,15 +75,19 @@ current version of the specification
         Change the class file format for exception parameters (catch clauses).
       </li>
       <li>
+        Remove <tt>wildcard_bound</tt> and <tt>wildcard_bound_target</tt>.
+        Wildcards are instead expressed in the location array used for type
+        arguments, array element types, and static nested types.
+      </li>
+      <li>
+        Make <tt>typeparam_bound_target</tt> reserve an index for an
+        implicit type variable upper bound of <tt>java.lang.Object</tt>.
+      </li>
+      <li>
         Change the <tt>target_type</tt> field of <tt>type_annotation</tt>
         from <tt>u1</tt> to <tt>u2</tt>, to
         permit future expansion and to improve word-alignment of the
         classfile.
-      </li>
-      <li>
-        Remove wildcard_bound TargetType and wildcard_location_type.
-        Wildcards are instead expressed in the location array used for type
-        arguments, array element types, and static nested types.
       </li>
       <li>
         Renumber all the enumeration constants of <tt>target_type</tt>.
