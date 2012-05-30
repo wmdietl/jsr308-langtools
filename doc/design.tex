@@ -352,7 +352,7 @@ as \code{this}.)
 % \end{itemize}
 
 \item
-  \label{type-annotation-locations-receiver}
+  \label{type-annotation-locations-receiver}%
   It is permitted to explicitly declare the method receiver as the first
   formal parameter.
   (Each non-static method has an implicit parameter, \code{this}, which is
@@ -366,11 +366,14 @@ as \code{this}.)
   method, or on a static method or constructor of an inner class.  The type
   of the \code{this} parameter must be the same as the class that contains
   the method and should include type arguments if that class has any.
+
   In a method in an inner type,
   the receiver type can be
   written as (for example) either \code{Inner} or as \code{Outer.Inner},
   and in the latter case annotations on both parts are possible, as in
   \code{@ReadOnly Outer .\ @Mutable Inner}.
+  In a constructor in an inner type, the receiver
+  has a name such as \code{Outer.this}.
 
   The optional \code{this} parameter has no effect on execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
@@ -401,7 +404,8 @@ It is equivalent to write instead
 \end{Verbatim}
 
 \noindent
-and then it would be possible to annotate the receiver's type:
+The only purpose of writing the receiver explicitly is to make it
+possible to annotate the receiver's type:
 
 \preverbnegspace
 \begin{Verbatim}
@@ -705,7 +709,7 @@ If the receiver is not expressed explicitly, then its type cannot be annotated.
 \qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
 \\
 \new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \nt{Type} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{Type} \multi{\nt{Identifier} \term{.}} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
 \qquad        \nt{FormalParameterDecls}
 \end{tabbing}
 
