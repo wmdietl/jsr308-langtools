@@ -416,9 +416,20 @@ possible to annotate the receiver's type:
   }
 \end{Verbatim}
 
+An example of an inner constructor with both a result and a receiver
+annotation is:
+
+\preverbnegspace
+\begin{Verbatim}
+class Outer {
+  class Inner {
+    @Result Inner(@Receiver Outer Outer.this, boolean b) { }
+  }
+}
+\end{Verbatim}
 
 \item
-\label{type-annotation-locations-type-parameter-declaration}
+\label{type-annotation-locations-type-parameter-declaration}%
 It is permitted to write an annotation on a type parameter
 declaration.  This appears before the declared name, as in
 \code{class MyClass<@Immutable T> \ttlcb\ ...\ \ttrcb} or
