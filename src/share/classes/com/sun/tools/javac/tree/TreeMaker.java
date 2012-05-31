@@ -179,7 +179,7 @@ public class TreeMaker implements JCTree.Factory {
                                JCExpression restype,
                                List<JCTypeParameter> typarams,
                                List<JCVariableDecl> params,
-                               List<JCTypeAnnotation> receiver,
+                               JCVariableDecl recvparam,
                                List<JCExpression> thrown,
                                JCBlock body,
                                JCExpression defaultValue)
@@ -189,7 +189,7 @@ public class TreeMaker implements JCTree.Factory {
                                        restype,
                                        typarams,
                                        params,
-                                       receiver,
+                                       recvparam,
                                        thrown,
                                        body,
                                        defaultValue,
@@ -518,7 +518,12 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
-        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType);
+        return this.AnnotatedType(annotations, underlyingType, true);
+    }
+
+    public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType,
+            boolean onRightType) {
+        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType, onRightType);
         tree.pos = pos;
         return tree;
     }

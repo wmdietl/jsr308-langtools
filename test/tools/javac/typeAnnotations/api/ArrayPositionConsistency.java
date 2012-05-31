@@ -28,6 +28,7 @@
  */
 
 import com.sun.tools.javac.api.JavacTool;
+import java.lang.annotation.*;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -107,7 +108,7 @@ public class ArrayPositionConsistency {
         }
     }
 
-    static int expectedAnnotations = 31;
+    static int expectedAnnotations = 23;
 
     // visited code
     @A String @C [] @B [] field1;
@@ -130,13 +131,11 @@ public class ArrayPositionConsistency {
     void vararg3(@A String    [] @B ... arg) {}
     void vararg4(   String    [] @B ... arg) {}
 
-    Object classLit1 = @A String @C [] @B [].class;
-    Object classLit2 = @A String @C []    [].class;
-    Object classLit3 = @A String    [] @B [].class;
-    Object classLit4 =    String    [] @B [].class;
-
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface B {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface C {}
 
 }

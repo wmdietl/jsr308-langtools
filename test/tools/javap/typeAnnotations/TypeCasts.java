@@ -123,7 +123,9 @@ public class TypeCasts {
     File writeTestFile() throws IOException {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
+        out.println("import java.lang.annotation.*;");
         out.println("class Test { ");
+        out.println("  @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})");
         out.println("  @interface A { }");
 
         out.println("  void emit() {");

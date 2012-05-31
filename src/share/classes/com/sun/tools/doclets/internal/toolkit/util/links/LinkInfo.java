@@ -66,7 +66,7 @@ public abstract class LinkInfo {
     public boolean isTypeBound = false;
 
     /**
-     * The type of the document element
+     * The type of the document element.
      */
     public ElementType elemType = null;
 

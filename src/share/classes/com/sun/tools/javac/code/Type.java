@@ -296,6 +296,7 @@ public class Type implements PrimitiveType {
     public Type              getEnclosingType() { return null; }
     public List<Type>        getParameterTypes() { return List.nil(); }
     public Type              getReturnType()     { return null; }
+    public Type              getReceiverType()   { return null; }
     public List<Type>        getThrownTypes()    { return List.nil(); }
     public Type              getUpperBound()     { return null; }
     public Type              getLowerBound()     { return null; }
@@ -546,7 +547,7 @@ public class Type implements PrimitiveType {
 
         /** The enclosing type of this type. If this is the type of an inner
          *  class, outer_field refers to the type of its enclosing
-         *  instance class, in all other cases it referes to noType.
+         *  instance class, in all other cases it refers to noType.
          */
         private Type outer_field;
 
@@ -879,7 +880,7 @@ public class Type implements PrimitiveType {
 
         /** The type annotations on the method receiver.
          */
-        public List<Attribute.TypeCompound> receiverTypeAnnotations = List.nil();
+        public Type recvtype;
 
         public MethodType(List<Type> argtypes,
                           Type restype,
@@ -935,6 +936,7 @@ public class Type implements PrimitiveType {
 
         public List<Type>        getParameterTypes() { return argtypes; }
         public Type              getReturnType()     { return restype; }
+        public Type              getReceiverType()   { return recvtype; }
         public List<Type>        getThrownTypes()    { return thrown; }
 
         public boolean isErroneous() {
@@ -963,6 +965,7 @@ public class Type implements PrimitiveType {
             for (List<Type> l = argtypes; l.nonEmpty(); l = l.tail)
                 l.head.complete();
             restype.complete();
+            recvtype.complete();
             for (List<Type> l = thrown; l.nonEmpty(); l = l.tail)
                 l.head.complete();
         }
@@ -1122,6 +1125,7 @@ public class Type implements PrimitiveType {
         public Type getEnclosingType() { return qtype.getEnclosingType(); }
         public List<Type> getParameterTypes() { return qtype.getParameterTypes(); }
         public Type getReturnType() { return qtype.getReturnType(); }
+        public Type getReceiverType() { return qtype.getReceiverType(); }
         public List<Type> getThrownTypes() { return qtype.getThrownTypes(); }
         public List<Type> allparams() { return qtype.allparams(); }
         public Type getUpperBound() { return qtype.getUpperBound(); }
@@ -1167,29 +1171,6 @@ public class Type implements PrimitiveType {
         }
 
         /**
-         * Kind of type-constraint derived during type inference
-         */
-        public enum ConstraintKind {
-            /**
-             * upper bound constraint (a type variable must be instantiated
-             * with a type T, where T is a subtype of all the types specified by
-             * its EXTENDS constraints).
-             */
-            EXTENDS,
-            /**
-             * lower bound constraint (a type variable must be instantiated
-             * with a type T, where T is a supertype of all the types specified by
-             * its SUPER constraints).
-             */
-            SUPER,
-            /**
-             * equality constraint (a type variable must be instantiated to the type
-             * specified by its EQUAL constraint.
-             */
-            EQUAL;
-        }
-
-        /**
          * Get the type-constraints of a given kind for a given type-variable of
          * this ForAll type. Subclasses should override in order to return more
          * accurate sets of constraints.
@@ -1198,7 +1179,7 @@ public class Type implements PrimitiveType {
          * @param ck the constraint kind to be retrieved
          * @return the list of types specified by the selected constraint
          */
-        public List<Type> getConstraints(TypeVar tv, ConstraintKind ck) {
+        public List<Type> undetvars() {
             return List.nil();
         }
 
@@ -1240,6 +1221,7 @@ public class Type implements PrimitiveType {
     public static class UndetVar extends DelegatedType {
         public List<Type> lobounds = List.nil();
         public List<Type> hibounds = List.nil();
+        public List<Type> eq = List.nil();
         public Type inst = null;
 
         @Override

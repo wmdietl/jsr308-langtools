@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @bug 6843077
@@ -89,5 +91,7 @@ class ModifiedVars {
 
 class Parameterized<K, V> { }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { }

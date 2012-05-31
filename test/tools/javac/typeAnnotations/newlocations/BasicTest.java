@@ -30,12 +30,17 @@
  * @compile -source 1.8 BasicTest.java
  */
 
+import java.lang.annotation.*;
 import java.util.*;
 import java.io.*;
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface C {}
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface D {}
 
 /**
@@ -46,8 +51,7 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
     void test() {
 
-        // Handle annotated class literals/cast types
-        Class<?> c = @A String.class;
+        // Handle annotated cast types
         Object o = (@A Object) "foo";
 
         // Handle annotated "new" expressions (except arrays; see ArrayTest)
@@ -55,24 +59,23 @@ class BasicTest<T extends @A Object> extends @B LinkedList<T> implements @C List
 
         boolean b = o instanceof @A Object;
 
-
         @A Map<@B List<@C String>, @D String> map =
             new @A HashMap<@B List<@C String>, @D String>();
 
-        Class<? extends @A String> c2 = @A String.class;
+        Class<? extends @A String> c2 = null;
     }
 
     // Handle receiver annotations
     // Handle annotations on a qualified identifier list
-    void test2() @C @D throws @A IllegalArgumentException, @B IOException {
+    void test2(@C @D BasicTest<T> this) throws @A IllegalArgumentException, @B IOException {
 
     }
 
     // Handle annotations on a varargs element type
-    void test3(Object @A... objs) {
+    void test3(@B Object @A... objs) { }
 
-    }
-
-    void test4(Class<?> @A ... clz) {
-    }
+    void test4(@B Class<@C ?> @A ... clz) { }
+    
+    
+    // TODO: add more tests... nested classes, etc.
 }

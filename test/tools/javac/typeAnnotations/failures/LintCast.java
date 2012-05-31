@@ -1,3 +1,4 @@
+import java.lang.annotation.*;
 import java.util.List;
 
 /*
@@ -39,4 +40,5 @@ class LintCast {
     }
 }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }

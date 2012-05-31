@@ -658,9 +658,9 @@ public class ClassWriter {
                 write(anno, out);
         }
 
-        public void write(ExtendedAnnotation[] annos, ClassOutputStream out) {
+        public void write(TypeAnnotation[] annos, ClassOutputStream out) {
             out.writeShort(annos.length);
-            for (ExtendedAnnotation anno: annos)
+            for (TypeAnnotation anno: annos)
                 write(anno, out);
         }
 
@@ -671,7 +671,7 @@ public class ClassWriter {
                 write(p, out);
         }
 
-        public void write(ExtendedAnnotation anno, ClassOutputStream out) {
+        public void write(TypeAnnotation anno, ClassOutputStream out) {
             write(anno.annotation, out);
             write(anno.position, out);
         }
@@ -714,23 +714,23 @@ public class ClassWriter {
             return null;
         }
 
-        private void write(ExtendedAnnotation.Position p, ClassOutputStream out) {
+        private void write(TypeAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
             // type cast
             case TYPECAST:
-            case TYPECAST_GENERIC_OR_ARRAY:
+            case TYPECAST_COMPONENT:
             // instanceof
             case INSTANCEOF:
-            case INSTANCEOF_GENERIC_OR_ARRAY:
+            case INSTANCEOF_COMPONENT:
             // new expression
             case NEW:
-            case NEW_GENERIC_OR_ARRAY:
+            case NEW_COMPONENT:
                 out.writeShort(p.offset);
                 break;
             // local variable
             case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_GENERIC_OR_ARRAY:
+            case LOCAL_VARIABLE_COMPONENT:
                 int table_length = p.lvarOffset.length;
                 out.writeShort(table_length);
                 for (int i = 0; i < table_length; ++i) {
@@ -742,6 +742,7 @@ public class ClassWriter {
                 break;
             // method receiver
             case METHOD_RECEIVER:
+            case METHOD_RECEIVER_COMPONENT:
                 // Do nothing
                 break;
             // type parameters
@@ -751,54 +752,49 @@ public class ClassWriter {
                 break;
             // type parameters bounds
             case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
             case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
-            // wildcard bound
-            case WILDCARD_BOUND:
-            case WILDCARD_BOUND_GENERIC_OR_ARRAY:
-                write(p.wildcard_position, out);
-                break;
             // class extends or implements clause
             case CLASS_EXTENDS:
-            case CLASS_EXTENDS_GENERIC_OR_ARRAY:
+            case CLASS_EXTENDS_COMPONENT:
                 out.writeByte(p.type_index);
                 break;
             // throws
             case THROWS:
                 out.writeByte(p.type_index);
                 break;
-            // class literal
-            case CLASS_LITERAL:
-            case CLASS_LITERAL_GENERIC_OR_ARRAY:
-                out.writeShort(p.offset);
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters!");
                 break;
             // method parameter
             case METHOD_PARAMETER:
-            case METHOD_PARAMETER_GENERIC_OR_ARRAY:
+            case METHOD_PARAMETER_COMPONENT:
                 out.writeByte(p.parameter_index);
                 break;
             // method/constructor type argument
             case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case NEW_TYPE_ARGUMENT_COMPONENT:
             case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_GENERIC_OR_ARRAY:
+            case METHOD_TYPE_ARGUMENT_COMPONENT:
                 out.writeShort(p.offset);
                 out.writeByte(p.type_index);
                 break;
             // We don't need to worry about these
             case METHOD_RETURN:
-            case METHOD_RETURN_GENERIC_OR_ARRAY:
+            case METHOD_RETURN_COMPONENT:
             case FIELD:
-            case FIELD_GENERIC_OR_ARRAY:
+            case FIELD_COMPONENT:
                 break;
             case UNKNOWN:
                 break;
             default:
-                throw new AssertionError("unknown type: " + p);
+                throw new AssertionError("Unknown target type for position: " + p);
             }
 
             // Append location data for generics/arrays.

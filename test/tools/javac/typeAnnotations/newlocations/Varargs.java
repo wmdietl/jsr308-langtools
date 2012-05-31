@@ -22,6 +22,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @summary test acceptance of varargs annotations
@@ -29,6 +31,7 @@
  * @compile -source 1.8 Varargs.java
  */
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A {}
 
 class Varargs {

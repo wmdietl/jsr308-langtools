@@ -466,6 +466,11 @@ public class Pretty extends JCTree.Visitor {
                 print(" " + tree.name);
             }
             print("(");
+            if (tree.recvparam!=null) {
+                printExpr(tree.recvparam);
+                // TODO 308: only output if there are parameters following.
+                print(", ");
+            }
             printExprs(tree.params);
             print(")");
             if (tree.thrown.nonEmpty()) {
@@ -1209,8 +1214,11 @@ public class Pretty extends JCTree.Visitor {
             elem = tree.elemtype;
             if (elem.hasTag(ANNOTATED_TYPE)) {
                 JCAnnotatedType atype = (JCAnnotatedType) elem;
-                printTypeAnnotations(atype.annotations);
                 elem = atype.underlyingType;
+                if (!elem.hasTag(TYPEARRAY)) break;
+                if (atype.onRightType) {
+                    printTypeAnnotations(atype.annotations);
+                }
             }
             print("[]");
             if (!elem.hasTag(TYPEARRAY)) break;
@@ -1308,8 +1316,26 @@ public class Pretty extends JCTree.Visitor {
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
         try {
-            printTypeAnnotations(tree.annotations);
-            printExpr(tree.underlyingType);
+            if (tree.onRightType &&
+                    tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT) {
+                JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
+                printExpr(access.selected, TreeInfo.postfixPrec);
+                print(".");
+                printTypeAnnotations(tree.annotations);
+                print(access.name);
+            } else if (tree.underlyingType.getKind() == JCTree.Kind.ARRAY_TYPE) {
+                JCArrayTypeTree array = (JCArrayTypeTree) tree.underlyingType;
+                printBaseElementType(tree);
+                printTypeAnnotations(tree.annotations);
+                print("[]");
+                JCExpression elem = array.elemtype;
+                if (elem.hasTag(TYPEARRAY)) {
+                    printBrackets((JCArrayTypeTree) elem);
+                }
+            } else {
+                printTypeAnnotations(tree.annotations);
+                printExpr(tree.underlyingType);
+            }
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

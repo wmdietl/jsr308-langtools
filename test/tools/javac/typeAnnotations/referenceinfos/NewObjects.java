@@ -21,7 +21,7 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.ExtendedAnnotation.TargetType.*;
+import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
@@ -38,7 +38,7 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = NEW_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectGeneric() {
@@ -52,9 +52,9 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = NEW_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = NEW_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TC", type = NEW_COMPONENT,
                 genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectGeneric() {
@@ -68,7 +68,7 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_GENERIC_OR_ARRAY,
+        @TADescription(annotation = "TB", type = NEW_COMPONENT,
                 genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectGeneric() {

@@ -33,6 +33,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
+import java.lang.annotation.*;
 import javax.tools.JavaFileManager;
 import javax.tools.JavaFileObject;
 import com.sun.source.tree.*;
@@ -130,18 +131,31 @@ public class AnnotatedArrayOrder {
         expectedLocations.put("@L()", 3);
     }
 
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface B {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface C {}
 
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface D {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface E {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface F {}
 
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface G {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface H {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface I {}
+
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface J {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface K {}
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface L {}
 }

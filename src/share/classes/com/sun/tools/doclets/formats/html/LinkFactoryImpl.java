@@ -120,7 +120,7 @@ public class LinkFactoryImpl extends LinkFactory {
         typeLinkInfo.excludeTypeBounds = linkInfo.excludeTypeBounds;
         typeLinkInfo.excludeTypeParameterLinks = linkInfo.excludeTypeParameterLinks;
         typeLinkInfo.linkToSelf = linkInfo.linkToSelf;
-        typeLinkInfo.elemType = ElementType.TYPE_USE;
+        typeLinkInfo.elemType = Util.getElementTypeTypeUse();
         LinkOutput output = getLinkOutput(typeLinkInfo);
         ((LinkInfoImpl) linkInfo).displayLength += typeLinkInfo.displayLength;
         return output;
