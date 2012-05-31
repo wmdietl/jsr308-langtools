@@ -80,7 +80,7 @@ public interface ExecutableType extends TypeMirror {
     /**
      * Returns the type of this executable's receiver parameter.
      *
-     * @return the type of this executable's reeiver parameter
+     * @return the type of this executable's receiver parameter
      * TODO: null if none specified or always a valid value?
      */
     TypeMirror getReceiverType();
