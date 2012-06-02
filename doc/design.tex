@@ -375,11 +375,21 @@ as \code{this}.)
   In a constructor in an inner type, the receiver
   has a name such as \code{Outer.this}.
 
-  The optional \code{this} parameter has no effect on execution --- it only
+  Strictly speaking, a method in an inner class (or a constructor in an
+  inner class that is in an inner class) has multiple receivers:  one for
+  each containing class.  For a method, the receivers are named \<this>,
+  \<Outer.this>, etc.  Only the innermost receiver may be written as a
+  formal parameter.  This restricton does not limit expressiveness, because
+  the annotations on the other receivers can be inferred
+  from the annotations on the fully-qualified type of the innermost
+  receiver, just as for outer class annotations on a constructor result.
+
+  The optional receiver parameter has no effect on execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
   generates the same bytecodes, and reflection returns the same results
   regarding number of method parameters, whether or not the optional
-  \code{this} parameter is present.
+  receiver parameter is present.
+
 
   As an example, here are the standard definitions for \code{toString} and \code{equals}:
 \preverbnegspace
@@ -720,7 +730,7 @@ If the receiver is not expressed explicitly, then its type cannot be annotated.
 \qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
 \\
 \new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \nt{Type} \multi{\nt{Identifier} \term{.}} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+\qquad        \nt{Type} \opt{\nt{Identifier} \term{.}} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
 \qquad        \nt{FormalParameterDecls}
 \end{tabbing}
 
