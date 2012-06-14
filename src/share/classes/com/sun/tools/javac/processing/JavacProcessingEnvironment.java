@@ -47,6 +47,7 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import static javax.tools.StandardLocation.*;
 
+import com.sun.source.util.AbstractTypeProcessor;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
 import com.sun.tools.javac.api.JavacTaskImpl;
@@ -113,6 +114,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
      * used.
      */
     private DiscoveredProcessors discoveredProcs;
+
+    /**
+     * Type processors, which should have Processor.init called later in
+     * compilation than declaration processors.
+     */
+    public static java.util.List<AbstractTypeProcessor> typeProcessorsToInit = new java.util.ArrayList<AbstractTypeProcessor>();
 
     /**
      * Map of processor-specific options.
@@ -462,7 +469,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
      * State about how a processor has been used by the tool.  If a
      * processor has been used on a prior round, its process method is
      * called on all subsequent rounds, perhaps with an empty set of
-     * annotations to process.  The {@code annotatedSupported} method
+     * annotations to process.  The {@code annotationSupported} method
      * caches the supported annotation information from the first (and
      * only) getSupportedAnnotationTypes call to the processor.
      */
@@ -477,7 +484,11 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             contributed = false;
 
             try {
-                processor.init(env);
+                if (processor instanceof AbstractTypeProcessor) {
+                    typeProcessorsToInit.add((AbstractTypeProcessor) processor);
+                } else {
+                    processor.init(env);
+                }
 
                 checkSourceVersionCompatibility(source, log);
 
@@ -682,6 +693,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             }
 
             if (matchedNames.size() > 0 || ps.contributed) {
+                foundTypeProcessors = foundTypeProcessors || (ps.processor instanceof AbstractTypeProcessor);
                 boolean processingResult = callProcessor(ps.processor, typeElements, renv);
                 ps.contributed = true;
                 ps.removeSupportedOptions(unmatchedProcessorOptions);

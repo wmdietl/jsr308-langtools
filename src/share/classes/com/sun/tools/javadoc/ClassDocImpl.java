@@ -1184,6 +1184,13 @@ public class ClassDocImpl extends ProgramElementDocImpl implements ClassDoc {
     }
 
     /**
+     * Returns null, as this is not an annotated type.
+     */
+    public AnnotatedType asAnnotatedType() {
+        return null;
+    }
+
+    /**
      * Return false, as this is not a primitive type.
      */
     public boolean isPrimitive() {
