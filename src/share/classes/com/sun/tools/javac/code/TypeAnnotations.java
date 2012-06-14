@@ -133,9 +133,15 @@ public class TypeAnnotations {
             if (!visitBodies) {
                 if (!areAllDecl(tree.sym)) {
                     TypeAnnotationPosition pos = new TypeAnnotationPosition(TargetType.METHOD_RETURN);
-                    pos.pos = tree.restype.pos;
-                    separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
-                            tree.sym, pos);
+                    if (tree.sym.isConstructor()) {
+                        pos.pos = tree.pos;
+                        // Use null to mark that the annotations go with the symbol.
+                        separateAnnotationsKinds(tree, null, tree.sym, pos);
+                    } else {
+                        pos.pos = tree.restype.pos;
+                        separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
+                                tree.sym, pos);
+                    }
                 }
                 if (tree.recvparam!=null) {
                     // TODO: make sure there are no declaration annotations.
@@ -814,6 +820,16 @@ public class TypeAnnotations {
 
         sym.attributes_field = declAnnos.toList();
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
+
+        if (type==null) {
+            // When type is null, put the type annotations to the symbol.
+            // This is used for constructor return annotations, for which
+            // no appropriate type exists.
+            sym.typeAnnotations = sym.typeAnnotations.appendList(typeAnnotations);
+            return;
+        }
+
+        // type is non-null and annotations are added to that type
         Type atype = typeWithAnnotations(typetree, type, typeAnnotations);
 
         if (sym.getKind() == ElementKind.METHOD) {
@@ -993,7 +1009,8 @@ public class TypeAnnotations {
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
-                       s.type.getReturnType().tag != VOID))
+                      s.type.getReturnType().tag != VOID) ||
+                      (s.kind == MTH && s.isConstructor()))
                     isType = true;
                 }
             else if (e.value.name == names.TYPE_PARAMETER)

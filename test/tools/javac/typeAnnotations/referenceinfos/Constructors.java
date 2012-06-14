@@ -32,42 +32,42 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 public class Constructors {
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RECEIVER),
-        @TADescription(annotation = "TB", type = METHOD_RECEIVER),
+        @TADescription(annotation = "TA", type = METHOD_RETURN),
+        @TADescription(annotation = "TB", type = METHOD_RETURN),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
     })
     public String regularClass() {
-        return "class Test { Test(@TA Test this) {}" +
-                           " Test(@TB Test this, @TC int b) {} }";
+        return "class Test { @TA Test() {}" +
+                           " @TB Test(@TC int b) {} }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RECEIVER),
-        @TADescription(annotation = "TB", type = METHOD_RECEIVER),
+        @TADescription(annotation = "TA", type = METHOD_RETURN),
+        @TADescription(annotation = "TB", type = METHOD_RETURN),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
     })
     @TestClass("Test$Inner")
     public String innerClass() {
         return "class Test { class Inner {" +
-               " Inner(@TA Inner this) {}" +
-               " Inner(@TB Inner this, @TC int b) {}" +
+               " @TA Inner() {}" +
+               " @TB Inner(@TC int b) {}" +
                " } }";
     }
 
+    /* TODO: Outer.this annotation support.
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RECEIVER_COMPONENT,
-                genericLocation = {0}),
-        @TADescription(annotation = "TB", type = METHOD_RECEIVER),
-        @TADescription(annotation = "TC", type = METHOD_RECEIVER_COMPONENT,
-                genericLocation = {0}),
-        @TADescription(annotation = "TD", type = METHOD_RECEIVER),
+        @TADescription(annotation = "TA", type = METHOD_RECEIVER),
+        @TADescription(annotation = "TB", type = METHOD_RETURN),
+        @TADescription(annotation = "TC", type = METHOD_RECEIVER),
+        @TADescription(annotation = "TD", type = METHOD_RETURN),
         @TADescription(annotation = "TE", type = METHOD_PARAMETER, paramIndex = 0)
     })
     @TestClass("Test$Inner")
     public String innerClass2() {
         return "class Test { class Inner {" +
-               " Inner(@TA Test. @TB Inner this) {}" +
-               " Inner(@TC Test. @TD Inner this, @TE int b) {}" +
+               " @TB Inner(@TA Test Test.this) {}" +
+               " @TD Inner(@TC Test Test.this, @TE int b) {}" +
                " } }";
     }
+    */
 }
