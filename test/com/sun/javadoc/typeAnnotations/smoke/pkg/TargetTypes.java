@@ -83,13 +83,6 @@ class T0x04 {
     }
 }
 
-/** class literal */
-class T0x1E {
-    void m0x1E() {
-        Class<Object> c = @A @DA Object.class;
-    }
-}
-
 /** local variable */
 class T0x08 {
     void m0x08() {
@@ -104,7 +97,7 @@ class T0x0D {
 
 /** method receiver */
 class T0x06 {
-    void m0x06() @A @DA {}
+    void m0x06(@A @DA T0x06 this) {}
 }
 
 /** method return type generic/array */
@@ -132,6 +125,7 @@ class T0x10<T extends @A @DA Cloneable> {
 
 class T0x10A<T extends @A @DA Object> {
 }
+
 /** method type parameter bound */
 class T0x12<T> {
     <T extends @A @DA Cloneable> void m0x12() {}
@@ -140,7 +134,6 @@ class T0x12<T> {
 /** class type parameter bound generic/array */
 class T0x11<T extends List<@A @DA T>> {
 }
-
 
 /** method type parameter bound generic/array */
 class T0x13 {

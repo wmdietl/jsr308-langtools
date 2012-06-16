@@ -1,6 +1,24 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.3.0, 31 May 2012
+
+Implements the updated JSR 308 specification from 29 May 2012,
+see jsr308-changes.html for details:
+- New receiver syntax
+- Annotations on nested classes
+- No annotations on class literals
+- Changed @Target default to be the Java 1.5 values
+- Bytecode changes (u2 instead of u1 for target type, renumbering,
+  consistent storage of wildcards, ...)
+- UW extension: in addition to annotations in comments, support
+  special /*>>> */ comments to hide multiple tokens, e.g. useful
+  for new receiver syntax
+
+Base build
+  Updated to OpenJDK 8 langtools as of 30 May 2012.
+
+----------------------------------------------------------------------
 Version 1.2.7, 14 May 2012
 
 No changes in functionality.

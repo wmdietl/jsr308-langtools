@@ -91,12 +91,21 @@ public class JavaTokenizer {
 
     protected ScannerFactory fac;
 
-    // Flags for extracting annotations from comments.
+    // Enable extracting annotations from comments.
+    protected boolean annotationsincomments;
+
+    // Whether to allow additional spaces before magic/voodoo trigger.
+    protected boolean spacesincomments;
+
+    // Magic allows a single annotation (with values) in a block comment. 
     protected boolean magicAt = false;
     protected boolean magicID = false;
     protected boolean magic = false;
-    protected boolean annotationsincomments;
-    protected boolean spacesincomments;
+
+    // Voodoo allows arbitrary AST parts in a special block comment.
+    protected boolean voodoo = false;
+
+    // Output additional debug information.
     protected boolean debugJSR308;
 
     private static final boolean hexFloatsWork = hexFloatsWork();
@@ -629,15 +638,34 @@ public class JavaTokenizer {
                                 isEmpty = true;
                             }
                             if (magicAt) break loop;
-                        } else if (annotationsincomments && reader.bp < reader.buflen && reader.ch == '@'
-                            && (spacesincomments || isCommentWithoutSpaces())) {
-                            reader.scanChar();
-                            while (Character.isWhitespace(reader.ch))
+                        } else if (annotationsincomments && reader.bp < reader.buflen) {
+                            if (reader.ch == '@' && (spacesincomments || isCommentWithoutSpaces())) {
                                 reader.scanChar();
-                            if (!Character.isJavaIdentifierStart(reader.ch)) break;
-                            tk = TokenKind.MONKEYS_AT;
-                            magicAt = true;
-                            break loop;
+                                while (Character.isWhitespace(reader.ch))
+                                    reader.scanChar();
+                                if (!Character.isJavaIdentifierStart(reader.ch)) break;
+                                tk = TokenKind.MONKEYS_AT;
+                                magicAt = true;
+                                break loop;
+                            }
+                            // spaces before >>>
+                            if (spacesincomments) {
+                                while (Character.isWhitespace(reader.ch)) {
+                                    reader.scanChar();
+                                }
+                            }
+                            if (reader.ch == '>') {
+                                reader.scanChar();
+                                if (reader.ch == '>') {
+                                    reader.scanChar();
+                                    if (reader.ch == '>') {
+                                        reader.scanChar();
+                                        voodoo = true;
+                                        continue loop;
+                                    }
+                                }
+                            }
+                            style = CommentStyle.BLOCK;
                         } else {
                             style = CommentStyle.BLOCK;
                         }
@@ -708,6 +736,14 @@ public class JavaTokenizer {
                     tk = TokenKind.HASH;
                     break loop;
                 default:
+                    if (voodoo && (reader.ch == '*')) {
+                        if (reader.peekChar() == '/') {
+                            reader.scanChar(); // the *
+                            reader.scanChar(); // the /
+                            voodoo = false;
+                            break;
+                        }
+                    }
                     if (isSpecial(reader.ch)) {
                         scanOperator();
                     } else {

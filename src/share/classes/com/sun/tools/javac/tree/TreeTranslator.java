@@ -139,6 +139,7 @@ public class TreeTranslator extends JCTree.Visitor {
         tree.mods = translate(tree.mods);
         tree.restype = translate(tree.restype);
         tree.typarams = translateTypeParams(tree.typarams);
+        tree.recvparam = translate(tree.recvparam);
         tree.params = translateVarDefs(tree.params);
         tree.thrown = translate(tree.thrown);
         tree.body = translate(tree.body);

@@ -1,3 +1,5 @@
+import java.lang.annotation.ElementType;
+
 /*
  * Copyright (c) 2009, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -29,6 +31,8 @@
  * @compile -source 1.8 InnerClass.java
  */
 
+import java.lang.annotation.*;
+
 class InnerClass {
 
     InnerClass() {}
@@ -55,5 +59,7 @@ class InnerClass {
     Object f4 = new InnerClass(null) {
             <@A R> void method() { }
         };
+
+    @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
     @interface A { }
 }

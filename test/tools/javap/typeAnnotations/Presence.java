@@ -22,6 +22,8 @@
  */
 
 import java.io.*;
+import java.lang.annotation.ElementType;
+
 import com.sun.tools.classfile.*;
 
 /*
@@ -122,14 +124,17 @@ public class Presence {
         File f = new File("Test.java");
         PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(f)));
         out.println("import java.util.*;");
+        out.println("import java.lang.annotation.*;");
+
         out.println("class Test<@Test.A T extends @Test.A List<@Test.A String>> { ");
+        out.println("  @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})");
         out.println("  @interface A { }");
 
         out.println("  Map<@A String, Map<@A String, @A String>> f1;");
 
-        out.println("  <@A T extends @A List<@A String>>");
+        out.println("  <@A TM extends @A List<@A String>>");
         out.println("  Map<@A String, @A List<@A String>>");
-        out.println("  method(List<@A String> @A [] param1, String @A [] @A ... param2) @A");
+        out.println("  method(@A Test<T> this, List<@A String> @A [] param1, String @A [] @A ... param2)");
         out.println("  throws @A Exception {");
         out.println("    @A String lc1 = null;");
         out.println("    @A List<@A String> lc2 = null;");
@@ -140,9 +145,8 @@ public class Presence {
         out.println("    boolean lc7 = lc5 instanceof @A String @A [] @A [];");
         out.println("    new @A ArrayList<@A String>();");
         out.println("    Object lc8 = new @A String @A [4];");
-        out.println("    Object lc9 = @A String.class;");
         out.println("    try {");
-        out.println("      Object lc10 = @A int.class;");
+        out.println("      Object lc10 = int.class;");
         out.println("    } catch (@A Exception e) { e.toString(); }");
         out.println("    return null;");
         out.println("  }");
@@ -161,7 +165,7 @@ public class Presence {
     }
 
     void countAnnotations() {
-        int expected_visibles = 0, expected_invisibles = 40;
+        int expected_visibles = 0, expected_invisibles = 38;
         int expected_all = expected_visibles + expected_invisibles;
 
         if (expected_all != all) {

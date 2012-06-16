@@ -21,6 +21,8 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
  * @bug 6843077
@@ -46,5 +48,7 @@ class OneAnnotatedB<@B("m") K> { }
 class TwoAnnotatedB<@B("m") K, @B("m") V> { }
 class SecondAnnotatedB<K, @B("m") V extends @B("m") String> { }
 
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { String value(); }

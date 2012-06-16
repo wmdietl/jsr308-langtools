@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -249,7 +249,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                                    final Name name,
                                    final Env<AttrContext> env) {
         if (tsym.kind != TYP) {
-            log.error(pos, "static.imp.only.classes.and.interfaces");
+            log.error(DiagnosticFlag.RECOVERABLE, pos, "static.imp.only.classes.and.interfaces");
             return;
         }
 
@@ -348,13 +348,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
      *  @param params      The method's value parameters.
      *  @param res             The method's result type,
      *                 null if it is a constructor.
+     *  @param recvparam       The method's receiver parameter,
+     *                 null if none given; TODO: or already set here?
      *  @param thrown      The method's thrown exceptions.
      *  @param env             The method's (local) environment.
      */
     Type signature(List<JCTypeParameter> typarams,
                    List<JCVariableDecl> params,
                    JCTree res,
-                   List<JCTypeAnnotation> receiverAnnotations,
+                   JCVariableDecl recvparam,
                    List<JCExpression> thrown,
                    Env<AttrContext> env) {
 
@@ -372,6 +374,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         // Attribute result type, if one is given.
         Type restype = res == null ? syms.voidType : attr.attribType(res, env);
 
+        // Attribute receiver type, if one is given.
+        Type recvtype;
+        if (recvparam!=null) {
+            memberEnter(recvparam, env);
+            recvtype = recvparam.vartype.type;
+        } else {
+            recvtype = null;
+        }
+
         // Attribute thrown exceptions.
         ListBuffer<Type> thrownbuf = new ListBuffer<Type>();
         for (List<JCExpression> l = thrown; l.nonEmpty(); l = l.tail) {
@@ -380,11 +391,12 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 exc = chk.checkClassType(l.head.pos(), exc);
             thrownbuf.append(exc);
         }
-        Type mtype = new MethodType(argbuf.toList(),
+        MethodType mtype = new MethodType(argbuf.toList(),
                                     restype,
                                     thrownbuf.toList(),
                                     syms.methodClass);
-        attr.annotateType(mtype, receiverAnnotations);
+        mtype.recvtype = recvtype;
+
         return tvars.isEmpty() ? mtype : new ForAll(tvars, mtype);
     }
 
@@ -572,7 +584,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         try {
             // Compute the method type
             m.type = signature(tree.typarams, tree.params,
-                               tree.restype, tree.receiverAnnotations,
+                               tree.restype, tree.recvparam,
                                tree.thrown,
                                localEnv);
         } finally {
@@ -624,7 +636,11 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         DeferredLintHandler prevLintHandler =
                 chk.setDeferredLintHandler(deferredLintHandler.setPos(tree.pos()));
         try {
-            attr.attribType(tree.vartype, localEnv);
+            if (TreeInfo.isEnumInit(tree)) {
+                attr.attribIdentAsEnumType(localEnv, (JCIdent)tree.vartype);
+            } else {
+                attr.attribType(tree.vartype, localEnv);
+            }
         } finally {
             chk.setDeferredLintHandler(prevLintHandler);
         }
@@ -785,20 +801,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 && s.owner.kind != MTH
                 && types.isSameType(c.type, syms.deprecatedType))
                 s.flags_field |= Flags.DEPRECATED;
-            // Internally to java.lang.invoke, a @PolymorphicSignature annotation
-            // acts like a classfile attribute.
-            if (!c.type.isErroneous() &&
-                types.isSameType(c.type, syms.polymorphicSignatureType)) {
-                if (!target.hasMethodHandles()) {
-                    // Somebody is compiling JDK7 source code to a JDK6 target.
-                    // Make it an error, since it is unlikely but important.
-                    log.error(env.tree.pos(),
-                            "wrong.target.for.polymorphic.signature.definition",
-                            target.name);
-                }
-                // Pull the flag through for better diagnostics, even on a bad target.
-                s.flags_field |= Flags.POLYMORPHIC_SIGNATURE;
-            }
             if (!annotated.add(a.type.tsym))
                 log.error(a.pos, "duplicate.annotation");
         }
@@ -1114,11 +1116,6 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)
                 annotate(tree, dimAnnos);
             super.visitNewArray(tree);
-        }
-        @Override
-        public void visitMethodDef(JCMethodDecl tree) {
-            annotate(tree, tree.receiverAnnotations);
-            super.visitMethodDef(tree);
         }
     }
 

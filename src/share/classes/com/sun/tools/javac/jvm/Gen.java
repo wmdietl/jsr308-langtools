@@ -2120,7 +2120,6 @@ public class Gen extends JCTree.Visitor {
 
     public void visitTypeTest(JCInstanceOf tree) {
         setTypeAnnotationPositions(tree.pos);
-
         genExpr(tree.expr, tree.expr.type).load();
         code.emitop2(instanceof_, makeRef(tree.pos(), tree.clazz.type));
         result = items.makeStackItem(syms.booleanType);
@@ -2171,6 +2170,7 @@ public class Gen extends JCTree.Visitor {
            // (e.g. int.class) which have been converted to TYPE field
            // access on the corresponding boxed type (e.g. Integer.TYPE).
            setTypeAnnotationPositions(tree.pos);
+           // TODO 308: Annotations on class literals were removed. Can we remove this?
         }
 
         Symbol ssym = TreeInfo.symbol(tree.selected);

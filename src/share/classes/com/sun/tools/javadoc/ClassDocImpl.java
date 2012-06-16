@@ -1187,7 +1187,6 @@ public class ClassDocImpl extends ProgramElementDocImpl implements ClassDoc {
      * Returns null, as this is not an annotated type.
      */
     public AnnotatedType asAnnotatedType() {
-        // TODO Auto-generated method stub
         return null;
     }
 

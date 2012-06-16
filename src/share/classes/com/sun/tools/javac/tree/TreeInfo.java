@@ -237,6 +237,15 @@ public class TreeInfo {
         }
     }
 
+    public static boolean isEnumInit(JCTree tree) {
+        switch (tree.getTag()) {
+            case VARDEF:
+                return (((JCVariableDecl)tree).mods.flags & ENUM) != 0;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Return true if the AST corresponds to a static select of the kind A.B
      */
@@ -709,6 +718,8 @@ public class TreeInfo {
             return ((JCFieldAccess) tree).sym;
         case TYPEAPPLY:
             return symbol(((JCTypeApply) tree).clazz);
+        case ANNOTATED_TYPE:
+            return symbol(((JCAnnotatedType) tree).underlyingType);
         default:
             return null;
         }
@@ -973,16 +984,35 @@ public class TreeInfo {
         }
     }
 
+    /* Return the inner-most type of a type tree.
+     * For an array that contains an annotated type, return that annotated type.
+     * TODO: currently only used by Pretty. Describe behavior better.
+     */
     public static JCTree innermostType(JCTree type) {
-        switch (type.getTag()) {
-        case TYPEARRAY:
-            return innermostType(((JCArrayTypeTree)type).elemtype);
-        case WILDCARD:
-            return innermostType(((JCWildcard)type).inner);
-        case ANNOTATED_TYPE:
-            return innermostType(((JCAnnotatedType)type).underlyingType);
-        default:
-            return type;
+        JCTree lastAnnotatedType = null;
+        JCTree cur = type;
+        loop: while (true) {
+            switch (cur.getTag()) {
+            case TYPEARRAY:
+                lastAnnotatedType = null;
+                cur = ((JCArrayTypeTree)cur).elemtype;
+                break;
+            case WILDCARD:
+                lastAnnotatedType = null;
+                cur = ((JCWildcard)cur).inner;
+                break;
+            case ANNOTATED_TYPE:
+                lastAnnotatedType = cur;
+                cur = ((JCAnnotatedType)cur).underlyingType;
+                break;
+            default:
+                break loop;
+            }
+        }
+        if (lastAnnotatedType!=null) {
+            return lastAnnotatedType;
+        } else {
+            return cur;
         }
     }
 }

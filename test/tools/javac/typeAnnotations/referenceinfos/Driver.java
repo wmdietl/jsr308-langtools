@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.sun.tools.classfile.ClassFile;
-import com.sun.tools.classfile.ExtendedAnnotation;
-import com.sun.tools.classfile.ExtendedAnnotation.TargetType;
+import com.sun.tools.classfile.TypeAnnotation;
+import com.sun.tools.classfile.TypeAnnotation.TargetType;
 
 public class Driver {
 
@@ -58,17 +58,18 @@ public class Driver {
 
         // Find methods
         for (Method method : clazz.getMethods()) {
-            Map<String, ExtendedAnnotation.Position> expected = expectedOf(method);
+            Map<String, TypeAnnotation.Position> expected = expectedOf(method);
             if (expected == null)
                 continue;
             if (method.getReturnType() != String.class)
                 throw new IllegalArgumentException("Test method needs to return a string: " + method);
+            String testClass = testClassOf(method);
 
             try {
                 String compact = (String)method.invoke(object);
                 String fullFile = wrap(compact);
-                ClassFile cf = compileAndReturn(fullFile);
-                List<ExtendedAnnotation> actual = ReferenceInfoUtil.extendedAnnotationsOf(cf);
+                ClassFile cf = compileAndReturn(fullFile, testClass);
+                List<TypeAnnotation> actual = ReferenceInfoUtil.extendedAnnotationsOf(cf);
                 ReferenceInfoUtil.compare(expected, actual, cf);
                 out.println("PASSED:  " + method.getName());
                 ++passed;
@@ -89,15 +90,15 @@ public class Driver {
             throw new RuntimeException(failed + " tests failed");
     }
 
-    private Map<String, ExtendedAnnotation.Position> expectedOf(Method m) {
+    private Map<String, TypeAnnotation.Position> expectedOf(Method m) {
         TADescription ta = m.getAnnotation(TADescription.class);
         TADescriptions tas = m.getAnnotation(TADescriptions.class);
 
         if (ta == null && tas == null)
             return null;
 
-        Map<String, ExtendedAnnotation.Position> result =
-            new HashMap<String, ExtendedAnnotation.Position>();
+        Map<String, TypeAnnotation.Position> result =
+            new HashMap<String, TypeAnnotation.Position>();
 
         if (ta != null)
             result.putAll(expectedOf(ta));
@@ -110,10 +111,11 @@ public class Driver {
 
         return result;
     }
-    private Map<String, ExtendedAnnotation.Position> expectedOf(TADescription d) {
+
+    private Map<String, TypeAnnotation.Position> expectedOf(TADescription d) {
         String annoName = d.annotation();
 
-        ExtendedAnnotation.Position p = new ExtendedAnnotation.Position();
+        TypeAnnotation.Position p = new TypeAnnotation.Position();
         p.type = d.type();
         if (d.offset() != NOT_SET)
             p.offset = d.offset();
@@ -143,9 +145,18 @@ public class Driver {
         return list;
     }
 
-    private ClassFile compileAndReturn(String fullFile) throws Exception {
+    private String testClassOf(Method m) {
+        TestClass tc = m.getAnnotation(TestClass.class);
+        if (tc != null) {
+            return tc.value();
+        } else {
+            return "Test";
+        }
+    }
+
+    private ClassFile compileAndReturn(String fullFile, String testClass) throws Exception {
         File source = writeTestFile(fullFile);
-        File clazzFile = compileTestFile(source);
+        File clazzFile = compileTestFile(source, testClass);
         return ClassFile.read(clazzFile);
     }
 
@@ -157,12 +168,18 @@ public class Driver {
         return f;
     }
 
-    protected File compileTestFile(File f) {
+    protected File compileTestFile(File f, String testClass) {
         int rc = com.sun.tools.javac.Main.compile(new String[] { "-source", "1.8", "-g", f.getPath() });
         if (rc != 0)
             throw new Error("compilation failed. rc=" + rc);
-        String path = f.getPath();
-        return new File(path.substring(0, path.length() - 5) + ".class");
+        String path;
+        if (f.getParent() != null) {
+            path = f.getParent();
+        } else {
+            path = "";
+        }
+
+        return new File(path + testClass + ".class");
     }
 
     private String wrap(String compact) {
@@ -196,12 +213,18 @@ public class Driver {
 
         // create TA ... TF proper type annotations
         sb.append("\n");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TA {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TB {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TC {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TD {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TE {}");
-        sb.append("\n@Target(ElementType.TYPE_USE) @interface TF {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TA {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TB {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TC {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TD {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TE {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TF {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TG {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TH {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TI {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TJ {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TK {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TL {}");
 
         sb.append("\n@Target(value={ElementType.TYPE,ElementType.FIELD,ElementType.METHOD,ElementType.PARAMETER,ElementType.CONSTRUCTOR,ElementType.LOCAL_VARIABLE})");
         sb.append("\n@interface Decl {}");
@@ -236,4 +259,14 @@ public class Driver {
 @Target(ElementType.METHOD)
 @interface TADescriptions {
     TADescription[] value() default {};
+}
+
+/**
+ * The name of the class that should be analyzed.
+ * Should only need to be provided when analyzing inner classes.
+ */
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+@interface TestClass {
+    String value() default "Test";
 }

@@ -26,7 +26,7 @@ package pkg;
 import java.lang.annotation.*;
 
 /**
- * This is just a test annotation type with optional type
+ * This is just a test annotation type with optional value element.
  *
  * @author Mahmood Ali
  * @since 1.5

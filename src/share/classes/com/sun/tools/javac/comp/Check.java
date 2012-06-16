@@ -95,6 +95,9 @@ public class Check {
         context.put(checkKey, this);
 
         names = Names.instance(context);
+        dfltTargetMeta = new Name[] { names.PACKAGE, names.TYPE,
+            names.FIELD, names.METHOD, names.CONSTRUCTOR,
+            names.ANNOTATION_TYPE, names.LOCAL_VARIABLE, names.PARAMETER};
         log = Log.instance(context);
         rs = Resolve.instance(context);
         syms = Symtab.instance(context);
@@ -269,23 +272,6 @@ public class Check {
         else return syms.errType;
     }
 
-    /** Report a type error.
-     *  @param pos        Position to be used for error reporting.
-     *  @param problem    A string describing the error.
-     *  @param found      The type that was found.
-     *  @param req        The type that was required.
-     */
-    Type typeError(DiagnosticPosition pos, Object problem, Type found, Type req) {
-        log.error(pos, "prob.found.req",
-                  problem, found, req);
-        return types.createErrorType(found);
-    }
-
-    Type typeError(DiagnosticPosition pos, String problem, Type found, Type req, Object explanation) {
-        log.error(pos, "prob.found.req.1", problem, found, req, explanation);
-        return types.createErrorType(found);
-    }
-
     /** Report an error that wrong type tag was found.
      *  @param pos        Position to be used for error reporting.
      *  @param required   An internationalized string describing the type tag
@@ -430,6 +416,72 @@ public class Check {
  * Type Checking
  **************************************************************************/
 
+    /**
+     * A check context is an object that can be used to perform compatibility
+     * checks - depending on the check context, meaning of 'compatibility' might
+     * vary significantly.
+     */
+    interface CheckContext {
+        /**
+         * Is type 'found' compatible with type 'req' in given context
+         */
+        boolean compatible(Type found, Type req, Warner warn);
+        /**
+         * Report a check error
+         */
+        void report(DiagnosticPosition pos, Type found, Type req, JCDiagnostic details);
+        /**
+         * Obtain a warner for this check context
+         */
+        public Warner checkWarner(DiagnosticPosition pos, Type found, Type req);
+    }
+
+    /**
+     * This class represent a check context that is nested within another check
+     * context - useful to check sub-expressions. The default behavior simply
+     * redirects all method calls to the enclosing check context leveraging
+     * the forwarding pattern.
+     */
+    static class NestedCheckContext implements CheckContext {
+        CheckContext enclosingContext;
+
+        NestedCheckContext(CheckContext enclosingContext) {
+            this.enclosingContext = enclosingContext;
+        }
+
+        public boolean compatible(Type found, Type req, Warner warn) {
+            return enclosingContext.compatible(found, req, warn);
+        }
+
+        public void report(DiagnosticPosition pos, Type found, Type req, JCDiagnostic details) {
+            enclosingContext.report(pos, found, req, details);
+        }
+
+        public Warner checkWarner(DiagnosticPosition pos, Type found, Type req) {
+            return enclosingContext.checkWarner(pos, found, req);
+        }
+    }
+
+    /**
+     * Check context to be used when evaluating assignment/return statements
+     */
+    CheckContext basicHandler = new CheckContext() {
+        public void report(DiagnosticPosition pos, Type found, Type req, JCDiagnostic details) {
+            if (details == null) {
+                log.error(pos, "prob.found.req", found, req);
+            } else {
+                log.error(pos, "prob.found.req.1", details);
+            }
+        }
+        public boolean compatible(Type found, Type req, Warner warn) {
+            return types.isAssignable(found, req, warn);
+        }
+
+        public Warner checkWarner(DiagnosticPosition pos, Type found, Type req) {
+            return convertWarner(pos, found, req);
+        }
+    };
+
     /** Check that a given type is assignable to a given proto-type.
      *  If it is, return the type, otherwise return errType.
      *  @param pos        Position to be used for error reporting.
@@ -437,64 +489,23 @@ public class Check {
      *  @param req        The type that was required.
      */
     Type checkType(DiagnosticPosition pos, Type found, Type req) {
-        return checkType(pos, found, req, "incompatible.types");
+        return checkType(pos, found, req, basicHandler);
     }
 
-    Type checkType(DiagnosticPosition pos, Type found, Type req, String errKey) {
+    Type checkType(final DiagnosticPosition pos, Type found, Type req, CheckContext checkContext) {
         if (req.tag == ERROR)
             return req;
-        if (found.tag == FORALL)
-            return instantiatePoly(pos, (ForAll)found, req, convertWarner(pos, found, req));
         if (req.tag == NONE)
             return found;
-        if (types.isAssignable(found, req, convertWarner(pos, found, req)))
+        if (checkContext.compatible(found, req, checkContext.checkWarner(pos, found, req))) {
             return found;
-        if (found.tag <= DOUBLE && req.tag <= DOUBLE)
-            return typeError(pos, diags.fragment("possible.loss.of.precision"), found, req);
-        if (found.isSuperBound()) {
-            log.error(pos, "assignment.from.super-bound", found);
-            return types.createErrorType(found);
-        }
-        if (req.isExtendsBound()) {
-            log.error(pos, "assignment.to.extends-bound", req);
-            return types.createErrorType(found);
-        }
-        return typeError(pos, diags.fragment(errKey), found, req);
-    }
-
-    /** Instantiate polymorphic type to some prototype, unless
-     *  prototype is `anyPoly' in which case polymorphic type
-     *  is returned unchanged.
-     */
-    Type instantiatePoly(DiagnosticPosition pos, ForAll t, Type pt, Warner warn) throws Infer.NoInstanceException {
-        if (pt == Infer.anyPoly && complexInference) {
-            return t;
-        } else if (pt == Infer.anyPoly || pt.tag == NONE) {
-            Type newpt = t.qtype.tag <= VOID ? t.qtype : syms.objectType;
-            return instantiatePoly(pos, t, newpt, warn);
-        } else if (pt.tag == ERROR) {
-            return pt;
         } else {
-            try {
-                return infer.instantiateExpr(t, pt, warn);
-            } catch (Infer.NoInstanceException ex) {
-                if (ex.isAmbiguous) {
-                    JCDiagnostic d = ex.getDiagnostic();
-                    log.error(pos,
-                              "undetermined.type" + (d!=null ? ".1" : ""),
-                              t, d);
-                    return types.createErrorType(pt);
-                } else {
-                    JCDiagnostic d = ex.getDiagnostic();
-                    return typeError(pos,
-                                     diags.fragment("incompatible.types" + (d!=null ? ".1" : ""), d),
-                                     t, pt);
-                }
-            } catch (Infer.InvalidInstanceException ex) {
-                JCDiagnostic d = ex.getDiagnostic();
-                log.error(pos, "invalid.inferred.types", t.tvars, d);
-                return types.createErrorType(pt);
+            if (found.tag <= DOUBLE && req.tag <= DOUBLE) {
+                checkContext.report(pos, found, req, diags.fragment("possible.loss.of.precision"));
+                return types.createErrorType(found);
             }
+            checkContext.report(pos, found, req, null);
+            return types.createErrorType(found);
         }
     }
 
@@ -505,18 +516,62 @@ public class Check {
      *  @param req        The target type of the cast.
      */
     Type checkCastable(DiagnosticPosition pos, Type found, Type req) {
-        if (found.tag == FORALL) {
-            instantiatePoly(pos, (ForAll) found, req, castWarner(pos, found, req));
-            return req;
-        } else if (types.isCastable(found, req, castWarner(pos, found, req))) {
+        return checkCastable(pos, found, req, basicHandler);
+    }
+    Type checkCastable(DiagnosticPosition pos, Type found, Type req, CheckContext checkContext) {
+        if (types.isCastable(found, req, castWarner(pos, found, req))) {
             return req;
         } else {
-            return typeError(pos,
-                             diags.fragment("inconvertible.types"),
-                             found, req);
+            checkContext.report(pos, found, req, diags.fragment("inconvertible.types", found, req));
+            return types.createErrorType(found);
         }
     }
-//where
+
+    /** Check for redundant casts (i.e. where source type is a subtype of target type)
+     * The problem should only be reported for non-292 cast
+     */
+    public void checkRedundantCast(Env<AttrContext> env, JCTypeCast tree) {
+        if (!tree.type.isErroneous() &&
+            (env.info.lint == null || env.info.lint.isEnabled(Lint.LintCategory.CAST))
+            && types.isSameType(tree.expr.type, tree.clazz.type)
+            && !(ignoreAnnotatedCasts && containsTypeAnnotation(tree.clazz))
+            && !is292targetTypeCast(tree)) {
+            log.warning(Lint.LintCategory.CAST,
+                    tree.pos(), "redundant.cast", tree.expr.type);
+        }
+    }
+    //where
+            private boolean is292targetTypeCast(JCTypeCast tree) {
+                boolean is292targetTypeCast = false;
+                JCExpression expr = TreeInfo.skipParens(tree.expr);
+                if (expr.hasTag(APPLY)) {
+                    JCMethodInvocation apply = (JCMethodInvocation)expr;
+                    Symbol sym = TreeInfo.symbol(apply.meth);
+                    is292targetTypeCast = sym != null &&
+                        sym.kind == MTH &&
+                        (sym.flags() & HYPOTHETICAL) != 0;
+                }
+                return is292targetTypeCast;
+            }
+
+            /* Utility methods for ignoring type-annotated casts lint checking. */
+            private static final boolean ignoreAnnotatedCasts = true;
+
+            private static class AnnotationFinder extends TreeScanner {
+                public boolean foundTypeAnno = false;
+                public void visitAnnotation(JCAnnotation tree) {
+                    foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
+                }
+            }
+
+            private boolean containsTypeAnnotation(JCTree e) {
+                AnnotationFinder finder = new AnnotationFinder();
+                finder.scan(e);
+                return finder.foundTypeAnno;
+            }
+            /* End utility methods for ignoring type-annotated casts. */
+
+        //where
         /** Is type a type variable, or a (possibly multi-dimensional) array of
          *  type variables?
          */
@@ -838,14 +893,6 @@ public class Check {
                 && types.isSubtype(actual, types.supertype(formal))
                 && types.isSubtypeUnchecked(actual, types.interfaces(formal), warn))
                 return;
-
-            if (false) {
-                // TODO: make assertConvertible work
-                typeError(tree.pos(), diags.fragment("incompatible.types"), actual, formal);
-                throw new AssertionError("Tree: " + tree
-                                         + " actual:" + actual
-                                         + " formal: " + formal);
-            }
         }
 
     /**
@@ -1222,6 +1269,10 @@ public class Check {
                 // looking at a static member type.  However, the
                 // qualifying expression is parameterized.
                 log.error(tree.pos(), "cant.select.static.class.from.param.type");
+            } else if (tree.selected.type.tsym.isStatic() &&
+                tree.selected.type.typeAnnotations.nonEmpty()) {
+                // Enclosing static classes cannot have type annotations.
+                log.error(tree.pos(), "cant.annotate.static.class");
             } else {
                 // otherwise validate the rest of the expression
                 tree.selected.accept(this);
@@ -2408,7 +2459,7 @@ public class Check {
             validateAnnotation(a, s);
     }
 
-    /** Check the type annotations
+    /** Check the type annotations.
      */
     public void validateTypeAnnotations(List<JCTypeAnnotation> annotations, boolean isTypeParameter) {
         if (skipAnnotations) return;
@@ -2457,17 +2508,27 @@ public class Check {
         return false;
     }
 
-    /** Is the annotation applicable to type annotations */
+    /** Is the annotation applicable to type annotations? */
     boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return true;
+        if (atTarget == null) {
+            // An annotation without @Target is not a type annotation.
+            return false;
+        }
+
         Attribute atValue = atTarget.member(names.value);
-        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
+        if (!(atValue instanceof Attribute.Array)) {
+            return false; // error recovery
+        }
+
         Attribute.Array arr = (Attribute.Array) atValue;
         for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return true; // recovery
+            if (!(app instanceof Attribute.Enum)) {
+                return false; // recovery
+            }
             Attribute.Enum e = (Attribute.Enum) app;
+
             if (!isTypeParameter && e.value.name == names.TYPE_USE)
                 return true;
             else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
@@ -2480,49 +2541,74 @@ public class Check {
     boolean annotationApplicable(JCAnnotation a, Symbol s) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
-        if (atTarget == null) return true;
-        Attribute atValue = atTarget.member(names.value);
-        if (!(atValue instanceof Attribute.Array)) return true; // error recovery
-        Attribute.Array arr = (Attribute.Array) atValue;
-        for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return true; // recovery
-            Attribute.Enum e = (Attribute.Enum) app;
-            if (e.value.name == names.TYPE)
+        Name[] targets;
+
+        if (atTarget == null) {
+            targets = defaultTargetMetaInfo(a, s);
+        } else {
+            Attribute atValue = atTarget.member(names.value);
+            if (!(atValue instanceof Attribute.Array)) {
+                return true; // error recovery
+            }
+            Attribute[] arr = ((Attribute.Array) atValue).values;
+            // TODO: can we optimize this?
+            targets = new Name[arr.length];
+            for (int i=0; i<arr.length; ++i) {
+                Attribute app = arr[i];
+                if (!(app instanceof Attribute.Enum)) {
+                    return true; // recovery
+                }
+                Attribute.Enum e = (Attribute.Enum) app;
+                targets[i] = e.value.name;
+            }
+        }
+        for (Name target : targets) {
+            if (target == names.TYPE)
                 { if (s.kind == TYP) return true; }
-            else if (e.value.name == names.FIELD)
+            else if (target == names.FIELD)
                 { if (s.kind == VAR && s.owner.kind != MTH) return true; }
-            else if (e.value.name == names.METHOD)
+            else if (target == names.METHOD)
                 { if (s.kind == MTH && !s.isConstructor()) return true; }
-            else if (e.value.name == names.PARAMETER)
+            else if (target == names.PARAMETER)
                 { if (s.kind == VAR &&
                       s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) != 0)
                     return true;
                 }
-            else if (e.value.name == names.CONSTRUCTOR)
+            else if (target == names.CONSTRUCTOR)
                 { if (s.kind == MTH && s.isConstructor()) return true; }
-            else if (e.value.name == names.LOCAL_VARIABLE)
+            else if (target == names.LOCAL_VARIABLE)
                 { if (s.kind == VAR && s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) == 0)
                     return true;
                 }
-            else if (e.value.name == names.ANNOTATION_TYPE)
+            else if (target == names.ANNOTATION_TYPE)
                 { if (s.kind == TYP && (s.flags() & ANNOTATION) != 0)
                     return true;
                 }
-            else if (e.value.name == names.PACKAGE)
+            else if (target == names.PACKAGE)
                 { if (s.kind == PCK) return true; }
-            else if (e.value.name == names.TYPE_USE)
+            else if (target == names.TYPE_USE)
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
-                       s.type.getReturnType().tag != VOID))
+                      s.type.getReturnType().tag != VOID) ||
+                      (s.kind == MTH && s.isConstructor()))
+                    return true;
+                }
+            else if (target == names.TYPE_PARAMETER)
+                { if (s.kind == TYP && s.type.tag == TYPEVAR)
                     return true;
                 }
             else
                 return true; // recovery
         }
         return false;
+    }
+
+    private final Name[] dfltTargetMeta;
+    private Name[] defaultTargetMetaInfo(JCAnnotation a, Symbol s) {
+        return dfltTargetMeta;
     }
 
     /** Check an annotation value.
