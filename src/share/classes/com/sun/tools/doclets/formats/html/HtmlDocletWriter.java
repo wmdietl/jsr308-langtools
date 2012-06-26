@@ -2755,7 +2755,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      *         documented.
      */
     public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
-        return getAnnotations(indent, descList, linkBreak, null);
+        return getAnnotations(indent, descList, linkBreak, true);
     }
 
     /**
@@ -2773,7 +2773,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      * @return an array of strings representing the annotations being
      *         documented.
      */
-    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak, ElementType elementType) {
+    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak,
+            boolean isJava5DeclarationLocation) {
         List<String> results = new ArrayList<String>();
         StringBuffer annotation;
         for (int i = 0; i < descList.length; i++) {
@@ -2781,8 +2782,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             if (! Util.isDocumentedAnnotation(annotationDoc)){
                 continue;
             }
-            if  (elementType != null
-                 && Util.isDeclarationAnnotation(annotationDoc, elementType)) {
+            if  (Util.isDeclarationAnnotation(annotationDoc, isJava5DeclarationLocation)) {
                 continue;
             }
             annotation = new StringBuffer();

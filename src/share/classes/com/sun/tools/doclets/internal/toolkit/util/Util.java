@@ -675,8 +675,7 @@ public class Util {
         return false;
     }
 
-    private static boolean isDeclarationTarget(AnnotationDesc targetAnno, ElementType elemType) {
-        assert elemType != null && elemType != getElementTypeTypeUse();
+    private static boolean isDeclarationTarget(AnnotationDesc targetAnno) {
         // The error recovery steps here are analogous to TypeAnnotations
         ElementValuePair[] elems = targetAnno.elementValues();
         if (elems == null
@@ -692,7 +691,7 @@ public class Util {
                 return true; // error recovery
 
             FieldDoc eValue = (FieldDoc)value;
-            if (elemType.name().equals(eValue.name())) {
+            if (Util.isJava5DeclarationElementType(eValue)) {
                 return true;
             }
         }
@@ -709,18 +708,19 @@ public class Util {
      * @param elemType  the targeted elemType
      * @return true if annotationDoc is a declaration annotation
      */
-    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc, ElementType elemType) {
-        if (elemType == null || elemType == getElementTypeTypeUse())
+    public static boolean isDeclarationAnnotation(AnnotationTypeDoc annotationDoc,
+            boolean isJava5DeclarationLocation) {
+        if (!isJava5DeclarationLocation)
             return false;
         AnnotationDesc[] annotationDescList = annotationDoc.annotations();
         for (int i = 0; i < annotationDescList.length; i++) {
             if (annotationDescList[i].annotationType().qualifiedName().equals(
                     java.lang.annotation.Target.class.getName())) {
-                return isDeclarationTarget(annotationDescList[i], elemType);
+                return isDeclarationTarget(annotationDescList[i]);
             }
         }
         // Annotations with no target are treated as declaration as well
-        return elemType == getElementTypeTypeUse() ? false : true;
+        return true;
     }
 
     /**
@@ -935,14 +935,23 @@ public class Util {
     }
 
     /**
-     * Reflectively return the ElementType.TYPE_USE constant.
-     * This is necessary to prevent a bootstrap problem.
+     * Test whether the given FieldDoc is one of the declaration annotation ElementTypes
+     * defined in Java 5.
+     * Instead of testing for one of the new enum constants added in Java 8, test for
+     * the old constants. This prevents bootstrapping problems.
      *
-     * @return ElementType.TYPE_USE
+     * @param elt The FieldDoc to test
+     * @return true, iff the given ElementType is one of the constants defined in Java 5
      * @since 1.8
      */
-    public static ElementType getElementTypeTypeUse() {
-        // return ElementType.TYPE_USE;
-        return ElementType.valueOf("TYPE_USE");
+    public static boolean isJava5DeclarationElementType(FieldDoc elt) {
+        return elt.name().contentEquals(ElementType.ANNOTATION_TYPE.name()) ||
+                elt.name().contentEquals(ElementType.CONSTRUCTOR.name()) ||
+                elt.name().contentEquals(ElementType.FIELD.name()) ||
+                elt.name().contentEquals(ElementType.LOCAL_VARIABLE.name()) ||
+                elt.name().contentEquals(ElementType.METHOD.name()) ||
+                elt.name().contentEquals(ElementType.PACKAGE.name()) ||
+                elt.name().contentEquals(ElementType.PARAMETER.name()) ||
+                elt.name().contentEquals(ElementType.TYPE.name());
     }
 }

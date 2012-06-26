@@ -66,9 +66,10 @@ public abstract class LinkInfo {
     public boolean isTypeBound = false;
 
     /**
-     * The type of the document element.
+     * Whether the document element is in a Java 5 declaration
+     * location or not.
      */
-    public ElementType elemType = null;
+    public boolean isJava5DeclarationLocation = true;
 
     /**
      * The label for the link.

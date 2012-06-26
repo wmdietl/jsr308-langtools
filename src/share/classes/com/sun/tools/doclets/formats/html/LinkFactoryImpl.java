@@ -120,7 +120,7 @@ public class LinkFactoryImpl extends LinkFactory {
         typeLinkInfo.excludeTypeBounds = linkInfo.excludeTypeBounds;
         typeLinkInfo.excludeTypeParameterLinks = linkInfo.excludeTypeParameterLinks;
         typeLinkInfo.linkToSelf = linkInfo.linkToSelf;
-        typeLinkInfo.elemType = Util.getElementTypeTypeUse();
+        typeLinkInfo.isJava5DeclarationLocation = false;
         LinkOutput output = getLinkOutput(typeLinkInfo);
         ((LinkInfoImpl) linkInfo).displayLength += typeLinkInfo.displayLength;
         return output;
@@ -145,7 +145,7 @@ public class LinkFactoryImpl extends LinkFactory {
         if (annotations.length == 0)
             return output;
 
-        List<String> annos = m_writer.getAnnotations(0, annotations, false, linkInfo.elemType);
+        List<String> annos = m_writer.getAnnotations(0, annotations, false, linkInfo.isJava5DeclarationLocation);
 
         boolean isFirst = true;
         for (String anno : annos) {

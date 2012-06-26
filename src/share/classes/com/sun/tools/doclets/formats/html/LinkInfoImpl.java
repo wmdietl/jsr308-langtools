@@ -424,11 +424,9 @@ public class LinkInfoImpl extends LinkInfo {
 
             case CONTEXT_RETURN_TYPE:
             case CONTEXT_SUMMARY_RETURN_TYPE:
-                elemType = ElementType.METHOD;
                 excludeTypeBounds = true;
                 break;
             case CONTEXT_EXECUTABLE_MEMBER_PARAM:
-                elemType = ElementType.PARAMETER;
                 excludeTypeBounds = true;
                 break;
         }
