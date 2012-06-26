@@ -25,8 +25,6 @@
 
 package com.sun.tools.doclets.internal.toolkit.util.links;
 
-import java.lang.annotation.ElementType;
-
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.Configuration;
 

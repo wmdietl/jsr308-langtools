@@ -26,7 +26,6 @@
 package com.sun.tools.doclets.formats.html;
 
 import java.io.*;
-import java.lang.annotation.ElementType;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
