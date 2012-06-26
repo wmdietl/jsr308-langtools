@@ -26,6 +26,8 @@
 
 package com.sun.tools.doclets.formats.html;
 
+import java.lang.annotation.ElementType;
+
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
 import com.sun.tools.doclets.internal.toolkit.util.links.*;
@@ -422,6 +424,8 @@ public class LinkInfoImpl extends LinkInfo {
 
             case CONTEXT_RETURN_TYPE:
             case CONTEXT_SUMMARY_RETURN_TYPE:
+                excludeTypeBounds = true;
+                break;
             case CONTEXT_EXECUTABLE_MEMBER_PARAM:
                 excludeTypeBounds = true;
                 break;

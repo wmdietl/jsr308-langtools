@@ -25,6 +25,8 @@
 
 package com.sun.tools.doclets.internal.toolkit.util.links;
 
+import java.lang.annotation.ElementType;
+
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.Configuration;
 
@@ -62,6 +64,12 @@ public abstract class LinkInfo {
      * Set this to true to indicate that you are linking to a type parameter.
      */
     public boolean isTypeBound = false;
+
+    /**
+     * Whether the document element is in a Java 5 declaration
+     * location or not.
+     */
+    public boolean isJava5DeclarationLocation = true;
 
     /**
      * The label for the link.
