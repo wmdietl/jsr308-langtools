@@ -619,10 +619,12 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \nt{ForVarControl}: \\
 \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
 \\
-\nt{QualifiedTypeList}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \nt{QualifiedType} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{QualifiedType} }
+\new{\nt{QualifiedTypeList}}: \\
+\qquad        \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} }
 \end{tabbing}
 
+% \nt{QualifiedTypeList} was \nt{QualifiedIdentifierList} in the Java SE 7
+% Edition of the JLS\@.
 
 % Optionally, two uses of
 %   ``\opt{\nt{Annotations}} \nt{Type}''
