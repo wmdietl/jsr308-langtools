@@ -362,10 +362,29 @@ as \code{this}.)
   annotation on the type of the \code{this} parameter.
 
   Only the first formal parameter may be
-  named \code{this}, and such a parameter is only permitted on an instance
-  method, or on a static method or constructor of an inner class.  The type
+  named \code{this}, and such a parameter is permitted on an instance
+  method.  The type
   of the \code{this} parameter must be the same as the class that contains
   the method and should include type arguments if that class has any.
+  A receiver \code{this} formal parameter is also permitted on a
+  constructor of an inner class, in which case its type is that of the
+  class that contains the inner class.
+
+  %% Examples for constructors:
+
+  % public class OuterWithInnerStatic {
+  %   class Inner { }
+  %   static class Nested {
+  %     class Inner2 { }
+  %   }
+  % }
+
+  % class OtherClass {
+  %   void m(OuterWithInnerStatic o, OuterWithInnerStatic.Nested n) {
+  %     o.new Inner();
+  %     n.new Inner2();
+  %   }
+  % }
 
   In a method in an inner type,
   the receiver type can be
@@ -1676,7 +1695,7 @@ targets a class declaration type parameter bound.
 When the type annotation's target is a method return type, a constructor
 result (which is stored in the same place, using the \code{METHOD\_RETURN}
 enum of \code{TargetType}), a receiver type (for an instance method or for an inner class
-constructor or static method), or a field, \code{target\_info} is empty.
+constructor), or a field, \code{target\_info} is empty.
 More formally, it contains \code{empty\_target}:
 
 \preverbnegspace
