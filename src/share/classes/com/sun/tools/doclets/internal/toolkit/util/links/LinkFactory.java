@@ -57,10 +57,10 @@ public abstract class LinkFactory {
                 linkInfo.displayLength += type.typeName().length();
                 linkOutput.append(type.typeName());
             } else if (type.asAnnotatedType() != null) {
-                    linkOutput.append(getTypeAnnotationLinks(linkInfo));
-                    linkInfo.type = type.asAnnotatedType().underlyingType();
-                    linkOutput.append(getLinkOutput(linkInfo));
-                    return linkOutput;
+                linkOutput.append(getTypeAnnotationLinks(linkInfo));
+                linkInfo.type = type.asAnnotatedType().underlyingType();
+                linkOutput.append(getLinkOutput(linkInfo));
+                return linkOutput;
             } else if (type.asWildcardType() != null) {
                 //Wildcard type.
                 linkInfo.isTypeBound = true;
