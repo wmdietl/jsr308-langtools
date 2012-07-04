@@ -326,8 +326,6 @@ location, a type annotation is treated as applying to the constructed
 object (which is different than the receiver, if any, of the constructor).
 Generic type parameter annotations are not
 possible on the constructor result.
-(Outer class annotations for a constructor result must be identical to
-those on the receiver, so they can be inferred from the annotations on the receiver.)
 %
   Here is an example:
 % \begin{itemize}
@@ -350,6 +348,10 @@ object, and in the body of the constructor it is referred to as
 \code{this}.  In any non-constructor, the receiver (if any) is referred to
 as \code{this}.)
 % \end{itemize}
+
+Outer class annotations for a constructor result must be identical to
+those on the receiver, so they can be inferred from the annotations on the
+receiver.
 
 \item
   \label{type-annotation-locations-receiver}%
@@ -398,7 +400,7 @@ as \code{this}.)
   inner class that is in an inner class) has multiple receivers:  one for
   each containing class.  For a method, the receivers are named \<this>,
   \<Outer.this>, etc.  Only the innermost receiver may be written as a
-  formal parameter.  This restricton does not limit expressiveness, because
+  formal parameter.  This restriction does not limit expressiveness, because
   the annotations on the other receivers can be inferred
   from the annotations on the fully-qualified type of the innermost
   receiver, just as for outer class annotations on a constructor result.
@@ -3627,6 +3629,10 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  0x16 0x17 0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22
 % LocalWords:  0x23 0x24 0x25 308's casted useE1 useE2 pack200 unpack200
 % LocalWords:  Mahmood theReceiver 2x5 foo 0x00 0x01 0x02 0x03 0x04 0x05
-% LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10
-% LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B
-% LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's
+% LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 2x5
+% LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B 0x00
+% LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's 7in
+%  LocalWords:  0x01 0x02 0x03 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17
+%  LocalWords:  0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x80 0x81 0x82
+%  LocalWords:  0x83 0x84 0x85 0x86 0x87 0x88 0x89 0x8A 0x8B 0x8C 0x8D
+%  LocalWords:  0x8E 0x8F 308's
