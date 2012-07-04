@@ -1,7 +1,6 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
-----------------------------------------------------------------------
 Version 1.3.0, 3 Jul 2012
 
 Implements the current Type Annotations (JSR 308) specification,
