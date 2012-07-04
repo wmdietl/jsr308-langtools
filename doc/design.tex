@@ -364,8 +364,8 @@ receiver.
   annotation on the type of the \code{this} parameter.
 
   Only the first formal parameter may be
-  named \code{this}, and such a parameter is permitted on an instance
-  method.  The type
+  named \code{this}, and such a parameter is permitted only on an instance
+  method.  It is forbidden on a static method or a lambda expression.  The type
   of the \code{this} parameter must be the same as the class that contains
   the method and should include type arguments if that class has any.
   A receiver \code{this} formal parameter is also permitted on a
