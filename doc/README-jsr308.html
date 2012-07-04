@@ -43,7 +43,12 @@ pre, blockquote {
           <li><a href="#jsr308-features">Type Annotations (JSR 308) features</a></li>
           <li><a href="#openjdk-differences">Differences from the OpenJDK compiler</a>
             <ul>
-              <li><a href="#annotations-in-comments">Writing annotations in comments for forward compatibility</a></li>
+              <li><a href="#annotations-in-comments">Writing annotations in comments for forward compatibility</a>
+                <ul>
+                  <li><a href="#annotation-in-comment">Annotations in comments</a></li>
+                  <li><a href="#code-in-comments">Code in comments</a></li>
+                  <li><a href="#implicit-import">Implicit import statements</a></li>
+                </ul></li>
               <li><a href="#diffs">Determining a diff against the OpenJDK distribution</a></li>
             </ul></li>
         </ul></li>
@@ -366,6 +371,31 @@ in the following ways:
 <h4 id="annotations-in-comments">Writing annotations in comments for forward compatibility</h4>
 
 <p>
+The UW version of the Type Annotations compiler supports writing
+annotations and code in comments, and implicitly importing packages.
+These are temporary features that make it easy to write code that contains
+type annotations but that also compiles when using earlier versions of Java.
+These features will not be supported by the Oracle OpenJDK compiler.
+</p>
+
+<p>
+In addition to the features described below, 
+the compiler accepts the <tt>-target 5</tt> command-line option
+even when the <tt>-source</tt> option is 8 or is omitted.  The compiler
+creates a <tt>.class</tt> file that is compatible with a Java 5 JVM, but
+that contains the type annotations.
+</p>
+
+<p>
+For additional information about these features, see the
+<a href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#annotations-in-comments">Checker
+Framework Manual</a>.
+</p>
+
+
+<h5 id="annotation-in-comment">Annotations in comments</h5>
+
+<p>
 The Type Annotations compiler allows annotations to
 be written in &ldquo;<code>/* */</code>&rdquo; (C-style) comments, for example:
 </p>
@@ -373,7 +403,7 @@ be written in &ldquo;<code>/* */</code>&rdquo; (C-style) comments, for example:
   List&lt;/*@NonNull*/ String&gt; strings;
 </pre>
 <p>
-There must be no whitespace within the comment.
+There must be no whitespace at the beginning or end of the comment.
 </p>
 
 <p>
@@ -383,12 +413,38 @@ unmodified Java compiler, including compilers for earlier versions of the
 Java language (such as Java 4, Java 5, Java 6, or Java 7).
 </p>
  
+
+<h5 id="code-in-comments">Code in comments</h5>
+
 <p>
-This mechanism permits annotations to be written in comments, but it does
-not permit the new receiver (&ldquo;<tt>this</tt>&rdquo;) syntax to be
-written in comments.  That means that it is not generally possible to write
-annotations on receivers in a forward-compatible way.
+There is a more powerful mechanism that permits arbitrary code to be
+written in a comment that is formatted as 
+&ldquo;<code>/*>>> */</code>&rdquo;, with the first three characters of the
+comment being greater-than signs.
+As with annotations in comments, the commented code
+is ignored by ordinary compilers but is treated like ordinary code by the
+UW Type Annotations compiler.
 </p>
+
+<p>
+This mechanism is intended only to support writing import statements and
+the new  receiver (&ldquo;<tt>this</tt>&rdquo;) syntax, as in
+</p>
+<pre>
+public boolean getResult(/*>>> @ReadOnly TestRun this*/) { ... }
+</pre>
+<p>
+for a method that does not modify its receiver.
+</p>
+
+<p>
+It would be possible to abuse this mechanism to inject code only when using
+the Type Annotations compiler.  Doing so is not a sanctioned use of the
+mechanism.
+</p>
+
+
+<h5 id="implicit-import">Implicit import statements</h5>
 
 <p>
 A related mechanism, that also facilitates compatibility with compilers
@@ -414,18 +470,6 @@ compatibility, that might help more people adopt Java 8 sooner, thus
 increasing its momentum.
 -->
 
-<p>
-Finally, the compiler accepts the <tt>-target 5</tt> command-line option
-even when the <tt>-source</tt> option is 8 or is omitted.  The compiler
-creates a <tt>.class</tt> file that is compatible with a Java 5 JVM, but
-that contains the type annotations.
-</p>
-
-<p>
-For additional information about these features, see the
-<a href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#annotations-in-comments">Checker
-Framework Manual</a>.
-</p>
 
 
 <h4 id="diffs">Determining a diff against the OpenJDK distribution</h4>
@@ -714,5 +758,9 @@ repository</a>.
  -->
 <!--  LocalWords:  BrowserJavaVersion exe SoyLatte IntelliJ javac's bytecodes
  -->
-<!--  LocalWords:  jdk jre Cygwin mkdir NullnessSubchecker MyFile
+<!--  LocalWords:  jdk jre Cygwin mkdir NullnessSubchecker MyFile 2em 1em Maia
+ -->
+<!--  LocalWords:  JVMs JSR308 jsr308 subdirectory whitespace boolean getResult
+ -->
+<!--  LocalWords:  ReadOnly TestRun
  -->
