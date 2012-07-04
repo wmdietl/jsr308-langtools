@@ -11,6 +11,8 @@ PLUME_BIN ?= ${PLUME_LIB}/bin
 
 RELEASEDATE ?= `date '+%Y%m%d'`
 
+CHECKLINK ?= PERL5LIB=/homes/gws/mernst/bin/src/perl:/homes/gws/mernst/bin/src/perl/share/perl5:/homes/gws/mernst/bin/src/perl/lib64/perl5:/homes/gws/mernst/research/steering/colony-2003/experiment-scripts:/usr/share/perl5/ ${PLUME_BIN}/checklink
+
 export PERLLIB := ${PERLLIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
 export PERL5LIB := ${PERL5LIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
 
@@ -66,7 +68,7 @@ ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
 ${jsr308_spec}/java-annotation-extensions.pdf \
 ${jsr308_spec}/java-annotation-extensions.html \
-${jsr308_spec}/jsr308-changes.html \
+${jsr308_spec}/jsr308-changes.html
 	\cp -f design.html ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.html
 	\cp -f design.pdf ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.pdf
 	$(MAKE) checklinks
@@ -84,8 +86,8 @@ ${jsr308_spec}/jsr308-changes.html \
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks: ${PLUME_BIN}
-	${PLUME_BIN}/checklink -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
-	${PLUME_BIN}/checklink -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
+	${CHECKLINK} -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
+	${CHECKLINK} -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
 
 
 ###########################################################################
@@ -112,11 +114,11 @@ annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi 
 #	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' annotation-extensions.html
 #	html-update-toc annotation-extensions.html
 
-${jsr308_spec}/java-annotation-extensions.pdf: java-annotaton-extensions.pdf ${jsr308_spec} ${PLUME_BIN}
+${jsr308_spec}/java-annotation-extensions.pdf: annotation-extensions.pdf ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_spec}/java-annotation-extensions.html: java-annotation-extensions.html ${jsr308_spec} ${PLUME_BIN}
+${jsr308_spec}/java-annotation-extensions.html: annotation-extensions.html ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
 # We don't know which of the two files will be created
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
