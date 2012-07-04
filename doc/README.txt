@@ -18,4 +18,4 @@ or:
 They sometimes contain different changesets.
 
 Also see the instructions at:
-  .../checker-framework/release/README-maintainers.html
+  ../../checker-framework/release/README-maintainers.html
