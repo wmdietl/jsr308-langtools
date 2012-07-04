@@ -396,8 +396,7 @@ Annotations webpage</a>.
 An annotation before a method sometimes refers to the return type, and
 sometimes to the method itself.  There is never any ambiguity regarding
 which is intended.  See section <a
-href="specification/java-annotation-design.html#disambiguating">Disambiguating
-type and declaration annotations</a> in the Type Annotations specification.
+href="specification/java-annotation-design.html#target-meta-annotation">Target meta-annotations for type annotations</a> in the Type Annotations specification.
 </p>
 
 
@@ -446,7 +445,7 @@ chosen receiver annotation syntax was nearly
 twice as understandable to beginners as the next best alternative.
 <!-- see an email titled
 <a href="https://groups.google.com/forum/?fromgroups#!topic/jsr308-discuss/rDklRXNM374">"Receiver
-  annotation syntax: experimental evaluation"</a>, --> 
+  annotation syntax: experimental evaluation"</a>, -->
 </p>
 
 <p>
@@ -479,18 +478,24 @@ annotations on source code.
 <h3 id="statement_annotations">Is there a way to annotate statements?</h3>
 
 <p>
-Statement annotations are within the scope of JSR 308, and this feature is
-under consideration.  See the section <a
+Statement annotations are within the scope of JSR 308.
+However, this feature will not be a part of the initial version of JSR 308.
+A future revision could add them.
+<!--  See the section <a
 href="specification/java-annotation-design.html#statement-annotations">Annotations on Statements</a> in the Type Annotations specification.
+-->
 </p>
 
 <h3 id="feature-x">Should the Type Annotations specification support feature <em>X</em>?</h3>
 
 <p>
-Perhaps it should.  See section <a
+Perhaps it should.  
+<!-- See section <a
 href="specification/java-annotation-design.html#other-annotations">Other
 possible extensions to Java annotations</a> in the Type Annotations
-Specification.  Feel free to suggest modifications or additions to that
+Specification.
+-->
+Feel free to suggest modifications or additions to that
 section.  Your edits should correct factual errors, or should be
 well-motivated by compelling use-cases that cannot be achieved by other
 means.
@@ -514,9 +519,11 @@ future annotations more useful to programmers.  By contrast, Annotations
 for Software Defect Detection (JSR 305) defines some specific annotations,
 such as <tt>@Nonnull</tt> and <tt>@Positive</tt>.  The JSR 305 annotations
 are most useful if they can be written on types, so JSR 305 needs JSR 308
-to achieve its full potential.  For a more detailed comparison, see section
+to achieve its full potential.
+<!--  For a more detailed comparison, see section
 <a href="specification/java-annotation-design.html#semantics">Semantics of
 annotations</a> in the Type Annotations specification.
+-->
 </p>
 
 
@@ -532,11 +539,13 @@ annotations</a> in the Type Annotations specification.
 
 <p>
 The Type Annotations (JSR 308) expert group gladly welcomes suggestions for improvements to
-the Type Annotations specification, and to the tools that support it.  See
+the Type Annotations specification, and to the tools that support it.
+<!--  See
 section <a
 href="specification/java-annotation-design.html#other-annotations">Other
 possible extensions to Java annotations</a> in the Type Annotations
 Specification.
+-->
 </p>
 
 
