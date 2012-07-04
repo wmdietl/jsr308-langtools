@@ -2576,8 +2576,8 @@ generic parameters of the receiver.  Here are some examples:
   }
 \end{Verbatim}
 
-In an inner class, there are two \<this> parameters:  that for the inner
-class, and that for the currently-executing method in the outer class.  It
+A method in an inner class has two \<this> parameters:  that for the inner
+class, and that for the enclosing instance (which is \<this> in the currently-executing method in the outer class).  It
 is desirable to specify the types for both.  
 One use case for this is a read-only type system, where you want to
 make the distinction between the outer and inner object.
