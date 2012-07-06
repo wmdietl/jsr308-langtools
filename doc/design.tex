@@ -1290,7 +1290,7 @@ trust annotated classes of unknown provenance~\cite{BurdyHP2007}.
 % ``attributes''.
 
 In Java SE 7, an annotation is stored in the class file in an
-\emph{attribute}~\cite{JSR175,LindholmY99:CFF5}.  An attribute 
+\emph{attribute}~\cite{JSR175,LindholmYBB2012}.  An attribute 
 associates data with a program element (a
 method's bytecodes, for instance, are stored in a \code{Code}
 attribute of the method). The \RuntimeVisibleParameterAnnotations attribute
@@ -1308,11 +1308,11 @@ These attributes contain arrays of
 the names and values of an annotation's arguments.
 
 Annotations on a field are stored as attributes of the field's 
-\code{field\_info} structure~\cite[\S 4.6]{LindholmY99:CFF5}.
+\code{field\_info} structure~\cite[\S 4.6]{LindholmYBB2012}.
 Annotations on a method are stored as attributes of the method's
-\code{method\_info} structure~\cite[\S 4.7]{LindholmY99:CFF5}.
+\code{method\_info} structure~\cite[\S 4.7]{LindholmYBB2012}.
 Annotations on a class are stored as attributes of the class's
-\code{attributes} structure~\cite[\S 4.2]{LindholmY99:CFF5}.
+\code{attributes} structure~\cite[\S 4.2]{LindholmYBB2012}.
 
 Generic type information is stored in a different way in the class file, in
 a signature attribute.  Its details are not germane to the current
@@ -1427,7 +1427,7 @@ type_annotation {
 
 
 We first briefly recap
-the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmY99:CFF5}.
+the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmYBB2012}.
 
 \begin{itemize}
 \item \code{type\_index} is an index into the constant pool indicating the
@@ -1438,7 +1438,7 @@ the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmY99:CFF5}.
   element-value pair in the annotation (in the source code, these are the
   arguments to the annotation):  \code{element\_name\_index} is a
   constant pool entry for the name of the annotation type element, and
-  \code{value} is the corresponding value~\cite[\S 4.8.15.1]{LindholmY99:CFF5}.
+  \code{value} is the corresponding value~\cite[\S 4.8.15.1]{LindholmYBB2012}.
 \end{itemize}
 
 Compared to \code{annotation},
@@ -1772,7 +1772,7 @@ live range in the bytecodes of the local variable's containing method
   length}, exclusive).  The
 \code{index} field stores the local variable's index in that method.
 These fields are similar to those of the optional
-\code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmY99:CFF5}.
+\code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmYBB2012}.
 
 Storing local variable annotations in the class file raises certain
 challenges.  For example, live ranges are not isomorphic to local
