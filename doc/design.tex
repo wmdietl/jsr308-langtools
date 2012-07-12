@@ -367,7 +367,7 @@ receiver.
   named \code{this}, and such a parameter is permitted only on an instance
   method.  It is forbidden on a static method or a lambda expression.  The type
   of the \code{this} parameter must be the same as the class that contains
-  the method and should include type arguments if that class has any.
+  the method and must include type arguments if that class has any.
   A receiver \code{this} formal parameter is also permitted on a
   constructor of an inner class, in which case its type is that of the
   class that contains the inner class.
@@ -3017,7 +3017,7 @@ Other new features do not raise any new interactions with type annotations.
 
 % no Coin 2, which is deferred to JDK 9
 
-It may be desirable to write an annotation that should should apply to all
+It may be desirable to write an annotation that should apply to all
 the disjuncts in a disjunctive union type, such as those in a multi-catch
 statement.  Here is a possibility, though it is not currently part of the
 specification:
@@ -3059,12 +3059,12 @@ for the same code without annotations.  (The class file may differ, since
 the annotations are stored in it, but the bytecode part does not differ.)
 
 The compiler sometimes creates new methods that did not appear in the
-source code.  The compiler should annotate these compiler-generated methods
+source code.  The compiler must annotate these compiler-generated methods
 in an appropriate way.  For example, a bridge method is an implementation
 strategy used when the erased signature of the actual method being invoked
 differs from that of the compile-time method
 declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
-nothing but call an existing method, and in this case, annotations should
+nothing but call an existing method, and in this case, annotations must
 be copied from the method being invoked.
 
 %% Cut this -- too compiler-specific.
@@ -3310,7 +3310,7 @@ For instance, suppose that a program reflectively calls a method
 with a parameter whose type is annotated as \code{@Readonly}, but the
 corresponding argument has a declared type that is non-\code{@Readonly}.
 The call succeeds.  This is a requirement for backward compatibility:  the
-existence of annotations in the class file should not cause a standard JVM
+existence of annotations in the class file must not cause a standard JVM
 to behave differently than if the annotations are not present (unless the
 program uses reflection to explicitly examine the annotations).  Likewise,
 other reflective functionality such as \code{AtomicReferenceFieldUpdater}
@@ -3345,7 +3345,7 @@ would not be able to read the impoverished version of type qualifiers that
 is expressible in Java SE 7 (see Section~\ref{compiler-mods}).  It is
 desirable for class file tools to be able to read at least that subset of
 type qualifiers.  Therefore, APIs for reading annotations from a class file
-should be dependent on the class file version (as a number of APIs already
+must be dependent on the class file version (as a number of APIs already
 are).  If the class file version indicates Java SE 7, and none of the
 extended annotations defined by JSR 308 appear in the class file, then the
 API may return (all) annotations from declarations when queried for the
