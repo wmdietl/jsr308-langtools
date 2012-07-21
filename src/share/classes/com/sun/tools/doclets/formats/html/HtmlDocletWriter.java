@@ -2624,6 +2624,17 @@ public class HtmlDocletWriter extends HtmlDocWriter {
     }
 
     /**
+     * Add the annotation types of the executable receiver.
+     *
+     * @param method the executable to write the receiver annotations for.
+     * @param htmltree the documentation tree to which the annotation info will be
+     *        added
+     */
+    public void addReceiverAnnotationInfo(ExecutableMemberDoc method, Content htmltree) {
+        addAnnotationInfo(method, method.receiverAnnotations(), htmltree);
+    }
+
+    /**
      * Write the annotatation types for the given doc.
      *
      * @param doc the doc to write annotations for.
@@ -2742,12 +2753,35 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      * @return an array of strings representing the annotations being
      *         documented.
      */
-    private List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
+    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak) {
+        return getAnnotations(indent, descList, linkBreak, true);
+    }
+
+    /**
+     * Return the string representations of the annotation types for
+     * the given doc.
+     *
+     * A {@code null} {@code elementType} indicates that all the
+     * annotations should be returned without any filtering.
+     *
+     * @param indent the number of extra spaces to indent the annotations.
+     * @param descList the array of {@link AnnotationDesc}.
+     * @param linkBreak if true, add new line between each member value.
+     * @param elementType the type of targeted element (used for filtering
+     *        type annotations from declaration annotations)
+     * @return an array of strings representing the annotations being
+     *         documented.
+     */
+    public List<String> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak,
+            boolean isJava5DeclarationLocation) {
         List<String> results = new ArrayList<String>();
         StringBuffer annotation;
         for (int i = 0; i < descList.length; i++) {
             AnnotationTypeDoc annotationDoc = descList[i].annotationType();
             if (! Util.isDocumentedAnnotation(annotationDoc)){
+                continue;
+            }
+            if  (Util.isDeclarationAnnotation(annotationDoc, isJava5DeclarationLocation)) {
                 continue;
             }
             annotation = new StringBuffer();

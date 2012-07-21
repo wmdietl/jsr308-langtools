@@ -35,6 +35,7 @@ import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.comp.Resolve;
 import com.sun.tools.javac.tree.JCTree.*;
 
 import static com.sun.tools.javac.code.Flags.*;
@@ -1738,6 +1739,11 @@ public class Flow {
 
         void referenced(Symbol sym) {
             unrefdResources.remove(sym);
+        }
+
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            // annotations don't get scanned
+            tree.underlyingType.accept(this);
         }
 
         public void visitTopLevel(JCCompilationUnit tree) {
