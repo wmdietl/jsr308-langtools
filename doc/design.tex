@@ -3058,14 +3058,21 @@ compiler produces the same bytecodes for annotated code as it would have
 for the same code without annotations.  (The class file may differ, since
 the annotations are stored in it, but the bytecode part does not differ.)
 
-The compiler sometimes creates new methods that did not appear in the
-source code.  The compiler must annotate these compiler-generated methods
+The compiler sometimes creates new methods or other constructs
+that did not appear in the
+source code.  The compiler must annotate this compiler-generated code
 in an appropriate way.  For example, a bridge method is an implementation
 strategy used when the erased signature of the actual method being invoked
 differs from that of the compile-time method
 declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
-nothing but call an existing method, and in this case, annotations must
-be copied from the method being invoked.
+nothing but call an existing method.  The compiler must copy annotations
+from the method being invoked to the bridge method.
+As another example, an anonymous class desugars into a class declaration
+and instantiation.  A programmer may write both type and declaration
+annotations on an anonymous class in Java source code.  In the classfile,
+the type annotations are copied to the class declaration and to its
+instantiation (\<new> expression).  The declaration annotations are copied
+only to the class declaration.
 
 %% Cut this -- too compiler-specific.
 % and
@@ -3632,7 +3639,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 2x5
 % LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B 0x00
 % LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's 7in
-%  LocalWords:  0x01 0x02 0x03 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17
+%  LocalWords:  0x01 0x02 0x03 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17 2x5
 %  LocalWords:  0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x80 0x81 0x82
 %  LocalWords:  0x83 0x84 0x85 0x86 0x87 0x88 0x89 0x8A 0x8B 0x8C 0x8D
-%  LocalWords:  0x8E 0x8F 308's
+%  LocalWords:  0x8E 0x8F 308's 0x00 0x01 0x02 0x03
