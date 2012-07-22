@@ -264,6 +264,11 @@ G{\"u}nter Kniesel and Dirk Theisen.
 \newblock {JAC} --- access right based encapsulation for {Java}.
 \newblock {\em Software: Practice and Experience}, 31(6):555--576, 2001.
 
+\bibitem[LBBY12]{LindholmYBB2012}
+Tim Lindholm, Gilad Bracha, Alex Buckley, and Frank Yellin.
+\newblock {\em The Java Virtual Machine Specification}.
+\newblock Oracle America, {Java SE 7} edition, February~6, 2012.
+
 \bibitem[LBR06]{LeavensBR2006:JML}
 Gary~T. Leavens, Albert~L. Baker, and Clyde Ruby.
 \newblock Preliminary design of {JML}: A behavioral interface specification
@@ -282,18 +287,6 @@ Yi~Lu and John Potter.
 \newblock In {\em Proceedings of the 33rd Annual ACM SIGPLAN-SIGACT Symposium
   on Principles of Programming Languages}, pages 359--371, Charleston, SC, USA,
   January~11--13, 2006.
-
-\bibitem[LY99]{LindholmY99}
-Tim Lindholm and Frank Yellin.
-\newblock {\em The Java Virtual Machine Specification}.
-\newblock Addison-Wesley, Reading, MA, USA, 2nd edition, 1999.
-
-\bibitem[LY07]{LindholmY99:CFF5}
-Tim Lindholm and Frank Yellin.
-\newblock The \texttt{class} file format.
-\newblock
-  \url{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}, December 2007.
-\newblock Revision to chapter 4 of \cite{LindholmY99} for JDK 1.5.
 
 \bibitem[Mor06]{JSR250}
 Rajiv Mordani.
