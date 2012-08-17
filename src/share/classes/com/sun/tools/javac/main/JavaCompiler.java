@@ -539,6 +539,11 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         if (shouldStopPolicy == null)
             return (errorCount() > 0 || unrecoverableError());
         else
+            // TODO Jon: should this also check for unrecoverable errors?
+            // I think test case tools/javac/processing/errors/TestParseErrors/TestParseErrors.java
+            // fails because of this.
+            // TODO Jon: wouldn't this be nicer if it used (an adapted?) isDone?
+            // return cs.isDone(shouldStopPolicy);
             return cs.ordinal() > shouldStopPolicy.ordinal();
     }
 
@@ -1648,6 +1653,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         hasBeenUsed = true;
         closeables = prev.closeables;
         prev.closeables = List.nil();
+        shouldStopPolicy = prev.shouldStopPolicy;
     }
 
     public static void enableLogging() {
