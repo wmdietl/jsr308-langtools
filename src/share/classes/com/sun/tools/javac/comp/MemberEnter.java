@@ -1051,7 +1051,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                             syms.annotationType,
                             env);
                     if (c == null) continue;
-                    Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, a.annotation_position);
+                    Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
                     a.attribute_field = tc;
                     // Note: @Deprecated has no effect on local variables and parameters
                     if (!annotated.add(a.type.tsym))
@@ -1068,15 +1068,15 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         public void visitClassDef(final JCClassDecl tree) {
             boolean wasEnclosing = isEnclosingClass;
             try {
-            	if (isEnclosingClass)
-            		return;
-            	isEnclosingClass = true;
-            	scan(tree.mods);
-            	// type parameter need to be visited with a separate env
-            	// scan(tree.typarams);
-            	scan(tree.extending);
-            	scan(tree.implementing);
-            	scan(tree.defs);
+                if (isEnclosingClass)
+                    return;
+                isEnclosingClass = true;
+                scan(tree.mods);
+                // type parameter need to be visited with a separate env
+                // scan(tree.typarams);
+                scan(tree.extending);
+                scan(tree.implementing);
+                scan(tree.defs);
             } finally {
             	isEnclosingClass = wasEnclosing;
             }
