@@ -157,6 +157,7 @@ public class TestAnonClassNames {
     }
 }
 
+@Target({ElementType.TYPE, ElementType.TYPE_USE})
 @Retention(RUNTIME)
 @interface Nesting {
     NestingKind value();
