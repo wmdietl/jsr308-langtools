@@ -567,7 +567,6 @@ public class TypeAnnotations {
 
         private static void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
             for (JCTypeAnnotation anno : annotations) {
-                anno.annotation_position = position;
                 anno.attribute_field.position = position;
             }
         }

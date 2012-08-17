@@ -87,7 +87,6 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
             // Fill the rest
             JCTypeAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
-            newTA.annotation_position = ta.annotation_position;
             newTA.annotationType = ta.annotationType;
             newTA.attribute_field = ta.attribute_field;
             return newTA;
