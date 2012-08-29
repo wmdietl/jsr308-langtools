@@ -156,6 +156,14 @@ public class MethodTypeParam {
         return "class Test { <T> Class<@TA T> m() { throw new RuntimeException(); } }";
     }
 
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_RETURN)
+    })
+    public String useInReturn3() {
+        return "class Test { <T extends @TA Object> @TB T m() { throw new RuntimeException(); } }";
+    }
+
     @TADescription(annotation = "TA", type = METHOD_PARAMETER_COMPONENT,
             paramIndex = 0, genericLocation = {0})
     public String useInParam1() {
