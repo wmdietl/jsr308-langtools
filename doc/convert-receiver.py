@@ -1,93 +1,101 @@
 #!/usr/bin/python
-# It DOESN'T work for methods that are declared over more than one line.
+# Change one JSR 308 receiver annotation from old style to new style.
+# Moves the annotation from after the parameter list (in C++ location)
+# to a new first parameter named "this"."""
 
 import os
 import re
 import sys
 
+output_dir = "convert_output"
 
+def get_end_index(source, start):
+    """Get the index of ';' or '{' starting from start."""
+    i = source.find(';', start);
+    j = source.find('{', start);
+    k = source.find('}', start);
+    if i == j and j == k and k == -1:
+        return -1
+    else:
+        m = i < j and i or j
+        return (m < k and m or k)
 
-def convert(fileName):
-    """Change one JSR 308 receiver annotation from old style to new
-    style.  Moves the annotation from after the parameter list (in C++
-    location) to a new first parameter named "this"."""
+def convert(file_name, in_place):
+    """Do the conversion"""
+
+    print "converting", file_name, "..."
 
     # A stack for keeping class names and curly braces
     stack = []
 
-    # Another stack for keeping the current class
+    # Another stack for keeping the current class name
     current_class = []
 
     # Regex for class declaration
-    class_pattern = re.compile(r".*?(\s+|^)(class|interface)\s+([A-Za-z0-9_]+\s*(<[A-Za-z0-9_]+(\s*,\s*[A-Za-z0-9_]+)*>)?)")
-    method_pattern = re.compile(r".*?(\s+|^)([A-Za-z0-9_]+?\s*\()([^)]*)(\)\s*(((\/\*)?\s*@[A-Za-z0-9_]+\s*(\*\/)?)+))")
-
-    # Tmp file
-    tmpFileName = fileName + '.tmp'
+    class_pattern = re.compile(r".*?(\s+|^)(class|interface)\s+(\w+\s*(<\w+(\s*,\s*\w+)*>)?)")
+    method_pattern = re.compile(r".*?(\s+|^)(\w+?\s*\()([^)]*)(\)\s*(((\/\*)?\s*@\w+\s*(\*\/)?)+))")
 
     # Open file
-    file = open(fileName)
-    tmpFile = open(tmpFileName, 'w')
-
-
-    # Scan the file line by line
-    for line in file:
-        class_names = {}
-        method_names = {}
-        # Match the class declarations and store into a dict: pos -> name
-        m = class_pattern.findall(line)
-        for match_classes in m:
-            class_name = match_classes[2].strip()
-            class_names[line.find(class_name)] = class_name
-
-        # Now we look for the method receiver annotation
-        for match_methods in  method_pattern.findall(line):
-#            print match_methods
-            method_name = match_methods[1].strip()
-            parameters = match_methods[2].strip()
-            be_removed = match_methods[3].strip()
-            annotations = match_methods[4].strip()
-            method_names[line.find(method_name)] = (method_name, parameters, be_removed, annotations)
-
-        new_line = line
-
-        for i in range(0, len(line)):
-            c = line[i]
-            if i in class_names:
-                stack.append(class_names[i])
-                current_class.append(class_names[i])
-#                print "push class:", class_names[i]
-            elif c == '{':
-                stack.append('{')
-            elif c == '}':
-                stack.pop()
-                if len(stack) > 0 and stack[len(stack) - 1] != '{':
-                    # In this case, we need to pop the class name
-                    stack.pop()
-#                    print "pop class:", current_class.pop()
-            elif i in method_names:
-                # We do the subsititution. This may fail if therer more than
-                # one method invocation
-                current = current_class[len(current_class) - 1]
-#                print "current:", current
-                old_method = method_names[i][0]
-                parameters = method_names[i][1]
-                be_removed = method_names[i][2]
-                annotations = method_names[i][3]
-                new_method = old_method + annotations + " " + current + " this"
-                if parameters != "":
-                    new_method = new_method + ", "
-                replace_line = new_line[i:]
-                replace_line = replace_line.replace(be_removed, ") ").replace(old_method, new_method)
-                new_line = new_line[: i] + replace_line
-        tmpFile.write(new_line)
-#        print new_line,
-
+    file = open(file_name)
+    source = file.read()
     file.close()
-    tmpFile.close()
 
-    # Rename the file
-    os.rename(tmpFileName, fileName)
+    length = len(source);
+    dest = "";  # The result will be stored in "dest"
+    i = 0;
+    while i < length:
+        end = get_end_index(source, i)
+        if end > 0:
+            s = source[i:end + 1]    # Include the character ; { }
+        else:
+            s = source[i:]
+        # Match the class declarations
+        c = class_pattern.search(s)
+        m = method_pattern.search(s)
+
+        if c is not None:
+            class_name = c.group(3).strip()
+            stack.append(class_name)
+            current_class.append(class_name)
+            dest = dest + source[i : i + c.end()]
+            i = i + c.end()
+        elif m is not None:
+        # Now we look for the method declaration with annotations
+            method_name = m.group(2).strip()
+            parameters = m.group(3).strip()
+            annotations = m.group(5).strip()
+            current = current_class[len(current_class) - 1]
+            new_method = method_name + annotations + " " + current + " this"
+            if parameters != "":
+                new_method = new_method + ", "
+            new_method = new_method + parameters + ")"
+            dest = dest + source[i : i + m.end(1)]
+            dest = dest + new_method
+            i = i + m.end(0)
+        else:
+            dest = dest + s
+            # Look for next { or }
+            if end > 0:
+                if source[end] == '{':
+                    stack.append('{')
+                elif source[end] == '}':
+                    stack.pop()
+                    if len(stack) > 0 and stack[len(stack) - 1] != '{':
+                        # In this case, we need to pop the class name
+                        stack.pop()
+                        current_class.pop()
+                i = end + 1
+            else:
+                break
+
+    if not in_place:
+        out_file_name = output_dir + os.sep + file_name
+        d = os.path.dirname(out_file_name)
+        if not os.path.exists(d):
+            os.makedirs(d)
+        out_file = open(out_file_name, 'w')
+        out_file.write(dest)
+        out_file.close()
 
 
 def main():
@@ -95,7 +103,8 @@ def main():
         print 'Usage:', sys.argv[0], '<fileName> <fileName> ...'
     else:
         for i in range(1, len(sys.argv)):
-            convert(sys.argv[i])
+            convert(sys.argv[i], False)
+        print "converted files were written into",output_dir,"directory"
 
 if __name__ == '__main__':
     main()
