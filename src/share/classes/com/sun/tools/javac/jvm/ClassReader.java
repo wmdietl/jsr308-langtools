@@ -204,6 +204,10 @@ public class ClassReader implements Completer {
     /** The minor version number of the class file being read. */
     int minorVersion;
 
+    /** Switch: debug output for JSR 308-related operations.
+     */
+    boolean debugJSR308;
+
     /** A table to hold the constant pool indices for method parameter
      * names, as given in LocalVariableTable attributes.
      */
@@ -289,6 +293,7 @@ public class ClassReader implements Completer {
             : null;
 
         typevars = new Scope(syms.noSymbol);
+        debugJSR308 = options.isSet("TA:reader");
 
         lintClassfile = Lint.instance(context).isEnabled(LintCategory.CLASSFILE);
 
@@ -1133,13 +1138,14 @@ public class ClassReader implements Completer {
                 }
             },
 
-            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
+            // JSR 308 local change: keep compatible with 1.5. Use V49 instead of V52.
+            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
 
-            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
+            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
@@ -1405,6 +1411,10 @@ public class ClassReader implements Completer {
     TypeAnnotationProxy readTypeAnnotation() {
         CompoundAnnotationProxy proxy = readCompoundAnnotation();
         TypeAnnotationPosition position = readPosition();
+
+        if (debugJSR308)
+            System.out.println("TA: reading: " + proxy + " @ " + position
+                    + " in " + log.currentSourceFile());
 
         return new TypeAnnotationProxy(proxy, position);
     }
@@ -1865,6 +1875,9 @@ public class ClassReader implements Completer {
             try {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
+                if (debugJSR308)
+                    System.out.println("TA: reading: adding " + newList
+                      + " to symbol " + sym + " in " + log.currentSourceFile());
                 sym.typeAnnotations = ((sym.typeAnnotations == null)
                                         ? newList
                                         : newList.prependList(sym.typeAnnotations));

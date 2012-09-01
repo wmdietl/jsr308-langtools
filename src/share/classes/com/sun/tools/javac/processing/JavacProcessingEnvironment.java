@@ -155,7 +155,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private Context context;
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     public JavacProcessingEnvironment(Context context, Iterable<? extends Processor> processors) {
+        uid = ++uidCounter;
+        options = Options.instance(context);
         this.context = context;
         log = Log.instance(context);
         source = Source.instance(context);
@@ -1478,7 +1483,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     }
 
     public String toString() {
-        return "javac ProcessingEnvironment";
+        return "JavacProcessingEnvironment#" + uid;
     }
 
     public static boolean isValidOptionName(String optionName) {
