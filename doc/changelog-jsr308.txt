@@ -1,6 +1,18 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.4.0, XX Sep 2012
+
+Code cleanups:
+- Remove com.sun.source.util.AbstractTypeProcessor
+- Remove com.sun.tools.javac.tree.JCTree.JCTypeAnnotation.annotation_position field
+- Add V52 classfile version
+- Adaptations to these changes and cleanups
+
+Base build
+  Updated to OpenJDK 8 langtools as of XX Sep 2012.
+
+----------------------------------------------------------------------
 Version 1.3.1, 21 Jul 2012
 
 Base build
