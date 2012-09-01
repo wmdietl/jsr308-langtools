@@ -1078,7 +1078,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 scan(tree.implementing);
                 scan(tree.defs);
             } finally {
-            	isEnclosingClass = wasEnclosing;
+                isEnclosingClass = wasEnclosing;
             }
         }
 
