@@ -1138,8 +1138,7 @@ public class ClassReader implements Completer {
                 }
             },
 
-            // TODO: v51 attributes or something specific to 1.8?
-            // JSR 308 local change: keep compatible with 1.5.
+            // JSR 308 local change: keep compatible with 1.5. Use V49 instead of V52.
             new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
                 void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);

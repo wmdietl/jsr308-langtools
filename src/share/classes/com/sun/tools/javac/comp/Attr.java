@@ -26,7 +26,6 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 import javax.lang.model.element.ElementKind;
 import javax.tools.JavaFileObject;
 
@@ -230,7 +229,7 @@ public class Attr extends JCTree.Visitor {
      *  @param env    The current environment.
      */
     boolean isAssignableAsBlankFinal(VarSymbol v, Env<AttrContext> env) {
-        Symbol owner = env.info.scope.owner;
+        Symbol owner = owner(env);
            // owner refers to the innermost variable, method or
            // initializer block declaration at this point.
         return
@@ -243,6 +242,41 @@ public class Attr extends JCTree.Visitor {
              v.owner == owner.owner
              &&
              ((v.flags() & STATIC) != 0) == Resolve.isStatic(env));
+    }
+
+    /**
+     * Return the innermost enclosing owner symbol in a given attribution context
+     */
+    Symbol owner(Env<AttrContext> env) {
+        while (true) {
+            switch (env.tree.getTag()) {
+                case VARDEF:
+                    //a field can be owner
+                    VarSymbol vsym = ((JCVariableDecl)env.tree).sym;
+                    if (vsym.owner.kind == TYP) {
+                        return vsym;
+                    }
+                    break;
+                case METHODDEF:
+                    //method def is always an owner
+                    return ((JCMethodDecl)env.tree).sym;
+                case CLASSDEF:
+                    //class def is always an owner
+                    return ((JCClassDecl)env.tree).sym;
+                case BLOCK:
+                    //static/instance init blocks are owner
+                    Symbol blockSym = env.info.scope.owner;
+                    if ((blockSym.flags() & BLOCK) != 0) {
+                        return blockSym;
+                    }
+                    break;
+                case TOPLEVEL:
+                    //toplevel is always an owner (for pkge decls)
+                    return env.info.scope.owner;
+            }
+            Assert.checkNonNull(env.next);
+            env = env.next;
+        }
     }
 
     /** Check that variable can be assigned to.
@@ -900,7 +934,6 @@ public class Attr extends JCTree.Visitor {
                 memberEnter.memberEnter(tree, env);
                 annotate.flush();
             }
-            tree.sym.flags_field |= EFFECTIVELY_FINAL;
         }
 
         VarSymbol v = tree.sym;
@@ -1148,8 +1181,8 @@ public class Attr extends JCTree.Visitor {
         for (JCTree resource : tree.resources) {
             CheckContext twrContext = new Check.NestedCheckContext(resultInfo.checkContext) {
                 @Override
-                public void report(DiagnosticPosition pos, Type found, Type req, JCDiagnostic details) {
-                    chk.basicHandler.report(pos, found, req, diags.fragment("try.not.applicable.to.type", found));
+                public void report(DiagnosticPosition pos, JCDiagnostic details) {
+                    chk.basicHandler.report(pos, diags.fragment("try.not.applicable.to.type", details));
                 }
             };
             ResultInfo twrResult = new ResultInfo(VAL, syms.autoCloseableType, twrContext);
@@ -1908,7 +1941,7 @@ public class Attr extends JCTree.Visitor {
 
     Type attribDiamond(Env<AttrContext> env,
                         final JCNewClass tree,
-                        Type clazztype,
+                        final Type clazztype,
                         List<Type> argtypes,
                         List<Type> typeargtypes) {
         if (clazztype.isErroneous() ||
@@ -1935,27 +1968,26 @@ public class Attr extends JCTree.Visitor {
                     argtypes,
                     typeargtypes);
 
+        Type owntype = types.createErrorType(clazztype);
         if (constructor.kind == MTH) {
-            try {
-                clazztype = rawCheckMethod(site,
-                        constructor,
-                        resultInfo,
-                        localEnv,
-                        tree.args,
-                        argtypes,
-                        typeargtypes,
-                        localEnv.info.varArgs).getReturnType();
-            } catch (Resolve.InapplicableMethodException ex) {
-                //an error occurred while inferring uninstantiated type-variables
-                resultInfo.checkContext.report(tree.clazz.pos(), clazztype, resultInfo.pt,
-                        diags.fragment("cant.apply.diamond.1", diags.fragment("diamond", clazztype.tsym), ex.diagnostic));
-                clazztype = syms.errType;
-            }
-        } else {
-            clazztype = syms.errType;
+            ResultInfo diamondResult = new ResultInfo(VAL, resultInfo.pt, new Check.NestedCheckContext(resultInfo.checkContext) {
+                @Override
+                public void report(DiagnosticPosition pos, JCDiagnostic details) {
+                    enclosingContext.report(tree.clazz.pos(),
+                            diags.fragment("cant.apply.diamond.1", diags.fragment("diamond", clazztype.tsym), details));
+                }
+            });
+            owntype = checkMethod(site,
+                    constructor,
+                    diamondResult,
+                    localEnv,
+                    tree.args,
+                    argtypes,
+                    typeargtypes,
+                    localEnv.info.varArgs).getReturnType();
         }
 
-        return chk.checkClassType(tree.clazz.pos(), clazztype, true);
+        return chk.checkClassType(tree.clazz.pos(), owntype, true);
     }
 
     /** Make an attributed null check tree.
@@ -2230,16 +2262,6 @@ public class Attr extends JCTree.Visitor {
             // ..., evaluate its initializer, if it has one, and check for
             // illegal forward reference.
             checkInit(tree, env, v, false);
-
-            // If symbol is a local variable accessed from an embedded
-            // inner class check that it is final.
-            if (v.owner.kind == MTH &&
-                v.owner != env.info.scope.owner &&
-                (v.flags_field & FINAL) == 0) {
-                log.error(tree.pos(),
-                          "local.var.accessed.from.icls.needs.final",
-                          v);
-            }
 
             // If we are expecting a variable (as opposed to a value), check
             // that the variable is assignable in the current environment.
@@ -2634,7 +2656,7 @@ public class Attr extends JCTree.Visitor {
             // and are subject to definite assignment checking.
             if ((env.info.enclVar == v || v.pos > tree.pos) &&
                 v.owner.kind == TYP &&
-                canOwnInitializer(env.info.scope.owner) &&
+                canOwnInitializer(owner(env)) &&
                 v.owner == env.info.scope.owner.enclClass() &&
                 ((v.flags() & STATIC) != 0) == Resolve.isStatic(env) &&
                 (!env.tree.hasTag(ASSIGN) ||
@@ -2730,32 +2752,6 @@ public class Attr extends JCTree.Visitor {
                             List<Type> argtypes,
                             List<Type> typeargtypes,
                             boolean useVarargs) {
-        try {
-            return rawCheckMethod(site, sym, resultInfo, env, argtrees, argtypes, typeargtypes, useVarargs);
-        } catch (Resolve.InapplicableMethodException ex) {
-            String key = ex.getDiagnostic() == null ?
-                    "cant.apply.symbol" :
-                    "cant.apply.symbol.1";
-            log.error(env.tree.pos, key,
-                      Kinds.kindName(sym),
-                      sym.name == names.init ? sym.owner.name : sym.name,
-                      rs.methodArguments(sym.type.getParameterTypes()),
-                      rs.methodArguments(argtypes),
-                      Kinds.kindName(sym.owner),
-                      sym.owner.type,
-                      ex.getDiagnostic());
-            return types.createErrorType(site);
-        }
-    }
-
-    private Type rawCheckMethod(Type site,
-                            Symbol sym,
-                            ResultInfo resultInfo,
-                            Env<AttrContext> env,
-                            final List<JCExpression> argtrees,
-                            List<Type> argtypes,
-                            List<Type> typeargtypes,
-                            boolean useVarargs) {
         // Test (5): if symbol is an instance method of a raw type, issue
         // an unchecked warning if its argument types change under erasure.
         if (allowGenerics &&
@@ -2776,19 +2772,29 @@ public class Attr extends JCTree.Visitor {
         // Resolve.instantiate from the symbol's type as well as
         // any type arguments and value arguments.
         noteWarner.clear();
-        Type owntype = rs.rawInstantiate(env,
-                                          site,
-                                          sym,
-                                          resultInfo,
-                                          argtypes,
-                                          typeargtypes,
-                                          true,
-                                          useVarargs,
-                                          noteWarner);
+        try {
+            Type owntype = rs.rawInstantiate(
+                    env,
+                    site,
+                    sym,
+                    resultInfo,
+                    argtypes,
+                    typeargtypes,
+                    allowBoxing,
+                    useVarargs,
+                    noteWarner);
 
-        boolean unchecked = noteWarner.hasNonSilentLint(LintCategory.UNCHECKED);
-
-        return chk.checkMethod(owntype, sym, env, argtrees, argtypes, useVarargs, unchecked);
+            return chk.checkMethod(owntype, sym, env, argtrees, argtypes, useVarargs,
+                    noteWarner.hasNonSilentLint(LintCategory.UNCHECKED));
+        } catch (Infer.InferenceException ex) {
+            //invalid target type - propagate exception outwards or report error
+            //depending on the current check context
+            resultInfo.checkContext.report(env.tree.pos(), ex.getDiagnostic());
+            return types.createErrorType(site);
+        } catch (Resolve.InapplicableMethodException ex) {
+            Assert.error();
+            return null;
+        }
     }
 
     /**

@@ -2672,6 +2672,7 @@ public class Lower extends TreeTranslator {
     }
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
+        // No need to retain type annotations any longer.
         tree.underlyingType = translate(tree.underlyingType);
         result = tree.underlyingType;
     }

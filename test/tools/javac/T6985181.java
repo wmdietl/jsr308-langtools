@@ -36,7 +36,9 @@ public class T6985181 {
     }
 
     public void run() throws Exception {
-        String code = "@interface Simple { }\ninterface Test<@Simple T> { }";
+        String code = "@java.lang.annotation.Target(java.lang.annotation.ElementType.TYPE_PARAMETER)\n" +
+                "@interface Simple { }\n" +
+                "interface Test<@Simple T> { }";
 
         File srcFile = writeFile("Test.java", code);
         File classesDir = new File("classes");

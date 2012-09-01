@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,14 +21,23 @@
  * questions.
  */
 
-// key: compiler.misc.applicable.method.found.1
-// key: compiler.note.verbose.resolve.multi
-// key: compiler.misc.partial.inst.sig
-// options: -XDverboseResolution=applicable,success
+/*
+ * @test
+ * @bug 7178324
+ * @summary Crash when compiling for(i : x) try(AutoCloseable x = ...) {}
+ * @compile T7178324.java
+ */
 
-class ApplicableMethodFound1 {
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
-    <X> void m(X x) {}
-
-    { m(1); }
+class T7178324 {
+    public static void main(String[] args) throws Exception {
+        List<File> files = new ArrayList<>();
+        for (File f : files)
+            try (FileInputStream is = new FileInputStream(f)) {
+        }
+    }
 }

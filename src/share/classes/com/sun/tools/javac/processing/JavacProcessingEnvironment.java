@@ -47,10 +47,9 @@ import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import static javax.tools.StandardLocation.*;
 
-import com.sun.source.util.AbstractTypeProcessor;
 import com.sun.source.util.JavacTask;
 import com.sun.source.util.TaskEvent;
-import com.sun.tools.javac.api.JavacTaskImpl;
+import com.sun.tools.javac.api.BasicJavacTask;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.api.MultiTaskListener;
 import com.sun.tools.javac.code.*;
@@ -98,11 +97,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     private final boolean printRounds;
     private final boolean verbose;
     private final boolean lint;
-    private final boolean procOnly;
     private final boolean fatalErrors;
     private final boolean werror;
     private final boolean showResolveErrors;
-    private boolean foundTypeProcessors;
 
     private final JavacFiler filer;
     private final JavacMessager messager;
@@ -114,12 +111,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
      * used.
      */
     private DiscoveredProcessors discoveredProcs;
-
-    /**
-     * Type processors, which should have Processor.init called later in
-     * compilation than declaration processors.
-     */
-    public static java.util.List<AbstractTypeProcessor> typeProcessorsToInit = new java.util.ArrayList<AbstractTypeProcessor>();
 
     /**
      * Map of processor-specific options.
@@ -179,12 +170,17 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         printRounds = options.isSet(XPRINTROUNDS);
         verbose = options.isSet(VERBOSE);
         lint = Lint.instance(context).isEnabled(PROCESSING);
-        procOnly = options.isSet(PROC, "only") || options.isSet(XPRINT);
+        if (options.isSet(PROC, "only") || options.isSet(XPRINT)) {
+            // TODO Jon: this has slightly different semantics than the
+            // previous procOnly boolean flag. Do you like this?
+            // Some tests fail because of this change.
+            JavaCompiler compiler = JavaCompiler.instance(context);
+            compiler.shouldStopPolicy = CompileState.PROCESS;
+        }
         fatalErrors = options.isSet("fatalEnterError");
         showResolveErrors = options.isSet("showResolveErrors");
         werror = options.isSet(WERROR);
         platformAnnotations = initPlatformAnnotations();
-        foundTypeProcessors = false;
 
         // Initialize services before any processors are initialized
         // in case processors use them.
@@ -489,11 +485,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             contributed = false;
 
             try {
-                if (processor instanceof AbstractTypeProcessor) {
-                    typeProcessorsToInit.add((AbstractTypeProcessor) processor);
-                } else {
-                    processor.init(env);
-                }
+                processor.init(env);
 
                 checkSourceVersionCompatibility(source, log);
 
@@ -698,7 +690,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             }
 
             if (matchedNames.size() > 0 || ps.contributed) {
-                foundTypeProcessors = foundTypeProcessors || (ps.processor instanceof AbstractTypeProcessor);
                 boolean processingResult = callProcessor(ps.processor, typeElements, renv);
                 ps.contributed = true;
                 ps.removeSupportedOptions(unmatchedProcessorOptions);
@@ -899,7 +890,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         /** Create the compiler to be used for the final compilation. */
         JavaCompiler finalCompiler(boolean errorStatus) {
             try {
-                JavaCompiler c = JavaCompiler.instance(nextContext());
+                Context nextCtxt = nextContext();
+                JavacProcessingEnvironment.this.context = nextCtxt;
+                JavaCompiler c = JavaCompiler.instance(nextCtxt);
                 c.log.nwarnings += compiler.log.nwarnings;
                 if (errorStatus) {
                     c.log.nerrors += compiler.log.nerrors;
@@ -1038,7 +1031,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         }
 
         /** Get the context for the next round of processing.
-         * Important values are propogated from round to round;
+         * Important values are propagated from round to round;
          * other values are implicitly reset.
          */
         private Context nextContext() {
@@ -1101,10 +1094,14 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             elementUtils.setContext(next);
             typeUtils.setContext(next);
 
-            JavacTaskImpl task = (JavacTaskImpl) context.get(JavacTask.class);
-            if (task != null) {
-                next.put(JavacTask.class, task);
-                task.updateContext(next);
+            JavacTask atask = context.get(JavacTask.class);
+            if (atask != null) {
+                next.put(JavacTask.class, atask);
+                if (atask instanceof BasicJavacTask) {
+                    BasicJavacTask task = (BasicJavacTask) atask; 
+                    task.updateContext(next);
+                }
+                // TODO Jon: what should happen if atask is not a BasicJavacTask?
             }
 
             JavacTrees trees = context.get(JavacTrees.class);
@@ -1204,14 +1201,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             return compiler;
         }
 
-        if (procOnly && !foundTypeProcessors) {
-            compiler.todo.clear();
-        } else {
-            if (procOnly && foundTypeProcessors)
-                compiler.shouldStopPolicy = CompileState.FLOW;
-
-            compiler.enterTrees(roots);
-        }
+        compiler.enterTrees(roots);
 
         return compiler;
     }
@@ -1367,6 +1357,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             public void visitIdent(JCIdent node) {
                 node.sym = null;
                 super.visitIdent(node);
+            }
+            public void visitAnnotation(JCAnnotation node) {
+                if (node instanceof JCTypeAnnotation) {
+                    ((JCTypeAnnotation)node).attribute_field = null;
+                }
+                super.visitAnnotation(node);
             }
         };
 

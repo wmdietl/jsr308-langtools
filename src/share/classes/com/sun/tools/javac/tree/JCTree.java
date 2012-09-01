@@ -2191,12 +2191,10 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     public static class JCTypeAnnotation extends JCAnnotation {
-        public TypeAnnotationPosition annotation_position;
         public Attribute.TypeCompound attribute_field;
 
         protected JCTypeAnnotation(JCTree annotationType, List<JCExpression> args) {
             super(annotationType, args);
-            this.annotation_position = new TypeAnnotationPosition();
         }
     }
 

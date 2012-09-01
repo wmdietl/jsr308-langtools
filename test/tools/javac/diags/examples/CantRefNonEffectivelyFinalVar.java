@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,14 +21,14 @@
  * questions.
  */
 
-// key: compiler.misc.applicable.method.found.1
-// key: compiler.note.verbose.resolve.multi
-// key: compiler.misc.partial.inst.sig
-// options: -XDverboseResolution=applicable,success
+// key: compiler.err.cant.ref.non.effectively.final.var
+// key: compiler.misc.inner.cls
+// options: -XDallowEffectivelyFinalInInnerClasses
 
-class ApplicableMethodFound1 {
-
-    <X> void m(X x) {}
-
-    { m(1); }
+class CantRefNonEffectivelyFinalVar {
+    void test() {
+        int i = 0;
+        new Object() { int j = i; };
+        i = 2;
+    }
 }
