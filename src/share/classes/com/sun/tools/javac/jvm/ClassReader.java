@@ -1134,13 +1134,13 @@ public class ClassReader implements Completer {
             },
 
             new AttributeReader(names.RuntimeVisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
-                void read(Symbol sym, int attrLen) {
+                protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
 
             new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
-                void read(Symbol sym, int attrLen) {
+                protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
@@ -1362,7 +1362,7 @@ public class ClassReader implements Completer {
                 ListBuffer.lb();
             for (int i = 0; i < numAttributes; i++)
                 proxies.append(readTypeAnnotation());
-            annotate.later(new TypeAnnotationCompleter(sym, proxies.toList()));
+            annotate.normal(new TypeAnnotationCompleter(sym, proxies.toList()));
         }
     }
 

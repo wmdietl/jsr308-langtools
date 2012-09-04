@@ -743,7 +743,7 @@ public class TypeAnnotations {
                 position.pos = tree.pos;
                 position.type = TargetType.LOCAL_VARIABLE;
                 ListBuffer<TypeCompound> typeAnnos = new ListBuffer<TypeCompound>();
-                for (Attribute.Compound attribute : tree.sym.attributes_field) {
+                for (Attribute.Compound attribute : tree.sym.getAnnotationMirrors()) {
                     Attribute.TypeCompound tc =
                         new Attribute.TypeCompound(attribute.type, attribute.values, position);
                     typeAnnos.append(tc);
@@ -793,7 +793,7 @@ public class TypeAnnotations {
     private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym, TypeAnnotationPosition pos) {
         // System.out.printf("separateAnnotationsKinds(typetree: %s, type: %s, symbol: %s, pos: %s%n",
         //        typetree, type, sym, pos);
-        List<Compound> annotations = sym.attributes_field;
+        List<Compound> annotations = sym.getAnnotationMirrors();
 
         ListBuffer<Compound> declAnnos = new ListBuffer<Compound>();
         ListBuffer<TypeCompound> typeAnnos = new ListBuffer<TypeCompound>();
@@ -817,7 +817,7 @@ public class TypeAnnotations {
             }
         }
 
-        sym.attributes_field = declAnnos.toList();
+        sym.annotations.setAttributes(declAnnos.toList());
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
 
         if (type==null) {
@@ -951,7 +951,7 @@ public class TypeAnnotations {
     }
 
     private boolean areAllDecl(Symbol s) {
-        for (Compound a : s.attributes_field) {
+        for (Compound a : s.getAnnotationMirrors()) {
             if (annotationType(a, s) != AnnotationType.DECLARATION)
                 return false;
         }

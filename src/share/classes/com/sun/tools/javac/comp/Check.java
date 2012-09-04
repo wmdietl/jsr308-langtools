@@ -2473,7 +2473,7 @@ public class Check {
         }
     }
 
-    private void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
+    public void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
         if (a.type == null)
             throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
@@ -2747,9 +2747,9 @@ public class Check {
             targets = defaultTargetMetaInfo(a, s);
         } else {
             // TODO: can we optimize this?
-            targets = new Name[arr.length];
-            for (int i=0; i<arr.length; ++i) {
-                Attribute app = arr[i];
+            targets = new Name[arr.values.length];
+            for (int i=0; i<arr.values.length; ++i) {
+                Attribute app = arr.values[i];
                 if (!(app instanceof Attribute.Enum)) {
                     return true; // recovery
                 }

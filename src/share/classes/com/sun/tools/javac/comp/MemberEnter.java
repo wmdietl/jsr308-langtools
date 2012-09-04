@@ -1069,19 +1069,17 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         private void enterTypeAnnotations(List<JCTypeAnnotation> annotations, JCTree tree) {
             Set<TypeSymbol> annotated = new HashSet<TypeSymbol>();
-            if (!skipAnnotations) {
-                for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
-                    JCTypeAnnotation a = al.head;
-                    Attribute.Compound c = annotate.enterAnnotation(a,
-                            syms.annotationType,
-                            env);
-                    if (c == null) continue;
-                    Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
-                    a.attribute_field = tc;
-                    // Note: @Deprecated has no effect on local variables and parameters
-                    if (!annotated.add(a.type.tsym))
-                        log.error(a.pos, "duplicate.annotation");
-                }
+            for (List<JCTypeAnnotation> al = annotations; al.nonEmpty(); al = al.tail) {
+                JCTypeAnnotation a = al.head;
+                Attribute.Compound c = annotate.enterAnnotation(a,
+                        syms.annotationType,
+                        env);
+                if (c == null) continue;
+                Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
+                a.attribute_field = tc;
+                // Note: @Deprecated has no effect on local variables and parameters
+                if (!annotated.add(a.type.tsym))
+                    log.error(a.pos, "duplicate.annotation");
             }
         }
 
@@ -1109,7 +1107,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         private void annotate(final JCTree tree, final List<JCTypeAnnotation> annotations) {
             if (annotations.nonEmpty()) {
-                annotate.later(new Annotate.Annotator() {
+                annotate.normal(new Annotate.Annotator() {
                     public String toString() {
                         return "annotate " + annotations + " onto " + tree;
                     }
