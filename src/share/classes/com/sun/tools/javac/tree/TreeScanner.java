@@ -201,8 +201,8 @@ public class TreeScanner extends Visitor {
 
     public void visitNewClass(JCNewClass tree) {
         scan(tree.encl);
-        scan(tree.clazz);
         scan(tree.typeargs);
+        scan(tree.clazz);
         scan(tree.args);
         scan(tree.def);
     }
