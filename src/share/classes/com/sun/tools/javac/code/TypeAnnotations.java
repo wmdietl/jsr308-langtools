@@ -183,7 +183,6 @@ public class TypeAnnotations {
                     pos.pos = tree.pos;
                     separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);*/
                 }
-
             }
             super.visitVarDef(tree);
         }
@@ -485,7 +484,7 @@ public class TypeAnnotations {
                 case MEMBER_SELECT: {
                     int index = 0;
                     List<JCTree> newPath = path.tail;
-                    JCTree npHead = null;
+                    JCTree npHead;
                     while (true) {
                         npHead = newPath.tail.head;
                         if (npHead.hasTag(JCTree.Tag.SELECT)) {
@@ -497,7 +496,7 @@ public class TypeAnnotations {
                             newPath = newPath.tail;
                         } else if (npHead.hasTag(JCTree.Tag.TYPEAPPLY)) {
                             JCTypeApply apply = (JCTypeApply) npHead;
-                            if( apply.arguments.contains(newPath.head)) {
+                            if (apply.arguments.contains(newPath.head)) {
                                 break;
                             } else {
                                 // Skip over parameterized types on the same level
@@ -817,6 +816,7 @@ public class TypeAnnotations {
             }
         }
 
+	sym.annotations.reset();
         sym.annotations.setAttributes(declAnnos.toList());
         List<TypeCompound> typeAnnotations = typeAnnos.toList();
 
