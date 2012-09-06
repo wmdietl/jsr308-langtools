@@ -166,11 +166,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         verbose = options.isSet(VERBOSE);
         lint = Lint.instance(context).isEnabled(PROCESSING);
         if (options.isSet(PROC, "only") || options.isSet(XPRINT)) {
-            // TODO Jon: this has slightly different semantics than the
-            // previous procOnly boolean flag. Do you like this?
-            // Some tests fail because of this change.
             JavaCompiler compiler = JavaCompiler.instance(context);
-            compiler.shouldStopPolicy = CompileState.PROCESS;
+            compiler.shouldStopPolicyAtMost = CompileState.PROCESS;
         }
         fatalErrors = options.isSet("fatalEnterError");
         showResolveErrors = options.isSet("showResolveErrors");
@@ -1196,7 +1193,11 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             return compiler;
         }
 
-        compiler.enterTrees(roots);
+        if (!compiler.shouldStop(CompileState.ATTR)) {
+            // TODO: logically, the above check should be in enterTrees
+            // However, many tests fail if the check is moved there.
+            compiler.enterTrees(roots);
+        }
 
         return compiler;
     }
