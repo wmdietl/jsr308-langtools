@@ -406,10 +406,12 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
             ? names.fromString(options.get("failcomplete"))
             : null;
 
-        shouldStopPolicy =
+        shouldStopPolicyAtLeast =
             options.isSet("shouldStopPolicy")
             ? CompileState.valueOf(options.get("shouldStopPolicy"))
-            : null;
+            : CompileState.INIT;
+        shouldStopPolicyAtMost = CompileState.GENERATE;
+
         if (options.isUnset("oldDiags"))
             log.setDiagnosticFormatter(RichDiagnosticFormatter.instance(context));
     }
@@ -486,10 +488,14 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
     public boolean verboseCompilePolicy;
 
     /**
-     * Policy of how far to continue processing. null means until first
-     * error.
+     * Policy of how far to continue processing AT LEAST.
      */
-    public CompileState shouldStopPolicy;
+    public CompileState shouldStopPolicyAtLeast;
+
+    /**
+     * Policy of how far to continue processing AT MOST.
+     */
+    public CompileState shouldStopPolicyAtMost;
 
     /** A queue of all as yet unattributed classes.
      */
@@ -501,6 +507,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
 
     /** Ordered list of compiler phases for each compilation unit. */
     public enum CompileState {
+        INIT(0),
         PARSE(1),
         ENTER(2),
         PROCESS(3),
@@ -515,7 +522,10 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         boolean isDone(CompileState other) {
             return value >= other.value;
         }
-        private int value;
+        public static CompileState max(CompileState a, CompileState b) {
+            return a.value > b.value ? a : b;
+        }
+        private final int value;
     };
     /** Partial map to record which compiler phases have been executed
      * for each compilation unit. Used for ATTR and FLOW phases.
@@ -535,16 +545,14 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
      */
     protected Set<JavaFileObject> inputFiles = new HashSet<JavaFileObject>();
 
-    protected boolean shouldStop(CompileState cs) {
-        if (shouldStopPolicy == null)
-            return (errorCount() > 0 || unrecoverableError());
-        else
-            // TODO Jon: should this also check for unrecoverable errors?
-            // I think test case tools/javac/processing/errors/TestParseErrors/TestParseErrors.java
-            // fails because of this.
-            // TODO Jon: wouldn't this be nicer if it used (an adapted?) isDone?
-            // return cs.isDone(shouldStopPolicy);
-            return cs.ordinal() > shouldStopPolicy.ordinal();
+    // TODO: make method protected again once use in JavacProcessingEnvironment
+    // is resolved.
+    public boolean shouldStop(CompileState cs) {
+        if (errorCount() > 0 || unrecoverableError()) {
+            return cs.value > shouldStopPolicyAtLeast.value;
+        } else {
+            return cs.value > shouldStopPolicyAtMost.value;
+        }
     }
 
     /** The number of errors reported so far.
@@ -1653,7 +1661,8 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
         hasBeenUsed = true;
         closeables = prev.closeables;
         prev.closeables = List.nil();
-        shouldStopPolicy = prev.shouldStopPolicy;
+        shouldStopPolicyAtLeast = prev.shouldStopPolicyAtLeast;
+        shouldStopPolicyAtMost = prev.shouldStopPolicyAtMost;
     }
 
     public static void enableLogging() {
