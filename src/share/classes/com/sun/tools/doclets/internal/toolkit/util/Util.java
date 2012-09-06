@@ -713,14 +713,17 @@ public class Util {
         if (!isJava5DeclarationLocation)
             return false;
         AnnotationDesc[] annotationDescList = annotationDoc.annotations();
+        // Annotations with no target are treated as declaration as well
+        if (annotationDescList.length==0)
+            return true;
         for (int i = 0; i < annotationDescList.length; i++) {
             if (annotationDescList[i].annotationType().qualifiedName().equals(
                     java.lang.annotation.Target.class.getName())) {
-                return isDeclarationTarget(annotationDescList[i]);
+                if (isDeclarationTarget(annotationDescList[i]))
+                    return true;
             }
         }
-        // Annotations with no target are treated as declaration as well
-        return true;
+        return false;
     }
 
     /**
