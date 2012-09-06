@@ -1075,7 +1075,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             next.put(Tokens.tokensKey, tokens);
 
             // propogate the log's writers directly, instead of going through context
-            Log.instance(next).setWriters(log);
+            Log newlog = Log.instance(next);
+            newlog.setWriters(log);
+            newlog.setSourceMap(log);
 
             JavaCompiler oldCompiler = JavaCompiler.instance(context);
             JavaCompiler nextCompiler = JavaCompiler.instance(next);
