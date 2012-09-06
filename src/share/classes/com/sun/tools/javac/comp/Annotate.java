@@ -121,15 +121,15 @@ public class Annotate {
         if (enterCount != 0) return;
         enterCount++;
         try {
-            while (q.nonEmpty())
+            while (q.nonEmpty()) {
                 q.next().enterAnnotation();
-
+            }
             while (repeatedQ.nonEmpty()) {
                 repeatedQ.next().enterAnnotation();
             }
-
-            while (flushQ.nonEmpty())
+            while (flushQ.nonEmpty()) {
                 flushQ.next().enterAnnotation();
+            }
         } finally {
             enterCount--;
         }
