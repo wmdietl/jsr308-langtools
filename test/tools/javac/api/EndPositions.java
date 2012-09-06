@@ -67,7 +67,7 @@ public class EndPositions extends AbstractProcessor {
         JavacTask task = (JavacTask)javac.getTask(null, null, diagnostics, options, null, compilationUnits);
         boolean valid = task.call();
         if (valid)
-            throw new AssertionError("Class is invalid");
+            throw new AssertionError("Expected one error, but found none.");
 
         List<Diagnostic<? extends JavaFileObject>> errors = diagnostics.getDiagnostics();
         if (errors.size() != 1)
