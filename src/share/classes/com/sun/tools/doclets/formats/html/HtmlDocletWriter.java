@@ -2781,9 +2781,11 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             if (! Util.isDocumentedAnnotation(annotationDoc)){
                 continue;
             }
+            /* TODO: check logic here to correctly handle declaration
+             * and type annotations.
             if  (Util.isDeclarationAnnotation(annotationDoc, isJava5DeclarationLocation)) {
                 continue;
-            }
+            }*/
             annotation = new StringBuffer();
             LinkInfoImpl linkInfo = new LinkInfoImpl(
                 LinkInfoImpl.CONTEXT_ANNOTATION, annotationDoc);
