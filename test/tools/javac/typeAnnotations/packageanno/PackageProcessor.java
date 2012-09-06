@@ -62,7 +62,8 @@ public class PackageProcessor extends AbstractProcessor {
         JavacTask.instance(env).addTaskListener(listener);
         Context ctx = ((JavacProcessingEnvironment)processingEnv).getContext();
         JavaCompiler compiler = JavaCompiler.instance(ctx);
-        compiler.shouldStopPolicy = CompileState.FLOW;
+        compiler.shouldStopPolicyAtMost = CompileState.max(compiler.shouldStopPolicyAtMost,
+                CompileState.FLOW);
     }
 
     @Override
