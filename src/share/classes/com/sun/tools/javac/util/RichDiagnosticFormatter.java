@@ -530,7 +530,7 @@ public class RichDiagnosticFormatter extends
                     bound = ((ErrorType)bound).getOriginalType();
                 //retrieve the bound list - if the type variable
                 //has not been attributed the bound is not set
-                List<Type> bounds = bound != null ?
+                List<Type> bounds = (bound != null && bound.tsym!=null) ?
                     types.getBounds(t) :
                     List.<Type>nil();
 
