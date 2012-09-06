@@ -27,11 +27,7 @@
  * an annotation processor is present
  */
 
-import com.sun.source.tree.ClassTree;
-import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.Tree;
 import com.sun.source.util.JavacTask;
-import com.sun.source.util.Trees;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Arrays;
@@ -58,8 +54,8 @@ public class EndPositions extends AbstractProcessor {
             }
             @Override
             public String getCharContent(boolean ignoreEncodingErrors) {
-                //      0         1          2          3
-                //      01234567890123456 7890 123456789012345
+                //      0         1         2         3
+                //      012345678901234567890123456789012345
                 return "class Test { String s = 1234; }";
             }
         }
@@ -75,12 +71,13 @@ public class EndPositions extends AbstractProcessor {
 
         List<Diagnostic<? extends JavaFileObject>> errors = diagnostics.getDiagnostics();
         if (errors.size() != 1)
-            throw new AssertionError("Expected one error only, but found " + errors.size() + " errors");
+            throw new AssertionError("Expected one error only, but found " + errors.size() + "; errors: " + errors);
 
         Diagnostic<?> error = errors.get(0);
         if (error.getStartPosition() >= error.getEndPosition())
             throw new AssertionError("Expected start to be less than end position: start [" +
-                    error.getStartPosition() + "], end [" + error.getEndPosition() +"]");
+                    error.getStartPosition() + "], end [" + error.getEndPosition() +"]" +
+                    "; diagnostics code: " + error.getCode());
 
         System.out.println("All is good!");
     }
