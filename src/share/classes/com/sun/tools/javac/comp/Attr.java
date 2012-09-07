@@ -1687,15 +1687,19 @@ public class Attr extends JCTree.Visitor {
         // complete class name to be fully qualified
         JCExpression clazz = tree.clazz; // Class field following new
         JCExpression clazzid;            // Identifier in class field
+        JCAnnotatedType annoclazzid;     // Annotated type enclosing clazzid
+        annoclazzid = null;
 
         if (clazz.hasTag(TYPEAPPLY)) {
             clazzid = ((JCTypeApply) clazz).clazz;
             if (clazzid.hasTag(ANNOTATED_TYPE)) {
-                clazzid = ((JCAnnotatedType) clazzid).underlyingType;
+                annoclazzid = (JCAnnotatedType) clazzid;
+                clazzid = annoclazzid.underlyingType;
             }
         } else {
             if (clazz.hasTag(ANNOTATED_TYPE)) {
-                clazzid = ((JCAnnotatedType) clazz).underlyingType;
+                annoclazzid = (JCAnnotatedType) clazz;
+                clazzid = annoclazzid.underlyingType;
             } else {
                 clazzid = clazz;
             }
@@ -1754,6 +1758,9 @@ public class Attr extends JCTree.Visitor {
             tree.clazz.type = clazztype;
             TreeInfo.setSymbol(clazzid, TreeInfo.symbol(clazzid1));
             clazzid.type = ((JCIdent) clazzid).sym.type;
+            if (annoclazzid != null) {
+                annoclazzid.type = clazzid.type;
+            }
             if (!clazztype.isErroneous()) {
                 if (cdef != null && clazztype.tsym.isInterface()) {
                     log.error(tree.encl.pos(), "anon.class.impl.intf.no.qual.for.new");
