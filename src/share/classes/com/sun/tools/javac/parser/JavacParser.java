@@ -749,8 +749,9 @@ public class JavacParser implements Parser {
     public JCExpression parseType(List<JCTypeAnnotation> annotations) {
         JCExpression result = unannotatedType();
 
-        if (annotations.nonEmpty())
+        if (annotations.nonEmpty()) {
             result = insertAnnotationsToMostInner(result, annotations, false);
+        }
 
         return result;
     }
@@ -1395,8 +1396,9 @@ public class JavacParser implements Parser {
                         nextToken();
                         t = bracketsOpt(t);
                         t = toP(F.at(pos1).TypeArray(t));
-                        if (annos.nonEmpty())
+                        if (annos.nonEmpty()) {
                             t = toP(F.at(pos1).AnnotatedType(annos, t));
+                        }
                         return t;
                     }
                     mode = oldmode;
@@ -1432,7 +1434,7 @@ public class JavacParser implements Parser {
                     }
                     t = toP(F.at(pos1).Select(t, ident()));
                     if (tyannos != null && tyannos.nonEmpty()) {
-                        t = toP(F.at(pos1).AnnotatedType(tyannos, t));
+                        t = toP(F.at(tyannos.head.pos).AnnotatedType(tyannos, t));
                     }
                     t = argumentsOpt(typeArgs, typeArgumentsOpt(t));
                     typeArgs = null;
@@ -1470,20 +1472,19 @@ public class JavacParser implements Parser {
      * @return true iff an AnnotatedTypeTree is found
      */
     private static boolean isAnnotated(JCTree tree) {
-        if (tree.getKind() == com.sun.source.tree.Tree.Kind.ANNOTATED_TYPE) {
+        if (tree.hasTag(ANNOTATED_TYPE)) {
             return true;
         }
-        if (tree.getKind() == com.sun.source.tree.Tree.Kind.ARRAY_TYPE) {
+        if (tree.hasTag(TYPEARRAY)) {
             return isAnnotated(((JCArrayTypeTree)tree).elemtype);
         }
-        if (tree.getKind() == com.sun.source.tree.Tree.Kind.PARAMETERIZED_TYPE) {
+        if (tree.hasTag(TYPEAPPLY)) {
             JCTypeApply apply = (JCTypeApply)tree;
             for (JCExpression arg : apply.arguments) {
                 if (isAnnotated(arg)) return true;
             }
         }
-        if (tree.getKind() == com.sun.source.tree.Tree.Kind.SUPER_WILDCARD ||
-                tree.getKind() == com.sun.source.tree.Tree.Kind.EXTENDS_WILDCARD) {
+        if (tree.hasTag(WILDCARD)) {
             return isAnnotated(((JCWildcard)tree).inner);
         }
         // Nothing to do for JCPrimitiveTypeTree
@@ -1734,8 +1735,9 @@ public class JavacParser implements Parser {
             TypeBoundKind t = toP(F.at(pos).TypeBoundKind(BoundKind.UNBOUND));
             result = toP(F.at(pos).Wildcard(t, null));
         }
-        if (!annotations.isEmpty())
+        if (!annotations.isEmpty()) {
             result = toP(F.at(annotations.head.pos).AnnotatedType(annotations,result));
+        }
         return result;
     }
 
@@ -1770,7 +1772,7 @@ public class JavacParser implements Parser {
         }
 
         if (!annotations.isEmpty()) {
-            t = F.at(token.pos).AnnotatedType(annotations, t);
+            t = toP(F.at(token.pos).AnnotatedType(annotations, t));
         }
         return t;
     }
@@ -1803,7 +1805,7 @@ public class JavacParser implements Parser {
             accept(CLASS);
             if (token.pos == endPosTable.errorEndPos) {
                 // error recovery
-                Name name = null;
+                Name name;
                 if (token.kind == IDENTIFIER) {
                     name = token.name();
                     nextToken();
@@ -1839,8 +1841,8 @@ public class JavacParser implements Parser {
         if (token.kind == LT) {
             typeArgs = typeArguments(false);
         }
-        Name refName = null;
-        ReferenceMode refMode = null;
+        Name refName;
+        ReferenceMode refMode;
         if (token.kind == NEW) {
             refMode = ReferenceMode.NEW;
             refName = names.init;
@@ -1861,10 +1863,11 @@ public class JavacParser implements Parser {
         case BYTE: case SHORT: case CHAR: case INT: case LONG: case FLOAT:
         case DOUBLE: case BOOLEAN:
             if (typeArgs == null) {
-                if (newAnnotations.isEmpty())
+                if (newAnnotations.isEmpty()) {
                     return arrayCreatorRest(newpos, basicType());
-                else
-                    return arrayCreatorRest(newpos, F.AnnotatedType(newAnnotations, basicType()));
+                } else {
+                    return arrayCreatorRest(newpos, toP(F.at(newAnnotations.head.pos).AnnotatedType(newAnnotations, basicType())));
+                }
             }
             break;
         default:
@@ -1872,8 +1875,9 @@ public class JavacParser implements Parser {
         JCExpression t = qualident(true);
 
         // handle type annotations for non primitive arrays
-        if (newAnnotations.nonEmpty())
-            t = F.AnnotatedType(newAnnotations, t);
+        if (newAnnotations.nonEmpty()) {
+            t = toP(F.at(newAnnotations.head.pos).AnnotatedType(newAnnotations, t));
+        }
 
         int oldmode = mode;
         mode = TYPE;
@@ -1896,7 +1900,7 @@ public class JavacParser implements Parser {
             t = toP(F.at(pos).Select(t, ident()));
 
             if (tyannos != null && tyannos.nonEmpty()) {
-                t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                t = toP(F.at(tyannos.head.pos).AnnotatedType(tyannos, t));
             }
 
             if (token.kind == LT) {
@@ -1952,8 +1956,9 @@ public class JavacParser implements Parser {
 
         JCExpression t = toP(F.at(token.pos).Ident(ident()));
 
-        if (newAnnotations.nonEmpty())
-            t = F.AnnotatedType(newAnnotations, t);
+        if (newAnnotations.nonEmpty()) {
+            t = toP(F.at(newAnnotations.head.pos).AnnotatedType(newAnnotations, t));
+        }
 
         if (token.kind == LT) {
             int oldmode = mode;
@@ -2588,7 +2593,7 @@ public class JavacParser implements Parser {
         if (token.deprecatedFlag()) {
             flags |= Flags.DEPRECATED;
         }
-        int lastPos = Position.NOPOS;
+        int lastPos;
     loop:
         while (true) {
             long flag;
@@ -2619,7 +2624,6 @@ public class JavacParser implements Parser {
                     if (flags == 0 && annotations.isEmpty())
                         pos = ann.pos;
                     annotations.append(ann);
-                    lastPos = ann.pos;
                     flag = 0;
                 }
             }
@@ -3335,7 +3339,7 @@ public class JavacParser implements Parser {
 
         List<JCTypeAnnotation> typeAnnos = typeAnnotationsOpt();
         if (!typeAnnos.isEmpty())
-            ts.append(F.AnnotatedType(typeAnnos, qualident(true)));
+            ts.append(toP(F.at(typeAnnos.head.pos).AnnotatedType(typeAnnos, qualident(true))));
         else
             ts.append(qualident(true));
         while (token.kind == COMMA) {
@@ -3343,7 +3347,7 @@ public class JavacParser implements Parser {
 
             typeAnnos = typeAnnotationsOpt();
             if (!typeAnnos.isEmpty())
-                ts.append(F.AnnotatedType(typeAnnos, qualident(true)));
+                ts.append(toP(F.at(typeAnnos.head.pos).AnnotatedType(typeAnnos, qualident(true))));
             else
                 ts.append(qualident(true));
         }
@@ -3395,7 +3399,7 @@ public class JavacParser implements Parser {
      */
     List<JCVariableDecl> formalParameters() {
         ListBuffer<JCVariableDecl> params = new ListBuffer<JCVariableDecl>();
-        JCVariableDecl lastParam = null;
+        JCVariableDecl lastParam;
         accept(LPAREN);
         if (token.kind != RPAREN) {
         	this.allowThisIdent = true;
@@ -3475,6 +3479,7 @@ public class JavacParser implements Parser {
     private JCExpression insertAnnotationsToMostInner(
             JCExpression type, List<JCTypeAnnotation> annos,
             boolean createNewLevel) {
+        int origEndPos = getEndPos(type);
         JCExpression mostInnerType = type;
         JCArrayTypeTree mostInnerArrayType = null;
         while (TreeInfo.typeIn(mostInnerType).hasTag(TYPEARRAY)) {
@@ -3489,16 +3494,15 @@ public class JavacParser implements Parser {
         if (annos.nonEmpty()) {
             // If createNewLevel is true, the annotations are already on the right type.
             // Otherwise, they might not be and will need to get adjustments.
-            int prevEndPos = this.getEndPos(mostInnerType);
-            mostInnerType = to(F.at(getStartPos(mostInnerType)).AnnotatedType(annos, mostInnerType, createNewLevel));
-            storeEnd(mostInnerType, prevEndPos);
+            mostInnerType = F.at(annos.head.pos).AnnotatedType(annos, mostInnerType, createNewLevel);
         }
 
         if (mostInnerArrayType == null) {
             return mostInnerType;
         } else {
             mostInnerArrayType.elemtype = mostInnerType;
-            return to(type);
+            storeEnd(type, origEndPos);
+            return type;
         }
     }
 
