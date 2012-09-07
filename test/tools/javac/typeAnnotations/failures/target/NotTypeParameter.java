@@ -3,7 +3,7 @@
  * @bug 6843077
  * @summary test invalid location of TypeUse and TypeParameter
  * @author Mahmood Ali
- * @compile/fail/ref=NotTypeParameter.out -XDrawDiagnostics -source 1.8 NotTypeParameter.java
+ * @compile/fail/ref=NotTypeParameter.out -XDrawDiagnostics NotTypeParameter.java
  */
 
 import java.lang.annotation.Target;

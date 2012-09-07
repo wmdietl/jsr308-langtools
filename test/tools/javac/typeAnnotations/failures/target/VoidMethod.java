@@ -3,7 +3,7 @@
  * @bug 6843077
  * @summary test invalid location of TypeUse and TypeParameter
  * @author Mahmood Ali
- * @compile/fail/ref=VoidMethod.out -XDrawDiagnostics -source 1.8 VoidMethod.java
+ * @compile/fail/ref=VoidMethod.out -XDrawDiagnostics VoidMethod.java
  */
 
 import java.lang.annotation.Target;

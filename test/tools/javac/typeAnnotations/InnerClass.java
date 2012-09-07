@@ -28,7 +28,7 @@ import java.lang.annotation.ElementType;
  * @bug 6843077
  * @summary compiler crashes when visiting inner classes
  * @author Mahmood Ali
- * @compile -source 1.8 InnerClass.java
+ * @compile InnerClass.java
  */
 
 import java.lang.annotation.*;

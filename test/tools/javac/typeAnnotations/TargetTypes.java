@@ -32,7 +32,7 @@ import java.io.*;
  * @summary compiler accepts all values
  * @author Mahmood Ali
  * @author Yuri Gaevsky
- * @compile -source 1.8 TargetTypes.java
+ * @compile TargetTypes.java
  */
 
 @Target({TYPE_USE, TYPE_PARAMETER, TYPE})

@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: wildcard bound
  * @author Mahmood Ali
- * @compile -source 1.8 Wildcards.java
+ * @compile Wildcards.java
  */
 class BoundTest {
   void wcExtends(MyList<? extends @A String> l) { }

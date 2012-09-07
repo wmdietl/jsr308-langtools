@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: throw clauses
  * @author Mahmood Ali
- * @compile -source 1.8 Throws.java
+ * @compile Throws.java
  */
 class DefaultUnmodified {
   void oneException() throws @A Exception {}

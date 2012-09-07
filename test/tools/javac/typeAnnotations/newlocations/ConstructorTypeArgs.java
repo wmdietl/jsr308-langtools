@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: constructor type args
  * @author Mahmood Ali
- * @compile -source 1.8 ConstructorTypeArgs.java
+ * @compile ConstructorTypeArgs.java
  */
 
 class ConstructorTypeArgs {

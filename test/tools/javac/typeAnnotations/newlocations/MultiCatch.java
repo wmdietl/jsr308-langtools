@@ -29,7 +29,7 @@ import java.lang.annotation.*;
  * @bug 1234567
  * @summary new type annotation location: multicatch
  * @author Werner Dietl
- * @compile -source 1.8 MultiCatch.java
+ * @compile MultiCatch.java
  */
 
 class DefaultScope {

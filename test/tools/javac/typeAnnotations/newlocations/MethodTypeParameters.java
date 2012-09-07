@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: method type parameter bounds
  * @author Mahmood Ali
- * @compile -source 1.8 MethodTypeParameters.java
+ * @compile MethodTypeParameters.java
  */
 
 class UnscopedUnmodified {

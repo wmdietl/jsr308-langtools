@@ -29,7 +29,7 @@ import java.util.Map;
  * @bug 1234567
  * @summary new type annotation location: nested types
  * @author Werner Dietl
- * @compile -source 1.8 NestedTypes.java
+ * @compile NestedTypes.java
  */
 class Outer {
     class Inner {

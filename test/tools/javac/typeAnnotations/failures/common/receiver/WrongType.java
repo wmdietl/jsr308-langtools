@@ -26,7 +26,7 @@
  * @bug 1234567
  * @summary the receiver parameter has the type of the surrounding class
  * @author Werner Dietl
- * @compile/fail/ref=WrongType.out -XDrawDiagnostics -source 1.8 WrongType.java
+ * @compile/fail/ref=WrongType.out -XDrawDiagnostics WrongType.java
  */
 
 @interface A {}

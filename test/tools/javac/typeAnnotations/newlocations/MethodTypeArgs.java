@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: method type args
  * @author Mahmood Ali
- * @compile -source 1.8 MethodTypeArgs.java
+ * @compile MethodTypeArgs.java
  */
 
 class MethodTypeArgs {

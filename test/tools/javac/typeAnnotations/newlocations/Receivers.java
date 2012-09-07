@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: receivers
  * @author Mahmood Ali, Werner Dietl
- * @compile -source 1.8 Receivers.java
+ * @compile Receivers.java
  */
 class DefaultUnmodified {
   void plain(@A DefaultUnmodified this) { }

@@ -3,7 +3,7 @@
  * @bug 6843077
  * @summary check that A is accessible in the class type parameters
  * @author Mahmood Ali
- * @compile/fail/ref=Scopes.out -XDrawDiagnostics -source 1.8 Scopes.java
+ * @compile/fail/ref=Scopes.out -XDrawDiagnostics Scopes.java
  */
 class Scopes<T extends @UniqueInner Object> {
   // UniqueInner is not visible in the type parameters.

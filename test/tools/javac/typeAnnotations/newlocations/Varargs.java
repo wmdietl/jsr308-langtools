@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @test
  * @summary test acceptance of varargs annotations
  * @author Mahmood Ali
- * @compile -source 1.8 Varargs.java
+ * @compile Varargs.java
  */
 
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

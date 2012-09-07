@@ -26,7 +26,7 @@
  * @bug 6843077
  * @summary test scopes of attribution
  * @author Mahmood Ali
- * @compile -source 1.8 Scopes.java
+ * @compile Scopes.java
  */
 class Scopes {
 

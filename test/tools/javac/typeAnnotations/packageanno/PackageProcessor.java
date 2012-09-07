@@ -46,8 +46,8 @@ import com.sun.tools.javac.util.Context;
  * @author Mahmood Ali
  * @author Werner Dietl
  *
- * @compile -source 1.8 PackageProcessor.java
- * @compile -source 1.8 -cp . -processor PackageProcessor mypackage/Anno.java mypackage/MyClass.java mypackage/package-info.java
+ * @compile PackageProcessor.java
+ * @compile -cp . -processor PackageProcessor mypackage/Anno.java mypackage/MyClass.java mypackage/package-info.java
  */
 
 @SupportedAnnotationTypes("*")

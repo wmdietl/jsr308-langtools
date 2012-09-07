@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: field type array/generics
  * @author Mahmood Ali
- * @compile -source 1.8 Fields.java
+ * @compile Fields.java
  */
 
 class DefaultScope {

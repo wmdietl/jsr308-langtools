@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: class type parameter bounds
  * @author Mahmood Ali
- * @compile -source 1.8 ClassParameters.java
+ * @compile ClassParameters.java
  */
 class Unannotated<K> { }
 

@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: class and method type parameters
  * @author Mahmood Ali
- * @compile -source 1.8 TypeParameters.java
+ * @compile TypeParameters.java
  */
 
 class Unannotated<K> { }

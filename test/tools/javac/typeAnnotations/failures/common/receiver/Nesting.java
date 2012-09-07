@@ -26,7 +26,7 @@
  * @bug 1234567
  * @summary Ensure that nested classes/methods work
  * @author Werner Dietl
- * @compile -source 1.8 Nesting.java
+ * @compile Nesting.java
  */
 @interface A { }
 

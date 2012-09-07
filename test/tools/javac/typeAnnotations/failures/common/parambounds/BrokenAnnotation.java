@@ -3,7 +3,7 @@
  * @bug 1234567
  * @summary Ensure unresolved upper bound annotation is handled correctly
  * @author Werner Dietl
- * @compile/fail/ref=BrokenAnnotation.out -XDrawDiagnostics -source 1.8 BrokenAnnotation.java
+ * @compile/fail/ref=BrokenAnnotation.out -XDrawDiagnostics BrokenAnnotation.java
  */
 
 // No import, making the annotation @A invalid.

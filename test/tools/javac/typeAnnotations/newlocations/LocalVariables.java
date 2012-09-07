@@ -28,7 +28,7 @@ import java.lang.annotation.*;
  * @bug 6843077
  * @summary new type annotation location: local variables array/generics
  * @author Mahmood Ali
- * @compile -source 1.8 LocalVariables.java
+ * @compile LocalVariables.java
  */
 
 class DefaultScope {

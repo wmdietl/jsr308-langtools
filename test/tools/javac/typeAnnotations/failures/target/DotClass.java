@@ -33,7 +33,7 @@ import java.lang.annotation.Target;
  * @test
  * @summary Class literals are not type uses and cannot be annotated
  * @author Werner Dietl
- * @compile/fail/ref=DotClass.out -XDrawDiagnostics -source 1.8 DotClass.java
+ * @compile/fail/ref=DotClass.out -XDrawDiagnostics DotClass.java
  */
 
 @Target({TYPE_USE, TYPE_PARAMETER, TYPE})
