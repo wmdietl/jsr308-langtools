@@ -375,13 +375,18 @@ public class TreePosTest {
                                 encl.tag == METHODDEF ||
                                 encl.tag == TYPEARRAY ||
                                 isAnnotatedArray(encl.tree))
-                            )) {
+                           ||
+                            encl.tag == ANNOTATED_TYPE && self.tag == SELECT
+                         )) {
                         check("encl.pos <= start || end <= encl.pos",
                                 encl, self, encl.pos <= self.start || self.end <= encl.pos);
                     }
                     check("pos <= end", encl, self, self.pos <= self.end);
                     if (!( (self.tag == TYPEARRAY || isAnnotatedArray(self.tree)) &&
-                            (encl.tag == TYPEARRAY || isAnnotatedArray(encl.tree))) ) {
+                            (encl.tag == TYPEARRAY || isAnnotatedArray(encl.tree))
+                           ||
+                            encl.tag == MODIFIERS && self.tag == ANNOTATION
+                         ) ) {
                         check("end <= encl.end", encl, self, self.end <= encl.end);
                     }
                 }
@@ -438,7 +443,8 @@ public class TreePosTest {
                     viewer.addEntry(sourcefile, label, encl, self);
                 }
 
-                String s = self.tree.toString();
+                String s = "encl: " + encl.tree.toString() +
+                        "  this: " + self.tree.toString();
                 String msg = sourcefile.getName() + ": " + label + ": " +
                         "encl:" + encl + " this:" + self + "\n" +
                         s.substring(0, Math.min(80, s.length())).replaceAll("[\r\n]+", " ");
