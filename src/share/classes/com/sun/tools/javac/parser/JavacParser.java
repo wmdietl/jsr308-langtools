@@ -240,11 +240,11 @@ public class JavacParser implements Parser {
      * This is needed to parse receiver types.
      */
     boolean allowThisIdent;
-    
+
     /** The type of the method receiver, as specified by a first "this" parameter.
      */
     JCVariableDecl receiverParam;
-    
+
 
     /** When terms are parsed, the mode determines which is expected:
      *     mode = EXPR        : an expression
@@ -598,7 +598,7 @@ public class JavacParser implements Parser {
                 tyannos = typeAnnotationsOpt();
             }
             t = toP(F.at(pos).Select(t, ident()));
-            if (tyannos!=null && tyannos.nonEmpty()) {
+            if (tyannos != null && tyannos.nonEmpty()) {
                 t = toP(F.at(pos).AnnotatedType(tyannos, t));
             }
         }
@@ -1231,7 +1231,7 @@ public class JavacParser implements Parser {
                             }
                             // .class is only allowed if there were no annotations
                             JCExpression nt = bracketsSuffix(t);                        
-                            if (nt!=t && (annos.nonEmpty() || isAnnotated(t))) {
+                            if (nt != t && (annos.nonEmpty() || isAnnotated(t))) {
                                 // t and nt are different if bracketsSuffix parsed a .class.
                                 // The check for nonEmpty covers the case when the whole array is annotated.
                                 // Helper method isAnnotated looks for annos deeply within t.
@@ -1295,12 +1295,12 @@ public class JavacParser implements Parser {
                         }
 
                         List<JCTypeAnnotation> tyannos = null;
-                        if ((mode & TYPE) != 0 && token.kind==MONKEYS_AT) {
+                        if ((mode & TYPE) != 0 && token.kind == MONKEYS_AT) {
                             tyannos = typeAnnotationsOpt();
                         }
                         // typeArgs saved for next loop iteration.
                         t = toP(F.at(pos).Select(t, ident()));
-                        if (tyannos!=null && tyannos.nonEmpty()) {
+                        if (tyannos != null && tyannos.nonEmpty()) {
                             t = toP(F.at(pos).AnnotatedType(tyannos, t));
                         }
                         break;
@@ -1426,12 +1426,12 @@ public class JavacParser implements Parser {
                     typeArgs = null;
                 } else {
                     List<JCTypeAnnotation> tyannos = null;
-                    if ((mode & TYPE) != 0 && token.kind==MONKEYS_AT) {
+                    if ((mode & TYPE) != 0 && token.kind == MONKEYS_AT) {
                         // is the mode check needed?
                         tyannos = typeAnnotationsOpt();
                     }
                     t = toP(F.at(pos1).Select(t, ident()));
-                    if (tyannos!=null && tyannos.nonEmpty()) {
+                    if (tyannos != null && tyannos.nonEmpty()) {
                         t = toP(F.at(pos1).AnnotatedType(tyannos, t));
                     }
                     t = argumentsOpt(typeArgs, typeArgumentsOpt(t));
@@ -1895,7 +1895,7 @@ public class JavacParser implements Parser {
             List<JCTypeAnnotation> tyannos = typeAnnotationsOpt();
             t = toP(F.at(pos).Select(t, ident()));
 
-            if (tyannos!=null && tyannos.nonEmpty()) {
+            if (tyannos != null && tyannos.nonEmpty()) {
                 t = toP(F.at(pos).AnnotatedType(tyannos, t));
             }
 
@@ -3478,22 +3478,24 @@ public class JavacParser implements Parser {
         JCExpression mostInnerType = type;
         JCArrayTypeTree mostInnerArrayType = null;
         while (TreeInfo.typeIn(mostInnerType).hasTag(TYPEARRAY)) {
-            mostInnerArrayType = (JCArrayTypeTree)TreeInfo.typeIn(mostInnerType);
+            mostInnerArrayType = (JCArrayTypeTree) TreeInfo.typeIn(mostInnerType);
             mostInnerType = mostInnerArrayType.elemtype;
         }
 
         if (createNewLevel) {
-            mostInnerType = F.at(token.pos).TypeArray(mostInnerType);
+            mostInnerType = to(F.at(token.pos).TypeArray(mostInnerType));
         }
 
         if (annos.nonEmpty()) {
             // If createNewLevel is true, the annotations are already on the right type.
             // Otherwise, they might not be and will need to get adjustments.
-            mostInnerType = F.at(token.pos).AnnotatedType(annos, mostInnerType, createNewLevel);
+            int prevEndPos = this.getEndPos(mostInnerType);
+            mostInnerType = to(F.at(getStartPos(mostInnerType)).AnnotatedType(annos, mostInnerType, createNewLevel));
+            storeEnd(mostInnerType, prevEndPos);
         }
 
         if (mostInnerArrayType == null) {
-            return to(mostInnerType);
+            return mostInnerType;
         } else {
             mostInnerArrayType.elemtype = mostInnerType;
             return to(type);
