@@ -75,6 +75,7 @@ import com.sun.tools.javac.api.JavacTool;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.tree.EndPosTable;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCAnnotatedType;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
@@ -100,7 +101,8 @@ import static com.sun.tools.javac.util.Position.NOPOS;
  * @test
  * @bug 6919889
  * @summary assorted position errors in compiler syntax trees
- * @run main TreePosTest -q -r -ef ./tools/javac/typeAnnotations -ef ./tools/javap/typeAnnotations -et ANNOTATED_TYPE .
+ * OLD: -q -r -ef ./tools/javac/typeAnnotations -ef ./tools/javap/typeAnnotations -et ANNOTATED_TYPE .
+ * @run main TreePosTest -q -r .
  */
 public class TreePosTest {
     /**
@@ -367,15 +369,19 @@ public class TreePosTest {
                     //    e.g.    int[][] a = new int[2][];
                     check("encl.start <= start", encl, self, encl.start <= self.start);
                     check("start <= pos", encl, self, self.start <= self.pos);
-                    if (!(self.tag == TYPEARRAY
+                    if (!( (self.tag == TYPEARRAY ||
+                            isAnnotatedArray(self.tree))
                             && (encl.tag == VARDEF ||
                                 encl.tag == METHODDEF ||
-                                encl.tag == TYPEARRAY))) {
+                                encl.tag == TYPEARRAY ||
+                                isAnnotatedArray(encl.tree))
+                            )) {
                         check("encl.pos <= start || end <= encl.pos",
                                 encl, self, encl.pos <= self.start || self.end <= encl.pos);
                     }
                     check("pos <= end", encl, self, self.pos <= self.end);
-                    if (!(self.tag == TYPEARRAY && encl.tag == TYPEARRAY)) {
+                    if (!( (self.tag == TYPEARRAY || isAnnotatedArray(self.tree)) &&
+                            (encl.tag == TYPEARRAY || isAnnotatedArray(encl.tree))) ) {
                         check("end <= encl.end", encl, self, self.end <= encl.end);
                     }
                 }
@@ -385,6 +391,11 @@ public class TreePosTest {
             encl = self;
             tree.accept(this);
             encl = prevEncl;
+        }
+
+        private boolean isAnnotatedArray(JCTree tree) {
+            return tree.hasTag(ANNOTATED_TYPE) &&
+                            ((JCAnnotatedType)tree).underlyingType.hasTag(TYPEARRAY);
         }
 
         @Override
