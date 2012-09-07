@@ -375,9 +375,11 @@ public class TreeInfo {
                 return getStartPos(((JCUnary) tree).arg);
             case ANNOTATED_TYPE: {
                 JCAnnotatedType node = (JCAnnotatedType) tree;
-                if (node.annotations.nonEmpty())
+                if (node.annotations.nonEmpty() &&
+                        !node.underlyingType.hasTag(TYPEARRAY))
                     return getStartPos(node.annotations.head);
-                return getStartPos(node.underlyingType);
+                else
+                    return getStartPos(node.underlyingType);
             }
             case NEWCLASS: {
                 JCNewClass node = (JCNewClass)tree;
