@@ -43,6 +43,11 @@ class TypeUseTarget<K extends @A Object> {
   }
 
   <K> @A String genericMethod(K k) { return null; }
+  @Decl <K> @A String genericMethod1(K k) { return null; }
+  @A @Decl <K> String genericMethod2(K k) { return null; }
+  @Decl @A <K> String genericMethod3(K k) { return null; }
+  <K> @Decl String genericMethod4(K k) { return null; }
+  <K> @A @Decl String genericMethod5(K k) { return null; }
 }
 
 @A
@@ -53,3 +58,5 @@ interface MyInterface { }
 
 @Target(ElementType.TYPE_USE)
 @interface A { }
+
+@interface Decl { }
