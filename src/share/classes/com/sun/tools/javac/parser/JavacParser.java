@@ -599,7 +599,7 @@ public class JavacParser implements Parser {
             }
             t = toP(F.at(pos).Select(t, ident()));
             if (tyannos != null && tyannos.nonEmpty()) {
-                t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                t = toP(F.at(tyannos.head.pos).AnnotatedType(tyannos, t));
             }
         }
         return t;
@@ -1301,7 +1301,7 @@ public class JavacParser implements Parser {
                         // typeArgs saved for next loop iteration.
                         t = toP(F.at(pos).Select(t, ident()));
                         if (tyannos != null && tyannos.nonEmpty()) {
-                            t = toP(F.at(pos).AnnotatedType(tyannos, t));
+                            t = toP(F.at(tyannos.head.pos).AnnotatedType(tyannos, t));
                         }
                         break;
                     case ELLIPSIS:
