@@ -15,7 +15,8 @@
 ;;   }
 ;; It is not 100% automated, nor does it convert all code perfectly, but it
 ;; greatly reduces manual effort.
-;; A Python script that performs this same action is also available.
+;; A Python script, convert-receiver.py, that performs this same action is
+;; also available.
 
 
 ;; Start off with this as a compilation (not a grep!) command:

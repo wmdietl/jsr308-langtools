@@ -3,6 +3,12 @@ For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 Version 1.4.0-b1, 01 Sep 2012
 
+Tools for converting to new receiver syntax:
+Files doc/convert-receiver.py and doc/convert-receiver.el are two
+programs (one written in Python and one writtenin Emacs Lisp) that convert
+a Java program from old-style (C++-style) receiver annotations to new-style
+("this" formal parameter) receiver annotations.
+
 Code cleanups:
 - Remove com.sun.source.util.AbstractTypeProcessor
 - Remove com.sun.tools.javac.tree.JCTree.JCTypeAnnotation.annotation_position field
