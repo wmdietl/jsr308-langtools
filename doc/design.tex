@@ -1407,13 +1407,6 @@ The \extendedannotation structure has the following format:
 \preverbnegspace
 \begin{Verbatim}
 type_annotation {
-    // Original fields from "annotation" structure:
-    u2 type_index;
-    u2 num_element_value_pairs;
-    {
-        u2 element_name_index;
-        element_value value;
-    } element_value_pairs[num_element_value_pairs];
     // New fields in JSR 308:
     u2 target_type;    // the type of the targeted program element, see Section 3.2
     union {
@@ -1428,6 +1421,13 @@ type_annotation {
         offset_target;
         typearg_target;
     } target_info;  // uniquely identifies the targeted program element, see Section 3.3
+    // Original fields from "annotation" structure:
+    u2 type_index;
+    u2 num_element_value_pairs;
+    {
+        u2 element_name_index;
+        element_value value;
+    } element_value_pairs[num_element_value_pairs];
 }
 \end{Verbatim}
 
