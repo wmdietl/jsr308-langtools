@@ -1356,6 +1356,12 @@ A type annotation written on a declaration's type (e.g., on a field type or
 on a method return type)
 appears in the \RuntimeInOrVisibleTypeAnnotations attribute of that declaration.
 
+In the \<annotations> array, annotations that target instructions must be
+sorted in increasing order of bytecode offset.  Other annotations can be in
+any order, and may be interleaved with instruction annotations.
+Annotations that target instructions are are those in
+Figure~\ref{tbl:target_types} with \<target\_type> $\ge$ 0x86; see below
+for details.
 
 No changes are made to the StackMapTable that stores the types of elements
 on the stack.
