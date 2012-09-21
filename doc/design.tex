@@ -498,6 +498,19 @@ annotation, not a type annotation, but its omission in JSR
 % % maybe make that explicit in both places).
 
 
+\subsubsection{Implicit type uses are not annotatable\label{implicit-type-uses}}
+
+There are places that Java implicitly uses a type but does not express it
+in the source code.  For example, consider an array type such as
+\<String[]>.  This array takes an \<int> as an index, and the array can be
+thought of as mapping \<int>s to \<String>s.  However, there is no way to
+write a type annotation on the \<int> type of the index.  Analogously to
+arrays, there is no convenient way to annotate the \<int> argument type
+that indexes a given \<List>.  These restrictions make it more difficult,
+and syntactically clumsy, to write an annotation processor that ensures
+proper use of array or list indices.
+
+
 \subsubsection{Not all type names are annotatable\label{type-names}}
 
 The Java language uses type names in three different ways:  in type
