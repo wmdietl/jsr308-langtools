@@ -1604,7 +1604,7 @@ type arguments and arrays.
   When the annotation's target is #1, \code{target\_info}}
 
 \newcommand{\attributelocation}[2]{
-A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes table of a \code{#2} structure.}
+A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes table of a #2.}
 
 
 
@@ -1651,7 +1651,7 @@ simply the value $i$ is used if the annotation is on the $i$th
 superinterface type.
 
 \attributelocation{containing a
-\code{supertype\_target}}{ClassFile}
+\code{supertype\_target}}{\code{ClassFile} structure}
 
 
 \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
@@ -1711,9 +1711,9 @@ More formally, it contains \code{empty\_target}:
 \end{Verbatim}
 
 % TODO: Make the following paragraph consistent with the rest
-\attributelocation{targeting a field type}{field\_info}
+\attributelocation{targeting a field type}{\code{field\_info} structure}
 \attributelocation{targeting a method return type, constructor result
-  type, or receiver}{method\_info}
+  type, or receiver}{\code{method\_info} structure}
 
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
@@ -1728,7 +1728,7 @@ indicates which of the method's formal parameters is being annotated:
     };
 \end{Verbatim}
 
-\attributelocation{containing a \code{methodparam\_target}}{method\_info}
+\attributelocation{containing a \code{methodparam\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
@@ -1747,7 +1747,7 @@ clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
 simply the value $i$ denotes an annotation on the $i$th exception
 type.
 
-\attributelocation{containing a \code{exception\_target}}{method\_info}
+\attributelocation{containing a \code{exception\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
@@ -1783,7 +1783,7 @@ challenges.  For example, live ranges are not isomorphic to local
 variables.  Note that a local variable with no live range might not appear in
 the class file; that is OK, because it is irrelevant to the program.
 
-\attributelocation{containing a \code{localvar\_target}}{method\_info}
+\attributelocation{containing a \code{localvar\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
@@ -1799,7 +1799,7 @@ appears in the \<exception\_table> slot of the \<Code> attribute).
     };
 \end{Verbatim}
 
-\attributelocation{containing a \code{catch\_target}}{method\_info}
+\attributelocation{containing a \code{catch\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{Typecasts, type tests, and object creation\label{class-file:ext:ri:typecast}}
@@ -1853,7 +1853,7 @@ The compiler may leave out the upcast, but in that case it must record that
 \<@A1> is attached to the second type argument of \<D>, even though it was
 originally attached to the first type argument of \<C>.
 
-\attributelocation{containing a \code{offset\_target}}{method\_info}
+\attributelocation{containing a \code{offset\_target}}{\code{method\_info} structure}
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
 % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
@@ -1895,7 +1895,7 @@ annotations are attached to a single bytecode, not a bytecode range.
 \code{type\_index} specifies the index of the type argument in the
 expression.
 
-\attributelocation{containing a \code{typearg\_target}}{method\_info}
+\attributelocation{containing a \code{typearg\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{Type arguments, wildcard bounds, array element types, and static nested types\label{class-file:ext:ri:typearg}}
