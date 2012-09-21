@@ -31,6 +31,25 @@ current version of the specification
 
   <dt><a href="java-annotation-design-XXXXX.html">XXXXX</a></dt>
   <dd>
+    Classfile changes:
+    <ul>
+      <li>
+        Change <tt>attribute_length</tt> from u2 to u4, for consistency
+        with <a href="http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7">other attributes</a>.
+      </li>
+      <li>
+        Move annotations that target instructions from <tt>method_info</tt>
+        structure to <tt>Code</tt> attribute.
+      </li>
+      <li>
+        In <tt>type_annotation</tt> structure, put the new JSR 308 fields at
+        the beginning, not the end.
+      </li>
+      <li>
+        Annotations that target instructions must be sorted.
+      </li>
+    </ul>
+    Compilation explanations:
     <ul>
       <li>
         Explain how annotations are copied from an anonymous class to its desugaring.
