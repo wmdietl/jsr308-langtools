@@ -390,7 +390,7 @@ public class JCDiagnostic implements Diagnostic<JavaFileObject> {
         this.source = source;
         this.position = pos;
         this.key = key;
-            this.args = args;
+        this.args = args;
 
         int n = (pos == null ? Position.NOPOS : pos.getPreferredPosition());
         if (n == Position.NOPOS || source == null)
