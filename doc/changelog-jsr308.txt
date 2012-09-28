@@ -1,6 +1,12 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.4.1, 29 Sep 2012
+
+Base build
+  Updated to OpenJDK 8 langtools as of 27 Sep 2012.
+
+----------------------------------------------------------------------
 Version 1.4.0, 11 Sep 2012
 
 Tools for converting to new receiver syntax:
