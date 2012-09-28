@@ -100,4 +100,8 @@ abstract class AbstractTypeImpl implements com.sun.javadoc.Type {
     public AnnotationTypeDoc asAnnotationTypeDoc() {
         return null;
     }
+
+    public AnnotatedType asAnnotatedType() {
+        return null;
+    }
 }

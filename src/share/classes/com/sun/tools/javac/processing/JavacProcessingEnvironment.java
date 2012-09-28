@@ -1349,6 +1349,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 node.sym = null;
                 super.visitIdent(node);
             }
+            public void visitAnnotation(JCAnnotation node) {
+                if (node instanceof JCTypeAnnotation) {
+                    ((JCTypeAnnotation)node).attribute_field = null;
+                }
+                super.visitAnnotation(node);
+            }
         };
 
 

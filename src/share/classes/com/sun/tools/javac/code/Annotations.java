@@ -48,7 +48,7 @@ import com.sun.tools.javac.util.*;
  *
  * An instance of this class can be in one of three states:
  *
- * NOT_STARTED indicates that the Symbol this instance belongs to have not been
+ * NOT_STARTED indicates that the Symbol this instance belongs to has not been
  * annotated (yet). Specifically if the declaration is not annotated this
  * instance will never move past NOT_STARTED. You can never go back to
  * NOT_STARTED.
@@ -59,7 +59,7 @@ import com.sun.tools.javac.util.*;
  *
  * "unnamed" this Annotations contains some attributes, possibly the final set.
  * While in this state you can only prepend or append to the attributes not set
- * it directly. You can also move back to the IN_PROGRESS sate using reset().
+ * it directly. You can also move back to the IN_PROGRESS state using reset().
  *
  * <p><b>This is NOT part of any supported API. If you write code that depends
  * on this, you do so at your own risk. This code and its internal interfaces
@@ -74,7 +74,7 @@ public class Annotations {
      */
     private List<Attribute.Compound> attributes = NOT_STARTED;
     /*
-     * The Symbol this Annotatios belong to
+     * The Symbol this Annotations belong to
      */
     private final Symbol s;
 

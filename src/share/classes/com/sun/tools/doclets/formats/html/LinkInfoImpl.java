@@ -422,6 +422,8 @@ public class LinkInfoImpl extends LinkInfo {
 
             case CONTEXT_RETURN_TYPE:
             case CONTEXT_SUMMARY_RETURN_TYPE:
+                excludeTypeBounds = true;
+                break;
             case CONTEXT_EXECUTABLE_MEMBER_PARAM:
                 excludeTypeBounds = true;
                 break;
