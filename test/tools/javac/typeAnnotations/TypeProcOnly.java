@@ -60,8 +60,8 @@ public class TypeProcOnly extends AbstractProcessor {
         JavacTask.instance(env).addTaskListener(listener);
         Context ctx = ((JavacProcessingEnvironment)processingEnv).getContext();
         JavaCompiler compiler = JavaCompiler.instance(ctx);
-        compiler.shouldStopPolicyAtMost = CompileState.max(
-                compiler.shouldStopPolicyAtMost,
+        compiler.shouldStopPolicyIfNoError = CompileState.max(
+                compiler.shouldStopPolicyIfNoError,
                 CompileState.FLOW);
     }
 
