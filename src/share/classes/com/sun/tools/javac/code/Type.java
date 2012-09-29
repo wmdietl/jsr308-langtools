@@ -72,6 +72,9 @@ import static com.sun.tools.javac.code.TypeTags.*;
  */
 public class Type implements PrimitiveType {
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /** Constant type: no type at all. */
     public static final JCNoType noType = new JCNoType(NONE);
 
@@ -127,6 +130,7 @@ public class Type implements PrimitiveType {
     public Type(int tag, TypeSymbol tsym) {
         this.tag = tag;
         this.tsym = tsym;
+        uid = ++uidCounter;
     }
 
     /** An abstract class for mappings from types to types
@@ -204,8 +208,12 @@ public class Type implements PrimitiveType {
         String s = (tsym == null || tsym.name == null)
             ? "<none>"
             : tsym.name.toString();
-        if (moreInfo && tag == TYPEVAR) s = s + hashCode();
+        if (moreInfo && tag == TYPEVAR) s = s + uid;
         return s;
+    }
+
+    public String toStringDebug() {
+        return toString() + " " + getClass().getSimpleName() + "#" + uid;
     }
 
     /**
