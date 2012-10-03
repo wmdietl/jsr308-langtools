@@ -40,6 +40,11 @@ The current development version of the specification is available in the
         with <a href="http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7">other attributes</a>.
       </li>
       <li>
+        Change <tt>target_type</tt> from u2 to u1; with less than 40 values
+        currently used, the likelihood that more than 256 will be needed
+        seems remote.
+      </li>
+      <li>
         Move annotations that target instructions from <tt>method_info</tt>
         structure to <tt>Code</tt> attribute.
       </li>
