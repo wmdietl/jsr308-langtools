@@ -1284,6 +1284,17 @@ This section defines how to store type annotations in a Java class file.
 It also defines how to store local variable annotations, which are
 permitted in Java SE 7 source code but are discarded by the compiler.
 
+The class file stores only annotations that are explicitly written in the
+Java source file.  Annotations that are inferred are not stored in the
+class file.  One location where Java infers types is the ``diamond'' used
+in class instance creation expressions (JLS \ahref{\jlsFifteenNine}{\S15.9}).
+Lambda leads to other examples.  The inference of type annotations can
+depend on the annotation processor,
+% example: flow-sensitive type refinement can affect effective types
+and it would be undesirable for the
+annotations in the classfile to depend on whether a given annotation
+processor is being run.
+
 
 \paragraph{Why store type annotations in the class file?}
 
