@@ -29,8 +29,6 @@ import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.jvm.*;
 import com.sun.tools.javac.util.*;
 
-import com.sun.tools.javac.code.Type.*;
-
 import static com.sun.tools.javac.code.TypeTags.*;
 import static com.sun.tools.javac.jvm.ByteCodes.*;
 
