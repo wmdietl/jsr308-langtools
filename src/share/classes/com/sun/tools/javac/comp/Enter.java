@@ -509,9 +509,9 @@ public class Enter extends JCTree.Visitor {
             uncompleted = prevUncompleted;
             annotate.enterDone();
 
-          for (JCCompilationUnit tree : trees) {
-              TypeAnnotations.completeTypeAnnotationsInSignatures(this.names, tree);
-          }
+            for (JCCompilationUnit tree : trees) {
+                TypeAnnotations.completeTypeAnnotationsInSignatures(this.names, tree);
+            }
         }
     }
 }
