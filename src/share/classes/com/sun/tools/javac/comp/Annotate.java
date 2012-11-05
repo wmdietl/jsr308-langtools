@@ -86,19 +86,19 @@ public class Annotate {
     private int enterCount = 0;
 
     ListBuffer<Annotator> q = new ListBuffer<Annotator>();
+    ListBuffer<Annotator> typesQ = new ListBuffer<Annotator>();
     ListBuffer<Annotator> repeatedQ = new ListBuffer<Annotator>();
-    ListBuffer<Annotator> flushQ = new ListBuffer<Annotator>();
+
+    public void earlier(Annotator a) {
+        q.prepend(a);
+    }
 
     public void normal(Annotator a) {
         q.append(a);
     }
 
-    public void laterOnFlush(Annotator a) {
-        flushQ.append(a);
-    }
-
-    public void earlier(Annotator a) {
-        q.prepend(a);
+    public void typeAnnotation(Annotator a) {
+        typesQ.append(a);
     }
 
     public void repeated(Annotator a) {
@@ -123,11 +123,11 @@ public class Annotate {
             while (q.nonEmpty()) {
                 q.next().enterAnnotation();
             }
+            while (typesQ.nonEmpty()) {
+                typesQ.next().enterAnnotation();
+            }
             while (repeatedQ.nonEmpty()) {
                 repeatedQ.next().enterAnnotation();
-            }
-            while (flushQ.nonEmpty()) {
-                flushQ.next().enterAnnotation();
             }
         } finally {
             enterCount--;
@@ -148,16 +148,18 @@ public class Annotate {
      * This context contains all the information needed to synthesize new
      * annotations trees by the completer for repeating annotations.
      */
-    public class AnnotateRepeatedContext {
+    public class AnnotateRepeatedContext<T extends Attribute.Compound> {
         public final Env<AttrContext> env;
-        public final Map<Symbol.TypeSymbol, ListBuffer<Attribute.Compound>> annotated;
-        public final Map<Attribute.Compound, JCDiagnostic.DiagnosticPosition> pos;
+        public final Map<Symbol.TypeSymbol, ListBuffer<T>> annotated;
+        public final Map<T, JCDiagnostic.DiagnosticPosition> pos;
         public final Log log;
+        public final boolean isTypeCompound;
 
         public AnnotateRepeatedContext(Env<AttrContext> env,
-                                       Map<Symbol.TypeSymbol, ListBuffer<Attribute.Compound>> annotated,
-                                       Map<Attribute.Compound, JCDiagnostic.DiagnosticPosition> pos,
-                                       Log log) {
+                                       Map<Symbol.TypeSymbol, ListBuffer<T>> annotated,
+                                       Map<T, JCDiagnostic.DiagnosticPosition> pos,
+                                       Log log,
+                                       boolean isTypeCompound) {
             Assert.checkNonNull(env);
             Assert.checkNonNull(annotated);
             Assert.checkNonNull(pos);
@@ -167,6 +169,7 @@ public class Annotate {
             this.annotated = annotated;
             this.pos = pos;
             this.log = log;
+            this.isTypeCompound = isTypeCompound;
         }
 
         /**
@@ -177,7 +180,7 @@ public class Annotate {
          * @param repeatingAnnotations a List of repeating annotations
          * @return a new Attribute.Compound that is the container for the repeatingAnnotations
          */
-        public Attribute.Compound processRepeatedAnnotations(List<Attribute.Compound> repeatingAnnotations) {
+        public T processRepeatedAnnotations(List<T> repeatingAnnotations) {
             return Annotate.this.processRepeatedAnnotations(repeatingAnnotations, this);
         }
 
@@ -253,6 +256,8 @@ public class Annotate {
                            ((MethodSymbol)method, value));
             t.type = result;
         }
+        // TODO: this should be a TypeCompound if "a" is a JCTypeAnnotation.
+        // However, how do we find the correct position?
         return new Attribute.Compound(a.type, buf.toList());
     }
 
@@ -336,6 +341,15 @@ public class Annotate {
         return new Attribute.Error(attr.attribExpr(tree, env, expected));
     }
 
+    Attribute.TypeCompound enterTypeAnnotation(JCTypeAnnotation a,
+            Type expected,
+            Env<AttrContext> env) {
+        Attribute.Compound c = enterAnnotation(a, expected, env);
+        Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
+        a.attribute_field = tc;
+        return tc;
+    }
+
     /* *********************************
      * Support for repeating annotations
      ***********************************/
@@ -344,9 +358,9 @@ public class Annotate {
      * synthesized container annotation or null IFF all repeating
      * annotation are invalid.  This method reports errors/warnings.
      */
-    private Attribute.Compound processRepeatedAnnotations(List<Attribute.Compound> annotations,
-            AnnotateRepeatedContext ctx) {
-        Attribute.Compound firstOccurrence = annotations.head;
+    private <T extends Attribute.Compound> T processRepeatedAnnotations(List<T> annotations,
+            AnnotateRepeatedContext<T> ctx) {
+        T firstOccurrence = annotations.head;
         List<Attribute> repeated = List.nil();
         Type origAnnoType;
         Type arrayOfOrigAnnoType = null;
@@ -356,16 +370,16 @@ public class Annotate {
         Assert.check(!annotations.isEmpty() &&
                      !annotations.tail.isEmpty()); // i.e. size() > 1
 
-        for (List<Attribute.Compound> al = annotations;
+        for (List<T> al = annotations;
              !al.isEmpty();
              al = al.tail)
         {
-            Attribute.Compound currentAnno = al.head;
+            T currentAnno = al.head;
 
             origAnnoType = currentAnno.type;
             if (arrayOfOrigAnnoType == null) {
                 arrayOfOrigAnnoType = types.makeArrayType(origAnnoType);
-}
+            }
 
             Type currentContainerType = getContainingType(currentAnno, ctx.pos.get(currentAnno));
             if (currentContainerType == null) {
@@ -389,17 +403,34 @@ public class Annotate {
 
         if (!repeated.isEmpty()) {
             repeated = repeated.reverse();
-            JCAnnotation annoTree;
             TreeMaker m = make.at(ctx.pos.get(firstOccurrence));
             Pair<MethodSymbol, Attribute> p =
                     new Pair<MethodSymbol, Attribute>(containerValueSymbol,
                                                       new Attribute.Array(arrayOfOrigAnnoType, repeated));
-            annoTree = m.Annotation(new Attribute.Compound(targetContainerType,
-                    List.of(p)));
-            Attribute.Compound c = enterAnnotation(annoTree,
-                                                   targetContainerType,
-                                                   ctx.env);
-            return c;
+            if (ctx.isTypeCompound) {
+                /* TODO: the following code would be cleaner:
+                Attribute.TypeCompound at = new Attribute.TypeCompound(targetContainerType, List.of(p),
+                        ((Attribute.TypeCompound)annotations.head).position);
+                JCTypeAnnotation annoTree = m.TypeAnnotation(at);
+                at = enterTypeAnnotation(annoTree, targetContainerType, ctx.env);
+                */
+                // However, we directly construct the TypeCompound to keep the
+                // direct relation to the contained TypeCompounds.
+                Attribute.TypeCompound at = new Attribute.TypeCompound(targetContainerType, List.of(p),
+                        ((Attribute.TypeCompound)annotations.head).position);
+
+                @SuppressWarnings("unchecked")
+                T x = (T) at;
+                return x;
+            } else {
+                Attribute.Compound c = new Attribute.Compound(targetContainerType, List.of(p));
+                JCAnnotation annoTree = m.Annotation(c);
+                c = enterAnnotation(annoTree, targetContainerType, ctx.env);
+
+                @SuppressWarnings("unchecked")
+                T x = (T) c;
+                return x;
+            }
         } else {
             return null; // errors should have been reported elsewhere
         }
