@@ -33,6 +33,15 @@ The current development version of the specification is available in the
 
   <dt><a href="java-annotation-design-XXXXX.html">XXXXX</a></dt>
   <dd>
+    Annotation syntax changes:
+    <ul>
+      <li>
+        In a qualified type, the type annotations appear before the simple
+        name, not before the package names.  For example, a programmer writes
+        <tt>package1.package2. @Annotation SimpleName</tt> rather than
+        <tt>@Annotation package1.package2.SimpleName</tt>.
+      </li>
+    </ul>
     Classfile changes:
     <ul>
       <li>

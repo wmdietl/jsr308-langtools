@@ -173,9 +173,8 @@ extension to declaration annotations (item
 
 \begin{enumerate}
 \item
-  A type annotation appears before the type, as in \code{@NonNull String}
-  or \code{@NonNull java.lang.String}.  A type annotation appears before
-  the package name, if any.
+  A type annotation appears before the type's simple name, as in \code{@NonNull String}
+  or \code{java.lang.@NonNull String}.
 %
   Here are examples:
 \begin{itemize}
@@ -251,12 +250,12 @@ It is not permitted to omit the Java type, as in
 % ; see Sections~\ref{type-annotation-use-cases}.
 % and~\ref{implicit-java-types-in-casts}.
 
-\end{itemize}
+\item for nested types:
+\preverbnegspace
+\begin{Verbatim}
+  Map.@NonNull Entry
+\end{Verbatim}
 
-\item
-  For a nested type, the type annotation appears before the type's simple
-  name, as in \code{Outer.\ @NonNull StaticNested};
-  a concrete example is \code{Map.@NonNull Entry}.
   %% We don't permit this any more:
   % If the nested type is a static type, then both the nested and
   % the outer type can be annotated individually, as in \code{@ReadOnly
@@ -270,6 +269,9 @@ It is not permitted to omit the Java type, as in
 %   Map.@NonNull Entry mapEntry;
 % \end{Verbatim}
 % \end{itemize}
+
+\end{itemize}
+
 
 % This is separate from regular type arguments, because there is a separate
 % grammar rule for it in the JLS.
@@ -584,7 +586,8 @@ It is not permitted to annotate the type name in an \<import> statement.
 
 \preverbnegspace
 \begin{Verbatim}
-  import @NotAllowed java.util.Date;        // illegal!
+  import java.util.@NotAllowed Date;      // illegal!
+  import @IllegalSyntax java.util.Date;   // illegal syntax
 \end{Verbatim}
 \preverbnegspace
 
@@ -709,8 +712,7 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 %     FormalParameterDecls:
 %             [final] Type FormalParameterDeclsRest]
 
-
-\item
+% \item
 Annotations are permitted on the simple name in a static nested class.
 
 \begin{tabbing}
