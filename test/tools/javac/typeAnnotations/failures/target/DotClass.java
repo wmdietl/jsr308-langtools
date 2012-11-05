@@ -46,32 +46,29 @@ class T0x1E {
     void m0x1E() {
         Class<Object> c = @A Object.class;
     }
-    
+
     Class<?> c = @A String.class;
-    
+
     Class<? extends @A String> as = @A String.class;
 }
 
 class ClassLiterals {
-	public static void main(String[] args) {
-		if (String.class != @A String.class) throw new Error();
-	    if (@A int.class != int.class) throw new Error();
-	    if (@A int.class != Integer.TYPE) throw new Error();
-	    if (@A int @B(0) [].class != int[].class) throw new Error();
+    public static void main(String[] args) {
+        if (String.class != @A String.class) throw new Error();
+        if (@A int.class != int.class) throw new Error();
+        if (@A int.class != Integer.TYPE) throw new Error();
+        if (@A int @B(0) [].class != int[].class) throw new Error();
 
-	    if (String[].class != @A String[].class) throw new Error();
-	    if (String[].class != String @A [].class) throw new Error();
-	    if (@A int[].class != int[].class) throw new Error();
-	    if (@A int @B(0) [].class != int[].class) throw new Error();
-	}
+        if (String[].class != @A String[].class) throw new Error();
+        if (String[].class != String @A [].class) throw new Error();
+        if (@A int[].class != int[].class) throw new Error();
+        if (@A int @B(0) [].class != int[].class) throw new Error();
+    }
 
-	Object classLit1 = @A String @C [] @B(0) [].class;
+    Object classLit1 = @A String @C [] @B(0) [].class;
     Object classLit2 = @A String @C []       [].class;
     Object classLit3 = @A String    [] @B(0) [].class;
-	Object classLit4 =    String    [] @B(0) [].class;
+    Object classLit4 =    String    [] @B(0) [].class;
     Object classLit5 =    String @C []       [].class;
     Object classLit6 =    String    []       [].class;
 }
-
-	
-	
