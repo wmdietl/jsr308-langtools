@@ -827,7 +827,7 @@ public class Attr extends JCTree.Visitor {
             chk.validate(tree.restype, localEnv);
 
             // Check that receiver type is well-formed.
-            if (tree.recvparam!=null) {
+            if (tree.recvparam != null) {
                 // Use a new environment to check the receiver parameter.
                 // Otherwise I get "might not have been initialized" errors.
                 // Is there a better way?
@@ -913,9 +913,17 @@ public class Attr extends JCTree.Visitor {
                     }
                 }
 
+                // Attribute all type annotations in the body
+                memberEnter.typeAnnotate(tree.body, localEnv, m);
+                annotate.flush();
+
                 // Attribute method body.
                 attribStat(tree.body, localEnv);
             }
+
+            // Correct the position of all type annotations.
+            TypeAnnotations.organizeTypeAnnotations(syms, names, tree);
+
             localEnv.info.scope.leave();
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
@@ -934,6 +942,15 @@ public class Attr extends JCTree.Visitor {
                 env.info.scope.enter(tree.sym);
             } else {
                 memberEnter.memberEnter(tree, env);
+                annotate.flush();
+            }
+        } else {
+            // Correct the position of all type annotations.
+            TypeAnnotations.organizeTypeAnnotations(syms, names, tree);
+
+            if (tree.init != null) {
+                // Field initializer expression need to be entered.
+                memberEnter.typeAnnotate(tree.init, env, tree.sym);
                 annotate.flush();
             }
         }
@@ -990,6 +1007,11 @@ public class Attr extends JCTree.Visitor {
                 new MethodSymbol(tree.flags | BLOCK, names.empty, null,
                                  env.info.scope.owner);
             if ((tree.flags & STATIC) != 0) localEnv.info.staticLevel++;
+
+            // Attribute all type annotations in the block
+            memberEnter.typeAnnotate(tree, localEnv, localEnv.info.scope.owner);
+            annotate.flush();
+
             attribStats(tree.stats, localEnv);
         } else {
             // Create a new local environment with a local scope.
@@ -3018,8 +3040,13 @@ public class Attr extends JCTree.Visitor {
      * Apply the annotations to the particular type.
      */
     public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
-        if (annotations.isEmpty()) return;
-        annotate.laterOnFlush(new Annotator() {
+        if (annotations.isEmpty())
+            return;
+        annotate.typeAnnotation(new Annotator() {
+            @Override
+            public String toString() {
+                return "annotate " + annotations + " onto " + type;
+            }
             @Override
             public void enterAnnotation() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
@@ -3028,7 +3055,7 @@ public class Attr extends JCTree.Visitor {
         });
     }
 
-    private List<Attribute.TypeCompound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+    private static List<Attribute.TypeCompound> fromAnnotations(List<JCTypeAnnotation> annotations) {
         if (annotations.isEmpty())
             return List.nil();
 
@@ -3277,6 +3304,8 @@ public class Attr extends JCTree.Visitor {
 
         // Check type annotations applicability rules
         validateTypeAnnotations(tree);
+
+        TypeAnnotations.completeTypeAnnotations(this.names, tree);
     }
         // where
         /** get a diagnostic position for an attribute of Type t, or null if attribute missing */
@@ -3353,16 +3382,18 @@ public class Attr extends JCTree.Visitor {
         }
         public void visitTypeParameter(JCTypeParameter tree) {
             chk.validateTypeAnnotations(tree.annotations, true);
-            // Don't call super. Skip type annotations.
-            // WMD: why can we skip them?
             scan(tree.bounds);
+            // Don't call super.
+            // This is needed because above we call validateTypeAnnotation with
+            // false, which would forbid annotations on type parameters.
+            // super.visitTypeParameter(tree);
         }
         public void visitMethodDef(JCMethodDecl tree) {
             // Static methods cannot have receiver type annotations.
             // In test case FailOver15.java, the nested method getString has
             // a null sym, because an unknown class is instantiated.
             // I would say it's safe to skip.
-            if (tree.sym!=null && (tree.sym.flags() & Flags.STATIC) != 0) {
+            if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
                 if (tree.recvparam != null) {
                     // TODO: better error message. Is the pos good?
                     log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
