@@ -37,12 +37,13 @@ import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.file.BaseFileObject;
 import com.sun.tools.javac.util.*;
 
-import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTags.*;
@@ -62,8 +63,6 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 public class ClassWriter extends ClassFile {
     protected static final Context.Key<ClassWriter> classWriterKey =
         new Context.Key<ClassWriter>();
-
-    private final Symtab syms;
 
     private final Options options;
 
@@ -176,7 +175,6 @@ public class ClassWriter extends ClassFile {
 
         log = Log.instance(context);
         names = Names.instance(context);
-        syms = Symtab.instance(context);
         options = Options.instance(context);
         target = Target.instance(context);
         source = Source.instance(context);
@@ -715,7 +713,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getAnnotationMirrors());
-        acount += writeTypeAnnotations(sym.typeAnnotations);
+        acount += writeTypeAnnotations(sym.getTypeAnnotationMirrors());
         return acount;
     }
 
@@ -817,8 +815,38 @@ public class ClassWriter extends ClassFile {
         ListBuffer<Attribute.TypeCompound> invisibles = ListBuffer.lb();
 
         for (Attribute.TypeCompound tc : typeAnnos) {
-            if (tc.position.type == TargetType.UNKNOWN
-                || !tc.position.emitToClassfile())
+            if (tc.position == null || tc.position.type == TargetType.UNKNOWN) {
+                boolean found = false;
+                // TODO: the position for the container annotation of a
+                // repeating type annotation has to be set.
+                // This cannot be done when the container is created, because
+                // then the position is not determined yet.
+                // How can we link these pieces better together?
+                if (tc.values.size() == 1) {
+                    Pair<MethodSymbol, Attribute> val = tc.values.get(0);
+                    if (val.fst.getSimpleName().contentEquals("value") &&
+                            val.snd instanceof Attribute.Array) {
+                        Attribute.Array arr = (Attribute.Array) val.snd;
+                        if (arr.values.length != 0 &&
+                                arr.values[0] instanceof Attribute.TypeCompound) {
+                            TypeCompound atycomp = (Attribute.TypeCompound) arr.values[0];
+                            if (atycomp.position.type != TargetType.UNKNOWN) {
+                                tc.position = atycomp.position;
+                                found = true;
+                            }
+                        }
+                    }
+                }
+                if (!found) {
+                    // This happens for nested types like @A Outer. @B Inner.
+                    // For method parameters we get the annotation twice! Once with
+                    // a valid position, once unknown.
+                    // TODO: find a cleaner solution.
+                    // System.err.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
+                    continue;
+                }
+            }
+            if (!tc.position.emitToClassfile())
                 continue;
             switch (types.getRetention(tc)) {
             case SOURCE: break;
@@ -956,6 +984,11 @@ public class ClassWriter extends ClassFile {
                 databuf.appendChar(p.lvarIndex[i]);
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters! pos: " + p);
+            break;
         // method receiver
         case METHOD_RECEIVER:
         case METHOD_RECEIVER_COMPONENT:
@@ -983,11 +1016,6 @@ public class ClassWriter extends ClassFile {
         case THROWS:
             databuf.appendChar(p.type_index);
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_COMPONENT:
@@ -1008,9 +1036,9 @@ public class ClassWriter extends ClassFile {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("jvm.ClassWriter: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + p);
+            throw new AssertionError("jvm.ClassWriter: Unknown target type for position: " + p);
         }
 
         // Append location data for generics/arrays.
@@ -1764,7 +1792,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getAnnotationMirrors());
-        acount += writeTypeAnnotations(c.typeAnnotations);
+        acount += writeTypeAnnotations(c.getTypeAnnotationMirrors());
         acount += writeEnclosingMethodAttribute(c);
         acount += writeExtraClassAttributes(c);
 
