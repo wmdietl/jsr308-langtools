@@ -1930,9 +1930,9 @@ public class Code {
 
     private void fillLocalVarPosition(LocalVar lv) {
         if (lv == null || lv.sym == null
-                || lv.sym.typeAnnotations == null)
+                || lv.sym.annotations.isTypesEmpty())
             return;
-        for (Attribute.TypeCompound ta : lv.sym.typeAnnotations) {
+        for (Attribute.TypeCompound ta : lv.sym.getTypeAnnotationMirrors()) {
             TypeAnnotationPosition p = ta.position;
             p.lvarOffset = new int[] { (int)lv.start_pc };
             p.lvarLength = new int[] { (int)lv.length };
