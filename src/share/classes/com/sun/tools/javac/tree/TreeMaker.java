@@ -786,7 +786,11 @@ public class TreeMaker implements JCTree.Factory {
             result = Erroneous();
         }
         public void visitCompound(Attribute.Compound compound) {
-            result = visitCompoundInternal(compound);
+            if (compound instanceof Attribute.TypeCompound) {
+                result = visitTypeCompoundInternal((Attribute.TypeCompound) compound);
+            } else {
+                result = visitCompoundInternal(compound);
+            }
         }
         public JCAnnotation visitCompoundInternal(Attribute.Compound compound) {
             ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
@@ -796,6 +800,15 @@ public class TreeMaker implements JCTree.Factory {
                 args.append(Assign(Ident(pair.fst), valueTree).setType(valueTree.type));
             }
             return Annotation(Type(compound.type), args.toList());
+        }
+        public JCTypeAnnotation visitTypeCompoundInternal(Attribute.TypeCompound compound) {
+            ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
+            for (List<Pair<Symbol.MethodSymbol,Attribute>> values = compound.values; values.nonEmpty(); values=values.tail) {
+                Pair<MethodSymbol,Attribute> pair = values.head;
+                JCExpression valueTree = translate(pair.snd);
+                args.append(Assign(Ident(pair.fst), valueTree).setType(valueTree.type));
+            }
+            return TypeAnnotation(Type(compound.type), args.toList());
         }
         public void visitArray(Attribute.Array array) {
             ListBuffer<JCExpression> elems = new ListBuffer<JCExpression>();
@@ -810,13 +823,21 @@ public class TreeMaker implements JCTree.Factory {
         JCAnnotation translate(Attribute.Compound a) {
             return visitCompoundInternal(a);
         }
+        JCTypeAnnotation translate(Attribute.TypeCompound a) {
+            return visitTypeCompoundInternal(a);
+        }
     }
+
     AnnotationBuilder annotationBuilder = new AnnotationBuilder();
 
     /** Create an annotation tree from an attribute.
      */
     public JCAnnotation Annotation(Attribute a) {
         return annotationBuilder.translate((Attribute.Compound)a);
+    }
+
+    public JCTypeAnnotation TypeAnnotation(Attribute a) {
+        return annotationBuilder.translate((Attribute.TypeCompound) a);
     }
 
     /** Create a method definition from a method symbol and a method body.
