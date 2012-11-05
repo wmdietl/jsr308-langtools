@@ -832,7 +832,7 @@ public class Check {
         // System.out.println("actuals: " + argtypes);
         List<Type> formals = owntype.getParameterTypes();
         Type last = useVarargs ? formals.last() : null;
-        if (sym.name==names.init &&
+        if (sym.name == names.init &&
                 sym.owner == syms.enumSym)
                 formals = formals.tail.tail;
         List<JCExpression> args = argtrees;
