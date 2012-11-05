@@ -1446,6 +1446,11 @@ public class ClassReader implements Completer {
                 position.lvarIndex[i] = nextChar();
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            // System.out.println("Handle exception parameters!");
+            break;
         // method receiver
         case METHOD_RECEIVER:
         case METHOD_RECEIVER_COMPONENT:
@@ -1473,11 +1478,6 @@ public class ClassReader implements Completer {
         case THROWS:
             position.type_index = nextChar();
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_COMPONENT:
@@ -1498,9 +1498,9 @@ public class ClassReader implements Completer {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("jvm.ClassReader: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + position);
+            throw new AssertionError("jvm.ClassReader: Unknown target type for position: " + position);
         }
 
         if (type.hasLocation()) {
@@ -1832,7 +1832,7 @@ public class ClassReader implements Completer {
                 Annotations annotations = sym.annotations;
                 List<Attribute.Compound> newList = deproxyCompoundList(l);
                 if (annotations.pendingCompletion()) {
-                    annotations.setAttributes(newList);
+                    annotations.setDeclarationAttributes(newList);
                 } else {
                     annotations.append(newList);
                 }
@@ -1868,9 +1868,7 @@ public class ClassReader implements Completer {
             try {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
-                sym.typeAnnotations = ((sym.typeAnnotations == null)
-                                        ? newList
-                                        : newList.prependList(sym.typeAnnotations));
+                sym.annotations.setTypeAttributes(newList.prependList(sym.getTypeAnnotationMirrors()));
 
             } finally {
                 currentClassFile = previousClassFile;
