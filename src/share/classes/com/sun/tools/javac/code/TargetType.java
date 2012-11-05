@@ -203,8 +203,15 @@ public enum TargetType {
     public TargetType getGenericComplement() {
         if (hasLocation())
             return this;
-        else
+        else {
+            // TODO: don't call with unknown!
+            if (((char)targetTypeValue()) == ((char)UNKNOWN.targetTypeValue)) {
+                // System.err.println("TargetType.getGenericComplement called with UNKNOWN!");
+                return UNKNOWN;
+            }
+
             return fromTargetTypeValue(targetTypeValue() + 1);
+        }
     }
 
     /**

@@ -740,6 +740,11 @@ public class ClassWriter {
                     out.writeShort(p.lvarIndex[i]);
                 }
                 break;
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                // TODO: how do we separate which of the types it is on?
+                System.out.println("Handle exception parameters! pos: " + p);
+                break;
             // method receiver
             case METHOD_RECEIVER:
             case METHOD_RECEIVER_COMPONENT:
@@ -767,11 +772,6 @@ public class ClassWriter {
             case THROWS:
                 out.writeByte(p.type_index);
                 break;
-            // exception parameter
-            case EXCEPTION_PARAMETER:
-                // TODO: how do we separate which of the types it is on?
-                System.out.println("Handle exception parameters!");
-                break;
             // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_COMPONENT:
@@ -792,9 +792,9 @@ public class ClassWriter {
             case FIELD_COMPONENT:
                 break;
             case UNKNOWN:
-                break;
+                throw new AssertionError("ClassWriter: UNKNOWN target type should never occur!");
             default:
-                throw new AssertionError("Unknown target type for position: " + p);
+                throw new AssertionError("ClassWriter: Unknown target type for position: " + p);
             }
 
             // Append location data for generics/arrays.
