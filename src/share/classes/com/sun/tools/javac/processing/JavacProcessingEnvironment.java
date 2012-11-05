@@ -1075,9 +1075,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             next.put(Tokens.tokensKey, tokens);
 
             Log nextLog = Log.instance(next);
-            // propogate the log's writers directly, instead of going through context
-            nextLog.setWriters(log);
-            nextLog.setSourceMap(log);
+            nextLog.initRound(log);
 
             JavaCompiler oldCompiler = JavaCompiler.instance(context);
             JavaCompiler nextCompiler = JavaCompiler.instance(next);
@@ -1278,7 +1276,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         if (procNames != null)
             return true;
 
-        String procPath;
         URL[] urls = new URL[1];
         for(File pathElement : workingpath) {
             try {
