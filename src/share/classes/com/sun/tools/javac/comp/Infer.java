@@ -40,7 +40,6 @@ import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.sun.tools.javac.code.TypeTags.*;
 
