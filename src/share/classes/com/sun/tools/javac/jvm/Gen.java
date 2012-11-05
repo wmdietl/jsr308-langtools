@@ -1719,7 +1719,7 @@ public class Gen extends JCTree.Visitor {
    private void setTypeAnnotationPositions(int treePos) {
        MethodSymbol meth = code.meth;
 
-       for (Attribute.TypeCompound ta : meth.typeAnnotations) {
+       for (Attribute.TypeCompound ta : meth.getTypeAnnotationMirrors()) {
            if (ta.position.pos == treePos) {
                ta.position.offset = code.cp;
                ta.position.lvarOffset = new int[] { code.cp };
@@ -1731,7 +1731,7 @@ public class Gen extends JCTree.Visitor {
                && code.meth.getKind() != javax.lang.model.element.ElementKind.STATIC_INIT)
            return;
 
-       for (Attribute.TypeCompound ta : meth.owner.typeAnnotations) {
+       for (Attribute.TypeCompound ta : meth.owner.getTypeAnnotationMirrors()) {
            if (ta.position.pos == treePos) {
                ta.position.offset = code.cp;
                ta.position.lvarOffset = new int[] { code.cp };
@@ -1743,7 +1743,7 @@ public class Gen extends JCTree.Visitor {
        for (Symbol s : new com.sun.tools.javac.model.FilteredMemberList(clazz.members())) {
            if (!s.getKind().isField())
                continue;
-           for (Attribute.TypeCompound ta : s.typeAnnotations) {
+           for (Attribute.TypeCompound ta : s.getTypeAnnotationMirrors()) {
                if (ta.position.pos == treePos) {
                    ta.position.offset = code.cp;
                    ta.position.lvarOffset = new int[] { code.cp };
