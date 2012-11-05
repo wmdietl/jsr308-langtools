@@ -82,7 +82,15 @@ public abstract class Symbol implements Element {
      *  method to make sure that the class symbol is loaded.
      */
     public List<Attribute.Compound> getAnnotationMirrors() {
-        return Assert.checkNonNull(annotations.getAttributes());
+        return annotations.getDeclarationAttributes();
+    }
+
+    /** An accessor method for the type attributes of this symbol.
+     *  Attributes of class symbols should be accessed through the accessor
+     *  method to make sure that the class symbol is loaded.
+     */
+    public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+        return annotations.getTypeAttributes();
     }
 
     /** Fetch a particular annotation from a symbol. */
@@ -100,17 +108,6 @@ public abstract class Symbol implements Element {
     /** The type of this symbol.
      */
     public Type type;
-
-    /** The type annotations targeted to a tree directly owned by this symbol.
-     */
-    // Type annotations are stored here for two purposes:
-    //  - convenient location to store annotations for generation after erasure
-    //  - a private interface for accessing type annotations parsed from
-    //    classfiles
-    // The field is populated for the following declarations only:
-    // class, field, variable, and type parameters.
-    //
-    public List<Attribute.TypeCompound> typeAnnotations;
 
     /** The owner of this symbol.
      */
@@ -133,7 +130,6 @@ public abstract class Symbol implements Element {
         this.owner = owner;
         this.completer = null;
         this.erasure_field = null;
-        this.typeAnnotations = List.nil();
         this.name = name;
     }
 
@@ -676,9 +672,9 @@ public abstract class Symbol implements Element {
                 package_info.complete();
                 if (annotations.isEmpty()) {
                     annotations.setAttributes(package_info.annotations);
+                }
             }
-            }
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
         }
 
         /** A package "exists" if a type or package that exists has
@@ -780,7 +776,12 @@ public abstract class Symbol implements Element {
 
         public List<Attribute.Compound> getAnnotationMirrors() {
             if (completer != null) complete();
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
+        }
+
+        public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+            if (completer != null) complete();
+            return Assert.checkNonNull(annotations.getTypeAttributes());
         }
 
         public Type erasure(Types types) {
