@@ -209,7 +209,7 @@ extension to declaration annotations (item
   void monitorTemperature() throws @Critical TemperatureException { ... }
 \end{Verbatim}
 
-\item for typecasts:
+\item for casts:
 \preverbnegspace
 \begin{Verbatim}
   myString = (@NonNull String) myObject;
@@ -1461,16 +1461,16 @@ type_annotation {
     // New fields in JSR 308:
     u1 target_type;    // the type of the targeted program element, see Section 3.2
     union {
-        typeparam_target;
+        type_parameter_target;
         supertype_target;
-        typeparam_bound_target;
+        type_parameter_bound_target;
         empty_target;
-        methodparam_target;
-        exception_target;
+        method_parameter_target;
+        throws_target;
         localvar_target;
         catch_target;
         offset_target;
-        typearg_target;
+        invocation_type_argument_target;
     } target_info;  // uniquely identifies the targeted program element, see Section 3.3
     // Original fields from "annotation" structure:
     u2 type_index;
@@ -1574,15 +1574,15 @@ resource variable type & \textbf{TODO}
 & \code{0x82}, \code{0x83} & \S\ref{class-file:ext:ri:localvar} \\
 exception parameter type & \textbf{TODO}
 & \code{0x84}, \code{0x85}\rlunused & \S\ref{class-file:ext:ri:catch} \\
-typecast & \code{TYPECAST}
-& \code{0x86}, \code{0x87} & \S\ref{class-file:ext:ri:typecast} \\
+cast & \code{CAST}
+& \code{0x86}, \code{0x87} & \S\ref{class-file:ext:ri:cast} \\
 type test (\code{instanceof}) & \code{INSTANCEOF}
-& \code{0x88}, \code{0x89} & \S\ref{class-file:ext:ri:typecast} \\
+& \code{0x88}, \code{0x89} & \S\ref{class-file:ext:ri:cast} \\
 object creation (\code{new}) & \code{NEW}
-& \code{0x8A}, \code{0x8B} & \S\ref{class-file:ext:ri:typecast} \\
-type argument in constructor call & \code{NEW\_TYPE\_ARGUMENT}
+& \code{0x8A}, \code{0x8B} & \S\ref{class-file:ext:ri:cast} \\
+type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMENT}
 & \code{0x8C}, \code{0x8D} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in method call & \code{METHOD\_TYPE\_ARGUMENT}
+type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
 & \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:con-typearg} \\
 \hline
 \end{tabular}
@@ -1670,19 +1670,19 @@ A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes tabl
 
 \subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
 
-\targetinfocontents{a type parameter of a class or method}{typeparam\_target}
+\targetinfocontents{a type parameter of a class or method}{type\_parameter\_target}
 
 \preverbnegspace
 \begin{Verbatim}
-    typeparam_target {
-        u1 param_index;
+    type_parameter_target {
+        u1 type_parameter_index;
     };
 \end{Verbatim}
 
-\code{param\_index} specifies the 0-based index of the type parameter.
+\code{type\_parameter\_index} specifies the 0-based index of the type parameter.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{type\_parameter\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure if it targets a method type parameter bound,
 otherwise, in the attributes table of a \code{ClassFile} structure if it
 targets a class declaration type parameter bound.
@@ -1696,12 +1696,12 @@ targets a class declaration type parameter bound.
 \preverbnegspace
 \begin{Verbatim}
     supertype_target {
-        u2 type_index;
+        u2 supertype_index;
     };
 \end{Verbatim}
 
-\code{type\_index} is \code{-1} (\code{65535}) if the annotation is on the
-superclass type.  Otherwise, \code{type\_index} specifies the index of the
+\code{supertype\_index} is \code{-1} (\code{65535}) if the annotation is on the
+superclass type.  Otherwise, \code{supertype\_index} specifies the index of the
 targeted type in the
 \code{interfaces} array field of the \code{ClassFile} structure;
 simply the value $i$ is used if the annotation is on the $i$th
@@ -1714,17 +1714,17 @@ superinterface type.
 \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
 
 \targetinfocontents{a bound of a type parameter of a class or
-method}{typeparam\_bound\_target}
+method}{type\_parameter\_bound\_target}
 
 \preverbnegspace
 \begin{Verbatim}
-    typeparam_bound_target {
-        u1 param_index;
+    type_parameter_bound_target {
+        u1 type_parameter_index;
         u1 bound_index;
     };
 \end{Verbatim}
 
-\code{param\_index} specifies the index of the type parameter, while
+\code{type\_parameter\_index} specifies the index of the type parameter, while
 \code{bound\_index} specifies the index of the bound.  Indexes start at 0.
 Bound index 0 is always a class, not interface, type.
 If the programmer-supplied upper bound of the type variable is an
@@ -1741,12 +1741,12 @@ example:
 
 \noindent
 Here
-\code{@A} has \code{param\_index} 0 and \code{bound\_index} 0,
-\code{@B} has \code{param\_index} 0 and \code{bound\_index} 1, and
-\code{@C} has \code{param\_index} 1 and \code{bound\_index} 1.
+\code{@A} has \code{type\_parameter\_index} 0 and \code{bound\_index} 0,
+\code{@B} has \code{type\_parameter\_index} 0 and \code{bound\_index} 1, and
+\code{@C} has \code{type\_parameter\_index} 1 and \code{bound\_index} 1.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{typeparam\_bound\_target} appears in the attributes table of a
+\code{type\_parameter\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure if it targets a method type parameter bound,
 otherwise, in the attributes table of a \code{ClassFile} structure if it
 targets a class declaration type parameter bound.
@@ -1775,36 +1775,40 @@ More formally, it contains \code{empty\_target}:
 
 \subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
 
-\targetinfocontentspartial{a method parameter type} contains one \code{methodparam\_target}, which
+\targetinfocontentspartial{a method parameter type} contains one \code{method\_parameter\_target}, which
 indicates which of the method's formal parameters is being annotated:
 
 \preverbnegspace
 \begin{Verbatim}
-    methodparam_target {
-        u1 parameter_index;
+    method_parameter_target {
+        u1 method_parameter_index;
     };
 \end{Verbatim}
 
-\attributelocation{containing a \code{methodparam\_target}}{\code{method\_info} structure}
+\attributelocation{containing a \code{method\_parameter\_target}}{\code{method\_info} structure}
+
+\todo{Constrain method_parameter_index w.r.t. to the number of
+      parameter descriptors in the method descriptor (JVMS 4.3.3) of the
+      enclosing method_info structure.}
 
 
 \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
 
-\targetinfocontents{a type in a \code{throws} clause}{exception\_target}
+\targetinfocontents{a type in a \code{throws} clause}{throws\_target}
 
 \preverbnegspace
 \begin{Verbatim}
-    exception_target {
-        u2 type_index;
+    throws_target {
+        u2 throws_type_index;
     };
 \end{Verbatim}
 
-\code{type\_index} specifies the index of the exception type in the
+\code{throws\_type\_index} specifies the index of the exception type in the
 clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
 simply the value $i$ denotes an annotation on the $i$th exception
 type.
 
-\attributelocation{containing a \code{exception\_target}}{\code{method\_info} structure}
+\attributelocation{containing a \code{throws\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
@@ -1859,9 +1863,9 @@ appears in the \<exception\_table> slot of the \<Code> attribute).
 \attributelocation{containing a \code{catch\_target}}{\code{Code} attribute}
 
 
-\subsubsection{Typecasts, type tests, and object creation\label{class-file:ext:ri:typecast}}
+\subsubsection{Casts, type tests, and object creation\label{class-file:ext:ri:cast}}
 
-\targetinfocontents{a typecast, an \code{instanceof}
+\targetinfocontents{a cast, an \code{instanceof}
 expression, or a \code{new} expression}{offset\_target}
 
 \preverbnegspace
@@ -1873,17 +1877,17 @@ expression, or a \code{new} expression}{offset\_target}
 
 The \code{offset} field denotes the offset (i.e., within the bytecodes
 of the containing method) of the \code{checkcast} bytecode emitted for
-the typecast, the \code{instanceof} bytecode emitted for the type tests,
+the cast, the \code{instanceof} bytecode emitted for the type tests,
 or the \code{new} bytecode emitted for the object creation expression.
-Typecast annotations are attached to a single bytecode, not a bytecode range
+Cast annotations are attached to a single bytecode, not a bytecode range
 (or ranges):  the annotation provides information about the type of a
 single value, not about the behavior of a code block.
 A similar explanation applies to type tests and object creation.
 
-For annotated typecasts, the attribute may be attached to a
+For annotated casts, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
 this is that the Java compiler is permitted to omit \code{checkcast}
-bytecodes for typecasts that are guaranteed to be no-ops.  For example, a
+bytecodes for casts that are guaranteed to be no-ops.  For example, a
 cast from \code{String} to \code{@NonNull String} may be a no-op for the
 underlying Java type system (which sees a cast from \code{String} to
 \code{String}).  If the compiler omits the \code{checkcast} bytecode, the
@@ -1914,7 +1918,7 @@ originally attached to the first type argument of \<C>.
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
 % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
-% Java compiler is permitted to omit \code{checkcast} bytecodes for typecasts
+% Java compiler is permitted to omit \code{checkcast} bytecodes for casts
 % that are guaranteed to be no-ops.  For example, a cast from \code{String}
 % to \code{@NonNull String} may be a no-op for the underlying Java type
 % system (which sees a cast from
@@ -1929,16 +1933,16 @@ originally attached to the first type argument of \<C>.
 % un-annotated type casts.
 
 
-\subsubsection{Constructor and method call type arguments\label{class-file:ext:ri:con-typearg}}
+\subsubsection{Type arguments to constructor/method invocation\label{class-file:ext:ri:con-typearg}}
 
 \targetinfocontents{a type argument in a constructor call or
-a method call}{typearg\_target}
+a method call}{invocation\_type\_argument\_target}
 
 \preverbnegspace
 \begin{Verbatim}
-    typearg_target {
+    invocation_type_argument_target {
         u2 offset;
-        u1 type_index;
+        u1 type_argument_index;
     };
 \end{Verbatim}
 
@@ -1949,10 +1953,17 @@ constructor call, or the
 method invocation.  Like type cast type annotations, type argument
 annotations are attached to a single bytecode, not a bytecode range.
 
-\code{type\_index} specifies the index of the type argument in the
+\code{type\_argument\_index} specifies the index of the type argument in the
 expression.
 
-\attributelocation{containing a \code{typearg\_target}}{\code{Code} attribute}
+\attributelocation{containing a \code{invocation\_type\_argument\_target}}{\code{Code} attribute}
+
+\todo{type_argument_index specifies the index of a type argument in the list
+       of explicit non-wildcard type arguments passed to the
+       constructor/method invocation.
+       e.g. \code{x.<@Foo String>m()}
+       e.g. \code{new <@Foo String> @Bar A()}}
+
 
 
 \subsubsection{Type arguments, wildcard bounds, array element types, and static nested types\label{class-file:ext:ri:typearg}}
@@ -2090,7 +2101,7 @@ The classfile must distinguish among these locations.
 array type, or nested type} contains what it normally would for a
 non-parameterized, non-array type
 % (e.g., \code{offset} for an annotation on a type argument in a
-% typecast, see Section~\ref{class-file:ext:ri:typecast}),
+% cast, see Section~\ref{class-file:ext:ri:cast}),
 {\em plus} the following fields at the end:
 
 \preverbnegspace
@@ -2474,7 +2485,7 @@ support of unforeseen future uses.
 An annotation need not utilize every
 possible annotation location.  For example, a system that fully specifies
 type qualifiers in signatures but infers them for implementations~\cite{GreenfieldboyceF2005}
-may not need annotations on typecasts, object creation, local variables, or
+may not need annotations on casts, object creation, local variables, or
 certain other locations.  Other
 systems may forbid top-level (non-type-argument, non-array) annotations
 on object creation (\code{new}) expressions, such as \code{new @Interned
@@ -3687,8 +3698,8 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedType toArray localvar methodparam typeparam ReadWrite
-% LocalWords:  typearg ClassFile clinit StackMapTable StaticNested boolean var1
+% LocalWords:  QualifiedType toArray localvar ReadWrite
+% LocalWords:  ClassFile clinit StackMapTable StaticNested boolean var1
 % LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver 2x5
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
 % LocalWords:  NestedStatic decompiler myLock Reified arr2 syntaxes TargetType

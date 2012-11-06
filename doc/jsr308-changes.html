@@ -64,6 +64,43 @@ The current development version of the specification is available in the
       <li>
         Annotations that target instructions must be sorted.
       </li>
+      <li>
+        Rename <tt>target_type</tt> structure and field names.
+        <ul>
+          <li>&sect;3.2<br/>
+              <tt>TYPECAST</tt> &rarr; <tt>CAST</tt><br/>
+              <tt>NEW_TYPE_ARGUMENT</tt> &rarr; <tt>CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT</tt><br/>
+              <tt>METHOD_TYPE_ARGUMENT</tt> &rarr; <tt>METHOD_INVOCATION_TYPE_ARGUMENT</tt>
+          </li>
+          <li>&sect;3.3.1
+              <tt>typeparam_target</tt> &rarr; <tt>type_parameter_target</tt><br/>
+              <tt>param_index</tt> &rarr; <tt>type_parameter_index</tt>
+
+          </li>
+          <li>&sect;3.3.2<br/>
+              <tt>type_index</tt> &rarr; <tt>supertype_index</tt>
+
+          </li>
+          <li>&sect;3.3.3<br/>
+              <tt>typeparam_bound_target</tt> &rarr; <tt>type_parameter_bound_target</tt><br/>
+              <tt>param_index</tt> &rarr; <tt>type_parameter_index</tt>
+
+          </li>
+          <li>&sect;3.3.5<br/>
+              <tt>methodparam_target</tt> &rarr; <tt>method_parameter_target</tt><br/>
+              <tt>parameter_index</tt> &rarr; <tt>method_parameter_index</tt>
+          </li>
+          <li>&sect;3.3.6<br/>
+              <tt>exception_target</tt> &rarr; <tt>throws_target</tt><br/>
+              <tt>type_index</tt> &rarr; <tt>throws_type_index</tt>
+
+          </li>
+          <li>&sect;3.3.10<br/>
+              <tt>typearg_target</tt> &rarr; <tt>invocation_type_argument_target</tt><br/>
+              <tt>type_index</tt> &rarr; <tt>type_argument_index</tt>
+          </li>
+        </ul>
+      </li>
     </ul>
     Compilation:
     <ul>
