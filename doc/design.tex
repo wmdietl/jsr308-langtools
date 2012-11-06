@@ -1584,6 +1584,10 @@ type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMEN
 & \code{0x8C}, \code{0x8D} & \S\ref{class-file:ext:ri:con-typearg} \\
 type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
 & \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:con-typearg} \\
+lambda parameter type & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
+& \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:lambda-parameter} \\
+type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
+& \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:mref-typearg} \\
 \hline
 \end{tabular}
 \end{center}
@@ -1787,9 +1791,9 @@ indicates which of the method's formal parameters is being annotated:
 
 \attributelocation{containing a \code{method\_parameter\_target}}{\code{method\_info} structure}
 
-\todo{Constrain method_parameter_index w.r.t. to the number of
+TODO: Constrain \code{method\_parameter\_index} w.r.t.\ the number of
       parameter descriptors in the method descriptor (JVMS 4.3.3) of the
-      enclosing method_info structure.}
+      enclosing \code{method\_info} structure.
 
 
 \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
@@ -1958,11 +1962,11 @@ expression.
 
 \attributelocation{containing a \code{invocation\_type\_argument\_target}}{\code{Code} attribute}
 
-\todo{type_argument_index specifies the index of a type argument in the list
+TODO: \code{type\_argument\_index} specifies the index of a type argument in the list
        of explicit non-wildcard type arguments passed to the
        constructor/method invocation.
        e.g. \code{x.<@Foo String>m()}
-       e.g. \code{new <@Foo String> @Bar A()}}
+       e.g. \code{new <@Foo String> @Bar A()}
 
 
 
