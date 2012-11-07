@@ -372,8 +372,11 @@ receiver.
   (Each non-static method has an implicit parameter, \code{this}, which is
   called the \emph{receiver}.)
   Then, no special
-  syntax is needed for expressing the receiver annotation:  it is simply an
+  syntax is needed for expressing the receiver type annotation:  it is simply an
   annotation on the type of the \code{this} parameter.
+  It is not permitted to write a declaration annotation on the
+  receiver (<tt>this</tt>) formal parameter declaration.
+  % (for one thing, there is nowhere to store it in the class file)
 
   Only the first formal parameter may be
   named \code{this}, and such a parameter is permitted only on an instance
