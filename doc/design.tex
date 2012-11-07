@@ -1471,7 +1471,8 @@ type_annotation {
         catch_target;
         offset_target;
         invocation_type_argument_target;
-    } target_info;  // uniquely identifies the targeted program element, see Section 3.3
+    } target_info;     // identifies the targeted program element, see Section 3.3
+    type_path target_path; // identifies targeted type in a compound type (array, generic, etc.), see Section 3.4
     // Original fields from "annotation" structure:
     u2 type_index;
     u2 num_element_value_pairs;
@@ -1511,21 +1512,13 @@ size and
 contents of \code{target\_info} (see Section~\ref{class-file:ext:target_info}).
 
 
-\subsection{The \code{target\_type} field\label{class-file:ext:target_type}\label{target_type}}
+\subsection{The \code{target\_type} field:  the type of annotated element\label{class-file:ext:target_type}\label{target_type}}
 
 The \code{target\_type} field denotes the type of program element that
 the annotation targets, such as whether the annotation is on a field, a
 method receiver, a cast, or some other location.
 Figure~\ref{tbl:target_types} gives the value of \code{target\_type} for
 every possible annotation location.
-
-
-\def\unused{\ensuremath{*}}
-\ifhevea
-  \def\rlunused{\unused}
-\else
-  \def\rlunused{\rlap{\unused}}
-\fi
 
 
 \begin{figure}[thp!]
@@ -1538,9 +1531,9 @@ every possible annotation location.
 %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
 %% so whenever that is updated, this table should be as well.
 class type parameter & \code{CLASS\_TYPE\_PARAMETER}
-& \code{0x00}, \code{0x01}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
+& \code{0x00} & \S\ref{class-file:ext:ri:mtp} \\
 method type parameter & \code{METHOD\_TYPE\_PARAMETER}
-& \code{0x02}, \code{0x03}\rlunused & \S\ref{class-file:ext:ri:mtp} \\
+& \code{0x02} & \S\ref{class-file:ext:ri:mtp} \\
 \hline
 \multicolumn{4}{c}{~} \\
 \multicolumn{4}{l}{Targets for type uses that may be externally visible in
@@ -1548,46 +1541,46 @@ method type parameter & \code{METHOD\_TYPE\_PARAMETER}
 \hline
 {\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
 class \code{extends}/\code{implements} & \code{CLASS\_EXTENDS}
-& \code{0x10}, \code{0x11} & \S\ref{class-file:ext:ri:extends} \\
+& \code{0x10} & \S\ref{class-file:ext:ri:extends} \\
 class type parameter bound & \code{CLASS\_TYPE\_PARAMETER\_BOUND}
-& \code{0x12}, \code{0x13} & \S\ref{class-file:ext:ri:tpbound} \\
+& \code{0x12} & \S\ref{class-file:ext:ri:tpbound} \\
 method type parameter bound & \code{METHOD\_TYPE\_PARAMETER\_BOUND}
-& \code{0x14}, \code{0x15} & \S\ref{class-file:ext:ri:tpbound} \\
+& \code{0x14} & \S\ref{class-file:ext:ri:tpbound} \\
 field type & \code{FIELD}
-& \code{0x16}, \code{0x17} & \S\ref{class-file:ext:ri:return} \\
+& \code{0x16} & \S\ref{class-file:ext:ri:return} \\
 method return type & \code{METHOD\_RETURN}
-& \code{0x18}, \code{0x19} & \S\ref{class-file:ext:ri:return} \\
+& \code{0x18} & \S\ref{class-file:ext:ri:return} \\
 method receiver type & \code{METHOD\_RECEIVER}
-& \code{0x1A}, \code{0x1B} & \S\ref{class-file:ext:ri:receiver} \\
+& \code{0x1A} & \S\ref{class-file:ext:ri:receiver} \\
 method parameter type & \code{METHOD\_PARAMETER}
-& \code{0x1C}, \code{0x1D} & \S\ref{class-file:ext:ri:parameters} \\
+& \code{0x1C} & \S\ref{class-file:ext:ri:parameters} \\
 exception type in \code{throws} & \code{THROWS}
-& \code{0x1E}, \code{0x1F}\rlunused & \S\ref{class-file:ext:ri:throws} \\
+& \code{0x1E} & \S\ref{class-file:ext:ri:throws} \\
 \hline
 \multicolumn{4}{c}{~} \\
 \multicolumn{4}{l}{Targets for type uses that occur only within code blocks (\<ElementType.TYPE\_USE>):} \\
 \hline
 {\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
 local variable type & \code{LOCAL\_VARIABLE}
-& \code{0x80}, \code{0x81} & \S\ref{class-file:ext:ri:localvar} \\
+& \code{0x80} & \S\ref{class-file:ext:ri:localvar} \\
 resource variable type & \textbf{TODO}
-& \code{0x82}, \code{0x83} & \S\ref{class-file:ext:ri:localvar} \\
+& \code{0x82} & \S\ref{class-file:ext:ri:localvar} \\
 exception parameter type & \textbf{TODO}
-& \code{0x84}, \code{0x85}\rlunused & \S\ref{class-file:ext:ri:catch} \\
+& \code{0x84} & \S\ref{class-file:ext:ri:catch} \\
 cast & \code{CAST}
-& \code{0x86}, \code{0x87} & \S\ref{class-file:ext:ri:cast} \\
+& \code{0x86} & \S\ref{class-file:ext:ri:cast} \\
 type test (\code{instanceof}) & \code{INSTANCEOF}
-& \code{0x88}, \code{0x89} & \S\ref{class-file:ext:ri:cast} \\
+& \code{0x88} & \S\ref{class-file:ext:ri:cast} \\
 object creation (\code{new}) & \code{NEW}
-& \code{0x8A}, \code{0x8B} & \S\ref{class-file:ext:ri:cast} \\
+& \code{0x8A} & \S\ref{class-file:ext:ri:cast} \\
 type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x8C}, \code{0x8D} & \S\ref{class-file:ext:ri:con-typearg} \\
+& \code{0x8C} & \S\ref{class-file:ext:ri:con-typearg} \\
 type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:con-typearg} \\
-lambda parameter type & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:lambda-parameter} \\
+& \code{0x8E} & \S\ref{class-file:ext:ri:con-typearg} \\
+lambda parameter type & \code{LAMBDA\_FORMAL\_PARAMETER}
+& \code{0x90} & \S\ref{class-file:ext:ri:lambda-parameter} \\
 type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
-& \code{0x8E}, \code{0x8F} & \S\ref{class-file:ext:ri:mref-typearg} \\
+& \code{0x92} & \S\ref{class-file:ext:ri:mref-typearg} \\
 \hline
 \end{tabular}
 \end{center}
@@ -1601,45 +1594,14 @@ type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
   % By contrast, declaration annotations other than type parameter
   % declarations appear in in \code{annotation} attributes in the class file.
   % 
-  % The bottom part of the table contains targets that only appear inside
-  % method bodies, where annotations do not appear in Java SE 7 (not even
-  % local variable annotations written by the programmer).
-  % Table elements such as ``field'', ``method parameter'', and ``local
-  % variable'' refer to the declaration, not the use, of such elements.
-\newline
-  There are two \code{target\_type} values for each annotation target:  one
-  for the construct itself, and one for type arguments, wildcard bounds, array types, or
-  nested types that appear at the construct.  The second
-  \code{target\_type} has the same structure as the first one, except it
-  adds the fields described in Section \ref{class-file:ext:ri:typearg} and its
-  symbolic constant name adds the suffix \code{\_COMPONENT}.
   The symbolic constants appear in the enums
   \code{com.sun.tools.javac.code.TargetType} and
   \code{com.sun.tools.classfile.TypeAnnotation.TargetType}.
-\newline
-  Enumeration elements marked \unused{} will never be generated from Java
-  source code as of Java SE 8.  However, they may appear in the
-  class file.
 }
 \end{figure}
 
 
-%% Commenting out for now; seems out of date, should compare with old
-%% versions of this document.
-% Enumeration elements marked \unused{} never appear in a \code{target\_type}
-% field.  Sometimes this is because annotations cannot be written in that
-% location, such as because Java prohibits writing the location itself.  In
-% other cases this is because the annotations were permitted in Java 7, so
-% there is already a place to store them in the class file
-% % in \RuntimeInOrVisibleAnnotations or
-% % \RuntimeInOrVisibleParameterAnnotations
-% rather than placing them in the new \RuntimeInOrVisibleTypeAnnotations
-% attribute.  The unused enumeration elements are included for completeness.
-% %% In what way are they convenient for annotation processors?
-% % and convenience for annotation processors.
-
-
-\subsection{The \code{target\_info} field\label{class-file:ext:target_info}}
+\subsection{The \code{target\_info} field:  identifying a program element\label{class-file:ext:target_info}}
 
 \code{target\_info} is a structure that contains enough information to
 uniquely identify the target of a given annotation.  A different
@@ -1651,7 +1613,7 @@ of the \code{target\_info} is determined by the value of
 
 All indexes count from zero.
 
-See Section~\ref{class-file:ext:ri:typearg} for handling of generic
+See Section~\ref{class-file:ext:type_path} for handling of generic
 type arguments and arrays.
 
 
@@ -1970,7 +1932,7 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 
 
-\subsubsection{Type arguments, wildcard bounds, array element types, and static nested types\label{class-file:ext:ri:typearg}}
+\subsection{The \code{type\_path} structure:  Identifying part of a compound type\label{class-file:ext:type_path}}
 
 \begin{figure}[tp!]
 \begin{center}
@@ -2066,6 +2028,7 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 \end{center}
 \caption{\label{tbl:locations}
+  TODO
   Example values of the \code{location\_length} and \code{location}
   fields.
   \newline
@@ -2084,8 +2047,10 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
   }
 \end{figure}
 
-In a parameterized, array, or nested type, there are multiple places that an
-annotation may appear.  For example, consider the difference among
+The \code{type\_path} structure identifies a part of a compound type.
+In a compound type (a parameterized, wildcard, array, or nested type),
+there are multiple places that an annotation may appear.
+For example, consider the difference among
 \code{@X Map<String, Object>},
 \code{Map<@X String, Object>}, and
 \code{Map<String, @X Object>};
@@ -2099,58 +2064,39 @@ or the difference among
 or the difference among 
 \code{@X Outer .\ Inner} and
 \code{Outer .\ @X Inner}.
-The classfile must distinguish among these locations.
+The \code{type\_path} structure distinguishes among these locations.
 
-\targetinfocontentspartial{within a parameterized type, wildcard bound,
-array type, or nested type} contains what it normally would for a
-non-parameterized, non-array type
-% (e.g., \code{offset} for an annotation on a type argument in a
-% cast, see Section~\ref{class-file:ext:ri:cast}),
-{\em plus} the following fields at the end:
-
-\preverbnegspace
 \begin{Verbatim}
-    u2 location_length;
-    u1 location[location_length];
+struct type_path {
+    u1 path_type; // five possible values, one for each case below
+    union {
+        struct empty_path {};
+        struct array_type_path { type_path element_path; };
+        struct inner_type_path { type_path outer_path; };
+        struct wildcard_path { type_path bound_path; };
+        struct type_argument_path { u1 parameter_index; type_path parameter_path; };
+    }
+}
 \end{Verbatim}
 
-The \code{location} field is a list of numbers that represents the annotation
-location among the type arguments, wildcard bounds, array levels, and type nestings.
-If the type is viewed as a tree, then 
-the \code{location} field represents a path in that tree.  The
-\code{location\_length} field is the depth of the annotation in the tree,
-which is also the length of the \code{location} field.  Each element of the
-\code{location} field indicates which child to select at the given depth in
-the tree; the leftmost child is numbered 0.
+% TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
 
 
-A parameterized, wildcard, array, or nested type can be viewed as a tree in the
-following way.
-%
-For a parameterized type, the children of the parameterized type are the
-type arguments, numbered from the left.
-%
-For a wildcard type, the wildcard has up to one child, which is its bound.
-%
-For a nested type, the children are the type arguments (if any), followed
-by the outer types, numbered from innermost to outermost.
-The type argument positions count even for a raw type; for
-example, the annotations on \code{@A Outer.@B MyClass} and \code{@A
-  Outer<T>.@B MyClass<U>} are stored identically.
-%
-For an array
-type, the children are the types of elements at each level, numbered from
-the first dimension.  At each level, the element type
-is itself an array type (of lesser dimensions than the main type), except
-for the last one which is a non-array type.  For a 1-dimensional array,
-there is only one child, which is a non-array.
+If the compound type is viewed as a tree, then 
+the \code{type\_path} structure represents a path in that tree, from the
+top down or the ``outside in''.
 
-% Really ought to say exactly where...
+The \code{type\_path} structure is always present; for any non-compound
+type, it is \code{empty\_path}.  Additionally, \code{empty\_path} is used
+for a compound type when the annotation is on its main part.  For example,
+consider a one-dimensional array type.  An annotation on the array type
+itself would use \code{empty\_path}.  An annotation on the array element
+type would use \code{array\_type\_path}, within which would be an
+\code{empty\_path}.
 
 Figure~\ref{tbl:locations} shows some examples.
 
-
-The numbering in the class file is with respect to the full type, not the
+The \code{type\_path} that is stored in the class file is with respect to the full type, not the
 source code representation.  In the source code, a type can be abbreviated
 or partially written out, such as a nested type written without the outer
 type or a raw type written without the type arguments.
