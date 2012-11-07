@@ -62,6 +62,15 @@ The current development version of the specification is available in the
         the beginning, not the end.
       </li>
       <li>
+        Change the representation of compound types (parameterized,
+        wildcard, array, and nested types), which have multiple annotatable
+        parts.  The path through the compound type, to the annotated part,
+        is now specified by a <tt>type_path</tt> structure rather than a
+        <tt>location_length</tt> and <tt>location</tt> field.  This 
+        eliminates the need for the odd-numbered <tt>target_type</tt>
+        values and also makes parsing easier.
+      </li>
+      <li>
         Annotations that target instructions must be sorted.
       </li>
       <li>

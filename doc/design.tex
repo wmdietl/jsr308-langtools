@@ -35,6 +35,11 @@
 %HEVEA \def\codesize{\relax}
 \newcommand{\code}[1]{\ifmmode{\mbox{\codesize\ttfamily{#1}}}\else{\codesize\ttfamily #1}\fi}
 \def\<#1>{\code{#1}}
+% Text size is \small
+% \small and \footnotesize are the same size!!  And seem to be the same as
+% the default...  Why?
+\newcommand{\codesmall}[1]{\ifmmode{\mbox{\small\ttfamily{#1}}}\else{\small\ttfamily #1}\fi}
+\newcommand{\codefootnotesize}[1]{\ifmmode{\mbox{\footnotesize\ttfamily{#1}}}\else{\footnotesize\ttfamily #1}\fi}
 \newcommand{\myurl}[1]{{\codesize\url{#1}}}
 %HEVEA \def\myurl{\url}
 
@@ -1934,42 +1939,43 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 \subsection{The \code{type\_path} structure:  Identifying part of a compound type\label{class-file:ext:type_path}}
 
+\newcommand{\emptypath}{\codefootnotesize{empty\_path}}
+\newcommand{\arraypath}[1]{\codefootnotesize{array\_type\_path \ttlcb\ #1 \ttrcb}}
+\newcommand{\innerpath}[1]{\codefootnotesize{inner\_type\_path \ttlcb\ #1 \ttrcb}}
+\newcommand{\wildcardpath}[1]{\codefootnotesize{wildcard\_path \ttlcb\ #1 \ttrcb}}
+\newcommand{\typeargpath}[2]{\codefootnotesize{type\_argument\_path \ttlcb\ #1, #2 \ttrcb}}
+
 \begin{figure}[tp!]
 \begin{center}
 
-\ifhevea
-  \def\locationexampleone{\code{@A Map<@B ? extends @C String, @D List<@E Object>>}}
-  \def\myhfill{\\}
-\else
-  \def\locationexampleone{\begin{minipage}{1.7in}{\code{@A Map<@B ? extends @C String, \\ \strut~~~~~~~@D List<@E Object>>}}\end{minipage}}
-  \def\myhfill{\hfill}
-\fi
-
-
-\locationexampleone
-\myhfill 
+\code{@A Map<@B ? extends @C String, @D List<@E Object>>}
+\\
 \code{@I String @F [] @G [] @H []}
-\myhfill
+\\
 \code{@M O1.@L O2.@K O3.@J NestedStatic}
 
-\resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
+%BEGIN LATEX
+~
+%END LATEX
 
-\begin{tabular}{|l|c|c|}
+% \resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
+
+\begin{tabular}{|l|l|}
 \hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{N/A} \\
-\code{@B}       & 1     & 0 \\
-\code{@C}       & 2     & 0, 0 \\
-\code{@D}       & 1     & 1 \\
-\code{@E}       & 2     & 1, 0 \\
-\code{@F}       & \multicolumn{2}{c|}{N/A} \\   
-\code{@G}       & 1     & 0 \\                  
-\code{@H}       & 1     & 1 \\                  
-\code{@I}       & 1     & 2 \\                  
-\code{@J}       & \multicolumn{2}{c|}{N/A} \\   
-\code{@K}       & 1     & 0 \\                  
-\code{@L}       & 1     & 1 \\                  
-\code{@M}       & 1     & 2 \\                  
+\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \emptypath \\
+\code{@B}       & \typeargpath{0}{\emptypath}  \\
+\code{@C}       & \typeargpath{0}{\wildcardpath{\emptypath}}  \\
+\code{@D}       & \typeargpath{1}{\emptypath}  \\
+\code{@E}       & \typeargpath{1}{\typeargpath{0}{\emptypath}}  \\
+\code{@F}       & \emptypath \\   
+\code{@G}       & \arraypath{\emptypath} \\                  
+\code{@H}       & \arraypath{\arraypath{\emptypath}} \\                  
+\code{@I}       & \arraypath{\arraypath{\arraypath{\emptypath}}} \\                  
+\code{@J}       & \emptypath \\   
+\code{@K}       & \innerpath{\emptypath} \\                  
+\code{@L}       & \innerpath{\innerpath{\emptypath}} \\                  
+\code{@M}       & \innerpath{\innerpath{\innerpath{\emptypath}}} \\                  
 \hline
 \end{tabular}
 
@@ -1977,26 +1983,26 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 ~ \\ ~
 %END LATEX
 
-\code{@A Map<@B Comparable<@C Object @D [] @E [] @F []>, @G List<@H Document>>}
+\code{@A Map<@B Comparable<@F Object @C [] @D [] @E []>, @G List<@H Document>>}
 
 %BEGIN LATEX
 ~
 %END LATEX
 
-% The table is not top-aligned if I increase the size.  I don't know why.
-\resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
-~~
-\begin{tabular}{|l|c|c|}
+% % The table is not top-aligned if I increase the size.  I don't know why.
+% \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
+% ~~
+\begin{tabular}{|l|l|}
 \hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@A}       & \multicolumn{2}{c|}{N/A} \\
-\code{@B}       & 1     & 0 \\
-\code{@C}       & 3     & 0, 0, 2 \\
-\code{@D}       & 2     & 0, 0 \\
-\code{@E}       & 3     & 0, 0, 0 \\
-\code{@F}       & 3     & 0, 0, 1 \\
-\code{@G}       & 1     & 1 \\
-\code{@H}       & 2     & 1, 0 \\
+\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \emptypath \\
+\code{@B}       & \typeargpath{0}{\emptypath} \\
+\code{@C}       & \typeargpath{0}{\typeargpath{0}{\emptypath}} \\
+\code{@D}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\emptypath}}} \\
+\code{@E}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\arraypath{\emptypath}}}} \\
+\code{@F}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\arraypath{\arraypath{\emptypath}}}}} \\
+\code{@G}       & \typeargpath{1}{\emptypath} \\
+\code{@H}       & \typeargpath{1}{\typeargpath{0}{\emptypath}} \\
 \hline
 \end{tabular}
 
@@ -2004,46 +2010,37 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 ~ \\ ~
 %END LATEX
 
-\code{@A O1.@B O2<@C S,@D T>.@E O3.@F Nested<@G U, @H V>}
+\code{@H O1.@E O2<@F S,@G T>.@D O3.@A Nested<@B U, @C V>}
 
 %BEGIN LATEX
 ~
 %END LATEX
 
-\resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
-~~
-\begin{tabular}{|l|c|c|}
+% \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
+% ~~
+\begin{tabular}{|l|l|}
 \hline
-\bf{Annotation} & \bf{\code{location\_length}} & \bf{\code{location}} \\ \hline
-\code{@F}       & \multicolumn{2}{c|}{N/A} \\
-\code{@G}       & 1     & 0 \\
-\code{@H}       & 1     & 1 \\
-\code{@E}       & 1     & 2 \\
-\code{@B}       & 1     & 3 \\
-\code{@C}       & 2     & 3, 0 \\
-\code{@D}       & 2     & 3, 1 \\
-\code{@A}       & 1     & 4 \\
+\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \emptypath \\
+\code{@B}       & \typeargpath{0}{\emptypath} \\
+\code{@C}       & \typeargpath{1}{\emptypath} \\
+\code{@D}       & \innerpath{\emptypath} \\
+\code{@E}       & \innerpath{\innerpath{\emptypath}} \\
+\code{@F}       & \innerpath{\innerpath{\typeargpath{0}{\emptypath}}} \\
+\code{@G}       & \innerpath{\innerpath{\typeargpath{1}{\emptypath}}} \\
+\code{@H}       & \innerpath{\innerpath{\innerpath{\emptypath}}} \\
 \hline
 \end{tabular}
 
 \end{center}
 \caption{\label{tbl:locations}
-  TODO
-  Example values of the \code{location\_length} and \code{location}
-  fields.
+  Example values of the \code{target\_path}
+  field, which is of type \code{type\_path}.
   \newline
   The top of the figure shows examples of each of parameterized types,
   array types, and nested types.  The middle shows the interaction between
   parameterized types and array types.  The bottom shows the interaction
   between parameterized types and nested types.
-  \newline
-  We assume that each annotation is a type annotation.
-  A \code{location} array is used only for type annotations that are not on
-  the main type.  Type annotations on the main type are stored
-  without a \code{location} array.  For example, a type annotation on the
-  outermost array level (\<@F> in the top part of the figure) is not stored
-  as an array level annotation but as a regular type annotation, see
-  Figure~\ref{tbl:target_types}.
   }
 \end{figure}
 
@@ -2066,7 +2063,7 @@ or the difference among
 \code{Outer .\ @X Inner}.
 The \code{type\_path} structure distinguishes among these locations.
 
-\begin{Verbatim}
+\begin{Verbatim}[samepage=true]
 struct type_path {
     u1 path_type; // five possible values, one for each case below
     union {
@@ -3648,20 +3645,21 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedType toArray localvar ReadWrite
-% LocalWords:  ClassFile clinit StackMapTable StaticNested boolean var1
+% LocalWords:  QualifiedType toArray localvar ReadWrite 2x5 0x86 0x00 0x02 0x10
+% LocalWords:  ClassFile clinit StackMapTable StaticNested boolean var1 0x12
 % LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver 2x5
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings
 % LocalWords:  NestedStatic decompiler myLock Reified arr2 syntaxes TargetType
 % LocalWords:  SillyAnnotation 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08
 % LocalWords:  0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 0x11 0x12 0x13 0x14 0x15
 % LocalWords:  0x16 0x17 0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22
-% LocalWords:  0x23 0x24 0x25 308's casted useE1 useE2 pack200 unpack200
-% LocalWords:  Mahmood theReceiver 2x5 foo 0x00 0x01 0x02 0x03 0x04 0x05
-% LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 2x5
-% LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B 0x00
-% LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's 7in
-%  LocalWords:  0x01 0x02 0x03 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17 2x5
-%  LocalWords:  0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x80 0x81 0x82 2x5
-%  LocalWords:  0x83 0x84 0x85 0x86 0x87 0x88 0x89 0x8A 0x8B 0x8C 0x8D
-%  LocalWords:  0x8E 0x8F 308's 0x00 0x01 0x02 0x03 innerMethod 0x86 0x00
+% LocalWords:  0x23 0x24 0x25 308's casted useE1 useE2 pack200 unpack200 0x14
+% LocalWords:  Mahmood theReceiver 2x5 foo 0x00 0x01 0x02 0x03 0x04 0x05 0x16
+% LocalWords:  0x06 0x07 0x08 0x09 0x0A 0x0B 0x0C 0x0D 0x0E 0x0F 0x10 2x5 0x18
+% LocalWords:  0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x18 0x19 0x1A 0x1B 0x00 0x1A
+% LocalWords:  0x1C 0x1D 0x1E 0x1F 0x20 0x21 0x22 0x23 0x24 0x25 308's 7in 0x1C
+%  LocalWords:  0x01 0x02 0x03 0x10 0x11 0x12 0x13 0x14 0x15 0x16 0x17 2x5 0x1E
+%  LocalWords:  0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x80 0x81 0x82 2x5 0x80
+%  LocalWords:  0x83 0x84 0x85 0x86 0x87 0x88 0x89 0x8A 0x8B 0x8C 0x8D 0x82
+%  LocalWords:  0x8E 0x8F 308's 0x00 0x01 0x02 0x03 innerMethod 0x86 0x00 0x84
+% LocalWords:  0x88 0x8A 0x8C 0x8E 0x90 0x92 308's multi
