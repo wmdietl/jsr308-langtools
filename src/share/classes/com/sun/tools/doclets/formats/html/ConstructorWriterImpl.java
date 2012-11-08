@@ -137,6 +137,7 @@ public class ConstructorWriterImpl extends AbstractExecutableMemberWriter
             addName(constructor.name(), pre);
         }
         addParameters(constructor, pre);
+        writer.addReceiverAnnotationInfo(constructor, pre);
         addExceptions(constructor, pre);
         return pre;
     }

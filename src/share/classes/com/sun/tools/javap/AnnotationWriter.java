@@ -26,6 +26,7 @@
 package com.sun.tools.javap;
 
 import com.sun.tools.classfile.Annotation;
+import com.sun.tools.classfile.TypeAnnotation;
 import com.sun.tools.classfile.Annotation.Annotation_element_value;
 import com.sun.tools.classfile.Annotation.Array_element_value;
 import com.sun.tools.classfile.Annotation.Class_element_value;
@@ -74,6 +75,129 @@ public class AnnotationWriter extends BasicWriter {
         }
         if (showParens)
             print(")");
+    }
+
+    public void write(TypeAnnotation annot) {
+        write(annot, true, false);
+    }
+
+    public void write(TypeAnnotation annot, boolean showOffsets, boolean resolveIndices) {
+        write(annot.annotation, resolveIndices);
+        print(": ");
+        write(annot.position, showOffsets);
+    }
+
+    public void write(TypeAnnotation.Position pos, boolean showOffsets) {
+        print(pos.type);
+
+        switch (pos.type) {
+        // type cast
+        case TYPECAST:
+        case TYPECAST_COMPONENT:
+        // instanceof
+        case INSTANCEOF:
+        case INSTANCEOF_COMPONENT:
+        // new expression
+        case NEW:
+        case NEW_COMPONENT:
+            if (showOffsets) {
+                print(", offset=");
+                print(pos.offset);
+            }
+            break;
+        // local variable
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_COMPONENT:
+            if (pos.lvarOffset == null) {
+                print(", lvarOffset is Null!");
+                break;
+            }
+            print(", {");
+            for (int i = 0; i < pos.lvarOffset.length; ++i) {
+                if (i != 0) print("; ");
+                if (showOffsets) {
+                    print("start_pc=");
+                    print(pos.lvarOffset[i]);
+                }
+                print(", length=");
+                print(pos.lvarLength[i]);
+                print(", index=");
+                print(pos.lvarIndex[i]);
+            }
+            print("}");
+            break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            // System.out.println("Handle exception parameters!");
+            break;
+        // method receiver
+        case METHOD_RECEIVER:
+        case METHOD_RECEIVER_COMPONENT:
+            // Do nothing
+            break;
+        // type parameter
+        case CLASS_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER:
+            print(", param_index=");
+            print(pos.parameter_index);
+            break;
+        // type parameter bound
+        case CLASS_TYPE_PARAMETER_BOUND:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
+        case METHOD_TYPE_PARAMETER_BOUND:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
+            print(", param_index=");
+            print(pos.parameter_index);
+            print(", bound_index=");
+            print(pos.bound_index);
+            break;
+        // class extends or implements clause
+        case CLASS_EXTENDS:
+        case CLASS_EXTENDS_COMPONENT:
+            print(", type_index=");
+            print(pos.type_index);
+            break;
+        // throws
+        case THROWS:
+            print(", type_index=");
+            print(pos.type_index);
+            break;
+        // method parameter
+        case METHOD_PARAMETER:
+        case METHOD_PARAMETER_COMPONENT:
+            print(", param_index=");
+            print(pos.parameter_index);
+            break;
+        // method/constructor type argument
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
+        case METHOD_TYPE_ARGUMENT:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
+            if (showOffsets) {
+                print(", offset=");
+                print(pos.offset);
+            }
+            print(", type_index=");
+            print(pos.type_index);
+            break;
+        // We don't need to worry about these
+        case METHOD_RETURN:
+        case METHOD_RETURN_COMPONENT:
+        case FIELD:
+        case FIELD_COMPONENT:
+            break;
+        case UNKNOWN:
+            throw new AssertionError("AnnotationWriter: UNKNOWN target type should never occur!");
+        default:
+            throw new AssertionError("AnnotationWriter: Unknown target type for position: " + pos);
+        }
+
+        // Append location data for generics/arrays.
+        if (pos.type.hasLocation()) {
+            print(", location=");
+            print(pos.location);
+        }
     }
 
     public void write(Annotation.element_value_pair pair) {

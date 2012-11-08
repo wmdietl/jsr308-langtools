@@ -84,7 +84,15 @@ public abstract class Symbol implements Element {
      *  method to make sure that the class symbol is loaded.
      */
     public List<Attribute.Compound> getAnnotationMirrors() {
-        return Assert.checkNonNull(annotations.getAttributes());
+        return annotations.getDeclarationAttributes();
+    }
+
+    /** An accessor method for the type attributes of this symbol.
+     *  Attributes of class symbols should be accessed through the accessor
+     *  method to make sure that the class symbol is loaded.
+     */
+    public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+        return annotations.getTypeAttributes();
     }
 
     /** Fetch a particular annotation from a symbol. */
@@ -666,9 +674,9 @@ public abstract class Symbol implements Element {
                 package_info.complete();
                 if (annotations.isEmpty()) {
                     annotations.setAttributes(package_info.annotations);
+                }
             }
-            }
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
         }
 
         /** A package "exists" if a type or package that exists has
@@ -770,7 +778,12 @@ public abstract class Symbol implements Element {
 
         public List<Attribute.Compound> getAnnotationMirrors() {
             if (completer != null) complete();
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
+        }
+
+        public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+            if (completer != null) complete();
+            return Assert.checkNonNull(annotations.getTypeAttributes());
         }
 
         public Type erasure(Types types) {
