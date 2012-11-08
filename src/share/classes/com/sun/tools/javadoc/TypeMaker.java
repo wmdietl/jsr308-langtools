@@ -34,6 +34,7 @@ import com.sun.tools.javac.code.Type.ClassType;
 import com.sun.tools.javac.code.Type.TypeVar;
 import com.sun.tools.javac.util.List;
 import static com.sun.tools.javac.code.TypeTag.ARRAY;
+import static com.sun.tools.javac.code.TypeTag.TYPEVAR;
 
 /**
  *  <p><b>This is NOT part of any supported API.
@@ -63,7 +64,7 @@ public class TypeMaker {
             t = env.types.erasure(t);
         }
         if (considerAnnotations
-                && t.tag != TYPEVAR
+                && !t.hasTag(TYPEVAR)
                 && t.typeAnnotations.nonEmpty()) {
             return new AnnotatedTypeImpl(env, t);
         }

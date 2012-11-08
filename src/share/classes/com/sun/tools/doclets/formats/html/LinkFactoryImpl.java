@@ -25,6 +25,8 @@
 
 package com.sun.tools.doclets.formats.html;
 
+import java.util.List;
+
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;

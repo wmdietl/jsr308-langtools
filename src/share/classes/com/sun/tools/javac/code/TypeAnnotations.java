@@ -32,7 +32,7 @@ import javax.lang.model.type.TypeKind;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Kinds;
-import com.sun.tools.javac.code.TypeTags;
+import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Symbol.TypeSymbol;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.tree.JCTree;
@@ -248,7 +248,7 @@ public class TypeAnnotations {
                 List<Attribute.TypeCompound> annotations) {
             // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s)%n",
             //         typetree, type, annotations);
-            if (type.tag != TypeTags.ARRAY) {
+            if (!type.hasTag(TypeTag.ARRAY)) {
                 Type enclTy = type;
                 Element enclEl = type.asElement();
                 JCTree enclTr = typetree;
@@ -314,7 +314,7 @@ public class TypeAnnotations {
                 JCArrayTypeTree arTree = arrayTypeTree(typetree);
 
                 int depth = 0;
-                while (arType.elemtype.tag == TypeTags.ARRAY) {
+                while (arType.elemtype.hasTag(TypeTag.ARRAY)) {
                     arType = (Type.ArrayType) arType.elemtype;
                     arTree = arrayTypeTree(arTree.elemtype);
                     depth++;
@@ -401,7 +401,7 @@ public class TypeAnnotations {
                     if (s.kind == Kinds.TYP ||
                             s.kind == Kinds.VAR ||
                             (s.kind == Kinds.MTH && !s.isConstructor() &&
-                            s.type.getReturnType().tag != TypeTags.VOID) ||
+                            !s.type.getReturnType().hasTag(TypeTag.VOID)) ||
                             (s.kind == Kinds.MTH && s.isConstructor()))
                         isType = true;
                 } else if (e.value.name == names.TYPE_PARAMETER) {

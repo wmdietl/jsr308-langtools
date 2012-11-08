@@ -3628,7 +3628,7 @@ public class Attr extends JCTree.Visitor {
     public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
         if (annotations.isEmpty())
             return;
-        annotate.typeAnnotation(new Annotator() {
+        annotate.typeAnnotation(new Annotate.Annotator() {
             @Override
             public String toString() {
                 return "annotate " + annotations + " onto " + type;
