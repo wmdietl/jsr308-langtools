@@ -51,12 +51,23 @@ public class TypeMaker {
      * @param errToClassDoc  if true, ERROR type results in a ClassDoc;
      *          false preserves legacy behavior
      */
+    public static com.sun.javadoc.Type getType(DocEnv env, Type t,
+            boolean errorToClassDoc) {
+        return getType(env, t, errorToClassDoc, true);
+    }
+
     @SuppressWarnings("fallthrough")
     public static com.sun.javadoc.Type getType(DocEnv env, Type t,
-                                               boolean errToClassDoc) {
+            boolean errToClassDoc, boolean considerAnnotations) {
         if (env.legacyDoclet) {
             t = env.types.erasure(t);
         }
+        if (considerAnnotations
+                && t.tag != TYPEVAR
+                && t.typeAnnotations.nonEmpty()) {
+            return new AnnotatedTypeImpl(env, t);
+        }
+
         switch (t.getTag()) {
         case CLASS:
             if (ClassDocImpl.isGeneric((ClassSymbol)t.tsym)) {
@@ -278,6 +289,13 @@ public class TypeMaker {
          * Return null, as there are no arrays of wildcard types.
          */
         public WildcardType asWildcardType() {
+            return null;
+        }
+
+        /**
+         * Return null, as there are no annotations of the type
+         */
+        public AnnotatedType asAnnotatedType() {
             return null;
         }
 

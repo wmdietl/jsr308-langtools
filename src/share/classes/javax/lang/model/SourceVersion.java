@@ -46,7 +46,7 @@ import java.util.HashSet;
  */
 public enum SourceVersion {
     /*
-     * Summary of language evoluation
+     * Summary of language evolution
      * 1.1: nested classes
      * 1.2: strictfp
      * 1.3: no changes

@@ -295,14 +295,19 @@ public class Log extends AbstractLog {
         noticeWriter = warnWriter = errWriter = pw;
     }
 
-    public void setWriters(Log other) {
+    /**
+     * Propagate the previous log's information.
+     */
+    public void initRound(Log other) {
         this.noticeWriter = other.noticeWriter;
         this.warnWriter = other.warnWriter;
         this.errWriter = other.errWriter;
-    }
-
-    public void setSourceMap(Log other) {
         this.sourceMap = other.sourceMap;
+        this.recorded = other.recorded;
+        // TODO: with this, the errors in Flow go away, e.g tools/javac/api/6406133/
+        // But it also causes problems with error counts, e.g. tools/javac/7129225/
+        // I propose we keep this and work on the test cases.
+        this.nerrors = other.nerrors;
     }
 
     /** Flush the logs

@@ -157,7 +157,7 @@ public class JNIWriter {
         if (c.isLocal() || (c.flags() & Flags.SYNTHETIC) != 0)
             return false;
 
-        for (Attribute.Compound a: c.annotations.getAttributes()) {
+        for (Attribute.Compound a: c.annotations.getDeclarationAttributes()) {
             if (a.type.tsym == syms.nativeHeaderType.tsym)
                 return true;
         }

@@ -37,12 +37,13 @@ import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.file.BaseFileObject;
 import com.sun.tools.javac.util.*;
 
-import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
 import static com.sun.tools.javac.code.TypeTag.*;
@@ -63,19 +64,17 @@ public class ClassWriter extends ClassFile {
     protected static final Context.Key<ClassWriter> classWriterKey =
         new Context.Key<ClassWriter>();
 
-    private final Symtab syms;
-
     private final Options options;
 
     /** Switch: verbose output.
      */
     private boolean verbose;
 
-    /** Switch: scramble private names.
+    /** Switch: scramble private field names.
      */
     private boolean scramble;
 
-    /** Switch: scramble private names.
+    /** Switch: scramble all field names.
      */
     private boolean scrambleAll;
 
@@ -91,7 +90,7 @@ public class ClassWriter extends ClassFile {
      */
     private boolean genCrt;
 
-    /** Switch: describe the generated stackmap
+    /** Switch: describe the generated stackmap.
      */
     boolean debugstackmap;
 
@@ -109,7 +108,7 @@ public class ClassWriter extends ClassFile {
     private Types types;
 
     /** The initial sizes of the data and constant pool buffers.
-     *  sizes are increased when buffers get full.
+     *  Sizes are increased when buffers get full.
      */
     static final int DATA_BUF_SIZE = 0x0fff0;
     static final int POOL_BUF_SIZE = 0x1fff0;
@@ -176,7 +175,6 @@ public class ClassWriter extends ClassFile {
 
         log = Log.instance(context);
         names = Names.instance(context);
-        syms = Symtab.instance(context);
         options = Options.instance(context);
         target = Target.instance(context);
         source = Source.instance(context);
@@ -715,6 +713,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getAnnotationMirrors());
+        acount += writeTypeAnnotations(sym.getTypeAnnotationMirrors());
         return acount;
     }
 
@@ -809,6 +808,76 @@ public class ClassWriter extends ClassFile {
         return attrCount;
     }
 
+    int writeTypeAnnotations(List<Attribute.TypeCompound> typeAnnos) {
+        if (typeAnnos.isEmpty()) return 0;
+
+        ListBuffer<Attribute.TypeCompound> visibles = ListBuffer.lb();
+        ListBuffer<Attribute.TypeCompound> invisibles = ListBuffer.lb();
+
+        for (Attribute.TypeCompound tc : typeAnnos) {
+            if (tc.position == null || tc.position.type == TargetType.UNKNOWN) {
+                boolean found = false;
+                // TODO: the position for the container annotation of a
+                // repeating type annotation has to be set.
+                // This cannot be done when the container is created, because
+                // then the position is not determined yet.
+                // How can we link these pieces better together?
+                if (tc.values.size() == 1) {
+                    Pair<MethodSymbol, Attribute> val = tc.values.get(0);
+                    if (val.fst.getSimpleName().contentEquals("value") &&
+                            val.snd instanceof Attribute.Array) {
+                        Attribute.Array arr = (Attribute.Array) val.snd;
+                        if (arr.values.length != 0 &&
+                                arr.values[0] instanceof Attribute.TypeCompound) {
+                            TypeCompound atycomp = (Attribute.TypeCompound) arr.values[0];
+                            if (atycomp.position.type != TargetType.UNKNOWN) {
+                                tc.position = atycomp.position;
+                                found = true;
+                            }
+                        }
+                    }
+                }
+                if (!found) {
+                    // This happens for nested types like @A Outer. @B Inner.
+                    // For method parameters we get the annotation twice! Once with
+                    // a valid position, once unknown.
+                    // TODO: find a cleaner solution.
+                    // System.err.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
+                    continue;
+                }
+            }
+            if (!tc.position.emitToClassfile())
+                continue;
+            switch (types.getRetention(tc)) {
+            case SOURCE: break;
+            case CLASS: invisibles.append(tc); break;
+            case RUNTIME: visibles.append(tc); break;
+            default: ;// /* fail soft */ throw new AssertionError(vis);
+            }
+        }
+
+        int attrCount = 0;
+        if (visibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeVisibleTypeAnnotations);
+            databuf.appendChar(visibles.length());
+            for (Attribute.TypeCompound p : visibles)
+                writeTypeAnnotation(p);
+            endAttr(attrIndex);
+            attrCount++;
+        }
+
+        if (invisibles.length() != 0) {
+            int attrIndex = writeAttr(names.RuntimeInvisibleTypeAnnotations);
+            databuf.appendChar(invisibles.length());
+            for (Attribute.TypeCompound p : invisibles)
+                writeTypeAnnotation(p);
+            endAttr(attrIndex);
+            attrCount++;
+        }
+
+        return attrCount;
+    }
+
     /** A visitor to write an attribute including its leading
      *  single-character marker.
      */
@@ -885,6 +954,101 @@ public class ClassWriter extends ClassFile {
             p.snd.accept(awriter);
         }
     }
+
+    void writeTypeAnnotation(Attribute.TypeCompound c) {
+        writeCompoundAttribute(c);
+        writePosition(c.position);
+    }
+
+    void writePosition(TypeAnnotationPosition p) {
+        databuf.appendChar(p.type.targetTypeValue());
+        switch (p.type) {
+        // type cast
+        case TYPECAST:
+        case TYPECAST_COMPONENT:
+        // instanceof
+        case INSTANCEOF:
+        case INSTANCEOF_COMPONENT:
+        // new expression
+        case NEW:
+        case NEW_COMPONENT:
+            databuf.appendChar(p.offset);
+            break;
+        // local variable
+        case LOCAL_VARIABLE:
+        case LOCAL_VARIABLE_COMPONENT:
+            databuf.appendChar(p.lvarOffset.length);  // for table length
+            for (int i = 0; i < p.lvarOffset.length; ++i) {
+                databuf.appendChar(p.lvarOffset[i]);
+                databuf.appendChar(p.lvarLength[i]);
+                databuf.appendChar(p.lvarIndex[i]);
+            }
+            break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            System.out.println("Handle exception parameters! pos: " + p);
+            break;
+        // method receiver
+        case METHOD_RECEIVER:
+        case METHOD_RECEIVER_COMPONENT:
+            // Do nothing
+            break;
+        // type parameter
+        case CLASS_TYPE_PARAMETER:
+        case METHOD_TYPE_PARAMETER:
+            databuf.appendByte(p.parameter_index);
+            break;
+        // type parameter bound
+        case CLASS_TYPE_PARAMETER_BOUND:
+        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
+        case METHOD_TYPE_PARAMETER_BOUND:
+        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
+            databuf.appendByte(p.parameter_index);
+            databuf.appendByte(p.bound_index);
+            break;
+        // class extends or implements clause
+        case CLASS_EXTENDS:
+        case CLASS_EXTENDS_COMPONENT:
+            databuf.appendChar(p.type_index);
+            break;
+        // throws
+        case THROWS:
+            databuf.appendChar(p.type_index);
+            break;
+        // method parameter
+        case METHOD_PARAMETER:
+        case METHOD_PARAMETER_COMPONENT:
+            databuf.appendByte(p.parameter_index);
+            break;
+        // method/constructor type argument
+        case NEW_TYPE_ARGUMENT:
+        case NEW_TYPE_ARGUMENT_COMPONENT:
+        case METHOD_TYPE_ARGUMENT:
+        case METHOD_TYPE_ARGUMENT_COMPONENT:
+            databuf.appendChar(p.offset);
+            databuf.appendByte(p.type_index);
+            break;
+        // We don't need to worry about these
+        case METHOD_RETURN:
+        case METHOD_RETURN_COMPONENT:
+        case FIELD:
+        case FIELD_COMPONENT:
+            break;
+        case UNKNOWN:
+            throw new AssertionError("jvm.ClassWriter: UNKNOWN target type should never occur!");
+        default:
+            throw new AssertionError("jvm.ClassWriter: Unknown target type for position: " + p);
+        }
+
+        // Append location data for generics/arrays.
+        if (p.type.hasLocation()) {
+            databuf.appendChar(p.location.size());
+            for (int i : p.location)
+                databuf.appendByte((byte)i);
+        }
+    }
+
 /**********************************************************************
  * Writing Objects
  **********************************************************************/
@@ -1628,6 +1792,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getAnnotationMirrors());
+        acount += writeTypeAnnotations(c.getTypeAnnotationMirrors());
         acount += writeEnclosingMethodAttribute(c);
         acount += writeExtraClassAttributes(c);
 
