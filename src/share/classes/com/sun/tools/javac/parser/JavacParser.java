@@ -583,13 +583,13 @@ public class JavacParser implements Parser {
             }
         } else if (token.kind == THIS) {
             if (allowThisIdent) {
-            	// Make sure we're using a supported source version.
-        		checkTypeAnnotations();
-            	Name name = token.name();
+                // Make sure we're using a supported source version.
+                checkTypeAnnotations();
+                Name name = token.name();
                 nextToken();
                 return name;
             } else {
-            	// TODO: add error message
+                // TODO: add error message
                 error(token.pos, "this.as.identifier");
                 nextToken();
                 return names.error;
@@ -3462,13 +3462,13 @@ public class JavacParser implements Parser {
         JCVariableDecl lastParam;
         accept(LPAREN);
         if (token.kind != RPAREN) {
-        	this.allowThisIdent = true;
-        	lastParam = formalParameter();
-        	if (lastParam.name.contentEquals(TokenKind.THIS.name)) {
-        		this.receiverParam = lastParam;
-        	} else {
-        		params.append(lastParam);
-        	}
+            this.allowThisIdent = true;
+            lastParam = formalParameter();
+            if (lastParam.name.contentEquals(TokenKind.THIS.name)) {
+                this.receiverParam = lastParam;
+            } else {
+                params.append(lastParam);
+            }
             this.allowThisIdent = false;
             while ((lastParam.mods.flags & Flags.VARARGS) == 0 && token.kind == COMMA) {
                 nextToken();
