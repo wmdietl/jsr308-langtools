@@ -1519,7 +1519,7 @@ public class JavacParser implements Parser {
     ParensResult analyzeParens() {
         int depth = 0;
         boolean type = false;
-        for (int lookahead = 0 ; ; lookahead++) {
+        outer: for (int lookahead = 0 ; ; lookahead++) {
             TokenKind tk = S.token(lookahead).kind;
             switch (tk) {
                 case EXTENDS: case SUPER: case COMMA:
@@ -1577,9 +1577,36 @@ public class JavacParser implements Parser {
                     break;
                 case FINAL:
                 case ELLIPSIS:
-                case MONKEYS_AT:
                     //those can only appear in explicit lambdas
                     return ParensResult.EXPLICIT_LAMBDA;
+                case MONKEYS_AT:
+                    type = true;
+                    lookahead += 1; //skip '@'
+                    while (peekToken(lookahead, DOT)) {
+                        lookahead += 2;
+                    }
+                    if (peekToken(lookahead, LPAREN)) {
+                        lookahead++;
+                        //skip annotation values
+                        int nesting = 0;
+                        for (; ; lookahead++) {
+                            TokenKind tk2 = S.token(lookahead).kind;
+                            switch (tk2) {
+                                case EOF:
+                                    return ParensResult.PARENS;
+                                case LPAREN:
+                                    nesting++;
+                                    break;
+                                case RPAREN:
+                                    nesting--;
+                                    if (nesting == 0) {
+                                        continue outer;
+                                    }
+                                break;
+                            }
+                        }
+                    }
+                    break;
                 case LBRACKET:
                     if (peekToken(lookahead, RBRACKET, IDENTIFIER)) {
                         // '[', ']', Identifier -> explicit lambda
