@@ -376,6 +376,12 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         return M.at(t.pos).TypeUnion(components);
     }
 
+    public JCTree visitIntersectionType(IntersectionTypeTree node, P p) {
+        JCTypeIntersection t = (JCTypeIntersection) node;
+        List<JCExpression> components = copy(t.bounds, p);
+        return M.at(t.pos).TypeIntersection(components);
+    }
+
     public JCTree visitArrayType(ArrayTypeTree node, P p) {
         JCArrayTypeTree t = (JCArrayTypeTree) node;
         JCExpression elemtype = copy(t.elemtype, p);

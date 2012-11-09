@@ -472,6 +472,12 @@ public class TreeMaker implements JCTree.Factory {
         return tree;
     }
 
+    public JCTypeIntersection TypeIntersection(List<JCExpression> components) {
+        JCTypeIntersection tree = new JCTypeIntersection(components);
+        tree.pos = pos;
+        return tree;
+    }
+
     public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds) {
         return TypeParameter(name, bounds, List.<JCTypeAnnotation>nil());
     }

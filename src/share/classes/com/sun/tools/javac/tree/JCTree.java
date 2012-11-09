@@ -250,9 +250,13 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
          */
         TYPEAPPLY,
 
-        /** Union types, of type TypeUnion
+        /** Union types, of type TypeUnion.
          */
         TYPEUNION,
+
+        /** Intersection types, of type TypeIntersection.
+         */
+        TYPEINTERSECTION,
 
         /** Formal type parameters, of type TypeParameter.
          */
@@ -270,10 +274,16 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
          */
         ANNOTATION,
 
+        /** metadata: Type annotation.
+         */
+        TYPE_ANNOTATION,
+
         /** metadata: Modifiers
          */
         MODIFIERS,
 
+        /** An annotated type tree.
+         */
         ANNOTATED_TYPE,
 
         /** Error trees, of type Erroneous.
@@ -1515,10 +1525,18 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public boolean canCompleteNormally = true;
         public List<Type> inferredThrownTypes;
 
+        private boolean needsParameterInference = false;
+
         public JCLambda(List<JCVariableDecl> params,
                         JCTree body) {
             this.params = params;
             this.body = body;
+            for (JCVariableDecl param : params) {
+                if (param.vartype == null) {
+                    needsParameterInference = true;
+                    break;
+                }
+            }
         }
         @Override
         public Tag getTag() {
@@ -1551,6 +1569,9 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
             return body.hasTag(BLOCK) ?
                     BodyKind.STATEMENT :
                     BodyKind.EXPRESSION;
+        }
+        public boolean needsParameterInference() {
+            return needsParameterInference;
         }
     }
 
@@ -2075,6 +2096,34 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     /**
+     * An intersection type, T1 & T2 & ... Tn (used in cast expressions)
+     */
+    public static class JCTypeIntersection extends JCExpression implements IntersectionTypeTree {
+
+        public List<JCExpression> bounds;
+
+        protected JCTypeIntersection(List<JCExpression> bounds) {
+            this.bounds = bounds;
+        }
+        @Override
+        public void accept(Visitor v) { v.visitTypeIntersection(this); }
+
+        public Kind getKind() { return Kind.INTERSECTION_TYPE; }
+
+        public List<JCExpression> getBounds() {
+            return bounds;
+        }
+        @Override
+        public <R,D> R accept(TreeVisitor<R,D> v, D d) {
+            return v.visitIntersectionType(this, d);
+        }
+        @Override
+        public Tag getTag() {
+            return TYPEINTERSECTION;
+        }
+    }
+
+    /**
      * A formal class parameter.
      */
     public static class JCTypeParameter extends JCTree implements TypeParameterTree {
@@ -2451,6 +2500,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void visitTypeArray(JCArrayTypeTree that)     { visitTree(that); }
         public void visitTypeApply(JCTypeApply that)         { visitTree(that); }
         public void visitTypeUnion(JCTypeUnion that)         { visitTree(that); }
+        public void visitTypeIntersection(JCTypeIntersection that)  { visitTree(that); }
         public void visitTypeParameter(JCTypeParameter that) { visitTree(that); }
         public void visitWildcard(JCWildcard that)           { visitTree(that); }
         public void visitTypeBoundKind(TypeBoundKind that)   { visitTree(that); }

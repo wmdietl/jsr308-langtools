@@ -1287,6 +1287,14 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
+    public void visitTypeIntersection(JCTypeIntersection tree) {
+        try {
+            printExprs(tree.bounds, " & ");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
     public void visitTypeParameter(JCTypeParameter tree) {
         try {
             print(tree.name);
