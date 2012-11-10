@@ -260,7 +260,10 @@ public class Annotate {
         }
         // TODO: this should be a TypeCompound if "a" is a JCTypeAnnotation.
         // However, how do we find the correct position?
-        return new Attribute.Compound(a.type, buf.toList());
+        Attribute.Compound ac = new Attribute.Compound(a.type, buf.toList());
+        // TODO: is this something we want? Who would use it?
+        // a.attribute = ac;
+        return ac;
     }
 
     Attribute enterAttributeValue(Type expected,
@@ -343,12 +346,12 @@ public class Annotate {
         return new Attribute.Error(attr.attribExpr(tree, env, expected));
     }
 
-    Attribute.TypeCompound enterTypeAnnotation(JCTypeAnnotation a,
+    Attribute.TypeCompound enterTypeAnnotation(JCAnnotation a,
             Type expected,
             Env<AttrContext> env) {
         Attribute.Compound c = enterAnnotation(a, expected, env);
         Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
-        a.attribute_field = tc;
+        a.attribute = tc;
         return tc;
     }
 

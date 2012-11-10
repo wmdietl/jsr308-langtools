@@ -1480,8 +1480,10 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     public static class JCNewArray extends JCExpression implements NewArrayTree {
         public JCExpression elemtype;
         public List<JCExpression> dims;
-        public List<JCTypeAnnotation> annotations;
-        public List<List<JCTypeAnnotation>> dimAnnotations;
+        // type annotations on inner-most component
+        public List<JCAnnotation> annotations;
+        // type annotations on dimensions
+        public List<List<JCAnnotation>> dimAnnotations;
         public List<JCExpression> elems;
         protected JCNewArray(JCExpression elemtype,
                            List<JCExpression> dims,
@@ -2131,9 +2133,9 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public Name name;
         /** bounds */
         public List<JCExpression> bounds;
-        /** annotations on type parameter */
-        public List<JCTypeAnnotation> annotations;
-        protected JCTypeParameter(Name name, List<JCExpression> bounds, List<JCTypeAnnotation> annotations) {
+        /** type annotations on type parameter */
+        public List<JCAnnotation> annotations;
+        protected JCTypeParameter(Name name, List<JCExpression> bounds, List<JCAnnotation> annotations) {
             this.name = name;
             this.bounds = bounds;
             this.annotations = annotations;
@@ -2146,7 +2148,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCExpression> getBounds() {
             return bounds;
         }
-        public List<JCTypeAnnotation> getAnnotations() {
+        public List<JCAnnotation> getAnnotations() {
             return annotations;
         }
         @Override
@@ -2215,16 +2217,27 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     public static class JCAnnotation extends JCExpression implements AnnotationTree {
+        // Either Tag.ANNOTATION or Tag.TYPE_ANNOTATION
+        private Tag tag;
+
         public JCTree annotationType;
         public List<JCExpression> args;
-        protected JCAnnotation(JCTree annotationType, List<JCExpression> args) {
+
+        // Attribute.Compound if tag is ANNOTATION
+        // Attribute.TypeCompound if tag is TYPE_ANNOTATION
+        public Attribute.Compound attribute;
+
+        protected JCAnnotation(Tag tag, JCTree annotationType, List<JCExpression> args) {
+            this.tag = tag;
             this.annotationType = annotationType;
             this.args = args;
         }
+
         @Override
         public void accept(Visitor v) { v.visitAnnotation(this); }
 
-        public Kind getKind() { return Kind.ANNOTATION; }
+        public Kind getKind() { return TreeInfo.tagToKind(getTag()); }
+
         public JCTree getAnnotationType() { return annotationType; }
         public List<JCExpression> getArguments() {
             return args;
@@ -2235,15 +2248,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
         @Override
         public Tag getTag() {
-            return ANNOTATION;
-        }
-    }
-
-    public static class JCTypeAnnotation extends JCAnnotation {
-        public Attribute.TypeCompound attribute_field;
-
-        protected JCTypeAnnotation(JCTree annotationType, List<JCExpression> args) {
-            super(annotationType, args);
+            return tag;
         }
     }
 
@@ -2275,7 +2280,8 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     public static class JCAnnotatedType extends JCExpression implements com.sun.source.tree.AnnotatedTypeTree {
-        public List<JCTypeAnnotation> annotations;
+        // type annotations
+        public List<JCAnnotation> annotations;
         public JCExpression underlyingType;
 
         /* True, iff the annotation should be associated with the underlying type.
@@ -2288,7 +2294,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
          */
         public boolean onRightType;
 
-        protected JCAnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType,
+        protected JCAnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType,
                 boolean onRightType) {
             this.annotations = annotations;
             this.underlyingType = underlyingType;
@@ -2298,7 +2304,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public void accept(Visitor v) { v.visitAnnotatedType(this); }
 
         public Kind getKind() { return Kind.ANNOTATED_TYPE; }
-        public List<JCTypeAnnotation> getAnnotations() {
+        public List<JCAnnotation> getAnnotations() {
             return annotations;
         }
         public JCExpression getUnderlyingType() {

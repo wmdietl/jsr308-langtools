@@ -997,6 +997,11 @@ public class TreeInfo {
         case NULLCHK:
             return Tree.Kind.OTHER;
 
+        case ANNOTATION:
+            return Tree.Kind.ANNOTATION;
+        case TYPE_ANNOTATION:
+            return Tree.Kind.TYPE_ANNOTATION;
+
         default:
             return null;
         }

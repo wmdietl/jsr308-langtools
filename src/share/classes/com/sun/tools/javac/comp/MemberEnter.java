@@ -1087,7 +1087,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
     }
 
-    private void actualEnterTypeAnnotations(final List<JCTypeAnnotation> annotations,
+    private void actualEnterTypeAnnotations(final List<JCAnnotation> annotations,
             final Env<AttrContext> env,
             final Symbol s) {
         Map<TypeSymbol, ListBuffer<Attribute.TypeCompound>> annotated =
@@ -1095,8 +1095,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         Map<Attribute.TypeCompound, DiagnosticPosition> pos =
                 new HashMap<Attribute.TypeCompound, DiagnosticPosition>();
 
-        for (List<JCTypeAnnotation> al = annotations; !al.isEmpty(); al = al.tail) {
-            JCTypeAnnotation a = al.head;
+        for (List<JCAnnotation> al = annotations; !al.isEmpty(); al = al.tail) {
+            JCAnnotation a = al.head;
             Attribute.TypeCompound tc = annotate.enterTypeAnnotation(a,
                     syms.annotationType,
                     env);
@@ -1140,7 +1140,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             this.sym = sym;
         }
 
-        void annotateTypeLater(final List<JCTypeAnnotation> annotations) {
+        void annotateTypeLater(final List<JCAnnotation> annotations) {
             if (annotations.isEmpty()) {
                 return;
             }
@@ -1177,7 +1177,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         @Override
         public void visitNewArray(final JCNewArray tree) {
             annotateTypeLater(tree.annotations);
-            for (List<JCTypeAnnotation> dimAnnos : tree.dimAnnotations)
+            for (List<JCAnnotation> dimAnnos : tree.dimAnnotations)
                 annotateTypeLater(dimAnnos);
             super.visitNewArray(tree);
         }

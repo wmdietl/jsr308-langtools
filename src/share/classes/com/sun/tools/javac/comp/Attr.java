@@ -1910,7 +1910,7 @@ public class Attr extends JCTree.Visitor {
 
             if (clazz.hasTag(ANNOTATED_TYPE)) {
                 JCAnnotatedType annoType = (JCAnnotatedType) clazz;
-                List<JCTypeAnnotation> annos = annoType.annotations;
+                List<JCAnnotation> annos = annoType.annotations;
 
                 if (annoType.underlyingType.hasTag(TYPEAPPLY)) {
                     clazzid1 = make.at(tree.pos).
@@ -3625,7 +3625,7 @@ public class Attr extends JCTree.Visitor {
     /**
      * Apply the annotations to the particular type.
      */
-    public void annotateType(final Type type, final List<JCTypeAnnotation> annotations) {
+    public void annotateType(final Type type, final List<JCAnnotation> annotations) {
         if (annotations.isEmpty())
             return;
         annotate.typeAnnotation(new Annotate.Annotator() {
@@ -3641,13 +3641,13 @@ public class Attr extends JCTree.Visitor {
         });
     }
 
-    private static List<Attribute.TypeCompound> fromAnnotations(List<JCTypeAnnotation> annotations) {
+    private static List<Attribute.TypeCompound> fromAnnotations(List<JCAnnotation> annotations) {
         if (annotations.isEmpty())
             return List.nil();
 
         ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
-        for (JCTypeAnnotation anno : annotations) {
-            buf.append(anno.attribute_field);
+        for (JCAnnotation anno : annotations) {
+            buf.append((Attribute.TypeCompound) anno.attribute);
         }
         return buf.toList();
     }
@@ -3962,13 +3962,13 @@ public class Attr extends JCTree.Visitor {
     private final JCTree.Visitor typeAnnotationsValidator =
         new TreeScanner() {
         public void visitAnnotation(JCAnnotation tree) {
-            if (tree instanceof JCTypeAnnotation) {
+            if (tree.hasTag(TYPE_ANNOTATION)) {
                 // TODO: It seems to WMD as if the annotation in
                 // parameters, in particular also the recvparam, are never
                 // of type JCTypeAnnotation and therefore never checked!
                 // Luckily this check doesn't really do anything that isn't
                 // also done elsewhere.
-                chk.validateTypeAnnotation((JCTypeAnnotation)tree, false);
+                chk.validateTypeAnnotation(tree, false);
             }
             super.visitAnnotation(tree);
         }

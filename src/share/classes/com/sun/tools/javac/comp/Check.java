@@ -611,7 +611,7 @@ public class Check {
             private static class AnnotationFinder extends TreeScanner {
                 public boolean foundTypeAnno = false;
                 public void visitAnnotation(JCAnnotation tree) {
-                    foundTypeAnno = foundTypeAnno || (tree instanceof JCTypeAnnotation);
+                    foundTypeAnno = foundTypeAnno || tree.hasTag(TYPE_ANNOTATION);
                 }
             }
 
@@ -2659,8 +2659,8 @@ public class Check {
 
     /** Check the type annotations.
      */
-    public void validateTypeAnnotations(List<JCTypeAnnotation> annotations, boolean isTypeParameter) {
-        for (JCTypeAnnotation a : annotations)
+    public void validateTypeAnnotations(List<JCAnnotation> annotations, boolean isTypeParameter) {
+        for (JCAnnotation a : annotations)
             validateTypeAnnotation(a, isTypeParameter);
     }
 
@@ -2678,7 +2678,7 @@ public class Check {
         }
     }
 
-    public void validateTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
+    public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
         if (a.type == null)
             throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
@@ -2931,7 +2931,7 @@ public class Check {
     }
 
     /** Is the annotation applicable to type annotations? */
-    boolean isTypeAnnotation(JCTypeAnnotation a, boolean isTypeParameter) {
+    boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) {

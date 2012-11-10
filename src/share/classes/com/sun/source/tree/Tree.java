@@ -49,9 +49,16 @@ public interface Tree {
         ANNOTATED_TYPE(AnnotatedTypeTree.class),
 
         /**
-         * Used for instances of {@link AnnotationTree}.
+         * Used for instances of {@link AnnotationTree}
+         * representing declaration annotations.
          */
         ANNOTATION(AnnotationTree.class),
+
+        /**
+         * Used for instances of {@link AnnotationTree}
+         * representing type annotations.
+         */
+        TYPE_ANNOTATION(AnnotationTree.class),
 
         /**
          * Used for instances of {@link ArrayAccessTree}.

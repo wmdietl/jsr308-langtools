@@ -780,9 +780,9 @@ public class TypeAnnotations {
             return false;
         }
 
-        private static void setTypeAnnotationPos(List<JCTypeAnnotation> annotations, TypeAnnotationPosition position) {
-            for (JCTypeAnnotation anno : annotations) {
-                anno.attribute_field.position = position;
+        private static void setTypeAnnotationPos(List<JCAnnotation> annotations, TypeAnnotationPosition position) {
+            for (JCAnnotation anno : annotations) {
+                ((Attribute.TypeCompound)anno.attribute).position = position;
             }
         }
 
@@ -843,7 +843,7 @@ public class TypeAnnotations {
             super.visitTypeParameter(tree);
         }
 
-        private void findPosition(JCTree tree, JCTree frame, List<JCTypeAnnotation> annotations) {
+        private void findPosition(JCTree tree, JCTree frame, List<JCAnnotation> annotations) {
             if (!annotations.isEmpty()) {
                 /*
                 System.out.println("Finding pos for: " + annotations);

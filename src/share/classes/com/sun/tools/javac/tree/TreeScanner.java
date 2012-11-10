@@ -211,7 +211,7 @@ public class TreeScanner extends Visitor {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        for (List<JCTypeAnnotation> annos : tree.dimAnnotations)
+        for (List<JCAnnotation> annos : tree.dimAnnotations)
             scan(annos);
         scan(tree.elems);
     }

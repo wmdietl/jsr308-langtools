@@ -73,7 +73,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitAnnotatedType(AnnotatedTypeTree node, P p) {
         JCAnnotatedType t = (JCAnnotatedType) node;
-        List<JCTypeAnnotation> annotations = copy(t.annotations, p);
+        List<JCAnnotation> annotations = copy(t.annotations, p);
         JCExpression underlyingType = copy(t.underlyingType, p);
         return M.at(t.pos).AnnotatedType(annotations, underlyingType, t.onRightType);
     }
@@ -82,16 +82,14 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         JCAnnotation t = (JCAnnotation) node;
         JCTree annotationType = copy(t.annotationType, p);
         List<JCExpression> args = copy(t.args, p);
-        if (t instanceof JCTypeAnnotation) {
-            JCTypeAnnotation ta = (JCTypeAnnotation)node;
-
-            // Fill the rest
-            JCTypeAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
-            newTA.annotationType = ta.annotationType;
-            newTA.attribute_field = ta.attribute_field;
+        if (t.getKind() == Tree.Kind.TYPE_ANNOTATION) {
+            JCAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
+            newTA.attribute= t.attribute;
             return newTA;
         } else {
-            return M.at(t.pos).Annotation(annotationType, args);
+            JCAnnotation newT = M.at(t.pos).Annotation(annotationType, args);
+            newT.attribute= t.attribute;
+            return newT;
         }
     }
 
@@ -402,7 +400,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitTypeParameter(TypeParameterTree node, P p) {
         JCTypeParameter t = (JCTypeParameter) node;
-        List<JCTypeAnnotation> annos = copy(t.annotations, p);
+        List<JCAnnotation> annos = copy(t.annotations, p);
         List<JCExpression> bounds = copy(t.bounds, p);
         return M.at(t.pos).TypeParameter(t.name, bounds, annos);
     }

@@ -479,10 +479,10 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds) {
-        return TypeParameter(name, bounds, List.<JCTypeAnnotation>nil());
+        return TypeParameter(name, bounds, List.<JCAnnotation>nil());
     }
 
-    public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds, List<JCTypeAnnotation> annos) {
+    public JCTypeParameter TypeParameter(Name name, List<JCExpression> bounds, List<JCAnnotation> annos) {
         JCTypeParameter tree = new JCTypeParameter(name, bounds, annos);
         tree.pos = pos;
         return tree;
@@ -501,13 +501,13 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCAnnotation Annotation(JCTree annotationType, List<JCExpression> args) {
-        JCAnnotation tree = new JCAnnotation(annotationType, args);
+        JCAnnotation tree = new JCAnnotation(Tag.ANNOTATION, annotationType, args);
         tree.pos = pos;
         return tree;
     }
 
-    public JCTypeAnnotation TypeAnnotation(JCTree annotationType, List<JCExpression> args) {
-        JCTypeAnnotation tree = new JCTypeAnnotation(annotationType, args);
+    public JCAnnotation TypeAnnotation(JCTree annotationType, List<JCExpression> args) {
+        JCAnnotation tree = new JCAnnotation(Tag.TYPE_ANNOTATION, annotationType, args);
         tree.pos = pos;
         return tree;
     }
@@ -523,11 +523,11 @@ public class TreeMaker implements JCTree.Factory {
         return Modifiers(flags, List.<JCAnnotation>nil());
     }
 
-    public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType) {
+    public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType) {
         return this.AnnotatedType(annotations, underlyingType, true);
     }
 
-    public JCAnnotatedType AnnotatedType(List<JCTypeAnnotation> annotations, JCExpression underlyingType,
+    public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType,
             boolean onRightType) {
         JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType, onRightType);
         tree.pos = pos;
@@ -807,7 +807,7 @@ public class TreeMaker implements JCTree.Factory {
             }
             return Annotation(Type(compound.type), args.toList());
         }
-        public JCTypeAnnotation visitTypeCompoundInternal(Attribute.TypeCompound compound) {
+        public JCAnnotation visitTypeCompoundInternal(Attribute.TypeCompound compound) {
             ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
             for (List<Pair<Symbol.MethodSymbol,Attribute>> values = compound.values; values.nonEmpty(); values=values.tail) {
                 Pair<MethodSymbol,Attribute> pair = values.head;
@@ -829,7 +829,7 @@ public class TreeMaker implements JCTree.Factory {
         JCAnnotation translate(Attribute.Compound a) {
             return visitCompoundInternal(a);
         }
-        JCTypeAnnotation translate(Attribute.TypeCompound a) {
+        JCAnnotation translate(Attribute.TypeCompound a) {
             return visitTypeCompoundInternal(a);
         }
     }
@@ -842,7 +842,7 @@ public class TreeMaker implements JCTree.Factory {
         return annotationBuilder.translate((Attribute.Compound)a);
     }
 
-    public JCTypeAnnotation TypeAnnotation(Attribute a) {
+    public JCAnnotation TypeAnnotation(Attribute a) {
         return annotationBuilder.translate((Attribute.TypeCompound) a);
     }
 
