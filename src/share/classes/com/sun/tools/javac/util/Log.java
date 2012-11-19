@@ -304,10 +304,8 @@ public class Log extends AbstractLog {
         this.errWriter = other.errWriter;
         this.sourceMap = other.sourceMap;
         this.recorded = other.recorded;
-        // TODO: with this, the errors in Flow go away, e.g tools/javac/api/6406133/
-        // But it also causes problems with error counts, e.g. tools/javac/7129225/
-        // I propose we keep this and work on the test cases.
         this.nerrors = other.nerrors;
+        this.nwarnings = other.nwarnings;
     }
 
     /** Flush the logs

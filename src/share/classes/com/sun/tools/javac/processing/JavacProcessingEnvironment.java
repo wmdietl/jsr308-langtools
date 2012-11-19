@@ -794,9 +794,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         /** The set of package-info files to be processed this round. */
         List<PackageSymbol> packageInfoFiles;
 
-        /** The number of Messager errors generated in this round. */
-        int nMessagerErrors;
-
         /** Create a round (common code). */
         private Round(Context context, int number, int priorErrors, int priorWarnings) {
             this.context = context;
@@ -805,7 +802,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             compiler = JavaCompiler.instance(context);
             log = Log.instance(context);
             log.nerrors = priorErrors;
-            log.nwarnings += priorWarnings;
+            log.nwarnings = priorWarnings;
             log.deferAll();
 
             // the following is for the benefit of JavacProcessingEnvironment.getContext()
@@ -840,7 +837,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 Set<JavaFileObject> newSourceFiles, Map<String,JavaFileObject> newClassFiles) {
             this(prev.nextContext(),
                     prev.number+1,
-                    prev.nMessagerErrors,
+                    prev.compiler.log.nerrors,
                     prev.compiler.log.nwarnings);
             this.genClassFiles = prev.genClassFiles;
 
@@ -880,15 +877,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         }
 
         /** Create the compiler to be used for the final compilation. */
-        JavaCompiler finalCompiler(boolean errorStatus) {
+        JavaCompiler finalCompiler() {
             try {
                 Context nextCtx = nextContext();
                 JavacProcessingEnvironment.this.context = nextCtx;
                 JavaCompiler c = JavaCompiler.instance(nextCtx);
-                c.log.nwarnings += compiler.log.nwarnings;
-                if (errorStatus) {
-                    c.log.nerrors += compiler.log.nerrors;
-                }
+                c.log.initRound(compiler.log);
                 return c;
             } finally {
                 compiler.close(false);
@@ -996,8 +990,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 if (!taskListener.isEmpty())
                     taskListener.finished(new TaskEvent(TaskEvent.Kind.ANNOTATION_PROCESSING_ROUND));
             }
-
-            nMessagerErrors = messager.errorCount();
         }
 
         void showDiagnostics(boolean showAll) {
@@ -1171,7 +1163,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 new LinkedHashSet<JavaFileObject>(filer.getGeneratedSourceFileObjects());
         roots = cleanTrees(round.roots);
 
-        JavaCompiler compiler = round.finalCompiler(errorStatus);
+        JavaCompiler compiler = round.finalCompiler();
 
         if (newSourceFiles.size() > 0)
             roots = roots.appendList(compiler.parseFiles(newSourceFiles));
