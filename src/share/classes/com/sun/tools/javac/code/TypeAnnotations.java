@@ -154,7 +154,10 @@ public class TypeAnnotations {
 
         @Override
         public void visitVarDef(final JCVariableDecl tree) {
-            if (tree.sym.getKind() == ElementKind.FIELD) {
+            if (tree.sym == null) {
+                // This only seems to happen with lambda.
+                // TODO: What should be done?
+            } else if (tree.sym.getKind() == ElementKind.FIELD) {
                 TypeAnnotationPosition pos = new TypeAnnotationPosition();
                 pos.type = TargetType.FIELD;
                 pos.pos = tree.pos;
