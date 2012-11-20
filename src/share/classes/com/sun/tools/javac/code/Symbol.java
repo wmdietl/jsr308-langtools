@@ -84,7 +84,15 @@ public abstract class Symbol implements Element {
      *  method to make sure that the class symbol is loaded.
      */
     public List<Attribute.Compound> getAnnotationMirrors() {
-        return Assert.checkNonNull(annotations.getAttributes());
+        return annotations.getDeclarationAttributes();
+    }
+
+    /** An accessor method for the type attributes of this symbol.
+     *  Attributes of class symbols should be accessed through the accessor
+     *  method to make sure that the class symbol is loaded.
+     */
+    public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+        return annotations.getTypeAttributes();
     }
 
     /** Fetch a particular annotation from a symbol. */
@@ -438,7 +446,8 @@ public abstract class Symbol implements Element {
     }
 
     public Set<Modifier> getModifiers() {
-        return Flags.asModifierSet(flags());
+        long flags = flags();
+        return Flags.asModifierSet((flags & DEFAULT) != 0 ? flags & ~ABSTRACT : flags);
     }
 
     public Name getSimpleName() {
@@ -475,6 +484,7 @@ public abstract class Symbol implements Element {
         public String toString() { return other.toString(); }
         public Symbol location() { return other.location(); }
         public Symbol location(Type site, Types types) { return other.location(site, types); }
+        public Symbol baseSymbol() { return other; }
         public Type erasure(Types types) { return other.erasure(types); }
         public Type externalType(Types types) { return other.externalType(types); }
         public boolean isLocal() { return other.isLocal(); }
@@ -666,9 +676,9 @@ public abstract class Symbol implements Element {
                 package_info.complete();
                 if (annotations.isEmpty()) {
                     annotations.setAttributes(package_info.annotations);
+                }
             }
-            }
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
         }
 
         /** A package "exists" if a type or package that exists has
@@ -770,7 +780,12 @@ public abstract class Symbol implements Element {
 
         public List<Attribute.Compound> getAnnotationMirrors() {
             if (completer != null) complete();
-            return Assert.checkNonNull(annotations.getAttributes());
+            return Assert.checkNonNull(annotations.getDeclarationAttributes());
+        }
+
+        public List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+            if (completer != null) complete();
+            return Assert.checkNonNull(annotations.getTypeAttributes());
         }
 
         public Type erasure(Types types) {
@@ -1192,7 +1207,7 @@ public abstract class Symbol implements Element {
 
             // check for an inherited implementation
             if ((flags() & ABSTRACT) != 0 ||
-                    (other.flags() & ABSTRACT) == 0 ||
+                    ((other.flags() & ABSTRACT) == 0 && (other.flags() & DEFAULT) == 0) ||
                     !other.isOverridableIn(origin) ||
                     !this.isMemberOf(origin, types))
                 return false;
@@ -1202,7 +1217,7 @@ public abstract class Symbol implements Element {
             Type ot = types.memberType(origin.type, other);
             return
                 types.isSubSignature(mt, ot) &&
-                (!checkResult || types.resultSubtype(mt, ot, Warner.noWarnings));
+                (!checkResult || types.resultSubtype(mt, ot, types.noWarnings));
         }
 
         private boolean isOverridableIn(TypeSymbol origin) {

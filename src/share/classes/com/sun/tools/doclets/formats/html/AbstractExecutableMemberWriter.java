@@ -45,7 +45,7 @@ import com.sun.tools.doclets.internal.toolkit.util.*;
 public abstract class AbstractExecutableMemberWriter extends AbstractMemberWriter {
 
     public AbstractExecutableMemberWriter(SubWriterHolderWriter writer,
-                                     ClassDoc classdoc) {
+            ClassDoc classdoc) {
         super(writer, classdoc);
     }
 
@@ -61,7 +61,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
      * @return the display length required to write this information.
      */
     protected int addTypeParameters(ExecutableMemberDoc member, Content htmltree) {
-        LinkInfoImpl linkInfo = new LinkInfoImpl(
+        LinkInfoImpl linkInfo = new LinkInfoImpl(configuration,
             LinkInfoImpl.CONTEXT_MEMBER_TYPE_PARAMS, member, false);
         String typeParameters = writer.getTypeParameterLinks(linkInfo);
         if (linkInfo.displayLength > 0) {
@@ -129,8 +129,8 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
         boolean isVarArg, Content tree) {
         if (param.type() != null) {
             Content link = new RawHtml(writer.getLink(new LinkInfoImpl(
-                    LinkInfoImpl.CONTEXT_EXECUTABLE_MEMBER_PARAM, param.type(),
-                    isVarArg)));
+                    configuration, LinkInfoImpl.CONTEXT_EXECUTABLE_MEMBER_PARAM,
+                    param.type(), isVarArg)));
             tree.addContent(link);
         }
         if(param.name().length() > 0) {
@@ -138,6 +138,15 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
             tree.addContent(param.name());
         }
     }
+
+    protected void addReceiverAnnotations(ExecutableMemberDoc member,
+            Content tree) {
+        if (member.receiverAnnotations().length > 0) {
+            tree.addContent(writer.getSpace());
+            writer.addReceiverAnnotationInfo(member, tree);
+        }
+    }
+
 
     /**
      * Add all the parameters for the executable member.
@@ -161,7 +170,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
         htmltree.addContent("(");
         Parameter[] params = member.parameters();
         String indent = makeSpace(writer.displayLength);
-        if (configuration().linksource) {
+        if (configuration.linksource) {
             //add spaces to offset indentation changes caused by link.
             indent+= makeSpace(member.name().length());
         }
@@ -212,7 +221,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
     protected void addExceptions(ExecutableMemberDoc member, Content htmltree) {
         Type[] exceptions = member.thrownExceptionTypes();
         if(exceptions.length > 0) {
-            LinkInfoImpl memberTypeParam = new LinkInfoImpl(
+            LinkInfoImpl memberTypeParam = new LinkInfoImpl(configuration,
                     LinkInfoImpl.CONTEXT_MEMBER, member, false);
             int retlen = getReturnTypeLength(member);
             writer.getTypeParameterLinks(memberTypeParam);
@@ -224,7 +233,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
             htmltree.addContent(indent);
             htmltree.addContent("throws ");
             indent += "       ";
-            Content link = new RawHtml(writer.getLink(new LinkInfoImpl(
+            Content link = new RawHtml(writer.getLink(new LinkInfoImpl(configuration,
                     LinkInfoImpl.CONTEXT_MEMBER, exceptions[0])));
             htmltree.addContent(link);
             for(int i = 1; i < exceptions.length; i++) {
@@ -232,7 +241,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
                 htmltree.addContent(DocletConstants.NL);
                 htmltree.addContent(indent);
                 Content exceptionLink = new RawHtml(writer.getLink(new LinkInfoImpl(
-                        LinkInfoImpl.CONTEXT_MEMBER, exceptions[i])));
+                        configuration, LinkInfoImpl.CONTEXT_MEMBER, exceptions[i])));
                 htmltree.addContent(exceptionLink);
             }
         }
@@ -246,7 +255,7 @@ public abstract class AbstractExecutableMemberWriter extends AbstractMemberWrite
                 return rettype.typeName().length() +
                        rettype.dimension().length();
             } else {
-                LinkInfoImpl linkInfo = new LinkInfoImpl(
+                LinkInfoImpl linkInfo = new LinkInfoImpl(configuration,
                     LinkInfoImpl.CONTEXT_MEMBER, rettype);
                 writer.getLink(linkInfo);
                 return linkInfo.displayLength;

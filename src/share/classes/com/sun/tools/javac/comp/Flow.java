@@ -35,6 +35,7 @@ import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.comp.Resolve;
 import com.sun.tools.javac.tree.JCTree.*;
 
 import static com.sun.tools.javac.code.Flags.*;
@@ -213,24 +214,21 @@ public class Flow {
     }
 
     public void analyzeLambda(Env<AttrContext> env, JCLambda that, TreeMaker make, boolean speculative) {
-        java.util.Queue<JCDiagnostic> prevDeferredDiagnostics = log.deferredDiagnostics;
-        Filter<JCDiagnostic> prevDeferDiagsFilter = log.deferredDiagFilter;
+        Log.DiagnosticHandler diagHandler = null;
         //we need to disable diagnostics temporarily; the problem is that if
         //a lambda expression contains e.g. an unreachable statement, an error
         //message will be reported and will cause compilation to skip the flow analyis
         //step - if we suppress diagnostics, we won't stop at Attr for flow-analysis
         //related errors, which will allow for more errors to be detected
         if (!speculative) {
-            log.deferAll();
-            log.deferredDiagnostics = ListBuffer.lb();
+            diagHandler = new Log.DiscardDiagnosticHandler(log);
         }
         try {
             new AliveAnalyzer().analyzeTree(env, that, make);
             new FlowAnalyzer().analyzeTree(env, that, make);
         } finally {
             if (!speculative) {
-                log.deferredDiagFilter = prevDeferDiagsFilter;
-                log.deferredDiagnostics = prevDeferredDiagnostics;
+                log.popDiagnosticHandler(diagHandler);
             }
         }
     }
@@ -275,9 +273,7 @@ public class Flow {
         Source source = Source.instance(context);
         allowImprovedRethrowAnalysis = source.allowImprovedRethrowAnalysis();
         allowImprovedCatchAnalysis = source.allowImprovedCatchAnalysis();
-        Options options = Options.instance(context);
-        allowEffectivelyFinalInInnerClasses = source.allowEffectivelyFinalInInnerClasses() &&
-                options.isSet("allowEffectivelyFinalInInnerClasses"); //pre-lambda guard
+        allowEffectivelyFinalInInnerClasses = source.allowEffectivelyFinalInInnerClasses();
     }
 
     /**
@@ -2178,6 +2174,11 @@ public class Flow {
 
         void referenced(Symbol sym) {
             unrefdResources.remove(sym);
+        }
+
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            // annotations don't get scanned
+            tree.underlyingType.accept(this);
         }
 
         public void visitTopLevel(JCCompilationUnit tree) {

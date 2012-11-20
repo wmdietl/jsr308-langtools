@@ -67,6 +67,7 @@ public class Flags {
         if ((mask&NATIVE) != 0) flags.add(Flag.NATIVE);
         if ((mask&INTERFACE) != 0) flags.add(Flag.INTERFACE);
         if ((mask&ABSTRACT) != 0) flags.add(Flag.ABSTRACT);
+        if ((mask&DEFAULT) != 0) flags.add(Flag.DEFAULT);
         if ((mask&STRICTFP) != 0) flags.add(Flag.STRICTFP);
         if ((mask&BRIDGE) != 0) flags.add(Flag.BRIDGE);
         if ((mask&SYNTHETIC) != 0) flags.add(Flag.SYNTHETIC);
@@ -232,23 +233,23 @@ public class Flags {
     public static final long PROPRIETARY = 1L<<38;
 
     /**
-     * Flag that marks a a multi-catch parameter
+     * Flag that marks a multi-catch parameter.
      */
     public static final long UNION = 1L<<39;
 
     /**
-     * Flag that marks a special kind of bridge methods (the ones that
-     * come from restricted supertype bounds)
+     * Flag that marks a special kind of bridge method (the ones that
+     * come from restricted supertype bounds).
      */
     public static final long OVERRIDE_BRIDGE = 1L<<40;
 
     /**
-     * Flag that marks an 'effectively final' local variable
+     * Flag that marks an 'effectively final' local variable.
      */
     public static final long EFFECTIVELY_FINAL = 1L<<41;
 
     /**
-     * Flag that marks non-override equivalent methods with the same signature
+     * Flag that marks non-override equivalent methods with the same signature.
      */
     public static final long CLASH = 1L<<42;
 
@@ -261,7 +262,7 @@ public class Flags {
      * Flag that marks class as auxiliary, ie a non-public class following
      * the public class in a source file, that could block implicit compilation.
      */
-    public static final long AUXILIARY = 1L<<43;
+    public static final long AUXILIARY = 1L<<44;
 
     /** Modifier masks.
      */
