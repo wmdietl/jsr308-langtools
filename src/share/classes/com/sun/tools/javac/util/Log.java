@@ -385,14 +385,17 @@ public class Log extends AbstractLog {
         noticeWriter = warnWriter = errWriter = pw;
     }
 
-    public void setWriters(Log other) {
+    /**
+     * Propagate the previous log's information.
+     */
+    public void initRound(Log other) {
         this.noticeWriter = other.noticeWriter;
         this.warnWriter = other.warnWriter;
         this.errWriter = other.errWriter;
-    }
-
-    public void setSourceMap(Log other) {
         this.sourceMap = other.sourceMap;
+        this.recorded = other.recorded;
+        this.nerrors = other.nerrors;
+        this.nwarnings = other.nwarnings;
     }
 
     /**

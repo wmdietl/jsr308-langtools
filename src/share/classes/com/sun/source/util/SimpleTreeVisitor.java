@@ -240,6 +240,10 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
         return defaultAction(node, p);
     }
 
+    public R visitIntersectionType(IntersectionTypeTree node, P p) {
+        return defaultAction(node, p);
+    }
+
     public R visitTypeParameter(TypeParameterTree node, P p) {
         return defaultAction(node, p);
     }
@@ -253,6 +257,10 @@ public class SimpleTreeVisitor <R,P> implements TreeVisitor<R,P> {
     }
 
     public R visitAnnotation(AnnotationTree node, P p) {
+        return defaultAction(node, p);
+    }
+
+    public R visitAnnotatedType(AnnotatedTypeTree node, P p) {
         return defaultAction(node, p);
     }
 
