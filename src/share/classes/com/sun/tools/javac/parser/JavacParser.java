@@ -615,7 +615,7 @@ public class JavacParser implements Parser {
             accept(IDENTIFIER);
             return names.error;
         }
-}
+    }
 
     /**
      * Qualident = Ident { DOT [Annotations] Ident }
@@ -741,7 +741,7 @@ public class JavacParser implements Parser {
         nextToken();
         return t;
     }
-//where
+    //where
         boolean isZero(String s) {
             char[] cs = s.toCharArray();
             int base = ((cs.length > 1 && Character.toLowerCase(cs[1]) == 'x') ? 16 : 10);
@@ -948,7 +948,7 @@ public class JavacParser implements Parser {
         opStackSupply.elems = savedOp; // optimization
         return t;
     }
-//where
+    //where
         /** Construct a binary or type test node.
          */
         private JCExpression makeOp(int pos,
