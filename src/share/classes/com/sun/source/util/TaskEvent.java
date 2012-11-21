@@ -60,7 +60,7 @@ public final class TaskEvent
          **/
         GENERATE,
         /**
-         * For events relating to overall annotaion processing.
+         * For events relating to overall annotation processing.
          **/
         ANNOTATION_PROCESSING,
         /**

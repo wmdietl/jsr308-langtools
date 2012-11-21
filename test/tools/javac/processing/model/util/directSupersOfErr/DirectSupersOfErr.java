@@ -28,7 +28,7 @@
  * @author  Scott Seligman
  * @library ../../../../lib
  * @build   JavacTestingAbstractProcessor DirectSupersOfErr
- * @compile -processor DirectSupersOfErr -proc:only C1.java
+ * @compile/fail/ref=DirectSupersOfErr.ref -processor DirectSupersOfErr -proc:only -XDrawDiagnostics C1.java
  */
 
 import java.util.Set;

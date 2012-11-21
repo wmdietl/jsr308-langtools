@@ -30,7 +30,9 @@ import java.text.CollationKey;
 
 import com.sun.javadoc.*;
 
+import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Flags;
+import com.sun.tools.javac.code.Attribute.Compound;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
@@ -193,6 +195,22 @@ public abstract class ExecutableMemberDocImpl
         int i = 0;
         for (VarSymbol param : params) {
             result[i++] = new ParameterImpl(env, param);
+        }
+        return result;
+    }
+
+    public AnnotationDesc[] receiverAnnotations() {
+        // TODO: change how receiver annotations are output!
+        Type recvtype = sym.type.asMethodType().recvtype;
+        if (recvtype==null) {
+            return new AnnotationDesc[0];
+        }
+
+        List<? extends Compound> typeAnnos = recvtype.typeAnnotations;
+        AnnotationDesc result[] = new AnnotationDesc[typeAnnos.length()];
+        int i = 0;
+        for (Attribute.Compound a : typeAnnos) {
+            result[i++] = new AnnotationDescImpl(env, a);
         }
         return result;
     }
