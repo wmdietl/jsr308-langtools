@@ -217,7 +217,7 @@ public class Log extends AbstractLog {
     private JavacMessages messages;
 
     /**
-+     * Handler for initial dispatch of diagnostics.
+     * Handler for initial dispatch of diagnostics.
      */
     private DiagnosticHandler diagnosticHandler;
 
