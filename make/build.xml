@@ -542,7 +542,7 @@
 
     <target name="jtreg-jsr308" depends="build-javac,build-javap,-def-jtreg">
       <jtreg-tool name="jsr308" samevm="true"
-                  tests="${javac.tests}/typeAnnotations ${javap.tests}/typeAnnotations"/>
+                  tests="${javac.tests}/annotations/typeAnnotations ${javap.tests}/typeAnnotations"/>
     </target>
 
     <target name="jtreg-envtests" depends="build-javac,build-javap,-def-jtreg">
