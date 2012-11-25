@@ -29,7 +29,6 @@ import java.io.*;
 
 import com.sun.source.tree.MemberReferenceTree.ReferenceMode;
 import com.sun.tools.javac.code.*;
-import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
@@ -501,8 +500,9 @@ public class Pretty extends JCTree.Visitor {
             print("(");
             if (tree.recvparam!=null) {
                 printExpr(tree.recvparam);
-                // TODO 308: only output if there are parameters following.
-                print(", ");
+                if (tree.params.size() > 0) {
+                    print(", ");
+                }
             }
             printExprs(tree.params);
             print(")");
