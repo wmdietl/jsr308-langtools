@@ -2725,7 +2725,7 @@ public class JavacParser implements Parser {
         mode = prevmode;
         List<JCAnnotation> annotations = buf.toList();
 
-        if (debugJSR308 && kind == AnnotationKind.TYPE_ANNO)
+        if (debugJSR308 && kind == Tag.TYPE_ANNOTATION)
             System.out.println("TA: parsing " + annotations
                     + " in " + log.currentSourceFile());
         return annotations;
