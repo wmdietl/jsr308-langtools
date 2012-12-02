@@ -1528,7 +1528,7 @@ public class JavacParser implements Parser {
     ParensResult analyzeParens() {
         int depth = 0;
         boolean type = false;
-        for (int lookahead = 0 ; ; lookahead++) {
+        outer: for (int lookahead = 0 ; ; lookahead++) {
             TokenKind tk = S.token(lookahead).kind;
             switch (tk) {
                 case EXTENDS: case SUPER: case COMMA:

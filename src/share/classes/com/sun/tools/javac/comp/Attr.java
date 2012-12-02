@@ -721,19 +721,6 @@ public class Attr extends JCTree.Visitor {
         }
     }
 
-    void attribBounds(List<JCTypeParameter> typarams) {
-        for (JCTypeParameter typaram : typarams) {
-            Type bound = typaram.type.getUpperBound();
-            if (bound != null && bound.tsym instanceof ClassSymbol) {
-                ClassSymbol c = (ClassSymbol)bound.tsym;
-                if ((c.flags_field & COMPOUND) != 0) {
-                    Assert.check((c.flags_field & UNATTRIBUTED) != 0, c);
-                    attribClass(typaram.pos(), c);
-                }
-            }
-        }
-    }
-
     /**
      * Attribute the type references in a list of annotations.
      */
@@ -899,7 +886,6 @@ public class Attr extends JCTree.Visitor {
             localEnv.info.lint = lint;
 
             attribStats(tree.typarams, localEnv);
-            attribBounds(tree.typarams);
 
             // If we override any other methods, check that we do so properly.
             // JLS ???
@@ -3673,7 +3659,7 @@ public class Attr extends JCTree.Visitor {
 
      public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar typeVar = (TypeVar)tree.type;
-        annotateType(a, tree.annotations);
+        annotateType(typeVar, tree.annotations);
         if (!typeVar.bound.isErroneous()) {
             //fixup type-parameter bound computed in 'attribTypeVariables'
             typeVar.bound = checkIntersection(tree, tree.bounds);
