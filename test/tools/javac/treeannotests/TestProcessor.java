@@ -203,13 +203,16 @@ public class TestProcessor extends AbstractProcessor {
          * expression <i>name</i>=<i>value</i>.
          */
         String getStringValue(JCExpression e) {
-            if (e.getTag() == JCTree.ASSIGN)  {
+            if (e.hasTag(JCTree.Tag.ASSIGN)) {
                 JCAssign a = (JCAssign) e;
                 JCExpression rhs = a.rhs;
-                if (rhs.getTag() == JCTree.LITERAL) {
+                if (rhs.hasTag(JCTree.Tag.LITERAL)) {
                     JCLiteral l = (JCLiteral) rhs;
                     return (String) l.value;
                 }
+            } else if (e.hasTag(JCTree.Tag.LITERAL)) {
+                JCLiteral l = (JCLiteral) e;
+                return (String) l.value;
             }
             throw new IllegalArgumentException(e.toString());
         }
