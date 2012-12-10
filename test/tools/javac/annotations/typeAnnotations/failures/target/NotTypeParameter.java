@@ -16,7 +16,7 @@ class VoidMethod<@A K> {
 @Target(ElementType.TYPE_USE)
 @interface A { }
 
-class TypeVariable<T> {
+class TypeVariable<@B T> {
   @B T test1() { return null; }
   void test2(@B T p) {}
 }

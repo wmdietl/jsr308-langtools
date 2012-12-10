@@ -48,7 +48,13 @@ class OneAnnotatedB<@B("m") K> { }
 class TwoAnnotatedB<@B("m") K, @B("m") V> { }
 class SecondAnnotatedB<K, @B("m") V extends @B("m") String> { }
 
+class OneAnnotatedC<@C K> { }
+class TwoAnnotatedC<@C K, @C V> { }
+class SecondAnnotatedC<K, @C V extends String> { }
+
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface A { }
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface B { String value(); }
+@Target(ElementType.TYPE_USE)
+@interface C { }

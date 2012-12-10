@@ -2877,7 +2877,7 @@ public class Check {
     }
 
     /** Is the annotation applicable to type annotations? */
-    boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
+    protected boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
         Attribute.Compound atTarget =
             a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
         if (atTarget == null) {
@@ -2897,7 +2897,7 @@ public class Check {
             }
             Attribute.Enum e = (Attribute.Enum) app;
 
-            if (!isTypeParameter && e.value.name == names.TYPE_USE)
+            if (e.value.name == names.TYPE_USE)
                 return true;
             else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
                 return true;
