@@ -672,8 +672,8 @@ public class ClassWriter {
         }
 
         public void write(TypeAnnotation anno, ClassOutputStream out) {
-            write(anno.annotation, out);
             write(anno.position, out);
+            write(anno.annotation, out);
         }
 
         public void write(element_value_pair pair, ClassOutputStream out) {
@@ -714,23 +714,20 @@ public class ClassWriter {
             return null;
         }
 
+        // TODO: Move this to TypeAnnotation to be closer with similar logic?
         private void write(TypeAnnotation.Position p, ClassOutputStream out) {
             out.writeByte(p.type.targetTypeValue());
             switch (p.type) {
             // type cast
-            case TYPECAST:
-            case TYPECAST_COMPONENT:
+            case CAST:
             // instanceof
             case INSTANCEOF:
-            case INSTANCEOF_COMPONENT:
             // new expression
             case NEW:
-            case NEW_COMPONENT:
                 out.writeShort(p.offset);
                 break;
             // local variable
             case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_COMPONENT:
                 int table_length = p.lvarOffset.length;
                 out.writeShort(table_length);
                 for (int i = 0; i < table_length; ++i) {
@@ -742,12 +739,10 @@ public class ClassWriter {
                 break;
             // exception parameter
             case EXCEPTION_PARAMETER:
-                // TODO: how do we separate which of the types it is on?
-                System.out.println("Handle exception parameters! pos: " + p);
+                out.writeByte(p.exception_index);
                 break;
             // method receiver
             case METHOD_RECEIVER:
-            case METHOD_RECEIVER_COMPONENT:
                 // Do nothing
                 break;
             // type parameters
@@ -757,15 +752,12 @@ public class ClassWriter {
                 break;
             // type parameters bounds
             case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
             case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
                 out.writeByte(p.parameter_index);
                 out.writeByte(p.bound_index);
                 break;
             // class extends or implements clause
             case CLASS_EXTENDS:
-            case CLASS_EXTENDS_COMPONENT:
                 out.writeByte(p.type_index);
                 break;
             // throws
@@ -774,22 +766,22 @@ public class ClassWriter {
                 break;
             // method parameter
             case METHOD_PARAMETER:
-            case METHOD_PARAMETER_COMPONENT:
                 out.writeByte(p.parameter_index);
                 break;
-            // method/constructor type argument
-            case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_COMPONENT:
-            case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_COMPONENT:
+            // method/constructor/reference type argument
+            case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+            case METHOD_INVOCATION_TYPE_ARGUMENT:
+            case METHOD_REFERENCE_TYPE_ARGUMENT:
                 out.writeShort(p.offset);
                 out.writeByte(p.type_index);
                 break;
             // We don't need to worry about these
             case METHOD_RETURN:
-            case METHOD_RETURN_COMPONENT:
             case FIELD:
-            case FIELD_COMPONENT:
+                break;
+            // lambda formal parameter
+            case LAMBDA_FORMAL_PARAMETER:
+                out.writeByte(p.parameter_index);
                 break;
             case UNKNOWN:
                 throw new AssertionError("ClassWriter: UNKNOWN target type should never occur!");
@@ -797,10 +789,10 @@ public class ClassWriter {
                 throw new AssertionError("ClassWriter: Unknown target type for position: " + p);
             }
 
-            // Append location data for generics/arrays.
-            if (p.type.hasLocation()) {
-                out.writeShort(p.location.size());
-                for (int i : p.location)
+            { // Append location data for generics/arrays.
+                // TODO: check for overrun?
+                out.writeByte((byte)p.location.size());
+                for (int i : p.getTypePathBinary())
                     out.writeByte((byte)i);
             }
         }

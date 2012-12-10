@@ -27,11 +27,9 @@ package com.sun.tools.classfile;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Set;
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
+import com.sun.tools.classfile.TypeAnnotation.Position.TypePathEntry;
 
 /**
  * See JSR 308 specification, Section 3.
@@ -44,15 +42,15 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetAttribute.*;
 public class TypeAnnotation {
     TypeAnnotation(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         constant_pool = cr.getConstantPool();
-        annotation = new Annotation(cr);
         position = read_position(cr);
+        annotation = new Annotation(cr);
     }
 
     public TypeAnnotation(ConstantPool constant_pool,
             Annotation annotation, Position position) {
         this.constant_pool = constant_pool;
-        this.annotation = annotation;
         this.position = position;
+        this.annotation = annotation;
     }
 
     public int length() {
@@ -73,8 +71,8 @@ public class TypeAnnotation {
     }
 
     public final ConstantPool constant_pool;
-    public final Annotation annotation;
     public final Position position;
+    public final Annotation annotation;
 
     private static Position read_position(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         // Copied from ClassReader
@@ -89,19 +87,15 @@ public class TypeAnnotation {
 
         switch (type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             position.offset = cr.readUnsignedShort();
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
             int table_length = cr.readUnsignedShort();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -114,11 +108,10 @@ public class TypeAnnotation {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
+            position.exception_index = cr.readUnsignedByte();
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -128,15 +121,12 @@ public class TypeAnnotation {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             int in = cr.readUnsignedShort();
             if (in == 0xFFFF)
                 in = -1;
@@ -148,22 +138,22 @@ public class TypeAnnotation {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             position.parameter_index = cr.readUnsignedByte();
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             position.offset = cr.readUnsignedShort();
             position.type_index = cr.readUnsignedByte();
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            position.parameter_index = cr.readUnsignedByte();
             break;
         case UNKNOWN:
             throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
@@ -171,12 +161,12 @@ public class TypeAnnotation {
             throw new AssertionError("TypeAnnotation: Unknown target type: " + type);
         }
 
-        if (type.hasLocation()) {
-            int len = cr.readUnsignedShort();
+        { // Write type path
+            int len = cr.readUnsignedByte();
             List<Integer> loc = new ArrayList<Integer>(len);
-            for (int i = 0; i < len; i++)
+            for (int i = 0; i < len * TypePathEntry.bytesPerEntry; ++i)
                 loc.add(cr.readUnsignedByte());
-            position.location = loc;
+            position.setTypePathFromBinary(loc);
         }
         return position;
     }
@@ -186,19 +176,15 @@ public class TypeAnnotation {
         n += 2; // target_type
         switch (pos.type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             n += 2;
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
             n += 2; // table_length;
             int table_length = pos.lvarOffset.length;
             n += 2 * table_length; // offset
@@ -207,12 +193,10 @@ public class TypeAnnotation {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            // System.out.println("Handle exception parameters!");
+            n += 1; // exception_index
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -222,15 +206,12 @@ public class TypeAnnotation {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             n += 1; // parameter_index
             n += 1; // bound_index
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             n += 2; // type_index
             break;
         // throws
@@ -239,22 +220,22 @@ public class TypeAnnotation {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             n += 1; // parameter_index
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             n += 2; // offset
             n += 1; // type index
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            n += 1; // parameter_index
             break;
         case UNKNOWN:
             throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
@@ -262,9 +243,9 @@ public class TypeAnnotation {
             throw new AssertionError("TypeAnnotation: Unknown target type: " + pos.type);
         }
 
-        if (pos.type.hasLocation()) {
-            n += 2; // length
-            n += 1 * pos.location.size(); // actual array size
+        {
+            n += 1; // length
+            n += TypePathEntry.bytesPerEntry * pos.location.size(); // bytes for actual array
         }
 
         return n;
@@ -272,16 +253,96 @@ public class TypeAnnotation {
 
     // Code duplicated from com.sun.tools.javac.code.TypeAnnotationPosition
     public static class Position {
+        public enum TypePathEntryKind {
+            ARRAY(0),
+            INNER_TYPE(1),
+            WILDCARD(2),
+            TYPE_ARGUMENT(3);
+
+            /*package-visible*/ final int tag;
+
+            private TypePathEntryKind(int tag) {
+                this.tag = tag;
+            }
+        }
+
+        public static class TypePathEntry {
+            /** The fixed number of bytes per TypePathEntry. */
+            public static final int bytesPerEntry = 2;
+
+            private final TypePathEntryKind tag;
+            private final int arg;
+
+            public static final TypePathEntry ARRAY = new TypePathEntry(TypePathEntryKind.ARRAY);
+            public static final TypePathEntry INNER_TYPE = new TypePathEntry(TypePathEntryKind.INNER_TYPE);
+            public static final TypePathEntry WILDCARD = new TypePathEntry(TypePathEntryKind.WILDCARD);
+
+            private TypePathEntry(TypePathEntryKind tag) {
+                if (!(tag == TypePathEntryKind.ARRAY ||
+                        tag == TypePathEntryKind.INNER_TYPE ||
+                        tag == TypePathEntryKind.WILDCARD)) {
+                    throw new AssertionError("Invalid TypePathEntryKind: " + tag);
+                }
+                this.tag = tag;
+                this.arg = 0;
+            }
+
+            public TypePathEntry(TypePathEntryKind tag, int arg) {
+                if (tag != TypePathEntryKind.TYPE_ARGUMENT) {
+                    throw new AssertionError("Invalid TypePathEntryKind: " + tag);
+                }
+                this.tag = tag;
+                this.arg = arg;
+            }
+
+            public static TypePathEntry fromBinary(int tag, int arg) {
+                if (arg != 0 && tag != TypePathEntryKind.TYPE_ARGUMENT.tag) {
+                    throw new AssertionError("Invalid TypePathEntry tag/arg: " + tag + "/" + arg);
+                }
+                switch (tag) {
+                case 0:
+                    return ARRAY;
+                case 1:
+                    return INNER_TYPE;
+                case 2:
+                    return WILDCARD;
+                case 3:
+                    return new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg);
+                default:
+                    throw new AssertionError("Invalid TypePathEntryKind tag: " + tag);
+                }
+            }
+
+            @Override
+            public String toString() {
+                return tag.toString() +
+                        (tag == TypePathEntryKind.TYPE_ARGUMENT ? ("(" + arg + ")") : "");
+            }
+
+            @Override
+            public boolean equals(Object other) {
+                if (! (other instanceof TypePathEntry)) {
+                    return false;
+                }
+                TypePathEntry tpe = (TypePathEntry) other;
+                return this.tag == tpe.tag && this.arg == tpe.arg;
+            }
+        }
 
         public TargetType type = TargetType.UNKNOWN;
 
         // For generic/array types.
-        public List<Integer> location = new ArrayList<Integer>();
+        // TODO: or should we use null? Noone will use this object.
+        public List<TypePathEntry> location = new ArrayList<TypePathEntry>(0);
+
+        // Tree position.
+        public int pos = -1;
 
         // For typecasts, type tests, new (and locals, as start_pc).
+        public boolean isValidOffset = false;
         public int offset = -1;
 
-        // For locals.
+        // For locals. arrays same length
         public int[] lvarOffset = null;
         public int[] lvarLength = null;
         public int[] lvarIndex = null;
@@ -292,8 +353,13 @@ public class TypeAnnotation {
         // For type parameter and method parameter
         public int parameter_index = Integer.MIN_VALUE;
 
-        // For class extends, implements, and throws classes
+        // For class extends, implements, and throws clauses
         public int type_index = Integer.MIN_VALUE;
+
+        // For exception parameters, index into exception table
+        public int exception_index = Integer.MIN_VALUE;
+
+        public Position() {}
 
         @Override
         public String toString() {
@@ -303,20 +369,16 @@ public class TypeAnnotation {
 
             switch (type) {
             // type cast
-            case TYPECAST:
-            case TYPECAST_COMPONENT:
+            case CAST:
             // instanceof
             case INSTANCEOF:
-            case INSTANCEOF_COMPONENT:
             // new expression
             case NEW:
-            case NEW_COMPONENT:
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
             // local variable
             case LOCAL_VARIABLE:
-            case LOCAL_VARIABLE_COMPONENT:
                 if (lvarOffset == null) {
                     sb.append(", lvarOffset is null!");
                     break;
@@ -333,14 +395,8 @@ public class TypeAnnotation {
                 }
                 sb.append("}");
                 break;
-            // exception parameter
-            case EXCEPTION_PARAMETER:
-                // TODO: how do we separate which of the types it is on?
-                // System.out.println("Handle exception parameters!");
-                break;
             // method receiver
             case METHOD_RECEIVER:
-            case METHOD_RECEIVER_COMPONENT:
                 // Do nothing
                 break;
             // type parameter
@@ -351,9 +407,7 @@ public class TypeAnnotation {
                 break;
             // type parameter bound
             case CLASS_TYPE_PARAMETER_BOUND:
-            case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
             case METHOD_TYPE_PARAMETER_BOUND:
-            case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 sb.append(", bound_index = ");
@@ -361,7 +415,6 @@ public class TypeAnnotation {
                 break;
             // class extends or implements clause
             case CLASS_EXTENDS:
-            case CLASS_EXTENDS_COMPONENT:
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
@@ -370,17 +423,20 @@ public class TypeAnnotation {
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                sb.append(", exception_index = ");
+                sb.append(exception_index);
+                break;
             // method parameter
             case METHOD_PARAMETER:
-            case METHOD_PARAMETER_COMPONENT:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 break;
-            // method/constructor type argument
-            case NEW_TYPE_ARGUMENT:
-            case NEW_TYPE_ARGUMENT_COMPONENT:
-            case METHOD_TYPE_ARGUMENT:
-            case METHOD_TYPE_ARGUMENT_COMPONENT:
+            // method/constructor/reference type argument
+            case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+            case METHOD_INVOCATION_TYPE_ARGUMENT:
+            case METHOD_REFERENCE_TYPE_ARGUMENT:
                 sb.append(", offset = ");
                 sb.append(offset);
                 sb.append(", type_index = ");
@@ -388,214 +444,168 @@ public class TypeAnnotation {
                 break;
             // We don't need to worry about these
             case METHOD_RETURN:
-            case METHOD_RETURN_COMPONENT:
             case FIELD:
-            case FIELD_COMPONENT:
+                break;
+            // lambda formal parameter
+            case LAMBDA_FORMAL_PARAMETER:
+                // TODO: also needs an offset?
+                sb.append(", param_index = ");
+                sb.append(parameter_index);
                 break;
             case UNKNOWN:
-                throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
+                sb.append(", position UNKNOWN!");
+                break;
             default:
-                throw new AssertionError("TypeAnnotation: Unknown target type: " + type);
+                throw new AssertionError("Unknown target type: " + type);
             }
 
             // Append location data for generics/arrays.
-            if (type.hasLocation()) {
+            if (!location.isEmpty()) {
                 sb.append(", location = (");
                 sb.append(location);
                 sb.append(")");
             }
 
+            sb.append(", pos = ");
+            sb.append(pos);
+
             sb.append(']');
             return sb.toString();
+        }
+
+        /**
+         * Indicates whether the target tree of the annotation has been optimized
+         * away from classfile or not.
+         * @return true if the target has not been optimized away
+         */
+        public boolean emitToClassfile() {
+            return !type.isLocal() || isValidOffset;
+        }
+
+        /**
+         * Decode the binary representation for a type path and set
+         * the {@code location} field.
+         *
+         * @param list The bytecode representation of the type path.
+         */
+        public void setTypePathFromBinary(List<Integer> list) {
+            List<TypePathEntry> loc = new ArrayList<TypePathEntry>(list.size() / TypePathEntry.bytesPerEntry);
+            int idx = 0;
+            while (idx < list.size()) {
+                if (idx + 1 == list.size()) {
+                    throw new AssertionError("Could not decode type path: " + list);
+                }
+                loc.add(TypePathEntry.fromBinary(list.get(idx), list.get(idx + 1)));
+                idx += 2;
+            }
+            this.location = loc;
+        }
+
+        public List<Integer> getTypePathBinary() {
+            List<Integer> loc = new ArrayList<Integer>(location.size() * TypePathEntry.bytesPerEntry);
+            for (TypePathEntry tpe : location) {
+                loc.add(tpe.tag.tag);
+                loc.add(tpe.arg);
+            }
+            return loc;
         }
     }
 
     // Code duplicated from com.sun.tools.javac.code.TargetType
-    // Except for the IsLocal flag, which can be removed here.
+    // The IsLocal flag could be removed here.
     public enum TargetType {
-
-        // Some target types are commented out, because Java doesn't permit such
-        // targets.  They are included here to confirm that their omission is
-        // intentional and not accidental.
-
-        // The term "component" is used for type arguments, nested arrays, and
-        // outer class types, whichever are legal in the current context.
-
         /** For annotations on a class type parameter declaration. */
-        CLASS_TYPE_PARAMETER(0x00, HasParameter),
-
-        // Invalid location.
-        // CLASS_TYPE_PARAMETER_COMPONENT(0x01, HasLocation, HasParameter),
+        CLASS_TYPE_PARAMETER(0x00),
 
         /** For annotations on a method type parameter declaration. */
-        METHOD_TYPE_PARAMETER(0x02, HasParameter),
-
-        // Invalid location.
-        // METHOD_TYPE_PARAMETER_COMPONENT(0x03, HasLocation, HasParameter),
+        METHOD_TYPE_PARAMETER(0x02),
 
         /** For annotations on the type of an "extends" or "implements" clause. */
         CLASS_EXTENDS(0x10),
 
-        /** For annotations on the component of an "extends" or "implements" clause. */
-        CLASS_EXTENDS_COMPONENT(0x11, HasLocation),
-
         /** For annotations on a bound of a type parameter of a class. */
-        CLASS_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
-
-        /**
-         * For annotations on a component of a bound of a type
-         * parameter of a class.
-         */
-        CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
+        CLASS_TYPE_PARAMETER_BOUND(0x12),
 
         /** For annotations on a bound of a type parameter of a method. */
-        METHOD_TYPE_PARAMETER_BOUND(0x14, HasBound, HasParameter),
-
-        /**
-         * For annotations on a component of a bound of a type
-         * parameter of a method.
-         */
-        METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x15, HasBound, HasLocation, HasParameter),
+        METHOD_TYPE_PARAMETER_BOUND(0x14),
 
         /** For annotations on a field. */
         FIELD(0x16),
 
-        /** For annotations on a component of a field. */
-        FIELD_COMPONENT(0x17, HasLocation),
-
         /** For annotations on a method return type. */
         METHOD_RETURN(0x18),
-
-        /** For annotations on a component of a method return type. */
-        METHOD_RETURN_COMPONENT(0x19, HasLocation),
 
         /** For annotations on the method receiver. */
         METHOD_RECEIVER(0x1A),
 
-        /** For annotations on a component of the method receiver. */
-        METHOD_RECEIVER_COMPONENT(0x1B, HasLocation),
-
         /** For annotations on a method parameter. */
         METHOD_PARAMETER(0x1C),
-
-        /** For annotations on a component of a method parameter. */
-        METHOD_PARAMETER_COMPONENT(0x1D, HasLocation),
 
         /** For annotations on a throws clause in a method declaration. */
         THROWS(0x1E),
 
-        // Invalid location.
-        // THROWS_COMPONENT(0x1F, HasLocation),
-
         /** For annotations on a local variable. */
-        LOCAL_VARIABLE(0x80),
-
-        /** For annotations on a component of a local variable. */
-        LOCAL_VARIABLE_COMPONENT(0x81, HasLocation),
+        LOCAL_VARIABLE(0x80, true),
 
         /** For annotations on a resource variable. */
-        RESOURCE_VARIABLE(0x82),
-
-        /** For annotations on a component of a resource variable. */
-        RESOURCE_VARIABLE_COMPONENT(0x83, HasLocation),
+        RESOURCE_VARIABLE(0x82, true),
 
         /** For annotations on an exception parameter. */
-        EXCEPTION_PARAMETER(0x84),
-
-        // Invalid location.
-        // EXCEPTION_PARAMETER_COMPONENT(0x85, HasLocation),
+        EXCEPTION_PARAMETER(0x84, true),
 
         /** For annotations on a typecast. */
-        TYPECAST(0x86),
-
-        /** For annotations on a component of a typecast. */
-        TYPECAST_COMPONENT(0x87, HasLocation),
+        CAST(0x86, true),
 
         /** For annotations on a type test. */
-        INSTANCEOF(0x88),
-
-        /** For annotations on a component of a type test. */
-        INSTANCEOF_COMPONENT(0x89, HasLocation),
+        INSTANCEOF(0x88, true),
 
         /** For annotations on an object creation expression. */
-        NEW(0x8A),
-
-        /** For annotations on a component of an object creation expression. */
-        NEW_COMPONENT(0x8B, HasLocation),
+        NEW(0x8A, true),
 
         /** For annotations on a type argument of an object creation expression. */
-        NEW_TYPE_ARGUMENT(0x8C),
-
-        /** For annotations on the component of a type argument of an object creation expression. */
-        NEW_TYPE_ARGUMENT_COMPONENT(0x8D, HasLocation),
+        CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(0x8C, true),
 
         /** For annotations on a type argument of a method call. */
-        METHOD_TYPE_ARGUMENT(0x8E),
+        METHOD_INVOCATION_TYPE_ARGUMENT(0x8E, true),
 
-        /** For annotations on the component of a type argument of a method call. */
-        METHOD_TYPE_ARGUMENT_COMPONENT(0x8F, HasLocation),
+        /** For annotations on a lambda parameter type. */
+        LAMBDA_FORMAL_PARAMETER(0x90, true),
+
+        /** For annotations on a type argument of a method reference. */
+        METHOD_REFERENCE_TYPE_ARGUMENT(0x92, true),
 
         /** For annotations with an unknown target. */
         UNKNOWN(0xFFFF);
 
-        private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x9A;
+        private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x92;
 
         private final int targetTypeValue;
-        private Set<TargetAttribute> flags;
+        private final boolean isLocal;
 
-        TargetType(int targetTypeValue, TargetAttribute... attrs) {
+        private TargetType(int targetTypeValue) {
+            this(targetTypeValue, false);
+        }
+
+        private TargetType(int targetTypeValue, boolean isLocal) {
             if (targetTypeValue < Character.MIN_VALUE
-                || targetTypeValue > Character.MAX_VALUE)
-                throw new AssertionError("TypeAnnotation: Attribute type value needs to be a char: " + targetTypeValue);
+                    || targetTypeValue > Character.MAX_VALUE)
+                    // TODO: Is a u2 a Short or a Character? jvm.ClassReader has a nextChar method,
+                    // but classfile.ClassReader has a readUnsignedShort method.
+                    // Short is signed, char is unsigned -> use char.
+                    throw new AssertionError("Attribute type value needs to be a char: " + targetTypeValue);
             this.targetTypeValue = (char)targetTypeValue;
-            this.flags = EnumSet.noneOf(TargetAttribute.class);
-            for (TargetAttribute attr : attrs)
-                this.flags.add(attr);
+            this.isLocal = isLocal;
         }
 
         /**
          * Returns whether or not this TargetType represents an annotation whose
-         * target is an inner type of a generic or array type.
+         * target is exclusively a tree in a method body
          *
-         * @return true if this TargetType represents an annotation on an inner
-         *         type, false otherwise
+         * Note: wildcard bound targets could target a local tree and a class
+         * member declaration signature tree
          */
-        public boolean hasLocation() {
-            return flags.contains(HasLocation);
-        }
-
-        public TargetType getGenericComplement() {
-            if (hasLocation())
-                return this;
-            else {
-                // TODO: don't call with unknown!
-                //if (((char)targetTypeValue()) == ((char)UNKNOWN.targetTypeValue))
-                //    return UNKNOWN;
-
-                return fromTargetTypeValue(targetTypeValue() + 1);
-            }
-        }
-
-        /**
-         * Returns whether or not this TargetType represents an annotation whose
-         * target has a parameter index.
-         *
-         * @return true if this TargetType has a parameter index,
-         *         false otherwise
-         */
-        public boolean hasParameter() {
-            return flags.contains(HasParameter);
-        }
-
-        /**
-         * Returns whether or not this TargetType represents an annotation whose
-         * target is a type parameter bound.
-         *
-         * @return true if this TargetType represents an type parameter bound
-         *         annotation, false otherwise
-         */
-        public boolean hasBound() {
-            return flags.contains(HasBound);
+        public boolean isLocal() {
+            return isLocal;
         }
 
         public int targetTypeValue() {
@@ -607,22 +617,22 @@ public class TypeAnnotation {
         private static TargetType[] buildTargets() {
             TargetType[] targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
             TargetType[] alltargets = values();
-            for (TargetType target : alltargets)
+            for (TargetType target : alltargets) {
                 if (target.targetTypeValue != UNKNOWN.targetTypeValue)
                     targets[target.targetTypeValue] = target;
-            for (int i = 0; i <= MAXIMUM_TARGET_TYPE_VALUE; ++i)
+            }
+            for (int i = 0; i <= MAXIMUM_TARGET_TYPE_VALUE; ++i) {
                 if (targets[i] == null)
                     targets[i] = UNKNOWN;
+            }
             return targets;
         }
 
         public static boolean isValidTargetTypeValue(int tag) {
             if (targets == null)
                 targets = buildTargets();
-
             if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
                 return true;
-
             return (tag >= 0 && tag < targets.length);
         }
 
@@ -634,12 +644,8 @@ public class TypeAnnotation {
                 return UNKNOWN;
 
             if (tag < 0 || tag >= targets.length)
-                throw new IllegalArgumentException("TypeAnnotation: Unknown TargetType: " + tag);
+                throw new AssertionError("Unknown TargetType: " + tag);
             return targets[tag];
         }
-    }
-
-    static enum TargetAttribute {
-        HasLocation, HasParameter, HasBound;
     }
 }

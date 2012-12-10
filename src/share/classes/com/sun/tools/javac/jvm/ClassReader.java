@@ -1416,8 +1416,8 @@ public class ClassReader implements Completer {
     }
 
     TypeAnnotationProxy readTypeAnnotation() {
-        CompoundAnnotationProxy proxy = readCompoundAnnotation();
         TypeAnnotationPosition position = readPosition();
+        CompoundAnnotationProxy proxy = readCompoundAnnotation();
 
         return new TypeAnnotationProxy(proxy, position);
     }
@@ -1435,19 +1435,15 @@ public class ClassReader implements Completer {
 
         switch (type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             position.offset = nextChar();
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
             int table_length = nextChar();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -1461,12 +1457,10 @@ public class ClassReader implements Completer {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            // System.out.println("Handle exception parameters!");
+            position.exception_index = nextByte();
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -1476,15 +1470,12 @@ public class ClassReader implements Completer {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             position.type_index = nextChar();
             break;
         // throws
@@ -1493,22 +1484,22 @@ public class ClassReader implements Completer {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             position.parameter_index = nextByte();
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             position.offset = nextChar();
             position.type_index = nextByte();
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            position.parameter_index = nextByte();
             break;
         case UNKNOWN:
             throw new AssertionError("jvm.ClassReader: UNKNOWN target type should never occur!");
@@ -1516,12 +1507,12 @@ public class ClassReader implements Completer {
             throw new AssertionError("jvm.ClassReader: Unknown target type for position: " + position);
         }
 
-        if (type.hasLocation()) {
-            int len = nextChar();
+        { // See whether there is location info and read it
+            int len = nextByte();
             ListBuffer<Integer> loc = ListBuffer.lb();
-            for (int i = 0; i < len; i++)
+            for (int i = 0; i < len * TypeAnnotationPosition.TypePathEntry.bytesPerEntry; ++i)
                 loc = loc.append((int)nextByte());
-            position.location = loc.toList();
+            position.setTypePathFromBinary(loc.toList());
         }
 
         return position;

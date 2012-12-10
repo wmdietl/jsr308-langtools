@@ -956,27 +956,23 @@ public class ClassWriter extends ClassFile {
     }
 
     void writeTypeAnnotation(Attribute.TypeCompound c) {
-        writeCompoundAttribute(c);
         writePosition(c.position);
+        writeCompoundAttribute(c);
     }
 
     void writePosition(TypeAnnotationPosition p) {
         databuf.appendChar(p.type.targetTypeValue());
         switch (p.type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             databuf.appendChar(p.offset);
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
             databuf.appendChar(p.lvarOffset.length);  // for table length
             for (int i = 0; i < p.lvarOffset.length; ++i) {
                 databuf.appendChar(p.lvarOffset[i]);
@@ -986,12 +982,10 @@ public class ClassWriter extends ClassFile {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters! pos: " + p);
+            databuf.appendByte(p.exception_index);
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -1001,15 +995,12 @@ public class ClassWriter extends ClassFile {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             databuf.appendByte(p.parameter_index);
             databuf.appendByte(p.bound_index);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             databuf.appendChar(p.type_index);
             break;
         // throws
@@ -1018,22 +1009,22 @@ public class ClassWriter extends ClassFile {
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             databuf.appendByte(p.parameter_index);
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             databuf.appendChar(p.offset);
             databuf.appendByte(p.type_index);
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            databuf.appendByte(p.parameter_index);
             break;
         case UNKNOWN:
             throw new AssertionError("jvm.ClassWriter: UNKNOWN target type should never occur!");
@@ -1041,10 +1032,10 @@ public class ClassWriter extends ClassFile {
             throw new AssertionError("jvm.ClassWriter: Unknown target type for position: " + p);
         }
 
-        // Append location data for generics/arrays.
-        if (p.type.hasLocation()) {
-            databuf.appendChar(p.location.size());
-            for (int i : p.location)
+        { // Append location data for generics/arrays.
+            databuf.appendByte(p.location.size());
+            List<Integer> loc = p.getTypePathBinary();
+            for (int i : loc)
                 databuf.appendByte((byte)i);
         }
     }

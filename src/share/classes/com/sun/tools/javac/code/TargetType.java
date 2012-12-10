@@ -25,10 +25,7 @@
 
 package com.sun.tools.javac.code;
 
-import java.util.EnumSet;
-import java.util.Set;
-
-import static com.sun.tools.javac.code.TargetType.TargetAttribute.*;
+import com.sun.tools.javac.util.Assert;
 
 /**
  * Describes the type of program element an extended annotation (or extended
@@ -46,194 +43,87 @@ import static com.sun.tools.javac.code.TargetType.TargetAttribute.*;
  */
 // Code duplicated in com.sun.tools.classfile.TypeAnnotation.TargetType
 public enum TargetType {
-
-    // Some target types are commented out, because Java doesn't permit such
-    // targets.  They are included here to confirm that their omission is
-    // intentional and not accidental.
-
-    // The term "component" is used for type arguments, nested arrays, and
-    // outer class types, whichever are legal in the current context.
-
     /** For annotations on a class type parameter declaration. */
-    CLASS_TYPE_PARAMETER(0x00, HasParameter),
-
-    // Invalid location.
-    // CLASS_TYPE_PARAMETER_COMPONENT(0x01, HasLocation, HasParameter),
+    CLASS_TYPE_PARAMETER(0x00),
 
     /** For annotations on a method type parameter declaration. */
-    METHOD_TYPE_PARAMETER(0x02, HasParameter),
-
-    // Invalid location.
-    // METHOD_TYPE_PARAMETER_COMPONENT(0x03, HasLocation, HasParameter),
+    METHOD_TYPE_PARAMETER(0x02),
 
     /** For annotations on the type of an "extends" or "implements" clause. */
     CLASS_EXTENDS(0x10),
 
-    /** For annotations on the component of an "extends" or "implements" clause. */
-    CLASS_EXTENDS_COMPONENT(0x11, HasLocation),
-
     /** For annotations on a bound of a type parameter of a class. */
-    CLASS_TYPE_PARAMETER_BOUND(0x12, HasBound, HasParameter),
-
-    /**
-     * For annotations on a component of a bound of a type
-     * parameter of a class.
-     */
-    CLASS_TYPE_PARAMETER_BOUND_COMPONENT(0x13, HasBound, HasLocation, HasParameter),
+    CLASS_TYPE_PARAMETER_BOUND(0x12),
 
     /** For annotations on a bound of a type parameter of a method. */
-    METHOD_TYPE_PARAMETER_BOUND(0x14, HasBound, HasParameter),
-
-    /**
-     * For annotations on a component of a bound of a type
-     * parameter of a method.
-     */
-    METHOD_TYPE_PARAMETER_BOUND_COMPONENT(0x15, HasBound, HasLocation, HasParameter),
+    METHOD_TYPE_PARAMETER_BOUND(0x14),
 
     /** For annotations on a field. */
     FIELD(0x16),
 
-    /** For annotations on a component of a field. */
-    FIELD_COMPONENT(0x17, HasLocation),
-
     /** For annotations on a method return type. */
     METHOD_RETURN(0x18),
-
-    /** For annotations on a component of a method return type. */
-    METHOD_RETURN_COMPONENT(0x19, HasLocation),
 
     /** For annotations on the method receiver. */
     METHOD_RECEIVER(0x1A),
 
-    /** For annotations on a component of the method receiver. */
-    METHOD_RECEIVER_COMPONENT(0x1B, HasLocation),
-
     /** For annotations on a method parameter. */
     METHOD_PARAMETER(0x1C),
-
-    /** For annotations on a component of a method parameter. */
-    METHOD_PARAMETER_COMPONENT(0x1D, HasLocation),
 
     /** For annotations on a throws clause in a method declaration. */
     THROWS(0x1E),
 
-    // Invalid location.
-    // THROWS_COMPONENT(0x1F, HasLocation),
-
     /** For annotations on a local variable. */
-    LOCAL_VARIABLE(0x80, IsLocal),
-
-    /** For annotations on a component of a local variable. */
-    LOCAL_VARIABLE_COMPONENT(0x81, HasLocation, IsLocal),
+    LOCAL_VARIABLE(0x80, true),
 
     /** For annotations on a resource variable. */
-    RESOURCE_VARIABLE(0x82),
-
-    /** For annotations on a component of a resource variable. */
-    RESOURCE_VARIABLE_COMPONENT(0x83, HasLocation),
+    RESOURCE_VARIABLE(0x82, true),
 
     /** For annotations on an exception parameter. */
-    EXCEPTION_PARAMETER(0x84, IsLocal),
-
-    // Invalid location.
-    // EXCEPTION_PARAMETER_COMPONENT(0x85, HasLocation),
+    EXCEPTION_PARAMETER(0x84, true),
 
     /** For annotations on a typecast. */
-    TYPECAST(0x86, IsLocal),
-
-    /** For annotations on a component of a typecast. */
-    TYPECAST_COMPONENT(0x87, HasLocation, IsLocal),
+    CAST(0x86, true),
 
     /** For annotations on a type test. */
-    INSTANCEOF(0x88, IsLocal),
-
-    /** For annotations on a component of a type test. */
-    INSTANCEOF_COMPONENT(0x89, HasLocation, IsLocal),
+    INSTANCEOF(0x88, true),
 
     /** For annotations on an object creation expression. */
-    NEW(0x8A, IsLocal),
-
-    /** For annotations on a component of an object creation expression. */
-    NEW_COMPONENT(0x8B, HasLocation, IsLocal),
+    NEW(0x8A, true),
 
     /** For annotations on a type argument of an object creation expression. */
-    NEW_TYPE_ARGUMENT(0x8C, IsLocal),
-
-    /** For annotations on the component of a type argument of an object creation expression. */
-    NEW_TYPE_ARGUMENT_COMPONENT(0x8D, HasLocation, IsLocal),
+    CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(0x8C, true),
 
     /** For annotations on a type argument of a method call. */
-    METHOD_TYPE_ARGUMENT(0x8E, IsLocal),
+    METHOD_INVOCATION_TYPE_ARGUMENT(0x8E, true),
 
-    /** For annotations on the component of a type argument of a method call. */
-    METHOD_TYPE_ARGUMENT_COMPONENT(0x8F, HasLocation, IsLocal),
+    /** For annotations on a lambda parameter type. */
+    LAMBDA_FORMAL_PARAMETER(0x90, true),
+
+    /** For annotations on a type argument of a method reference. */
+    METHOD_REFERENCE_TYPE_ARGUMENT(0x92, true),
 
     /** For annotations with an unknown target. */
     UNKNOWN(0xFFFF);
 
-    private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x9A;
+    private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x92;
 
     private final int targetTypeValue;
-    private Set<TargetAttribute> flags;
+    private final boolean isLocal;
 
-    TargetType(int targetTypeValue, TargetAttribute... attributes) {
+    private TargetType(int targetTypeValue) {
+        this(targetTypeValue, false);
+    }
+
+    private TargetType(int targetTypeValue, boolean isLocal) {
         if (targetTypeValue < Character.MIN_VALUE
                 || targetTypeValue > Character.MAX_VALUE)
                 // TODO: Is a u2 a Short or a Character? jvm.ClassReader has a nextChar method,
                 // but classfile.ClassReader has a readUnsignedShort method.
                 // Short is signed, char is unsigned -> use char.
-                throw new AssertionError("Attribute type value needs to be a char: " + targetTypeValue);
+                Assert.error("Attribute type value needs to be a char: " + targetTypeValue);
         this.targetTypeValue = (char)targetTypeValue;
-        flags = EnumSet.noneOf(TargetAttribute.class);
-        for (TargetAttribute attr : attributes)
-            flags.add(attr);
-    }
-
-    /**
-     * Returns whether or not this TargetType represents an annotation whose
-     * target is an inner type of a generic or array type.
-     *
-     * @return true if this TargetType represents an annotation on an inner
-     *         type, false otherwise
-     */
-    public boolean hasLocation() {
-        return flags.contains(HasLocation);
-    }
-
-    public TargetType getGenericComplement() {
-        if (hasLocation())
-            return this;
-        else {
-            // TODO: don't call with unknown!
-            if (((char)targetTypeValue()) == ((char)UNKNOWN.targetTypeValue)) {
-                // System.err.println("TargetType.getGenericComplement called with UNKNOWN!");
-                return UNKNOWN;
-            }
-
-            return fromTargetTypeValue(targetTypeValue() + 1);
-        }
-    }
-
-    /**
-     * Returns whether or not this TargetType represents an annotation whose
-     * target has a parameter index.
-     *
-     * @return true if this TargetType has a parameter index,
-     *         false otherwise
-     */
-    public boolean hasParameter() {
-        return flags.contains(HasParameter);
-    }
-
-    /**
-     * Returns whether or not this TargetType represents an annotation whose
-     * target is a type parameter bound.
-     *
-     * @return true if this TargetType represents an type parameter bound
-     *         annotation, false otherwise
-     */
-    public boolean hasBound() {
-        return flags.contains(HasBound);
+        this.isLocal = isLocal;
     }
 
     /**
@@ -244,7 +134,7 @@ public enum TargetType {
      * member declaration signature tree
      */
     public boolean isLocal() {
-        return flags.contains(IsLocal);
+        return isLocal;
     }
 
     public int targetTypeValue() {
@@ -270,10 +160,8 @@ public enum TargetType {
     public static boolean isValidTargetTypeValue(int tag) {
         if (targets == null)
             targets = buildTargets();
-
         if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
             return true;
-
         return (tag >= 0 && tag < targets.length);
     }
 
@@ -285,11 +173,7 @@ public enum TargetType {
             return UNKNOWN;
 
         if (tag < 0 || tag >= targets.length)
-            throw new IllegalArgumentException("Unknown TargetType: " + tag);
+            Assert.error("Unknown TargetType: " + tag);
         return targets[tag];
-    }
-
-    static enum TargetAttribute {
-        HasLocation, HasParameter, HasBound, IsLocal;
     }
 }
