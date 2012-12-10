@@ -2271,21 +2271,9 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCAnnotation> annotations;
         public JCExpression underlyingType;
 
-        /* True, iff the annotation should be associated with the underlying type.
-         * False, iff the annotation should be associated with the outer-most component
-         * of the underlying type.
-         * Usually, this should be true.
-         * In a nested type "@A java.lang.Outer. @B Inner" we have two JCAnnotatedTypes:
-         * @A with underlying type "java.lang.Outer.@B Inner" and onRightType false;
-         * @B with underlying type "java.lang.Outer.Inner" and onRightType true.
-         */
-        public boolean onRightType;
-
-        protected JCAnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType,
-                boolean onRightType) {
+        protected JCAnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType) {
             this.annotations = annotations;
             this.underlyingType = underlyingType;
-            this.onRightType = onRightType;
         }
         @Override
         public void accept(Visitor v) { v.visitAnnotatedType(this); }

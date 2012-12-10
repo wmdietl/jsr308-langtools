@@ -3647,6 +3647,8 @@ public class JavacParser implements Parser {
      * 
      * The innermost/outermost naming is a bit confusing, it's more the
      * leftmost type.
+     *
+     * TODO: update comments above.
      */
     private JCExpression insertAnnotationsToMostInner(
             JCExpression type, List<JCAnnotation> annos,
@@ -3661,12 +3663,16 @@ public class JavacParser implements Parser {
 
         if (createNewLevel) {
             mostInnerType = to(F.at(token.pos).TypeArray(mostInnerType));
+        } else {
+            while (TreeInfo.typeIn(mostInnerType).hasTag(SELECT)) {
+                mostInnerType = ((JCFieldAccess) TreeInfo.typeIn(mostInnerType)).getExpression();
+            }
         }
 
         if (annos.nonEmpty()) {
             // If createNewLevel is true, the annotations are already on the right type.
             // Otherwise, they might not be and will need to get adjustments.
-            mostInnerType = F.at(annos.head.pos).AnnotatedType(annos, mostInnerType, createNewLevel);
+            mostInnerType = F.at(annos.head.pos).AnnotatedType(annos, mostInnerType/*, createNewLevel*/);
         }
 
         if (mostInnerArrayType == null) {

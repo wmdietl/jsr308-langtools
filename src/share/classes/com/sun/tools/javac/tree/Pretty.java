@@ -1258,9 +1258,7 @@ public class Pretty extends JCTree.Visitor {
                 JCAnnotatedType atype = (JCAnnotatedType) elem;
                 elem = atype.underlyingType;
                 if (!elem.hasTag(TYPEARRAY)) break;
-                if (atype.onRightType) {
-                    printTypeAnnotations(atype.annotations);
-                }
+                printTypeAnnotations(atype.annotations);
             }
             print("[]");
             if (!elem.hasTag(TYPEARRAY)) break;
@@ -1366,8 +1364,7 @@ public class Pretty extends JCTree.Visitor {
 
     public void visitAnnotatedType(JCAnnotatedType tree) {
         try {
-            if (tree.onRightType &&
-                    tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT) {
+            if (tree.underlyingType.getKind() == JCTree.Kind.MEMBER_SELECT) {
                 JCFieldAccess access = (JCFieldAccess) tree.underlyingType;
                 printExpr(access.selected, TreeInfo.postfixPrec);
                 print(".");

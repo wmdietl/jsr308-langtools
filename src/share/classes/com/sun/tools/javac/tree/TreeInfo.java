@@ -419,8 +419,7 @@ public class TreeInfo {
                 JCAnnotatedType node = (JCAnnotatedType) tree;
                 if (node.annotations.nonEmpty()) {
                     if (node.underlyingType.hasTag(TYPEARRAY) ||
-                            (node.underlyingType.hasTag(SELECT) &&
-                            node.onRightType)) {
+                            node.underlyingType.hasTag(SELECT)) {
                         return getStartPos(node.underlyingType);
                     } else {
                         return getStartPos(node.annotations.head);

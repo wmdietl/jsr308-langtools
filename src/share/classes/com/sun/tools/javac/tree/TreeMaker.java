@@ -524,12 +524,7 @@ public class TreeMaker implements JCTree.Factory {
     }
 
     public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType) {
-        return this.AnnotatedType(annotations, underlyingType, true);
-    }
-
-    public JCAnnotatedType AnnotatedType(List<JCAnnotation> annotations, JCExpression underlyingType,
-            boolean onRightType) {
-        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType, onRightType);
+        JCAnnotatedType tree = new JCAnnotatedType(annotations, underlyingType);
         tree.pos = pos;
         return tree;
     }
@@ -881,7 +876,6 @@ public class TreeMaker implements JCTree.Factory {
      */
     public List<JCTypeParameter> TypeParams(List<Type> typarams) {
         ListBuffer<JCTypeParameter> tparams = new ListBuffer<JCTypeParameter>();
-        int i = 0;
         for (List<Type> l = typarams; l.nonEmpty(); l = l.tail)
             tparams.append(TypeParam(l.head.tsym.name, (TypeVar)l.head));
         return tparams.toList();
