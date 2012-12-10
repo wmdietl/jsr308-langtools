@@ -43,12 +43,12 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0 }, paramIndex = 0)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 3, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1 }, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0 }, paramIndex = 0)
     })
     public String methodParamAsParametrized() {
         return "void test(@TA Map<@TB String, @TC List<@TD String>> a) { }";
@@ -56,24 +56,24 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0, 0, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0, 0, 0, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TI", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0, 0, 1 }, paramIndex = 0),
-        @TADescription(annotation = "TJ", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0, 0, 1, 0 }, paramIndex = 0)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 3, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 3, 0, 2, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1 }, paramIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0, 2, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0, 2, 0, 3, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0, 2, 0, 3, 0, 2, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0, 2, 0, 3, 1 }, paramIndex = 0),
+        @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0, 2, 0, 3, 1, 2, 0 }, paramIndex = 0)
     })
     public String methodParamAsWildcard() {
         return "void test(@TA Map<@TB ? extends @TC String," +
@@ -83,10 +83,10 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 1)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0 }, paramIndex = 1),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsArray() {
         return "void test(Object b, @TC String @TA [] @TB [] a) { }";
@@ -94,10 +94,10 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 1)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0 }, paramIndex = 1),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsVararg() {
         return "void test(Object b, @TC String @TA [] @TB ... a) { }";
@@ -105,13 +105,13 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 1)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0 }, paramIndex = 1),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsFQVararg() {
-        return "void test(Object b, @TC java.lang.String @TA [] @TB ... a) { }";
+        return "void test(Object b, java.lang.@TC String @TA [] @TB ... a) { }";
     }
 
     @TADescriptions({})
@@ -137,12 +137,12 @@ public class MethodParameters {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER_COMPONENT,
-                genericLocation = { 1, 0 }, paramIndex = 0)
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+                genericLocation = { 3, 0 }, paramIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1 }, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = { 3, 1, 3, 0 }, paramIndex = 0)
     })
     public String interfacemethodParamAsParametrized() {
         return "interface Test { void test(@TA Map<@TB String, @TC List<@TD String>> a); }";

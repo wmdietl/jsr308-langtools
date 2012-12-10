@@ -41,10 +41,10 @@ public class ClassExtends {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CLASS_EXTENDS_COMPONENT, typeIndex = -1,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
-                genericLocation  = { 1 })
+        @TADescription(annotation = "TA", type = CLASS_EXTENDS, typeIndex = -1,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TB", type = CLASS_EXTENDS, typeIndex = 1,
+                genericLocation  = { 3, 1 })
     })
     public String regularClassExtendsParametrized() {
         return "class Test extends HashMap<@TA String, String> implements Cloneable, Map<String, @TB String>{ } ";
@@ -60,10 +60,10 @@ public class ClassExtends {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CLASS_EXTENDS_COMPONENT, typeIndex = -1,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
-                genericLocation  = { 1 })
+        @TADescription(annotation = "TA", type = CLASS_EXTENDS, typeIndex = -1,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TB", type = CLASS_EXTENDS, typeIndex = 1,
+                genericLocation  = { 3, 1 })
     })
     public String abstractClassExtendsParametrized() {
         return "abstract class Test extends HashMap<@TA String, String> implements Cloneable, Map<String, @TB String>{ } ";
@@ -74,8 +74,8 @@ public class ClassExtends {
         return "interface Test extends Cloneable, @TB Runnable { }";
     }
 
-    @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
-            genericLocation  = { 1 })
+    @TADescription(annotation = "TB", type = CLASS_EXTENDS, typeIndex = 1,
+            genericLocation  = { 3, 1 })
     public String regularInterfaceExtendsParametrized() {
         return "interface Test extends Cloneable, Map<String, @TB String>{ } ";
     }
@@ -85,8 +85,8 @@ public class ClassExtends {
         return "enum Test implements Cloneable, @TB Runnable { TEST; public void run() { } }";
     }
 
-    @TADescription(annotation = "TB", type = CLASS_EXTENDS_COMPONENT, typeIndex = 1,
-            genericLocation  = { 0 })
+    @TADescription(annotation = "TB", type = CLASS_EXTENDS, typeIndex = 1,
+            genericLocation  = { 3, 0 })
     public String regularEnumExtendsParametrized() {
         return
             "enum Test implements Cloneable, Comparator<@TB String> { TEST;  "

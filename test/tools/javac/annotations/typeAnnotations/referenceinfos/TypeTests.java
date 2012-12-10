@@ -38,10 +38,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectArray() {
         return "Object returnObjectArray() { return null instanceof @TC String @TA [] @TB []; }";
@@ -51,10 +51,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnPrimArray() {
         return "Object returnPrimArray() { return null instanceof @TC int @TA [] @TB []; }";
@@ -70,10 +70,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectArray() {
         return "void initObjectArray() { Object a = null instanceof @TC String @TA [] @TB []; }";
@@ -83,10 +83,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initPrimArray() {
         return "void initPrimArray() { Object a = null instanceof @TC int @TA [] @TB []; }";
@@ -102,10 +102,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectArray() {
         return "void eqtestObjectArray() { if (true == (null instanceof @TC String @TA [] @TB [])); }";
@@ -115,10 +115,10 @@ public class TypeTests {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = INSTANCEOF, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = INSTANCEOF_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = INSTANCEOF,
+                genericLocation = { 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = INSTANCEOF,
+                genericLocation = { 0, 0, 0, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestPrimArray() {
         return "void eqtestPrimArray() { if (true == (null instanceof @TC int @TA [] @TB [])); }";

@@ -132,7 +132,7 @@ public class Driver {
         if (d.typeIndex() != NOT_SET)
             p.type_index = d.typeIndex();
         if (d.genericLocation().length != 0) {
-            p.location = wrapIntArray(d.genericLocation());
+            p.setTypePathFromBinary(wrapIntArray(d.genericLocation()));
         }
 
         return Collections.singletonMap(annoName, p);
@@ -259,8 +259,6 @@ public class Driver {
     int typeIndex() default Driver.NOT_SET;
 
     int[] genericLocation() default {};
-
-    // cannot do anything about wildcards for now
 }
 
 @Retention(RetentionPolicy.RUNTIME)

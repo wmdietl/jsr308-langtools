@@ -44,12 +44,12 @@ public class MethodReturns {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN),
-        @TADescription(annotation = "TB", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 1, 0 })
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TD", type = METHOD_RETURN,
+                genericLocation = { 3, 1, 3, 0 })
     })
     public String methodReturnAsParametrized() {
         return "@TA Map<@TB String, @TC List<@TD String>> test() { return null; }";
@@ -57,10 +57,10 @@ public class MethodReturns {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN),
-        @TADescription(annotation = "TB", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 1 })
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 0, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 0, 0, 0, 0 })
     })
     public String methodReturnAsArray() {
         return "@TC String @TA [] @TB [] test() { return null; }";
@@ -90,45 +90,73 @@ public class MethodReturns {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN),
-        @TADescription(annotation = "TB", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 1, 0 })
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TD", type = METHOD_RETURN,
+                genericLocation = { 3, 1, 3, 0 })
     })
     public String interfaceMethodReturnAsParametrized() {
         return "interface Test { @TA Map<@TB String, @TC List<@TD String>> test(); }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TB", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0, 2 }),
-        @TADescription(annotation = "TC", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0 }),
-        @TADescription(annotation = "TD", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0, 0 }),
-        @TADescription(annotation = "TE", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0, 1 }),
-        @TADescription(annotation = "TF", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0, 1, 0 })
+        @TADescription(annotation = "TA", type = METHOD_RETURN,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0 }),
+        @TADescription(annotation = "TD", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0, 3, 0 }),
+        @TADescription(annotation = "TE", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0, 3, 1 }),
+        @TADescription(annotation = "TF", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0, 3, 1, 2, 0 })
     })
     public String methodReturnAsNestedWildcard() {
         return "Set<@TA ? extends @TB Map. @TC Entry<@TD String, @TE ? super @TF Object>> entrySet() { return null; }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 0 }),
-        @TADescription(annotation = "TB", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 1 }),
-        @TADescription(annotation = "TC", type = METHOD_RETURN_COMPONENT,
-                genericLocation = { 0, 1, 0 })
+        @TADescription(annotation = "TA", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 3, 0 }),
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 3, 1 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 3, 1, 2, 0 })
     })
     public String methodReturnAsNestedWildcard2() {
         return "class Test<K> { Set<Map.Entry<@TA K, @TB ? extends @TC Object>> entrySet() { return null; } }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0 }),
+    })
+    public String methodReturnAsNestedWildcard3() {
+        return "Set<? extends @TB Map. @TC Entry<String, Object>> entrySet() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0 }),
+    })
+    public String methodReturnAsNestedWildcard4() {
+        return "Set<? extends Map. @TC Entry<String, Object>> entrySet() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0 }),
+    })
+    public String methodReturnAsNestedWildcard5() {
+        return "Set<? extends @TB Map. @TC Entry> entrySet() { return null; }";
     }
 
 }

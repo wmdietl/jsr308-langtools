@@ -52,9 +52,9 @@ public class RepeatingTypeAnnotations {
     @TADescriptions({
         @TADescription(annotation = "RTAs", type = METHOD_PARAMETER,
                 paramIndex = 0),
-        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER_COMPONENT,
+        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER,
                 paramIndex = 0,
-                genericLocation = { 0 })
+                genericLocation = { 3, 0 })
     })
     public String methodParam1() {
         return "void m(@RTA @RTA List<@RTB @RTB String> p) {}";
@@ -63,9 +63,9 @@ public class RepeatingTypeAnnotations {
     @TADescriptions({
         @TADescription(annotation = "RTAs", type = METHOD_PARAMETER,
                 paramIndex = 0),
-        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER_COMPONENT,
+        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER,
                 paramIndex = 0,
-                genericLocation = { 0 })
+                genericLocation = { 3, 0 })
     })
     public String methodParam2() {
         return "void m(@RTAs({@RTA, @RTA}) List<@RTBs({@RTB, @RTB}) String> p) {}";

@@ -38,8 +38,8 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = NEW,
+                genericLocation = { 3, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnObjectGeneric() {
         return "Object returnObjectGeneric() { return new @TA ArrayList<@TB String>(); }";
@@ -52,10 +52,10 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TC", type = NEW_COMPONENT,
-                genericLocation = { 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = NEW,
+                genericLocation = { 3, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = NEW,
+                genericLocation = { 3, 1 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String initObjectGeneric() {
         return "void initObjectGeneric() { Object a = new @TA HashMap<@TB String, @TC String>(); }";
@@ -68,8 +68,8 @@ public class NewObjects {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = NEW, offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = NEW_COMPONENT,
-                genericLocation = { 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
+        @TADescription(annotation = "TB", type = NEW,
+                genericLocation = { 3, 0 }, offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String eqtestObjectGeneric() {
         return "void eqtestObjectGeneric() { if (null == new @TA ArrayList<@TB String >()); }";

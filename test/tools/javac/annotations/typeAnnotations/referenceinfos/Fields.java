@@ -44,12 +44,12 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
-                genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
-                genericLocation = { 1, 0 })
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TD", type = FIELD,
+                genericLocation = { 3, 1, 3, 0 })
     })
     public String fieldAsParametrized() {
         return "@TA Map<@TB String, @TC List<@TD String>> test;";
@@ -57,10 +57,10 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
-                genericLocation = { 1 })
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = { 0, 0 }),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = { 0, 0, 0, 0 })
     })
     public String fieldAsArray() {
         return "@TC String @TA [] @TB [] test;";
@@ -89,12 +89,12 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
-                genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
-                genericLocation = { 1, 0 })
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TD", type = FIELD,
+                genericLocation = { 3, 1, 3, 0 })
     })
     public String interfacefieldAsParametrized() {
         return "interface Test { @TA Map<@TB String, @TC List<@TD String>> test = null; }";
@@ -103,12 +103,12 @@ public class Fields {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = FIELD),
-        @TADescription(annotation = "TB", type = FIELD_COMPONENT,
-                genericLocation = { 0 }),
-        @TADescription(annotation = "TC", type = FIELD_COMPONENT,
-                genericLocation = { 1 }),
-        @TADescription(annotation = "TD", type = FIELD_COMPONENT,
-                genericLocation = { 1, 0 })
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TD", type = FIELD,
+                genericLocation = { 3, 1, 3, 0 })
     })
     public String staticFieldAsParametrized() {
         return "static @TA Map<@TB String, @TC List<@TD String>> test;";

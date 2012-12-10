@@ -52,23 +52,25 @@ public class MethodReceivers {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_RECEIVER_COMPONENT,
-                genericLocation = {0}),
-        @TADescription(annotation = "TB", type = METHOD_RECEIVER)
+        @TADescription(annotation = "TA", type = METHOD_RECEIVER,
+                genericLocation = {}),
+        @TADescription(annotation = "TB", type = METHOD_RECEIVER,
+                genericLocation = {1, 0})
     })
     @TestClass("TestOuter$TestInner")
     public String nestedtypes1() {
         return "class TestOuter { class TestInner { void test(@TA TestOuter. @TB TestInner this) { } } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_RECEIVER_COMPONENT,
-            genericLocation = {0})
+    @TADescription(annotation = "TA", type = METHOD_RECEIVER,
+            genericLocation = {})
     @TestClass("TestOuter$TestInner")
     public String nestedtypes2() {
         return "class TestOuter { class TestInner { void test(@TA TestOuter.TestInner this) { } } }";
     }
 
-    @TADescription(annotation = "TB", type = METHOD_RECEIVER)
+    @TADescription(annotation = "TB", type = METHOD_RECEIVER,
+            genericLocation = {1, 0})
     @TestClass("TestOuter$TestInner")
     public String nestedtypes3() {
         return "class TestOuter { class TestInner { void test(TestOuter. @TB TestInner this) { } } }";

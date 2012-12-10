@@ -54,10 +54,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1, genericLocation = {3, 1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0, 3, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0)
     })
     public String regularClassParameterized() {
@@ -77,10 +77,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1, genericLocation = {3, 1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0, 3, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0)
     })
@@ -90,10 +90,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1, genericLocation = {3, 1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0})
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0, 3, 0})
     })
     public String abstractClassParameterized2() {
         return "abstract class Test { abstract <K extends @TA Map<String, @TB String>, V extends @TC List<@TD List<@TE Object>>> void test(); }";
@@ -120,10 +120,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1, genericLocation = {3, 1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0, 3, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "TH", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
@@ -135,10 +135,10 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 1, genericLocation = {1}),
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1, genericLocation = {3, 1}),
         @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 1, boundIndex = 1, genericLocation = {0, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0}),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 1, boundIndex = 1, genericLocation = {3, 0, 3, 0}),
         @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_TYPE_PARAMETER, paramIndex = 1)
     })
@@ -151,7 +151,7 @@ public class MethodTypeParam {
         return "class Test { <T> @TA T m() { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_RETURN_COMPONENT, genericLocation = {0})
+    @TADescription(annotation = "TA", type = METHOD_RETURN, genericLocation = {3, 0})
     public String useInReturn2() {
         return "class Test { <T> Class<@TA T> m() { throw new RuntimeException(); } }";
     }
@@ -164,14 +164,14 @@ public class MethodTypeParam {
         return "class Test { <T extends @TA Object> @TB T m() { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER_COMPONENT,
-            paramIndex = 0, genericLocation = {0})
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+            paramIndex = 0, genericLocation = {3, 0})
     public String useInParam1() {
         return "class Test { <T> void m(Class<@TA T> p) { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER_COMPONENT,
-            paramIndex = 0, genericLocation = {0})
+    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+            paramIndex = 0, genericLocation = {3, 0})
     public String useInParam2() {
         return "class Test { void m(Class<@TA Object> p) { throw new RuntimeException(); } }";
     }
@@ -203,15 +203,15 @@ public class MethodTypeParam {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 2,
-                genericLocation = {1}),
-        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 2,
-                genericLocation = {0}),
-        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 3),
-        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 3,
-                genericLocation = {1}),
-        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND_COMPONENT, paramIndex = 0, boundIndex = 3,
-                genericLocation = {0})
+        @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 2,
+                genericLocation = {}),
+        @TADescription(annotation = "TC", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 2,
+                genericLocation = {1, 0, 3, 0}),
+        @TADescription(annotation = "TD", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 3),
+        @TADescription(annotation = "TE", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 3,
+                genericLocation = {1, 0}),
+        @TADescription(annotation = "TF", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 3,
+                genericLocation = {1, 0, 3, 0})
     })
     public String useInParam5() {
         return "class Test {" +
