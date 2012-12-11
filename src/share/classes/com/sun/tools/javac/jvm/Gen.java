@@ -71,6 +71,7 @@ public class Gen extends JCTree.Visitor {
     private final Map<Type,Symbol> stringBufferAppend;
     private Name accessDollar;
     private final Types types;
+    private final Lower lower;
 
     /** Switch: GJ mode?
      */
@@ -112,6 +113,7 @@ public class Gen extends JCTree.Visitor {
         stringBufferAppend = new HashMap<Type,Symbol>();
         accessDollar = names.
             fromString("access" + target.syntheticNameChar());
+        lower = Lower.instance(context);
 
         Options options = Options.instance(context);
         lineDebugInfo =
@@ -816,6 +818,62 @@ public class Gen extends JCTree.Visitor {
         }
     }
 
+    /** Visitor class for expressions which might be constant expressions.
+     *  This class is a subset of TreeScanner. Intended to visit trees pruned by
+     *  Lower as long as constant expressions looking for references to any
+     *  ClassSymbol. Any such reference will be added to the constant pool so
+     *  automated tools can detect class dependencies better.
+     */
+    class ClassReferenceVisitor extends JCTree.Visitor {
+
+        @Override
+        public void visitTree(JCTree tree) {}
+
+        @Override
+        public void visitBinary(JCBinary tree) {
+            tree.lhs.accept(this);
+            tree.rhs.accept(this);
+        }
+
+        @Override
+        public void visitSelect(JCFieldAccess tree) {
+            if (tree.selected.type.hasTag(CLASS)) {
+                makeRef(tree.selected.pos(), tree.selected.type);
+            }
+        }
+
+        @Override
+        public void visitIdent(JCIdent tree) {
+            if (tree.sym.owner instanceof ClassSymbol) {
+                pool.put(tree.sym.owner);
+            }
+        }
+
+        @Override
+        public void visitConditional(JCConditional tree) {
+            tree.cond.accept(this);
+            tree.truepart.accept(this);
+            tree.falsepart.accept(this);
+        }
+
+        @Override
+        public void visitUnary(JCUnary tree) {
+            tree.arg.accept(this);
+        }
+
+        @Override
+        public void visitParens(JCParens tree) {
+            tree.expr.accept(this);
+        }
+
+        @Override
+        public void visitTypeCast(JCTypeCast tree) {
+            tree.expr.accept(this);
+        }
+    }
+
+    private ClassReferenceVisitor classReferenceVisitor = new ClassReferenceVisitor();
+
     /** Visitor method: generate code for an expression, catching and reporting
      *  any completion failures.
      *  @param tree    The expression to be visited.
@@ -826,6 +884,7 @@ public class Gen extends JCTree.Visitor {
         try {
             if (tree.type.constValue() != null) {
                 // Short circuit any expressions which are constants
+                tree.accept(classReferenceVisitor);
                 checkStringConstant(tree.pos(), tree.type.constValue());
                 result = items.makeImmediateItem(tree.type, tree.type.constValue());
             } else {
@@ -1678,6 +1737,7 @@ public class Gen extends JCTree.Visitor {
  *************************************************************************/
 
     public void visitApply(JCMethodInvocation tree) {
+        setTypeAnnotationPositions(tree.pos);
         // Generate code for method.
         Item m = genExpr(tree.meth, methodType);
         // Generate code for all arguments, where the expected types are
@@ -1715,10 +1775,48 @@ public class Gen extends JCTree.Visitor {
         result = items.makeStackItem(pt);
     }
 
+   private void setTypeAnnotationPositions(int treePos) {
+       MethodSymbol meth = code.meth;
+
+       for (Attribute.TypeCompound ta : meth.getTypeAnnotationMirrors()) {
+           if (ta.position.pos == treePos) {
+               ta.position.offset = code.cp;
+               ta.position.lvarOffset = new int[] { code.cp };
+               ta.position.isValidOffset = true;
+           }
+       }
+
+       if (code.meth.getKind() != javax.lang.model.element.ElementKind.CONSTRUCTOR
+               && code.meth.getKind() != javax.lang.model.element.ElementKind.STATIC_INIT)
+           return;
+
+       for (Attribute.TypeCompound ta : meth.owner.getTypeAnnotationMirrors()) {
+           if (ta.position.pos == treePos) {
+               ta.position.offset = code.cp;
+               ta.position.lvarOffset = new int[] { code.cp };
+               ta.position.isValidOffset = true;
+           }
+       }
+
+       ClassSymbol clazz = meth.enclClass();
+       for (Symbol s : new com.sun.tools.javac.model.FilteredMemberList(clazz.members())) {
+           if (!s.getKind().isField())
+               continue;
+           for (Attribute.TypeCompound ta : s.getTypeAnnotationMirrors()) {
+               if (ta.position.pos == treePos) {
+                   ta.position.offset = code.cp;
+                   ta.position.lvarOffset = new int[] { code.cp };
+                   ta.position.isValidOffset = true;
+               }
+           }
+       }
+   }
+
     public void visitNewClass(JCNewClass tree) {
         // Enclosing instances or anonymous classes should have been eliminated
         // by now.
         Assert.check(tree.encl == null && tree.def == null);
+        setTypeAnnotationPositions(tree.pos);
 
         code.emitop2(new_, makeRef(tree.pos(), tree.type));
         code.emitop0(dup);
@@ -1733,6 +1831,7 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitNewArray(JCNewArray tree) {
+        setTypeAnnotationPositions(tree.pos);
 
         if (tree.elems != null) {
             Type elemtype = types.elemtype(tree.type);
@@ -2062,6 +2161,7 @@ public class Gen extends JCTree.Visitor {
         }
 
     public void visitTypeCast(JCTypeCast tree) {
+        setTypeAnnotationPositions(tree.pos);
         result = genExpr(tree.expr, tree.clazz.type).load();
         // Additional code is only needed if we cast to a reference type
         // which is not statically a supertype of the expression's type.
@@ -2078,6 +2178,7 @@ public class Gen extends JCTree.Visitor {
     }
 
     public void visitTypeTest(JCInstanceOf tree) {
+        setTypeAnnotationPositions(tree.pos);
         genExpr(tree.expr, tree.expr.type).load();
         code.emitop2(instanceof_, makeRef(tree.pos(), tree.clazz.type));
         result = items.makeStackItem(syms.booleanType);
@@ -2121,9 +2222,16 @@ public class Gen extends JCTree.Visitor {
 
         if (tree.name == names._class) {
             Assert.check(target.hasClassLiterals());
+            setTypeAnnotationPositions(tree.pos);
             code.emitop2(ldc2, makeRef(tree.pos(), tree.selected.type));
             result = items.makeStackItem(pt);
             return;
+       } else if (tree.name == names.TYPE) {
+           // Set the annotation positions for primitive class literals
+           // (e.g. int.class) which have been converted to TYPE field
+           // access on the corresponding boxed type (e.g. Integer.TYPE).
+           setTypeAnnotationPositions(tree.pos);
+           // TODO 308: Annotations on class literals were removed. Can we remove this?
         }
 
         Symbol ssym = TreeInfo.symbol(tree.selected);
@@ -2205,6 +2313,15 @@ public class Gen extends JCTree.Visitor {
         code.endScopes(limit);
     }
 
+    private void generateReferencesToPrunedTree(ClassSymbol classSymbol, Pool pool) {
+        List<JCTree> prunedInfo = lower.prunedTree.get(classSymbol);
+        if (prunedInfo != null) {
+            for (JCTree prunedTree: prunedInfo) {
+                prunedTree.accept(classReferenceVisitor);
+            }
+        }
+    }
+
 /* ************************************************************************
  * main method
  *************************************************************************/
@@ -2232,6 +2349,7 @@ public class Gen extends JCTree.Visitor {
             cdef.defs = normalizeDefs(cdef.defs, c);
             c.pool = pool;
             pool.reset();
+            generateReferencesToPrunedTree(c, pool);
             Env<GenContext> localEnv =
                 new Env<GenContext>(cdef, new GenContext());
             localEnv.toplevel = env.toplevel;

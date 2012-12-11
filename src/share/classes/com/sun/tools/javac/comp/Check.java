@@ -100,6 +100,9 @@ public class Check {
         context.put(checkKey, this);
 
         names = Names.instance(context);
+        dfltTargetMeta = new Name[] { names.PACKAGE, names.TYPE,
+            names.FIELD, names.METHOD, names.CONSTRUCTOR,
+            names.ANNOTATION_TYPE, names.LOCAL_VARIABLE, names.PARAMETER};
         log = Log.instance(context);
         rs = Resolve.instance(context);
         syms = Symtab.instance(context);
@@ -571,6 +574,7 @@ public class Check {
         if (!tree.type.isErroneous() &&
                 (env.info.lint == null || env.info.lint.isEnabled(Lint.LintCategory.CAST))
                 && types.isSameType(tree.expr.type, tree.clazz.type)
+                && !(ignoreAnnotatedCasts && containsTypeAnnotation(tree.clazz))
                 && !is292targetTypeCast(tree)) {
             log.warning(Lint.LintCategory.CAST,
                     tree.pos(), "redundant.cast", tree.expr.type);
@@ -590,9 +594,24 @@ public class Check {
                 return is292targetTypeCast;
             }
 
+            /* Utility methods for ignoring type-annotated casts lint checking. */
+            private static final boolean ignoreAnnotatedCasts = true;
 
+            private static class AnnotationFinder extends TreeScanner {
+                public boolean foundTypeAnno = false;
+                public void visitAnnotation(JCAnnotation tree) {
+                    foundTypeAnno = foundTypeAnno || tree.hasTag(TYPE_ANNOTATION);
+                }
+            }
 
-//where
+            private boolean containsTypeAnnotation(JCTree e) {
+                AnnotationFinder finder = new AnnotationFinder();
+                finder.scan(e);
+                return finder.foundTypeAnno;
+            }
+            /* End utility methods for ignoring type-annotated casts. */
+
+        //where
         /** Is type a type variable, or a (possibly multi-dimensional) array of
          *  type variables?
          */
@@ -840,7 +859,7 @@ public class Check {
         // System.out.println("actuals: " + argtypes);
         List<Type> formals = owntype.getParameterTypes();
         Type last = useVarargs ? formals.last() : null;
-        if (sym.name==names.init &&
+        if (sym.name == names.init &&
                 sym.owner == syms.enumSym)
                 formals = formals.tail.tail;
         List<JCExpression> args = argtrees;
@@ -1310,10 +1329,19 @@ public class Check {
                 // looking at a static member type.  However, the
                 // qualifying expression is parameterized.
                 log.error(tree.pos(), "cant.select.static.class.from.param.type");
+            } else if (tree.selected.type.tsym.isStatic() &&
+                tree.selected.type.typeAnnotations.nonEmpty()) {
+                // Enclosing static classes cannot have type annotations.
+                log.error(tree.pos(), "cant.annotate.static.class");
             } else {
                 // otherwise validate the rest of the expression
                 tree.selected.accept(this);
             }
+        }
+
+        @Override
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            tree.underlyingType.accept(this);
         }
 
         /** Default visitor method: do nothing.
@@ -1833,13 +1861,15 @@ public class Check {
         for (Scope.Entry e1 = t1.tsym.members().elems; e1 != null; e1 = e1.sibling) {
             Symbol s1 = e1.sym;
             Type st1 = null;
-            if (s1.kind != MTH || !s1.isInheritedIn(site.tsym, types)) continue;
+            if (s1.kind != MTH || !s1.isInheritedIn(site.tsym, types) ||
+                    (s1.flags() & SYNTHETIC) != 0) continue;
             Symbol impl = ((MethodSymbol)s1).implementation(site.tsym, types, false);
             if (impl != null && (impl.flags() & ABSTRACT) == 0) continue;
             for (Scope.Entry e2 = t2.tsym.members().lookup(s1.name); e2.scope != null; e2 = e2.next()) {
                 Symbol s2 = e2.sym;
                 if (s1 == s2) continue;
-                if (s2.kind != MTH || !s2.isInheritedIn(site.tsym, types)) continue;
+                if (s2.kind != MTH || !s2.isInheritedIn(site.tsym, types) ||
+                        (s2.flags() & SYNTHETIC) != 0) continue;
                 if (st1 == null) st1 = types.memberType(t1, s1);
                 Type st2 = types.memberType(t2, s2);
                 if (types.overrideEquivalent(st1, st2)) {
@@ -2234,7 +2264,7 @@ public class Check {
     void checkImplementations(JCClassDecl tree) {
         checkImplementations(tree, tree.sym, tree.sym);
     }
-//where
+    //where
         /** Check that all methods which implement some
          *  method in `ic' conform to the method they implement.
          */
@@ -2575,6 +2605,13 @@ public class Check {
             validateAnnotation(a, s);
     }
 
+    /** Check the type annotations.
+     */
+    public void validateTypeAnnotations(List<JCAnnotation> annotations, boolean isTypeParameter) {
+        for (JCAnnotation a : annotations)
+            validateTypeAnnotation(a, isTypeParameter);
+    }
+
     /** Check an annotation of a symbol.
      */
     private void validateAnnotation(JCAnnotation a, Symbol s) {
@@ -2587,6 +2624,15 @@ public class Check {
             if (!isOverrider(s))
                 log.error(a.pos(), "method.does.not.override.superclass");
         }
+    }
+
+    public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
+        if (a.type == null)
+            throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
+        validateAnnotationTree(a);
+
+        if (!isTypeAnnotation(a, isTypeParameter))
+            log.error(a.pos(), "annotation.type.not.applicable");
     }
 
     /**
@@ -2832,45 +2878,90 @@ public class Check {
         return false;
     }
 
+    /** Is the annotation applicable to type annotations? */
+    protected boolean isTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
+        Attribute.Compound atTarget =
+            a.annotationType.type.tsym.attribute(syms.annotationTargetType.tsym);
+        if (atTarget == null) {
+            // An annotation without @Target is not a type annotation.
+            return false;
+        }
+
+        Attribute atValue = atTarget.member(names.value);
+        if (!(atValue instanceof Attribute.Array)) {
+            return false; // error recovery
+        }
+
+        Attribute.Array arr = (Attribute.Array) atValue;
+        for (Attribute app : arr.values) {
+            if (!(app instanceof Attribute.Enum)) {
+                return false; // recovery
+            }
+            Attribute.Enum e = (Attribute.Enum) app;
+
+            if (e.value.name == names.TYPE_USE)
+                return true;
+            else if (isTypeParameter && e.value.name == names.TYPE_PARAMETER)
+                return true;
+        }
+        return false;
+    }
+
     /** Is the annotation applicable to the symbol? */
     boolean annotationApplicable(JCAnnotation a, Symbol s) {
         Attribute.Array arr = getAttributeTargetAttribute(a.annotationType.type.tsym);
+        Name[] targets;
+
         if (arr == null) {
-            return true;
+            targets = defaultTargetMetaInfo(a, s);
+        } else {
+            // TODO: can we optimize this?
+            targets = new Name[arr.values.length];
+            for (int i=0; i<arr.values.length; ++i) {
+                Attribute app = arr.values[i];
+                if (!(app instanceof Attribute.Enum)) {
+                    return true; // recovery
+                }
+                Attribute.Enum e = (Attribute.Enum) app;
+                targets[i] = e.value.name;
+            }
         }
-        for (Attribute app : arr.values) {
-            if (!(app instanceof Attribute.Enum)) return true; // recovery
-            Attribute.Enum e = (Attribute.Enum) app;
-            if (e.value.name == names.TYPE)
+        for (Name target : targets) {
+            if (target == names.TYPE)
                 { if (s.kind == TYP) return true; }
-            else if (e.value.name == names.FIELD)
+            else if (target == names.FIELD)
                 { if (s.kind == VAR && s.owner.kind != MTH) return true; }
-            else if (e.value.name == names.METHOD)
+            else if (target == names.METHOD)
                 { if (s.kind == MTH && !s.isConstructor()) return true; }
-            else if (e.value.name == names.PARAMETER)
+            else if (target == names.PARAMETER)
                 { if (s.kind == VAR &&
                       s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) != 0)
                     return true;
                 }
-            else if (e.value.name == names.CONSTRUCTOR)
+            else if (target == names.CONSTRUCTOR)
                 { if (s.kind == MTH && s.isConstructor()) return true; }
-            else if (e.value.name == names.LOCAL_VARIABLE)
+            else if (target == names.LOCAL_VARIABLE)
                 { if (s.kind == VAR && s.owner.kind == MTH &&
                       (s.flags() & PARAMETER) == 0)
                     return true;
                 }
-            else if (e.value.name == names.ANNOTATION_TYPE)
+            else if (target == names.ANNOTATION_TYPE)
                 { if (s.kind == TYP && (s.flags() & ANNOTATION) != 0)
                     return true;
                 }
-            else if (e.value.name == names.PACKAGE)
+            else if (target == names.PACKAGE)
                 { if (s.kind == PCK) return true; }
-            else if (e.value.name == names.TYPE_USE)
+            else if (target == names.TYPE_USE)
                 { if (s.kind == TYP ||
                       s.kind == VAR ||
                       (s.kind == MTH && !s.isConstructor() &&
-                       !s.type.getReturnType().hasTag(VOID)))
+                      !s.type.getReturnType().hasTag(VOID)) ||
+                      (s.kind == MTH && s.isConstructor()))
+                    return true;
+                }
+            else if (target == names.TYPE_PARAMETER)
+                { if (s.kind == TYP && s.type.hasTag(TYPEVAR))
                     return true;
                 }
             else
@@ -2887,6 +2978,11 @@ public class Check {
         Attribute atValue = atTarget.member(names.value);
         if (!(atValue instanceof Attribute.Array)) return null; // error recovery
         return (Attribute.Array) atValue;
+    }
+
+    private final Name[] dfltTargetMeta;
+    private Name[] defaultTargetMetaInfo(JCAnnotation a, Symbol s) {
+        return dfltTargetMeta;
     }
 
     /** Check an annotation value.

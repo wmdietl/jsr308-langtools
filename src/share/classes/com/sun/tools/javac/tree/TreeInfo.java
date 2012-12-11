@@ -267,6 +267,25 @@ public class TreeInfo {
         return lambda.params.isEmpty() ||
                 lambda.params.head.vartype != null;
     }
+
+    /** Return true if the tree corresponds to an expression statement */
+    public static boolean isExpressionStatement(JCExpression tree) {
+        switch(tree.getTag()) {
+            case PREINC: case PREDEC:
+            case POSTINC: case POSTDEC:
+            case ASSIGN:
+            case BITOR_ASG: case BITXOR_ASG: case BITAND_ASG:
+            case SL_ASG: case SR_ASG: case USR_ASG:
+            case PLUS_ASG: case MINUS_ASG:
+            case MUL_ASG: case DIV_ASG: case MOD_ASG:
+            case APPLY: case NEWCLASS:
+            case ERRONEOUS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Return true if the AST corresponds to a static select of the kind A.B
      */
@@ -396,6 +415,19 @@ public class TreeInfo {
             case POSTINC:
             case POSTDEC:
                 return getStartPos(((JCUnary) tree).arg);
+            case ANNOTATED_TYPE: {
+                JCAnnotatedType node = (JCAnnotatedType) tree;
+                if (node.annotations.nonEmpty()) {
+                    if (node.underlyingType.hasTag(TYPEARRAY) ||
+                            node.underlyingType.hasTag(SELECT)) {
+                        return getStartPos(node.underlyingType);
+                    } else {
+                        return getStartPos(node.annotations.head);
+                    }
+                } else {
+                    return getStartPos(node.underlyingType);
+                }
+            }
             case NEWCLASS: {
                 JCNewClass node = (JCNewClass)tree;
                 if (node.encl != null)
@@ -503,6 +535,8 @@ public class TreeInfo {
                 return getEndPos(((JCUnary) tree).arg, endPosTable);
             case WHILELOOP:
                 return getEndPos(((JCWhileLoop) tree).body, endPosTable);
+            case ANNOTATED_TYPE:
+                return getEndPos(((JCAnnotatedType) tree).underlyingType, endPosTable);
             case ERRONEOUS: {
                 JCErroneous node = (JCErroneous)tree;
                 if (node.errs != null && node.errs.nonEmpty())
@@ -742,6 +776,8 @@ public class TreeInfo {
             return ((JCFieldAccess) tree).sym;
         case TYPEAPPLY:
             return symbol(((JCTypeApply) tree).clazz);
+        case ANNOTATED_TYPE:
+            return symbol(((JCAnnotatedType) tree).underlyingType);
         default:
             return null;
         }
@@ -979,17 +1015,24 @@ public class TreeInfo {
         case NULLCHK:
             return Tree.Kind.OTHER;
 
+        case ANNOTATION:
+            return Tree.Kind.ANNOTATION;
+        case TYPE_ANNOTATION:
+            return Tree.Kind.TYPE_ANNOTATION;
+
         default:
             return null;
         }
     }
 
     /**
-     * Returns the underlying type of the tree if it is annotated type,
-     * or the tree itself otherwise
+     * Returns the underlying type of the tree if it is an annotated type,
+     * or the tree itself otherwise.
      */
     public static JCExpression typeIn(JCExpression tree) {
         switch (tree.getTag()) {
+        case ANNOTATED_TYPE:
+            return ((JCAnnotatedType)tree).underlyingType;
         case IDENT: /* simple names */
         case TYPEIDENT: /* primitive name */
         case SELECT: /* qualified name */
@@ -997,20 +1040,42 @@ public class TreeInfo {
         case WILDCARD: /* wild cards */
         case TYPEPARAMETER: /* type parameters */
         case TYPEAPPLY: /* parameterized types */
+        case ERRONEOUS: /* error tree TODO: needed for BadCast JSR308 test case. Better way? */
             return tree;
         default:
             throw new AssertionError("Unexpected type tree: " + tree);
         }
     }
 
+    /* Return the inner-most type of a type tree.
+     * For an array that contains an annotated type, return that annotated type.
+     * TODO: currently only used by Pretty. Describe behavior better.
+     */
     public static JCTree innermostType(JCTree type) {
-        switch (type.getTag()) {
-        case TYPEARRAY:
-            return innermostType(((JCArrayTypeTree)type).elemtype);
-        case WILDCARD:
-            return innermostType(((JCWildcard)type).inner);
-        default:
-            return type;
+        JCTree lastAnnotatedType = null;
+        JCTree cur = type;
+        loop: while (true) {
+            switch (cur.getTag()) {
+            case TYPEARRAY:
+                lastAnnotatedType = null;
+                cur = ((JCArrayTypeTree)cur).elemtype;
+                break;
+            case WILDCARD:
+                lastAnnotatedType = null;
+                cur = ((JCWildcard)cur).inner;
+                break;
+            case ANNOTATED_TYPE:
+                lastAnnotatedType = cur;
+                cur = ((JCAnnotatedType)cur).underlyingType;
+                break;
+            default:
+                break loop;
+            }
+        }
+        if (lastAnnotatedType!=null) {
+            return lastAnnotatedType;
+        } else {
+            return cur;
         }
     }
 }

@@ -483,6 +483,7 @@ public class TransTypes extends TreeTranslator {
             tree.restype = translate(tree.restype, null);
             tree.typarams = List.nil();
             tree.params = translateVarDefs(tree.params);
+            tree.recvparam = translate(tree.recvparam, null);
             tree.thrown = translate(tree.thrown, null);
             tree.body = translate(tree.body, tree.sym.erasure(types).getReturnType());
             tree.type = erasure(tree.type);
@@ -551,6 +552,7 @@ public class TransTypes extends TreeTranslator {
             tree.body = translate(tree.body, null);
             //save non-erased target
             tree.targetType = tree.type;
+            Assert.check(!tree.targetType.isCompound(), "Intersection-type targets not supported yet!");
             tree.type = erasure(tree.type);
             result = tree;
         }
@@ -786,6 +788,7 @@ public class TransTypes extends TreeTranslator {
         tree.expr = translate(tree.expr, null);
         //save non-erased target
         tree.targetType = tree.type;
+        Assert.check(!tree.targetType.isCompound(), "Intersection-type targets not supported yet!");
         tree.type = erasure(tree.type);
         result = tree;
     }
@@ -801,6 +804,12 @@ public class TransTypes extends TreeTranslator {
     public void visitTypeApply(JCTypeApply tree) {
         JCTree clazz = translate(tree.clazz, null);
         result = clazz;
+    }
+
+    public void visitTypeIntersection(JCTypeIntersection tree) {
+        tree.bounds = translate(tree.bounds, null);
+        tree.type = erasure(tree.type);
+        result = tree;
     }
 
 /**************************************************************************

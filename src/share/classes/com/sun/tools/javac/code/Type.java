@@ -87,9 +87,13 @@ public class Type implements PrimitiveType {
      */
     protected TypeTag tag;
 
-    /** The defining class / interface / package / type variable
+    /** The defining class / interface / package / type variable.
      */
     public TypeSymbol tsym;
+
+    /** The type annotations on this type.
+     */
+    public List<Attribute.TypeCompound> typeAnnotations = List.nil();
 
     /**
      * Checks if the current type tag is equal to the given tag.
@@ -166,7 +170,7 @@ public class Type implements PrimitiveType {
     /**
      * Get the representation of this type used for modelling purposes.
      * By default, this is itself. For ErrorType, a different value
-     * may be provided,
+     * may be provided.
      */
     public Type getModelType() {
         return this;
@@ -352,6 +356,7 @@ public class Type implements PrimitiveType {
     public Type              getEnclosingType() { return null; }
     public List<Type>        getParameterTypes() { return List.nil(); }
     public Type              getReturnType()     { return null; }
+    public Type              getReceiverType()   { return null; }
     public List<Type>        getThrownTypes()    { return List.nil(); }
     public Type              getUpperBound()     { return null; }
     public Type              getLowerBound()     { return null; }
@@ -598,7 +603,7 @@ public class Type implements PrimitiveType {
 
         /** The enclosing type of this type. If this is the type of an inner
          *  class, outer_field refers to the type of its enclosing
-         *  instance class, in all other cases it referes to noType.
+         *  instance class, in all other cases it refers to noType.
          */
         private Type outer_field;
 
@@ -839,6 +844,49 @@ public class Type implements PrimitiveType {
         }
     }
 
+    // a clone of a ClassType that knows about the bounds of an intersection type.
+    public static class IntersectionClassType extends ClassType implements IntersectionType {
+
+        public boolean allInterfaces;
+
+        public enum IntersectionKind {
+            EXPLICIT,
+            IMPLICT;
+        }
+
+        public IntersectionKind intersectionKind;
+
+        public IntersectionClassType(List<Type> bounds, ClassSymbol csym, boolean allInterfaces) {
+            super(Type.noType, List.<Type>nil(), csym);
+            this.allInterfaces = allInterfaces;
+            Assert.check((csym.flags() & COMPOUND) != 0);
+            supertype_field = bounds.head;
+            interfaces_field = bounds.tail;
+            Assert.check(supertype_field.tsym.completer != null ||
+                    !supertype_field.isInterface(), supertype_field);
+        }
+
+        public java.util.List<? extends TypeMirror> getBounds() {
+            return Collections.unmodifiableList(getComponents());
+        }
+
+        public List<Type> getComponents() {
+            return interfaces_field.prepend(supertype_field);
+        }
+
+        @Override
+        public TypeKind getKind() {
+            return TypeKind.INTERSECTION;
+        }
+
+        @Override
+        public <R, P> R accept(TypeVisitor<R, P> v, P p) {
+            return intersectionKind == IntersectionKind.EXPLICIT ?
+                v.visitIntersection(this, p) :
+                v.visitDeclared(this, p);
+        }
+    }
+
     public static class ArrayType extends Type
             implements javax.lang.model.type.ArrayType {
 
@@ -929,6 +977,10 @@ public class Type implements PrimitiveType {
         public Type restype;
         public List<Type> thrown;
 
+        /** The type annotations on the method receiver.
+         */
+        public Type recvtype;
+
         public MethodType(List<Type> argtypes,
                           Type restype,
                           List<Type> thrown,
@@ -983,6 +1035,7 @@ public class Type implements PrimitiveType {
 
         public List<Type>        getParameterTypes() { return argtypes; }
         public Type              getReturnType()     { return restype; }
+        public Type              getReceiverType()   { return recvtype; }
         public List<Type>        getThrownTypes()    { return thrown; }
 
         public boolean isErroneous() {
@@ -1011,6 +1064,7 @@ public class Type implements PrimitiveType {
             for (List<Type> l = argtypes; l.nonEmpty(); l = l.tail)
                 l.head.complete();
             restype.complete();
+            recvtype.complete();
             for (List<Type> l = thrown; l.nonEmpty(); l = l.tail)
                 l.head.complete();
         }
@@ -1095,7 +1149,11 @@ public class Type implements PrimitiveType {
         }
 
         @Override
-        public Type getUpperBound() { return bound; }
+        public Type getUpperBound() {
+            if ((bound == null || bound.tag == NONE) && this != tsym.type)
+                bound = tsym.type.getUpperBound();
+            return bound;
+        }
 
         int rank_field = -1;
 
@@ -1166,6 +1224,7 @@ public class Type implements PrimitiveType {
         public Type getEnclosingType() { return qtype.getEnclosingType(); }
         public List<Type> getParameterTypes() { return qtype.getParameterTypes(); }
         public Type getReturnType() { return qtype.getReturnType(); }
+        public Type getReceiverType() { return qtype.getReceiverType(); }
         public List<Type> getThrownTypes() { return qtype.getThrownTypes(); }
         public List<Type> allparams() { return qtype.allparams(); }
         public Type getUpperBound() { return qtype.getUpperBound(); }

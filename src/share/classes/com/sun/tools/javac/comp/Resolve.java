@@ -54,7 +54,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.ElementVisitor;
 
@@ -2617,8 +2616,7 @@ public class Resolve {
         @Override
         ReferenceKind referenceKind(Symbol sym) {
             if (sym.isStatic()) {
-                return TreeInfo.isStaticSelector(referenceTree.expr, names) ?
-                        ReferenceKind.STATIC : ReferenceKind.STATIC_EVAL;
+                return ReferenceKind.STATIC;
             } else {
                 Name selName = TreeInfo.name(referenceTree.getQualifierExpression());
                 return selName != null && selName == names._super ?
