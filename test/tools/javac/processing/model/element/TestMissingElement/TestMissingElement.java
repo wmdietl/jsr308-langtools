@@ -28,7 +28,7 @@
  * @summary Modeling type implementing missing interfaces
  * @library ../../../../lib
  * @build JavacTestingAbstractProcessor TestMissingElement
- * @compile -proc:only -XprintRounds -processor TestMissingElement InvalidSource.java
+ * @compile/fail/ref=TestMissingElement.ref -proc:only -XprintRounds -XDrawDiagnostics -processor TestMissingElement InvalidSource.java
  */
 
 import java.util.*;
