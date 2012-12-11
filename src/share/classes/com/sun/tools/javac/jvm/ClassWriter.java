@@ -1034,7 +1034,7 @@ public class ClassWriter extends ClassFile {
 
         { // Append location data for generics/arrays.
             databuf.appendByte(p.location.size());
-            List<Integer> loc = p.getTypePathBinary();
+            java.util.List<Integer> loc = TypeAnnotationPosition.getBinaryFromTypePath(p.location);
             for (int i : loc)
                 databuf.appendByte((byte)i);
         }

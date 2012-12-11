@@ -1512,7 +1512,7 @@ public class ClassReader implements Completer {
             ListBuffer<Integer> loc = ListBuffer.lb();
             for (int i = 0; i < len * TypeAnnotationPosition.TypePathEntry.bytesPerEntry; ++i)
                 loc = loc.append((int)nextByte());
-            position.setTypePathFromBinary(loc.toList());
+            position.location = TypeAnnotationPosition.getTypePathFromBinary(loc.toList());
         }
 
         return position;

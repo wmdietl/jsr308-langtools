@@ -166,7 +166,7 @@ public class TypeAnnotation {
             List<Integer> loc = new ArrayList<Integer>(len);
             for (int i = 0; i < len * TypePathEntry.bytesPerEntry; ++i)
                 loc.add(cr.readUnsignedByte());
-            position.setTypePathFromBinary(loc);
+            position.location = Position.getTypePathFromBinary(loc);
         }
         return position;
     }
@@ -259,7 +259,7 @@ public class TypeAnnotation {
             WILDCARD(2),
             TYPE_ARGUMENT(3);
 
-            /*package-visible*/ final int tag;
+            public final int tag;
 
             private TypePathEntryKind(int tag) {
                 this.tag = tag;
@@ -270,8 +270,8 @@ public class TypeAnnotation {
             /** The fixed number of bytes per TypePathEntry. */
             public static final int bytesPerEntry = 2;
 
-            private final TypePathEntryKind tag;
-            private final int arg;
+            public final TypePathEntryKind tag;
+            public final int arg;
 
             public static final TypePathEntry ARRAY = new TypePathEntry(TypePathEntryKind.ARRAY);
             public static final TypePathEntry INNER_TYPE = new TypePathEntry(TypePathEntryKind.INNER_TYPE);
@@ -488,7 +488,7 @@ public class TypeAnnotation {
          *
          * @param list The bytecode representation of the type path.
          */
-        public void setTypePathFromBinary(List<Integer> list) {
+        public static List<TypePathEntry> getTypePathFromBinary(List<Integer> list) {
             List<TypePathEntry> loc = new ArrayList<TypePathEntry>(list.size() / TypePathEntry.bytesPerEntry);
             int idx = 0;
             while (idx < list.size()) {
@@ -498,12 +498,12 @@ public class TypeAnnotation {
                 loc.add(TypePathEntry.fromBinary(list.get(idx), list.get(idx + 1)));
                 idx += 2;
             }
-            this.location = loc;
+            return loc;
         }
 
-        public List<Integer> getTypePathBinary() {
-            List<Integer> loc = new ArrayList<Integer>(location.size() * TypePathEntry.bytesPerEntry);
-            for (TypePathEntry tpe : location) {
+        public static List<Integer> getBinaryFromTypePath(List<TypePathEntry> locs) {
+            List<Integer> loc = new ArrayList<Integer>(locs.size() * TypePathEntry.bytesPerEntry);
+            for (TypePathEntry tpe : locs) {
                 loc.add(tpe.tag.tag);
                 loc.add(tpe.arg);
             }

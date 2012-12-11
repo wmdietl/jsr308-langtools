@@ -25,6 +25,8 @@
 
 package com.sun.tools.javac.code;
 
+import java.util.Iterator;
+
 import com.sun.tools.javac.util.*;
 
 /** A type annotation position.
@@ -43,7 +45,7 @@ public class TypeAnnotationPosition {
         WILDCARD(2),
         TYPE_ARGUMENT(3);
 
-        /*package-visible*/ final int tag;
+        public final int tag;
 
         private TypePathEntryKind(int tag) {
             this.tag = tag;
@@ -54,8 +56,8 @@ public class TypeAnnotationPosition {
         /** The fixed number of bytes per TypePathEntry. */
         public static final int bytesPerEntry = 2;
 
-        private final TypePathEntryKind tag;
-        private final int arg;
+        public final TypePathEntryKind tag;
+        public final int arg;
 
         public static final TypePathEntry ARRAY = new TypePathEntry(TypePathEntryKind.ARRAY);
         public static final TypePathEntry INNER_TYPE = new TypePathEntry(TypePathEntryKind.INNER_TYPE);
@@ -269,20 +271,21 @@ public class TypeAnnotationPosition {
      *
      * @param list The bytecode representation of the type path.
      */
-    public void setTypePathFromBinary(List<Integer> list) {
+    public static List<TypePathEntry> getTypePathFromBinary(java.util.List<Integer> list) {
         ListBuffer<TypePathEntry> loc = ListBuffer.lb();
-        List<Integer> proc = list;
-        while (proc.nonEmpty()) {
-            Assert.check(!proc.tail.isEmpty(), "Could not decode type path: " + list);
-            loc = loc.append(TypePathEntry.fromBinary(proc.head, proc.tail.head));
-            proc = proc.tail.tail;
+        Iterator<Integer> iter = list.iterator();
+        while (iter.hasNext()) {
+            Integer fst = iter.next();
+            Assert.check(iter.hasNext(), "Could not decode type path: " + list);
+            Integer snd = iter.next();
+            loc = loc.append(TypePathEntry.fromBinary(fst, snd));
         }
-        this.location = loc.toList();
+        return loc.toList();
     }
 
-    public List<Integer> getTypePathBinary() {
+    public static List<Integer> getBinaryFromTypePath(java.util.List<TypePathEntry> locs) {
         ListBuffer<Integer> loc = ListBuffer.lb();
-        for (TypePathEntry tpe : location) {
+        for (TypePathEntry tpe : locs) {
             loc = loc.append(tpe.tag.tag);
             loc = loc.append(tpe.arg);
         }

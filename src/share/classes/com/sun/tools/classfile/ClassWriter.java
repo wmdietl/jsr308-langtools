@@ -792,7 +792,7 @@ public class ClassWriter {
             { // Append location data for generics/arrays.
                 // TODO: check for overrun?
                 out.writeByte((byte)p.location.size());
-                for (int i : p.getTypePathBinary())
+                for (int i : TypeAnnotation.Position.getBinaryFromTypePath(p.location))
                     out.writeByte((byte)i);
             }
         }

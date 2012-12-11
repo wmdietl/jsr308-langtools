@@ -132,7 +132,7 @@ public class Driver {
         if (d.typeIndex() != NOT_SET)
             p.type_index = d.typeIndex();
         if (d.genericLocation().length != 0) {
-            p.setTypePathFromBinary(wrapIntArray(d.genericLocation()));
+            p.location = TypeAnnotation.Position.getTypePathFromBinary(wrapIntArray(d.genericLocation()));
         }
 
         return Collections.singletonMap(annoName, p);
