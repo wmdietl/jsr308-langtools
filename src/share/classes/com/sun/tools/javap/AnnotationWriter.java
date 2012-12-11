@@ -108,6 +108,10 @@ public class AnnotationWriter extends BasicWriter {
         // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_COMPONENT:
+            if (pos.lvarOffset == null) {
+                print(", lvarOffset is Null!");
+                break;
+            }
             print(", {");
             for (int i = 0; i < pos.lvarOffset.length; ++i) {
                 if (i != 0) print("; ");
@@ -121,6 +125,11 @@ public class AnnotationWriter extends BasicWriter {
                 print(pos.lvarIndex[i]);
             }
             print("}");
+            break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            // System.out.println("Handle exception parameters!");
             break;
         // method receiver
         case METHOD_RECEIVER:
@@ -154,11 +163,6 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_COMPONENT:
@@ -184,9 +188,9 @@ public class AnnotationWriter extends BasicWriter {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("AnnotationWriter: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + pos);
+            throw new AssertionError("AnnotationWriter: Unknown target type for position: " + pos);
         }
 
         // Append location data for generics/arrays.

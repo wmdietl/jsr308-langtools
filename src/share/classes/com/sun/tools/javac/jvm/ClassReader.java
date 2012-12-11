@@ -55,7 +55,7 @@ import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
-import static com.sun.tools.javac.code.TypeTags.*;
+import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.jvm.ClassFile.*;
 import static com.sun.tools.javac.jvm.ClassFile.Version.*;
 
@@ -115,6 +115,9 @@ public class ClassReader implements Completer {
      */
     boolean lintClassfile;
 
+    /** Switch: allow default methods
+     */
+    boolean allowDefaultMethods;
 
     /** Switch: preserve parameter names from the variable table.
      */
@@ -283,6 +286,7 @@ public class ClassReader implements Completer {
         allowVarargs     = source.allowVarargs();
         allowAnnotations = source.allowAnnotations();
         allowSimplifiedVarargs = source.allowSimplifiedVarargs();
+        allowDefaultMethods = source.allowDefaultMethods();
         saveParameterNames = options.isSet("save-parameter-names");
         cacheCompletionFailure = options.isUnset("dev");
         preferSource = "source".equals(options.get("-Xprefer"));
@@ -1023,6 +1027,15 @@ public class ClassReader implements Completer {
                     ClassSymbol c = (ClassSymbol) sym;
                     Name n = readName(nextChar());
                     c.sourcefile = new SourceFileObject(n, c.flatname);
+                    // If the class is a toplevel class, originating from a Java source file,
+                    // but the class name does not match the file name, then it is
+                    // an auxiliary class.
+                    String sn = n.toString();
+                    if (c.owner.kind == Kinds.PCK &&
+                        sn.endsWith(".java") &&
+                        !sn.equals(c.name.toString()+".java")) {
+                        c.flags_field |= AUXILIARY;
+                    }
                 }
             },
 
@@ -1456,6 +1469,11 @@ public class ClassReader implements Completer {
                 position.lvarIndex[i] = nextChar();
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            // System.out.println("Handle exception parameters!");
+            break;
         // method receiver
         case METHOD_RECEIVER:
         case METHOD_RECEIVER_COMPONENT:
@@ -1483,11 +1501,6 @@ public class ClassReader implements Completer {
         case THROWS:
             position.type_index = nextChar();
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_COMPONENT:
@@ -1508,9 +1521,9 @@ public class ClassReader implements Completer {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("jvm.ClassReader: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + position);
+            throw new AssertionError("jvm.ClassReader: Unknown target type for position: " + position);
         }
 
         if (type.hasLocation()) {
@@ -1842,7 +1855,7 @@ public class ClassReader implements Completer {
                 Annotations annotations = sym.annotations;
                 List<Attribute.Compound> newList = deproxyCompoundList(l);
                 if (annotations.pendingCompletion()) {
-                    annotations.setAttributes(newList);
+                    annotations.setDeclarationAttributes(newList);
                 } else {
                     annotations.append(newList);
                 }
@@ -1881,9 +1894,7 @@ public class ClassReader implements Completer {
                 if (debugJSR308)
                     System.out.println("TA: reading: adding " + newList
                       + " to symbol " + sym + " in " + log.currentSourceFile());
-                sym.typeAnnotations = ((sym.typeAnnotations == null)
-                                        ? newList
-                                        : newList.prependList(sym.typeAnnotations));
+                sym.annotations.setTypeAttributes(newList.prependList(sym.getTypeAnnotationMirrors()));
 
             } finally {
                 currentClassFile = previousClassFile;
@@ -1913,6 +1924,17 @@ public class ClassReader implements Completer {
         long flags = adjustMethodFlags(nextChar());
         Name name = readName(nextChar());
         Type type = readType(nextChar());
+        if (currentOwner.isInterface() &&
+                (flags & ABSTRACT) == 0 && !name.equals(names.clinit)) {
+            if (majorVersion > Target.JDK1_8.majorVersion ||
+                    (majorVersion == Target.JDK1_8.majorVersion && minorVersion >= Target.JDK1_8.minorVersion)) {
+                currentOwner.flags_field |= DEFAULT;
+                flags |= DEFAULT | ABSTRACT;
+            } else {
+                //protect against ill-formed classfiles
+                throw new CompletionFailure(currentOwner, "default method found in pre JDK 8 classfile");
+            }
+        }
         if (name == names.init && currentOwner.hasOuterInstance()) {
             // Sometimes anonymous classes don't have an outer
             // instance, however, there is no reliable way to tell so
@@ -2055,7 +2077,7 @@ public class ClassReader implements Completer {
      *  `typevars'.
      */
     protected void enterTypevars(Type t) {
-        if (t.getEnclosingType() != null && t.getEnclosingType().tag == CLASS)
+        if (t.getEnclosingType() != null && t.getEnclosingType().hasTag(CLASS))
             enterTypevars(t.getEnclosingType());
         for (List<Type> xs = t.getTypeArguments(); xs.nonEmpty(); xs = xs.tail)
             typevars.enter(xs.head.tsym);
@@ -2080,7 +2102,7 @@ public class ClassReader implements Completer {
 
         // prepare type variable table
         typevars = typevars.dup(currentOwner);
-        if (ct.getEnclosingType().tag == CLASS)
+        if (ct.getEnclosingType().hasTag(CLASS))
             enterTypevars(ct.getEnclosingType());
 
         // read flags, or skip if this is an inner class

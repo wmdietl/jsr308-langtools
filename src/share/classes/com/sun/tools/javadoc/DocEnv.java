@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,6 +45,11 @@ import com.sun.tools.javac.util.Position;
  * Holds only the information needed throughout the
  * run and not the compiler info that could be GC'ed
  * or ported.
+ *
+ *  <p><b>This is NOT part of any supported API.
+ *  If you write code that depends on this, you do so at your own risk.
+ *  This code and its internal interfaces are subject to change or
+ *  deletion without notice.</b>
  *
  * @since 1.4
  * @author Robert Field
@@ -97,6 +102,7 @@ public class DocEnv {
     Check chk;
     Types types;
     JavaFileManager fileManager;
+    Context context;
 
     /** Allow documenting from class files? */
     boolean docClasses = false;
@@ -117,6 +123,7 @@ public class DocEnv {
      */
     protected DocEnv(Context context) {
         context.put(docEnvKey, this);
+        this.context = context;
 
         messager = Messager.instance0(context);
         syms = Symtab.instance(context);
@@ -204,8 +211,8 @@ public class DocEnv {
     public void setLocale(String localeName) {
         // create locale specifics
         doclocale = new DocLocale(this, localeName, breakiterator);
-        // reset Messager if locale has changed.
-        messager.reset();
+        // update Messager if locale has changed.
+        messager.setLocale(doclocale.locale);
     }
 
     /** Check whether this member should be documented. */

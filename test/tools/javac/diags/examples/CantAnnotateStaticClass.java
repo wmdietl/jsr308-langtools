@@ -30,7 +30,7 @@ class CantAnnotateStaticClass {
     @interface A {}
 
     static class Outer {
-	class Inner {}
+        class Inner {}
     }
 
     // Error:

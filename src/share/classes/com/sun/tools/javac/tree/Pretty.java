@@ -26,12 +26,10 @@
 package com.sun.tools.javac.tree;
 
 import java.io.*;
-import java.util.*;
 
 import com.sun.source.tree.MemberReferenceTree.ReferenceMode;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.parser.Tokens.Comment;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.List;
@@ -81,6 +79,17 @@ public class Pretty extends JCTree.Visitor {
      */
     DocCommentTable docComments = null;
 
+    /**
+     * A string sequence to be used when Pretty output should be constrained
+     * to fit into a given size
+     */
+    private final static String trimSequence = "[...]";
+
+    /**
+     * Max number of chars to be generated when output should fit into a single line
+     */
+    private final static int PREFERRED_LENGTH = 20;
+
     /** Align code to be indented to left margin.
      */
     void align() throws IOException {
@@ -127,6 +136,31 @@ public class Pretty extends JCTree.Visitor {
      */
     public void println() throws IOException {
         out.write(lineSep);
+    }
+
+    public static String toSimpleString(JCTree tree) {
+        return toSimpleString(tree, PREFERRED_LENGTH);
+    }
+
+    public static String toSimpleString(JCTree tree, int maxLength) {
+        StringWriter s = new StringWriter();
+        try {
+            new Pretty(s, false).printExpr(tree);
+        }
+        catch (IOException e) {
+            // should never happen, because StringWriter is defined
+            // never to throw any IOExceptions
+            throw new AssertionError(e);
+        }
+        //we need to (i) replace all line terminators with a space and (ii) remove
+        //occurrences of 'missing' in the Pretty output (generated when types are missing)
+        String res = s.toString().replaceAll("\\s+", " ").replaceAll("/\\*missing\\*/", "");
+        if (res.length() < maxLength) {
+            return res;
+        } else {
+            int split = (maxLength - trimSequence.length()) * 2 / 3;
+            return res.substring(0, split) + trimSequence + res.substring(split);
+        }
     }
 
     String lineSep = System.getProperty("line.separator");
@@ -214,7 +248,7 @@ public class Pretty extends JCTree.Visitor {
     public void printFlags(long flags) throws IOException {
         if ((flags & SYNTHETIC) != 0) print("/*synthetic*/ ");
         print(TreeInfo.flagNames(flags));
-        if ((flags & StandardFlags) != 0) print(" ");
+        if ((flags & ExtendedStandardFlags) != 0) print(" ");
         if ((flags & ANNOTATION) != 0) print("@");
     }
 
@@ -226,10 +260,10 @@ public class Pretty extends JCTree.Visitor {
         }
     }
 
-    public void printTypeAnnotations(List<JCTypeAnnotation> trees) throws IOException {
+    public void printTypeAnnotations(List<JCAnnotation> trees) throws IOException {
         if (trees.nonEmpty())
             print(" ");
-        for (List<JCTypeAnnotation> l = trees; l.nonEmpty(); l = l.tail) {
+        for (List<JCAnnotation> l = trees; l.nonEmpty(); l = l.tail) {
             printExpr(l.head);
             print(" ");
         }
@@ -906,7 +940,7 @@ public class Pretty extends JCTree.Visitor {
                 printBaseElementType(elem);
                 boolean isElemAnnoType = elem instanceof JCAnnotatedType;
                 int i = 0;
-                List<List<JCTypeAnnotation>> da = tree.dimAnnotations;
+                List<List<JCAnnotation>> da = tree.dimAnnotations;
                 for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                     if (da.size() > i) {
                         printTypeAnnotations(da.get(i));
@@ -941,7 +975,16 @@ public class Pretty extends JCTree.Visitor {
     public void visitLambda(JCLambda tree) {
         try {
             print("(");
-            printExprs(tree.params);
+            if (TreeInfo.isExplicitLambda(tree)) {
+                printExprs(tree.params);
+            } else {
+                String sep = "";
+                for (JCVariableDecl param : tree.params) {
+                    print(sep);
+                    print(param.name);
+                    sep = ",";
+                }
+            }
             print(")->");
             printExpr(tree.body);
         } catch (IOException e) {
@@ -1097,7 +1140,7 @@ public class Pretty extends JCTree.Visitor {
     public void visitReference(JCMemberReference tree) {
         try {
             printExpr(tree.expr);
-            print("#");
+            print("::");
             if (tree.typeargs != null) {
                 print("<");
                 printExprs(tree.typeargs);
@@ -1120,28 +1163,28 @@ public class Pretty extends JCTree.Visitor {
     public void visitLiteral(JCLiteral tree) {
         try {
             switch (tree.typetag) {
-                case TypeTags.INT:
+                case INT:
                     print(tree.value.toString());
                     break;
-                case TypeTags.LONG:
+                case LONG:
                     print(tree.value + "L");
                     break;
-                case TypeTags.FLOAT:
+                case FLOAT:
                     print(tree.value + "F");
                     break;
-                case TypeTags.DOUBLE:
+                case DOUBLE:
                     print(tree.value.toString());
                     break;
-                case TypeTags.CHAR:
+                case CHAR:
                     print("\'" +
                             Convert.quote(
                             String.valueOf((char)((Number)tree.value).intValue())) +
                             "\'");
                     break;
-                case TypeTags.BOOLEAN:
+                case BOOLEAN:
                     print(((Number)tree.value).intValue() == 1 ? "true" : "false");
                     break;
-                case TypeTags.BOT:
+                case BOT:
                     print("null");
                     break;
                 default:
@@ -1156,31 +1199,31 @@ public class Pretty extends JCTree.Visitor {
     public void visitTypeIdent(JCPrimitiveTypeTree tree) {
         try {
             switch(tree.typetag) {
-                case TypeTags.BYTE:
+                case BYTE:
                     print("byte");
                     break;
-                case TypeTags.CHAR:
+                case CHAR:
                     print("char");
                     break;
-                case TypeTags.SHORT:
+                case SHORT:
                     print("short");
                     break;
-                case TypeTags.INT:
+                case INT:
                     print("int");
                     break;
-                case TypeTags.LONG:
+                case LONG:
                     print("long");
                     break;
-                case TypeTags.FLOAT:
+                case FLOAT:
                     print("float");
                     break;
-                case TypeTags.DOUBLE:
+                case DOUBLE:
                     print("double");
                     break;
-                case TypeTags.BOOLEAN:
+                case BOOLEAN:
                     print("boolean");
                     break;
-                case TypeTags.VOID:
+                case VOID:
                     print("void");
                     break;
                 default:
@@ -1239,6 +1282,14 @@ public class Pretty extends JCTree.Visitor {
     public void visitTypeUnion(JCTypeUnion tree) {
         try {
             printExprs(tree.alternatives, " | ");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    public void visitTypeIntersection(JCTypeIntersection tree) {
+        try {
+            printExprs(tree.bounds, " & ");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

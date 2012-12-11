@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,14 +28,16 @@ package com.sun.tools.javac.code;
 import java.util.Locale;
 
 import com.sun.tools.javac.api.Messages;
-import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 
-import static com.sun.tools.javac.code.TypeTags.*;
 import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
+import static com.sun.tools.javac.code.TypeTag.ARRAY;
+import static com.sun.tools.javac.code.TypeTag.CLASS;
+import static com.sun.tools.javac.code.TypeTag.FORALL;
 
 /**
  * A combined type/symbol visitor for generating non-trivial localized string
@@ -50,6 +52,8 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
 
     List<Type> seenCaptured = List.nil();
     static final int PRIME = 997;  // largest prime less than 1000
+
+    protected Printer() { }
 
     /**
      * This method should be overriden in order to provide proper i18n support.
@@ -123,7 +127,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
     /**
      * Get a localized string represenation for a given type.
      *
-     * @param ts type to be displayed
+     * @param t type to be displayed
      * @param locale the locale in which the string is to be rendered
      * @return localized string representation
      */
@@ -134,7 +138,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
     /**
      * Get a localized string represenation for a given symbol.
      *
-     * @param ts symbol to be displayed
+     * @param s symbol to be displayed
      * @param locale the locale in which the string is to be rendered
      * @return localized string representation
      */
@@ -181,7 +185,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
 
     @Override
     public String visitClassType(ClassType t, Locale locale) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if (t.getEnclosingType().tag == CLASS && t.tsym.owner.kind == Kinds.TYP) {
             buf.append(visit(t.getEnclosingType(), locale));
             buf.append(".");
@@ -209,7 +213,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
 
     @Override
     public String visitWildcardType(WildcardType t, Locale locale) {
-        StringBuffer s = new StringBuffer();
+        StringBuilder s = new StringBuilder();
         s.append(t.kind);
         if (t.kind != UNBOUND) {
             s.append(visit(t.type, locale));
@@ -247,7 +251,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
     protected String className(ClassType t, boolean longform, Locale locale) {
         Symbol sym = t.tsym;
         if (sym.name.length() == 0 && (sym.flags() & COMPOUND) != 0) {
-            StringBuffer s = new StringBuffer(visit(t.supertype_field, locale));
+            StringBuilder s = new StringBuilder(visit(t.supertype_field, locale));
             for (List<Type> is = t.interfaces_field; is.nonEmpty(); is = is.tail) {
                 s.append("&");
                 s.append(visit(is.head, locale));
@@ -286,7 +290,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
         if (!varArgs) {
             return visitTypes(args, locale);
         } else {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             while (args.tail.nonEmpty()) {
                 buf.append(visit(args.head, locale));
                 args = args.tail;

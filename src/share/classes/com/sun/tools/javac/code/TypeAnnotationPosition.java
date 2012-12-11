@@ -35,7 +35,7 @@ import com.sun.tools.javac.util.*;
 *  deletion without notice.</b>
 */
 // Code duplicated in com.sun.tools.classfile.TypeAnnotation.Position
-public class TypeAnnotationPosition implements Cloneable {
+public class TypeAnnotationPosition {
 
     public TargetType type = TargetType.UNKNOWN;
 
@@ -63,10 +63,7 @@ public class TypeAnnotationPosition implements Cloneable {
     // For class extends, implements, and throws classes
     public int type_index = Integer.MIN_VALUE;
 
-    public TypeAnnotationPosition() { }
-    public TypeAnnotationPosition(TargetType type) {
-        this.type = type;
-    }
+    public TypeAnnotationPosition() {}
 
     @Override
     public String toString() {
@@ -90,6 +87,10 @@ public class TypeAnnotationPosition implements Cloneable {
         // local variable
         case LOCAL_VARIABLE:
         case LOCAL_VARIABLE_COMPONENT:
+            if (lvarOffset == null) {
+                sb.append(", lvarOffset is null!");
+                break;
+            }
             sb.append(", {");
             for (int i = 0; i < lvarOffset.length; ++i) {
                 if (i != 0) sb.append("; ");
@@ -137,7 +138,7 @@ public class TypeAnnotationPosition implements Cloneable {
         // exception parameter
         case EXCEPTION_PARAMETER:
             // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
+            // System.out.println("TypeAnnotationPosition: Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
@@ -162,6 +163,7 @@ public class TypeAnnotationPosition implements Cloneable {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
+            sb.append(", position UNKNOWN!");
             break;
         default:
             throw new AssertionError("Unknown target type: " + type);
@@ -188,13 +190,5 @@ public class TypeAnnotationPosition implements Cloneable {
      */
     public boolean emitToClassfile() {
         return !type.isLocal() || isValidOffset;
-    }
-
-    public TypeAnnotationPosition clone() {
-        try {
-            return (TypeAnnotationPosition)super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("This not cloneable");
-        }
     }
 }

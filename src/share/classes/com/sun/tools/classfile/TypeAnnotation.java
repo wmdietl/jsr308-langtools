@@ -80,7 +80,7 @@ public class TypeAnnotation {
         // Copied from ClassReader
         int tag = (char)cr.readUnsignedShort();  // cast to introduce signedness
         if (!TargetType.isValidTargetTypeValue(tag))
-            throw new Annotation.InvalidAnnotation("invalid type annotation target type value: " + tag);
+            throw new Annotation.InvalidAnnotation("TypeAnnotation: Invalid type annotation target type value: " + tag);
 
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
@@ -112,6 +112,10 @@ public class TypeAnnotation {
                 position.lvarIndex[i] = cr.readUnsignedShort();
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            break;
         // method receiver
         case METHOD_RECEIVER:
         case METHOD_RECEIVER_COMPONENT:
@@ -130,6 +134,7 @@ public class TypeAnnotation {
             position.parameter_index = cr.readUnsignedByte();
             position.bound_index = cr.readUnsignedByte();
             break;
+        // class extends or implements clause
         case CLASS_EXTENDS:
         case CLASS_EXTENDS_COMPONENT:
             int in = cr.readUnsignedShort();
@@ -140,11 +145,6 @@ public class TypeAnnotation {
         // throws
         case THROWS:
             position.type_index = cr.readUnsignedShort();
-            break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
             break;
         // method parameter
         case METHOD_PARAMETER:
@@ -166,9 +166,9 @@ public class TypeAnnotation {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type: " + type);
+            throw new AssertionError("TypeAnnotation: Unknown target type: " + type);
         }
 
         if (type.hasLocation()) {
@@ -205,6 +205,11 @@ public class TypeAnnotation {
             n += 2 * table_length; // length;
             n += 2 * table_length; // index
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            // TODO: how do we separate which of the types it is on?
+            // System.out.println("Handle exception parameters!");
+            break;
         // method receiver
         case METHOD_RECEIVER:
         case METHOD_RECEIVER_COMPONENT:
@@ -232,11 +237,6 @@ public class TypeAnnotation {
         case THROWS:
             n += 2; // type_index
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
         case METHOD_PARAMETER_COMPONENT:
@@ -257,9 +257,9 @@ public class TypeAnnotation {
         case FIELD_COMPONENT:
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type: " + pos.type);
+            throw new AssertionError("TypeAnnotation: Unknown target type: " + pos.type);
         }
 
         if (pos.type.hasLocation()) {
@@ -317,6 +317,10 @@ public class TypeAnnotation {
             // local variable
             case LOCAL_VARIABLE:
             case LOCAL_VARIABLE_COMPONENT:
+                if (lvarOffset == null) {
+                    sb.append(", lvarOffset is null!");
+                    break;
+                }
                 sb.append(", {");
                 for (int i = 0; i < lvarOffset.length; ++i) {
                     if (i != 0) sb.append("; ");
@@ -328,6 +332,11 @@ public class TypeAnnotation {
                     sb.append(lvarIndex[i]);
                 }
                 sb.append("}");
+                break;
+            // exception parameter
+            case EXCEPTION_PARAMETER:
+                // TODO: how do we separate which of the types it is on?
+                // System.out.println("Handle exception parameters!");
                 break;
             // method receiver
             case METHOD_RECEIVER:
@@ -361,11 +370,6 @@ public class TypeAnnotation {
                 sb.append(", type_index = ");
                 sb.append(type_index);
                 break;
-            // exception parameter
-            case EXCEPTION_PARAMETER:
-                // TODO: how do we separate which of the types it is on?
-                System.out.println("Handle exception parameters!");
-                break;
             // method parameter
             case METHOD_PARAMETER:
             case METHOD_PARAMETER_COMPONENT:
@@ -389,9 +393,9 @@ public class TypeAnnotation {
             case FIELD_COMPONENT:
                 break;
             case UNKNOWN:
-                break;
+                throw new AssertionError("TypeAnnotation: UNKNOWN target type should never occur!");
             default:
-                throw new AssertionError("Unknown target type: " + type);
+                throw new AssertionError("TypeAnnotation: Unknown target type: " + type);
             }
 
             // Append location data for generics/arrays.
@@ -542,7 +546,7 @@ public class TypeAnnotation {
         TargetType(int targetTypeValue, TargetAttribute... attrs) {
             if (targetTypeValue < Character.MIN_VALUE
                 || targetTypeValue > Character.MAX_VALUE)
-                throw new AssertionError("Attribute type value needs to be a char: " + targetTypeValue);
+                throw new AssertionError("TypeAnnotation: Attribute type value needs to be a char: " + targetTypeValue);
             this.targetTypeValue = (char)targetTypeValue;
             this.flags = EnumSet.noneOf(TargetAttribute.class);
             for (TargetAttribute attr : attrs)
@@ -563,8 +567,13 @@ public class TypeAnnotation {
         public TargetType getGenericComplement() {
             if (hasLocation())
                 return this;
-            else
+            else {
+                // TODO: don't call with unknown!
+                //if (((char)targetTypeValue()) == ((char)UNKNOWN.targetTypeValue))
+                //    return UNKNOWN;
+
                 return fromTargetTypeValue(targetTypeValue() + 1);
+            }
         }
 
         /**
@@ -625,7 +634,7 @@ public class TypeAnnotation {
                 return UNKNOWN;
 
             if (tag < 0 || tag >= targets.length)
-                throw new IllegalArgumentException("Unknown TargetType: " + tag);
+                throw new IllegalArgumentException("TypeAnnotation: Unknown TargetType: " + tag);
             return targets[tag];
         }
     }

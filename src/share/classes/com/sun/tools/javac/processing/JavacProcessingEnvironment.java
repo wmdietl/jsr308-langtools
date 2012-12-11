@@ -145,6 +145,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     Source source;
 
     private ClassLoader processorClassLoader;
+    private SecurityException processorClassLoaderException;
 
     /**
      * JavacMessages object used for localization
@@ -155,12 +156,15 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
 
     private Context context;
 
-    private static int uidCounter = 0;
-    private final int uid;
+    /** Get the JavacProcessingEnvironment instance for this context. */
+    public static JavacProcessingEnvironment instance(Context context) {
+        JavacProcessingEnvironment instance = context.get(JavacProcessingEnvironment.class);
+        if (instance == null)
+            instance = new JavacProcessingEnvironment(context);
+        return instance;
+    }
 
-    public JavacProcessingEnvironment(Context context, Iterable<? extends Processor> processors) {
-        uid = ++uidCounter;
-        options = Options.instance(context);
+    protected JavacProcessingEnvironment(Context context) {
         this.context = context;
         log = Log.instance(context);
         source = Source.instance(context);
@@ -189,6 +193,11 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         unmatchedProcessorOptions = initUnmatchedProcessorOptions();
         messages = JavacMessages.instance(context);
         taskListener = MultiTaskListener.instance(context);
+        initProcessorClassLoader();
+    }
+
+    public void setProcessors(Iterable<? extends Processor> processors) {
+        Assert.checkNull(discoveredProcs);
         initProcessorIterator(context, processors);
     }
 
@@ -202,6 +211,23 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         platformAnnotations.add("java.lang.annotation.Retention");
         platformAnnotations.add("java.lang.annotation.Target");
         return Collections.unmodifiableSet(platformAnnotations);
+    }
+
+    private void initProcessorClassLoader() {
+        JavaFileManager fileManager = context.get(JavaFileManager.class);
+        try {
+            // If processorpath is not explicitly set, use the classpath.
+            processorClassLoader = fileManager.hasLocation(ANNOTATION_PROCESSOR_PATH)
+                ? fileManager.getClassLoader(ANNOTATION_PROCESSOR_PATH)
+                : fileManager.getClassLoader(CLASS_PATH);
+
+            if (processorClassLoader != null && processorClassLoader instanceof Closeable) {
+                JavaCompiler compiler = JavaCompiler.instance(context);
+                compiler.closeables = compiler.closeables.prepend((Closeable) processorClassLoader);
+            }
+        } catch (SecurityException e) {
+            processorClassLoaderException = e;
+        }
     }
 
     private void initProcessorIterator(Context context, Iterable<? extends Processor> processors) {
@@ -222,18 +248,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             processorIterator = processors.iterator();
         } else {
             String processorNames = options.get(PROCESSOR);
-            JavaFileManager fileManager = context.get(JavaFileManager.class);
-            try {
-                // If processorpath is not explicitly set, use the classpath.
-                processorClassLoader = fileManager.hasLocation(ANNOTATION_PROCESSOR_PATH)
-                    ? fileManager.getClassLoader(ANNOTATION_PROCESSOR_PATH)
-                    : fileManager.getClassLoader(CLASS_PATH);
-
-                if (processorClassLoader != null && processorClassLoader instanceof Closeable) {
-                    JavaCompiler compiler = JavaCompiler.instance(context);
-                    compiler.closeables = compiler.closeables.prepend((Closeable) processorClassLoader);
-                }
-
+            if (processorClassLoaderException == null) {
                 /*
                  * If the "-processor" option is used, search the appropriate
                  * path for the named class.  Otherwise, use a service
@@ -244,14 +259,15 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 } else {
                     processorIterator = new ServiceIterator(processorClassLoader, log);
                 }
-            } catch (SecurityException e) {
+            } else {
                 /*
                  * A security exception will occur if we can't create a classloader.
                  * Ignore the exception if, with hindsight, we didn't need it anyway
                  * (i.e. no processor was specified either explicitly, or implicitly,
                  * in service configuration file.) Otherwise, we cannot continue.
                  */
-                processorIterator = handleServiceLoaderUnavailability("proc.cant.create.loader", e);
+                processorIterator = handleServiceLoaderUnavailability("proc.cant.create.loader",
+                        processorClassLoaderException);
             }
         }
         discoveredProcs = new DiscoveredProcessors(processorIterator);
@@ -786,6 +802,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         final JavaCompiler compiler;
         /** The log for the round. */
         final Log log;
+        /** The diagnostic handler for the round. */
+        final Log.DeferredDiagnosticHandler deferredDiagnosticHandler;
 
         /** The ASTs to be compiled. */
         List<JCCompilationUnit> roots;
@@ -799,19 +817,22 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         /** The set of package-info files to be processed this round. */
         List<PackageSymbol> packageInfoFiles;
 
-        /** The number of Messager errors generated in this round. */
-        int nMessagerErrors;
-
         /** Create a round (common code). */
-        private Round(Context context, int number, int priorErrors, int priorWarnings) {
+        private Round(Context context, int number, int priorErrors, int priorWarnings,
+                Log.DeferredDiagnosticHandler deferredDiagnosticHandler) {
             this.context = context;
             this.number = number;
 
             compiler = JavaCompiler.instance(context);
             log = Log.instance(context);
             log.nerrors = priorErrors;
-            log.nwarnings += priorWarnings;
-            log.deferDiagnostics = true;
+            log.nwarnings = priorWarnings;
+            if (number == 1) {
+                Assert.checkNonNull(deferredDiagnosticHandler);
+                this.deferredDiagnosticHandler = deferredDiagnosticHandler;
+            } else {
+                this.deferredDiagnosticHandler = new Log.DeferredDiagnosticHandler(log);
+            }
 
             // the following is for the benefit of JavacProcessingEnvironment.getContext()
             JavacProcessingEnvironment.this.context = context;
@@ -822,8 +843,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         }
 
         /** Create the first round. */
-        Round(Context context, List<JCCompilationUnit> roots, List<ClassSymbol> classSymbols) {
-            this(context, 1, 0, 0);
+        Round(Context context, List<JCCompilationUnit> roots, List<ClassSymbol> classSymbols,
+                Log.DeferredDiagnosticHandler deferredDiagnosticHandler) {
+            this(context, 1, 0, 0, deferredDiagnosticHandler);
             this.roots = roots;
             genClassFiles = new HashMap<String,JavaFileObject>();
 
@@ -845,8 +867,9 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 Set<JavaFileObject> newSourceFiles, Map<String,JavaFileObject> newClassFiles) {
             this(prev.nextContext(),
                     prev.number+1,
-                    prev.nMessagerErrors,
-                    prev.compiler.log.nwarnings);
+                    prev.compiler.log.nerrors,
+                    prev.compiler.log.nwarnings,
+                    null);
             this.genClassFiles = prev.genClassFiles;
 
             List<JCCompilationUnit> parsedFiles = compiler.parseFiles(newSourceFiles);
@@ -885,15 +908,12 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         }
 
         /** Create the compiler to be used for the final compilation. */
-        JavaCompiler finalCompiler(boolean errorStatus) {
+        JavaCompiler finalCompiler() {
             try {
                 Context nextCtx = nextContext();
                 JavacProcessingEnvironment.this.context = nextCtx;
                 JavaCompiler c = JavaCompiler.instance(nextCtx);
-                c.log.nwarnings += compiler.log.nwarnings;
-                if (errorStatus) {
-                    c.log.nerrors += compiler.log.nerrors;
-                }
+                c.log.initRound(compiler.log);
                 return c;
             } finally {
                 compiler.close(false);
@@ -917,7 +937,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             if (messager.errorRaised())
                 return true;
 
-            for (JCDiagnostic d: log.deferredDiagnostics) {
+            for (JCDiagnostic d: deferredDiagnosticHandler.getDiagnostics()) {
                 switch (d.getKind()) {
                     case WARNING:
                         if (werror)
@@ -1001,8 +1021,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 if (!taskListener.isEmpty())
                     taskListener.finished(new TaskEvent(TaskEvent.Kind.ANNOTATION_PROCESSING_ROUND));
             }
-
-            nMessagerErrors = messager.errorCount();
         }
 
         void showDiagnostics(boolean showAll) {
@@ -1011,7 +1029,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 // suppress errors, which are all presumed to be transient resolve errors
                 kinds.remove(JCDiagnostic.Kind.ERROR);
             }
-            log.reportDeferredDiagnostics(kinds);
+            deferredDiagnosticHandler.reportDeferredDiagnostics(kinds);
+            log.popDiagnosticHandler(deferredDiagnosticHandler);
         }
 
         /** Print info about this round. */
@@ -1080,9 +1099,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             next.put(Tokens.tokensKey, tokens);
 
             Log nextLog = Log.instance(next);
-            // propogate the log's writers directly, instead of going through context
-            nextLog.setWriters(log);
-            nextLog.setSourceMap(log);
+            nextLog.initRound(log);
 
             JavaCompiler oldCompiler = JavaCompiler.instance(context);
             JavaCompiler nextCompiler = JavaCompiler.instance(next);
@@ -1117,7 +1134,8 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     public JavaCompiler doProcessing(Context context,
                                      List<JCCompilationUnit> roots,
                                      List<ClassSymbol> classSymbols,
-                                     Iterable<? extends PackageSymbol> pckSymbols) {
+                                     Iterable<? extends PackageSymbol> pckSymbols,
+                                     Log.DeferredDiagnosticHandler deferredDiagnosticHandler) {
         log = Log.instance(context);
 
         Set<PackageSymbol> specifiedPackages = new LinkedHashSet<PackageSymbol>();
@@ -1125,7 +1143,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
             specifiedPackages.add(psym);
         this.specifiedPackages = Collections.unmodifiableSet(specifiedPackages);
 
-        Round round = new Round(context, roots, classSymbols);
+        Round round = new Round(context, roots, classSymbols, deferredDiagnosticHandler);
 
         boolean errorStatus;
         boolean moreToDo;
@@ -1178,7 +1196,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 new LinkedHashSet<JavaFileObject>(filer.getGeneratedSourceFileObjects());
         roots = cleanTrees(round.roots);
 
-        JavaCompiler compiler = round.finalCompiler(errorStatus);
+        JavaCompiler compiler = round.finalCompiler();
 
         if (newSourceFiles.size() > 0)
             roots = roots.appendList(compiler.parseFiles(newSourceFiles));
@@ -1283,7 +1301,6 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
         if (procNames != null)
             return true;
 
-        String procPath;
         URL[] urls = new URL[1];
         for(File pathElement : workingpath) {
             try {
@@ -1355,9 +1372,7 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
                 super.visitIdent(node);
             }
             public void visitAnnotation(JCAnnotation node) {
-                if (node instanceof JCTypeAnnotation) {
-                    ((JCTypeAnnotation)node).attribute_field = null;
-                }
+                node.attribute = null;
                 super.visitAnnotation(node);
             }
         };
@@ -1472,15 +1487,21 @@ public class JavacProcessingEnvironment implements ProcessingEnvironment, Closea
     }
 
     /**
-     * For internal use only.  This method will be
-     * removed without warning.
+     * For internal use only.  This method may be removed without warning.
      */
     public Context getContext() {
         return context;
     }
 
+    /**
+     * For internal use only.  This method may be removed without warning.
+     */
+    public ClassLoader getProcessorClassLoader() {
+        return processorClassLoader;
+    }
+
     public String toString() {
-        return "JavacProcessingEnvironment#" + uid;
+        return "javac ProcessingEnvironment";
     }
 
     public static boolean isValidOptionName(String optionName) {
