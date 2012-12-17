@@ -513,7 +513,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
      */
     public CompileState shouldStopPolicyIfNoError;
 
-    /** A queue of all as yet unattributed classes.oLo
+    /** A queue of all as yet unattributed classes.
      */
     public Todo todo;
 

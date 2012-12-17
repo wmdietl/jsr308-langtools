@@ -1924,10 +1924,24 @@ public class Code {
                 if (length < Character.MAX_VALUE) {
                     v.length = length;
                     putVar(v);
+                    fillLocalVarPosition(v);
                 }
             }
         }
         state.defined.excl(adr);
+    }
+
+    private void fillLocalVarPosition(LocalVar lv) {
+        if (lv == null || lv.sym == null
+                || lv.sym.annotations.isTypesEmpty())
+            return;
+        for (Attribute.TypeCompound ta : lv.sym.getTypeAnnotationMirrors()) {
+            TypeAnnotationPosition p = ta.position;
+            p.lvarOffset = new int[] { (int)lv.start_pc };
+            p.lvarLength = new int[] { (int)lv.length };
+            p.lvarIndex = new int[] { (int)lv.reg };
+            p.isValidOffset = true;
+        }
     }
 
     /** Put a live variable range into the buffer to be output to the

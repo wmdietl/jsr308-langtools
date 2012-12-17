@@ -130,6 +130,7 @@ public class MethodWriterImpl extends AbstractExecutableMemberWriter
             addName(method.name(), pre);
         }
         addParameters(method, pre);
+        addReceiverAnnotations(method, pre);
         addExceptions(method, pre);
         return pre;
     }
