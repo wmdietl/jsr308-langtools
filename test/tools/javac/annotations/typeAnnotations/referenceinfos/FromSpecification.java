@@ -59,13 +59,13 @@ public class FromSpecification {
 
     @TADescriptions({
         @TADescription(annotation = "TL", type = METHOD_PARAMETER,
-                genericLocation = {}, paramIndex = 0),
-        @TADescription(annotation = "TK", type = METHOD_PARAMETER,
                 genericLocation = {1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TK", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
         @TADescription(annotation = "TI", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0)
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0)
     })
     public String testSpec3() {
         return "class Test { class O1 { class O2 { class O3 { class NestedStatic {} } } }" +
@@ -95,21 +95,21 @@ public class FromSpecification {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER,
-                genericLocation = {}, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
                 genericLocation = {1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 3, 0}, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 3, 1}, paramIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0, 3, 0}, paramIndex = 0),
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 0}, paramIndex = 0),
         @TADescription(annotation = "TH", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0)
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0)
     })
     public String testSpec5() {
         return "class Test { class O1 { class O2<A, B> { class O3 { class Nested<X, Y> {} } } }" +

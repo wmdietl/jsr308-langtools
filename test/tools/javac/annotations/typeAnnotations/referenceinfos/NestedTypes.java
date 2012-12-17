@@ -70,7 +70,7 @@ public class NestedTypes {
     }
 
     @TADescription(annotation = "TA", type = METHOD_PARAMETER,
-            genericLocation = {3, 0, 1, 0}, paramIndex = 0)
+            genericLocation = {3, 0}, paramIndex = 0)
     public String testParam1e() {
         return "void test(List<java.util.@TA Map.Entry> a) { }";
     }
@@ -146,27 +146,27 @@ public class NestedTypes {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 3}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0}, paramIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 2}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0}, paramIndex = 0),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 2, 0}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 3, 0}, paramIndex = 0),
         @TADescription(annotation = "TD", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 2, 0, 0, 1}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 0, 0, 0, 0, 0}, paramIndex = 0),
         @TADescription(annotation = "TE", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 2, 0, 0}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 0}, paramIndex = 0),
         @TADescription(annotation = "TF", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 2, 0, 0, 0}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 3, 0, 3, 0, 0, 0}, paramIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_PARAMETER,
-                genericLocation = {0, 1}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 1, 0}, paramIndex = 0),
         @TADescription(annotation = "TH", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 0}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 1, 0, 3, 0}, paramIndex = 0),
         @TADescription(annotation = "TI", type = METHOD_PARAMETER,
-                genericLocation = {0, 1, 1}, paramIndex = 0),
+                genericLocation = {3, 0, 0, 0, 0, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0),
         @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
-                genericLocation = {0}, paramIndex = 0),
+                genericLocation = {3, 0}, paramIndex = 0),
         @TADescription(annotation = "TK", type = METHOD_PARAMETER,
-                genericLocation = {0, 0}, paramIndex = 0)
+                genericLocation = {3, 0, 0, 0}, paramIndex = 0)
     })
     public String testParam4() {
         return "class Outer {\n" +
@@ -178,6 +178,8 @@ public class NestedTypes {
                 "}";
     }
 
+
+    // TODO: adapt all tests below to new bytecode representation
 
     // Local variables
 

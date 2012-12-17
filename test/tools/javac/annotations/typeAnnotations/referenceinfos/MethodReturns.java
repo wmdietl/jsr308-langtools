@@ -67,7 +67,7 @@ public class MethodReturns {
     }
 
     @TADescriptions({})
-    public String methodWithDeclarationAnnotatin() {
+    public String methodWithDeclarationAnnotation() {
         return "@Decl String test() { return null; }";
     }
 
@@ -121,11 +121,11 @@ public class MethodReturns {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN,
-                genericLocation = { 3, 0, 3, 0 }),
+                genericLocation = { 3, 0, 1, 0, 3, 0 }),
         @TADescription(annotation = "TB", type = METHOD_RETURN,
-                genericLocation = { 3, 0, 3, 1 }),
+                genericLocation = { 3, 0, 1, 0, 3, 1 }),
         @TADescription(annotation = "TC", type = METHOD_RETURN,
-                genericLocation = { 3, 0, 3, 1, 2, 0 })
+                genericLocation = { 3, 0, 1, 0, 3, 1, 2, 0 })
     })
     public String methodReturnAsNestedWildcard2() {
         return "class Test<K> { Set<Map.Entry<@TA K, @TB ? extends @TC Object>> entrySet() { return null; } }";
@@ -157,6 +157,18 @@ public class MethodReturns {
     })
     public String methodReturnAsNestedWildcard5() {
         return "Set<? extends @TB Map. @TC Entry> entrySet() { return null; }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0, 3, 0 }),
+        @TADescription(annotation = "TB", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0, 3, 1 }),
+        @TADescription(annotation = "TC", type = METHOD_RETURN,
+                genericLocation = { 3, 0, 2, 0, 1, 0 }),
+    })
+    public String methodReturnAsNestedWildcard6() {
+        return "Set<? extends Map. @TC Entry<@TA String, @TB Object>> entrySet() { return null; }";
     }
 
 }
