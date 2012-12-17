@@ -368,7 +368,7 @@ public class Annotate {
             Symbol on) {
         T firstOccurrence = annotations.head;
         List<Attribute> repeated = List.nil();
-        Type origAnnoType;
+        Type origAnnoType = null;
         Type arrayOfOrigAnnoType = null;
         Type targetContainerType = null;
         MethodSymbol containerValueSymbol = null;
