@@ -3437,16 +3437,19 @@ public class JavacParser implements Parser {
     }
 
     /** MethodDeclaratorRest =
-     *      FormalParameters BracketsOpt [Annotations] [Throws TypeList] ( MethodBody | [DEFAULT AnnotationValue] ";")
+     *      FormalParameters BracketsOpt [Throws TypeList] ( MethodBody | [DEFAULT AnnotationValue] ";")
      *  VoidMethodDeclaratorRest =
-     *      FormalParameters [Annotations] [Throws TypeList] ( MethodBody | ";")
+     *      FormalParameters [Throws TypeList] ( MethodBody | ";")
      *  InterfaceMethodDeclaratorRest =
-     *      FormalParameters BracketsOpt [Annotations] [THROWS TypeList] ";"
+     *      FormalParameters BracketsOpt [THROWS TypeList] ";"
      *  VoidInterfaceMethodDeclaratorRest =
-     *      FormalParameters [Annotations] [THROWS TypeList] ";"
+     *      FormalParameters [THROWS TypeList] ";"
      *  ConstructorDeclaratorRest =
-     *      "(" FormalParameterListOpt ")" [Annotations] [THROWS TypeList] MethodBody
+     *      "(" FormalParameterListOpt ")" [THROWS TypeList] MethodBody
      */
+    // TODO: do we need to allow Annotations before BracketsOpt, to allow:
+    //   Object foobar() @A @B [] @C @D []
+    // BracketsOpt does not seem to allow @A @B.
     protected JCTree methodDeclaratorRest(int pos,
                               JCModifiers mods,
                               JCExpression type,
@@ -3663,22 +3666,40 @@ public class JavacParser implements Parser {
 
         if (createNewLevel) {
             mostInnerType = to(F.at(token.pos).TypeArray(mostInnerType));
-        } else {
-            while (TreeInfo.typeIn(mostInnerType).hasTag(SELECT)) {
-                mostInnerType = ((JCFieldAccess) TreeInfo.typeIn(mostInnerType)).getExpression();
+        }
+
+        JCExpression mostInnerTypeToReturn = mostInnerType;
+        if (annos.nonEmpty()) {
+            JCExpression lastToModify = mostInnerType;
+
+            while (TreeInfo.typeIn(mostInnerType).hasTag(SELECT) ||
+                    TreeInfo.typeIn(mostInnerType).hasTag(TYPEAPPLY)) {
+                while (TreeInfo.typeIn(mostInnerType).hasTag(SELECT)) {
+                    lastToModify = mostInnerType;
+                    mostInnerType = ((JCFieldAccess) TreeInfo.typeIn(mostInnerType)).getExpression();
+                }
+                while (TreeInfo.typeIn(mostInnerType).hasTag(TYPEAPPLY)) {
+                    lastToModify = mostInnerType;
+                    mostInnerType = ((JCTypeApply) TreeInfo.typeIn(mostInnerType)).clazz;
+                }
+            }
+
+            mostInnerType = F.at(annos.head.pos).AnnotatedType(annos, mostInnerType);
+
+            if (TreeInfo.typeIn(lastToModify).hasTag(TYPEAPPLY)) {
+                ((JCTypeApply) TreeInfo.typeIn(lastToModify)).clazz = mostInnerType;
+            } else if (TreeInfo.typeIn(lastToModify).hasTag(SELECT)) {
+                ((JCFieldAccess) TreeInfo.typeIn(lastToModify)).selected = mostInnerType;
+            } else {
+                // We never saw a SELECT or TYPEAPPLY, return the annotated type.
+                mostInnerTypeToReturn = mostInnerType;
             }
         }
 
-        if (annos.nonEmpty()) {
-            // If createNewLevel is true, the annotations are already on the right type.
-            // Otherwise, they might not be and will need to get adjustments.
-            mostInnerType = F.at(annos.head.pos).AnnotatedType(annos, mostInnerType/*, createNewLevel*/);
-        }
-
         if (mostInnerArrayType == null) {
-            return mostInnerType;
+            return mostInnerTypeToReturn;
         } else {
-            mostInnerArrayType.elemtype = mostInnerType;
+            mostInnerArrayType.elemtype = mostInnerTypeToReturn;
             storeEnd(type, origEndPos);
             return type;
         }
