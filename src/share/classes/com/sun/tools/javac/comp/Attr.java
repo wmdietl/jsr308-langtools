@@ -1020,9 +1020,6 @@ public class Attr extends JCTree.Visitor {
                 attribStat(tree.body, localEnv);
             }
 
-            // Correct the position of all type annotations.
-            TypeAnnotations.organizeTypeAnnotations(syms, names, tree);
-
             localEnv.info.scope.leave();
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
@@ -1044,9 +1041,6 @@ public class Attr extends JCTree.Visitor {
                 annotate.flush();
             }
         } else {
-            // Correct the position of all type annotations.
-            TypeAnnotations.organizeTypeAnnotations(syms, names, tree);
-
             if (tree.init != null) {
                 // Field initializer expression need to be entered.
                 memberEnter.typeAnnotate(tree.init, env, tree.sym);
@@ -4037,7 +4031,8 @@ public class Attr extends JCTree.Visitor {
         // Check type annotations applicability rules
         validateTypeAnnotations(tree);
 
-        TypeAnnotations.completeTypeAnnotations(this.names, tree);
+        // Correctly organize the postions of the type annotations
+        TypeAnnotations.organizeTypeAnnotations(this.syms, this.names, tree);
     }
         // where
         /** get a diagnostic position for an attribute of Type t, or null if attribute missing */
