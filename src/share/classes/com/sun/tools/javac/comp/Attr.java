@@ -879,6 +879,7 @@ public class Attr extends JCTree.Visitor {
             deferredLintHandler.flush(tree.pos());
             chk.checkDeprecatedAnnotation(tree.pos(), m);
 
+
             // Create a new environment with local scope
             // for attributing the method.
             Env<AttrContext> localEnv = memberEnter.methodEnv(tree, env);
@@ -921,6 +922,21 @@ public class Attr extends JCTree.Visitor {
 
             // Check that result type is well-formed.
             chk.validate(tree.restype, localEnv);
+
+            // Check that receiver type is well-formed.
+            if (tree.recvparam != null) {
+                // Use a new environment to check the receiver parameter.
+                // Otherwise I get "might not have been initialized" errors.
+                // Is there a better way?
+                Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
+                attribType(tree.recvparam, newEnv);
+                chk.validate(tree.recvparam, newEnv);
+                if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
+                    // The == covers the common non-generic case, but for generic classes we need isSameType;
+                    // note that equals didn't work.
+                    log.error(tree.recvparam.pos(), "incorrect.receiver.type");
+                }
+            }
 
             // annotation method checks
             if ((owner.flags() & ANNOTATION) != 0) {
@@ -996,9 +1012,14 @@ public class Attr extends JCTree.Visitor {
                     }
                 }
 
+                // Attribute all type annotations in the body
+                memberEnter.typeAnnotate(tree.body, localEnv, m);
+                annotate.flush();
+
                 // Attribute method body.
                 attribStat(tree.body, localEnv);
             }
+
             localEnv.info.scope.leave();
             result = tree.type = m.type;
             chk.validateAnnotations(tree.mods.annotations, m);
@@ -1017,6 +1038,12 @@ public class Attr extends JCTree.Visitor {
                 env.info.scope.enter(tree.sym);
             } else {
                 memberEnter.memberEnter(tree, env);
+                annotate.flush();
+            }
+        } else {
+            if (tree.init != null) {
+                // Field initializer expression need to be entered.
+                memberEnter.typeAnnotate(tree.init, env, tree.sym);
                 annotate.flush();
             }
         }
@@ -1076,6 +1103,11 @@ public class Attr extends JCTree.Visitor {
                 new MethodSymbol(tree.flags | BLOCK, names.empty, null,
                                  env.info.scope.owner);
             if ((tree.flags & STATIC) != 0) localEnv.info.staticLevel++;
+
+            // Attribute all type annotations in the block
+            memberEnter.typeAnnotate(tree, localEnv, localEnv.info.scope.owner);
+            annotate.flush();
+
             attribStats(tree.stats, localEnv);
         } else {
             // Create a new local environment with a local scope.
@@ -1828,10 +1860,24 @@ public class Attr extends JCTree.Visitor {
         // If enclosing class is given, attribute it, and
         // complete class name to be fully qualified
         JCExpression clazz = tree.clazz; // Class field following new
-        JCExpression clazzid =          // Identifier in class field
-            (clazz.hasTag(TYPEAPPLY))
-            ? ((JCTypeApply) clazz).clazz
-            : clazz;
+        JCExpression clazzid;            // Identifier in class field
+        JCAnnotatedType annoclazzid;     // Annotated type enclosing clazzid
+        annoclazzid = null;
+
+        if (clazz.hasTag(TYPEAPPLY)) {
+            clazzid = ((JCTypeApply) clazz).clazz;
+            if (clazzid.hasTag(ANNOTATED_TYPE)) {
+                annoclazzid = (JCAnnotatedType) clazzid;
+                clazzid = annoclazzid.underlyingType;
+            }
+        } else {
+            if (clazz.hasTag(ANNOTATED_TYPE)) {
+                annoclazzid = (JCAnnotatedType) clazz;
+                clazzid = annoclazzid.underlyingType;
+            } else {
+                clazzid = clazz;
+            }
+        }
 
         JCExpression clazzid1 = clazzid; // The same in fully qualified form
 
@@ -1846,14 +1892,30 @@ public class Attr extends JCTree.Visitor {
             // yields a clazz T.C.
             Type encltype = chk.checkRefType(tree.encl.pos(),
                                              attribExpr(tree.encl, env));
+            // TODO 308: in <expr>.new C, do we also want to add the type annotations
+            // from expr to the combined type, or not? Yes, do this.
             clazzid1 = make.at(clazz.pos).Select(make.Type(encltype),
                                                  ((JCIdent) clazzid).name);
-            if (clazz.hasTag(TYPEAPPLY))
-                clazz = make.at(tree.pos).
+
+            if (clazz.hasTag(ANNOTATED_TYPE)) {
+                JCAnnotatedType annoType = (JCAnnotatedType) clazz;
+                List<JCAnnotation> annos = annoType.annotations;
+
+                if (annoType.underlyingType.hasTag(TYPEAPPLY)) {
+                    clazzid1 = make.at(tree.pos).
+                        TypeApply(clazzid1,
+                                  ((JCTypeApply) clazz).arguments);
+                }
+
+                clazzid1 = make.at(tree.pos).
+                    AnnotatedType(annos, clazzid1);
+            } else if (clazz.hasTag(TYPEAPPLY)) {
+                clazzid1 = make.at(tree.pos).
                     TypeApply(clazzid1,
                               ((JCTypeApply) clazz).arguments);
-            else
-                clazz = clazzid1;
+            }
+
+            clazz = clazzid1;
         }
 
         // Attribute clazz expression and store
@@ -1870,6 +1932,9 @@ public class Attr extends JCTree.Visitor {
             tree.clazz.type = clazztype;
             TreeInfo.setSymbol(clazzid, TreeInfo.symbol(clazzid1));
             clazzid.type = ((JCIdent) clazzid).sym.type;
+            if (annoclazzid != null) {
+                annoclazzid.type = clazzid.type;
+            }
             if (!clazztype.isErroneous()) {
                 if (cdef != null && clazztype.tsym.isInterface()) {
                     log.error(tree.encl.pos(), "anon.class.impl.intf.no.qual.for.new");
@@ -3589,6 +3654,7 @@ public class Attr extends JCTree.Visitor {
 
      public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar typeVar = (TypeVar)tree.type;
+        annotateType(typeVar, tree.annotations);
         if (!typeVar.bound.isErroneous()) {
             //fixup type-parameter bound computed in 'attribTypeVariables'
             typeVar.bound = checkIntersection(tree, tree.bounds);
@@ -3682,6 +3748,43 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotation(JCAnnotation tree) {
         log.error(tree.pos(), "annotation.not.valid.for.type", pt());
         result = tree.type = syms.errType;
+    }
+
+    public void visitAnnotatedType(JCAnnotatedType tree) {
+        Type underlyingType = attribType(tree.getUnderlyingType(), env);
+        this.attribAnnotationTypes(tree.annotations, env);
+        annotateType(underlyingType, tree.annotations);
+        result = tree.type = underlyingType;
+    }
+
+    /**
+     * Apply the annotations to the particular type.
+     */
+    public void annotateType(final Type type, final List<JCAnnotation> annotations) {
+        if (annotations.isEmpty())
+            return;
+        annotate.typeAnnotation(new Annotate.Annotator() {
+            @Override
+            public String toString() {
+                return "annotate " + annotations + " onto " + type;
+            }
+            @Override
+            public void enterAnnotation() {
+                List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
+                type.typeAnnotations = compounds;
+            }
+        });
+    }
+
+    private static List<Attribute.TypeCompound> fromAnnotations(List<JCAnnotation> annotations) {
+        if (annotations.isEmpty())
+            return List.nil();
+
+        ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
+        for (JCAnnotation anno : annotations) {
+            buf.append((Attribute.TypeCompound) anno.attribute);
+        }
+        return buf.toList();
     }
 
     public void visitErroneous(JCErroneous tree) {
@@ -3925,6 +4028,12 @@ public class Attr extends JCTree.Visitor {
             (c.flags() & ABSTRACT) == 0) {
             checkSerialVersionUID(tree, c);
         }
+
+        // Check type annotations applicability rules
+        validateTypeAnnotations(tree);
+
+        // Correctly organize the postions of the type annotations
+        TypeAnnotations.organizeTypeAnnotations(this.syms, this.names, tree);
     }
         // where
         /** get a diagnostic position for an attribute of Type t, or null if attribute missing */
@@ -3981,6 +4090,46 @@ public class Attr extends JCTree.Visitor {
     private Type capture(Type type) {
         return types.capture(type);
     }
+
+    private void validateTypeAnnotations(JCTree tree) {
+        tree.accept(typeAnnotationsValidator);
+    }
+    //where
+    private final JCTree.Visitor typeAnnotationsValidator =
+        new TreeScanner() {
+        public void visitAnnotation(JCAnnotation tree) {
+            if (tree.hasTag(TYPE_ANNOTATION)) {
+                // TODO: It seems to WMD as if the annotation in
+                // parameters, in particular also the recvparam, are never
+                // of type JCTypeAnnotation and therefore never checked!
+                // Luckily this check doesn't really do anything that isn't
+                // also done elsewhere.
+                chk.validateTypeAnnotation(tree, false);
+            }
+            super.visitAnnotation(tree);
+        }
+        public void visitTypeParameter(JCTypeParameter tree) {
+            chk.validateTypeAnnotations(tree.annotations, true);
+            scan(tree.bounds);
+            // Don't call super.
+            // This is needed because above we call validateTypeAnnotation with
+            // false, which would forbid annotations on type parameters.
+            // super.visitTypeParameter(tree);
+        }
+        public void visitMethodDef(JCMethodDecl tree) {
+            // Static methods cannot have receiver type annotations.
+            // In test case FailOver15.java, the nested method getString has
+            // a null sym, because an unknown class is instantiated.
+            // I would say it's safe to skip.
+            if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
+                if (tree.recvparam != null) {
+                    // TODO: better error message. Is the pos good?
+                    log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
+                }
+            }
+            super.visitMethodDef(tree);
+        }
+    };
 
     // <editor-fold desc="post-attribution visitor">
 

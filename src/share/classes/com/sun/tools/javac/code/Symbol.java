@@ -84,7 +84,15 @@ public abstract class Symbol implements Element {
      *  method to make sure that the class symbol is loaded.
      */
     public List<Attribute.Compound> getRawAttributes() {
-        return annotations.getAttributes();
+        return annotations.getDeclarationAttributes();
+    }
+
+    /** An accessor method for the type attributes of this symbol.
+     *  Attributes of class symbols should be accessed through the accessor
+     *  method to make sure that the class symbol is loaded.
+     */
+    public List<Attribute.TypeCompound> getRawTypeAttributes() {
+        return annotations.getTypeAttributes();
     }
 
     /** Fetch a particular annotation from a symbol. */
@@ -790,6 +798,12 @@ public abstract class Symbol implements Element {
             return super.getRawAttributes();
         }
 
+        @Override
+        public List<Attribute.TypeCompound> getRawTypeAttributes() {
+            if (completer != null) complete();
+            return super.getRawTypeAttributes();
+        }
+
         public Type erasure(Types types) {
             if (erasure_field == null)
                 erasure_field = new ClassType(types.erasure(type.getEnclosingType()),
@@ -1368,7 +1382,7 @@ public abstract class Symbol implements Element {
             return defaultValue;
         }
 
-         public List<VarSymbol> getParameters() {
+        public List<VarSymbol> getParameters() {
             return params();
         }
 
