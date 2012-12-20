@@ -116,13 +116,10 @@ public enum TargetType {
     }
 
     private TargetType(int targetTypeValue, boolean isLocal) {
-        if (targetTypeValue < Character.MIN_VALUE
-                || targetTypeValue > Character.MAX_VALUE)
-                // TODO: Is a u2 a Short or a Character? jvm.ClassReader has a nextChar method,
-                // but classfile.ClassReader has a readUnsignedShort method.
-                // Short is signed, char is unsigned -> use char.
-                Assert.error("Attribute type value needs to be a char: " + targetTypeValue);
-        this.targetTypeValue = (char)targetTypeValue;
+        if (targetTypeValue < 0
+                || targetTypeValue > 255)
+                Assert.error("Attribute type value needs to be an unsigned byte: " + targetTypeValue);
+        this.targetTypeValue = targetTypeValue;
         this.isLocal = isLocal;
     }
 
@@ -157,14 +154,14 @@ public enum TargetType {
     }
 
     public static boolean isValidTargetTypeValue(int tag) {
-        if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+        if (tag == UNKNOWN.targetTypeValue)
             return true;
 
         return (tag >= 0 && tag < targets.length);
     }
 
     public static TargetType fromTargetTypeValue(int tag) {
-        if (((byte)tag) == ((byte)UNKNOWN.targetTypeValue))
+        if (tag == UNKNOWN.targetTypeValue)
             return UNKNOWN;
 
         if (tag < 0 || tag >= targets.length)

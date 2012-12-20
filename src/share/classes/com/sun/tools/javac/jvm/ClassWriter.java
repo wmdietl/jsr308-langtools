@@ -968,7 +968,7 @@ public class ClassWriter extends ClassFile {
     }
 
     void writePosition(TypeAnnotationPosition p) {
-        databuf.appendChar(p.type.targetTypeValue());
+        databuf.appendByte(p.type.targetTypeValue()); // TargetType tag is a byte
         switch (p.type) {
         // type cast
         case CAST:

@@ -76,7 +76,7 @@ public class TypeAnnotation {
 
     private static Position read_position(ClassReader cr) throws IOException, Annotation.InvalidAnnotation {
         // Copied from ClassReader
-        int tag = (char)cr.readUnsignedShort();  // cast to introduce signedness
+        int tag = cr.readUnsignedByte(); // TargetType tag is a byte
         if (!TargetType.isValidTargetTypeValue(tag))
             throw new Annotation.InvalidAnnotation("TypeAnnotation: Invalid type annotation target type value: " + tag);
 
@@ -173,7 +173,7 @@ public class TypeAnnotation {
 
     private static int position_length(Position pos) {
         int n = 0;
-        n += 2; // target_type
+        n += 1; // TargetType tag is a byte
         switch (pos.type) {
         // type cast
         case CAST:
@@ -575,7 +575,7 @@ public class TypeAnnotation {
         METHOD_REFERENCE_TYPE_ARGUMENT(0x92, true),
 
         /** For annotations with an unknown target. */
-        UNKNOWN(0xFFFF);
+        UNKNOWN(0xFF);
 
         private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x92;
 
@@ -587,13 +587,10 @@ public class TypeAnnotation {
         }
 
         private TargetType(int targetTypeValue, boolean isLocal) {
-            if (targetTypeValue < Character.MIN_VALUE
-                    || targetTypeValue > Character.MAX_VALUE)
-                    // TODO: Is a u2 a Short or a Character? jvm.ClassReader has a nextChar method,
-                    // but classfile.ClassReader has a readUnsignedShort method.
-                    // Short is signed, char is unsigned -> use char.
-                    throw new AssertionError("Attribute type value needs to be a char: " + targetTypeValue);
-            this.targetTypeValue = (char)targetTypeValue;
+            if (targetTypeValue < 0
+                    || targetTypeValue > 255)
+                    throw new AssertionError("Attribute type value needs to be an unsigned byte: " + targetTypeValue);
+            this.targetTypeValue = targetTypeValue;
             this.isLocal = isLocal;
         }
 
@@ -612,10 +609,10 @@ public class TypeAnnotation {
             return this.targetTypeValue;
         }
 
-        private static TargetType[] targets = null;
+        private static final TargetType[] targets;
 
-        private static TargetType[] buildTargets() {
-            TargetType[] targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
+        static {
+            targets = new TargetType[MAXIMUM_TARGET_TYPE_VALUE + 1];
             TargetType[] alltargets = values();
             for (TargetType target : alltargets) {
                 if (target.targetTypeValue != UNKNOWN.targetTypeValue)
@@ -625,22 +622,16 @@ public class TypeAnnotation {
                 if (targets[i] == null)
                     targets[i] = UNKNOWN;
             }
-            return targets;
         }
 
         public static boolean isValidTargetTypeValue(int tag) {
-            if (targets == null)
-                targets = buildTargets();
-            if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
+            if (tag == UNKNOWN.targetTypeValue)
                 return true;
             return (tag >= 0 && tag < targets.length);
         }
 
         public static TargetType fromTargetTypeValue(int tag) {
-            if (targets == null)
-                targets = buildTargets();
-
-            if (((char)tag) == ((char)UNKNOWN.targetTypeValue))
+            if (tag == UNKNOWN.targetTypeValue)
                 return UNKNOWN;
 
             if (tag < 0 || tag >= targets.length)
