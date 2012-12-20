@@ -463,6 +463,14 @@ public abstract class Symbol implements Element {
     }
 
     /**
+     * TODO: Should there be a {@code
+     * javax.lang.model.element.Element.getTypeAnnotationMirrors()}.
+     */
+    public final List<Attribute.TypeCompound> getTypeAnnotationMirrors() {
+        return getRawTypeAttributes();
+    }
+
+    /**
      * @deprecated this method should never be used by javac internally.
      */
     @Deprecated
