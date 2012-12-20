@@ -109,7 +109,7 @@ public class TypeAnnotations {
             ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
             // Also include existing type annotations.
-            typeAnnos.appendList(sym.getTypeAnnotationMirrors());
+            typeAnnos.appendList(sym.getRawTypeAttributes());
 
             for (Attribute.Compound a : annotations) {
                 switch (annotationType(a, sym)) {

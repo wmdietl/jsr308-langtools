@@ -1935,7 +1935,7 @@ public class Code {
         if (lv == null || lv.sym == null
                 || lv.sym.annotations.isTypesEmpty())
             return;
-        for (Attribute.TypeCompound ta : lv.sym.getTypeAnnotationMirrors()) {
+        for (Attribute.TypeCompound ta : lv.sym.getRawTypeAttributes()) {
             TypeAnnotationPosition p = ta.position;
             p.lvarOffset = new int[] { (int)lv.start_pc };
             p.lvarLength = new int[] { (int)lv.length };

@@ -25,9 +25,9 @@
 
 package com.sun.tools.javac.model;
 
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;

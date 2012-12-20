@@ -1885,8 +1885,7 @@ public class ClassReader implements Completer {
             try {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
-                sym.annotations.setTypeAttributes(newList.prependList(sym.getTypeAnnotationMirrors()));
-
+                sym.annotations.setTypeAttributes(newList.prependList(sym.getRawTypeAttributes()));
             } finally {
                 currentClassFile = previousClassFile;
             }
