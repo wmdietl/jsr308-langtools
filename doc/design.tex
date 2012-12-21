@@ -2076,16 +2076,28 @@ The \code{type\_path} structure distinguishes among these locations.
 
 \begin{Verbatim}[samepage=true]
 struct type_path {
-    u1 path_type; // five possible values, one for each case below
-    union {
-        struct empty_path {};
-        struct array_type_path { type_path element_path; };
-        struct inner_type_path { type_path outer_path; };
-        struct wildcard_path { type_path bound_path; };
-        struct type_argument_path { u1 parameter_index; type_path parameter_path; };
-    }
+  u1              path_length;
+  type_path_entry path[path_length];
+}
+
+struct type_path_entry {
+  u1 type_path_kind;
+    // 0: annotation is deeper in this array type
+    // 1: annotation is deeper in this nested type
+    // 2: annotation is on the bound of this wildcard type arg
+    // 3: annotation is on the i'th type arg of this parameterized type
+  u1 type_argument_index;
+    // 0: ignore me
+    // non-0: the 1st, 2nd, etc type arg of this parameterized type
 }
 \end{Verbatim}
+
+%TODO:
+% A further improvement would be to drop the
+% type_argument_index item and encode the i'th type arg into the
+% type_path_kind item. Namely, type_path_kind values >=3 represent the
+% type_path_kind-2'th type arg of the current parameterized type. This trick
+% is used in the stack_map_frame structure (JVMS 4.7.4).
 
 % TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
 
