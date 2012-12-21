@@ -214,24 +214,13 @@ extension to declaration annotations (item
   void monitorTemperature() throws @Critical TemperatureException { ... }
 \end{Verbatim}
 
-\item for casts:
-\preverbnegspace
-\begin{Verbatim}
-  myString = (@NonNull String) myObject;
-\end{Verbatim}
-\preverbnegspace
-It is not permitted to omit the Java type, as in
-\code{myString = (@NonNull) myObject;}.
-% ; see Sections~\ref{type-annotation-use-cases}.
-% and~\ref{implicit-java-types-in-casts}.
-
 \item for constructor invocation results (that is, for object creation):
 
 \preverbnegspace
 \begin{Verbatim}
   new @Interned MyObject()
   new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
-  myVar . new @Tainted NestedClass
+  myVar . new @Tainted NestedClass()
 \end{Verbatim}
 \preverbnegspace
 
@@ -244,6 +233,23 @@ annotation follows the explicit type arguments (JLS
   new <String> @Interned MyObject()
 \end{Verbatim}
 
+\item for nested types:
+\preverbnegspace
+\begin{Verbatim}
+  Map.@NonNull Entry
+\end{Verbatim}
+
+\item for casts:
+\preverbnegspace
+\begin{Verbatim}
+  myString = (@NonNull String) myObject;
+\end{Verbatim}
+\preverbnegspace
+It is not permitted to omit the Java type, as in
+\code{myString = (@NonNull) myObject;}.
+% ; see Sections~\ref{type-annotation-use-cases}.
+% and~\ref{implicit-java-types-in-casts}.
+
 \item for type tests:
 \preverbnegspace
 \begin{Verbatim}
@@ -254,12 +260,6 @@ It is not permitted to omit the Java type, as in
 \code{myString instanceof @NonNull}.
 % ; see Sections~\ref{type-annotation-use-cases}.
 % and~\ref{implicit-java-types-in-casts}.
-
-\item for nested types:
-\preverbnegspace
-\begin{Verbatim}
-  Map.@NonNull Entry
-\end{Verbatim}
 
   %% We don't permit this any more:
   % If the nested type is a static type, then both the nested and
@@ -276,6 +276,10 @@ It is not permitted to omit the Java type, as in
 % \end{itemize}
 
 \end{itemize}
+
+% Don't mention that casts and type tests have no run-time effect; that is
+% not appropriate here, where we are focusing on the syntax rather than
+% introducing the semantics.
 
 
 % This is separate from regular type arguments, because there is a separate
@@ -1291,6 +1295,7 @@ annotation position.
 \newcommand{\RuntimeVisibleTypeAnnotations}{\code{Runtime\-Visible\-Type\-Annotations}\xspace}
 \newcommand{\RuntimeInvisibleTypeAnnotations}{\code{Runtime\-Invisible\-Type\-Annotations}\xspace}
 \newcommand{\RuntimeInOrVisibleTypeAnnotations}{\code{Runtime}\-[\code{In}]\code{visible\-Type\-Annotations}\xspace}
+\newcommand{\RuntimeInOrVisibleTypeParameterAnnotations}{\code{Runtime}\-[\code{In}]\code{visible\-Type\-Parameter\-Annotations}\xspace}
 
 % Don't use this in section headings, as that throws Hevea off.
 \newcommand{\extendedannotation}{\code{type\-\_anno\-ta\-tion}\xspace}
@@ -1420,11 +1425,13 @@ on the smallest enclosing class, field, method, or \<Code> structure.
 A type annotation written on a declaration's type (e.g., on a field type or
 on a method return type)
 appears in the \RuntimeInOrVisibleTypeAnnotations attribute of that declaration.
+JSR 308 does not add a \RuntimeInOrVisibleTypeParameterAnnotations
+attribute; annotations on type parameters are stored with the method or class.
 
 In the \<annotations> array, annotations that target instructions must be
 sorted in increasing order of bytecode offset.  Other annotations can be in
 any order, and may be interleaved with instruction annotations.
-Annotations that target instructions are are those in
+Annotations that target instructions are those in
 Figure~\ref{tbl:target_types} with \<target\_type> $\ge$ 0x86; see below
 for details.
 
@@ -1526,6 +1533,8 @@ field \code{target\_type} is the tag (see
 Section~\ref{class-file:ext:target_type}), and its value determines the
 size and
 contents of \code{target\_info} (see Section~\ref{class-file:ext:target_info}).
+Section~\ref{class-file:ext:type_path} describes how the classfile
+indicates a part of a compound type.
 
 
 \subsection{The \code{target\_type} field:  the type of annotated element\label{class-file:ext:target_type}\label{target_type}}
@@ -1629,8 +1638,8 @@ of the \code{target\_info} is determined by the value of
 
 All indexes count from zero.
 
-See Section~\ref{class-file:ext:type_path} for handling of generic
-type arguments and arrays.
+See Section~\ref{class-file:ext:type_path} for indicating a specific part
+of a compound type:  a parameterized, wildcard, array, or nested type.
 
 
 \newcommand{\targetinfocontents}[2]{
@@ -1664,10 +1673,10 @@ A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes tabl
 \code{type\_parameter\_index} specifies the 0-based index of the type parameter.
 
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{type\_parameter\_bound\_target} appears in the attributes table of a
-\code{method\_info} structure if it targets a method type parameter bound,
+\code{type\_parameter\_target} appears in the attributes table of a
+\code{method\_info} structure if it targets a method type parameter,
 otherwise, in the attributes table of a \code{ClassFile} structure if it
-targets a class declaration type parameter bound.
+targets a class declaration type parameter.
 
 
 \subsubsection{Class supertypes:  \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
@@ -1683,7 +1692,7 @@ targets a class declaration type parameter bound.
 \end{Verbatim}
 
 \code{supertype\_index} is \code{-1} (\code{65535}) if the annotation is on the
-superclass type.  Otherwise, \code{supertype\_index} specifies the index of the
+superclass type.  Otherwise, \code{supertype\_index} specifies the 0-based index of the
 targeted type in the
 \code{interfaces} array field of the \code{ClassFile} structure;
 simply the value $i$ is used if the annotation is on the $i$th
@@ -2092,27 +2101,14 @@ struct type_path_entry {
 }
 \end{Verbatim}
 
-%TODO:
-% A further improvement would be to drop the
-% type_argument_index item and encode the i'th type arg into the
-% type_path_kind item. Namely, type_path_kind values >=3 represent the
-% type_path_kind-2'th type arg of the current parameterized type. This trick
-% is used in the stack_map_frame structure (JVMS 4.7.4).
-
 % TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
 
+When \code{type\_path\_kind} is 0, 1, or 2, then
+\code{type\_argument\_index} must be 0.
 
 If the compound type is viewed as a tree, then 
-the \code{type\_path} structure represents a path in that tree, from the
-top down or the ``outside in''.
-
-The \code{type\_path} structure is always present; for any non-compound
-type, it is \code{empty\_path}.  Additionally, \code{empty\_path} is used
-for a compound type when the annotation is on its main part.  For example,
-consider a one-dimensional array type.  An annotation on the array type
-itself would use \code{empty\_path}.  An annotation on the array element
-type would use \code{array\_type\_path}, within which would be an
-\code{empty\_path}.
+the \code{type\_path} structure represents a path in that tree.
+% , from the top down or the ``outside in''.
 
 Figure~\ref{tbl:locations} shows some examples.
 
