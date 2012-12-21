@@ -1428,6 +1428,10 @@ appears in the \RuntimeInOrVisibleTypeAnnotations attribute of that declaration.
 JSR 308 does not add a \RuntimeInOrVisibleTypeParameterAnnotations
 attribute; annotations on type parameters are stored with the method or class.
 
+% TODO: No RuntimeInvisibleParameterTypeAnnotations (similar to the
+% RuntimeInvisibleParameterAnnotations) are introduced.
+
+
 In the \<annotations> array, annotations that target instructions must be
 sorted in increasing order of bytecode offset.  Other annotations can be in
 any order, and may be interleaved with instruction annotations.
@@ -1959,11 +1963,13 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 \subsection{The \code{type\_path} structure:  Identifying part of a compound type\label{class-file:ext:type_path}}
 
-\newcommand{\emptypath}{\codefootnotesize{empty\_path}}
-\newcommand{\arraypath}[1]{\codefootnotesize{array\_type\_path \ttlcb\ #1 \ttrcb}}
-\newcommand{\innerpath}[1]{\codefootnotesize{inner\_type\_path \ttlcb\ #1 \ttrcb}}
-\newcommand{\wildcardpath}[1]{\codefootnotesize{wildcard\_path \ttlcb\ #1 \ttrcb}}
-\newcommand{\typeargpath}[2]{\codefootnotesize{type\_argument\_path \ttlcb\ #1, #2 \ttrcb}}
+\newcommand{\tpath}[2]{\codefootnotesize{path\_length: #1; path: [#2]}}
+\newcommand{\tarray}{\codefootnotesize{ARRAY(0, 0)}}
+\newcommand{\tinner}{\codefootnotesize{INNER\_TYPE(1, 0)}}
+\newcommand{\twildcard}{\codefootnotesize{WILDCARD(2, 0)}}
+\newcommand{\ttypearg}[1]{\codefootnotesize{TYPE\_ARGUMENT(3, #1)}}
+
+% See test/tools/javac/annotations/typeAnnotations/referenceinfos/FromSpecification.java
 
 \begin{figure}[tp!]
 \begin{center}
@@ -1980,22 +1986,24 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 % \resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
 
-\begin{tabular}{|l|l|}
+\begin{tabular}{|c|l|}
 \hline
-\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \emptypath \\
-\code{@B}       & \typeargpath{0}{\emptypath}  \\
-\code{@C}       & \typeargpath{0}{\wildcardpath{\emptypath}}  \\
-\code{@D}       & \typeargpath{1}{\emptypath}  \\
-\code{@E}       & \typeargpath{1}{\typeargpath{0}{\emptypath}}  \\
-\code{@F}       & \emptypath \\   
-\code{@G}       & \arraypath{\emptypath} \\                  
-\code{@H}       & \arraypath{\arraypath{\emptypath}} \\                  
-\code{@I}       & \arraypath{\arraypath{\arraypath{\emptypath}}} \\                  
-\code{@J}       & \emptypath \\   
-\code{@K}       & \innerpath{\emptypath} \\                  
-\code{@L}       & \innerpath{\innerpath{\emptypath}} \\                  
-\code{@M}       & \innerpath{\innerpath{\innerpath{\emptypath}}} \\                  
+\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \tpath{0}{} \\
+\code{@B}       & \tpath{1}{\ttypearg{0}} \\
+\code{@C}       & \tpath{2}{\ttypearg{0}, \twildcard}  \\
+\code{@D}       & \tpath{1}{\ttypearg{1}}  \\
+\code{@E}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}}  \\
+
+\code{@F}       & \tpath{0}{} \\
+\code{@G}       & \tpath{1}{\tarray} \\
+\code{@H}       & \tpath{2}{\tarray, \tarray} \\
+\code{@I}       & \tpath{3}{\tarray, \tarray, \tarray} \\
+
+\code{@J}       & \tpath{3}{\tinner, \tinner, \tinner} \\
+\code{@K}       & \tpath{2}{\tinner, \tinner} \\
+\code{@L}       & \tpath{1}{\tinner} \\
+\code{@M}       & \tpath{0}{} \\
 \hline
 \end{tabular}
 
@@ -2012,17 +2020,17 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 % % The table is not top-aligned if I increase the size.  I don't know why.
 % \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
 % ~~
-\begin{tabular}{|l|l|}
+\begin{tabular}{|c|l|}
 \hline
-\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \emptypath \\
-\code{@B}       & \typeargpath{0}{\emptypath} \\
-\code{@C}       & \typeargpath{0}{\typeargpath{0}{\emptypath}} \\
-\code{@D}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\emptypath}}} \\
-\code{@E}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\arraypath{\emptypath}}}} \\
-\code{@F}       & \typeargpath{0}{\typeargpath{0}{\arraypath{\arraypath{\arraypath{\emptypath}}}}} \\
-\code{@G}       & \typeargpath{1}{\emptypath} \\
-\code{@H}       & \typeargpath{1}{\typeargpath{0}{\emptypath}} \\
+\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \tpath{0}{} \\
+\code{@B}       & \tpath{1}{\ttypearg{0}} \\
+\code{@C}       & \tpath{2}{\ttypearg{0}, \ttypearg{0}} \\
+\code{@D}       & \tpath{3}{\ttypearg{0}, \ttypearg{0}, \tarray} \\
+\code{@E}       & \tpath{4}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray} \\
+\code{@F}       & \tpath{5}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray, \tarray} \\
+\code{@G}       & \tpath{1}{\ttypearg{1}} \\
+\code{@H}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}} \\
 \hline
 \end{tabular}
 
@@ -2030,7 +2038,7 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 ~ \\ ~
 %END LATEX
 
-\code{@H O1.@E O2<@F S,@G T>.@D O3.@A Nested<@B U, @C V>}
+\code{@H O1.@E O2<@F S, @G T>.@D O3.@A Nested<@B U, @C V>}
 
 %BEGIN LATEX
 ~
@@ -2038,17 +2046,17 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 % \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
 % ~~
-\begin{tabular}{|l|l|}
+\begin{tabular}{|c|l|}
 \hline
-\bf{Annotation} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \emptypath \\
-\code{@B}       & \typeargpath{0}{\emptypath} \\
-\code{@C}       & \typeargpath{1}{\emptypath} \\
-\code{@D}       & \innerpath{\emptypath} \\
-\code{@E}       & \innerpath{\innerpath{\emptypath}} \\
-\code{@F}       & \innerpath{\innerpath{\typeargpath{0}{\emptypath}}} \\
-\code{@G}       & \innerpath{\innerpath{\typeargpath{1}{\emptypath}}} \\
-\code{@H}       & \innerpath{\innerpath{\innerpath{\emptypath}}} \\
+\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+\code{@A}       & \tpath{3}{\tinner, \tinner, \tinner} \\
+\code{@B}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{0}} \\
+\code{@C}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{1}} \\
+\code{@D}       & \tpath{2}{\tinner, \tinner} \\
+\code{@E}       & \tpath{1}{\tinner} \\
+\code{@F}       & \tpath{2}{\tinner, \ttypearg{0}} \\
+\code{@G}       & \tpath{2}{\tinner, \ttypearg{1}} \\
+\code{@H}       & \tpath{0}{} \\
 \hline
 \end{tabular}
 
@@ -2061,6 +2069,10 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
   array types, and nested types.  The middle shows the interaction between
   parameterized types and array types.  The bottom shows the interaction
   between parameterized types and nested types.
+  \newline
+  For clarity, we use a meaningful name for each \code{type\_path\_entry},
+  in addition to the raw bytes.
+  % TODO: re-define the \t macros to change this.
   }
 \end{figure}
 
@@ -2083,7 +2095,7 @@ or the difference among
 \code{Outer .\ @X Inner}.
 The \code{type\_path} structure distinguishes among these locations.
 
-\begin{Verbatim}[samepage=true]
+\begin{Verbatim}
 struct type_path {
   u1              path_length;
   type_path_entry path[path_length];
