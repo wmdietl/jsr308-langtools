@@ -225,6 +225,7 @@ public class Driver {
         sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TJ {}");
         sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TK {}");
         sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TL {}");
+        sb.append("\n@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface TM {}");
 
         // create RTA, RTAs, RTB, RTBs for repeating type annotations
         sb.append("\n");

@@ -36,40 +36,43 @@ public class FromSpecification {
         @TADescription(annotation = "TB", type = METHOD_PARAMETER,
                 genericLocation = {3, 0}, paramIndex = 0),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER,
-                genericLocation = {3, 1}, paramIndex = 0),
+                genericLocation = {3, 0, 2, 0}, paramIndex = 0),
         @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = {3, 1}, paramIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
                 genericLocation = {3, 1, 3, 0}, paramIndex = 0)
     })
     public String testSpec1() {
-        return "void test(@TA Map<@TB String, @TC List<@TD Object>> a) { }";
+        return "void test(@TA Map<@TB ? extends @TC String, @TD List<@TE Object>> a) { }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
-                genericLocation = {0, 0, 0, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
-                genericLocation = {0, 0}, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER, paramIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_PARAMETER,
-                genericLocation = {0, 0, 0, 0}, paramIndex = 0)
+                genericLocation = {0, 0}, paramIndex = 0),
+        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+                genericLocation = {0, 0, 0, 0}, paramIndex = 0),
+        @TADescription(annotation = "TI", type = METHOD_PARAMETER,
+                genericLocation = {0, 0, 0, 0, 0, 0}, paramIndex = 0)
     })
     public String testSpec2() {
-        return "void test(@TH String @TE [] @TF [] @TG [] a) { }";
+        return "void test(@TI String @TF [] @TG [] @TH [] a) { }";
     }
 
+    // Note first "1, 0" for top-level class Test.
     @TADescriptions({
-        @TADescription(annotation = "TL", type = METHOD_PARAMETER,
-                genericLocation = {1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TK", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0}, paramIndex = 0),
         @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TK", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TI", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0)
+        @TADescription(annotation = "TL", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TM", type = METHOD_PARAMETER,
+                genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testSpec3() {
         return "class Test { class O1 { class O2 { class O3 { class NestedStatic {} } } }" +
-                "void test(@TL O1.@TK O2.@TJ O3.@TI NestedStatic a) { } }";
+                "void test(@TM O1.@TL O2.@TK O3.@TJ NestedStatic a) { } }";
     }
 
     @TADescriptions({
@@ -77,42 +80,43 @@ public class FromSpecification {
         @TADescription(annotation = "TB", type = METHOD_PARAMETER,
                 genericLocation = {3, 0}, paramIndex = 0),
         @TADescription(annotation = "TC", type = METHOD_PARAMETER,
-                genericLocation = {3, 0, 3, 0, 0, 0, 0, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
                 genericLocation = {3, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
                 genericLocation = {3, 0, 3, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
                 genericLocation = {3, 0, 3, 0, 0, 0, 0, 0}, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+                genericLocation = {3, 0, 3, 0, 0, 0, 0, 0, 0, 0}, paramIndex = 0),
         @TADescription(annotation = "TG", type = METHOD_PARAMETER,
                 genericLocation = {3, 1}, paramIndex = 0),
         @TADescription(annotation = "TH", type = METHOD_PARAMETER,
                 genericLocation = {3, 1, 3, 0}, paramIndex = 0)
     })
     public String testSpec4() {
-        return "void test(@TA Map<@TB Comparable<@TC Object @TD [] @TE [] @TF []>, @TG List<@TH String>> a) { }";
+        return "void test(@TA Map<@TB Comparable<@TF Object @TC [] @TD [] @TE []>, @TG List<@TH String>> a) { }";
     }
 
+    // Note first "1, 0" for top-level class Test.
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_PARAMETER,
-                genericLocation = {1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 0}, paramIndex = 0),
+        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0),
+        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0}, paramIndex = 0),
+        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 3, 0}, paramIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+                genericLocation = {1, 0, 1, 0, 3, 1}, paramIndex = 0),
         @TADescription(annotation = "TH", type = METHOD_PARAMETER,
-                genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0)
+                genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testSpec5() {
         return "class Test { class O1 { class O2<A, B> { class O3 { class Nested<X, Y> {} } } }" +
-                "void test(@TA O1.@TB O2<@TC String, @TD String>.@TE O3.@TF Nested<@TG String, @TH String> a) { } }";
+                "void test(@TH O1.@TE O2<@TF String, @TG String>.@TD O3.@TA Nested<@TB String, @TC String> a) { } }";
     }
 }
