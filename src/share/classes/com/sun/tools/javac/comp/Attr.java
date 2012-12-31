@@ -26,9 +26,9 @@
 package com.sun.tools.javac.comp;
 
 import java.util.*;
-import java.util.Set;
 
 import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 import com.sun.source.tree.IdentifierTree;
@@ -45,7 +45,6 @@ import com.sun.tools.javac.comp.DeferredAttr.AttrMode;
 import com.sun.tools.javac.comp.Infer.InferenceContext;
 import com.sun.tools.javac.comp.Infer.InferenceContext.FreeTypeListener;
 import com.sun.tools.javac.jvm.*;
-import com.sun.tools.javac.jvm.Target;
 import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
@@ -3272,8 +3271,18 @@ public class Attr extends JCTree.Visitor {
                     // Tree<Point>.Visitor.
                     else if (ownOuter.hasTag(CLASS) && site != ownOuter) {
                         Type normOuter = site;
-                        if (normOuter.hasTag(CLASS))
+                        if (normOuter.hasTag(CLASS)) {
                             normOuter = types.asEnclosingSuper(site, ownOuter.tsym);
+                            if (site.getKind() == TypeKind.ANNOTATED) {
+                                // Propagate any type annotations.
+                                // TODO: should asEnclosingSuper do this?
+                                // Note that the type annotations in site will be updated
+                                // by annotateType. Therefore, modify site instead
+                                // of creating a new AnnotatedType.
+                                ((AnnotatedType)site).underlyingType = normOuter;
+                                normOuter = site;
+                            }
+                        }
                         if (normOuter == null) // perhaps from an import
                             normOuter = types.erasure(ownOuter);
                         if (normOuter != ownOuter)
@@ -3653,8 +3662,11 @@ public class Attr extends JCTree.Visitor {
     }
 
      public void visitTypeParameter(JCTypeParameter tree) {
-        TypeVar typeVar = (TypeVar)tree.type;
-        annotateType(typeVar, tree.annotations);
+        TypeVar typeVar = (TypeVar) tree.type;
+        AnnotatedType antype = new AnnotatedType(typeVar);
+        annotateType(antype, tree.annotations);
+        tree.type = antype;
+
         if (!typeVar.bound.isErroneous()) {
             //fixup type-parameter bound computed in 'attribTypeVariables'
             typeVar.bound = checkIntersection(tree, tree.bounds);
@@ -3753,14 +3765,15 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotatedType(JCAnnotatedType tree) {
         Type underlyingType = attribType(tree.getUnderlyingType(), env);
         this.attribAnnotationTypes(tree.annotations, env);
-        annotateType(underlyingType, tree.annotations);
-        result = tree.type = underlyingType;
+        AnnotatedType antype = new AnnotatedType(underlyingType);
+        annotateType(antype, tree.annotations);
+        result = tree.type = antype;
     }
 
     /**
      * Apply the annotations to the particular type.
      */
-    public void annotateType(final Type type, final List<JCAnnotation> annotations) {
+    public void annotateType(final AnnotatedType type, final List<JCAnnotation> annotations) {
         if (annotations.isEmpty())
             return;
         annotate.typeAnnotation(new Annotate.Annotator() {
@@ -4029,11 +4042,11 @@ public class Attr extends JCTree.Visitor {
             checkSerialVersionUID(tree, c);
         }
 
+        // Correctly organize the postions of the type annotations
+        TypeAnnotations.organizeTypeAnnotations(this.syms, this.names, this.log, tree);
+
         // Check type annotations applicability rules
         validateTypeAnnotations(tree);
-
-        // Correctly organize the postions of the type annotations
-        TypeAnnotations.organizeTypeAnnotations(this.syms, this.names, tree);
     }
         // where
         /** get a diagnostic position for an attribute of Type t, or null if attribute missing */
@@ -4127,7 +4140,57 @@ public class Attr extends JCTree.Visitor {
                     log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
                 }
             }
+            if (tree.restype != null && tree.restype.type != null) {
+                validateAnnotatedType(tree.restype, tree.restype.type);
+            }
             super.visitMethodDef(tree);
+        }
+        public void visitVarDef(final JCVariableDecl tree) {
+            if (tree.sym != null && tree.sym.type != null)
+                validateAnnotatedType(tree, tree.sym.type);
+            super.visitVarDef(tree);
+        }
+        public void visitTypeCast(JCTypeCast tree) {
+            if (tree.clazz != null && tree.clazz.type != null)
+                validateAnnotatedType(tree.clazz, tree.clazz.type);
+            super.visitTypeCast(tree);
+        }
+        public void visitTypeTest(JCInstanceOf tree) {
+            if (tree.clazz != null && tree.clazz.type != null)
+                validateAnnotatedType(tree.clazz, tree.clazz.type);
+            super.visitTypeTest(tree);
+        }
+        // TODO: what else do we need?
+        // public void visitNewClass(JCNewClass tree) {
+        // public void visitNewArray(JCNewArray tree) {
+
+        /* I would want to model this after
+         * com.sun.tools.javac.comp.Check.Validator.visitSelectInternal(JCFieldAccess)
+         * and override visitSelect and visitTypeApply.
+         * However, we only set the annotated type in the top-level type
+         * of the symbol.
+         * Therefore, we need to override each individual location where a type
+         * can occur.
+         */
+        private void validateAnnotatedType(final JCTree errtree, final Type type) {
+            if (type.getEnclosingType() != null &&
+                    type != type.getEnclosingType()) {
+                validateEnclosingAnnotatedType(errtree, type.getEnclosingType());
+            }
+            for (Type targ : type.getTypeArguments()) {
+                validateAnnotatedType(errtree, targ);
+            }
+        }
+        private void validateEnclosingAnnotatedType(final JCTree errtree, final Type type) {
+            validateAnnotatedType(errtree, type);
+            if (type.tsym != null &&
+                    type.tsym.isStatic() &&
+                    type.getKind() == TypeKind.ANNOTATED &&
+                    ((AnnotatedType)type).typeAnnotations != null &&
+                    ((AnnotatedType)type).typeAnnotations.nonEmpty()) {
+                    // Enclosing static classes cannot have type annotations.
+                log.error(errtree.pos(), "cant.annotate.static.class");
+            }
         }
     };
 
