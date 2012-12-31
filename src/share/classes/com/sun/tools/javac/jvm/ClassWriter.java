@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.HashSet;
 
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileManager;
 import javax.tools.FileObject;
 import javax.tools.JavaFileObject;
@@ -38,7 +39,6 @@ import javax.tools.JavaFileObject;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
 import com.sun.tools.javac.code.Attribute.TypeCompound;
-import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.code.Types.UniqueType;
@@ -277,6 +277,9 @@ public class ClassWriter extends ClassFile {
     /** Assemble signature of given type in string buffer.
      */
     void assembleSig(Type type) {
+        if (type.getKind() == TypeKind.ANNOTATED) {
+            type = ((AnnotatedType) type).underlyingType;
+        }
         switch (type.getTag()) {
         case BYTE:
             sigbuf.appendByte('B');
@@ -377,6 +380,9 @@ public class ClassWriter extends ClassFile {
     }
 
     void assembleClassSig(Type type) {
+        if (type.getKind() == TypeKind.ANNOTATED) {
+            type = ((AnnotatedType) type).underlyingType;
+        }
         ClassType ct = (ClassType)type;
         ClassSymbol c = (ClassSymbol)ct.tsym;
         enterInner(c);
