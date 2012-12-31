@@ -151,7 +151,14 @@ public enum TypeKind {
       *
       * @since 1.8
       */
-    INTERSECTION;
+    INTERSECTION,
+
+    /**
+     * An annotated type.
+     *
+     * @since 1.8
+     */
+    ANNOTATED;
 
     /**
      * Returns {@code true} if this kind corresponds to a primitive
