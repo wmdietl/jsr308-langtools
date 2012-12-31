@@ -38,6 +38,12 @@ class LintCast {
         String anno2 = (String)annotated;
         String unanno2 = (String)unannotated;
     }
+
+    void objarray() {
+        Object @A [] a = null;
+        Object[] a1 = (Object[])a;
+        Object[] a2 = (Object @A [])a;
+    }
 }
 
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
