@@ -69,7 +69,6 @@ public class TestSmoke extends JavadocTester {
         {BUG_ID + FS + "pkg" + FS + "T0x01.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x02.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x04.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x1E.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x08.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x06.html", "@A"},
