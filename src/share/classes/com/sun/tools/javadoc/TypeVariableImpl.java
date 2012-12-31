@@ -25,9 +25,12 @@
 
 package com.sun.tools.javadoc;
 
+import javax.lang.model.type.TypeKind;
+
 import com.sun.javadoc.*;
 
 import com.sun.tools.javac.code.Attribute;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
@@ -124,7 +127,7 @@ public class TypeVariableImpl extends AbstractTypeImpl implements TypeVariable {
         final Type upperBound = v.getUpperBound();
         Name boundname = upperBound.tsym.getQualifiedName();
         if (boundname == boundname.table.names.java_lang_Object
-            && upperBound.typeAnnotations.isEmpty()) {
+            && upperBound.getKind() != TypeKind.ANNOTATED) {
             return List.nil();
         } else {
             return env.types.getBounds(v);
@@ -136,9 +139,13 @@ public class TypeVariableImpl extends AbstractTypeImpl implements TypeVariable {
      * Return an empty array if there are none.
      */
     public AnnotationDesc[] annotations() {
-        AnnotationDesc res[] = new AnnotationDesc[type.typeAnnotations.length()];
+        if (type.getKind() != TypeKind.ANNOTATED) {
+            return new AnnotationDesc[0];
+        }
+        List<TypeCompound> tas = ((com.sun.tools.javac.code.Type.AnnotatedType) type).typeAnnotations;
+        AnnotationDesc res[] = new AnnotationDesc[tas.length()];
         int i = 0;
-        for (Attribute.Compound a : type.typeAnnotations) {
+        for (Attribute.Compound a : tas) {
             res[i++] = new AnnotationDescImpl(env, a);
         }
         return res;

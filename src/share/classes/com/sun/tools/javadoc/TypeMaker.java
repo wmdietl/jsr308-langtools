@@ -25,6 +25,8 @@
 
 package com.sun.tools.javadoc;
 
+import javax.lang.model.type.TypeKind;
+
 import com.sun.javadoc.*;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.ClassSymbol;
@@ -34,7 +36,6 @@ import com.sun.tools.javac.code.Type.ClassType;
 import com.sun.tools.javac.code.Type.TypeVar;
 import com.sun.tools.javac.util.List;
 import static com.sun.tools.javac.code.TypeTag.ARRAY;
-import static com.sun.tools.javac.code.TypeTag.TYPEVAR;
 
 /**
  *  <p><b>This is NOT part of any supported API.
@@ -64,9 +65,8 @@ public class TypeMaker {
             t = env.types.erasure(t);
         }
         if (considerAnnotations
-                && !t.hasTag(TYPEVAR)
-                && t.typeAnnotations.nonEmpty()) {
-            return new AnnotatedTypeImpl(env, t);
+                && t.getKind() == TypeKind.ANNOTATED) {
+            return new AnnotatedTypeImpl(env, (com.sun.tools.javac.code.Type.AnnotatedType) t);
         }
 
         switch (t.getTag()) {
@@ -141,6 +141,11 @@ public class TypeMaker {
      * Class names are qualified if "full" is true.
      */
     static String getTypeString(DocEnv env, Type t, boolean full) {
+        // TODO: should annotations be included here?
+        if (t.getKind() == TypeKind.ANNOTATED) {
+            Type.AnnotatedType at = (Type.AnnotatedType)t;
+            t = at.underlyingType;
+        }
         switch (t.getTag()) {
         case ARRAY:
             StringBuilder s = new StringBuilder();

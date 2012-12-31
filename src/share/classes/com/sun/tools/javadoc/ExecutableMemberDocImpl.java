@@ -28,6 +28,8 @@ package com.sun.tools.javadoc;
 import java.lang.reflect.Modifier;
 import java.text.CollationKey;
 
+import javax.lang.model.type.TypeKind;
+
 import com.sun.javadoc.*;
 
 import com.sun.source.util.TreePath;
@@ -200,11 +202,13 @@ public abstract class ExecutableMemberDocImpl
     public AnnotationDesc[] receiverAnnotations() {
         // TODO: change how receiver annotations are output!
         Type recvtype = sym.type.asMethodType().recvtype;
-        if (recvtype==null) {
+        if (recvtype == null) {
             return new AnnotationDesc[0];
         }
-
-        List<? extends Compound> typeAnnos = recvtype.typeAnnotations;
+        if (recvtype.getKind() != TypeKind.ANNOTATED) {
+            return new AnnotationDesc[0];
+        }
+        List<? extends Compound> typeAnnos = ((com.sun.tools.javac.code.Type.AnnotatedType)recvtype).typeAnnotations;
         AnnotationDesc result[] = new AnnotationDesc[typeAnnos.length()];
         int i = 0;
         for (Attribute.Compound a : typeAnnos) {

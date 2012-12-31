@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,11 +25,10 @@
 
 package com.sun.tools.javadoc;
 
-
 import com.sun.javadoc.*;
 import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Type;
-
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.util.List;
 
 /**
  * Implementation of <code>AnnotatedType</code>, which
@@ -41,7 +40,7 @@ import com.sun.tools.javac.code.Type;
 public class AnnotatedTypeImpl
         extends AbstractTypeImpl implements AnnotatedType {
 
-    AnnotatedTypeImpl(DocEnv env, Type type) {
+    AnnotatedTypeImpl(DocEnv env, com.sun.tools.javac.code.Type.AnnotatedType type) {
         super(env, type);
     }
 
@@ -51,9 +50,14 @@ public class AnnotatedTypeImpl
      */
     @Override
     public AnnotationDesc[] annotations() {
-        AnnotationDesc res[] = new AnnotationDesc[type.typeAnnotations.length()];
+        List<TypeCompound> tas = ((com.sun.tools.javac.code.Type.AnnotatedType)type).typeAnnotations;
+        if (tas == null ||
+                tas.isEmpty()) {
+            return new AnnotationDesc[0];
+        }
+        AnnotationDesc res[] = new AnnotationDesc[tas.length()];
         int i = 0;
-        for (Attribute.Compound a : type.typeAnnotations) {
+        for (Attribute.Compound a : tas) {
             res[i++] = new AnnotationDescImpl(env, a);
         }
         return res;
