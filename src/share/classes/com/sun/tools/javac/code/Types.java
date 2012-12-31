@@ -34,13 +34,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
 
+import javax.lang.model.type.TypeKind;
+
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
 import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Type.UndetVar.InferenceBound;
 import com.sun.tools.javac.comp.Check;
 import com.sun.tools.javac.jvm.ClassReader;
 import com.sun.tools.javac.util.*;
-import com.sun.tools.javac.util.List;
 import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Scope.*;
@@ -654,6 +655,10 @@ public class Types {
     //where
         private boolean isSubtypeUncheckedInternal(Type t, Type s, Warner warn) {
             if (t.hasTag(ARRAY) && s.hasTag(ARRAY)) {
+                if (t.getKind() == TypeKind.ANNOTATED)
+                    t = ((AnnotatedType)t).underlyingType;
+                if (s.getKind() == TypeKind.ANNOTATED)
+                    s = ((AnnotatedType)s).underlyingType;
                 if (((ArrayType)t).elemtype.isPrimitive()) {
                     return isSameType(elemtype(t), elemtype(s));
                 } else {
@@ -679,7 +684,10 @@ public class Types {
         }
 
         private void checkUnsafeVarargsConversion(Type t, Type s, Warner warn) {
-            if (t.tag != ARRAY || isReifiable(t)) return;
+            if (t.tag != ARRAY || isReifiable(t))
+                return;
+            if (t.getKind() == TypeKind.ANNOTATED)
+                t = ((AnnotatedType)t).underlyingType;
             ArrayType from = (ArrayType)t;
             boolean shouldWarn = false;
             switch (s.tag) {
@@ -711,6 +719,11 @@ public class Types {
     public boolean isSubtype(Type t, Type s, boolean capture) {
         if (t == s)
              return true;
+
+        if (t.getKind() == TypeKind.ANNOTATED)
+            t = ((AnnotatedType)t).underlyingType;
+        if (s.getKind() == TypeKind.ANNOTATED)
+            s = ((AnnotatedType)s).underlyingType;
 
         // TODO: JSR 308 review
         if (t.tag == TYPEVAR && s.tag == TYPEVAR
@@ -1672,6 +1685,8 @@ public class Types {
         case WILDCARD:
             return elemtype(upperBound(t));
         case ARRAY:
+            if (t.getKind() == TypeKind.ANNOTATED)
+                t = ((AnnotatedType)t).underlyingType;
             return ((ArrayType)t).elemtype;
         case FORALL:
             return elemtype(((ForAll)t).qtype);
@@ -2942,6 +2957,8 @@ public class Types {
      * graph. Undefined for all but reference types.
      */
     public int rank(Type t) {
+        if (t.getKind() == TypeKind.ANNOTATED)
+            t = ((AnnotatedType)t).underlyingType;
         switch(t.tag) {
         case CLASS: {
             ClassType cls = (ClassType)t;
@@ -3643,6 +3660,8 @@ public class Types {
                 t = subst(type1, t.tsym.type.getTypeArguments(), t.getTypeArguments());
             }
         }
+        if (t.getKind() == TypeKind.ANNOTATED)
+            t = ((AnnotatedType)t).underlyingType;
         ClassType cls = (ClassType)t;
         if (cls.isRaw() || !cls.isParameterized())
             return cls;
@@ -4161,6 +4180,8 @@ public class Types {
         public R visitForAll(ForAll t, S s)             { return visitType(t, s); }
         public R visitUndetVar(UndetVar t, S s)         { return visitType(t, s); }
         public R visitErrorType(ErrorType t, S s)       { return visitType(t, s); }
+        // Pretend annotations don't exist
+        public R visitAnnotatedType(AnnotatedType t, S s) { return visit(t.underlyingType, s); }
     }
 
     /**
