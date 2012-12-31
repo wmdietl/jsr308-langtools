@@ -30,8 +30,21 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.code.Flags;
 import com.sun.tools.javac.code.Kinds;
+import com.sun.tools.javac.code.Type.AnnotatedType;
+import com.sun.tools.javac.code.Type.ArrayType;
+import com.sun.tools.javac.code.Type.CapturedType;
+import com.sun.tools.javac.code.Type.ClassType;
+import com.sun.tools.javac.code.Type.ErrorType;
+import com.sun.tools.javac.code.Type.ForAll;
+import com.sun.tools.javac.code.Type.MethodType;
+import com.sun.tools.javac.code.Type.PackageType;
+import com.sun.tools.javac.code.Type.TypeVar;
+import com.sun.tools.javac.code.Type.UndetVar;
+import com.sun.tools.javac.code.Type.Visitor;
+import com.sun.tools.javac.code.Type.WildcardType;
 import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntry;
 import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntryKind;
 import com.sun.tools.javac.code.TypeTag;
@@ -46,6 +59,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
+import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
 
 /**
@@ -59,8 +73,8 @@ public class TypeAnnotations {
     // Class cannot be instantiated.
     private TypeAnnotations() {}
 
-    public static void organizeTypeAnnotations(Symtab syms, Names names, JCClassDecl tree) {
-        new TypeAnnotationPositions(syms, names).scan(tree);
+    public static void organizeTypeAnnotations(Symtab syms, Names names, Log log, JCClassDecl tree) {
+        new TypeAnnotationPositions(syms, names, log).scan(tree);
     }
 
     private static class TypeAnnotationPositions extends TreeScanner {
@@ -69,10 +83,12 @@ public class TypeAnnotations {
 
         private final Symtab syms;
         private final Names names;
+        private final Log log;
 
-        private TypeAnnotationPositions(Symtab syms, Names names) {
+        private TypeAnnotationPositions(Symtab syms, Names names, Log log) {
             this.syms = syms;
             this.names = names;
+            this.log = log;
         }
 
         /*
@@ -100,7 +116,8 @@ public class TypeAnnotations {
          * we never build an JCAnnotatedType. This step finds these
          * annotations and marks them as if they were part of the type.
          */
-        private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym, TypeAnnotationPosition pos) {
+        private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym,
+                TypeAnnotationPosition pos) {
             /*
             System.out.printf("separateAnnotationsKinds(typetree: %s, type: %s, symbol: %s, pos: %s%n",
                     typetree, type, sym, pos);
@@ -108,8 +125,6 @@ public class TypeAnnotations {
             List<Attribute.Compound> annotations = sym.getAnnotationMirrors();
             ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
-            // Also include existing type annotations.
-            typeAnnos.appendList(sym.getRawTypeAttributes());
 
             for (Attribute.Compound a : annotations) {
                 switch (annotationType(a, sym)) {
@@ -139,12 +154,12 @@ public class TypeAnnotations {
                 // When type is null, put the type annotations to the symbol.
                 // This is used for constructor return annotations, for which
                 // no appropriate type exists.
-                sym.annotations.setTypeAttributes(typeAnnotations);
+                sym.annotations.appendUniqueTypes(typeAnnotations);
                 return;
             }
 
             // type is non-null and annotations are added to that type
-            typeWithAnnotations(typetree, type, typeAnnotations);
+            type = typeWithAnnotations(typetree, type, typeAnnotations, log);
 
             if (sym.getKind() == ElementKind.METHOD) {
                 sym.type.asMethodType().restype = type;
@@ -171,28 +186,65 @@ public class TypeAnnotations {
         // for example, on the return type.
         // Such an annotation is _not_ part of an JCAnnotatedType tree and we therefore
         // need to set its position explicitly.
-        private static void typeWithAnnotations(JCTree typetree, Type type,
-                List<Attribute.TypeCompound> annotations) {
+        // The method returns a copy of type that contains these annotations.
+        private static Type typeWithAnnotations(final JCTree typetree, final Type type,
+                final List<Attribute.TypeCompound> annotations, Log log) {
             // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s)%n",
             //         typetree, type, annotations);
+            if (annotations.isEmpty()) {
+                return type;
+            }
             if (type.hasTag(TypeTag.ARRAY)) {
-                Type.ArrayType arType = (Type.ArrayType) type;
+                Type toreturn;
+                Type.ArrayType tomodify;
+                Type.ArrayType arType;
+                {
+                    Type touse = type;
+                    if (type.getKind() == TypeKind.ANNOTATED) {
+                        Type.AnnotatedType atype = (Type.AnnotatedType)type;
+                        toreturn = new Type.AnnotatedType(atype.underlyingType);
+                        ((Type.AnnotatedType)toreturn).typeAnnotations = atype.typeAnnotations;
+                        touse = atype.underlyingType;
+                        arType = (Type.ArrayType) touse;
+                        tomodify = new Type.ArrayType(null, arType.tsym);
+                        ((Type.AnnotatedType)toreturn).underlyingType = tomodify;
+                    } else {
+                        arType = (Type.ArrayType) touse;
+                        tomodify = new Type.ArrayType(null, arType.tsym);
+                        toreturn = tomodify;
+                    }
+                }
                 JCArrayTypeTree arTree = arrayTypeTree(typetree);
 
                 ListBuffer<TypePathEntry> depth = ListBuffer.lb();
                 depth = depth.append(TypePathEntry.ARRAY);
                 while (arType.elemtype.hasTag(TypeTag.ARRAY)) {
-                    arType = (Type.ArrayType) arType.elemtype;
+                    if (arType.elemtype.getKind() == TypeKind.ANNOTATED) {
+                        Type.AnnotatedType aelemtype = (Type.AnnotatedType) arType.elemtype;
+                        Type.AnnotatedType newAT = new Type.AnnotatedType(aelemtype.underlyingType);
+                        tomodify.elemtype = newAT;
+                        newAT.typeAnnotations = aelemtype.typeAnnotations;
+                        arType = (Type.ArrayType) aelemtype.underlyingType;
+                        tomodify = new Type.ArrayType(null, arType.tsym);
+                        newAT.underlyingType = tomodify;
+                    } else {
+                        arType = (Type.ArrayType) arType.elemtype;
+                        tomodify.elemtype = new Type.ArrayType(null, arType.tsym);
+                        tomodify = (Type.ArrayType) tomodify.elemtype;
+                    }
                     arTree = arrayTypeTree(arTree.elemtype);
                     depth = depth.append(TypePathEntry.ARRAY);
                 }
-                typeWithAnnotations(arTree.elemtype, arType.elemtype, annotations);
+                Type arelemType = typeWithAnnotations(arTree.elemtype, arType.elemtype, annotations, log);
+                tomodify.elemtype = arelemType;
                 for (Attribute.TypeCompound a : annotations) {
                     TypeAnnotationPosition p = a.position;
                     p.location = p.location.prependList(depth.toList());
                 }
+                return toreturn;
             } else if (type.hasTag(TypeTag.TYPEVAR)) {
                 // Nothing to do for type variables.
+                return type;
             } else {
                 Type enclTy = type;
                 Element enclEl = type.asElement();
@@ -219,6 +271,21 @@ public class TypeAnnotations {
                         // only other option because of while condition
                         enclTr = ((JCAnnotatedType)enclTr).getUnderlyingType();
                     }
+                }
+
+                /** We are trying to annotate some enclosing type,
+                 * but nothing more exists.
+                 */
+                if (enclTy != null &&
+                        enclTy.getKind() == TypeKind.NONE &&
+                        (enclTr.getKind() == JCTree.Kind.IDENTIFIER ||
+                         enclTr.getKind() == JCTree.Kind.MEMBER_SELECT ||
+                         enclTr.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
+                         enclTr.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
+                    // TODO: also if it's "java. @A lang.Object", that is,
+                    // if it's on a package?
+                    log.error(enclTr.pos(), "cant.annotate.nested.type");
+                    return type;
                 }
 
                 // At this point we have visited the part of the nested
@@ -253,7 +320,9 @@ public class TypeAnnotations {
 
                 // TODO: method receiver type annotations don't work. There is a strange
                 // interaction with arrays.
-                enclTy.typeAnnotations = annotations;
+
+                Type ret = typeWithAnnotations(type, enclTy, annotations);
+                return ret;
             }
         }
 
@@ -266,6 +335,110 @@ public class TypeAnnotations {
                 Assert.error("Could not determine array type from type tree: " + typetree);
                 return null;
             }
+        }
+
+        /** Return a copy of the first type that only differs by
+         * inserting the annotations to the left-most/inner-most type
+         * or the type given by stopAt.
+         *
+         * We need the stopAt parameter to know where on a type to
+         * put the annotations.
+         * If we have nested classes Outer > Middle > Inner, and we
+         * have the source type "@A Middle.Inner", we will invoke
+         * this method with type = Outer.Middle.Inner,
+         * stopAt = Middle.Inner, and annotations = @A.
+         *
+         * @param type The type to copy.
+         * @param stopAt The type to stop at.
+         * @param annotations The annotations to insert.
+         * @return A copy of type that contains the annotations.
+         */
+        private static Type typeWithAnnotations(final Type type,
+                final Type stopAt,
+                final List<Attribute.TypeCompound> annotations) {
+            Visitor<Type, List<TypeCompound>> visitor =
+                    new Type.Visitor<Type, List<Attribute.TypeCompound>>() {
+                @Override
+                public Type visitClassType(ClassType t, List<TypeCompound> s) {
+                    // assert that t.constValue() == null?
+                    if (t == stopAt ||
+                        t.getEnclosingType() == Type.noType) {
+                        return new AnnotatedType(s, t);
+                    } else {
+                        ClassType ret = new ClassType(t.getEnclosingType().accept(this, s),
+                                t.typarams_field, t.tsym);
+                        ret.all_interfaces_field = t.all_interfaces_field;
+                        ret.allparams_field = t.allparams_field;
+                        ret.interfaces_field = t.interfaces_field;
+                        ret.rank_field = t.rank_field;
+                        ret.supertype_field = t.supertype_field;
+                        return ret;
+                    }
+                }
+
+                @Override
+                public Type visitAnnotatedType(AnnotatedType t, List<TypeCompound> s) {
+                    return new AnnotatedType(t.typeAnnotations, t.underlyingType.accept(this, s));
+                }
+
+                @Override
+                public Type visitWildcardType(WildcardType t, List<TypeCompound> s) {
+                    return new AnnotatedType(s, t);
+                }
+
+                @Override
+                public Type visitArrayType(ArrayType t, List<TypeCompound> s) {
+                    ArrayType ret = new ArrayType(t.elemtype.accept(this, s), t.tsym);
+                    return ret;
+                }
+
+                @Override
+                public Type visitMethodType(MethodType t, List<TypeCompound> s) {
+                    // Impossible?
+                    return t;
+                }
+
+                @Override
+                public Type visitPackageType(PackageType t, List<TypeCompound> s) {
+                    // Impossible?
+                    return t;
+                }
+
+                @Override
+                public Type visitTypeVar(TypeVar t, List<TypeCompound> s) {
+                    return new AnnotatedType(s, t);
+                }
+
+                @Override
+                public Type visitCapturedType(CapturedType t, List<TypeCompound> s) {
+                    return new AnnotatedType(s, t);
+                }
+
+                @Override
+                public Type visitForAll(ForAll t, List<TypeCompound> s) {
+                    // Impossible?
+                    return t;
+                }
+
+                @Override
+                public Type visitUndetVar(UndetVar t, List<TypeCompound> s) {
+                    // Impossible?
+                    return t;
+                }
+
+                @Override
+                public Type visitErrorType(ErrorType t, List<TypeCompound> s) {
+                    return new AnnotatedType(s, t);
+                }
+
+                @Override
+                public Type visitType(Type t, List<TypeCompound> s) {
+                    // Error?
+                    return t;
+                }
+            };
+
+            return type.accept(visitor, annotations);
         }
 
         private static Attribute.TypeCompound toTypeCompound(Attribute.Compound a, TypeAnnotationPosition p) {
