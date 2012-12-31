@@ -2024,7 +2024,7 @@ public class JavacParser implements Parser {
 
         // handle type annotations for non primitive arrays
         if (newAnnotations.nonEmpty()) {
-            t = toP(F.at(newAnnotations.head.pos).AnnotatedType(newAnnotations, t));
+            t = insertAnnotationsToMostInner(t, newAnnotations, false);
         }
 
         int oldmode = mode;
