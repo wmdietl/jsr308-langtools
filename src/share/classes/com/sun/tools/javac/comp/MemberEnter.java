@@ -30,6 +30,8 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+
+import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
@@ -663,8 +665,13 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             //(a plain array type) with the more precise VarargsType --- we need
             //to do it this way because varargs is represented in the tree as a modifier
             //on the parameter declaration, and not as a distinct type of array node.
-            ArrayType atype = (ArrayType)tree.vartype.type;
-            tree.vartype.type = atype.makeVarargs();
+            Type atype;
+            if (tree.vartype.type.getKind() == TypeKind.ANNOTATED) {
+                atype = ((AnnotatedType)tree.vartype.type).makeVarargs();
+            } else {
+                atype = ((ArrayType) tree.vartype.type).makeVarargs();
+            }
+            tree.vartype.type = atype;
         }
         Scope enclScope = enter.enterScope(env);
         VarSymbol v =
