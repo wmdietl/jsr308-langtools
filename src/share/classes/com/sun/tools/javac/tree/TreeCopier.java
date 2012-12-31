@@ -84,11 +84,11 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         List<JCExpression> args = copy(t.args, p);
         if (t.getKind() == Tree.Kind.TYPE_ANNOTATION) {
             JCAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
-            newTA.attribute= t.attribute;
+            newTA.attribute = t.attribute;
             return newTA;
         } else {
             JCAnnotation newT = M.at(t.pos).Annotation(annotationType, args);
-            newT.attribute= t.attribute;
+            newT.attribute = t.attribute;
             return newT;
         }
     }
