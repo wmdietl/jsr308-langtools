@@ -1,0 +1,3 @@
+DuplicateTypeAnnotation.java:9:25: compiler.err.duplicate.annotation.missing.container: A, java.lang.annotation.ContainedBy
+DuplicateTypeAnnotation.java:9:28: compiler.err.duplicate.annotation.missing.container: A, java.lang.annotation.ContainedBy
+2 errors
