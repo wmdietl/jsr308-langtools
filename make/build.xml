@@ -866,19 +866,17 @@
     </target>
 
     <property environment="env"/>
-    <presetdef name="jsr308.javac">
-      <javac fork="yes">
+    <presetdef name="jsr308.javac" >
+      <javac fork="yes" executable="${env.CHECKERS}/binary/javac">
         <!-- JSR308 related compiler arguments -->
         <compilerarg value="-version"/>
         <!-- optional, so .class files work with older JVMs: <compilerarg line="-target 5"/> -->
         <compilerarg value="-implicit:class"/>
         <compilerarg line="-Awarns -Xmaxwarns 10000"/>
-        <compilerarg value="-J-Xbootclasspath/p:${env.CHECKERS}/binary/jsr308-all.jar"/>
-        <!-- <compilerarg value="-J-Xbootclasspath/p:/home/mernst/research/types/checker-framework/checkers/binary/jsr308-all.jar"/> -->
 
         <classpath>
-          <pathelement location="${env.CHECKERS}/checkers.jar"/>
-          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checkers/checkers.jar"/> -->
+          <pathelement location="${env.CHECKERS}/binary/checkers.jar"/>
+          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checkers/binary/checkers.jar"/> -->
         </classpath>
       </javac>
     </presetdef>
@@ -944,8 +942,6 @@
 
                     <!-- Checker Framework command-line arguments -->
                     <compilerarg line="-processor checkers.interning.InterningChecker"/>
-		    <!-- This -Xbootclasspath must appear *after* the previous compilerarg lines -->
-                    <compilerarg value="-Xbootclasspath/p:${env.CHECKERS}/jdk/jdk.jar"/>
                     <compilerarg value="-J-Djsr308_imports=checkers.interning.quals.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
@@ -1024,8 +1020,6 @@
 
                     <!-- Checker Framework command-line arguments -->
                     <compilerarg line="-processor checkers.nullness.NullnessChecker"/>
-		    <!-- This -Xbootclasspath must appear *after* the previous compilerarg lines -->
-                    <compilerarg value="-Xbootclasspath/p:${env.CHECKERS}/jdk/jdk.jar"/>
                     <compilerarg value="-J-Djsr308_imports=checkers.nullness.quals.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
