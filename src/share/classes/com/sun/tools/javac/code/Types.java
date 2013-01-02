@@ -688,6 +688,8 @@ public class Types {
                 return;
             if (t.getKind() == TypeKind.ANNOTATED)
                 t = ((AnnotatedType)t).underlyingType;
+            if (s.getKind() == TypeKind.ANNOTATED)
+                s = ((AnnotatedType)s).underlyingType;
             ArrayType from = (ArrayType)t;
             boolean shouldWarn = false;
             switch (s.tag) {
