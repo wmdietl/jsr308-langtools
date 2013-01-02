@@ -50,14 +50,6 @@ class DefaultScope {
     String @A [] [] array2First;
     String [] @B [] array2Second;
   }
-
-  void exception() {
-    try {
-      arrays();
-    } catch (@A Exception e) {
-      e.toString();
-    }
-  }
 }
 
 class ModifiedVars {
@@ -78,14 +70,6 @@ class ModifiedVars {
     final @A String @A [] @B [] array2Deep = null;
     final String @A [] [] array2First = null;
     final String [] @B [] array2Second = null;
-  }
-
-  void exception() {
-    try {
-      arrays();
-    } catch (final @A Exception e) {
-      e.toString();
-    }
   }
 }
 

@@ -1016,8 +1016,11 @@ public class Gen extends JCTree.Visitor {
                     code.frameBeforeLast = null;
                 }
 
-                //compress exception table
+                // Compress exception table
                 code.compressCatchTable();
+
+                // Fill in type annotation positions for exception parameters
+                code.fillExceptionParameterPositions();
             }
         }
 

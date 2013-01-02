@@ -131,6 +131,8 @@ public class Driver {
             p.parameter_index = d.paramIndex();
         if (d.typeIndex() != NOT_SET)
             p.type_index = d.typeIndex();
+        if (d.exceptionIndex() != NOT_SET)
+            p.exception_index = d.exceptionIndex();
         if (d.genericLocation().length != 0) {
             p.location = TypeAnnotation.Position.getTypePathFromBinary(wrapIntArray(d.genericLocation()));
         }
@@ -258,6 +260,7 @@ public class Driver {
     int boundIndex() default Driver.NOT_SET;
     int paramIndex() default Driver.NOT_SET;
     int typeIndex() default Driver.NOT_SET;
+    int exceptionIndex() default Driver.NOT_SET;
 
     int[] genericLocation() default {};
 }
