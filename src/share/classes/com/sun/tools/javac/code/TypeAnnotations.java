@@ -697,6 +697,9 @@ public class TypeAnnotations {
                         case EXCEPTION_PARAMETER:
                             p.type = TargetType.EXCEPTION_PARAMETER;
                             break;
+                        case RESOURCE_VARIABLE:
+                            p.type = TargetType.RESOURCE_VARIABLE;
+                            break;
                         default:
                             Assert.error("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
                     }

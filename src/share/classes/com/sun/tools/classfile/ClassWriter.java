@@ -737,6 +737,8 @@ public class ClassWriter {
                 break;
             // local variable
             case LOCAL_VARIABLE:
+            // resource variable
+            case RESOURCE_VARIABLE:
                 int table_length = p.lvarOffset.length;
                 out.writeShort(table_length);
                 for (int i = 0; i < table_length; ++i) {

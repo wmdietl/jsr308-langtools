@@ -162,6 +162,8 @@ public class TypeAnnotationPosition {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             if (lvarOffset == null) {
                 sb.append(", lvarOffset is null!");
                 break;

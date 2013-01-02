@@ -96,6 +96,8 @@ public class TypeAnnotation {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             int table_length = cr.readUnsignedShort();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -185,6 +187,8 @@ public class TypeAnnotation {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             n += 2; // table_length;
             int table_length = pos.lvarOffset.length;
             n += 2 * table_length; // offset
@@ -379,6 +383,8 @@ public class TypeAnnotation {
                 break;
             // local variable
             case LOCAL_VARIABLE:
+            // resource variable
+            case RESOURCE_VARIABLE:
                 if (lvarOffset == null) {
                     sb.append(", lvarOffset is null!");
                     break;

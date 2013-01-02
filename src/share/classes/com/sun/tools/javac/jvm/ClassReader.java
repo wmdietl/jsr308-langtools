@@ -1480,6 +1480,8 @@ public class ClassReader implements Completer {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             int table_length = nextChar();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];

@@ -1008,6 +1008,8 @@ public class ClassWriter extends ClassFile {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             databuf.appendChar(p.lvarOffset.length);  // for table length
             for (int i = 0; i < p.lvarOffset.length; ++i) {
                 databuf.appendChar(p.lvarOffset[i]);

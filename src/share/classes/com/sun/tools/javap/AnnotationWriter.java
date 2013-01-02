@@ -104,6 +104,8 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // local variable
         case LOCAL_VARIABLE:
+        // resource variable
+        case RESOURCE_VARIABLE:
             if (pos.lvarOffset == null) {
                 print(", lvarOffset is Null!");
                 break;
