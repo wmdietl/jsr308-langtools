@@ -159,7 +159,7 @@ see \myurl{http://types.cs.washington.edu/jsr308/jsr308-faq.html}.
 
 \subsection{Source locations for annotations on types\label{type-annotation-locations}}
 
-In Java SE 7, annotations can be written only on method parameters
+In Java SE 7, annotations can be written only on method formal parameters
 and the declarations of packages, classes, methods, fields, and local variables.
 JSR 308 extends Java to allow annotations on any use of a type, and
 on type parameter declarations.  JSR 308 does not extend Java to allow
@@ -415,7 +415,7 @@ receiver.
   The optional receiver parameter has no effect on execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
   generates the same bytecodes, and reflection returns the same results
-  regarding number of method parameters, whether or not the optional
+  regarding number of method formal parameters, whether or not the optional
   receiver parameter is present.
 
 
@@ -1462,7 +1462,7 @@ names of a few new attributes and specifies their layout.
 JVMs ignore unknown
 attributes.
 JSR 308 does
-not alter the way that existing annotations on classes, methods, method parameters,
+not alter the way that existing annotations on classes, methods, method formal parameters,
 and fields are stored in the class file.
 % , except those on parameterized types or arrays.
 JSR 308 mandates no changes to the processing of existing annotation locations;
@@ -1492,7 +1492,7 @@ type_annotation {
         supertype_target;
         type_parameter_bound_target;
         empty_target;
-        method_parameter_target;
+        method_formal_parameter_target;
         throws_target;
         localvar_target;
         catch_target;
@@ -1581,7 +1581,7 @@ method return type & \code{METHOD\_RETURN}
 & \code{0x14} & \S\ref{class-file:ext:ri:return} \\
 method receiver type & \code{METHOD\_RECEIVER}
 & \code{0x15} & \S\ref{class-file:ext:ri:receiver} \\
-method parameter type & \code{METHOD\_PARAMETER}
+method formal parameter type & \code{METHOD\_FORMAL\_PARAMETER}
 & \code{0x16} & \S\ref{class-file:ext:ri:parameters} \\
 exception type in \code{throws} & \code{THROWS}
 & \code{0x17} & \S\ref{class-file:ext:ri:throws} \\
@@ -1608,8 +1608,10 @@ type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
 & \code{0x47} & \S\ref{class-file:ext:ri:con-typearg} \\
 lambda parameter type & \code{LAMBDA\_FORMAL\_PARAMETER}
 & \code{0x48} & \S\ref{class-file:ext:ri:lambda-parameter} \\
+method reference & \code{METHOD\_REFERENCE}
+& \code{0x49} & \S\ref{class-file:ext:ri:mref} \\
 type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
-& \code{0x49} & \S\ref{class-file:ext:ri:mref-typearg} \\
+& \code{0x50} & \S\ref{class-file:ext:ri:mref-typearg} \\
 \hline
 \end{tabular}
 \end{center}
@@ -1768,21 +1770,21 @@ More formally, it contains \code{empty\_target}:
   type, or receiver}{\code{method\_info} structure}
 
 
-\subsubsection{Method parameters\label{class-file:ext:ri:parameters}}
+\subsubsection{Method formal parameters\label{class-file:ext:ri:parameters}}
 
-\targetinfocontentspartial{a method parameter type} contains one \code{method\_parameter\_target}, which
+\targetinfocontentspartial{a method formal parameter type} contains one \code{method\_formal\_parameter\_target}, which
 indicates which of the method's formal parameters is being annotated:
 
 \preverbnegspace
 \begin{Verbatim}
-    method_parameter_target {
-        u1 method_parameter_index;
+    method_formal_parameter_target {
+        u1 method_formal_parameter_index;
     };
 \end{Verbatim}
 
-\attributelocation{containing a \code{method\_parameter\_target}}{\code{method\_info} structure}
+\attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
 
-TODO: Constrain \code{method\_parameter\_index} w.r.t.\ the number of
+TODO: Constrain \code{method\_formal\_parameter\_index} w.r.t.\ the number of
       parameter descriptors in the method descriptor (JVMS 4.3.3) of the
       enclosing \code{method\_info} structure.
 
@@ -2966,7 +2968,7 @@ reach the \<catch> clause.
 %% part of the document.
 % \section{Discussion of Java language syntax extensions\label{syntax-discussion}}
 % 
-% In Java SE 7, annotations can be written only on method parameters
+% In Java SE 7, annotations can be written only on method formal parameters
 % and the declarations of packages, classes, methods, fields, and local variables.
 % Additional annotations are necessary in order to fully specify Java classes and
 % methods.
