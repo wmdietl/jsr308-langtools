@@ -37,15 +37,16 @@ import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.code.Type.*;
 import com.sun.tools.javac.file.BaseFileObject;
 import com.sun.tools.javac.util.*;
 
-import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
-import static com.sun.tools.javac.code.TypeTags.*;
+import static com.sun.tools.javac.code.TypeTag.*;
 import static com.sun.tools.javac.jvm.UninitializedType.*;
 import static com.sun.tools.javac.main.Option.*;
 import static javax.tools.StandardLocation.CLASS_OUTPUT;
@@ -62,8 +63,6 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
 public class ClassWriter extends ClassFile {
     protected static final Context.Key<ClassWriter> classWriterKey =
         new Context.Key<ClassWriter>();
-
-    private final Symtab syms;
 
     private final Options options;
 
@@ -180,7 +179,6 @@ public class ClassWriter extends ClassFile {
 
         log = Log.instance(context);
         names = Names.instance(context);
-        syms = Symtab.instance(context);
         options = Options.instance(context);
         target = Target.instance(context);
         source = Source.instance(context);
@@ -279,7 +277,7 @@ public class ClassWriter extends ClassFile {
     /** Assemble signature of given type in string buffer.
      */
     void assembleSig(Type type) {
-        switch (type.tag) {
+        switch (type.getTag()) {
         case BYTE:
             sigbuf.appendByte('B');
             break;
@@ -366,13 +364,13 @@ public class ClassWriter extends ClassFile {
             assembleSig(types.erasure(((UninitializedType)type).qtype));
             break;
         default:
-            throw new AssertionError("typeSig " + type.tag);
+            throw new AssertionError("typeSig " + type.getTag());
         }
     }
 
     boolean hasTypeVar(List<Type> l) {
         while (l.nonEmpty()) {
-            if (l.head.tag == TypeTags.TYPEVAR) return true;
+            if (l.head.hasTag(TYPEVAR)) return true;
             l = l.tail;
         }
         return false;
@@ -444,9 +442,9 @@ public class ClassWriter extends ClassFile {
      *  external representation.
      */
     public Name xClassName(Type t) {
-        if (t.tag == CLASS) {
+        if (t.hasTag(CLASS)) {
             return names.fromUtf(externalize(t.tsym.flatName()));
-        } else if (t.tag == ARRAY) {
+        } else if (t.hasTag(ARRAY)) {
             return typeSig(types.erasure(t));
         } else {
             throw new AssertionError("xClassName");
@@ -526,7 +524,7 @@ public class ClassWriter extends ClassFile {
                 ClassSymbol c = (ClassSymbol)value;
                 if (c.owner.kind == TYP) pool.put(c.owner);
                 poolbuf.appendByte(CONSTANT_Class);
-                if (c.type.tag == ARRAY) {
+                if (c.type.hasTag(ARRAY)) {
                     poolbuf.appendChar(pool.put(typeSig(c.type)));
                 } else {
                     poolbuf.appendChar(pool.put(names.fromUtf(externalize(c.flatname))));
@@ -560,7 +558,7 @@ public class ClassWriter extends ClassFile {
                 poolbuf.appendChar(pool.put(typeSig(mtype)));
             } else if (value instanceof Type) {
                 Type type = (Type)value;
-                if (type.tag == CLASS) enterInner((ClassSymbol)type.tsym);
+                if (type.hasTag(CLASS)) enterInner((ClassSymbol)type.tsym);
                 poolbuf.appendByte(CONSTANT_Class);
                 poolbuf.appendChar(pool.put(xClassName(type)));
             } else if (value instanceof Pool.MethodHandle) {
@@ -720,7 +718,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getAnnotationMirrors());
-        acount += writeTypeAnnotations(sym.typeAnnotations);
+        acount += writeTypeAnnotations(sym.getTypeAnnotationMirrors());
         return acount;
     }
 
@@ -822,8 +820,38 @@ public class ClassWriter extends ClassFile {
         ListBuffer<Attribute.TypeCompound> invisibles = ListBuffer.lb();
 
         for (Attribute.TypeCompound tc : typeAnnos) {
-            if (tc.position.type == TargetType.UNKNOWN
-                || !tc.position.emitToClassfile())
+            if (tc.position == null || tc.position.type == TargetType.UNKNOWN) {
+                boolean found = false;
+                // TODO: the position for the container annotation of a
+                // repeating type annotation has to be set.
+                // This cannot be done when the container is created, because
+                // then the position is not determined yet.
+                // How can we link these pieces better together?
+                if (tc.values.size() == 1) {
+                    Pair<MethodSymbol, Attribute> val = tc.values.get(0);
+                    if (val.fst.getSimpleName().contentEquals("value") &&
+                            val.snd instanceof Attribute.Array) {
+                        Attribute.Array arr = (Attribute.Array) val.snd;
+                        if (arr.values.length != 0 &&
+                                arr.values[0] instanceof Attribute.TypeCompound) {
+                            TypeCompound atycomp = (Attribute.TypeCompound) arr.values[0];
+                            if (atycomp.position.type != TargetType.UNKNOWN) {
+                                tc.position = atycomp.position;
+                                found = true;
+                            }
+                        }
+                    }
+                }
+                if (!found) {
+                    // This happens for nested types like @A Outer. @B Inner.
+                    // For method parameters we get the annotation twice! Once with
+                    // a valid position, once unknown.
+                    // TODO: find a cleaner solution.
+                    // System.err.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
+                    continue;
+                }
+            }
+            if (!tc.position.emitToClassfile())
                 continue;
             switch (types.getRetention(tc)) {
             case SOURCE: break;
@@ -861,7 +889,7 @@ public class ClassWriter extends ClassFile {
     class AttributeWriter implements Attribute.Visitor {
         public void visitConstant(Attribute.Constant _value) {
             Object value = _value.value;
-            switch (_value.type.tag) {
+            switch (_value.type.getTag()) {
             case BYTE:
                 databuf.appendByte('B');
                 break;
@@ -936,27 +964,23 @@ public class ClassWriter extends ClassFile {
         if (debugJSR308)
             System.out.println("TA: writing " + c + " at " + c.position
                     + " in " + log.currentSourceFile());
-        writeCompoundAttribute(c);
         writePosition(c.position);
+        writeCompoundAttribute(c);
     }
 
     void writePosition(TypeAnnotationPosition p) {
         databuf.appendChar(p.type.targetTypeValue());
         switch (p.type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             databuf.appendChar(p.offset);
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
             databuf.appendChar(p.lvarOffset.length);  // for table length
             for (int i = 0; i < p.lvarOffset.length; ++i) {
                 databuf.appendChar(p.lvarOffset[i]);
@@ -964,9 +988,12 @@ public class ClassWriter extends ClassFile {
                 databuf.appendChar(p.lvarIndex[i]);
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            databuf.appendByte(p.exception_index);
+            break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -976,55 +1003,47 @@ public class ClassWriter extends ClassFile {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             databuf.appendByte(p.parameter_index);
             databuf.appendByte(p.bound_index);
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             databuf.appendChar(p.type_index);
             break;
         // throws
         case THROWS:
             databuf.appendChar(p.type_index);
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             databuf.appendByte(p.parameter_index);
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             databuf.appendChar(p.offset);
             databuf.appendByte(p.type_index);
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            databuf.appendByte(p.parameter_index);
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("jvm.ClassWriter: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + p);
+            throw new AssertionError("jvm.ClassWriter: Unknown target type for position: " + p);
         }
 
-        // Append location data for generics/arrays.
-        if (p.type.hasLocation()) {
-            databuf.appendChar(p.location.size());
-            for (int i : p.location)
+        { // Append location data for generics/arrays.
+            databuf.appendByte(p.location.size());
+            java.util.List<Integer> loc = TypeAnnotationPosition.getBinaryFromTypePath(p.location);
+            for (int i : loc)
                 databuf.appendByte((byte)i);
         }
     }
@@ -1045,7 +1064,7 @@ public class ClassWriter extends ClassFile {
             System.err.println("error: " + c + ": " + ex.getMessage());
             throw ex;
         }
-        if (c.type.tag != CLASS) return; // arrays
+        if (!c.type.hasTag(CLASS)) return; // arrays
         if (pool != null && // pool might be null if called from xClassName
             c.owner.enclClass() != null &&
             (innerClasses == null || !innerClasses.contains(c))) {
@@ -1351,7 +1370,7 @@ public class ClassWriter extends ClassFile {
                 if (debugstackmap) System.out.print("empty");
                 databuf.appendByte(0);
             }
-            else switch(t.tag) {
+            else switch(t.getTag()) {
             case BYTE:
             case CHAR:
             case SHORT:
@@ -1574,7 +1593,7 @@ public class ClassWriter extends ClassFile {
         }
 
         static boolean isInt(Type t) {
-            return (t.tag < TypeTags.INT || t.tag == TypeTags.BOOLEAN);
+            return (t.getTag().isStrictSubRangeOf(INT)  || t.hasTag(BOOLEAN));
         }
 
         static boolean isSameType(Type t1, Type t2, Types types) {
@@ -1583,15 +1602,15 @@ public class ClassWriter extends ClassFile {
 
             if (isInt(t1) && isInt(t2)) { return true; }
 
-            if (t1.tag == UNINITIALIZED_THIS) {
-                return t2.tag == UNINITIALIZED_THIS;
-            } else if (t1.tag == UNINITIALIZED_OBJECT) {
-                if (t2.tag == UNINITIALIZED_OBJECT) {
+            if (t1.hasTag(UNINITIALIZED_THIS)) {
+                return t2.hasTag(UNINITIALIZED_THIS);
+            } else if (t1.hasTag(UNINITIALIZED_OBJECT)) {
+                if (t2.hasTag(UNINITIALIZED_OBJECT)) {
                     return ((UninitializedType)t1).offset == ((UninitializedType)t2).offset;
                 } else {
                     return false;
                 }
-            } else if (t2.tag == UNINITIALIZED_THIS || t2.tag == UNINITIALIZED_OBJECT) {
+            } else if (t2.hasTag(UNINITIALIZED_THIS) || t2.hasTag(UNINITIALIZED_OBJECT)) {
                 return false;
             }
 
@@ -1684,7 +1703,7 @@ public class ClassWriter extends ClassFile {
         List<Type> interfaces = types.interfaces(c.type);
         List<Type> typarams = c.type.getTypeArguments();
 
-        int flags = adjustFlags(c.flags());
+        int flags = adjustFlags(c.flags() & ~DEFAULT);
         if ((flags & PROTECTED) != 0) flags |= PUBLIC;
         flags = flags & ClassFlags & ~STRICTFP;
         if ((flags & INTERFACE) == 0) flags |= ACC_SUPER;
@@ -1698,7 +1717,7 @@ public class ClassWriter extends ClassFile {
         databuf.appendChar(flags);
 
         databuf.appendChar(pool.put(c));
-        databuf.appendChar(supertype.tag == CLASS ? pool.put(supertype.tsym) : 0);
+        databuf.appendChar(supertype.hasTag(CLASS) ? pool.put(supertype.tsym) : 0);
         databuf.appendChar(interfaces.length());
         for (List<Type> l = interfaces; l.nonEmpty(); l = l.tail)
             databuf.appendChar(pool.put(l.head.tsym));
@@ -1772,7 +1791,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getAnnotationMirrors());
-        acount += writeTypeAnnotations(c.typeAnnotations);
+        acount += writeTypeAnnotations(c.getTypeAnnotationMirrors());
         acount += writeEnclosingMethodAttribute(c);
         acount += writeExtraClassAttributes(c);
 
@@ -1821,6 +1840,8 @@ public class ClassWriter extends ClassFile {
             result |= ACC_BRIDGE;
         if ((flags & VARARGS) != 0  && target.useVarargsFlag())
             result |= ACC_VARARGS;
+        if ((flags & DEFAULT) != 0)
+            result &= ~ABSTRACT;
         return result;
     }
 

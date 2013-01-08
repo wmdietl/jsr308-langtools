@@ -73,25 +73,23 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitAnnotatedType(AnnotatedTypeTree node, P p) {
         JCAnnotatedType t = (JCAnnotatedType) node;
-        List<JCTypeAnnotation> annotations = copy(t.annotations, p);
+        List<JCAnnotation> annotations = copy(t.annotations, p);
         JCExpression underlyingType = copy(t.underlyingType, p);
-        return M.at(t.pos).AnnotatedType(annotations, underlyingType, t.onRightType);
+        return M.at(t.pos).AnnotatedType(annotations, underlyingType);
     }
 
     public JCTree visitAnnotation(AnnotationTree node, P p) {
         JCAnnotation t = (JCAnnotation) node;
         JCTree annotationType = copy(t.annotationType, p);
         List<JCExpression> args = copy(t.args, p);
-        if (t instanceof JCTypeAnnotation) {
-            JCTypeAnnotation ta = (JCTypeAnnotation)node;
-
-            // Fill the rest
-            JCTypeAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
-            newTA.annotationType = ta.annotationType;
-            newTA.attribute_field = ta.attribute_field;
+        if (t.getKind() == Tree.Kind.TYPE_ANNOTATION) {
+            JCAnnotation newTA = M.at(t.pos).TypeAnnotation(annotationType, args);
+            newTA.attribute= t.attribute;
             return newTA;
         } else {
-            return M.at(t.pos).Annotation(annotationType, args);
+            JCAnnotation newT = M.at(t.pos).Annotation(annotationType, args);
+            newT.attribute= t.attribute;
+            return newT;
         }
     }
 
@@ -254,7 +252,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         List<JCExpression> thrown = copy(t.thrown, p);
         JCBlock body = copy(t.body, p);
         JCExpression defaultValue = copy(t.defaultValue, p);
-        return M.at(t.pos).MethodDef(mods, t.name, restype, typarams, params, recvparam, thrown, body, defaultValue);
+        return M.at(t.pos).MethodDef(mods, t.name, restype, typarams, recvparam, params, thrown, body, defaultValue);
     }
 
     public JCTree visitMethodInvocation(MethodInvocationTree node, P p) {
@@ -376,6 +374,12 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
         return M.at(t.pos).TypeUnion(components);
     }
 
+    public JCTree visitIntersectionType(IntersectionTypeTree node, P p) {
+        JCTypeIntersection t = (JCTypeIntersection) node;
+        List<JCExpression> bounds = copy(t.bounds, p);
+        return M.at(t.pos).TypeIntersection(bounds);
+    }
+
     public JCTree visitArrayType(ArrayTypeTree node, P p) {
         JCArrayTypeTree t = (JCArrayTypeTree) node;
         JCExpression elemtype = copy(t.elemtype, p);
@@ -396,7 +400,7 @@ public class TreeCopier<P> implements TreeVisitor<JCTree,P> {
 
     public JCTree visitTypeParameter(TypeParameterTree node, P p) {
         JCTypeParameter t = (JCTypeParameter) node;
-        List<JCTypeAnnotation> annos = copy(t.annotations, p);
+        List<JCAnnotation> annos = copy(t.annotations, p);
         List<JCExpression> bounds = copy(t.bounds, p);
         return M.at(t.pos).TypeParameter(t.name, bounds, annos);
     }
