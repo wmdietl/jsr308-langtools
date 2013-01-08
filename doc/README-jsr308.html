@@ -183,16 +183,16 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
 
 <ol>
   <li>
-    Install a new copy of OpenJDK.  This new installation will be modified
-    later (but no other copy of OpenJDK will be modified).  You can
+    Install a new copy of the Oracle JDK.  This new installation will be modified
+    later (but no other copy of the JDK will be modified).  You can
     put the new installation anywhere you want; a common place is in a new
     directory <code>~/jsr308</code>.  We will call that directory
     <tt>$JSR308</tt>.
     <ol type="a">
       <li>
-	Download a JDK 7 or 8 <a
-	href="http://download.java.net/jdk7/binaries/">binary snapshot:
-	self-extracting JDK file</a>.
+	Download a <a href="http://jdk7.java.net/archive/">JDK 7 binary snapshot</a> or <a
+	href="http://jdk8.java.net/archive/">JDK 8 binary snapshot</a>:
+	self-extracting JDK file.
 	Choose JDK, not JRE or DEBUG, and choose a binary, not a source
 	distribution.  The rest of these instructions assume JDK 8, but
         they work just as well with JDK 7.
@@ -209,7 +209,7 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
 	  <li>
 	For <b>Linux</b>:  
 	After installing, your old version of Java remains the default.
-        If you wish to make OpenJDK Java 8 the default, then
+        If you wish to make JDK Java 8 the default, then
 	set your <code>JAVA_HOME</code> environment variable to the top-level
 	directory of the JDK 8 installation <code>/path/to/jdk1.8.0</code>, and
 	augment your <code>PATH</code> with
@@ -224,7 +224,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 	  </li>
 	  <li>
         For <b>Windows</b>:
-	After installing, the OpenJDK Java 8 (at <code>c:\Program
+	After installing, the JDK Java 8 (at <code>c:\Program
 	Files\Java\jdk1.8.0\</code>) becomes the default.
 	If you wish to retain an older version of Java as the default, then
 	do the following:
@@ -275,7 +275,7 @@ ant clean build-javac build-javap
     <p>
     The effect of the above commands is that the <code>javac</code>
     command invokes the Type Annotations Java compiler and the <code>javap</code>
-    command invokes the Type Annotations <code>javap</code>, but the Java 8 OpenJDK
+    command invokes the Type Annotations <code>javap</code>, but the Java 8 JDK
     is used for everything else.
     </p>
   </li>
@@ -302,7 +302,7 @@ javac -version
 <p>
 When updating to a newer version of the Type Annotations compiler, you only have to
 follow steps 2, 3, and 4.  In other words, you only have to redo step 1 if
-you want a newer version of OpenJDK.
+you want a newer version of JDK.
 </p>
 
 
