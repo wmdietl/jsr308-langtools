@@ -373,16 +373,16 @@ receiver.
   \label{type-annotation-locations-receiver}%
   It is permitted to explicitly declare the method receiver as the first
   formal parameter.
-  (Each non-static method has an implicit parameter, \code{this}, which is
+  (Each non-static method has an implicit formal parameter, \code{this}, which is
   called the \emph{receiver}.)
   Then, no special
   syntax is needed for expressing a receiver type annotation:  it is simply an
-  annotation on the type of the \code{this} parameter.
+  annotation on the type of the \code{this} formal parameter.
 
   Only the first formal parameter may be
-  named \code{this}, and such a parameter is permitted only on an instance
+  named \code{this}, and such a formal parameter is permitted only on an instance
   method.  It is forbidden on a static method or a lambda expression.  The type
-  of the \code{this} parameter must be the same as the class that contains
+  of the \code{this} formal parameter must be the same as the class that contains
   the method and may include type arguments if that class has any.
   A receiver \code{this} formal parameter is also permitted on a
   constructor of an inner class, in which case its type is that of the
@@ -1582,7 +1582,7 @@ method return type & \code{METHOD\_RETURN}
 method receiver type & \code{METHOD\_RECEIVER}
 & \code{0x15} & \S\ref{class-file:ext:ri:receiver} \\
 method formal parameter type & \code{METHOD\_FORMAL\_PARAMETER}
-& \code{0x16} & \S\ref{class-file:ext:ri:parameters} \\
+& \code{0x16} & \S\ref{class-file:ext:ri:formal-parameters} \\
 exception type in \code{throws} & \code{THROWS}
 & \code{0x17} & \S\ref{class-file:ext:ri:throws} \\
 \hline
@@ -1606,8 +1606,8 @@ type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMEN
 & \code{0x46} & \S\ref{class-file:ext:ri:con-typearg} \\
 type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
 & \code{0x47} & \S\ref{class-file:ext:ri:con-typearg} \\
-lambda parameter type & \code{LAMBDA\_FORMAL\_PARAMETER}
-& \code{0x48} & \S\ref{class-file:ext:ri:lambda-parameter} \\
+lambda formal parameter type & \code{LAMBDA\_FORMAL\_PARAMETER}
+& \code{0x48} & \S\ref{class-file:ext:ri:lambda-formal-parameter} \\
 method reference & \code{METHOD\_REFERENCE}
 & \code{0x49} & \S\ref{class-file:ext:ri:mref} \\
 type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
@@ -1770,7 +1770,7 @@ More formally, it contains \code{empty\_target}:
   type, or receiver}{\code{method\_info} structure}
 
 
-\subsubsection{Method formal parameters\label{class-file:ext:ri:parameters}}
+\subsubsection{Method formal parameters\label{class-file:ext:ri:formal-parameters}}
 
 \targetinfocontentspartial{a method formal parameter type} contains one \code{method\_formal\_parameter\_target}, which
 indicates which of the method's formal parameters is being annotated:
@@ -1785,7 +1785,7 @@ indicates which of the method's formal parameters is being annotated:
 \attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
 
 TODO: Constrain \code{method\_formal\_parameter\_index} w.r.t.\ the number of
-      parameter descriptors in the method descriptor (JVMS 4.3.3) of the
+      formal parameter descriptors in the method descriptor (JVMS 4.3.3) of the
       enclosing \code{method\_info} structure.
 
 
@@ -2360,7 +2360,7 @@ designer would create a compiler plug-in (an annotation processor) to check
 the semantics of \code{@Readonly}.  For instance, a method may only be
 called on a \code{@Readonly} object if the method was declared with a
 \code{@Readonly} receiver.
-(Each non-static method has an implicit parameter, \code{this}, which is
+(Each non-static method has an implicit formal parameter, \code{this}, which is
 called the \emph{receiver}.)
 \code{@Readonly}'s immutability guarantee can
 help developers avoid accidental modifications, which are often manifested
@@ -2502,7 +2502,7 @@ Here are examples of uses for annotations on array levels:
   An immutability type system, as discussed in Section~\ref{type-qualifier-examples},
   needs to be able to specify which levels of
   an array may be modified.  Consider specifying a procedure that inverts a
-  matrix in place.  The procedure parameter type should guarantee that the procedure
+  matrix in place.  The procedure formal parameter type should guarantee that the procedure
   does not change the shape of the array (does not replace any of the rows
   with another row of a different length), but must permit changing
   elements of the inner arrays.  In other words, the top-level array is
@@ -2510,7 +2510,7 @@ Here are examples of uses for annotations on array levels:
   are immutable.
 \item
   An ownership domain system~\cite{AbiAntounA2006:OOPSLA} uses array
-  annotations to indicate properties of array parameters, similarly to type
+  annotations to indicate properties of arrays, similarly to type
   parameters.
 \item
   \newcommand{\bs}{\char"5C}
@@ -2522,7 +2522,7 @@ Here are examples of uses for annotations on array levels:
   A simple example is a method that accepts a list of files to search.
   \code{null} may be used to indicate that there were no files to search,
   but when a list is provided, then the \code{File}s themselves must be
-  non-null.  Using JSR 308, a programmer would declare the parameter as
+  non-null.  Using JSR 308, a programmer would declare the formal parameter as
   \code{@NonNull File @Nullable [] filesToSearch} --- more concisely,
   depending on the default nullness, as either \code{File @Nullable []
     filesToSearch} or \code{@NonNull File [] filesToSearch}
@@ -2580,7 +2580,7 @@ Here are examples of uses for annotations on array levels:
 
 \paragraph{Receivers\label{receivers}}
 A type qualifier on a formal parameter is a contract regarding what the
-method may (or may not) do with that parameter.  Since the method receiver
+method may (or may not) do with that formal parameter.  Since the method receiver
 (\code{this}) is an implicit formal parameter, programmers should be able
 to express type qualifiers on it, for consistency and expressiveness.  An
 annotation on the receiver is a contract regarding what the method may
@@ -2605,11 +2605,11 @@ For example, consider the following method:
 \end{Verbatim}
 
 \noindent
-The annotations indicate that \code{marshal} modifies its second parameter
-but does not modify its first parameter nor its receiver.
+The annotations indicate that \code{marshal} modifies its second formal parameter
+but does not modify its first formal parameter nor its receiver.
 
 The syntax also permits expressing constraints on the
-generic parameters of the receiver.  Here are some examples:
+generic type parameters of the receiver.  Here are some examples:
 
 \preverbnegspace
 \begin{Verbatim}
@@ -2628,7 +2628,7 @@ generic parameters of the receiver.  Here are some examples:
   }
 \end{Verbatim}
 
-A method in an inner class has two \<this> parameters:  that for the inner
+A method in an inner class has two \<this> formal parameters:  that for the inner
 class, and that for the enclosing instance (which is \<this> in the currently-executing method in the outer class).  It
 is desirable to specify the types for both.  
 One use case for this is a read-only type system, where you want to
@@ -3044,7 +3044,7 @@ SAM-converted.
 %  * WCET
 %  * parallelizable, moveable across nodes]
 
-%      inferred parameter types for lambda -- like diamond (same issues), so
+%      inferred formal parameter types for lambda -- like diamond (same issues), so
 %        benign from the point of view of type annotations
 
 %% A Java 7 issue:
@@ -3337,7 +3337,7 @@ clients would immediately cast the result of the latter method.)
 % of \code{@Interned} and \code{@Opened} above.
 
 % Therefore, it is usually better to obtain the annotated type (say, of a
-% parameter or return value) and to query it directly.
+% formal parameter or return value) and to query it directly.
 
 
 \subsubsection{Non-changes to reflection\label{non-changes-to-reflection}}
@@ -3354,7 +3354,7 @@ superseded by JSR 269~\cite{JSR269}.
 
 
 Method \code{Method\-.getParameterAnnotations()} returns the annotations on
-the parameter \emph{declarations}, just as in Java SE 7.  It does not return
+the formal parameter \emph{declarations}, just as in Java SE 7.  It does not return
 type annotations.  There is no point in new methods that parallel it,
 such as \code{Method.getReceiverAnnotation} (for the receiver
 \code{this}) and \code{Method.getReturnAnnotation} (for the return
@@ -3366,7 +3366,7 @@ The semantics of reflective invocation is not changed.
 (The changes described in this section are to APIs that query classes,
 method signatures, etc.)
 For instance, suppose that a program reflectively calls a method
-with a parameter whose type is annotated as \code{@Readonly}, but the
+whose formal parameter type is annotated as \code{@Readonly}, but the
 corresponding argument has a declared type that is non-\code{@Readonly}.
 The call succeeds.  This is a requirement for backward compatibility:  the
 existence of annotations in the class file must not cause a standard JVM
