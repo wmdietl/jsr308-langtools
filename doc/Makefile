@@ -11,7 +11,7 @@ PLUME_BIN ?= ${PLUME_LIB}/bin
 
 RELEASEDATE ?= `date '+%Y%m%d'`
 
-CHECKLINK ?= PERL5LIB=/homes/gws/mernst/bin/src/perl:/homes/gws/mernst/bin/src/perl/share/perl5:/homes/gws/mernst/bin/src/perl/lib64/perl5:/homes/gws/mernst/research/steering/colony-2003/experiment-scripts:/usr/share/perl5/ ${PLUME_BIN}/checklink
+CHECKLINK ?= PERL5LIB=/homes/gws/mernst/bin/src/perl:/homes/gws/mernst/bin/src/perl/share/perl5:/homes/gws/mernst/bin/src/perl/lib64/perl5:/homes/gws/mernst/research/steering/colony-2003/experiment-scripts:/usr/share/perl5/:/homes/gws/jburke/perl_lib ${PLUME_BIN}/checklink
 
 export PERLLIB := ${PERLLIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
 export PERL5LIB := ${PERL5LIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
