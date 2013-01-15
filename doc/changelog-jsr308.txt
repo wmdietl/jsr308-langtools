@@ -1,6 +1,14 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.5.0, 1 Dec 2012
+
+Modified build.xml to work with new Checker Framework binary layout
+Minor documentation improvements
+No significant code changes
+
+----------------------------------------------------------------------
+
 Version 1.4.4, 1 Dec 2012
 
 Several documentation improvements
