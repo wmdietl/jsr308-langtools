@@ -1092,6 +1092,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
         }
+        annotate.afterRepeated(TypeAnnotations.organizeTypeAnnotationsSignatures(syms, names, log, tree));
     }
 
     private void actualEnterTypeAnnotations(final List<JCAnnotation> annotations,
