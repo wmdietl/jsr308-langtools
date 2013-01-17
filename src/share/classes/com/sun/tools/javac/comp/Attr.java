@@ -3661,11 +3661,14 @@ public class Attr extends JCTree.Visitor {
         tree.type = result = checkIntersection(tree, tree.bounds);
     }
 
-     public void visitTypeParameter(JCTypeParameter tree) {
+    public void visitTypeParameter(JCTypeParameter tree) {
         TypeVar typeVar = (TypeVar) tree.type;
-        AnnotatedType antype = new AnnotatedType(typeVar);
-        annotateType(antype, tree.annotations);
-        tree.type = antype;
+
+        if (tree.annotations != null && tree.annotations.nonEmpty()) {
+            AnnotatedType antype = new AnnotatedType(typeVar);
+            annotateType(antype, tree.annotations);
+            tree.type = antype;
+        }
 
         if (!typeVar.bound.isErroneous()) {
             //fixup type-parameter bound computed in 'attribTypeVariables'
@@ -4043,7 +4046,7 @@ public class Attr extends JCTree.Visitor {
         }
 
         // Correctly organize the postions of the type annotations
-        TypeAnnotations.organizeTypeAnnotations(this.syms, this.names, this.log, tree);
+        TypeAnnotations.organizeTypeAnnotationsBodies(this.syms, this.names, this.log, tree);
 
         // Check type annotations applicability rules
         validateTypeAnnotations(tree);
