@@ -27,18 +27,12 @@
  * @summary Combinations of Target ElementTypes on (repeated)type annotations.
  */
 
-import com.sun.source.util.JavacTask;
-import com.sun.tools.javac.api.JavacTool;
 import com.sun.tools.classfile.*;
-import java.net.URI;
 import java.io.File;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.Arrays;
 
 public class CombinationsTargetTest1 extends ClassfileTestHelper {
     // Helps identify test case in event of failure.
-    static int testcount = 0;
+    int testcount = 0;
     int src1 = 1, src2 = 2, src4 = 4, 
         src5 = 5, src6 = 6, src7 = 7;
 
