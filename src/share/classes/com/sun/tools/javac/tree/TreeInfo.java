@@ -26,6 +26,7 @@
 package com.sun.tools.javac.tree;
 
 
+
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.comp.AttrContext;
@@ -34,6 +35,7 @@ import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import static com.sun.tools.javac.code.Flags.*;
+import static com.sun.tools.javac.code.TypeTag.BOT;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 import static com.sun.tools.javac.tree.JCTree.Tag.BLOCK;
 import static com.sun.tools.javac.tree.JCTree.Tag.SYNCHRONIZED;
@@ -245,6 +247,46 @@ public class TreeInfo {
         }
     }
 
+    /** Return true if a a tree corresponds to a poly expression. */
+    public static boolean isPoly(JCTree tree, JCTree origin) {
+        switch (tree.getTag()) {
+            case APPLY:
+            case NEWCLASS:
+            case CONDEXPR:
+                return !origin.hasTag(TYPECAST);
+            case LAMBDA:
+            case REFERENCE:
+                return true;
+            case PARENS:
+                return isPoly(((JCParens)tree).expr, origin);
+            default:
+                return false;
+        }
+    }
+
+    public static boolean isExplicitLambda(JCLambda lambda) {
+        return lambda.params.isEmpty() ||
+                lambda.params.head.vartype != null;
+    }
+
+    /** Return true if the tree corresponds to an expression statement */
+    public static boolean isExpressionStatement(JCExpression tree) {
+        switch(tree.getTag()) {
+            case PREINC: case PREDEC:
+            case POSTINC: case POSTDEC:
+            case ASSIGN:
+            case BITOR_ASG: case BITXOR_ASG: case BITAND_ASG:
+            case SL_ASG: case SR_ASG: case USR_ASG:
+            case PLUS_ASG: case MINUS_ASG:
+            case MUL_ASG: case DIV_ASG: case MOD_ASG:
+            case APPLY: case NEWCLASS:
+            case ERRONEOUS:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     /**
      * Return true if the AST corresponds to a static select of the kind A.B
      */
@@ -261,6 +303,7 @@ public class TreeInfo {
                 return isStaticSym(base) &&
                     isStaticSelector(((JCFieldAccess)base).selected, names);
             case TYPEAPPLY:
+            case TYPEARRAY:
                 return true;
             default:
                 return false;
@@ -278,7 +321,7 @@ public class TreeInfo {
         if (!tree.hasTag(LITERAL))
             return false;
         JCLiteral lit = (JCLiteral) tree;
-        return (lit.typetag == TypeTags.BOT);
+        return (lit.typetag == BOT);
     }
 
     public static String getCommentText(Env<?> env, JCTree tree) {
@@ -286,6 +329,13 @@ public class TreeInfo {
                 ? ((JCCompilationUnit) tree).docComments
                 : env.toplevel.docComments;
         return (docComments == null) ? null : docComments.getCommentText(tree);
+    }
+
+    public static DCTree.DCDocComment getCommentTree(Env<?> env, JCTree tree) {
+        DocCommentTable docComments = (tree.hasTag(JCTree.Tag.TOPLEVEL))
+                ? ((JCCompilationUnit) tree).docComments
+                : env.toplevel.docComments;
+        return (docComments == null) ? null : docComments.getCommentTree(tree);
     }
 
     /** The position of the first statement in a block, or the position of
@@ -377,8 +427,7 @@ public class TreeInfo {
                 JCAnnotatedType node = (JCAnnotatedType) tree;
                 if (node.annotations.nonEmpty()) {
                     if (node.underlyingType.hasTag(TYPEARRAY) ||
-                            (node.underlyingType.hasTag(SELECT) &&
-                            node.onRightType)) {
+                            node.underlyingType.hasTag(SELECT)) {
                         return getStartPos(node.underlyingType);
                     } else {
                         return getStartPos(node.annotations.head);
@@ -397,6 +446,10 @@ public class TreeInfo {
                 JCVariableDecl node = (JCVariableDecl)tree;
                 if (node.mods.pos != Position.NOPOS) {
                     return node.mods.pos;
+                } else if (node.vartype == null) {
+                    //if there's no type (partially typed lambda parameter)
+                    //simply return node position
+                    return node.pos;
                 } else {
                     return getStartPos(node.vartype);
                 }
@@ -782,8 +835,8 @@ public class TreeInfo {
      *  pre: flags != 0
      */
     public static long firstFlag(long flags) {
-        int flag = 1;
-        while ((flag & StandardFlags) != 0 && (flag & flags) == 0)
+        long flag = 1;
+        while ((flag & flags & ExtendedStandardFlags) == 0)
             flag = flag << 1;
         return flag;
     }
@@ -791,7 +844,7 @@ public class TreeInfo {
     /** Return flags as a string, separated by " ".
      */
     public static String flagNames(long flags) {
-        return Flags.toString(flags & StandardFlags).trim();
+        return Flags.toString(flags & ExtendedStandardFlags).trim();
     }
 
     /** Operator precedences values.
@@ -969,6 +1022,11 @@ public class TreeInfo {
         // Null check (implementation detail), for example, __.getClass()
         case NULLCHK:
             return Tree.Kind.OTHER;
+
+        case ANNOTATION:
+            return Tree.Kind.ANNOTATION;
+        case TYPE_ANNOTATION:
+            return Tree.Kind.TYPE_ANNOTATION;
 
         default:
             return null;

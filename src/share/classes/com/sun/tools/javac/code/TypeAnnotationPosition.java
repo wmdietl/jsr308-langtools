@@ -25,6 +25,8 @@
 
 package com.sun.tools.javac.code;
 
+import java.util.Iterator;
+
 import com.sun.tools.javac.util.*;
 
 /** A type annotation position.
@@ -35,12 +37,91 @@ import com.sun.tools.javac.util.*;
 *  deletion without notice.</b>
 */
 // Code duplicated in com.sun.tools.classfile.TypeAnnotation.Position
-public class TypeAnnotationPosition implements Cloneable {
+public class TypeAnnotationPosition {
+
+    public enum TypePathEntryKind {
+        ARRAY(0),
+        INNER_TYPE(1),
+        WILDCARD(2),
+        TYPE_ARGUMENT(3);
+
+        public final int tag;
+
+        private TypePathEntryKind(int tag) {
+            this.tag = tag;
+        }
+    }
+
+    public static class TypePathEntry {
+        /** The fixed number of bytes per TypePathEntry. */
+        public static final int bytesPerEntry = 2;
+
+        public final TypePathEntryKind tag;
+        public final int arg;
+
+        public static final TypePathEntry ARRAY = new TypePathEntry(TypePathEntryKind.ARRAY);
+        public static final TypePathEntry INNER_TYPE = new TypePathEntry(TypePathEntryKind.INNER_TYPE);
+        public static final TypePathEntry WILDCARD = new TypePathEntry(TypePathEntryKind.WILDCARD);
+
+        private TypePathEntry(TypePathEntryKind tag) {
+            Assert.check(tag == TypePathEntryKind.ARRAY ||
+                    tag == TypePathEntryKind.INNER_TYPE ||
+                    tag == TypePathEntryKind.WILDCARD,
+                    "Invalid TypePathEntryKind: " + tag);
+            this.tag = tag;
+            this.arg = 0;
+        }
+
+        public TypePathEntry(TypePathEntryKind tag, int arg) {
+            Assert.check(tag == TypePathEntryKind.TYPE_ARGUMENT,
+                    "Invalid TypePathEntryKind: " + tag);
+            this.tag = tag;
+            this.arg = arg;
+        }
+
+        public static TypePathEntry fromBinary(int tag, int arg) {
+            Assert.check(arg == 0 || tag == TypePathEntryKind.TYPE_ARGUMENT.tag,
+                    "Invalid TypePathEntry tag/arg: " + tag + "/" + arg);
+            switch (tag) {
+            case 0:
+                return ARRAY;
+            case 1:
+                return INNER_TYPE;
+            case 2:
+                return WILDCARD;
+            case 3:
+                return new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg);
+            default:
+                Assert.error("Invalid TypePathEntryKind tag: " + tag);
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return tag.toString() +
+                    (tag == TypePathEntryKind.TYPE_ARGUMENT ? ("(" + arg + ")") : "");
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (! (other instanceof TypePathEntry)) {
+                return false;
+            }
+            TypePathEntry tpe = (TypePathEntry) other;
+            return this.tag == tpe.tag && this.arg == tpe.arg;
+        }
+
+        @Override
+        public int hashCode() {
+            return this.tag.hashCode() * 17 + this.arg;
+        }
+    }
 
     public TargetType type = TargetType.UNKNOWN;
 
     // For generic/array types.
-    public List<Integer> location = List.nil();
+    public List<TypePathEntry> location = List.nil();
 
     // Tree position.
     public int pos = -1;
@@ -60,13 +141,13 @@ public class TypeAnnotationPosition implements Cloneable {
     // For type parameter and method parameter
     public int parameter_index = Integer.MIN_VALUE;
 
-    // For class extends, implements, and throws classes
+    // For class extends, implements, and throws clauses
     public int type_index = Integer.MIN_VALUE;
 
-    public TypeAnnotationPosition() { }
-    public TypeAnnotationPosition(TargetType type) {
-        this.type = type;
-    }
+    // For exception parameters, index into exception table
+    public int exception_index = Integer.MIN_VALUE;
+
+    public TypeAnnotationPosition() {}
 
     @Override
     public String toString() {
@@ -76,20 +157,22 @@ public class TypeAnnotationPosition implements Cloneable {
 
         switch (type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             sb.append(", offset = ");
             sb.append(offset);
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
+        // resource variable
+        case RESOURCE_VARIABLE:
+            if (lvarOffset == null) {
+                sb.append(", lvarOffset is null!");
+                break;
+            }
             sb.append(", {");
             for (int i = 0; i < lvarOffset.length; ++i) {
                 if (i != 0) sb.append("; ");
@@ -104,7 +187,6 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -115,9 +197,7 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             sb.append(", bound_index = ");
@@ -125,7 +205,6 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             sb.append(", type_index = ");
             sb.append(type_index);
             break;
@@ -136,20 +215,18 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
+            sb.append(", exception_index = ");
+            sb.append(exception_index);
             break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             sb.append(", offset = ");
             sb.append(offset);
             sb.append(", type_index = ");
@@ -157,18 +234,23 @@ public class TypeAnnotationPosition implements Cloneable {
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            // TODO: also needs an offset?
+            sb.append(", param_index = ");
+            sb.append(parameter_index);
             break;
         case UNKNOWN:
+            sb.append(", position UNKNOWN!");
             break;
         default:
-            throw new AssertionError("Unknown target type: " + type);
+            Assert.error("Unknown target type: " + type);
         }
 
         // Append location data for generics/arrays.
-        if (type.hasLocation()) {
+        if (!location.isEmpty()) {
             sb.append(", location = (");
             sb.append(location);
             sb.append(")");
@@ -190,11 +272,30 @@ public class TypeAnnotationPosition implements Cloneable {
         return !type.isLocal() || isValidOffset;
     }
 
-    public TypeAnnotationPosition clone() {
-        try {
-            return (TypeAnnotationPosition)super.clone();
-        } catch (CloneNotSupportedException e) {
-            throw new AssertionError("This not cloneable");
+    /**
+     * Decode the binary representation for a type path and set
+     * the {@code location} field.
+     *
+     * @param list The bytecode representation of the type path.
+     */
+    public static List<TypePathEntry> getTypePathFromBinary(java.util.List<Integer> list) {
+        ListBuffer<TypePathEntry> loc = ListBuffer.lb();
+        Iterator<Integer> iter = list.iterator();
+        while (iter.hasNext()) {
+            Integer fst = iter.next();
+            Assert.check(iter.hasNext(), "Could not decode type path: " + list);
+            Integer snd = iter.next();
+            loc = loc.append(TypePathEntry.fromBinary(fst, snd));
         }
+        return loc.toList();
+    }
+
+    public static List<Integer> getBinaryFromTypePath(java.util.List<TypePathEntry> locs) {
+        ListBuffer<Integer> loc = ListBuffer.lb();
+        for (TypePathEntry tpe : locs) {
+            loc = loc.append(tpe.tag.tag);
+            loc = loc.append(tpe.arg);
+        }
+        return loc.toList();
     }
 }

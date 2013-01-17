@@ -55,7 +55,7 @@ import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Kinds.*;
-import static com.sun.tools.javac.code.TypeTags.*;
+import static com.sun.tools.javac.code.TypeTag.CLASS;
 import static com.sun.tools.javac.jvm.ClassFile.*;
 import static com.sun.tools.javac.jvm.ClassFile.Version.*;
 
@@ -115,6 +115,9 @@ public class ClassReader implements Completer {
      */
     boolean lintClassfile;
 
+    /** Switch: allow default methods
+     */
+    boolean allowDefaultMethods;
 
     /** Switch: preserve parameter names from the variable table.
      */
@@ -218,6 +221,13 @@ public class ClassReader implements Completer {
      */
     boolean haveParameterNameIndices;
 
+    /** Set this to false every time we start reading a method
+     * and are saving parameter names.  Set it to true when we see
+     * MethodParameters, if it's set when we see a LocalVariableTable,
+     * then we ignore the parameter names from the LVT.
+     */
+    boolean sawMethodParameters;
+
     /**
      * The set of attribute names for which warnings have been generated for the current class
      */
@@ -283,6 +293,7 @@ public class ClassReader implements Completer {
         allowVarargs     = source.allowVarargs();
         allowAnnotations = source.allowAnnotations();
         allowSimplifiedVarargs = source.allowSimplifiedVarargs();
+        allowDefaultMethods = source.allowDefaultMethods();
         saveParameterNames = options.isSet("save-parameter-names");
         cacheCompletionFailure = options.isUnset("dev");
         preferSource = "source".equals(options.get("-Xprefer"));
@@ -489,20 +500,20 @@ public class ClassReader implements Completer {
         case CONSTANT_Fieldref: {
             ClassSymbol owner = readClassSymbol(getChar(index + 1));
             NameAndType nt = (NameAndType)readPool(getChar(index + 3));
-            poolObj[i] = new VarSymbol(0, nt.name, nt.type, owner);
+            poolObj[i] = new VarSymbol(0, nt.name, nt.uniqueType.type, owner);
             break;
         }
         case CONSTANT_Methodref:
         case CONSTANT_InterfaceMethodref: {
             ClassSymbol owner = readClassSymbol(getChar(index + 1));
             NameAndType nt = (NameAndType)readPool(getChar(index + 3));
-            poolObj[i] = new MethodSymbol(0, nt.name, nt.type, owner);
+            poolObj[i] = new MethodSymbol(0, nt.name, nt.uniqueType.type, owner);
             break;
         }
         case CONSTANT_NameandType:
             poolObj[i] = new NameAndType(
                 readName(getChar(index + 1)),
-                readType(getChar(index + 3)));
+                readType(getChar(index + 3)), types);
             break;
         case CONSTANT_Integer:
             poolObj[i] = getInt(index + 1);
@@ -847,17 +858,17 @@ public class ClassReader implements Completer {
             tvar = (TypeVar)findTypeVar(name);
         }
         List<Type> bounds = List.nil();
-        Type st = null;
+        boolean allInterfaces = false;
         if (signature[sigp] == ':' && signature[sigp+1] == ':') {
             sigp++;
-            st = syms.objectType;
+            allInterfaces = true;
         }
         while (signature[sigp] == ':') {
             sigp++;
             bounds = bounds.prepend(sigToType());
         }
         if (!sigEnterPhase) {
-            types.setBounds(tvar, bounds.reverse(), st);
+            types.setBounds(tvar, bounds.reverse(), allInterfaces);
         }
         return tvar;
     }
@@ -985,7 +996,7 @@ public class ClassReader implements Completer {
             new AttributeReader(names.LocalVariableTable, V45_3, CLASS_OR_MEMBER_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     int newbp = bp + attrLen;
-                    if (saveParameterNames) {
+                    if (saveParameterNames && !sawMethodParameters) {
                         // Pick up parameter names from the variable table.
                         // Parameter names are not explicitly identified as such,
                         // but all parameter name entries in the LocalVariableTable
@@ -1018,11 +1029,39 @@ public class ClassReader implements Completer {
                 }
             },
 
+            new AttributeReader(names.MethodParameters, V52, MEMBER_ATTRIBUTE) {
+                protected void read(Symbol sym, int attrlen) {
+                    int newbp = bp + attrlen;
+                    if (saveParameterNames) {
+                        sawMethodParameters = true;
+                        int numEntries = nextByte();
+                        parameterNameIndices = new int[numEntries];
+                        haveParameterNameIndices = true;
+                        for (int i = 0; i < numEntries; i++) {
+                            int nameIndex = nextChar();
+                            int flags = nextInt();
+                            parameterNameIndices[i] = nameIndex;
+                        }
+                    }
+                    bp = newbp;
+                }
+            },
+
+
             new AttributeReader(names.SourceFile, V45_3, CLASS_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     ClassSymbol c = (ClassSymbol) sym;
                     Name n = readName(nextChar());
                     c.sourcefile = new SourceFileObject(n, c.flatname);
+                    // If the class is a toplevel class, originating from a Java source file,
+                    // but the class name does not match the file name, then it is
+                    // an auxiliary class.
+                    String sn = n.toString();
+                    if (c.owner.kind == Kinds.PCK &&
+                        sn.endsWith(".java") &&
+                        !sn.equals(c.name.toString()+".java")) {
+                        c.flags_field |= AUXILIARY;
+                    }
                 }
             },
 
@@ -1230,7 +1269,7 @@ public class ClassReader implements Completer {
         if (nt == null)
             return null;
 
-        MethodType type = nt.type.asMethodType();
+        MethodType type = nt.uniqueType.type.asMethodType();
 
         for (Scope.Entry e = scope.lookup(nt.name); e.scope != null; e = e.next())
             if (e.sym.kind == MTH && isSameBinaryType(e.sym.type.asMethodType(), type))
@@ -1242,16 +1281,16 @@ public class ClassReader implements Completer {
         if ((flags & INTERFACE) != 0)
             // no enclosing instance
             return null;
-        if (nt.type.getParameterTypes().isEmpty())
+        if (nt.uniqueType.type.getParameterTypes().isEmpty())
             // no parameters
             return null;
 
         // A constructor of an inner class.
         // Remove the first argument (the enclosing instance)
-        nt.type = new MethodType(nt.type.getParameterTypes().tail,
-                                 nt.type.getReturnType(),
-                                 nt.type.getThrownTypes(),
-                                 syms.methodClass);
+        nt.setType(new MethodType(nt.uniqueType.type.getParameterTypes().tail,
+                                 nt.uniqueType.type.getReturnType(),
+                                 nt.uniqueType.type.getThrownTypes(),
+                                 syms.methodClass));
         // Try searching again
         return findMethod(nt, scope, flags);
     }
@@ -1377,6 +1416,16 @@ public class ClassReader implements Completer {
     void attachAnnotationDefault(final Symbol sym) {
         final MethodSymbol meth = (MethodSymbol)sym; // only on methods
         final Attribute value = readAttributeValue();
+
+        // The default value is set later during annotation. It might
+        // be the case that the Symbol sym is annotated _after_ the
+        // repeating instances that depend on this default value,
+        // because of this we set an interim value that tells us this
+        // element (most likely) has a default.
+        //
+        // Set interim value for now, reset just before we do this
+        // properly at annotate time.
+        meth.defaultValue = value;
         annotate.normal(new AnnotationDefaultCompleter(meth, value));
     }
 
@@ -1409,8 +1458,8 @@ public class ClassReader implements Completer {
     }
 
     TypeAnnotationProxy readTypeAnnotation() {
-        CompoundAnnotationProxy proxy = readCompoundAnnotation();
         TypeAnnotationPosition position = readPosition();
+        CompoundAnnotationProxy proxy = readCompoundAnnotation();
 
         if (debugJSR308)
             System.out.println("TA: reading: " + proxy + " @ " + position
@@ -1420,7 +1469,7 @@ public class ClassReader implements Completer {
     }
 
     TypeAnnotationPosition readPosition() {
-        char tag = nextChar();
+        int tag = nextByte(); // TargetType tag is a byte
 
         if (!TargetType.isValidTargetTypeValue(tag))
             throw this.badClassFile("bad.type.annotation.value", "0x" + Integer.toHexString(tag));
@@ -1432,19 +1481,17 @@ public class ClassReader implements Completer {
 
         switch (type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             position.offset = nextChar();
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
+        // resource variable
+        case RESOURCE_VARIABLE:
             int table_length = nextChar();
             position.lvarOffset = new int[table_length];
             position.lvarLength = new int[table_length];
@@ -1456,9 +1503,12 @@ public class ClassReader implements Completer {
                 position.lvarIndex[i] = nextChar();
             }
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            position.exception_index = nextByte();
+            break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -1468,57 +1518,49 @@ public class ClassReader implements Completer {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             position.parameter_index = nextByte();
             position.bound_index = nextByte();
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             position.type_index = nextChar();
             break;
         // throws
         case THROWS:
             position.type_index = nextChar();
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
         case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
             position.parameter_index = nextByte();
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             position.offset = nextChar();
             position.type_index = nextByte();
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            position.parameter_index = nextByte();
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("jvm.ClassReader: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + position);
+            throw new AssertionError("jvm.ClassReader: Unknown target type for position: " + position);
         }
 
-        if (type.hasLocation()) {
-            int len = nextChar();
+        { // See whether there is location info and read it
+            int len = nextByte();
             ListBuffer<Integer> loc = ListBuffer.lb();
-            for (int i = 0; i < len; i++)
+            for (int i = 0; i < len * TypeAnnotationPosition.TypePathEntry.bytesPerEntry; ++i)
                 loc = loc.append((int)nextByte());
-            position.location = loc.toList();
+            position.location = TypeAnnotationPosition.getTypePathFromBinary(loc.toList());
         }
 
         return position;
@@ -1813,6 +1855,9 @@ public class ClassReader implements Completer {
         public void enterAnnotation() {
             JavaFileObject previousClassFile = currentClassFile;
             try {
+                // Reset the interim value set earlier in
+                // attachAnnotationDefault().
+                sym.defaultValue = null;
                 currentClassFile = classFile;
                 sym.defaultValue = deproxy(sym.type.getReturnType(), value);
             } finally {
@@ -1842,7 +1887,7 @@ public class ClassReader implements Completer {
                 Annotations annotations = sym.annotations;
                 List<Attribute.Compound> newList = deproxyCompoundList(l);
                 if (annotations.pendingCompletion()) {
-                    annotations.setAttributes(newList);
+                    annotations.setDeclarationAttributes(newList);
                 } else {
                     annotations.append(newList);
                 }
@@ -1881,10 +1926,7 @@ public class ClassReader implements Completer {
                 if (debugJSR308)
                     System.out.println("TA: reading: adding " + newList
                       + " to symbol " + sym + " in " + log.currentSourceFile());
-                sym.typeAnnotations = ((sym.typeAnnotations == null)
-                                        ? newList
-                                        : newList.prependList(sym.typeAnnotations));
-
+                sym.annotations.setTypeAttributes(newList.prependList(sym.getRawTypeAttributes()));
             } finally {
                 currentClassFile = previousClassFile;
             }
@@ -1913,6 +1955,17 @@ public class ClassReader implements Completer {
         long flags = adjustMethodFlags(nextChar());
         Name name = readName(nextChar());
         Type type = readType(nextChar());
+        if (currentOwner.isInterface() &&
+                (flags & ABSTRACT) == 0 && !name.equals(names.clinit)) {
+            if (majorVersion > Target.JDK1_8.majorVersion ||
+                    (majorVersion == Target.JDK1_8.majorVersion && minorVersion >= Target.JDK1_8.minorVersion)) {
+                currentOwner.flags_field |= DEFAULT;
+                flags |= DEFAULT | ABSTRACT;
+            } else {
+                //protect against ill-formed classfiles
+                throw new CompletionFailure(currentOwner, "default method found in pre JDK 8 classfile");
+            }
+        }
         if (name == names.init && currentOwner.hasOuterInstance()) {
             // Sometimes anonymous classes don't have an outer
             // instance, however, there is no reliable way to tell so
@@ -1974,6 +2027,7 @@ public class ClassReader implements Completer {
         } else
             Arrays.fill(parameterNameIndices, 0);
         haveParameterNameIndices = false;
+        sawMethodParameters = false;
     }
 
     /**
@@ -1993,12 +2047,16 @@ public class ClassReader implements Completer {
         // if no names were found in the class file, there's nothing more to do
         if (!haveParameterNameIndices)
             return;
-
-        int firstParam = ((sym.flags() & STATIC) == 0) ? 1 : 0;
-        // the code in readMethod may have skipped the first parameter when
-        // setting up the MethodType. If so, we make a corresponding allowance
-        // here for the position of the first parameter.  Note that this
-        // assumes the skipped parameter has a width of 1 -- i.e. it is not
+        // If we get parameter names from MethodParameters, then we
+        // don't need to skip.
+        int firstParam = 0;
+        if (!sawMethodParameters) {
+            firstParam = ((sym.flags() & STATIC) == 0) ? 1 : 0;
+            // the code in readMethod may have skipped the first
+            // parameter when setting up the MethodType. If so, we
+            // make a corresponding allowance here for the position of
+            // the first parameter.  Note that this assumes the
+            // skipped parameter has a width of 1 -- i.e. it is not
         // a double width type (long or double.)
         if (sym.name == names.init && currentOwner.hasOuterInstance()) {
             // Sometimes anonymous classes don't have an outer
@@ -2009,16 +2067,19 @@ public class ClassReader implements Completer {
         }
 
         if (sym.type != jvmType) {
-            // reading the method attributes has caused the symbol's type to
-            // be changed. (i.e. the Signature attribute.)  This may happen if
-            // there are hidden (synthetic) parameters in the descriptor, but
-            // not in the Signature.  The position of these hidden parameters
-            // is unspecified; for now, assume they are at the beginning, and
-            // so skip over them. The primary case for this is two hidden
-            // parameters passed into Enum constructors.
+                // reading the method attributes has caused the
+                // symbol's type to be changed. (i.e. the Signature
+                // attribute.)  This may happen if there are hidden
+                // (synthetic) parameters in the descriptor, but not
+                // in the Signature.  The position of these hidden
+                // parameters is unspecified; for now, assume they are
+                // at the beginning, and so skip over them. The
+                // primary case for this is two hidden parameters
+                // passed into Enum constructors.
             int skip = Code.width(jvmType.getParameterTypes())
                     - Code.width(sym.type.getParameterTypes());
             firstParam += skip;
+        }
         }
         List<Name> paramNames = List.nil();
         int index = firstParam;
@@ -2055,7 +2116,7 @@ public class ClassReader implements Completer {
      *  `typevars'.
      */
     protected void enterTypevars(Type t) {
-        if (t.getEnclosingType() != null && t.getEnclosingType().tag == CLASS)
+        if (t.getEnclosingType() != null && t.getEnclosingType().hasTag(CLASS))
             enterTypevars(t.getEnclosingType());
         for (List<Type> xs = t.getTypeArguments(); xs.nonEmpty(); xs = xs.tail)
             typevars.enter(xs.head.tsym);
@@ -2080,7 +2141,7 @@ public class ClassReader implements Completer {
 
         // prepare type variable table
         typevars = typevars.dup(currentOwner);
-        if (ct.getEnclosingType().tag == CLASS)
+        if (ct.getEnclosingType().hasTag(CLASS))
             enterTypevars(ct.getEnclosingType());
 
         // read flags, or skip if this is an inner class
@@ -2107,7 +2168,7 @@ public class ClassReader implements Completer {
 
         if (readAllOfClassFile) {
             for (int i = 1; i < poolObj.length; i++) readPool(i);
-            c.pool = new Pool(poolObj.length, poolObj);
+            c.pool = new Pool(poolObj.length, poolObj, types);
         }
 
         // reset and read rest of classinfo

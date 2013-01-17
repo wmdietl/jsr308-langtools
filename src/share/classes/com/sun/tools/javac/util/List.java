@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -74,7 +74,7 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
         return (List<A>)EMPTY_LIST;
     }
 
-    private static List<?> EMPTY_LIST = new List<Object>(null,null) {
+    private static final List<?> EMPTY_LIST = new List<Object>(null,null) {
         public List<Object> setTail(List<Object> tail) {
             throw new UnsupportedOperationException();
         }
@@ -82,6 +82,19 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
             return true;
         }
     };
+
+    /** Returns the list obtained from 'l' after removing all elements 'elem'
+     */
+    public static <A> List<A> filter(List<A> l, A elem) {
+        Assert.checkNonNull(elem);
+        List<A> res = List.nil();
+        for (A a : l) {
+            if (a != null && !a.equals(elem)) {
+                res = res.prepend(a);
+            }
+        }
+        return res.reverse();
+    }
 
     /** Construct a list consisting of given element.
      */
@@ -117,6 +130,14 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
         if (array != null)
             for (int i = array.length - 1; i >= 0; i--)
                 xs = new List<A>(array[i], xs);
+        return xs;
+    }
+
+    public static <A> List<A> from(Iterable<? extends A> coll) {
+        List<A> xs = nil();
+        for (A a : coll) {
+            xs = new List<A>(a, xs);
+        }
         return xs;
     }
 
@@ -266,7 +287,7 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
         if (isEmpty()) {
             return "";
         } else {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             buf.append(head);
             for (List<A> l = tail; l.nonEmpty(); l = l.tail) {
                 buf.append(sep);
@@ -370,7 +391,7 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
         return (List<T>)list;
     }
 
-    private static Iterator<?> EMPTYITERATOR = new Iterator<Object>() {
+    private static final Iterator<?> EMPTYITERATOR = new Iterator<Object>() {
             public boolean hasNext() {
                 return false;
             }
