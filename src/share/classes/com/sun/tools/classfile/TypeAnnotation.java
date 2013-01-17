@@ -331,6 +331,11 @@ public class TypeAnnotation {
                 TypePathEntry tpe = (TypePathEntry) other;
                 return this.tag == tpe.tag && this.arg == tpe.arg;
             }
+
+            @Override
+            public int hashCode() {
+                return this.tag.hashCode() * 17 + this.arg;
+            }
         }
 
         public TargetType type = TargetType.UNKNOWN;
