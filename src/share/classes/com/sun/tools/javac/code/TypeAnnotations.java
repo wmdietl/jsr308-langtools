@@ -149,7 +149,7 @@ public class TypeAnnotations {
             System.out.printf("separateAnnotationsKinds(typetree: %s, type: %s, symbol: %s, pos: %s%n",
                     typetree, type, sym, pos);
             */
-            List<Attribute.Compound> annotations = sym.getAnnotationMirrors();
+            List<Attribute.Compound> annotations = sym.getRawAttributes();
             ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
 
