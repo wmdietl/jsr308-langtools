@@ -190,7 +190,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
         StringBuilder buf = new StringBuilder();
         if (t.getEnclosingType().tag == CLASS && t.tsym.owner.kind == Kinds.TYP) {
             buf.append(visit(t.getEnclosingType(), locale));
-            buf.append(".");
+            buf.append('.');
             buf.append(className(t, false, locale));
         } else {
             buf.append(className(t, true, locale));
@@ -198,7 +198,7 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
         if (t.getTypeArguments().nonEmpty()) {
             buf.append('<');
             buf.append(visitTypes(t.getTypeArguments(), locale));
-            buf.append(">");
+            buf.append('>');
         }
         return buf.toString();
     }
