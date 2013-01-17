@@ -17,19 +17,19 @@ class CantAnnotateStaticClass {
         class Inner {}
     }
 
-    // Errors:
+    // 8 errors:
     @A Outer.Inner f1;
     @A Outer.Inner f1r() { return null; }
     void f1p(@A Outer.Inner p) { }
     void f1c(Object o) {
-	Object l = (@A Outer.Inner) o;
+        Object l = (@A Outer.Inner) o;
     }
 
     List<@A Outer.Inner> f2;
     List<@A Outer.Inner> f2r() { return null; }
     void f2p(List<@A Outer.Inner> p) { }
     void f2c(Object o) {
-	Object l = (List<@A Outer.Inner>) o;
+        Object l = (List<@A Outer.Inner>) o;
     }
 
     // OK:
