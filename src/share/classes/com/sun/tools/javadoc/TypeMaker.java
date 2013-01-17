@@ -69,6 +69,11 @@ public class TypeMaker {
             return new AnnotatedTypeImpl(env, (com.sun.tools.javac.code.Type.AnnotatedType) t);
         }
 
+        if (t.getKind() == TypeKind.ANNOTATED) {
+            Type.AnnotatedType at = (Type.AnnotatedType) t;
+            return new AnnotatedTypeImpl(env, at);
+        }
+
         switch (t.getTag()) {
         case CLASS:
             if (ClassDocImpl.isGeneric((ClassSymbol)t.tsym)) {
