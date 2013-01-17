@@ -341,8 +341,14 @@ public class Type implements PrimitiveType {
             buf.append(',');
         }
         if (args.head.tag == ARRAY) {
-            buf.append(((ArrayType)args.head).elemtype);
-            buf.append("...");
+            if (args.head.getKind() == TypeKind.ANNOTATED) {
+                buf.append(((ArrayType)((AnnotatedType)args.head).underlyingType).elemtype);
+                buf.append(((AnnotatedType)args.head).typeAnnotations);
+                buf.append("...");
+            } else {
+                buf.append(((ArrayType)args.head).elemtype);
+                buf.append("...");
+            }
         } else {
             buf.append(args.head);
         }
@@ -352,7 +358,7 @@ public class Type implements PrimitiveType {
     /** Access methods.
      */
     public List<Type>        getTypeArguments()  { return List.nil(); }
-    public Type              getEnclosingType() { return null; }
+    public Type              getEnclosingType()  { return null; }
     public List<Type>        getParameterTypes() { return List.nil(); }
     public Type              getReturnType()     { return null; }
     public Type              getReceiverType()   { return null; }
