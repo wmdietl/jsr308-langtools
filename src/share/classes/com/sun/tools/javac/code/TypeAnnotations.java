@@ -49,7 +49,10 @@ import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntry;
 import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntryKind;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
+import com.sun.tools.javac.tree.JCTree.JCBlock;
+import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
 import com.sun.tools.javac.tree.JCTree.JCTypeApply;
@@ -73,8 +76,30 @@ public class TypeAnnotations {
     // Class cannot be instantiated.
     private TypeAnnotations() {}
 
-    public static void organizeTypeAnnotations(Symtab syms, Names names, Log log, JCClassDecl tree) {
-        new TypeAnnotationPositions(syms, names, log).scan(tree);
+    /**
+     * Separate type annotations from declaration annotations and
+     * determine the correct positions for type annotations.
+     * This version only visits types in signatures and should be
+     * called from MemberEnter.
+     * The method returns the Annotator object that should be added
+     * to the correct Annotate queue for later processing.
+     */
+    public static Annotator organizeTypeAnnotationsSignatures(final Symtab syms, final Names names,
+            final Log log, final JCClassDecl tree) {
+        return new Annotator() {
+            @Override
+            public void enterAnnotation() {
+                new TypeAnnotationPositions(syms, names, log, true).scan(tree);
+            }
+        };
+    }
+
+    /**
+     * This version only visits types in bodies, that is, field initializers,
+     * top-level blocks, and method bodies, and should be called from Attr.
+     */
+    public static void organizeTypeAnnotationsBodies(Symtab syms, Names names, Log log, JCClassDecl tree) {
+        new TypeAnnotationPositions(syms, names, log, false).scan(tree);
     }
 
     private static class TypeAnnotationPositions extends TreeScanner {
@@ -84,11 +109,13 @@ public class TypeAnnotations {
         private final Symtab syms;
         private final Names names;
         private final Log log;
+        private final boolean sigOnly;
 
-        private TypeAnnotationPositions(Symtab syms, Names names, Log log) {
+        private TypeAnnotationPositions(Symtab syms, Names names, Log log, boolean sigOnly) {
             this.syms = syms;
             this.names = names;
             this.log = log;
+            this.sigOnly = sigOnly;
         }
 
         /*
@@ -175,8 +202,11 @@ public class TypeAnnotations {
             }
             if (sym.getKind() == ElementKind.PARAMETER ||
                     sym.getKind() == ElementKind.LOCAL_VARIABLE ||
+                    sym.getKind() == ElementKind.RESOURCE_VARIABLE ||
                     sym.getKind() == ElementKind.EXCEPTION_PARAMETER) {
-                sym.owner.annotations.appendUniqueTypes(typeAnnotations);
+                // Make sure all type annotations from the symbol are also
+                // on the owner.
+                sym.owner.annotations.appendUniqueTypes(sym.getTypeAnnotationMirrors());
             }
         }
 
@@ -284,7 +314,7 @@ public class TypeAnnotations {
                          enclTr.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
                     // TODO: also if it's "java. @A lang.Object", that is,
                     // if it's on a package?
-                    log.error(enclTr.pos(), "cant.annotate.nested.type");
+                    log.error(enclTr.pos(), "cant.annotate.nested.type", enclTr.toString());
                     return type;
                 }
 
@@ -304,7 +334,9 @@ public class TypeAnnotations {
                     topTy = topTy.getEnclosingType();
                     enclEl = enclEl.getEnclosingElement();
 
-                    if (enclEl.getKind() != ElementKind.PACKAGE) {
+                    if (enclEl.getKind() != ElementKind.PACKAGE &&
+                            enclEl.getKind() != ElementKind.METHOD) {
+                        // Only count enclosing classes, not methods.
                         depth = depth.append(TypePathEntry.INNER_TYPE);
                     }
                 }
@@ -317,9 +349,6 @@ public class TypeAnnotations {
                         p.location = p.location.appendList(depth.toList());
                     }
                 }
-
-                // TODO: method receiver type annotations don't work. There is a strange
-                // interaction with arrays.
 
                 Type ret = typeWithAnnotations(type, enclTy, annotations);
                 return ret;
@@ -728,6 +757,14 @@ public class TypeAnnotations {
                     return;
                 }
 
+                case UNION_TYPE: {
+                    // TODO: can we store any information here to help in
+                    // determining the final position?
+                    List<JCTree> newPath = path.tail;
+                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
+                    return;
+                }
+
                 case METHOD_INVOCATION: {
                     JCMethodInvocation invocation = (JCMethodInvocation)frame;
                     if (!invocation.typeargs.contains(tree)) {
@@ -768,8 +805,10 @@ public class TypeAnnotations {
 
             Symbol encl = tsym.getEnclosingElement();
             while (encl != null && encl.getKind() != ElementKind.PACKAGE) {
+                if (encl.getKind() != ElementKind.METHOD) {
+                    depth = depth.append(TypePathEntry.INNER_TYPE);
+                }
                 encl = encl.getEnclosingElement();
-                depth = depth.append(TypePathEntry.INNER_TYPE);
             }
             if (depth.nonEmpty()) {
                 p.location = p.location.prependList(depth.toList());
@@ -785,6 +824,24 @@ public class TypeAnnotations {
             return method.params.indexOf(param);
         }
 
+        // Each class (including enclosed inner classes) is visited separately.
+        // This flag is used to prevent from visiting inner classes.
+        private boolean isInClass = false;
+
+        @Override
+        public void visitClassDef(JCClassDecl tree) {
+            if (isInClass)
+                return;
+            isInClass = true;
+            if (sigOnly) {
+                scan(tree.mods);
+                scan(tree.typarams);
+                scan(tree.extending);
+                scan(tree.implementing);
+            }
+            scan(tree.defs);
+        }
+
         /**
          * Resolve declaration vs. type annotations in methods and
          * then determine the positions.
@@ -796,39 +853,52 @@ public class TypeAnnotations {
                 // Quietly ignore. (See test FailOver15.java)
                 return;
             }
-            {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.METHOD_RETURN;
-                if (tree.sym.isConstructor()) {
-                    pos.pos = tree.pos;
-                    // Use null to mark that the annotations go with the symbol.
-                    separateAnnotationsKinds(tree, null, tree.sym, pos);
-                } else {
-                    pos.pos = tree.restype.pos;
-                    separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
-                            tree.sym, pos);
+            if (sigOnly) {
+                {
+                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                    pos.type = TargetType.METHOD_RETURN;
+                    if (tree.sym.isConstructor()) {
+                        pos.pos = tree.pos;
+                        // Use null to mark that the annotations go with the symbol.
+                        separateAnnotationsKinds(tree, null, tree.sym, pos);
+                    } else {
+                        pos.pos = tree.restype.pos;
+                        separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
+                                tree.sym, pos);
+                    }
                 }
-            }
-            if (tree.recvparam != null && tree.recvparam.sym != null) {
-                // TODO: make sure there are no declaration annotations.
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.METHOD_RECEIVER;
-                pos.pos = tree.recvparam.vartype.pos;
-                separateAnnotationsKinds(tree.recvparam.vartype, tree.recvparam.sym.type,
-                        tree.recvparam.sym, pos);
-            }
-            int i = 0;
-            for (JCVariableDecl param : tree.params) {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.METHOD_PARAMETER;
-                pos.parameter_index = i;
-                pos.pos = param.vartype.pos;
-                separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
-                ++i;
+                if (tree.recvparam != null && tree.recvparam.sym != null) {
+                    // TODO: make sure there are no declaration annotations.
+                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                    pos.type = TargetType.METHOD_RECEIVER;
+                    pos.pos = tree.recvparam.vartype.pos;
+                    separateAnnotationsKinds(tree.recvparam.vartype, tree.recvparam.sym.type,
+                            tree.recvparam.sym, pos);
+                }
+                int i = 0;
+                for (JCVariableDecl param : tree.params) {
+                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                    pos.type = TargetType.METHOD_PARAMETER;
+                    pos.parameter_index = i;
+                    pos.pos = param.vartype.pos;
+                    separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
+                    ++i;
+                }
             }
 
             push(tree);
-            super.visitMethodDef(tree);
+            // super.visitMethodDef(tree);
+            if (sigOnly) {
+                scan(tree.mods);
+                scan(tree.restype);
+                scan(tree.typarams);
+                scan(tree.recvparam);
+                scan(tree.params);
+                scan(tree.thrown);
+            } else {
+                scan(tree.defaultValue);
+                scan(tree.body);
+            }
             pop();
         }
 
@@ -867,8 +937,22 @@ public class TypeAnnotations {
             }
 
             push(tree);
-            super.visitVarDef(tree);
+            // super.visitVarDef(tree);
+            scan(tree.mods);
+            scan(tree.vartype);
+            if (!sigOnly) {
+                scan(tree.init);
+            }
             pop();
+        }
+
+        @Override
+        public void visitBlock(JCBlock tree) {
+            // Do not descend into top-level blocks when only interested
+            // in the signature.
+            if (!sigOnly) {
+                scan(tree.stats);
+            }
         }
 
         @Override
@@ -881,7 +965,6 @@ public class TypeAnnotations {
 
         @Override
         public void visitTypeParameter(JCTypeParameter tree) {
-            // TODO: why the peek2()? why no push/pop?
             findPosition(tree, peek2(), tree.annotations);
             super.visitTypeParameter(tree);
         }
