@@ -6,6 +6,7 @@ import java.util.List;
  * @bug 6843077
  * @summary test that compiler doesn't warn about annotated redundant casts
  * @author Mahmood Ali
+ * @author Werner Dietl
  * @compile/ref=LintCast.out -Xlint:cast -XDrawDiagnostics LintCast.java
  */
 class LintCast {
@@ -39,11 +40,29 @@ class LintCast {
         String unanno2 = (String)unannotated;
     }
 
-    void objarray() {
+    void more() {
         Object @A [] a = null;
         Object[] a1 = (Object[])a;
         Object[] a2 = (Object @A [])a;
+
+        @A List<String> l3 = null;
+        List<String> l4 = (List<String>)l3;
+        List<String> l5 = (@A List<String>)l3;
+
+        List<@A String> l6 = null;
+        List<String> l7 = (List<String>)l6;
+        List<String> l8 = (List<@A String>)l6;
+
+        @A Object o = null;
+        Object o1 = (Object)o;
+        Object o2 = (@A Object)o;
+
+        Outer. @A Inner oi = null;
+        Outer.Inner oi1 = (Outer.Inner)oi;
+        Outer.Inner oi2 = (Outer. @A Inner)oi;
     }
+
+    class Outer { class Inner {} }
 }
 
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
