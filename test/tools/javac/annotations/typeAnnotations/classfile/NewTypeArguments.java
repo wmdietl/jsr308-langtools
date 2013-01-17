@@ -33,12 +33,15 @@ import com.sun.tools.classfile.*;
  * @summary test that new type arguments are emitted to classfile
  */
 
-public class NewTypeArguments {
+public class NewTypeArguments extends ClassfileTestHelper{
     public static void main(String[] args) throws Exception {
         new NewTypeArguments().run();
     }
 
     public void run() throws Exception {
+        expected_tinvisibles = 3;
+        expected_tvisibles = 0;
+
         ClassFile cf = getClassFile("NewTypeArguments$Test.class");
         test(cf);
         for (Field f : cf.fields) {
@@ -55,111 +58,7 @@ public class NewTypeArguments {
         System.out.println("PASSED");
     }
 
-    ClassFile getClassFile(String name) throws IOException, ConstantPoolException {
-        URL url = getClass().getResource(name);
-        InputStream in = url.openStream();
-        try {
-            return ClassFile.read(in);
-        } finally {
-            in.close();
-        }
-    }
-
-    /************ Helper annotations counting methods ******************/
-    void test(ClassFile cf) {
-        test(cf, Attribute.RuntimeVisibleTypeAnnotations, true);
-        test(cf, Attribute.RuntimeInvisibleTypeAnnotations, false);
-    }
-
-    void test(ClassFile cf, Method m) {
-        test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
-        test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
-    }
-
-    void test(ClassFile cf, Field m) {
-        test(cf, m, Attribute.RuntimeVisibleTypeAnnotations, true);
-        test(cf, m, Attribute.RuntimeInvisibleTypeAnnotations, false);
-    }
-
-    // test the result of Attributes.getIndex according to expectations
-    // encoded in the method's name
-    void test(ClassFile cf, String name, boolean visible) {
-        int index = cf.attributes.getIndex(cf.constant_pool, name);
-        if (index != -1) {
-            Attribute attr = cf.attributes.get(index);
-            assert attr instanceof RuntimeTypeAnnotations_attribute;
-            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
-            all += tAttr.annotations.length;
-            if (visible)
-                visibles += tAttr.annotations.length;
-            else
-                invisibles += tAttr.annotations.length;
-        }
-    }
-
-    // test the result of Attributes.getIndex according to expectations
-    // encoded in the method's name
-    void test(ClassFile cf, Method m, String name, boolean visible) {
-        int index = m.attributes.getIndex(cf.constant_pool, name);
-        if (index != -1) {
-            Attribute attr = m.attributes.get(index);
-            assert attr instanceof RuntimeTypeAnnotations_attribute;
-            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
-            all += tAttr.annotations.length;
-            if (visible)
-                visibles += tAttr.annotations.length;
-            else
-                invisibles += tAttr.annotations.length;
-        }
-    }
-
-    // test the result of Attributes.getIndex according to expectations
-    // encoded in the method's name
-    void test(ClassFile cf, Field m, String name, boolean visible) {
-        int index = m.attributes.getIndex(cf.constant_pool, name);
-        if (index != -1) {
-            Attribute attr = m.attributes.get(index);
-            assert attr instanceof RuntimeTypeAnnotations_attribute;
-            RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
-            all += tAttr.annotations.length;
-            if (visible)
-                visibles += tAttr.annotations.length;
-            else
-                invisibles += tAttr.annotations.length;
-        }
-    }
-
-    void countAnnotations() {
-        int expected_all = expected_visibles + expected_invisibles;
-
-        if (expected_all != all) {
-            errors++;
-            System.err.println("expected " + expected_all
-                    + " annotations but found " + all);
-        }
-
-        if (expected_visibles != visibles) {
-            errors++;
-            System.err.println("expected " + expected_visibles
-                    + " visibles annotations but found " + visibles);
-        }
-
-        if (expected_invisibles != invisibles) {
-            errors++;
-            System.err.println("expected " + expected_invisibles
-                    + " invisibles annotations but found " + invisibles);
-        }
-
-    }
-
-    int errors;
-    int all;
-    int visibles;
-    int invisibles;
-
     /*********************** Test class *************************/
-    static int expected_invisibles = 3;
-    static int expected_visibles = 0;
     static class Test {
         @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
         @interface A {}
