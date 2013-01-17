@@ -40,7 +40,7 @@ public class NestedTypes {
                 genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testParam1() {
-        return "void test(@TA Map.@TB Entry a) { }";
+        return "void test(@TA Outer.@TB Inner a) { }";
     }
 
     @TADescriptions({
@@ -52,6 +52,8 @@ public class NestedTypes {
     public String testParam1b() {
         return "void test(List<@TA Map.@TB Entry> a) { }";
     }
+
+    // TODO: the tests that use Map.Entry should fail.
 
     @TADescription(annotation = "TA", type = METHOD_PARAMETER,
             genericLocation = {}, paramIndex = 0)
@@ -98,7 +100,7 @@ public class NestedTypes {
                 genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testParam2() {
-        return "void test(@TA Map<String,String>.@TB Entry<String,String> a) { }";
+        return "void test(@TA GOuter<String,String>.@TB GInner<String,String> a) { }";
     }
 
     @TADescriptions({
@@ -108,7 +110,7 @@ public class NestedTypes {
                 genericLocation = {3, 0, 1, 0}, paramIndex = 0)
     })
     public String testParam2b() {
-        return "void test(List<@TA Map<String,String>.@TB Entry<String,String>> a) { }";
+        return "void test(List<@TA GOuter<String,String>.@TB GInner<String,String>> a) { }";
     }
 
     @TADescriptions({
@@ -190,21 +192,21 @@ public class NestedTypes {
                 lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
     })
     public String testLocal1a() {
-        return "void test() { @TA Map.@TB Entry a = null; }";
+        return "void test() { @TA Outer.@TB Inner a = null; }";
     }
 
     @TADescription(annotation = "TA", type = LOCAL_VARIABLE,
             genericLocation = {},
             lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
     public String testLocal1b() {
-        return "void test() { @TA Map.Entry a = null; }";
+        return "void test() { @TA Outer.Inner a = null; }";
     }
 
     @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
             genericLocation = {1, 0},
             lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
     public String testLocal1c() {
-        return "void test() { Map.@TB Entry a = null; }";
+        return "void test() { Outer.@TB Inner a = null; }";
     }
 
     @TADescriptions({
@@ -216,7 +218,7 @@ public class NestedTypes {
                 lvarOffset = {2}, lvarLength = {1}, lvarIndex = {1})
     })
     public String testLocal2() {
-        return "void test() { @TA Map<String,String>.@TB Entry<String,String> a = null; }";
+        return "void test() { @TA GOuter<String,String>.@TB GInner<String,String> a = null; }";
     }
 
     @TADescriptions({
@@ -319,19 +321,19 @@ public class NestedTypes {
                 genericLocation = {1, 0})
     })
     public String testField1a() {
-        return "@TA Map.@TB Entry a;";
+        return "@TA Outer.@TB Inner a;";
     }
 
     @TADescription(annotation = "TA", type = FIELD,
             genericLocation = {})
     public String testField1b() {
-        return "@TA Map.Entry a;";
+        return "@TA Outer.Inner a;";
     }
 
     @TADescription(annotation = "TB", type = FIELD,
             genericLocation = {1, 0})
     public String testField1c() {
-        return "Map.@TB Entry a;";
+        return "Outer.@TB Inner a;";
     }
 
     @TADescriptions({
@@ -341,7 +343,7 @@ public class NestedTypes {
                 genericLocation = {1, 0})
     })
     public String testField2() {
-        return "@TA Map<String,String>.@TB Entry<String,String> a;";
+        return "@TA GOuter<String,String>.@TB GInner<String,String> a;";
     }
 
     @TADescriptions({
@@ -421,7 +423,7 @@ public class NestedTypes {
                 genericLocation = {1, 0})
     })
     public String testReturn1() {
-        return "@TA Map.@TB Entry test() { return null; }";
+        return "@TA Outer.@TB Inner test() { return null; }";
     }
 
     @TADescriptions({
@@ -431,7 +433,7 @@ public class NestedTypes {
                 genericLocation = {1, 0})
     })
     public String testReturn2() {
-        return "@TA Map<String,String>.@TB Entry<String,String> test() { return null; }";
+        return "@TA GOuter<String,String>.@TB GInner<String,String> test() { return null; }";
     }
 
     @TADescriptions({
@@ -538,22 +540,22 @@ public class NestedTypes {
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND,
-                genericLocation = {}, paramIndex = 0, boundIndex = 1),
+                genericLocation = {}, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
-                genericLocation = {1, 0}, paramIndex = 0, boundIndex = 1)
+                genericLocation = {1, 0}, paramIndex = 0, boundIndex = 0)
     })
     public String testTypeparam1() {
-        return "<X extends @TA Map.@TB Entry> X test() { return null; }";
+        return "<X extends @TA Outer.@TB Inner> X test() { return null; }";
     }
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND,
-                genericLocation = {}, paramIndex = 0, boundIndex = 1),
+                genericLocation = {}, paramIndex = 0, boundIndex = 0),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
-                genericLocation = {1, 0}, paramIndex = 0, boundIndex = 1)
+                genericLocation = {1, 0}, paramIndex = 0, boundIndex = 0)
     })
     public String testTypeparam2() {
-        return "<X extends @TA Map<String,String>.@TB Entry<String,String>> X test() { return null; }";
+        return "<X extends @TA GOuter<String,String>.@TB GInner<String,String>> X test() { return null; }";
     }
 
     @TADescriptions({
@@ -759,5 +761,59 @@ public class NestedTypes {
             genericLocation = {3, 0})
     public String testFullyQualified2() {
         return "void testme(List<java.security.@TA ProtectionDomain> protectionDomain) {}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = LOCAL_VARIABLE,
+                genericLocation = {},
+                lvarOffset = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarLength = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarIndex = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TB", type = LOCAL_VARIABLE,
+                genericLocation = {1, 0},
+                lvarOffset = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarLength = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarIndex = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TC", type = LOCAL_VARIABLE,
+                // Only classes count, not methods.
+                genericLocation = {1, 0, 1, 0},
+                lvarOffset = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarLength = ReferenceInfoUtil.IGNORE_VALUE,
+                lvarIndex = ReferenceInfoUtil.IGNORE_VALUE),
+    })
+    @TestClass("Outer$Inner")
+    public String testMethodNesting1() {
+        return "class Outer {\n" +
+                " class Inner {\n" +
+                "  void foo() {\n" +
+                "    class MInner {}\n" +
+                "    @TA Outer . @TB Inner l1 = null;\n" +
+                "    @TC MInner l2 = null;\n" +
+                "  }\n" +
+                "}}\n";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = NEW,
+                genericLocation = {},
+                offset = 0),
+        @TADescription(annotation = "TB", type = NEW,
+                genericLocation = {1, 0},
+                offset = 0),
+        @TADescription(annotation = "TC", type = NEW,
+                // Only classes count, not methods.
+                genericLocation = {1, 0, 1, 0},
+                offset = 12),
+    })
+    @TestClass("Outer$Inner")
+    public String testMethodNesting2() {
+        return "class Outer {\n" +
+                " class Inner {\n" +
+                "  void foo() {\n" +
+                "    class MInner {}\n" +
+                "    Object o1 = new @TA Outer . @TB Inner();" +
+                "    Object o2 = new @TC MInner();\n" +
+                "  }\n" +
+                "}}\n";
     }
 }

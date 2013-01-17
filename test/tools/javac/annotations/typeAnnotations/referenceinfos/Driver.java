@@ -205,6 +205,13 @@ public class Driver {
         if (isSnippet)
             sb.append("}\n\n");
 
+        if (isSnippet) {
+            // Have a few common nested types for testing
+            sb.append("class Outer { class Inner {} }");
+            sb.append("class SOuter { static class SInner {} }");
+            sb.append("class GOuter<X, Y> { class GInner<X, Y> {} }");
+        }
+
         // create A ... F annotation declarations
         sb.append("\n@interface A {}");
         sb.append("\n@interface B {}");
