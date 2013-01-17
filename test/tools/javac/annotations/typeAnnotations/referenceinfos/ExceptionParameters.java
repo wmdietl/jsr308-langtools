@@ -55,4 +55,23 @@ public class ExceptionParameters {
             " }";
     }
 
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0),
+        @TADescription(annotation = "TB", type = EXCEPTION_PARAMETER, exceptionIndex = 1)
+    })
+    public String multiException1() {
+        return "void multiException() { " +
+            "try { new Object(); } catch (@TA NullPointerException | @TB IndexOutOfBoundsException e) { e.toString(); } }";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0),
+        @TADescription(annotation = "TB", type = EXCEPTION_PARAMETER, exceptionIndex = 1),
+        @TADescription(annotation = "TC", type = EXCEPTION_PARAMETER, exceptionIndex = 2),
+    })
+    public String multiException2() {
+        return "void multiException() { " +
+            "try { new Object(); } catch (@TA NullPointerException | @TB IndexOutOfBoundsException | @TC IllegalArgumentException e) { e.toString(); } }";
+    }
+
 }

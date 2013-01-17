@@ -51,6 +51,22 @@ class ExceptionParameters {
     }
   }
 
+  void multiException1() {
+    try {
+      foobar();
+    } catch (@A NullPointerException | @B IndexOutOfBoundsException e) {
+      e.toString();
+    }
+  }
+
+  void multiException2() {
+    try {
+      foobar();
+    } catch (java.lang.@A NullPointerException | java.lang.@B IndexOutOfBoundsException e) {
+      e.toString();
+    }
+  }
+
   void foobar() {}
 }
 
