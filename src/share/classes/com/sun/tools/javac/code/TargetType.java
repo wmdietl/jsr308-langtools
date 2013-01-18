@@ -118,7 +118,7 @@ public enum TargetType {
     private TargetType(int targetTypeValue, boolean isLocal) {
         if (targetTypeValue < 0
                 || targetTypeValue > 255)
-                Assert.error("Attribute type value needs to be an unsigned byte: " + targetTypeValue);
+                Assert.error("Attribute type value needs to be an unsigned byte: " + String.format("0x%02X", targetTypeValue));
         this.targetTypeValue = targetTypeValue;
         this.isLocal = isLocal;
     }

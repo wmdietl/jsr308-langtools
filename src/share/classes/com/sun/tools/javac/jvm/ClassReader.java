@@ -351,8 +351,8 @@ public class ClassReader implements Completer {
 
     /** Read a byte.
      */
-    byte nextByte() {
-        return buf[bp++];
+    int nextByte() {
+        return buf[bp++] & 0xFF;
     }
 
     /** Read an integer.
@@ -1462,7 +1462,7 @@ public class ClassReader implements Completer {
         int tag = nextByte(); // TargetType tag is a byte
 
         if (!TargetType.isValidTargetTypeValue(tag))
-            throw this.badClassFile("bad.type.annotation.value", "0x" + Integer.toHexString(tag));
+            throw this.badClassFile("bad.type.annotation.value", String.format("0x%02X", tag));
 
         TypeAnnotationPosition position = new TypeAnnotationPosition();
         TargetType type = TargetType.fromTargetTypeValue(tag);
@@ -1549,7 +1549,7 @@ public class ClassReader implements Completer {
             int len = nextByte();
             ListBuffer<Integer> loc = ListBuffer.lb();
             for (int i = 0; i < len * TypeAnnotationPosition.TypePathEntry.bytesPerEntry; ++i)
-                loc = loc.append((int)nextByte());
+                loc = loc.append(nextByte());
             position.location = TypeAnnotationPosition.getTypePathFromBinary(loc.toList());
         }
 

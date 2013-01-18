@@ -78,7 +78,7 @@ public class TypeAnnotation {
         // Copied from ClassReader
         int tag = cr.readUnsignedByte(); // TargetType tag is a byte
         if (!TargetType.isValidTargetTypeValue(tag))
-            throw new Annotation.InvalidAnnotation("TypeAnnotation: Invalid type annotation target type value: " + tag);
+            throw new Annotation.InvalidAnnotation("TypeAnnotation: Invalid type annotation target type value: " + String.format("0x%02X", tag));
 
         TargetType type = TargetType.fromTargetTypeValue(tag);
 
@@ -600,7 +600,7 @@ public class TypeAnnotation {
         private TargetType(int targetTypeValue, boolean isLocal) {
             if (targetTypeValue < 0
                     || targetTypeValue > 255)
-                    throw new AssertionError("Attribute type value needs to be an unsigned byte: " + targetTypeValue);
+                    throw new AssertionError("Attribute type value needs to be an unsigned byte: " + String.format("0x%02X", targetTypeValue));
             this.targetTypeValue = targetTypeValue;
             this.isLocal = isLocal;
         }
