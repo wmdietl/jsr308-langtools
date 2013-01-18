@@ -238,8 +238,8 @@ public class Driver {
 
         // create RTA, RTAs, RTB, RTBs for repeating type annotations
         sb.append("\n");
-        sb.append("\n@ContainedBy(RTAs.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTA {}");
-        sb.append("\n@ContainedBy(RTBs.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTB {}");
+        sb.append("\n@Repeatable(RTAs.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTA {}");
+        sb.append("\n@Repeatable(RTBs.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTB {}");
 
         sb.append("\n@ContainerFor(RTA.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTAs { RTA[] value(); }");
         sb.append("\n@ContainerFor(RTB.class) @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER}) @interface RTBs { RTB[] value(); }");
