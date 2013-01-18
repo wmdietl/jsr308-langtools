@@ -116,7 +116,7 @@ class MyList<E> { }
     TA[] value();
 }
 
-@ContainedBy(RTAs.class)
+@Repeatable(RTAs.class)
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
 @interface RTA { }
 
