@@ -50,11 +50,13 @@ public class NestedTypes {
                 genericLocation = {3, 0, 1, 0}, paramIndex = 0)
     })
     public String testParam1b() {
-        return "void test(List<@TA Map.@TB Entry> a) { }";
+        return "void test(List<@TA Outer.@TB Inner> a) { }";
     }
 
-    // TODO: the tests that use Map.Entry should fail.
-
+    // TODO: the tests that use @TA Map.Entry should fail, as
+    // Map cannot be annotated.
+    // We need some tests for the fully qualified name syntax.
+    /*
     @TADescription(annotation = "TA", type = METHOD_PARAMETER,
             genericLocation = {}, paramIndex = 0)
     public String testParam1c() {
@@ -86,9 +88,10 @@ public class NestedTypes {
     public String testParam1f() {
         return "void test(List<java.util.@TA Map. @TB Entry> a) { }";
     }
+    */
 
     @TADescription(annotation = "TB", type = METHOD_PARAMETER,
-           genericLocation = {3, 0, 1, 0}, paramIndex = 0)
+           genericLocation = {3, 0}, paramIndex = 0)
     public String testParam1g() {
         return "void test(List<java.util.Map. @TB Entry> a) { }";
     }
@@ -742,6 +745,18 @@ public class NestedTypes {
     public String testUses3b() {
         return "class Test { class Inner<A, B> { class Inner2<C, D>{}\n" +
                 "    List<Test.@TA Inner.Inner2> f; }}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = FIELD,
+                genericLocation = {}),
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = {3, 0})
+    })
+    public String testUses4() {
+        return "class Test { static class TInner {}\n" +
+                "    @TA TInner f; \n" +
+                "    List<@TB TInner> g; }";
     }
 
     @TADescription(annotation = "TA", type = FIELD,

@@ -116,7 +116,7 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 2, 0, 1, 0, 3, 1, 2, 0 })
     })
     public String methodReturnAsNestedWildcard() {
-        return "Set<@TA ? extends @TB Map. @TC Entry<@TD String, @TE ? super @TF Object>> entrySet() { return null; }";
+        return "Set<@TA ? extends @TB GOuter<String, String>. @TC GInner<@TD String, @TE ? super @TF Object>> entrySet() { return null; }";
     }
 
     @TADescriptions({
@@ -128,7 +128,8 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 1, 0, 3, 1, 2, 0 })
     })
     public String methodReturnAsNestedWildcard2() {
-        return "class Test<K> { Set<Map.Entry<@TA K, @TB ? extends @TC Object>> entrySet() { return null; } }";
+        return "class GOuter<X, Y> { class GInner<X, Y> {} } " +
+                "class Test<K> { Set<GOuter<String, String>.GInner<@TA K, @TB ? extends @TC Object>> entrySet() { return null; } }";
     }
 
     @TADescriptions({
@@ -138,7 +139,7 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 2, 0, 1, 0 }),
     })
     public String methodReturnAsNestedWildcard3() {
-        return "Set<? extends @TB Map. @TC Entry<String, Object>> entrySet() { return null; }";
+        return "Set<? extends @TB GOuter<String, String>. @TC GInner<String, Object>> entrySet() { return null; }";
     }
 
     @TADescriptions({
@@ -146,7 +147,7 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 2, 0, 1, 0 }),
     })
     public String methodReturnAsNestedWildcard4() {
-        return "Set<? extends Map. @TC Entry<String, Object>> entrySet() { return null; }";
+        return "Set<? extends GOuter<String, String>. @TC GInner<String, Object>> entrySet() { return null; }";
     }
 
     @TADescriptions({
@@ -156,7 +157,7 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 2, 0, 1, 0 }),
     })
     public String methodReturnAsNestedWildcard5() {
-        return "Set<? extends @TB Map. @TC Entry> entrySet() { return null; }";
+        return "Set<? extends @TB Outer. @TC Inner> entrySet() { return null; }";
     }
 
     @TADescriptions({
@@ -168,7 +169,7 @@ public class MethodReturns {
                 genericLocation = { 3, 0, 2, 0, 1, 0 }),
     })
     public String methodReturnAsNestedWildcard6() {
-        return "Set<? extends Map. @TC Entry<@TA String, @TB Object>> entrySet() { return null; }";
+        return "Set<? extends GOuter<String, String>. @TC GInner<@TA String, @TB Object>> entrySet() { return null; }";
     }
 
 }

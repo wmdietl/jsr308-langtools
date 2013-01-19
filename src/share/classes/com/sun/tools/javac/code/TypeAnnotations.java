@@ -284,6 +284,7 @@ public class TypeAnnotations {
                         enclEl.getKind() != ElementKind.PACKAGE &&
                         enclTy != null &&
                         enclTy.getKind() != TypeKind.NONE &&
+                        enclTy.getKind() != TypeKind.ERROR &&
                         (enclTr.getKind() == JCTree.Kind.MEMBER_SELECT ||
                          enclTr.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
                          enclTr.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
@@ -330,13 +331,13 @@ public class TypeAnnotations {
                 while (enclEl != null &&
                         enclEl.getKind() != ElementKind.PACKAGE &&
                         topTy != null &&
-                        topTy.getKind() != TypeKind.NONE) {
+                        topTy.getKind() != TypeKind.NONE &&
+                        topTy.getKind() != TypeKind.ERROR) {
                     topTy = topTy.getEnclosingType();
                     enclEl = enclEl.getEnclosingElement();
 
-                    if (enclEl.getKind() != ElementKind.PACKAGE &&
-                            enclEl.getKind() != ElementKind.METHOD) {
-                        // Only count enclosing classes, not methods.
+                    if (topTy != null && topTy.getKind() != TypeKind.NONE) {
+                        // Only count enclosing types.
                         depth = depth.append(TypePathEntry.INNER_TYPE);
                     }
                 }
@@ -647,7 +648,7 @@ public class TypeAnnotations {
                         int arg = taframe.arguments.indexOf(tree);
                         p.location = p.location.prepend(new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg));
 
-                        locateNestedTypes(taframe.type.tsym, p);
+                        locateNestedTypes(taframe.type, p);
                     } else {
                         Assert.error("Could not determine type argument position of tree " + tree +
                                 " within frame " + frame);
@@ -749,7 +750,7 @@ public class TypeAnnotations {
                             // class/method as enclosing elements.
                             // There is actually nothing to do for them.
                         } else {
-                            locateNestedTypes(tsym, p);
+                            locateNestedTypes(utype, p);
                         }
                     }
                     List<JCTree> newPath = path.tail;
@@ -798,17 +799,17 @@ public class TypeAnnotations {
             }
         }
 
-        private static void locateNestedTypes(Symbol tsym, TypeAnnotationPosition p) {
+        private static void locateNestedTypes(Type type, TypeAnnotationPosition p) {
             // The number of "steps" to get from the full type to the
             // left-most outer type.
             ListBuffer<TypePathEntry> depth = ListBuffer.lb();
 
-            Symbol encl = tsym.getEnclosingElement();
-            while (encl != null && encl.getKind() != ElementKind.PACKAGE) {
-                if (encl.getKind() != ElementKind.METHOD) {
-                    depth = depth.append(TypePathEntry.INNER_TYPE);
-                }
-                encl = encl.getEnclosingElement();
+            Type encl = type.getEnclosingType();
+            while (encl != null &&
+                    encl.getKind() != TypeKind.NONE &&
+                    encl.getKind() != TypeKind.ERROR) {
+                depth = depth.append(TypePathEntry.INNER_TYPE);
+                encl = encl.getEnclosingType();
             }
             if (depth.nonEmpty()) {
                 p.location = p.location.prependList(depth.toList());
