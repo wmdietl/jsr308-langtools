@@ -156,7 +156,7 @@ public class ReferenceInfoUtil {
             case CLASS_TYPE_PARAMETER:
             case METHOD_TYPE_PARAMETER:
             // method parameter
-            case METHOD_PARAMETER:
+            case METHOD_FORMAL_PARAMETER:
                 pos.parameter_index = index;
                 break;
             default:

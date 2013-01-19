@@ -720,7 +720,7 @@ public class TypeAnnotations {
                                 // TODO: Intro a separate ElementKind?
                                 p.type = TargetType.METHOD_RECEIVER;
                             } else {
-                                p.type = TargetType.METHOD_PARAMETER;
+                                p.type = TargetType.METHOD_FORMAL_PARAMETER;
                                 p.parameter_index = methodParamIndex(path, frame);
                             }
                             break;
@@ -879,7 +879,7 @@ public class TypeAnnotations {
                 int i = 0;
                 for (JCVariableDecl param : tree.params) {
                     TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.METHOD_PARAMETER;
+                    pos.type = TargetType.METHOD_FORMAL_PARAMETER;
                     pos.parameter_index = i;
                     pos.pos = param.vartype.pos;
                     separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);

@@ -158,7 +158,7 @@ public class AnnotationWriter extends BasicWriter {
             print(pos.type_index);
             break;
         // method parameter
-        case METHOD_PARAMETER:
+        case METHOD_FORMAL_PARAMETER:
             print(", param_index=");
             print(pos.parameter_index);
             break;

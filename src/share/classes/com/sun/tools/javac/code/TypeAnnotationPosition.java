@@ -219,7 +219,7 @@ public class TypeAnnotationPosition {
             sb.append(exception_index);
             break;
         // method parameter
-        case METHOD_PARAMETER:
+        case METHOD_FORMAL_PARAMETER:
             sb.append(", param_index = ");
             sb.append(parameter_index);
             break;

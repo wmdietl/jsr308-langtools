@@ -31,23 +31,23 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
  */
 public class MethodParameters {
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0)
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     public String methodParamAsPrimitive() {
         return "void test(@TA int a) { }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1)
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 1)
     public String methodParamAsObject() {
         return "void test(Object b, @TA Object a) { }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0 }, paramIndex = 0)
     })
     public String methodParamAsParametrized() {
@@ -55,24 +55,24 @@ public class MethodParameters {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 0, 2, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1 }, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TE", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TF", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0, 2, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TG", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0, 2, 0, 3, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TH", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0, 2, 0, 3, 0, 2, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TI", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TI", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0, 2, 0, 3, 1 }, paramIndex = 0),
-        @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TJ", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0, 2, 0, 3, 1, 2, 0 }, paramIndex = 0)
     })
     public String methodParamAsWildcard() {
@@ -82,10 +82,10 @@ public class MethodParameters {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsArray() {
@@ -93,10 +93,10 @@ public class MethodParameters {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsVararg() {
@@ -104,10 +104,10 @@ public class MethodParameters {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 1),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 1),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0 }, paramIndex = 1),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 0, 0, 0, 0 }, paramIndex = 1)
     })
     public String methodParamAsFQVararg() {
@@ -125,23 +125,23 @@ public class MethodParameters {
     }
 
     // Smoke tests
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0)
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     public String interfacemethodParamAsObject() {
         return "interface Test { void test(@TA Object a); }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 2)
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 2)
     public String abstractmethodParamAsObject() {
         return "abstract class Test { abstract void test(Object b, Object c, @TA Object a); }";
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 0 }, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1 }, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = { 3, 1, 3, 0 }, paramIndex = 0)
     })
     public String interfacemethodParamAsParametrized() {

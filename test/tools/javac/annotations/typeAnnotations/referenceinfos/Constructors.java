@@ -34,7 +34,7 @@ public class Constructors {
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN),
         @TADescription(annotation = "TB", type = METHOD_RETURN),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     })
     public String regularClass() {
         return "class Test { @TA Test() {}" +
@@ -44,7 +44,7 @@ public class Constructors {
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_RETURN),
         @TADescription(annotation = "TB", type = METHOD_RETURN),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     })
     @TestClass("Test$Inner")
     public String innerClass() {
@@ -60,7 +60,7 @@ public class Constructors {
         @TADescription(annotation = "TB", type = METHOD_RETURN),
         @TADescription(annotation = "TC", type = METHOD_RECEIVER),
         @TADescription(annotation = "TD", type = METHOD_RETURN),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER, paramIndex = 0)
+        @TADescription(annotation = "TE", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     })
     @TestClass("Test$Inner")
     public String innerClass2() {

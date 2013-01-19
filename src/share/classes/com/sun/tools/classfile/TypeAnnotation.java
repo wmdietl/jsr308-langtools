@@ -139,7 +139,7 @@ public class TypeAnnotation {
             position.type_index = cr.readUnsignedShort();
             break;
         // method parameter
-        case METHOD_PARAMETER:
+        case METHOD_FORMAL_PARAMETER:
             position.parameter_index = cr.readUnsignedByte();
             break;
         // method/constructor/reference type argument
@@ -223,7 +223,7 @@ public class TypeAnnotation {
             n += 2; // type_index
             break;
         // method parameter
-        case METHOD_PARAMETER:
+        case METHOD_FORMAL_PARAMETER:
             n += 1; // parameter_index
             break;
         // method/constructor/reference type argument
@@ -440,7 +440,7 @@ public class TypeAnnotation {
                 sb.append(exception_index);
                 break;
             // method parameter
-            case METHOD_PARAMETER:
+            case METHOD_FORMAL_PARAMETER:
                 sb.append(", param_index = ");
                 sb.append(parameter_index);
                 break;
@@ -529,66 +529,69 @@ public class TypeAnnotation {
         CLASS_TYPE_PARAMETER(0x00),
 
         /** For annotations on a method type parameter declaration. */
-        METHOD_TYPE_PARAMETER(0x02),
+        METHOD_TYPE_PARAMETER(0x01),
 
         /** For annotations on the type of an "extends" or "implements" clause. */
         CLASS_EXTENDS(0x10),
 
         /** For annotations on a bound of a type parameter of a class. */
-        CLASS_TYPE_PARAMETER_BOUND(0x12),
+        CLASS_TYPE_PARAMETER_BOUND(0x11),
 
         /** For annotations on a bound of a type parameter of a method. */
-        METHOD_TYPE_PARAMETER_BOUND(0x14),
+        METHOD_TYPE_PARAMETER_BOUND(0x12),
 
         /** For annotations on a field. */
-        FIELD(0x16),
+        FIELD(0x13),
 
         /** For annotations on a method return type. */
-        METHOD_RETURN(0x18),
+        METHOD_RETURN(0x14),
 
         /** For annotations on the method receiver. */
-        METHOD_RECEIVER(0x1A),
+        METHOD_RECEIVER(0x15),
 
         /** For annotations on a method parameter. */
-        METHOD_PARAMETER(0x1C),
+        METHOD_FORMAL_PARAMETER(0x16),
 
         /** For annotations on a throws clause in a method declaration. */
-        THROWS(0x1E),
+        THROWS(0x17),
 
         /** For annotations on a local variable. */
-        LOCAL_VARIABLE(0x80, true),
+        LOCAL_VARIABLE(0x40, true),
 
         /** For annotations on a resource variable. */
-        RESOURCE_VARIABLE(0x82, true),
+        RESOURCE_VARIABLE(0x41, true),
 
         /** For annotations on an exception parameter. */
-        EXCEPTION_PARAMETER(0x84, true),
+        EXCEPTION_PARAMETER(0x42, true),
 
         /** For annotations on a typecast. */
-        CAST(0x86, true),
+        CAST(0x43, true),
 
         /** For annotations on a type test. */
-        INSTANCEOF(0x88, true),
+        INSTANCEOF(0x44, true),
 
         /** For annotations on an object creation expression. */
-        NEW(0x8A, true),
+        NEW(0x45, true),
 
         /** For annotations on a type argument of an object creation expression. */
-        CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(0x8C, true),
+        CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT(0x46, true),
 
         /** For annotations on a type argument of a method call. */
-        METHOD_INVOCATION_TYPE_ARGUMENT(0x8E, true),
+        METHOD_INVOCATION_TYPE_ARGUMENT(0x47, true),
 
         /** For annotations on a lambda parameter type. */
-        LAMBDA_FORMAL_PARAMETER(0x90, true),
+        LAMBDA_FORMAL_PARAMETER(0x48, true),
+
+        /** For annotations on a method reference. */
+        METHOD_REFERENCE(0x49, true),
 
         /** For annotations on a type argument of a method reference. */
-        METHOD_REFERENCE_TYPE_ARGUMENT(0x92, true),
+        METHOD_REFERENCE_TYPE_ARGUMENT(0x50, true),
 
         /** For annotations with an unknown target. */
         UNKNOWN(0xFF);
 
-        private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x92;
+        private static final int MAXIMUM_TARGET_TYPE_VALUE = 0x50;
 
         private final int targetTypeValue;
         private final boolean isLocal;

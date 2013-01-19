@@ -1045,7 +1045,7 @@ public class ClassWriter extends ClassFile {
             databuf.appendChar(p.type_index);
             break;
         // method parameter
-        case METHOD_PARAMETER:
+        case METHOD_FORMAL_PARAMETER:
             databuf.appendByte(p.parameter_index);
             break;
         // method/constructor/reference type argument

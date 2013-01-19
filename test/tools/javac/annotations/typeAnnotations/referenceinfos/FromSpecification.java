@@ -32,14 +32,14 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 public class FromSpecification {
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0, 2, 0}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TE", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 1, 3, 0}, paramIndex = 0)
     })
     public String testSpec1() {
@@ -47,12 +47,12 @@ public class FromSpecification {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TF", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TG", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TH", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {0, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TI", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TI", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {0, 0, 0, 0, 0, 0}, paramIndex = 0)
     })
     public String testSpec2() {
@@ -61,13 +61,13 @@ public class FromSpecification {
 
     // Note first "1, 0" for top-level class Test.
     @TADescriptions({
-        @TADescription(annotation = "TJ", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TJ", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TK", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TK", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TL", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TL", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TM", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TM", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testSpec3() {
@@ -76,20 +76,20 @@ public class FromSpecification {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER, paramIndex = 0),
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0, 3, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TE", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0, 3, 0, 0, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TF", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 0, 3, 0, 0, 0, 0, 0, 0, 0}, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TG", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TH", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {3, 1, 3, 0}, paramIndex = 0)
     })
     public String testSpec4() {
@@ -98,21 +98,21 @@ public class FromSpecification {
 
     // Note first "1, 0" for top-level class Test.
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TB", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TB", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0, 1, 0, 3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TD", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TD", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TE", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TE", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0}, paramIndex = 0),
-        @TADescription(annotation = "TF", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TF", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 3, 0}, paramIndex = 0),
-        @TADescription(annotation = "TG", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TG", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0, 1, 0, 3, 1}, paramIndex = 0),
-        @TADescription(annotation = "TH", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TH", type = METHOD_FORMAL_PARAMETER,
                 genericLocation = {1, 0}, paramIndex = 0)
     })
     public String testSpec5() {

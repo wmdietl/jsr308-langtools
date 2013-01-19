@@ -144,13 +144,13 @@ public class ClassTypeParam {
         return "class Test<T> { Class<@TA T> m() { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
             paramIndex = 0, genericLocation = {3, 0})
     public String useInParam1() {
         return "class Test<T> { void m(Class<@TA T> p) { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
             paramIndex = 0, genericLocation = {3, 0})
     public String useInParam2() {
         return "class Test { void m(Class<@TA Object> p) { throw new RuntimeException(); } }";

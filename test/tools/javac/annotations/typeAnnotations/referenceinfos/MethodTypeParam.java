@@ -164,13 +164,13 @@ public class MethodTypeParam {
         return "class Test { <T extends @TA Object> @TB T m() { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
             paramIndex = 0, genericLocation = {3, 0})
     public String useInParam1() {
         return "class Test { <T> void m(Class<@TA T> p) { throw new RuntimeException(); } }";
     }
 
-    @TADescription(annotation = "TA", type = METHOD_PARAMETER,
+    @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
             paramIndex = 0, genericLocation = {3, 0})
     public String useInParam2() {
         return "class Test { void m(Class<@TA Object> p) { throw new RuntimeException(); } }";
@@ -179,7 +179,7 @@ public class MethodTypeParam {
     @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 1),
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND, paramIndex = 0, boundIndex = 2),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER, paramIndex = 0)
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER, paramIndex = 0)
     })
     public String useInParam3() {
         return "interface IA {} " +
@@ -195,7 +195,7 @@ public class MethodTypeParam {
         @TADescription(annotation = "TB", type = METHOD_TYPE_PARAMETER_BOUND,
                 paramIndex = 0, boundIndex = 2,
                 genericLocation = {}),
-        @TADescription(annotation = "TC", type = METHOD_PARAMETER,
+        @TADescription(annotation = "TC", type = METHOD_FORMAL_PARAMETER,
                 paramIndex = 0)
     })
     public String useInParam4() {

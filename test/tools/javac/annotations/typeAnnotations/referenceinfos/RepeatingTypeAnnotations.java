@@ -50,9 +50,9 @@ public class RepeatingTypeAnnotations {
 
     // Method parameters
     @TADescriptions({
-        @TADescription(annotation = "RTAs", type = METHOD_PARAMETER,
+        @TADescription(annotation = "RTAs", type = METHOD_FORMAL_PARAMETER,
                 paramIndex = 0),
-        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER,
+        @TADescription(annotation = "RTBs", type = METHOD_FORMAL_PARAMETER,
                 paramIndex = 0,
                 genericLocation = { 3, 0 })
     })
@@ -61,9 +61,9 @@ public class RepeatingTypeAnnotations {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "RTAs", type = METHOD_PARAMETER,
+        @TADescription(annotation = "RTAs", type = METHOD_FORMAL_PARAMETER,
                 paramIndex = 0),
-        @TADescription(annotation = "RTBs", type = METHOD_PARAMETER,
+        @TADescription(annotation = "RTBs", type = METHOD_FORMAL_PARAMETER,
                 paramIndex = 0,
                 genericLocation = { 3, 0 })
     })

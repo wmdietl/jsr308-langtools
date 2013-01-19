@@ -776,7 +776,7 @@ public class ClassWriter {
                 out.writeByte(p.type_index);
                 break;
             // method parameter
-            case METHOD_PARAMETER:
+            case METHOD_FORMAL_PARAMETER:
                 out.writeByte(p.parameter_index);
                 break;
             // method/constructor/reference type argument
