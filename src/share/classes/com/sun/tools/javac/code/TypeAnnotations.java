@@ -912,10 +912,12 @@ public class TypeAnnotations {
             if (tree.sym == null) {
                 // Something is wrong already. Quietly ignore.
             } else if (tree.sym.getKind() == ElementKind.FIELD) {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.FIELD;
-                pos.pos = tree.pos;
-                separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
+                if (sigOnly) {
+                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                    pos.type = TargetType.FIELD;
+                    pos.pos = tree.pos;
+                    separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
+                }
             } else if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE) {
                 TypeAnnotationPosition pos = new TypeAnnotationPosition();
                 pos.type = TargetType.LOCAL_VARIABLE;
