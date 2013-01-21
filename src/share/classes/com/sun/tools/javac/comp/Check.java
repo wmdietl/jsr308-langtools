@@ -2624,8 +2624,7 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
-        if (a.type == null)
-            throw new AssertionError("annotation tree hasn't been attributed yet: " + a);
+        Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
 
         if (!isTypeAnnotation(a, isTypeParameter))
