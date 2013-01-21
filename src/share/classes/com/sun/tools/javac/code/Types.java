@@ -719,6 +719,9 @@ public class Types {
         return isSubtype(t, s, false);
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
+        if (t == s)
+            return true;
+
         if (t.getKind() == TypeKind.ANNOTATED)
             t = ((AnnotatedType)t).underlyingType;
         if (s.getKind() == TypeKind.ANNOTATED)
