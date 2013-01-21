@@ -1086,4 +1086,17 @@ public class TreeInfo {
             return cur;
         }
     }
+
+    private static class TypeAnnotationFinder extends TreeScanner {
+        public boolean foundTypeAnno = false;
+        public void visitAnnotation(JCAnnotation tree) {
+            foundTypeAnno = foundTypeAnno || tree.hasTag(TYPE_ANNOTATION);
+        }
+    }
+
+    public static boolean containsTypeAnnotation(JCTree e) {
+        TypeAnnotationFinder finder = new TypeAnnotationFinder();
+        finder.scan(e);
+        return finder.foundTypeAnno;
+    }
 }

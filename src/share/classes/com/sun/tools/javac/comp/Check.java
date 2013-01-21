@@ -574,50 +574,27 @@ public class Check {
         if (!tree.type.isErroneous() &&
                 (env.info.lint == null || env.info.lint.isEnabled(Lint.LintCategory.CAST))
                 && types.isSameType(tree.expr.type, tree.clazz.type)
-                && !(ignoreAnnotatedCasts && containsTypeAnnotation(tree.clazz))
+                && !(ignoreAnnotatedCasts && TreeInfo.containsTypeAnnotation(tree.clazz))
                 && !is292targetTypeCast(tree)) {
             log.warning(Lint.LintCategory.CAST,
                     tree.pos(), "redundant.cast", tree.expr.type);
         }
     }
     //where
-            private boolean is292targetTypeCast(JCTypeCast tree) {
-                boolean is292targetTypeCast = false;
-                JCExpression expr = TreeInfo.skipParens(tree.expr);
-                if (expr.hasTag(APPLY)) {
-                    JCMethodInvocation apply = (JCMethodInvocation)expr;
-                    Symbol sym = TreeInfo.symbol(apply.meth);
-                    is292targetTypeCast = sym != null &&
-                        sym.kind == MTH &&
-                        (sym.flags() & HYPOTHETICAL) != 0;
-                }
-                return is292targetTypeCast;
+        private boolean is292targetTypeCast(JCTypeCast tree) {
+            boolean is292targetTypeCast = false;
+            JCExpression expr = TreeInfo.skipParens(tree.expr);
+            if (expr.hasTag(APPLY)) {
+                JCMethodInvocation apply = (JCMethodInvocation)expr;
+                Symbol sym = TreeInfo.symbol(apply.meth);
+                is292targetTypeCast = sym != null &&
+                    sym.kind == MTH &&
+                    (sym.flags() & HYPOTHETICAL) != 0;
             }
-
-            /* Utility methods for ignoring type-annotated casts lint checking. */
-            private static final boolean ignoreAnnotatedCasts = true;
-
-            private static class AnnotationFinder extends TreeScanner {
-                public boolean foundTypeAnno = false;
-                public void visitAnnotation(JCAnnotation tree) {
-                    foundTypeAnno = foundTypeAnno || tree.hasTag(TYPE_ANNOTATION);
-                }
-            }
-
-            private boolean containsTypeAnnotation(JCTree e) {
-                AnnotationFinder finder = new AnnotationFinder();
-                finder.scan(e);
-                return finder.foundTypeAnno;
-            }
-            /* End utility methods for ignoring type-annotated casts. */
-
-        //where
-        /** Is type a type variable, or a (possibly multi-dimensional) array of
-         *  type variables?
-         */
-        boolean isTypeVar(Type t) {
-            return t.hasTag(TYPEVAR) || t.hasTag(ARRAY) && isTypeVar(types.elemtype(t));
+            return is292targetTypeCast;
         }
+
+        private static final boolean ignoreAnnotatedCasts = true;
 
     /** Check that a type is within some bounds.
      *

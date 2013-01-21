@@ -1215,7 +1215,7 @@ public class JavacParser implements Parser {
                             }
                             // .class is only allowed if there were no annotations
                             JCExpression nt = bracketsSuffix(t);                        
-                            if (nt != t && (annos.nonEmpty() || isAnnotated(t))) {
+                            if (nt != t && (annos.nonEmpty() || TreeInfo.containsTypeAnnotation(t))) {
                                 // t and nt are different if bracketsSuffix parsed a .class.
                                 // The check for nonEmpty covers the case when the whole array is annotated.
                                 // Helper method isAnnotated looks for annos deeply within t.
@@ -1449,35 +1449,6 @@ public class JavacParser implements Parser {
             nextToken();
         }
         return toP(t);
-    }
-
-    /**
-     * A simple method to determine whether there are any AnnotatedTypeTrees
-     * within the expression.
-     * TODO: do we already have this somewhere?
-     *
-     * @param t A type tree.
-     * @return true iff an AnnotatedTypeTree is found
-     */
-    private static boolean isAnnotated(JCTree tree) {
-        if (tree.hasTag(ANNOTATED_TYPE)) {
-            return true;
-        }
-        if (tree.hasTag(TYPEARRAY)) {
-            return isAnnotated(((JCArrayTypeTree)tree).elemtype);
-        }
-        if (tree.hasTag(TYPEAPPLY)) {
-            JCTypeApply apply = (JCTypeApply)tree;
-            for (JCExpression arg : apply.arguments) {
-                if (isAnnotated(arg)) return true;
-            }
-        }
-        if (tree.hasTag(WILDCARD)) {
-            return isAnnotated(((JCWildcard)tree).inner);
-        }
-        // Nothing to do for JCPrimitiveTypeTree
-        // Anything else missing?
-        return false;
     }
 
     /**
