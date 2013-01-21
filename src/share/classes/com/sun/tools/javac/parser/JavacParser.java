@@ -3633,37 +3633,22 @@ public class JavacParser implements Parser {
 
     /**
      * Inserts the annotations (and possibly a new array level)
-     * to the most inner type of an array.
+     * to the left-most type in an array or nested type.
      *
-     * When parsing a type: {@code @B String @A []}, the
+     * When parsing a type like {@code @B Outer.Inner @A []}, the
      * {@code @A} annotation should target the array itself, while
-     * {@code @B} targets the inner type {@code B}.
+     * {@code @B} targets the nested type {@code Outer}.
      *
      * Currently the parser parses the annotation first, then
-     * the array, and then inserts the annotation to the most
-     * inner type.
+     * the array, and then inserts the annotation to the left-most
+     * nested type.
      *
      * When {@code createNewLevel} is true, then a new array
-     * level inserted as the most inner type, and have the
+     * level is inserted as the most inner type, and have the
      * annotations target it.  This is useful in the case of
      * varargs, e.g. {@code String @A [] @B ...}, as the parser
      * first parses the type {@code String @A []} then inserts
      * a new array level with {@code @B} annotation.
-     *
-     * For nested types like {@code @A java.lang.Outer. @B Inner} the type
-     * {@code java.lang.Outer. @B Inner} is parsed first, but we cannot yet
-     * decide that {@code java.lang} represents a package prefix.
-     * Therefore, we create an JCAnnotatedType that has {@code @A} as annotation
-     * and {@code java.lang.Outer. @B Inner} as underlying type and resolve the
-     * position for {@code @A} later; this is similar to "top-level" annotations
-     * for parameter types, which are also resolved later.
-     * For an array {@code @A java.lang.Outer. @B Inner[][]} we attach {@code @A}
-     * to the innermost non-array type.
-     * 
-     * The innermost/outermost naming is a bit confusing, it's more the
-     * leftmost type.
-     *
-     * TODO: update comments above.
      */
     private JCExpression insertAnnotationsToMostInner(
             JCExpression type, List<JCAnnotation> annos,
