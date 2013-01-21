@@ -106,9 +106,6 @@ public class JavacParser implements Parser {
     // back the extra annotations that it read.  (But, bracketsOpt should
     // not *always* be allowed to push back extra annotations that it finds
     // -- in most contexts, any such extra annotation is an error.
-    // Another similar case occurs with arrays and receiver annotations:
-    //   String b() @Array [] @Receiver { }
-    //   String b() @Receiver { }
     //
     // The following two variables permit type annotations that have
     // already been read to be stored for later use.  Alternate

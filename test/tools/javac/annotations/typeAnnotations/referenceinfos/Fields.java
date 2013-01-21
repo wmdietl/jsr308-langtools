@@ -66,6 +66,17 @@ public class Fields {
         return "@TC String @TA [] @TB [] test;";
     }
 
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = FIELD),
+        @TADescription(annotation = "TB", type = FIELD,
+                genericLocation = { 0, 0 }),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = { 0, 0, 0, 0 })
+    })
+    public String fieldAsArrayOld() {
+        return "@TC String test @TA [] @TB [];";
+    }
+
     @TADescriptions({})
     public String fieldWithDeclarationAnnotatin() {
         return "@Decl String test;";

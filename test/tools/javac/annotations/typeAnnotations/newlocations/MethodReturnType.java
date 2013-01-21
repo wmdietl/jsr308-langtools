@@ -48,6 +48,10 @@ class DefaultScope {
   @A String @A [] @B [] array2Deep() { return null; }
   String @A [] [] array2First() { return null; }
   String [] @B [] array2Second() { return null; }
+
+  // Old-style array syntax
+  String array2FirstOld() @A [] { return null; }
+  String array2SecondOld() [] @B [] { return null; }
 }
 
 class ModifiedScoped {

@@ -46,6 +46,10 @@ class DefaultScope {
   @A String @A [] @B [] array2Deep;
   String @A [] [] array2First;
   String [] @B [] array2Second;
+
+  // Old-style array syntax
+  String array2FirstOld @A [];
+  String array2SecondOld [] @B [];
 }
 
 class ModifiedScoped {
