@@ -719,17 +719,12 @@ public class Types {
         return isSubtype(t, s, false);
     }
     public boolean isSubtype(Type t, Type s, boolean capture) {
-        if (t == s)
-             return true;
-
         if (t.getKind() == TypeKind.ANNOTATED)
             t = ((AnnotatedType)t).underlyingType;
         if (s.getKind() == TypeKind.ANNOTATED)
             s = ((AnnotatedType)s).underlyingType;
 
-        // TODO: JSR 308 review
-        if (t.tag == TYPEVAR && s.tag == TYPEVAR
-            && ((TypeVar)t).tsym == ((TypeVar)s).tsym)
+        if (t == s)
             return true;
 
         if (s.isPartial())
@@ -764,17 +759,6 @@ public class Types {
                  case BOOLEAN: case VOID:
                      return t.hasTag(s.getTag());
                  case TYPEVAR:
-                     // TODO: JSR 308 review
-                     if (t == t.getUpperBound()) {
-                         // XXX
-                         if (s == syms.objectType) {
-                             return true;
-                         }
-                         if ((s instanceof TypeVar) &&
-                             ((TypeVar) s).getUpperBound() == syms.objectType) {
-                             return true;
-                         }
-                     }
                      return isSubtypeNoCapture(t.getUpperBound(), s);
                  case BOT:
                      return
@@ -996,10 +980,7 @@ public class Types {
                 case DOUBLE: case BOOLEAN: case VOID: case BOT: case NONE:
                     return t.tag == s.tag;
                 case TYPEVAR: {
-                    // TODO: JSR 308 review
-                    if (t.tsym == s.tsym) {
-                        return true;
-                    } else if (s.tag == TYPEVAR) {
+                    if (s.tag == TYPEVAR) {
                         //type-substitution does not preserve type-var types
                         //check that type var symbols and bounds are indeed the same
                         return t.tsym == s.tsym &&
