@@ -55,7 +55,6 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Set;
 
 import javax.lang.model.element.ElementVisitor;
 
@@ -696,7 +695,7 @@ public class Resolve {
 
             if (varargsFormal == null &&
                     argtypes.size() != formals.size()) {
-                report(MethodCheckDiag.ARITY_MISMATCH, inferenceContext); // not enough args
+                reportMC(MethodCheckDiag.ARITY_MISMATCH, inferenceContext); // not enough args
             }
 
             while (argtypes.nonEmpty() && formals.head != varargsFormal) {
@@ -707,7 +706,7 @@ public class Resolve {
             }
 
             if (formals.head != varargsFormal) {
-                report(MethodCheckDiag.ARITY_MISMATCH, inferenceContext); // not enough args
+                reportMC(MethodCheckDiag.ARITY_MISMATCH, inferenceContext); // not enough args
             }
 
             if (useVarargs) {
@@ -724,7 +723,7 @@ public class Resolve {
             }
         }
 
-        private void report(MethodCheckDiag diag, InferenceContext inferenceContext, Object... args) {
+        private void reportMC(MethodCheckDiag diag, InferenceContext inferenceContext, Object... args) {
             boolean inferDiag = inferenceContext != infer.emptyContext;
             InapplicableMethodException ex = inferDiag ?
                     infer.inferenceException : inapplicableMethodException;
@@ -748,7 +747,7 @@ public class Resolve {
             } else {
                 if (!isAccessible(env, t)) {
                     Symbol location = env.enclClass.sym;
-                    report(MethodCheckDiag.INACCESSIBLE_VARARGS, inferenceContext, t, Kinds.kindName(location), location);
+                    reportMC(MethodCheckDiag.INACCESSIBLE_VARARGS, inferenceContext, t, Kinds.kindName(location), location);
                 }
             }
         }
@@ -761,7 +760,7 @@ public class Resolve {
 
                 @Override
                 public void report(DiagnosticPosition pos, JCDiagnostic details) {
-                    report(methodDiag, deferredAttrContext.inferenceContext, details);
+                    reportMC(methodDiag, deferredAttrContext.inferenceContext, details);
                 }
             };
             return new MethodResultInfo(to, checkContext);
