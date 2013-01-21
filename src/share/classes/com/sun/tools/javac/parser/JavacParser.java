@@ -613,7 +613,6 @@ public class JavacParser implements Parser {
                 nextToken();
                 return name;
             } else {
-                // TODO: add error message
                 error(token.pos, "this.as.identifier");
                 nextToken();
                 return names.error;
@@ -1456,7 +1455,7 @@ public class JavacParser implements Parser {
      * A simple method to determine whether there are any AnnotatedTypeTrees
      * within the expression.
      * TODO: do we already have this somewhere?
-     * 
+     *
      * @param t A type tree.
      * @return true iff an AnnotatedTypeTree is found
      */
@@ -3460,9 +3459,6 @@ public class JavacParser implements Parser {
      *  ConstructorDeclaratorRest =
      *      "(" FormalParameterListOpt ")" [THROWS TypeList] MethodBody
      */
-    // TODO: do we need to allow Annotations before BracketsOpt, to allow:
-    //   Object foobar() @A @B [] @C @D []
-    // BracketsOpt does not seem to allow @A @B.
     protected JCTree methodDeclaratorRest(int pos,
                               JCModifiers mods,
                               JCExpression type,
