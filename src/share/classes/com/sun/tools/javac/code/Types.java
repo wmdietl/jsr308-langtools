@@ -2024,6 +2024,11 @@ public class Types {
             public Type visitErrorType(ErrorType t, Boolean recurse) {
                 return t;
             }
+
+            @Override
+            public Type visitAnnotatedType(AnnotatedType t, Boolean recurse) {
+                return new AnnotatedType(t.typeAnnotations, erasure(t.underlyingType, recurse));
+            }
         };
 
     private Mapping erasureFun = new Mapping ("erasure") {
