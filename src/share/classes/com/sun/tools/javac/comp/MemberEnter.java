@@ -665,13 +665,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             //(a plain array type) with the more precise VarargsType --- we need
             //to do it this way because varargs is represented in the tree as a modifier
             //on the parameter declaration, and not as a distinct type of array node.
-            Type atype;
-            if (tree.vartype.type.getKind() == TypeKind.ANNOTATED) {
-                atype = ((AnnotatedType)tree.vartype.type).makeVarargs();
-            } else {
-                atype = ((ArrayType) tree.vartype.type).makeVarargs();
-            }
-            tree.vartype.type = atype;
+            ArrayType atype = (ArrayType)tree.vartype.type.unannotatedType();
+            tree.vartype.type = atype.makeVarargs();
         }
         Scope enclScope = enter.enterScope(env);
         VarSymbol v =

@@ -246,6 +246,14 @@ public class Type implements PrimitiveType {
         return this;
     }
 
+    /**
+     * If this is an annotated type, return the underlying type.
+     * Otherwise, return the type itself.
+     */
+    public Type unannotatedType() {
+        return this;
+    }
+
     /** Return the base types of a list of types.
      */
     public static List<Type> baseTypes(List<Type> ts) {
@@ -340,15 +348,12 @@ public class Type implements PrimitiveType {
             args = args.tail;
             buf.append(',');
         }
-        if (args.head.tag == ARRAY) {
-            if (args.head.getKind() == TypeKind.ANNOTATED) {
-                buf.append(((ArrayType)((AnnotatedType)args.head).underlyingType).elemtype);
-                buf.append(((AnnotatedType)args.head).typeAnnotations);
-                buf.append("...");
-            } else {
-                buf.append(((ArrayType)args.head).elemtype);
-                buf.append("...");
+        if (args.head.unannotatedType().tag == ARRAY) {
+            buf.append(((ArrayType)args.head.unannotatedType()).elemtype);
+            if (args.head.getAnnotations().nonEmpty()) {
+                buf.append(args.head.getAnnotations());
             }
+            buf.append("...");
         } else {
             buf.append(args.head);
         }
@@ -357,6 +362,7 @@ public class Type implements PrimitiveType {
 
     /** Access methods.
      */
+    public List<? extends AnnotationMirror> getAnnotations() { return List.nil(); }
     public List<Type>        getTypeArguments()  { return List.nil(); }
     public Type              getEnclosingType()  { return null; }
     public List<Type>        getParameterTypes() { return List.nil(); }
@@ -1492,6 +1498,7 @@ public class Type implements PrimitiveType {
 
         public AnnotatedType(Type underlyingType) {
             super(underlyingType.tag, underlyingType.tsym);
+            this.typeAnnotations = List.nil();
             this.underlyingType = underlyingType;
             Assert.check(underlyingType.getKind() != TypeKind.ANNOTATED,
                     "Can't annotate already annotated type: " + underlyingType);
@@ -1513,12 +1520,17 @@ public class Type implements PrimitiveType {
         }
 
         @Override
-        public java.util.List<? extends AnnotationMirror> getAnnotations() {
+        public List<? extends AnnotationMirror> getAnnotations() {
             return typeAnnotations;
         }
 
         @Override
         public TypeMirror getUnderlyingType() {
+            return underlyingType;
+        }
+
+        @Override
+        public Type unannotatedType() {
             return underlyingType;
         }
 

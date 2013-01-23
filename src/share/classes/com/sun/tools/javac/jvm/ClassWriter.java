@@ -277,9 +277,7 @@ public class ClassWriter extends ClassFile {
     /** Assemble signature of given type in string buffer.
      */
     void assembleSig(Type type) {
-        if (type.getKind() == TypeKind.ANNOTATED) {
-            type = ((AnnotatedType) type).underlyingType;
-        }
+        type = type.unannotatedType();
         switch (type.getTag()) {
         case BYTE:
             sigbuf.appendByte('B');
@@ -380,9 +378,7 @@ public class ClassWriter extends ClassFile {
     }
 
     void assembleClassSig(Type type) {
-        if (type.getKind() == TypeKind.ANNOTATED) {
-            type = ((AnnotatedType) type).underlyingType;
-        }
+        type = type.unannotatedType();
         ClassType ct = (ClassType)type;
         ClassSymbol c = (ClassSymbol)ct.tsym;
         enterInner(c);

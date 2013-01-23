@@ -685,10 +685,8 @@ public class Types {
     //where
         private boolean isSubtypeUncheckedInternal(Type t, Type s, Warner warn) {
             if (t.hasTag(ARRAY) && s.hasTag(ARRAY)) {
-                if (t.getKind() == TypeKind.ANNOTATED)
-                    t = ((AnnotatedType)t).underlyingType;
-                if (s.getKind() == TypeKind.ANNOTATED)
-                    s = ((AnnotatedType)s).underlyingType;
+                t = t.unannotatedType();
+                s = s.unannotatedType();
                 if (((ArrayType)t).elemtype.isPrimitive()) {
                     return isSameType(elemtype(t), elemtype(s));
                 } else {
@@ -716,10 +714,8 @@ public class Types {
         private void checkUnsafeVarargsConversion(Type t, Type s, Warner warn) {
             if (t.tag != ARRAY || isReifiable(t))
                 return;
-            if (t.getKind() == TypeKind.ANNOTATED)
-                t = ((AnnotatedType)t).underlyingType;
-            if (s.getKind() == TypeKind.ANNOTATED)
-                s = ((AnnotatedType)s).underlyingType;
+            t = t.unannotatedType();
+            s = s.unannotatedType();
             ArrayType from = (ArrayType)t;
             boolean shouldWarn = false;
             switch (s.tag) {
@@ -752,10 +748,8 @@ public class Types {
         if (t == s)
             return true;
 
-        if (t.getKind() == TypeKind.ANNOTATED)
-            t = ((AnnotatedType)t).underlyingType;
-        if (s.getKind() == TypeKind.ANNOTATED)
-            s = ((AnnotatedType)s).underlyingType;
+        t = t.unannotatedType();
+        s = s.unannotatedType();
 
         if (t == s)
             return true;
@@ -1701,8 +1695,7 @@ public class Types {
         case WILDCARD:
             return elemtype(upperBound(t));
         case ARRAY:
-            if (t.getKind() == TypeKind.ANNOTATED)
-                t = ((AnnotatedType)t).underlyingType;
+            t = t.unannotatedType();
             return ((ArrayType)t).elemtype;
         case FORALL:
             return elemtype(((ForAll)t).qtype);
@@ -2973,8 +2966,7 @@ public class Types {
      * graph. Undefined for all but reference types.
      */
     public int rank(Type t) {
-        if (t.getKind() == TypeKind.ANNOTATED)
-            t = ((AnnotatedType)t).underlyingType;
+        t = t.unannotatedType();
         switch(t.tag) {
         case CLASS: {
             ClassType cls = (ClassType)t;
@@ -3676,8 +3668,7 @@ public class Types {
                 t = subst(type1, t.tsym.type.getTypeArguments(), t.getTypeArguments());
             }
         }
-        if (t.getKind() == TypeKind.ANNOTATED)
-            t = ((AnnotatedType)t).underlyingType;
+        t = t.unannotatedType();
         ClassType cls = (ClassType)t;
         if (cls.isRaw() || !cls.isParameterized())
             return cls;

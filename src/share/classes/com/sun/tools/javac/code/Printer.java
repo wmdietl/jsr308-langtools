@@ -309,15 +309,14 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
                 args = args.tail;
                 buf.append(',');
             }
-            if (args.head.getKind() == TypeKind.ARRAY) {
-                buf.append(visit(((ArrayType) args.head).elemtype, locale));
+            if (args.head.unannotatedType().getKind() == TypeKind.ARRAY) {
+                buf.append(visit(((ArrayType) args.head.unannotatedType()).elemtype, locale));
+                if (args.head.getAnnotations().nonEmpty()) {
+                    buf.append(' ');
+                    buf.append(args.head.getAnnotations());
+                    buf.append(' ');
+                }
                 buf.append("...");
-            } else if (args.head.getKind() == TypeKind.ANNOTATED) {
-                AnnotatedType annotype = (AnnotatedType) args.head;
-                buf.append(visit(((ArrayType) annotype.underlyingType).elemtype, locale));
-                buf.append(' ');
-                buf.append(annotype.typeAnnotations);
-                buf.append(" ...");
             } else {
                 buf.append(visit(args.head, locale));
             }
