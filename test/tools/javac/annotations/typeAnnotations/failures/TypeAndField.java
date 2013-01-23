@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006703
  * @summary Ensure that TYPE_USE and FIELD work together.
  * @author Werner Dietl
  * @compile TypeAndField.java
