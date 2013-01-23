@@ -103,7 +103,7 @@ public class CombinationsTargetTest2 extends ClassfileTestHelper {
 //        // 8005681 - skip cases with repeated annotations on new, array, cast.
 //        if((source==3 || source==8 || source==9) && (ABmix || (Arepeats && BDrepeats))) {
 //            System.out.println(testDef+"\n8005681-skip repeated annotations on new,array,cast");
-//            return;        
+//            return;
 //        }
 
         println(testDef);
@@ -204,12 +204,12 @@ public class CombinationsTargetTest2 extends ClassfileTestHelper {
             case 3: // (repeating) type annotations on field in method body
                     /*
                      * class Test1 {
-                     * Test1(){} 
-                     * // type usage in method body 
-                     * String test(Test1 this, String param, String ... vararg) { 
+                     * Test1(){}
+                     * // type usage in method body
+                     * String test(Test1 this, String param, String ... vararg) {
                      *     @A @B
-                     *     Object o = new @A @B  String @A @B  [3]; 
-                     *         return (@A @B  String) null; 
+                     *     Object o = new @A @B  String @A @B  [3];
+                     *         return (@A @B  String) null;
                      * }}
                       */
                 source = new String(
@@ -245,12 +245,12 @@ public class CombinationsTargetTest2 extends ClassfileTestHelper {
                 "}\n").concat(sourceBase).replace("_OTHER_", annot2).replace("_As_",As).replace("_Bs_",Bs) +
                 "\n\n";
             break;
-            case 9: // (repeating)annotations on type parameters of class, method return value in method. 
-                    /* 
+            case 9: // (repeating)annotations on type parameters of class, method return value in method.
+                    /*
                      * class Test3{
                      *     <E extends Comparable> Map<List<E>, E > foo(E e) {
                      *         class maptest <E> {
-                     *             Map<List<E>,E> getMap() { 
+                     *             Map<List<E>,E> getMap() {
                      *                 Map<List<E>,E> Em = new HashMap<List<@A @B @D E>,@A @B @D E>();
                      *                 return Em;
                      *             }

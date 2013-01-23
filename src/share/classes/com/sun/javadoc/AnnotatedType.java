@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2004, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,7 +33,7 @@ package com.sun.javadoc;
  *      {@code @NonNull String}
  *      {@code @Positive int}
  * </pre>
- * 
+ *
  * @author Mahmood Ali
  * @since 1.8
  */

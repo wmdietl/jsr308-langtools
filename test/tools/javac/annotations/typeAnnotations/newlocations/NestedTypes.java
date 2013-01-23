@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -45,7 +45,7 @@ class Outer {
             void m2a(@A Inner.Inner2 p2a) {}
             void m2b(Outer.@A Inner.Inner2 p2b) {}
 
-            // The location for @A is the same in m3a-c 
+            // The location for @A is the same in m3a-c
             void m3a(@A Outer p3a) {}
             void m3b(@A Outer.Inner p3b) {}
             void m3c(@A Outer.Inner.Inner2 p3c) {}
@@ -92,7 +92,7 @@ class Test1 {
     MyList<@A Outer . @B Inner. @C Inner2> f;
     @A Outer .GInner<Object>.GInner2<String, Integer> g;
 
-    // TODO: Make sure that something like this fails gracefully: 
+    // TODO: Make sure that something like this fails gracefully:
     // MyList<java.@B lang.Object> pkg;
 
     @A Outer f1;

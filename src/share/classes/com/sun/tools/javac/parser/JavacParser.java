@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -1217,7 +1217,7 @@ public class JavacParser implements Parser {
                                 t = toP(F.at(pos).AnnotatedType(annos, t));
                             }
                             // .class is only allowed if there were no annotations
-                            JCExpression nt = bracketsSuffix(t);                        
+                            JCExpression nt = bracketsSuffix(t);
                             if (nt != t && (annos.nonEmpty() || TreeInfo.containsTypeAnnotation(t))) {
                                 // t and nt are different if bracketsSuffix parsed a .class.
                                 // The check for nonEmpty covers the case when the whole array is annotated.

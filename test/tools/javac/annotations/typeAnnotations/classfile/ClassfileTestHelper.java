@@ -101,7 +101,7 @@ public class ClassfileTestHelper {
     // Test the result of Attributes.getIndex according to expectations
     // encoded in the class/field/method name; increment annotations counts.
     void test(String ttype, ClassFile cf, Field f, Method m, String annName, boolean visible) {
-        String testtype = ttype; 
+        String testtype = ttype;
         String name = null;
         int index = -1;
         Attribute attr = null;
@@ -123,14 +123,14 @@ public class ClassfileTestHelper {
                     index = cf.attributes.getIndex(cf.constant_pool, annName);
                     if(index!= -1) attr = cf.attributes.get(index);
             }
-        } catch(ConstantPoolException cpe) { cpe.printStackTrace(); } 
-        
+        } catch(ConstantPoolException cpe) { cpe.printStackTrace(); }
+
         if (index != -1) {
             assert attr instanceof RuntimeTypeAnnotations_attribute;
             if(isTAattr) { //count RuntimeTypeAnnotations
                 RuntimeTypeAnnotations_attribute tAttr =
                         (RuntimeTypeAnnotations_attribute)attr;
-                println(testtype + ": " + name + ", " + annName + ": " + 
+                println(testtype + ": " + name + ", " + annName + ": " +
                         tAttr.annotations.length );
                 allt += tAttr.annotations.length;
                 if (visible)
@@ -140,7 +140,7 @@ public class ClassfileTestHelper {
             } else {
                 RuntimeAnnotations_attribute tAttr =
                         (RuntimeAnnotations_attribute)attr;
-                println(testtype + ": " + name + ", " + annName + ": " + 
+                println(testtype + ": " + name + ", " + annName + ": " +
                         tAttr.annotations.length );
                 all += tAttr.annotations.length;
                 if (visible)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,14 +35,14 @@ import java.lang.annotation.*;
 class DefaultScope {
   void exception01() {
     try {
-	System.out.println("Hello 1!");
+        System.out.println("Hello 1!");
     } catch (@B NullPointerException | @C IllegalArgumentException e) {
       e.toString();
     }
   }
   void exception02() {
     try {
-	System.out.println("Hello 2!");
+        System.out.println("Hello 2!");
     } catch @A (@B NullPointerException | @C IllegalArgumentException e) {
       e.toString();
     }

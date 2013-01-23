@@ -34,7 +34,7 @@ import java.io.File;
 public class CombinationsTargetTest1 extends ClassfileTestHelper {
     // Helps identify test case in event of failure.
     int testcount = 0;
-    int src1 = 1, src2 = 2, src4 = 4, 
+    int src1 = 1, src2 = 2, src4 = 4,
         src5 = 5, src6 = 6, src7 = 7;
 
     String[] ETypes={"TYPE", "FIELD", "METHOD", "PARAMETER", "CONSTRUCTOR",
@@ -211,13 +211,13 @@ public class CombinationsTargetTest1 extends ClassfileTestHelper {
             case 1: // repeating type annotations at class level
                     /*
                      * @A @B class Test1 {
-                     * @A @B Test1(){} 
-                     * @A @B Integer i1 = 0; 
-                     * String @A @B [] @A @B [] sa = null; 
-                     * // type usage in method body 
-                     * String test(Test1 this, String param, String ... vararg) { 
-                     *     Object o = new  String  [3]; 
-                     *     return (String) null; 
+                     * @A @B Test1(){}
+                     * @A @B Integer i1 = 0;
+                     * String @A @B [] @A @B [] sa = null;
+                     * // type usage in method body
+                     * String test(Test1 this, String param, String ... vararg) {
+                     *     Object o = new  String  [3];
+                     *     return (String) null;
                      * }}
                      */
                 source = new String(
@@ -238,11 +238,11 @@ public class CombinationsTargetTest1 extends ClassfileTestHelper {
             case 2: // (repeating) type annotations on method.
                     /*
                      * class Test12 {
-                     * Test12(){} 
-                     * // type usage on method 
-                     * @A @B String test(@A @B  Test12 this, @A @B  String param, @A @B  String @A @B  ... vararg) { 
-                     *     Object o = new String [3]; 
-                     *     return (String) null; 
+                     * Test12(){}
+                     * // type usage on method
+                     * @A @B String test(@A @B  Test12 this, @A @B  String param, @A @B  String @A @B  ... vararg) {
+                     *     Object o = new String [3];
+                     *     return (String) null;
                      * }}
                      */
                 source = new String(
@@ -288,7 +288,7 @@ public class CombinationsTargetTest1 extends ClassfileTestHelper {
                 hasInnerClass=true;
                 innerClassname="$1";
             break;
-            case 5: // (repeating)annotations on type parameters, bounds and  type arguments on class decl. 
+            case 5: // (repeating)annotations on type parameters, bounds and  type arguments on class decl.
                     /*
                      * @A @B @D
                      * class Test2<@A @B @C @D T extends @A @B Object> {
@@ -337,7 +337,7 @@ public class CombinationsTargetTest1 extends ClassfileTestHelper {
                      * class Test7{
                      *     <E extends Comparable> Map<List<E>, E > foo(E e) {
                      *         class maptest <@A @B @D E> {
-                     *             Map<List<@A @B @D E>,@A @B @D E> getMap() { 
+                     *             Map<List<@A @B @D E>,@A @B @D E> getMap() {
                      *                 return new HashMap<List<E>,E>();
                      *             }
                      *         }
@@ -345,7 +345,7 @@ public class CombinationsTargetTest1 extends ClassfileTestHelper {
                      *    }
                      *    Map<List<String>,String> shm = foo(new String("hello"));
                      * }
-                     */ 
+                     */
                 source = new String( source +
                 "// (repeating)annotations on type parameters of class, method return value in method. \n" +
                 "class "+ testname + "{\n" +

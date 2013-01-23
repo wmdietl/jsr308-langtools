@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -35,7 +35,7 @@ class WrongType {
   Object f;
 
   void good1(@A WrongType this) {}
-  
+
   void good2(@A WrongType this) {
     this.f = null;
     Object o = this.f;
@@ -55,7 +55,7 @@ class WrongType {
   class Inner {
     void good1(@A Inner this) {}
     void good2(@A WrongType.Inner this) {}
-    
+
     void outerOnly(@A WrongType this) {}
     void wrongInner(@A Object this) {}
     void badOuter(@A Outer.Inner this) {}
