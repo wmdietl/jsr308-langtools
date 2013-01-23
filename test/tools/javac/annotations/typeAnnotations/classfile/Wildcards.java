@@ -30,7 +30,7 @@ import com.sun.tools.classfile.*;
 
 /*
  * @test Wildcards
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test that annotations target wildcards get emitted to classfile
  */
 public class Wildcards extends ClassfileTestHelper {

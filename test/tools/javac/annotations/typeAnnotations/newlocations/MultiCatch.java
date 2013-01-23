@@ -26,7 +26,7 @@ import java.lang.annotation.*;
 /*
  * @test
  * @ignore // syntax not sure yet.
- * @bug 1234567
+ * @bug 8006775
  * @summary new type annotation location: multicatch
  * @author Werner Dietl
  * @compile MultiCatch.java

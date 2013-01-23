@@ -26,7 +26,7 @@ import java.util.Map;
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006775
  * @summary type annotation location: top level blocks
  * @author Werner Dietl
  * @compile TopLevelBlocks.java

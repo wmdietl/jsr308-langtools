@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006775
  * @summary repeating type annotations are possible
  * @author Werner Dietl
  * @compile/fail/ref=RepeatingTypeAnnotations.out -XDrawDiagnostics RepeatingTypeAnnotations.java

@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006775
  * @summary Ensure that nested classes/methods work
  * @author Werner Dietl
  * @compile Nesting.java

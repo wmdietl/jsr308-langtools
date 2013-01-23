@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006775
  * @summary the receiver parameter and static methods/classes
  * @author Werner Dietl
  * @compile/fail/ref=StaticThings.out -XDrawDiagnostics StaticThings.java

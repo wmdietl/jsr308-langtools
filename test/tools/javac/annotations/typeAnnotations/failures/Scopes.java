@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary check that A is accessible in the class type parameters
  * @author Mahmood Ali
  * @compile/fail/ref=Scopes.out -XDrawDiagnostics Scopes.java

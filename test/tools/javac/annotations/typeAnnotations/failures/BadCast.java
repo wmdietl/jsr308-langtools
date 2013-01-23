@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 1234567
+ * @bug 8006775
  * @summary A cast cannot consist of only an annotation.
  * @author Werner Dietl
  * @compile/fail/ref=BadCast.out -XDrawDiagnostics BadCast.java

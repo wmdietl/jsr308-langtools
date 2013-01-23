@@ -26,7 +26,7 @@ import java.util.Map;
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8006775
  * @summary new type annotation location: nested types
  * @author Werner Dietl
  * @compile NestedTypes.java

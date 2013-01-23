@@ -24,7 +24,7 @@
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary random tests for new locations
  * @author Matt Papi
  * @compile BasicTest.java

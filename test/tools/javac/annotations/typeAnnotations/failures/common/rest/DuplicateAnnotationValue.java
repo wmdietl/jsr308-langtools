@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary check for Duplicate annotation value
  * @author Mahmood Ali
  * @compile/fail/ref=DuplicateAnnotationValue.out -XDrawDiagnostics DuplicateAnnotationValue.java

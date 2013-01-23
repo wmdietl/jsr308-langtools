@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test type annotation on void generic methods
  * @author Mahmood Ali
  * @compile/fail VoidGenericMethod.java

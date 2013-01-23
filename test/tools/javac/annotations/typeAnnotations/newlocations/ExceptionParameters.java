@@ -27,7 +27,7 @@ import java.io.*;
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary new type annotation location: exception parameters
  * @author Werner Dietl
  * @compile ExceptionParameters.java

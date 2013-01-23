@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 1234567
+ * @bug 8006775
  * @summary Import clauses cannot use annotations.
  * @author Werner Dietl
  * @compile/fail/ref=AnnotatedImport.out -XDrawDiagnostics AnnotatedImport.java

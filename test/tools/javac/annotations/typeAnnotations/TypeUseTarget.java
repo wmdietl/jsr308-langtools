@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary check that type annotations may appear on all type declarations
  * @author Mahmood Ali
  * @compile TypeUseTarget.java

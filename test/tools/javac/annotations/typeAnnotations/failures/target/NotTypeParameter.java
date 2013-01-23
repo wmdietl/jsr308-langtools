@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test invalid location of TypeUse and TypeParameter
  * @author Mahmood Ali
  * @compile/fail/ref=NotTypeParameter.out -XDrawDiagnostics NotTypeParameter.java

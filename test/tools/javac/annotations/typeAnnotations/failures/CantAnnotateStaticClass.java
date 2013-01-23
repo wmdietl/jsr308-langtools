@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 8006733
+ * @bug 8006733 8006775
  * @ignore
  * @summary A static outer class cannot be annotated.
  * @author Werner Dietl

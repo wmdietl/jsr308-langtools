@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 1234567
+ * @bug 8006775
  * @summary Package declarations cannot use annotations.
  * @author Werner Dietl
  * @compile/fail/ref=AnnotatedPackage1.out -XDrawDiagnostics AnnotatedPackage1.java

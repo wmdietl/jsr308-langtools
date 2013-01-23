@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test indexing of an array
  * @author Mahmood Ali
  * @compile/fail/ref=IndexArray.out -XDrawDiagnostics IndexArray.java

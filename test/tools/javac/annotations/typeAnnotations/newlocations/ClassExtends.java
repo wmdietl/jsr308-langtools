@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary new type annotation location: class extends/implements
  * @author Mahmood Ali
  * @compile ClassExtends.java

@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary check for invalid annotatins given the target
  * @author Mahmood Ali
  * @compile/fail/ref=InvalidLocation.out -XDrawDiagnostics InvalidLocation.java

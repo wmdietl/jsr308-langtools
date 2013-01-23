@@ -3,7 +3,7 @@ import java.util.List;
 
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test that compiler doesn't warn about annotated redundant casts
  * @author Mahmood Ali
  * @author Werner Dietl

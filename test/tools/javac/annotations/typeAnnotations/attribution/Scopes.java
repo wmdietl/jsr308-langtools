@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test scopes of attribution
  * @author Mahmood Ali
  * @compile Scopes.java

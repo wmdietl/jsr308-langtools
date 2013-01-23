@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 1234567
+ * @bug 8006775
  * @summary Ensure unresolved upper bound annotation is handled correctly
  * @author Werner Dietl
  * @compile/fail/ref=BrokenAnnotation.out -XDrawDiagnostics BrokenAnnotation.java

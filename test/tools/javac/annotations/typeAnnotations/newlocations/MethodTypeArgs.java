@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 
 /*
  * @test
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary new type annotation location: method type args
  * @author Mahmood Ali
  * @compile MethodTypeArgs.java

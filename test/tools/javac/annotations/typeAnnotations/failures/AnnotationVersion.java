@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 6843077
+ * @bug 6843077 8006775
  * @summary test that only Java 8 allows type annotations
  * @author Mahmood Ali
  * @compile/fail/ref=AnnotationVersion.out -XDrawDiagnostics -Xlint:-options -source 1.6 AnnotationVersion.java
