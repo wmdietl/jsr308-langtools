@@ -25,33 +25,32 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
- * @summary Test population of reference info for exception parameters
+ * @bug 8006732
+ * @ignore
+ * @summary Test population of reference info for multicatch exception parameters
  * @author Werner Dietl
- * @compile -g Driver.java ReferenceInfoUtil.java ExceptionParameters.java
- * @run main Driver ExceptionParameters
+ * @compile -g Driver.java ReferenceInfoUtil.java MultiCatch.java
+ * @run main Driver MultiCatch
  */
-public class ExceptionParameters {
+public class MultiCatch {
 
-    @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0)
-    public String exception() {
-        return "void exception() { try { new Object(); } catch(@TA Exception e) { } }";
-    }
-
-    @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0)
-    public String finalException() {
-        return "void finalException() { try { new Object(); } catch(final @TA Exception e) { } }";
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0),
+        @TADescription(annotation = "TB", type = EXCEPTION_PARAMETER, exceptionIndex = 1)
+    })
+    public String multiCatch1() {
+        return "void multiCatch1() { " +
+            "try { new Object(); } catch (@TA NullPointerException | @TB IndexOutOfBoundsException e) { e.toString(); } }";
     }
 
     @TADescriptions({
         @TADescription(annotation = "TA", type = EXCEPTION_PARAMETER, exceptionIndex = 0),
         @TADescription(annotation = "TB", type = EXCEPTION_PARAMETER, exceptionIndex = 1),
-        @TADescription(annotation = "TC", type = EXCEPTION_PARAMETER, exceptionIndex = 2)
+        @TADescription(annotation = "TC", type = EXCEPTION_PARAMETER, exceptionIndex = 2),
     })
-    public String multipleExceptions() {
-        return "void multipleExceptions() { " +
-            "try { new Object(); } catch(@TA Exception e) { }" +
-            "try { new Object(); } catch(@TB Exception e) { }" +
-            "try { new Object(); } catch(@TC Exception e) { }" +
-            " }";
+    public String multiCatch2() {
+        return "void multiCatch2() { " +
+            "try { new Object(); } catch (@TA NullPointerException | @TB IndexOutOfBoundsException | @TC IllegalArgumentException e) { e.toString(); } }";
     }
+
 }
