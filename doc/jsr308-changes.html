@@ -54,6 +54,11 @@ The current development version of the specification is available in the
         seems remote.
       </li>
       <li>
+        Renumber <tt>target_type</tt> constannts to make
+        uses within code blocks start at 0x40, and to number by ones
+        instead of by twos.
+       </li>
+      <li>
         Move annotations that target instructions from <tt>method_info</tt>
         structure to <tt>Code</tt> attribute.
       </li>
@@ -77,6 +82,12 @@ The current development version of the specification is available in the
         Add new target_type constants, to support lambda:
         <tt>LAMBDA_FORMAL_PARAMETER</tt> and
         <tt>METHOD_REFERENCE_TYPE_ARGUMENT</tt>
+      </li>
+      <li>
+	Handle the fact that Lambda allows a cast to an intersection type:  use a
+	single classfile representation for casts and type arguments.  Also use a
+	single classfile representation for instanceof, new, and constructor/method
+	reference receivers.  Renumber target_type for consistency.
       </li>
       <li>
         Rename <tt>target_type</tt> structure and field names.
@@ -116,6 +127,10 @@ The current development version of the specification is available in the
         </ul>
       </li>
       <li>
+        The VM is not responsible for validating legality of
+        all the new classfile constructs that do not affect runtime behavior.
+      </li>
+      <li>
         The class file changes apply to class file version 52 and higher.
       </li>
     </ul>
@@ -144,6 +159,18 @@ The current development version of the specification is available in the
       <li>
         It is impossible to annotate the receiver of an anonymous class
         constructor or method.
+      </li>
+    </ul>
+    Removed text from appendices:
+    <ul>
+      <li>
+        Removed Appendix B, "Interactions with other Java SE 8 language changes"
+      </li>
+      <li>
+        Reduced Appendix C, "Discussion of tool modifications"
+      </li>
+      <li>
+        Merged Appendix D, "Related work", into Appendix A
       </li>
     </ul>
   </dd>

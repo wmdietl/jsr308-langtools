@@ -131,7 +131,7 @@ the class file format (Section~\ref{class-file}).
 The non-normative part
 motivates annotations on types by presenting one
 possible use, type qualifiers
-(Appendix~\ref{type-qualifiers}).
+(Appendix~\ref{type-qualifiers}), along with related work.
 It discusses how JSR 308 interacts with 
 other Java SE 8 language changes
 (Appendix~\ref{java8-interactions}).
@@ -139,8 +139,6 @@ It lists tools that
 must be updated to accommodate the Java and class file
 modifications (Appendix~\ref{mods-discussion}), along with some
 requirements on those tool changes.
-The document concludes with
-related work (Section~\ref{related-work}).
 
 A JSR, or Java Specification Request, is a proposed specification for some
 aspect of the Java platform --- the Java language, virtual machine,
@@ -260,6 +258,17 @@ It is not permitted to omit the Java type, as in
 \code{myString instanceof @NonNull}.
 % ; see Sections~\ref{type-annotation-use-cases}.
 % and~\ref{implicit-java-types-in-casts}.
+
+\item for method and constructor references, including their receiver,
+  receiver type arguments, and type arguments to the method or constructor
+  itself:
+\preverbnegspace
+\begin{Verbatim}
+  @Vernal Date::getDay
+  List<@English String>::size
+  Arrays::<@NonNegative Integer>sort
+\end{Verbatim}
+
 
   %% We don't permit this any more:
   % If the nested type is a static type, then both the nested and
@@ -642,6 +651,12 @@ access, which is the simple name of the type being used.
   Outer . @Legal StaticNestedClass x = ...;     // legal
 \end{Verbatim}
 \preverbnegspace
+
+\paragraph{Super references}
+
+In a field access expression such as \<MyType.super.fieldname> or a method
+reference expression like \<MyType.super::methodname>, \<MyType> is a
+scoping mechanism rather than a use of a type.
 
 
 \subsection{Java language grammar changes\label{grammar}}
@@ -1452,6 +1467,11 @@ No changes are made to the Exception table.
 Local variable type annotations are stored in the class file, see
 Section~\ref{class-file:ext:ri:localvar}.
 
+The VM does not have to validate all the constraints in
+Section~\ref{class-file:ext:target_info}, such as that offsets point to the
+right type of instruction.  The VM does not do format checking (JVMS 4.8)
+on attributes used solely for reflection.
+
 The JSR 308 changes apply to class file version 52 and higher.
 
 
@@ -1497,7 +1517,9 @@ type_annotation {
         localvar_target;
         catch_target;
         offset_target;
-        invocation_type_argument_target;
+        type_argument_target;
+        method_reference_receiver_target;
+        method_reference_type_argument;
     } target_info;     // identifies the targeted program element, see Section 3.3
     type_path target_path; // identifies targeted type in a compound type (array, generic, etc.), see Section 3.4
     // Original fields from "annotation" structure:
@@ -1596,22 +1618,24 @@ resource variable type & \code{RESOURCE\_VARIABLE}
 & \code{0x41} & \S\ref{class-file:ext:ri:localvar} \\
 exception parameter type & \code{EXCEPTION\_PARAMETER}
 & \code{0x42} & \S\ref{class-file:ext:ri:catch} \\
-cast & \code{CAST}
-& \code{0x43} & \S\ref{class-file:ext:ri:cast} \\
 type test (\code{instanceof}) & \code{INSTANCEOF}
-& \code{0x44} & \S\ref{class-file:ext:ri:cast} \\
+& \code{0x44} & \S\ref{class-file:ext:ri:instanceof} \\
 object creation (\code{new}) & \code{NEW}
-& \code{0x45} & \S\ref{class-file:ext:ri:cast} \\
+& \code{0x45} & \S\ref{class-file:ext:ri:new} \\
+constructor reference receiver & \code{CONSTRUCTOR\_REFERENCE\_RECEIVER}
+& \code{0x46} & \S\ref{class-file:ext:ri:cref-receiver} \\
+method reference receiver & \code{METHOD\_REFERENCE\_RECEIVER}
+& \code{0x47} & \S\ref{class-file:ext:ri:mref-receiver} \\
+cast & \code{CAST}
+& \code{0x48} & \S\ref{class-file:ext:ri:cast} \\
 type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x46} & \S\ref{class-file:ext:ri:con-typearg} \\
+& \code{0x49} & \S\ref{class-file:ext:ri:con-typearg} \\
 type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x47} & \S\ref{class-file:ext:ri:con-typearg} \\
-lambda formal parameter type & \code{LAMBDA\_FORMAL\_PARAMETER}
-& \code{0x48} & \S\ref{class-file:ext:ri:lambda-formal-parameter} \\
-method reference & \code{METHOD\_REFERENCE}
-& \code{0x49} & \S\ref{class-file:ext:ri:mref} \\
+& \code{0x4A} & \S\ref{class-file:ext:ri:con-typearg} \\
+type argument in constructor reference & \code{CONSTRUCTOR\_REFERENCE\_TYPE\_ARGUMENT}
+& \code{0x4B} & \S\ref{class-file:ext:ri:cref-typearg} \\
 type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
-& \code{0x50} & \S\ref{class-file:ext:ri:mref-typearg} \\
+& \code{0x4C} & \S\ref{class-file:ext:ri:mref-typearg} \\
 \hline
 \end{tabular}
 \end{center}
@@ -1782,11 +1806,10 @@ indicates which of the method's formal parameters is being annotated:
     };
 \end{Verbatim}
 
-\attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
+The index indicates the $i$th formal parameter type of the method
+descriptor of the enclosing \code{method\_info} structure.
 
-TODO: Constrain \code{method\_formal\_parameter\_index} w.r.t.\ the number of
-      formal parameter descriptors in the method descriptor (JVMS 4.3.3) of the
-      enclosing \code{method\_info} structure.
+\attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
 
 
 \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
@@ -1810,7 +1833,7 @@ type.
 
 \subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
 
-\targetinfocontents{a local variable or resource variable}{localvar\_target}
+\targetinfocontents{a local variable or resource variable type}{localvar\_target}
 
 \preverbnegspace
 \begin{Verbatim}
@@ -1836,7 +1859,7 @@ live range in the bytecodes of the local variable's containing method
 These fields are similar to those of the optional
 \code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmYBB2012}.
 
-Storing local variable annotations in the class file raises certain
+Storing local variable type annotations in the class file raises certain
 challenges.  For example, live ranges are not isomorphic to local
 variables.  Note that a local variable with no live range might not appear in
 the class file; that is OK, because it is irrelevant to the program.
@@ -1860,10 +1883,10 @@ appears in the \<exception\_table> slot of the \<Code> attribute).
 \attributelocation{containing a \code{catch\_target}}{\code{Code} attribute}
 
 
-\subsubsection{Casts, type tests, and object creation\label{class-file:ext:ri:cast}}
+\subsubsection{Type tests, object creation, and method/constructor references\label{class-file:ext:ri:instanceof}\label{class-file:ext:ri:new}\label{class-file:ext:ri:mref-receiver}\label{class-file:ext:ri:cref-receiver}}
 
-\targetinfocontents{a cast, an \code{instanceof}
-expression, or a \code{new} expression}{offset\_target}
+\targetinfocontents{an \code{instanceof}
+expression, a \code{new} expression, or a method or constructor reference receiver}{offset\_target}
 
 \preverbnegspace
 \begin{Verbatim}
@@ -1873,13 +1896,56 @@ expression, or a \code{new} expression}{offset\_target}
 \end{Verbatim}
 
 The \code{offset} field denotes the offset (i.e., within the bytecodes
-of the containing method) of the \code{checkcast} bytecode emitted for
-the cast, the \code{instanceof} bytecode emitted for the type tests,
-or the \code{new} bytecode emitted for the object creation expression.
-Cast annotations are attached to a single bytecode, not a bytecode range
+of the containing method) of the \code{instanceof} bytecode emitted for the type tests,
+the \code{new} bytecode emitted for the object creation expression, or the
+instruction that implements a method/constructor reference.
+These annotations are attached to a single bytecode, not a bytecode range
 (or ranges):  the annotation provides information about the type of a
 single value, not about the behavior of a code block.
-A similar explanation applies to type tests and object creation.
+
+
+
+% The Java compiler must emit a \code{checkcast} bytecode for any annotated
+% cast, so that there is a target for the \code{offset} field.  Ordinarily, a
+% Java compiler is permitted to omit \code{checkcast} bytecodes for casts
+% that are guaranteed to be no-ops.  For example, a cast from \code{String}
+% to \code{@NonNull String} may be a no-op for the underlying Java type
+% system (which sees a cast from
+% \code{String} to \code{String}), but it may be significant to the type
+% system for the qualified types
+% % ; for example, it may be needed for load-time type checking.
+% Retaining the \code{checkcast} bytecodes does not change
+% behavior, and is unlikely to affect performance.  A JIT will eliminate the
+% cast, leading to no runtime performance penalty, and the impact on class
+% file size is minimal, especially when compared to the size of the
+% annotations themselves.  No \code{checkcast} bytecode need be emitted for
+% un-annotated type casts.
+
+
+\subsubsection{Casts and type arguments to constructor/method invocation/references\label{class-file:ext:ri:cast}\label{class-file:ext:ri:con-typearg}\label{class-file:ext:ri:mref-typearg}\label{class-file:ext:ri:cref-typearg}}
+
+\targetinfocontents{a cast or a type argument in a constructor/method
+  call/reference}{invocation\_type\_argument\_target or method\_reference\_type\_argument}
+
+\preverbnegspace
+\begin{Verbatim}
+    type_argument_target {
+        u2 offset;
+        u1 type_argument_index;
+    };
+\end{Verbatim}
+
+The \code{offset} field denotes the offset (i.e., within the bytecodes
+of the containing method) of the \code{new} bytecode emitted for
+constructor call, or the
+% \code{invoke\{dynamic|interface|special|static|virtual\}} bytecode emitted for
+instruction that implements a
+method invocation or a method reference.  These annotations
+are attached to a single bytecode, not a bytecode range.
+
+\code{type\_argument\_index} specifies the index of the type argument in the
+expression.
+
 
 For annotated casts, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
@@ -1911,49 +1977,10 @@ The compiler may leave out the upcast, but in that case it must record that
 \<@A1> is attached to the second type argument of \<D>, even though it was
 originally attached to the first type argument of \<C>.
 
-\attributelocation{containing a \code{offset\_target}}{\code{Code} attribute}
 
-% The Java compiler must emit a \code{checkcast} bytecode for any annotated
-% cast, so that there is a target for the \code{offset} field.  Ordinarily, a
-% Java compiler is permitted to omit \code{checkcast} bytecodes for casts
-% that are guaranteed to be no-ops.  For example, a cast from \code{String}
-% to \code{@NonNull String} may be a no-op for the underlying Java type
-% system (which sees a cast from
-% \code{String} to \code{String}), but it may be significant to the type
-% system for the qualified types
-% % ; for example, it may be needed for load-time type checking.
-% Retaining the \code{checkcast} bytecodes does not change
-% behavior, and is unlikely to affect performance.  A JIT will eliminate the
-% cast, leading to no runtime performance penalty, and the impact on class
-% file size is minimal, especially when compared to the size of the
-% annotations themselves.  No \code{checkcast} bytecode need be emitted for
-% un-annotated type casts.
+\attributelocation{containing a \code{type\_argument\_target}}{\code{Code} attribute}
 
 
-\subsubsection{Type arguments to constructor/method invocation\label{class-file:ext:ri:con-typearg}}
-
-\targetinfocontents{a type argument in a constructor call or
-a method call}{invocation\_type\_argument\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    invocation_type_argument_target {
-        u2 offset;
-        u1 type_argument_index;
-    };
-\end{Verbatim}
-
-The \code{offset} field denotes the offset (i.e., within the bytecodes
-of the containing method) of the \code{new} bytecode emitted for
-constructor call, or the
-\code{invoke\{dynamic|interface|special|static|virtual\}} bytecode emitted for
-method invocation.  Like type cast type annotations, type argument
-annotations are attached to a single bytecode, not a bytecode range.
-
-\code{type\_argument\_index} specifies the index of the type argument in the
-expression.
-
-\attributelocation{containing a \code{invocation\_type\_argument\_target}}{\code{Code} attribute}
 
 TODO: \code{type\_argument\_index} specifies the index of a type argument in the list
        of explicit non-wildcard type arguments passed to the
@@ -2963,530 +2990,7 @@ reach the \<catch> clause.
 % on itself.  Conjuncts are treated analogously.
 
 
-
-%% This appendix has been dispersed, mostly to the normative (non-appendix)
-%% part of the document.
-% \section{Discussion of Java language syntax extensions\label{syntax-discussion}}
-% 
-% In Java SE 7, annotations can be written only on method formal parameters
-% and the declarations of packages, classes, methods, fields, and local variables.
-% Additional annotations are necessary in order to fully specify Java classes and
-% methods.
-
-
-
-
-
-
-% \subsection{Target meta-annotation for type annotations}
-% \label{target-meta-annotation}
-% 
-% 
-% 
-% 
-% The remainder of this section provides background on the \code{Target}
-% meta-annotation.
-% 
-% Java's \code{Target} meta-annotation provides machine-readable
-% documentation of the intended use of an annotation.  For example, the
-% \code{@Override} annotation is intended for use only on method
-% declarations, so its definition is written as
-% 
-% \preverbnegspace
-% \begin{Verbatim}
-%   @Target(ElementType.METHOD)
-%   public @interface Override { }
-% \end{Verbatim}
-% 
-% 
-% Java SE 7 requires the compiler to issue an error if a programmer places an
-% annotation in a location not permitted by its Target meta-annotation.
-% % Thus, it is already the case that examination of the
-% % source alone does not indicate whether the annotation will be rejected by
-% % the compiler.
-% 
-% \preverbnegspace
-% \begin{Verbatim}
-%   @Override                                     // compile-time error
-%   class Window extends Container {
-%     @Override String warningString;             // compile-time error
-%     @Override Container getContainer() { ... }  // OK; correct use of @Override
-% \end{Verbatim}
-
-
-\section{Interactions with other Java SE 8 language changes\label{java8-interactions}}
-
-This section discusses the interactions between type annotations and other
-language changes in Java SE 8.
-
-\paragraph{Lambda}
-There are two different syntaxes for a lambda argument list: normal and
-compact.
-\begin{itemize}
-\item
-The compact form does not explicitly specify a type, so no type
-annotation is possible.  An example of this syntax is \<\#{ x -> x.toString }>.
-\item
-The normal form permits type annotations; a programmer who wants to write
-type annotations must write the normal form.
-\end{itemize}
-
-No annotations are permitted on the lambda expression itself, because it is
-an expression, not a type.
-
-Annotations cannot be written on the lambda's type, because the lambda's
-type cannot be written:  lambda expressions are always immediately
-SAM-converted.
-
-% [For example, these potential annotations one might want to write are
-% facts about execution, rather than type annotations:
-%  * non-blocking
-%  * WCET
-%  * parallelizable, moveable across nodes]
-
-%      inferred formal parameter types for lambda -- like diamond (same issues), so
-%        benign from the point of view of type annotations
-
-%% A Java 7 issue:
-%      diamonds: when doing type inference to infer what should go in the
-%        diamond, also need to copy over annotations (this is not a Checker
-%        Framework task, but a JSR 308 compiler task)
-
-
-\paragraph{Modules}
-The modules specification states that modules cannot be annotated.
-
-
-\paragraph{Extension methods}
-It might be desirable to annotate signatures for defaults.
-The syntax and semantics are still being worked out; when those are
-finalized, we will revisit the semantics of annotations on extension
-methods
-
-
-\paragraph{Other Java SE 8 features}
-Other new features do not raise any new interactions with type annotations.
-
-% no Coin 2, which is deferred to JDK 9
-
-It may be desirable to write an annotation that should apply to all
-the disjuncts in a disjunctive union type, such as those in a multi-catch
-statement.  Here is a possibility, though it is not currently part of the
-specification:
-
-\begin{Verbatim}
-  catch ( @A | @B NullPointerException | @C IllegalArgumentException e) {
-\end{Verbatim}
-
-An annotation before the first \<|> is treated as applying to every
-disjunct, so the above would be equivalent to (but shorter than)
-
-\begin{Verbatim}
-  catch ( @A @B NullPointerException | @A @C IllegalArgumentException e) {
-\end{Verbatim}
-
-
-\section{Discussion of tool modifications\label{mods-discussion}}
-
-This section primarily discusses tool modifications that are consequences
-of JSR 308's changes to the Java syntax and class file format, as presented
-in Sections~\ref{syntax} and~\ref{class-file}.
-
-
-\subsection{Compiler\label{compiler-mods}}
-
-The Java compiler must accept type annotations
-and add them to the program's AST\@.  The relevant AST node
-classes must also be modified to store these annotations.
-When generating \code{.class} files, the compiler must emit the attributes
-described in Section~\ref{class-file}.
-% (The JLS needs to be updated to so state.)
-
-% Section~\ref{compiler}
-This specification requires compilers to place certain annotations
-in the class file.  This is consistent with the principle that annotations
-should not affect behavior:  in the absence of an annotation processor, the
-compiler produces the same bytecodes for annotated code as it would have
-for the same code without annotations.  (The class file may differ, since
-the annotations are stored in it, but the bytecode part does not differ.)
-
-The compiler sometimes creates new methods or other constructs
-that did not appear in the
-source code.  The compiler must annotate this compiler-generated code
-in an appropriate way.  For example, a bridge method is an implementation
-strategy used when the erased signature of the actual method being invoked
-differs from that of the compile-time method
-declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
-nothing but call an existing method.  The compiler must copy annotations
-from the method being invoked to the bridge method.
-As another example, an anonymous class desugars into a class declaration
-and instantiation.  A programmer may write both type and declaration
-annotations on an anonymous class in Java source code.  In the classfile,
-the type annotations are copied to the class declaration and to its
-instantiation (\<new> expression).  The declaration annotations are copied
-only to the class declaration.
-
-%% Cut this -- too compiler-specific.
-% and
-% constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
-
-%% Remarks about javac are not appropriate in a specification.
-% (As of Java SE 6, javac does not copy/transfer any annotations from
-% original methods to the compiler-generated methods; that is probably a bug
-% in javac.  It is, however, perhaps debatable whether \emph{all} annotations
-% should be copied.)
-
-Javac's \code{-Xprint} functionality reads a \code{.class} file and prints
-the interface (class declarations with signatures of all fields and
-methods).  (The \code{-Xprint} functionality is similar to javap, but
-cannot provide
-any information about bytecodes or method bodies, because it is implemented
-internally as an annotation processor.)
-This must be updated to print the type annotations as well.
-Also see Section~\ref{class-file-tools}.
-
-
-
-\subsubsection{Backward and forward compatibility\label{mods-compatibility}}
-
-Java compilers can often produce bytecode for an earlier version of the
-virtual machine, via the \code{-target} command-line option.  For example,
-a programmer could execute a compilation command such as \code{javac
--source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
-with the same attributes for type annotations as when the target is a
-version 8 JVM\@.  However, the compiler is permitted to also place type
-annotations in declaration attributes.  For instance, the annotation on the
-top level of a return type would also be placed on the method (in the
-method attribute in the class file).  This enables class file analysis
-tools that are written for Java SE 5 to view a subset of the type
-qualifiers (lacking generics, array levels, method receivers, etc.), albeit
-attached to declarations.
-
-A user can use a Java SE 7 compiler to compile a Java class that contains
-type annotations, so long as the type annotations only appear in places
-that are legal in Java SE 7.  Furthermore, the compiler must be provided
-with a definition of the annotation that is meta-annotated not with
-\code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
-does not exist in Java SE 7), but with no meta-annotation or with a
-meta-annotation that permits annotations on any declaration.
-
-
-\subsubsection{Optimizations\label{mods-optimization}}
-
-
-The compiler is required to preserve annotations in the class file.  More
-precisely, if an expression has an annotated type (and the annotation has
-class file or runtime retention), and that expression is represented
-in the compiled class file, then the annotation must be present, in the
-compiled class file, on the type of the compiled representation of the
-expression.  For expressions within a field initializer or a static
-initializer block, the compiled representation might be in an \code{<init>}
-or \code{<clinit>} method, or in a helper method called by them.
-
-If the compiler optimizes away an expression, then it may also
-optimize away the annotation.  (Exception:  when a type cast
-is optimized away without optimizing away its argument, the
-annotation remains on the argument; see Section~\ref{target_type}.)
-
-
-
-This may change the compiler implementation of certain optimizations, such
-as common subexpression elimination, but this restriction on the compiler
-implementation is unobjectionable for three reasons.
-\begin{enumerate}
-\item
-Java-to-bytecode compilers rarely perform sophisticated
-optimizations, since the bytecode-to-native (JIT) compiler is the major
-determinant in Java program performance.  Thus, the restriction will not
-affect most compilers.
-% (We need a list of problematic optimizations, and a catalog of widely used
-% Java-to-bytecode compilers indicating whether each one performs the
-% optimizations.)
-\item
-The compiler workarounds are simple.  Suppose that two expressions
-that are candidates for common subexpression elimination
-have different type annotations.
-% or statements
-A compiler could:  not perform the optimization when the annotations
-differ; create a single expression whose type has both of the annotations
-(e.g., merging \code{(@Positive Integer) 42} and \code{(@Even Integer) 42}
-into \code{(@Positive @Even Integer) 42});
-or create an unannotated expression and copy its value into two variables
-with differently-annotated types.
-% 
-\item
-It seems unlikely that two identical, non-trivial expressions would
-have differently-annotated types.  Thus, any compiler restrictions will
-have little or no effect on most compiled programs.
-% (We should try to predict or measure this number.)
-\end{enumerate}
-
-
-
-
-\subsubsection{Annotations in comments\label{annotations-in-comments}}
-
-To ease the transition from standard Java SE 7 code to code with type
-annotations, the reference implementation recognizes the type
-annotations when surrounded by comment markers:
-
-\preverbnegspace
-\begin{Verbatim}
-  List</*@Readonly*/ Object> myList;
-\end{Verbatim}
-
-\noindent
-This permits use of both standard Java SE 7 tools and the new annotations even
-before Java SE 8 is released.  However, it is not part of the proposal;
-that is, it is not required that every Java compiler parses comments.
-Oracle's OpenJDK implementation does not support a switch that
-makes it recognize the new annotations when embedded in comments.
-The Spec\#~\cite{BarnettLS2004} extension to C\# can be made compilable by
-a standard C\# compiler in a similar way, by enclosing its annotations in
-special \verb|/*^|\ldots\verb|^*/| comment markers.
-The \code{/*@} comment syntax is a standard part of the
-Splint~\cite{Evans96}, ESC/Java~\cite{FlanaganLLNSS02}, and
-JML~\cite{LeavensBR2006:JML} tools (that is, not
-with the goal of backward compatibility).
-% Javadoc has /**@ comments.
-
-
-
-\subsection{ASTs and annotation processing\label{asts-and-annotation-processing}}
-
-The Java Model AST of JSR 198 (Extension API for Integrated Development
-Environments)~\cite{JSR198} gives access to the entire source code of a
-method.  This AST (abstract syntax tree) must be updated to represent all
-new locations for annotations.
-
-Oracle's Tree API, which exposes the AST (including annotations) to authors of
-javac annotation processors (compile-time plug-ins), must be updated to
-reflect the modifications made to the internal AST node classes described in
-Section~\ref{syntax}.
-The same goes for other Java compilers, such as that of Eclipse.
-
-
-\label{jsr269-changes}
-
-Like reflection, the JSR 269 (annotation processing) model
-does not represent constructs below the
-method level, such as individual statements and expressions.  Therefore, it
-needs to be updated only with respect to declaration-related annotations
-(the top of Figure~\ref{tbl:target_types}.
-% ; also see Section~\ref{out-of-scope-annotation-processing-api}).
-The JSR 269 model, \code{javax.lang.model.*},
-already has some classes representing annotations; see
-\myurl{http://download.oracle.com/javase/7/docs/api/javax/lang/model/element/package-summary.html}.
-The annotation processing API in \code{javax.annotation.processing} must
-also be revised.
-
-
-
-
-\subsection{Reflection\label{reflection}}
-
-To do:  Complete this design.
-
-The \code{java.lang.reflect.*} and \code{java.lang.Class} APIs give access
-to annotations on public API elements such as classes,
-method signatures, etc.  They must be updated to give the same
-access to the type annotations in the top of
-Figure~\ref{tbl:target_types}.
-
-Here are a few examples (the design is not yet complete).
-
-\begin{enumerate}
-\item
-\code{java.lang.reflect.Type} needs to implement
-\code{java.lang.reflect.AnnotatedElement}.
-(An alternative would be an \code{java.lang.reflect.AnnotatedType}
-interface, with two methods that return an annotation and a type.  This
-design seems suboptimal, because most
-clients would immediately cast the result of the latter method.)
-
-\end{enumerate}
-
-%% This design doesn't work, as it gives access to only the top level of
-%% annotations.  It's better to obtain the annotated type and query it.
-% New methods \code{Method.getReceiverAnnotation} (for the
-% receiver \code{this}) and \code{Method.getReturnAnnotation} (for the return
-% value) would parallel the existing
-% \code{Method.getParameterAnnotations} (for the formal parameters).
-% \code{Method.getAnnotations} is unchanged, for reasons of backward
-% compatibility:  it returns annotations on the method declaration itself.
-% % Should it return annotations on the return value as well?
-% 
-% Suppose that a method is declared as:
-% 
-% \preverbnegspace
-% \begin{Verbatim}
-%   @NonEmpty List<@Interned String> foo(@Readonly MyClass this, @NonNull List<@Opened File> files) {...}
-% \end{Verbatim}
-% 
-% \noindent
-% Then \code{Method\-.getParameterAnnotations()} returns the \code{@NonNull}
-% annotation, just as in Java SE 7.
-% New method \code{Method.getReturnAnnotations()} returns the \code{@NonEmpty}
-% annotation, and
-% new method \code{Method.getReceiverAnnotations()} returns the
-% \code{@Readonly} annotation.
-% 
-% There is a problem with these proposed methods:  they only give access to
-% the annotation on the raw (top-level) type.  They do not give access to
-% annotations on generic types in a method's signature, such as the instances
-% of \code{@Interned} and \code{@Opened} above.
-
-% Therefore, it is usually better to obtain the annotated type (say, of a
-% formal parameter or return value) and to query it directly.
-
-
-\subsubsection{Non-changes to reflection\label{non-changes-to-reflection}}
-
-Reflection gives no access to method implementations, so no changes are
-needed to
-provide access to annotations on casts (or other annotations inside
-a method body), type parameter names, or similar implementation details.
-
-
-% This is lifted from http://blogs.oracle.com/darcy/entry/so_you_want_to_change
-The Mirror API \code{com.sun.mirror.*} need not be updated, as it has been
-superseded by JSR 269~\cite{JSR269}.
-
-
-Method \code{Method\-.getParameterAnnotations()} returns the annotations on
-the formal parameter \emph{declarations}, just as in Java SE 7.  It does not return
-type annotations.  There is no point in new methods that parallel it,
-such as \code{Method.getReceiverAnnotation} (for the receiver
-\code{this}) and \code{Method.getReturnAnnotation} (for the return
-value).  Rather, the interface will provide a uniform mechanism for
-querying annotations on types.
-
-
-The semantics of reflective invocation is not changed.
-(The changes described in this section are to APIs that query classes,
-method signatures, etc.)
-For instance, suppose that a program reflectively calls a method
-whose formal parameter type is annotated as \code{@Readonly}, but the
-corresponding argument has a declared type that is non-\code{@Readonly}.
-The call succeeds.  This is a requirement for backward compatibility:  the
-existence of annotations in the class file must not cause a standard JVM
-to behave differently than if the annotations are not present (unless the
-program uses reflection to explicitly examine the annotations).  Likewise,
-other reflective functionality such as \code{AtomicReferenceFieldUpdater}
-can bypass annotation constraints on a field.
-
-% On the other hand, if you are using a custom version of the JVM -- which is
-% appropriate in certain situations, including for testing -- then it could
-% do whatever is appropriate for the particular type system.
-
-
-\subsection{Virtual machine and class file analysis tools\label{class-file-tools}}
-
-% Since load-time plug-ins
-% % (described in Section~\ref{load-time}) can use
-% the \code{premain} method,
-No modifications to the virtual machine are necessary.
-(The changes to reflection (Section~\ref{reflection}) do change virtual
-machine APIs in a minor way, but the representation of execution of
-bytecodes is unaffected.)
-
-The \code{javap} disassembler must recognize the new class
-file format and must output annotations.
-
-The pack200/unpack200 tool must preserve the new attributes through a
-compress-decompress cycle.
-% http://download.oracle.com/javase/7/docs/api/java/util/jar/Pack200.html
-
-
-The compiler and other tools that read class files are trivially compatible
-with class files produced by a Java SE 7 compiler.  However, the tools
-would not be able to read the impoverished version of type qualifiers that
-is expressible in Java SE 7 (see Section~\ref{compiler-mods}).  It is
-desirable for class file tools to be able to read at least that subset of
-type qualifiers.  Therefore, APIs for reading annotations from a class file
-must be dependent on the class file version (as a number of APIs already
-are).  If the class file version indicates Java SE 7, and none of the
-extended annotations defined by JSR 308 appear in the class file, then the
-API may return (all) annotations from declarations when queried for the
-annotations on the top-level type associated with the declaration (for
-example, the top-level return type, for a method declaration).
-
-
-\subsection{Other tools\label{other-tools}}
-
-Javadoc must output annotations at the new locations when those are part
-of the public API, such as in a
-method signature.
-%% (Does the doclet API itself need to change??
-
-% This is true but irrelevant: "(if meta-annotated with \code{@Documented})"
-% http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Documented.html
-% @Documented annotations "are part of the public API of the annotated
-% elements", and "are documented by javadoc and similar tools by default".
-% (No option exists at present in the standard doclet to override that default.)
-
-Similar modifications need to be made to tools outside the Oracle JDK,
-such as IDEs (Eclipse, IDEA, JBuilder, jEdit, NetBeans), other tools that
-manipulate Java code (grammars for CUP, javacc), and tools that
-manipulate class files (ASM, BCEL\@).  These changes need to be made by the
-authors of the respective tools.
-% Eugene Kuleshov has volunteered to make the ASM updates.
-% (\myurl{http://asm.objectweb.org/})
-% (One example in ASM:  \code{util.TraceClassVisitor} prints annotations and
-% must be extended to print the new annotations.)
-
-
-A separate document, ``Custom type qualifiers via annotations on Java
-types'' (\myurl{http://types.cs.washington.edu/jsr308/java-type-qualifiers.pdf}),
-explores implementation strategies for annotation processors that act as type-checking
-compiler plug-ins.  It is not germane to this proposal, both because this proposal
-does not concern itself with annotation semantics and because writing such
-plug-ins does not require any changes beyond those described in this document.
-
-
-A separate document, ``Annotation File Specification''
-(\myurl{http://types.cs.washington.edu/annotation-file-utilities/annotation-file-format.pdf}), describes a
-textual format for annotations that is independent of \code{.java} or
-\code{.class} files.  This textual format can represent annotations for
-libraries that cannot or should not be modified.  We have built
-tools for manipulating annotations, including extracting
-annotations from and inserting annotations in \code{.java} and
-\code{.class} files.
-% Such tools will be useful in transitioning to use of the new annotations.
-That file format is not part of this proposal for
-extending Java's annotations; it is better viewed as an implementation
-detail of our tools.
-
-
-
-% \subsection{Java Language Specification}
-% 
-% The Java Language Specification needs to be updated.  A separate document
-% will one day contain a list of all the changes.  (The list of changes would
-% be too long to include in this document, and would not succinctly convey
-% the implications of the changes.)  Finding all the places that mention
-% annotations is a good start.
-% 
-% One nonobvious place is in places like section~9.6.1.5, where the
-% description of \code{SuppressWarnings} states
-% ``If a program declaration is annotated \ldots''
-% and the use of ``declaration'' must be changed to ``element'' or
-% ``construct'' or some similar word.
-% 
-% 
-% \subsection{Java Virtual Machine Specification}
-% 
-% The Java Virtual Machine Specification (JVMS) needs to be updated to
-% describe the \code{Runtime\{Inv,V\}isibleType\-Annotations} attributes.
-% This section, or a separate document, will one day contain a list of all
-% the changes.  Since the third edition of JVMS~\cite{LindholmY:JVMS3} has
-% not yet been published, the changes must work from the document titled
-% ``revisions to `The class file Format'\,'', which this document calls
-% ``JVMS3'' and is available at
-% \myurl{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}.
-
-
-\section{Related work\label{related-work}}
+\subsection{Related work\label{related-work}}
 
 Section~\ref{type-qualifier-examples} gave many examples of how type
 qualifiers have been used in the past.  Also see the related work section
@@ -3572,7 +3076,409 @@ elements of the array~\cite{MalePPD2008}.
 % reference type.
 
 
+
+%% This appendix has been dispersed, mostly to the normative (non-appendix)
+%% part of the document.
+% \section{Discussion of Java language syntax extensions\label{syntax-discussion}}
+% 
+% In Java SE 7, annotations can be written only on method formal parameters
+% and the declarations of packages, classes, methods, fields, and local variables.
+% Additional annotations are necessary in order to fully specify Java classes and
+% methods.
+
+
+
+
+
+
+% \subsection{Target meta-annotation for type annotations}
+% \label{target-meta-annotation}
+% 
+% 
+% 
+% 
+% The remainder of this section provides background on the \code{Target}
+% meta-annotation.
+% 
+% Java's \code{Target} meta-annotation provides machine-readable
+% documentation of the intended use of an annotation.  For example, the
+% \code{@Override} annotation is intended for use only on method
+% declarations, so its definition is written as
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   @Target(ElementType.METHOD)
+%   public @interface Override { }
+% \end{Verbatim}
+% 
+% 
+% Java SE 7 requires the compiler to issue an error if a programmer places an
+% annotation in a location not permitted by its Target meta-annotation.
+% % Thus, it is already the case that examination of the
+% % source alone does not indicate whether the annotation will be rejected by
+% % the compiler.
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   @Override                                     // compile-time error
+%   class Window extends Container {
+%     @Override String warningString;             // compile-time error
+%     @Override Container getContainer() { ... }  // OK; correct use of @Override
+% \end{Verbatim}
+
+
+\section{Tool modifications\label{mods-discussion}}
+
+As a consequence of JSR 308's changes to the Java syntax and class file
+format (Sections~\ref{syntax} and~\ref{class-file}), several tools need to
+be updated.
+
+These tools include:
+\begin{itemize}
+\item
+  The Java compiler accepts type annotations and adds them to the program's
+  AST\@.  It writes them to the classfile, including accounting for
+  synthetic methods (such as bridge methods) and optimizations.  Its
+  \code{-Xprint} functionality prints type annotations.
+
+  When producing bytecode for an earlier version of the
+  virtual machine, via the \code{-target} command-line option, a Java 8
+  compiler is permitted to place type
+  annotations in declaration attributes.
+
+\item
+  The Java Model AST of JSR 198 (Extension API for Integrated Development
+  Environments)~\cite{JSR198} represents all new locations for annotations.
+
+  Oracle's Tree API, which exposes the AST (including annotations) to
+  authors of javac annotation processors (compile-time plug-ins),
+  represents type annotations, per Section~\ref{syntax}.  The same goes for
+  other Java compilers, such as that of Eclipse.
+
+  The JSR 269 (annotation processing) model
+  represents type annotations that are visible down to class member
+  declarations (the top of Figure~\ref{tbl:target_types}), but not within a
+  method, such as on individual statements and expressions.
+
+\item
+  No modifications to the virtual machine are necessary.
+  (Some changes to reflection do change virtual machine APIs in a minor
+  way, but the representation of execution of bytecodes is unaffected.)
+  
+  The \code{javap} disassembler recognizes the new class
+  file format and outputs annotations.
+  
+  The pack200/unpack200 tool preserves the new attributes through a
+  compress-decompress cycle.
+  % http://download.oracle.com/javase/7/docs/api/java/util/jar/Pack200.html
+
+\item
+  Javadoc  outputs type annotations in class and method signatures.
+
+\end{itemize}
+
+
+% \subsection{Compiler\label{compiler-mods}}
+% 
+% The Java compiler must accept type annotations
+% and add them to the program's AST\@.  The relevant AST node
+% classes must also be modified to store these annotations.
+% When generating \code{.class} files, the compiler must emit the attributes
+% described in Section~\ref{class-file}.
+% % (The JLS needs to be updated to so state.)
+% 
+% % Section~\ref{compiler}
+% This specification requires compilers to place certain annotations
+% in the class file.  This is consistent with the principle that annotations
+% should not affect behavior:  in the absence of an annotation processor, the
+% compiler produces the same bytecodes for annotated code as it would have
+% for the same code without annotations.  (The class file may differ, since
+% the annotations are stored in it, but the bytecode part does not differ.)
+% 
+% The compiler sometimes creates new methods or other constructs
+% that did not appear in the
+% source code.  The compiler must annotate this compiler-generated code
+% in an appropriate way.  For example, a bridge method is an implementation
+% strategy used when the erased signature of the actual method being invoked
+% differs from that of the compile-time method
+% declaration~\cite[\S15.12.4.5]{GoslingJSB2005}.  The bridge method does
+% nothing but call an existing method.  The compiler must copy annotations
+% from the method being invoked to the bridge method.
+% As another example, an anonymous class desugars into a class declaration
+% and instantiation.  A programmer may write both type and declaration
+% annotations on an anonymous class in Java source code.  In the classfile,
+% the type annotations are copied to the class declaration and to its
+% instantiation (\<new> expression).  The declaration annotations are copied
+% only to the class declaration.
+% 
+% %% Cut this -- too compiler-specific.
+% % and
+% % constructors for anonymous classes~\cite[\S15.9.5.1]{GoslingJSB2005}.
+% 
+% %% Remarks about javac are not appropriate in a specification.
+% % (As of Java SE 6, javac does not copy/transfer any annotations from
+% % original methods to the compiler-generated methods; that is probably a bug
+% % in javac.  It is, however, perhaps debatable whether \emph{all} annotations
+% % should be copied.)
+% 
+% Javac's \code{-Xprint} functionality reads a \code{.class} file and prints
+% the interface (class declarations with signatures of all fields and
+% methods).  (The \code{-Xprint} functionality is similar to javap, but
+% cannot provide
+% any information about bytecodes or method bodies, because it is implemented
+% internally as an annotation processor.)
+% This must be updated to print the type annotations as well.
+% Also see Section~\ref{class-file-tools}.
+
+
+
+% \subsubsection{Backward and forward compatibility\label{mods-compatibility}}
+% 
+% Java compilers can often produce bytecode for an earlier version of the
+% virtual machine, via the \code{-target} command-line option.  For example,
+% a programmer could execute a compilation command such as \code{javac
+% -source 8 -target 5 MyFile.java}.  A Java 8 compiler produces a class file
+% with the same attributes for type annotations as when the target is a
+% version 8 JVM\@.  However, the compiler is permitted to also place type
+% annotations in declaration attributes.  For instance, the annotation on the
+% top level of a return type would also be placed on the method (in the
+% method attribute in the class file).  This enables class file analysis
+% tools that are written for Java SE 5 to view a subset of the type
+% qualifiers (lacking generics, array levels, method receivers, etc.), albeit
+% attached to declarations.
+% 
+% A user can use a Java SE 7 compiler to compile a Java class that contains
+% type annotations, so long as the type annotations only appear in places
+% that are legal in Java SE 7.  Furthermore, the compiler must be provided
+% with a definition of the annotation that is meta-annotated not with
+% \code{@Target(ElementType.TYPE\_USE)} (since \code{ElementType.TYPE\_USE}
+% does not exist in Java SE 7), but with no meta-annotation or with a
+% meta-annotation that permits annotations on any declaration.
+% 
+% 
+% \subsubsection{Optimizations\label{mods-optimization}}
+% 
+% 
+% The compiler is required to preserve annotations in the class file.  More
+% precisely, if an expression has an annotated type (and the annotation has
+% class file or runtime retention), and that expression is represented
+% in the compiled class file, then the annotation must be present, in the
+% compiled class file, on the type of the compiled representation of the
+% expression.  For expressions within a field initializer or a static
+% initializer block, the compiled representation might be in an \code{<init>}
+% or \code{<clinit>} method, or in a helper method called by them.
+% 
+% If the compiler optimizes away an expression, then it may also
+% optimize away the annotation.  (Exception:  when a type cast
+% is optimized away without optimizing away its argument, the
+% annotation remains on the argument; see Section~\ref{target_type}.)
+% 
+% 
+% 
+% This may change the compiler implementation of certain optimizations, such
+% as common subexpression elimination, but this restriction on the compiler
+% implementation is unobjectionable for three reasons.
+% \begin{enumerate}
+% \item
+% Java-to-bytecode compilers rarely perform sophisticated
+% optimizations, since the bytecode-to-native (JIT) compiler is the major
+% determinant in Java program performance.  Thus, the restriction will not
+% affect most compilers.
+% % (We need a list of problematic optimizations, and a catalog of widely used
+% % Java-to-bytecode compilers indicating whether each one performs the
+% % optimizations.)
+% \item
+% The compiler workarounds are simple.  Suppose that two expressions
+% that are candidates for common subexpression elimination
+% have different type annotations.
+% % or statements
+% A compiler could:  not perform the optimization when the annotations
+% differ; create a single expression whose type has both of the annotations
+% (e.g., merging \code{(@Positive Integer) 42} and \code{(@Even Integer) 42}
+% into \code{(@Positive @Even Integer) 42});
+% or create an unannotated expression and copy its value into two variables
+% with differently-annotated types.
+% % 
+% \item
+% It seems unlikely that two identical, non-trivial expressions would
+% have differently-annotated types.  Thus, any compiler restrictions will
+% have little or no effect on most compiled programs.
+% % (We should try to predict or measure this number.)
+% \end{enumerate}
+
+
+
+
+% \subsubsection{Annotations in comments\label{annotations-in-comments}}
+% 
+% To ease the transition from standard Java SE 7 code to code with type
+% annotations, the reference implementation recognizes the type
+% annotations when surrounded by comment markers:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   List</*@Readonly*/ Object> myList;
+% \end{Verbatim}
+% 
+% \noindent
+% This permits use of both standard Java SE 7 tools and the new annotations even
+% before Java SE 8 is released.  However, it is not part of the proposal;
+% that is, it is not required that every Java compiler parses comments.
+% Oracle's OpenJDK implementation does not support a switch that
+% makes it recognize the new annotations when embedded in comments.
+% The Spec\#~\cite{BarnettLS2004} extension to C\# can be made compilable by
+% a standard C\# compiler in a similar way, by enclosing its annotations in
+% special \verb|/*^|\ldots\verb|^*/| comment markers.
+% The \code{/*@} comment syntax is a standard part of the
+% Splint~\cite{Evans96}, ESC/Java~\cite{FlanaganLLNSS02}, and
+% JML~\cite{LeavensBR2006:JML} tools (that is, not
+% with the goal of backward compatibility).
+% % Javadoc has /**@ comments.
+
+
+
+% \subsection{ASTs and annotation processing\label{asts-and-annotation-processing}}
+% 
+% The Java Model AST of JSR 198 (Extension API for Integrated Development
+% Environments)~\cite{JSR198} gives access to the entire source code of a
+% method.  This AST (abstract syntax tree) must be updated to represent all
+% new locations for annotations.
+% 
+% Oracle's Tree API, which exposes the AST (including annotations) to authors of
+% javac annotation processors (compile-time plug-ins), must be updated to
+% reflect the modifications made to the internal AST node classes described in
+% Section~\ref{syntax}.
+% The same goes for other Java compilers, such as that of Eclipse.
+% 
+% 
+% \label{jsr269-changes}
+% 
+% Like reflection, the JSR 269 (annotation processing) model
+% does not represent constructs below the
+% method level, such as individual statements and expressions.  Therefore, it
+% needs to be updated only with respect to declaration-related annotations
+% (the top of Figure~\ref{tbl:target_types}.
+% % ; also see Section~\ref{out-of-scope-annotation-processing-api}).
+% The JSR 269 model, \code{javax.lang.model.*},
+% already has some classes representing annotations; see
+% \myurl{http://download.oracle.com/javase/7/docs/api/javax/lang/model/element/package-summary.html}.
+% The annotation processing API in \code{javax.annotation.processing} must
+% also be revised.
+% 
+% 
+% 
+% 
+% \subsection{Virtual machine and class file analysis tools\label{class-file-tools}}
+% 
+% % Since load-time plug-ins
+% % % (described in Section~\ref{load-time}) can use
+% % the \code{premain} method,
+% No modifications to the virtual machine are necessary.
+% (The changes to reflection (Section~\ref{reflection}) do change virtual
+% machine APIs in a minor way, but the representation of execution of
+% bytecodes is unaffected.)
+% 
+% The \code{javap} disassembler must recognize the new class
+% file format and must output annotations.
+% 
+% The pack200/unpack200 tool must preserve the new attributes through a
+% compress-decompress cycle.
+% % http://download.oracle.com/javase/7/docs/api/java/util/jar/Pack200.html
+% 
+% 
+% The compiler and other tools that read class files are trivially compatible
+% with class files produced by a Java SE 7 compiler.  However, the tools
+% would not be able to read the impoverished version of type qualifiers that
+% is expressible in Java SE 7 (see Section~\ref{compiler-mods}).  It is
+% desirable for class file tools to be able to read at least that subset of
+% type qualifiers.  Therefore, APIs for reading annotations from a class file
+% must be dependent on the class file version (as a number of APIs already
+% are).  If the class file version indicates Java SE 7, and none of the
+% extended annotations defined by JSR 308 appear in the class file, then the
+% API may return (all) annotations from declarations when queried for the
+% annotations on the top-level type associated with the declaration (for
+% example, the top-level return type, for a method declaration).
+% 
+% 
+% \subsection{Other tools\label{other-tools}}
+% 
+% Javadoc must output annotations at the new locations when those are part
+% of the public API, such as in a
+% method signature.
+% %% (Does the doclet API itself need to change??
+% 
+% % This is true but irrelevant: "(if meta-annotated with \code{@Documented})"
+% % http://download.oracle.com/javase/7/docs/api/java/lang/annotation/Documented.html
+% % @Documented annotations "are part of the public API of the annotated
+% % elements", and "are documented by javadoc and similar tools by default".
+% % (No option exists at present in the standard doclet to override that default.)
+% 
+% Similar modifications need to be made to tools outside the Oracle JDK,
+% such as IDEs (Eclipse, IDEA, JBuilder, jEdit, NetBeans), other tools that
+% manipulate Java code (grammars for CUP, javacc), and tools that
+% manipulate class files (ASM, BCEL\@).  These changes need to be made by the
+% authors of the respective tools.
+% % Eugene Kuleshov has volunteered to make the ASM updates.
+% % (\myurl{http://asm.objectweb.org/})
+% % (One example in ASM:  \code{util.TraceClassVisitor} prints annotations and
+% % must be extended to print the new annotations.)
+% 
+% 
+% A separate document, ``Custom type qualifiers via annotations on Java
+% types'' (\myurl{http://types.cs.washington.edu/jsr308/java-type-qualifiers.pdf}),
+% explores implementation strategies for annotation processors that act as type-checking
+% compiler plug-ins.  It is not germane to this proposal, both because this proposal
+% does not concern itself with annotation semantics and because writing such
+% plug-ins does not require any changes beyond those described in this document.
+% 
+% 
+% A separate document, ``Annotation File Specification''
+% (\myurl{http://types.cs.washington.edu/annotation-file-utilities/annotation-file-format.pdf}), describes a
+% textual format for annotations that is independent of \code{.java} or
+% \code{.class} files.  This textual format can represent annotations for
+% libraries that cannot or should not be modified.  We have built
+% tools for manipulating annotations, including extracting
+% annotations from and inserting annotations in \code{.java} and
+% \code{.class} files.
+% % Such tools will be useful in transitioning to use of the new annotations.
+% That file format is not part of this proposal for
+% extending Java's annotations; it is better viewed as an implementation
+% detail of our tools.
+
+
+
+% \subsection{Java Language Specification}
+% 
+% The Java Language Specification needs to be updated.  A separate document
+% will one day contain a list of all the changes.  (The list of changes would
+% be too long to include in this document, and would not succinctly convey
+% the implications of the changes.)  Finding all the places that mention
+% annotations is a good start.
+% 
+% One nonobvious place is in places like section~9.6.1.5, where the
+% description of \code{SuppressWarnings} states
+% ``If a program declaration is annotated \ldots''
+% and the use of ``declaration'' must be changed to ``element'' or
+% ``construct'' or some similar word.
+% 
+% 
+% \subsection{Java Virtual Machine Specification}
+% 
+% The Java Virtual Machine Specification (JVMS) needs to be updated to
+% describe the \code{Runtime\{Inv,V\}isibleType\-Annotations} attributes.
+% This section, or a separate document, will one day contain a list of all
+% the changes.  Since the third edition of JVMS~\cite{LindholmY:JVMS3} has
+% not yet been published, the changes must work from the document titled
+% ``revisions to `The class file Format'\,'', which this document calls
+% ``JVMS3'' and is available at
+% \myurl{http://java.sun.com/docs/books/jvms/second_edition/ClassFileFormat-Java5.pdf}.
+
+
 \section*{Acknowledgments}
+
+The co-spec-lead, Alex Buckley, made significant contributions throughout
+the process, to both the design and this document.  The JSR 308 Expert
+Group also have helpful feedback and suggestions.
 
 Matt Papi, Mahmood Ali, and Werner Dietl designed and implemented the JSR 308 compiler as
 modifications to Oracle's OpenJDK javac compiler, and contributed to the JSR

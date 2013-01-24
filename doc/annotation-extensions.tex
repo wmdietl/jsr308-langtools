@@ -531,6 +531,26 @@ or to a declaration.
 %       annotated (but annotation processors should).
 
 
+\subsection{Disjunctions\label{locations-disjunctions}}
+
+It may be desirable to write an annotation that should apply to all
+the disjuncts in a disjunctive union type, such as those in a multi-catch
+statement.  Here is a possibility, though it is not currently part of the
+specification:
+
+\begin{Verbatim}
+  catch ( @A | @B NullPointerException | @C IllegalArgumentException e) {
+\end{Verbatim}
+
+An annotation before the first \<|> is treated as applying to every
+disjunct, so the above would be equivalent to (but shorter than)
+
+\begin{Verbatim}
+  catch ( @A @B NullPointerException | @A @C IllegalArgumentException e) {
+\end{Verbatim}
+
+
+
 \subsection{Only certain statements\label{locations-subset-of-statements}}
 
 It would be possible to permit annotations only on blocks and/or loops, as
