@@ -766,6 +766,14 @@ public class TypeAnnotations {
                     return;
                 }
 
+                case INTERSECTION_TYPE: {
+                    JCTypeIntersection isect = (JCTypeIntersection)frame;
+                    p.type_index = isect.bounds.indexOf(tree);
+                    List<JCTree> newPath = path.tail;
+                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
+                    return;
+                }
+
                 case METHOD_INVOCATION: {
                     JCMethodInvocation invocation = (JCMethodInvocation)frame;
                     if (!invocation.typeargs.contains(tree)) {
