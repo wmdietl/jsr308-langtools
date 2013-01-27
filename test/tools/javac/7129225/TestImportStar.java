@@ -26,11 +26,11 @@
 /* @test
  * @bug 7129225
  * @summary import xxx.* isn't handled correctly by annotation processing
- * @library ../lib
+ * @library /tools/javac/lib
  * @build JavacTestingAbstractProcessor
  * @compile/fail/ref=NegTest.ref -XDrawDiagnostics TestImportStar.java
  * @compile Anno.java AnnoProcessor.java
- * @compile/ref=TestImportStar.ref -XDrawDiagnostics -processor AnnoProcessor -proc:only TestImportStar.java
+ * @compile/fail/ref=TestImportStar.ref -XDrawDiagnostics -processor AnnoProcessor -proc:only TestImportStar.java
  */
 
  //The @compile/fail... verifies that the fix doesn't break the normal compilation of import xxx.*

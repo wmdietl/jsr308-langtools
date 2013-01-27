@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,9 +26,12 @@
 package com.sun.tools.javac.model;
 
 import java.lang.annotation.Annotation;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.EnumSet;
+
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 
@@ -85,6 +88,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
     public Element asElement(TypeMirror t) {
         switch (t.getKind()) {
             case DECLARED:
+            case INTERSECTION:
             case ERROR:
             case TYPEVAR:
                 Type type = cast(Type.class, t);
@@ -312,13 +316,42 @@ public class JavacTypes implements javax.lang.model.util.Types {
         return clazz.cast(o);
     }
 
+    public Set<MethodSymbol> getOverriddenMethods(Element elem) {
+        if (elem.getKind() != ElementKind.METHOD
+                || elem.getModifiers().contains(Modifier.STATIC)
+                || elem.getModifiers().contains(Modifier.PRIVATE))
+            return Collections.emptySet();
+
+        if (!(elem instanceof MethodSymbol))
+            throw new IllegalArgumentException();
+
+        MethodSymbol m = (MethodSymbol) elem;
+        ClassSymbol origin = (ClassSymbol) m.owner;
+
+        Set<MethodSymbol> results = new LinkedHashSet<MethodSymbol>();
+        for (Type t : types.closure(origin.type)) {
+            if (t != origin.type) {
+                ClassSymbol c = (ClassSymbol) t.tsym;
+                for (Scope.Entry e = c.members().lookup(m.name); e.scope != null; e = e.next()) {
+                    if (e.sym.kind == Kinds.MTH && m.overrides(e.sym, origin, types, true)) {
+                        results.add((MethodSymbol) e.sym);
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
     public List<? extends AnnotationMirror> typeAnnotationsOf(TypeMirror type) {
-        return ((Type)type).typeAnnotations;
+        // TODO: these methods can be removed.
+        return null; // ((Type)type).typeAnnotations;
     }
 
     public <A extends Annotation> A typeAnnotationOf(TypeMirror type,
             Class<A> annotationType) {
-        return JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
+        // TODO: these methods can be removed.
+        return null; // JavacElements.getAnnotation(((Type)type).typeAnnotations, annotationType);
     }
 
     public TypeMirror receiverTypeOf(ExecutableType type) {

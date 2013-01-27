@@ -41,7 +41,8 @@ import com.sun.tools.javac.tree.JCTree.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Flags.BLOCK;
 import static com.sun.tools.javac.code.Kinds.*;
-import static com.sun.tools.javac.code.TypeTags.*;
+import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
+import static com.sun.tools.javac.code.TypeTag.VOID;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 /** This pass implements dataflow analysis for Java programs though
@@ -51,8 +52,8 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  *  (see AssignAnalyzer) ensures that each variable is assigned when used.  Definite
  *  unassignment analysis (see AssignAnalyzer) in ensures that no final variable
  *  is assigned more than once. Finally, local variable capture analysis (see CaptureAnalyzer)
- *  determines that local variables accessed within the scope of an inner class are
- *  either final or effectively-final.
+ *  determines that local variables accessed within the scope of an inner class/lambda
+ *  are either final or effectively-final.
  *
  *  <p>The JLS has a number of problems in the
  *  specification of these flow analysis problems. This implementation
@@ -149,7 +150,7 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  *  exception to this [no pun intended] is that checked exceptions that
  *  are known to be caught or declared to be caught in the enclosing
  *  method are not recorded in the queue, but instead are recorded in a
- *  global variable "Set<Type> thrown" that records the type of all
+ *  global variable "{@code Set<Type> thrown}" that records the type of all
  *  exceptions that can be thrown.
  *
  *  <p>Other minor issues the treatment of members of other classes
@@ -212,6 +213,26 @@ public class Flow {
         new CaptureAnalyzer().analyzeTree(env, make);
     }
 
+    public void analyzeLambda(Env<AttrContext> env, JCLambda that, TreeMaker make, boolean speculative) {
+        Log.DiagnosticHandler diagHandler = null;
+        //we need to disable diagnostics temporarily; the problem is that if
+        //a lambda expression contains e.g. an unreachable statement, an error
+        //message will be reported and will cause compilation to skip the flow analyis
+        //step - if we suppress diagnostics, we won't stop at Attr for flow-analysis
+        //related errors, which will allow for more errors to be detected
+        if (!speculative) {
+            diagHandler = new Log.DiscardDiagnosticHandler(log);
+        }
+        try {
+            new AliveAnalyzer().analyzeTree(env, that, make);
+            new FlowAnalyzer().analyzeTree(env, that, make);
+        } finally {
+            if (!speculative) {
+                log.popDiagnosticHandler(diagHandler);
+            }
+        }
+    }
+
     /**
      * Definite assignment scan mode
      */
@@ -226,8 +247,8 @@ public class Flow {
          */
         SPECULATIVE_LOOP("var.might.be.assigned.in.loop", true);
 
-        String errKey;
-        boolean isFinal;
+        final String errKey;
+        final boolean isFinal;
 
         FlowKind(String errKey, boolean isFinal) {
             this.errKey = errKey;
@@ -252,9 +273,7 @@ public class Flow {
         Source source = Source.instance(context);
         allowImprovedRethrowAnalysis = source.allowImprovedRethrowAnalysis();
         allowImprovedCatchAnalysis = source.allowImprovedCatchAnalysis();
-        Options options = Options.instance(context);
-        allowEffectivelyFinalInInnerClasses = source.allowEffectivelyFinalInInnerClasses() &&
-                options.isSet("allowEffectivelyFinalInInnerClasses"); //pre-lambda guard
+        allowEffectivelyFinalInInnerClasses = source.allowEffectivelyFinalInInnerClasses();
     }
 
     /**
@@ -277,7 +296,7 @@ public class Flow {
                 }
             };
 
-            JCTree.Tag treeTag;
+            final JCTree.Tag treeTag;
 
             private JumpKind(Tag treeTag) {
                 this.treeTag = treeTag;
@@ -451,7 +470,7 @@ public class Flow {
                 alive = true;
                 scanStat(tree.body);
 
-                if (alive && tree.sym.type.getReturnType().tag != VOID)
+                if (alive && !tree.sym.type.getReturnType().hasTag(VOID))
                     log.error(TreeInfo.diagEndPos(tree.body), "missing.ret.stmt");
 
                 List<PendingExit> exits = pendingExits.toList();
@@ -660,6 +679,27 @@ public class Flow {
             }
         }
 
+        @Override
+        public void visitLambda(JCLambda tree) {
+            if (tree.type != null &&
+                    tree.type.isErroneous()) {
+                return;
+            }
+
+            ListBuffer<PendingExit> prevPending = pendingExits;
+            boolean prevAlive = alive;
+            try {
+                pendingExits = ListBuffer.lb();
+                alive = true;
+                scanStat(tree.body);
+                tree.canCompleteNormally = alive;
+            }
+            finally {
+                pendingExits = prevPending;
+                alive = prevAlive;
+            }
+        }
+
         public void visitTopLevel(JCCompilationUnit tree) {
             // Do nothing for TopLevel since each class is visited individually
         }
@@ -671,6 +711,9 @@ public class Flow {
         /** Perform definite assignment/unassignment analysis on a tree.
          */
         public void analyzeTree(Env<AttrContext> env, TreeMaker make) {
+            analyzeTree(env, env.tree, make);
+        }
+        public void analyzeTree(Env<AttrContext> env, JCTree tree, TreeMaker make) {
             try {
                 attrEnv = env;
                 Flow.this.make = make;
@@ -1186,6 +1229,29 @@ public class Flow {
             }
         }
 
+        @Override
+        public void visitLambda(JCLambda tree) {
+            if (tree.type != null &&
+                    tree.type.isErroneous()) {
+                return;
+            }
+            List<Type> prevCaught = caught;
+            List<Type> prevThrown = thrown;
+            ListBuffer<FlowPendingExit> prevPending = pendingExits;
+            try {
+                pendingExits = ListBuffer.lb();
+                caught = List.of(syms.throwableType); //inhibit exception checking
+                thrown = List.nil();
+                scan(tree.body);
+                tree.inferredThrownTypes = thrown;
+            }
+            finally {
+                pendingExits = prevPending;
+                caught = prevCaught;
+                thrown = prevThrown;
+            }
+        }
+
         public void visitTopLevel(JCCompilationUnit tree) {
             // Do nothing for TopLevel since each class is visited individually
         }
@@ -1268,6 +1334,10 @@ public class Flow {
          */
         int nextadr;
 
+        /** The first variable sequence number in a block that can return.
+         */
+        int returnadr;
+
         /** The list of unreferenced automatic resources.
          */
         Scope unrefdResources;
@@ -1297,8 +1367,8 @@ public class Flow {
 
         @Override
         void markDead() {
-            inits.inclRange(firstadr, nextadr);
-            uninits.inclRange(firstadr, nextadr);
+            inits.inclRange(returnadr, nextadr);
+            uninits.inclRange(returnadr, nextadr);
         }
 
         /*-------------- Processing variables ----------------------*/
@@ -1553,6 +1623,7 @@ public class Flow {
             Bits uninitsPrev = uninits.dup();
             int nextadrPrev = nextadr;
             int firstadrPrev = firstadr;
+            int returnadrPrev = returnadr;
             Lint lintPrev = lint;
 
             lint = lint.augment(tree.sym.annotations);
@@ -1597,6 +1668,7 @@ public class Flow {
                 uninits = uninitsPrev;
                 nextadr = nextadrPrev;
                 firstadr = firstadrPrev;
+                returnadr = returnadrPrev;
                 lint = lintPrev;
             }
         }
@@ -1901,8 +1973,8 @@ public class Flow {
             Bits uninitsBeforeElse = uninitsWhenFalse;
             inits = initsWhenTrue;
             uninits = uninitsWhenTrue;
-            if (tree.truepart.type.tag == BOOLEAN &&
-                tree.falsepart.type.tag == BOOLEAN) {
+            if (tree.truepart.type.hasTag(BOOLEAN) &&
+                tree.falsepart.type.hasTag(BOOLEAN)) {
                 // if b and c are boolean valued, then
                 // v is (un)assigned after a?b:c when true iff
                 //    v is (un)assigned after b when true and
@@ -1979,6 +2051,35 @@ public class Flow {
             scanExpr(tree.encl);
             scanExprs(tree.args);
             scan(tree.def);
+        }
+
+        @Override
+        public void visitLambda(JCLambda tree) {
+            Bits prevUninits = uninits;
+            Bits prevInits = inits;
+            int returnadrPrev = returnadr;
+            ListBuffer<AssignPendingExit> prevPending = pendingExits;
+            try {
+                returnadr = nextadr;
+                pendingExits = new ListBuffer<AssignPendingExit>();
+                for (List<JCVariableDecl> l = tree.params; l.nonEmpty(); l = l.tail) {
+                    JCVariableDecl def = l.head;
+                    scan(def);
+                    inits.incl(def.sym.adr);
+                    uninits.excl(def.sym.adr);
+                }
+                if (tree.getBodyKind() == JCLambda.BodyKind.EXPRESSION) {
+                    scanExpr(tree.body);
+                } else {
+                    scan(tree.body);
+                }
+            }
+            finally {
+                returnadr = returnadrPrev;
+                uninits = prevUninits;
+                inits = prevInits;
+                pendingExits = prevPending;
+            }
         }
 
         public void visitNewArray(JCNewArray tree) {

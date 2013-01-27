@@ -210,6 +210,9 @@ public class TestProcessor extends AbstractProcessor {
                     JCLiteral l = (JCLiteral) rhs;
                     return (String) l.value;
                 }
+            } else if (e.hasTag(JCTree.Tag.LITERAL)) {
+                JCLiteral l = (JCLiteral) e;
+                return (String) l.value;
             }
             throw new IllegalArgumentException(e.toString());
         }

@@ -211,7 +211,7 @@ public class TreeScanner extends Visitor {
         scan(tree.annotations);
         scan(tree.elemtype);
         scan(tree.dims);
-        for (List<JCTypeAnnotation> annos : tree.dimAnnotations)
+        for (List<JCAnnotation> annos : tree.dimAnnotations)
             scan(annos);
         scan(tree.elems);
     }
@@ -288,6 +288,10 @@ public class TreeScanner extends Visitor {
 
     public void visitTypeUnion(JCTypeUnion tree) {
         scan(tree.alternatives);
+    }
+
+    public void visitTypeIntersection(JCTypeIntersection tree) {
+        scan(tree.bounds);
     }
 
     public void visitTypeParameter(JCTypeParameter tree) {

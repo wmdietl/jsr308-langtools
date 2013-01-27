@@ -26,12 +26,12 @@
 package com.sun.tools.javac.code;
 
 import java.util.*;
+
 import javax.lang.model.SourceVersion;
 import static javax.lang.model.SourceVersion.*;
 
-import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.jvm.Target;
-
+import com.sun.tools.javac.util.*;
 import static com.sun.tools.javac.main.Option.*;
 
 /** The source language version accepted.
@@ -87,7 +87,7 @@ public enum Source {
 
     public final String name;
 
-    private static Map<String,Source> tab = new HashMap<String,Source>();
+    private static final Map<String,Source> tab = new HashMap<String,Source>();
     static {
         for (Source s : values()) {
             tab.put(s.name, s);
@@ -197,19 +197,40 @@ public enum Source {
     public boolean allowObjectToPrimitiveCast() {
         return compareTo(JDK1_7) >= 0;
     }
+    public boolean allowPoly() {
+        return compareTo(JDK1_8) >= 0;
+    }
     public boolean allowLambda() {
         return compareTo(JDK1_8) >= 0;
     }
     public boolean allowMethodReferences() {
         return compareTo(JDK1_8) >= 0;
     }
-    public boolean allowTypeAnnotations() {
+    public boolean allowDefaultMethods() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowStaticInterfaceMethods() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowStrictMethodClashCheck() {
         return compareTo(JDK1_8) >= 0;
     }
     public boolean allowEffectivelyFinalInInnerClasses() {
         return compareTo(JDK1_8) >= 0;
     }
+    public boolean allowTypeAnnotations() {
+        return compareTo(JDK1_8) >= 0;
+    }
     public boolean allowRepeatedAnnotations() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowIntersectionTypesInCast() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowEarlyReturnConstraints() {
+        return compareTo(JDK1_8) >= 0;
+    }
+    public boolean allowStructuralMostSpecific() {
         return compareTo(JDK1_8) >= 0;
     }
     public static SourceVersion toSourceVersion(Source source) {

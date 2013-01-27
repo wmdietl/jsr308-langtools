@@ -26,6 +26,8 @@
 package com.sun.tools.javac.jvm;
 
 import com.sun.tools.javac.code.Type;
+import com.sun.tools.javac.code.Types;
+import com.sun.tools.javac.code.Types.UniqueType;
 import com.sun.tools.javac.util.Name;
 
 
@@ -105,7 +107,7 @@ public class ClassFile {
         V49(49, 0),   // JDK 1.5: enum, generics, annotations
         V50(50, 0),   // JDK 1.6: stackmaps
         V51(51, 0),   // JDK 1.7
-        V52(51, 0);   // JDK 1.8: TODO update version number
+        V52(52, 0);   // JDK 1.8: lambda, type annos, param names
         Version(int major, int minor) {
             this.major = major;
             this.minor = minor;
@@ -166,22 +168,29 @@ public class ClassFile {
      */
     public static class NameAndType {
         Name name;
-        Type type;
+        UniqueType uniqueType;
+        Types types;
 
-        NameAndType(Name name, Type type) {
+        NameAndType(Name name, Type type, Types types) {
             this.name = name;
-            this.type = type;
+            this.uniqueType = new UniqueType(type, types);
+            this.types = types;
         }
 
+        void setType(Type type) {
+            this.uniqueType = new UniqueType(type, types);
+        }
+
+        @Override
         public boolean equals(Object other) {
-            return
-                other instanceof NameAndType &&
-                name == ((NameAndType) other).name &&
-                type.equals(((NameAndType) other).type);
+            return (other instanceof NameAndType &&
+                    name == ((NameAndType) other).name &&
+                        uniqueType.equals(((NameAndType) other).uniqueType));
         }
 
+        @Override
         public int hashCode() {
-            return name.hashCode() * type.hashCode();
+            return name.hashCode() * uniqueType.hashCode();
         }
     }
 }

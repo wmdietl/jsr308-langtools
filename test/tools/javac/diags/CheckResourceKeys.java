@@ -185,6 +185,8 @@ public class CheckResourceKeys {
         "compiler.err.cant.resolve.args.params",
         "compiler.err.cant.resolve.location.args",
         "compiler.err.cant.resolve.location.args.params",
+        "compiler.misc.cant.resolve.location.args",
+        "compiler.misc.cant.resolve.location.args.params",
         // JavaCompiler, reports #errors and #warnings
         "compiler.misc.count.error",
         "compiler.misc.count.error.plural",
@@ -312,9 +314,8 @@ public class CheckResourceKeys {
                     pkg, EnumSet.of(JavaFileObject.Kind.CLASS), true)) {
                 String name = fo.getName();
                 // ignore resource files, and files which are not really part of javac
-                if (name.contains("resources")
-                        || name.contains("Launcher.class")
-                        || name.contains("CreateSymbols.class"))
+                if (name.matches(".*resources.[A-Za-z_0-9]+\\.class.*")
+                        || name.matches(".*CreateSymbols\\.class.*"))
                     continue;
                 scan(fo, results);
             }

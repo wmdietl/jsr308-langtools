@@ -144,7 +144,21 @@ public enum TypeKind {
       *
       * @since 1.7
       */
-    UNION;
+    UNION,
+
+    /**
+      * An intersection type.
+      *
+      * @since 1.8
+      */
+    INTERSECTION,
+
+    /**
+     * An annotated type.
+     *
+     * @since 1.8
+     */
+    ANNOTATED;
 
     /**
      * Returns {@code true} if this kind corresponds to a primitive

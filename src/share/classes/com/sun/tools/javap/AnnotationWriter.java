@@ -92,14 +92,11 @@ public class AnnotationWriter extends BasicWriter {
 
         switch (pos.type) {
         // type cast
-        case TYPECAST:
-        case TYPECAST_COMPONENT:
+        case CAST:
         // instanceof
         case INSTANCEOF:
-        case INSTANCEOF_COMPONENT:
         // new expression
         case NEW:
-        case NEW_COMPONENT:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -107,7 +104,12 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // local variable
         case LOCAL_VARIABLE:
-        case LOCAL_VARIABLE_COMPONENT:
+        // resource variable
+        case RESOURCE_VARIABLE:
+            if (pos.lvarOffset == null) {
+                print(", lvarOffset is Null!");
+                break;
+            }
             print(", {");
             for (int i = 0; i < pos.lvarOffset.length; ++i) {
                 if (i != 0) print("; ");
@@ -122,9 +124,13 @@ public class AnnotationWriter extends BasicWriter {
             }
             print("}");
             break;
+        // exception parameter
+        case EXCEPTION_PARAMETER:
+            print(", exception_index=");
+            print(pos.exception_index);
+            break;
         // method receiver
         case METHOD_RECEIVER:
-        case METHOD_RECEIVER_COMPONENT:
             // Do nothing
             break;
         // type parameter
@@ -135,9 +141,7 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // type parameter bound
         case CLASS_TYPE_PARAMETER_BOUND:
-        case CLASS_TYPE_PARAMETER_BOUND_COMPONENT:
         case METHOD_TYPE_PARAMETER_BOUND:
-        case METHOD_TYPE_PARAMETER_BOUND_COMPONENT:
             print(", param_index=");
             print(pos.parameter_index);
             print(", bound_index=");
@@ -145,7 +149,6 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // class extends or implements clause
         case CLASS_EXTENDS:
-        case CLASS_EXTENDS_COMPONENT:
             print(", type_index=");
             print(pos.type_index);
             break;
@@ -154,22 +157,15 @@ public class AnnotationWriter extends BasicWriter {
             print(", type_index=");
             print(pos.type_index);
             break;
-        // exception parameter
-        case EXCEPTION_PARAMETER:
-            // TODO: how do we separate which of the types it is on?
-            System.out.println("Handle exception parameters!");
-            break;
         // method parameter
-        case METHOD_PARAMETER:
-        case METHOD_PARAMETER_COMPONENT:
+        case METHOD_FORMAL_PARAMETER:
             print(", param_index=");
             print(pos.parameter_index);
             break;
-        // method/constructor type argument
-        case NEW_TYPE_ARGUMENT:
-        case NEW_TYPE_ARGUMENT_COMPONENT:
-        case METHOD_TYPE_ARGUMENT:
-        case METHOD_TYPE_ARGUMENT_COMPONENT:
+        // method/constructor/reference type argument
+        case CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_INVOCATION_TYPE_ARGUMENT:
+        case METHOD_REFERENCE_TYPE_ARGUMENT:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);
@@ -179,18 +175,21 @@ public class AnnotationWriter extends BasicWriter {
             break;
         // We don't need to worry about these
         case METHOD_RETURN:
-        case METHOD_RETURN_COMPONENT:
         case FIELD:
-        case FIELD_COMPONENT:
+            break;
+        // lambda formal parameter
+        case LAMBDA_FORMAL_PARAMETER:
+            print(", param_index=");
+            print(pos.parameter_index);
             break;
         case UNKNOWN:
-            break;
+            throw new AssertionError("AnnotationWriter: UNKNOWN target type should never occur!");
         default:
-            throw new AssertionError("Unknown target type for position: " + pos);
+            throw new AssertionError("AnnotationWriter: Unknown target type for position: " + pos);
         }
 
         // Append location data for generics/arrays.
-        if (pos.type.hasLocation()) {
+        if (!pos.location.isEmpty()) {
             print(", location=");
             print(pos.location);
         }
