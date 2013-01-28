@@ -1,6 +1,17 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.6.0, 1 Feb 2013
+
+Implements the current Type Annotations (JSR 308) specification,
+see file jsr308-changes.html for details:
+- Completely changed bytecode representation
+- Annotations in lambda expressions not stored in bytecode yet
+
+Base build
+  Updated to OpenJDK 8 tl/langtools as of 28 Jan 2013.
+
+----------------------------------------------------------------------
 Version 1.5.0, 14 Jan 2013
 
 Modified build.xml to work with new Checker Framework binary layout
@@ -8,7 +19,6 @@ Minor documentation improvements
 No significant code changes
 
 ----------------------------------------------------------------------
-
 Version 1.4.4, 1 Dec 2012
 
 Several documentation improvements
