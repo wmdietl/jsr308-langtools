@@ -463,8 +463,7 @@ public class TypeAnnotations {
 
                 @Override
                 public Type visitType(Type t, List<TypeCompound> s) {
-                    // Error?
-                    return t;
+                    return new AnnotatedType(s, t);
                 }
             };
 
