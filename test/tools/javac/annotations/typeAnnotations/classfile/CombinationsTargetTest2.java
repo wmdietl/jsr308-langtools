@@ -24,7 +24,6 @@
 /*
  * @test
  * @bug 8005085 8005877 8004829 8005681 8006734 8006775
- * @ignore
  * @summary Combinations of Target ElementTypes on (repeated)type annotations.
  */
 
