@@ -9,7 +9,8 @@ see file jsr308-changes.html for details:
 - Annotations in lambda expressions not stored in bytecode yet
 
 Base build
-  Updated to OpenJDK 8 tl/langtools as of 28 Jan 2013.
+  Updated to OpenJDK 8 tl/langtools and type-annotations/langtools
+  as of 31 Jan 2013.
 
 ----------------------------------------------------------------------
 Version 1.5.0, 14 Jan 2013
