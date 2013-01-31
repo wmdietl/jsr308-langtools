@@ -463,8 +463,7 @@ public class TypeAnnotations {
 
                 @Override
                 public Type visitType(Type t, List<TypeCompound> s) {
-                    // Error?
-                    return t;
+                    return new AnnotatedType(s, t);
                 }
             };
 
@@ -761,6 +760,14 @@ public class TypeAnnotations {
                 case UNION_TYPE: {
                     // TODO: can we store any information here to help in
                     // determining the final position?
+                    List<JCTree> newPath = path.tail;
+                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
+                    return;
+                }
+
+                case INTERSECTION_TYPE: {
+                    JCTypeIntersection isect = (JCTypeIntersection)frame;
+                    p.type_index = isect.bounds.indexOf(tree);
                     List<JCTree> newPath = path.tail;
                     resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                     return;
