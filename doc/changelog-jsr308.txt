@@ -11,6 +11,7 @@ see file jsr308-changes.html for details:
 Base build
   Updated to OpenJDK 8 tl/langtools and type-annotations/langtools
   as of 31 Jan 2013.
+  No longer builds or runs on JDK6
 
 ----------------------------------------------------------------------
 Version 1.5.0, 14 Jan 2013
