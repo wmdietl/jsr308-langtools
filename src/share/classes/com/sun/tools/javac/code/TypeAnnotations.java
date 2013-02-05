@@ -579,6 +579,10 @@ public class TypeAnnotations {
             System.out.println("Resolving tree: " + tree + " kind: " + tree.getKind());
             System.out.println("    Framing tree: " + frame + " kind: " + frame.getKind());
             */
+
+            // Note that p.offset is set in
+            // com.sun.tools.javac.jvm.Gen.setTypeAnnotationPositions(int)
+
             switch (frame.getKind()) {
                 case TYPE_CAST:
                     p.type = TargetType.CAST;
@@ -660,6 +664,30 @@ public class TypeAnnotations {
 
                     List<JCTree> newPath = path.tail;
                     resolveFrame(newPath.head, newPath.tail.head, newPath, p);
+                    return;
+                }
+
+                case MEMBER_REFERENCE: {
+                    if (((JCMemberReference)frame).typeargs.contains(tree)) {
+                        JCMemberReference mrframe = (JCMemberReference) frame;
+                        int arg = mrframe.typeargs.indexOf(tree);
+                        p.type_index = arg;
+                        switch (mrframe.mode) {
+                        case INVOKE:
+                            p.type = TargetType.METHOD_REFERENCE_TYPE_ARGUMENT;
+                            break;
+                        case NEW:
+                            p.type = TargetType.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT;
+                            break;
+                        default:
+                            Assert.error("Unknown method reference mode " + mrframe.mode +
+                                    " for tree " + tree + " within frame " + frame);
+                        }
+                        p.pos = frame.pos;
+                    } else {
+                        Assert.error("Could not determine type argument position of tree " + tree +
+                                " within frame " + frame);
+                    }
                     return;
                 }
 
