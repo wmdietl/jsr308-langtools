@@ -924,12 +924,7 @@ public class TypeAnnotations {
             if (tree.sym == null) {
                 // Something is wrong already. Quietly ignore.
             } else if (tree.sym.getKind() == ElementKind.PARAMETER) {
-                if (sigOnly) {
-                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.METHOD_FORMAL_PARAMETER;
-                    pos.pos = tree.pos;
-                    separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
-                }
+                // Parameters are handled in visitMethodDef above.
             } else if (tree.sym.getKind() == ElementKind.FIELD) {
                 if (sigOnly) {
                     TypeAnnotationPosition pos = new TypeAnnotationPosition();
