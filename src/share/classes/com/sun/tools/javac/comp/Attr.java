@@ -2540,7 +2540,7 @@ public class Attr extends JCTree.Visitor {
 
             if (exprType.isErroneous()) {
                 //if the qualifier expression contains problems,
-                //give up atttribution of method reference
+                //give up attribution of method reference
                 result = that.type = exprType;
                 return;
             }
