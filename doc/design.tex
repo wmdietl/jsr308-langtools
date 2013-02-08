@@ -1515,7 +1515,7 @@ type_annotation {
         catch_target;
         offset_target;
         type_argument_target;
-        method_reference_receiver_target;
+        method_reference_target;
         method_reference_type_argument;
     } target_info;     // identifies the targeted program element, see Section 3.3
     type_path target_path; // identifies targeted type in a compound type (array, generic, etc.), see Section 3.4
@@ -1619,9 +1619,9 @@ type test (\code{instanceof}) & \code{INSTANCEOF}
 & \code{0x43} & \S\ref{class-file:ext:ri:instanceof} \\
 object creation (\code{new}) & \code{NEW}
 & \code{0x44} & \S\ref{class-file:ext:ri:new} \\
-constructor reference receiver & \code{CONSTRUCTOR\_REFERENCE\_RECEIVER}
+constructor reference receiver & \code{CONSTRUCTOR\_REFERENCE}
 & \code{0x45} & \S\ref{class-file:ext:ri:cref-receiver} \\
-method reference receiver & \code{METHOD\_REFERENCE\_RECEIVER}
+method reference receiver & \code{METHOD\_REFERENCE}
 & \code{0x46} & \S\ref{class-file:ext:ri:mref-receiver} \\
 cast & \code{CAST}
 & \code{0x47} & \S\ref{class-file:ext:ri:cast} \\
