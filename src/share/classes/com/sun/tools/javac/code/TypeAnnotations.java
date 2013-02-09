@@ -668,8 +668,23 @@ public class TypeAnnotations {
                 }
 
                 case MEMBER_REFERENCE: {
-                    if (((JCMemberReference)frame).typeargs.contains(tree)) {
-                        JCMemberReference mrframe = (JCMemberReference) frame;
+                    JCMemberReference mrframe = (JCMemberReference) frame;
+
+                    if (mrframe.expr == tree) {
+                        switch (mrframe.mode) {
+                        case INVOKE:
+                            p.type = TargetType.METHOD_REFERENCE_RECEIVER;
+                            break;
+                        case NEW:
+                            p.type = TargetType.CONSTRUCTOR_REFERENCE_RECEIVER;
+                            break;
+                        default:
+                            Assert.error("Unknown method reference mode " + mrframe.mode +
+                                    " for tree " + tree + " within frame " + frame);
+                        }
+                        p.pos = frame.pos;
+                    } else if (mrframe.typeargs != null &&
+                            mrframe.typeargs.contains(tree)) {
                         int arg = mrframe.typeargs.indexOf(tree);
                         p.type_index = arg;
                         switch (mrframe.mode) {

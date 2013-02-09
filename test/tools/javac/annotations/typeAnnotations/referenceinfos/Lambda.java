@@ -33,6 +33,180 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 public class Lambda {
 
     @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TB", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE)
+    })
+    public String returnMethodRef1() {
+        return
+                "class Lambda {" +
+                "  public String getName() { return \"Lambda!\"; }" +
+                "}" +
+
+                "class Test {" +
+                "  java.util.function.Function<Lambda, String> lambda() {" +
+                "    return @TA @TB Lambda::getName;" +
+                "  }" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TB", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TD", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TE", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 })
+    })
+    public String returnMethodRef2() {
+        return
+                "class Lambda<S, T> {" +
+                "  public String getName() { return \"Lambda!\"; }" +
+                "}" +
+
+                "class Test {" +
+                "  java.util.function.Function<Lambda<Integer, Float>, String> lambda() {" +
+                "    return @TA Lambda<@TB @TC Integer, @TD @TE Float>::getName;" +
+                "  }" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "CTA", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "CTB", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "CTC", type = METHOD_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 })
+    })
+    public String returnMethodRef3() {
+        return
+                "class Lambda<S, T> {" +
+                "  public String getName() { return \"Lambda!\"; }" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTA {" +
+                "  String value();" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTB {" +
+                "  int age();" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTC {" +
+                "  String name();" +
+                "}" +
+
+                "class Test {" +
+                "  java.util.function.Function<Lambda<Integer, Float>, String> lambda() {" +
+                "    return @CTA(\"x\") Lambda<@CTB(age = 5) Integer, @CTC(name = \"y\") Float>::getName;" +
+                "  }" +
+                "}";
+    }
+
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE)
+    })
+    public String returnConstructorRef1() {
+        return
+                "class Lambda {" +
+                "  Lambda() { }" +
+                "}" +
+
+                "class Test {" +
+                "  Runnable lambda() {" +
+                "    return @TA @TB Lambda::new;" +
+                "  }" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TC", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "TD", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 }),
+        @TADescription(annotation = "TE", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 })
+    })
+    public String returnConstructorRef2() {
+        return
+                "class Lambda<S, T> {" +
+                "  Lambda() { }" +
+                "}" +
+
+                "class Test {" +
+                "  Runnable lambda() {" +
+                "    return @TA Lambda<@TB @TC Integer, @TD @TE Float>::new;" +
+                "  }" +
+                "}";
+    }
+
+    @TADescriptions({
+        @TADescription(annotation = "CTA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE),
+        @TADescription(annotation = "CTB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 0 }),
+        @TADescription(annotation = "CTC", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+                offset = ReferenceInfoUtil.IGNORE_VALUE,
+                genericLocation = { 3, 1 })
+    })
+    public String returnConstructorRef3() {
+        return
+                "class Lambda<S, T> {" +
+                "  Lambda() { }" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTA {" +
+                "  String value();" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTB {" +
+                "  int age();" +
+                "}" +
+
+                "@Target(ElementType.TYPE_USE)" +
+                "@interface CTC {" +
+                "  String name();" +
+                "}" +
+
+                "class Test {" +
+                "  Runnable lambda() {" +
+                "    return @CTA(\"x\") Lambda<@CTB(age = 5) Integer, @CTC(name = \"y\") Float>::new;" +
+                "  }" +
+                "}";
+    }
+
+
+    @TADescriptions({
         @TADescription(annotation = "TA", type = METHOD_REFERENCE_TYPE_ARGUMENT,
                  offset = ReferenceInfoUtil.IGNORE_VALUE,
                  typeIndex = 0),
