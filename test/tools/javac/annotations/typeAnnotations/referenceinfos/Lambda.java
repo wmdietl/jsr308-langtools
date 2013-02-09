@@ -33,9 +33,9 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 public class Lambda {
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TA", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TB", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnMethodRef1() {
@@ -52,18 +52,18 @@ public class Lambda {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TA", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TB", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "TC", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TC", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "TD", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TD", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 }),
-        @TADescription(annotation = "TE", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TE", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 })
     })
@@ -81,12 +81,12 @@ public class Lambda {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "CTA", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTA", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "CTB", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTB", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "CTC", type = METHOD_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTC", type = METHOD_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 })
     })
@@ -120,9 +120,9 @@ public class Lambda {
 
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE)
     })
     public String returnConstructorRef1() {
@@ -139,18 +139,18 @@ public class Lambda {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TA", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TB", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "TC", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TC", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "TD", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TD", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 }),
-        @TADescription(annotation = "TE", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "TE", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 })
     })
@@ -168,12 +168,12 @@ public class Lambda {
     }
 
     @TADescriptions({
-        @TADescription(annotation = "CTA", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTA", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE),
-        @TADescription(annotation = "CTB", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTB", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 0 }),
-        @TADescription(annotation = "CTC", type = CONSTRUCTOR_REFERENCE_RECEIVER,
+        @TADescription(annotation = "CTC", type = CONSTRUCTOR_REFERENCE,
                 offset = ReferenceInfoUtil.IGNORE_VALUE,
                 genericLocation = { 3, 1 })
     })

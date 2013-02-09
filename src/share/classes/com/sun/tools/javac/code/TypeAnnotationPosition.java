@@ -162,8 +162,8 @@ public class TypeAnnotationPosition {
         // new expression
         case NEW:
         // constructor/method reference receiver
-        case CONSTRUCTOR_REFERENCE_RECEIVER:
-        case METHOD_REFERENCE_RECEIVER:
+        case CONSTRUCTOR_REFERENCE:
+        case METHOD_REFERENCE:
             sb.append(", offset = ");
             sb.append(offset);
             break;

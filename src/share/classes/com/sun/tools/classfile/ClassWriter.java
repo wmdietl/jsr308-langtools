@@ -732,8 +732,8 @@ public class ClassWriter {
             // new expression
             case NEW:
             // constructor/method reference receiver
-            case CONSTRUCTOR_REFERENCE_RECEIVER:
-            case METHOD_REFERENCE_RECEIVER:
+            case CONSTRUCTOR_REFERENCE:
+            case METHOD_REFERENCE:
                 out.writeShort(p.offset);
                 break;
             // local variable

@@ -89,10 +89,10 @@ public enum TargetType {
     NEW(0x44, true),
 
     /** For annotations on a constructor reference receiver. */
-    CONSTRUCTOR_REFERENCE_RECEIVER(0x45, true),
+    CONSTRUCTOR_REFERENCE(0x45, true),
 
     /** For annotations on a method reference receiver. */
-    METHOD_REFERENCE_RECEIVER(0x46, true),
+    METHOD_REFERENCE(0x46, true),
 
     /** For annotations on a typecast. */
     CAST(0x47, true),

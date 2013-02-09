@@ -96,8 +96,8 @@ public class AnnotationWriter extends BasicWriter {
         // new expression
         case NEW:
         // constructor/method reference receiver
-        case CONSTRUCTOR_REFERENCE_RECEIVER:
-        case METHOD_REFERENCE_RECEIVER:
+        case CONSTRUCTOR_REFERENCE:
+        case METHOD_REFERENCE:
             if (showOffsets) {
                 print(", offset=");
                 print(pos.offset);

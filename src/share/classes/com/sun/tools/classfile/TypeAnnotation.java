@@ -91,8 +91,8 @@ public class TypeAnnotation {
         // new expression
         case NEW:
         // constructor/method reference receiver
-        case CONSTRUCTOR_REFERENCE_RECEIVER:
-        case METHOD_REFERENCE_RECEIVER:
+        case CONSTRUCTOR_REFERENCE:
+        case METHOD_REFERENCE:
             position.offset = cr.readUnsignedShort();
             break;
         // local variable
@@ -182,8 +182,8 @@ public class TypeAnnotation {
         // new expression
         case NEW:
         // constructor/method reference receiver
-        case CONSTRUCTOR_REFERENCE_RECEIVER:
-        case METHOD_REFERENCE_RECEIVER:
+        case CONSTRUCTOR_REFERENCE:
+        case METHOD_REFERENCE:
             n += 2; // offset
             break;
         // local variable
@@ -382,8 +382,8 @@ public class TypeAnnotation {
             // new expression
             case NEW:
             // constructor/method reference receiver
-            case CONSTRUCTOR_REFERENCE_RECEIVER:
-            case METHOD_REFERENCE_RECEIVER:
+            case CONSTRUCTOR_REFERENCE:
+            case METHOD_REFERENCE:
                 sb.append(", offset = ");
                 sb.append(offset);
                 break;
@@ -569,10 +569,10 @@ public class TypeAnnotation {
         NEW(0x44, true),
 
         /** For annotations on a constructor reference receiver. */
-        CONSTRUCTOR_REFERENCE_RECEIVER(0x45, true),
+        CONSTRUCTOR_REFERENCE(0x45, true),
 
         /** For annotations on a method reference receiver. */
-        METHOD_REFERENCE_RECEIVER(0x46, true),
+        METHOD_REFERENCE(0x46, true),
 
         /** For annotations on a typecast. */
         CAST(0x47, true),

@@ -673,10 +673,10 @@ public class TypeAnnotations {
                     if (mrframe.expr == tree) {
                         switch (mrframe.mode) {
                         case INVOKE:
-                            p.type = TargetType.METHOD_REFERENCE_RECEIVER;
+                            p.type = TargetType.METHOD_REFERENCE;
                             break;
                         case NEW:
-                            p.type = TargetType.CONSTRUCTOR_REFERENCE_RECEIVER;
+                            p.type = TargetType.CONSTRUCTOR_REFERENCE;
                             break;
                         default:
                             Assert.error("Unknown method reference mode " + mrframe.mode +
