@@ -4154,7 +4154,9 @@ public class Attr extends JCTree.Visitor {
         }
 
     private Type capture(Type type) {
-        return types.capture(type);
+        //do not capture free types
+        return resultInfo.checkContext.inferenceContext().free(type) ?
+                type : types.capture(type);
     }
 
     private void validateTypeAnnotations(JCTree tree) {
