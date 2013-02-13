@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8008077
  * @summary Type annotations in a lazy constant need to be attributed
  *   in the correct order.
  * @author Werner Dietl

@@ -21,15 +21,17 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
-
 /*
  * @test
+ * @bug 8008077
  * @summary Test population of reference info for lambda expressions
  * @compile -g Driver.java ReferenceInfoUtil.java Lambda.java
  * @run main Driver Lambda
  * @author Werner Dietl
  */
+
+import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+
 public class Lambda {
 
     @TADescriptions({

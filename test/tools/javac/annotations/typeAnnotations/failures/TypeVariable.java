@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 1234567
+ * @bug 8008077
  * @summary Type annotations on a type variable, where the bound of
  *   the type variable is also annotated, need to be processed correctly.
  * @author Werner Dietl

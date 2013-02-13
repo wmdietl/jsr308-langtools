@@ -21,14 +21,16 @@
  * questions.
  */
 
-import java.lang.annotation.*;
-
 /*
  * @test
+ * @bug 8008077
  * @summary new type annotation location: lambda expressions
  * @compile Lambda.java
  * @author Werner Dietl
  */
+
+import java.lang.annotation.*;
+
 public class Lambda {
 
     interface LambdaInt {
