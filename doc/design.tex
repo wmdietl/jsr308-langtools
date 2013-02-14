@@ -493,7 +493,7 @@ class Outer {
 class Outer {
   class Middle {
     class Inner {
-      void innerMethod(@A Outer. @B Middle. @C Inner this) { ... }
+      void innerMethod(@A Outer.@B Middle.@C Inner this) { ... }
     }
   }
 }
@@ -645,7 +645,7 @@ access, which is the simple name of the type being used.
 
 \preverbnegspace
 \begin{Verbatim}
-  Outer . @Legal StaticNestedClass x = ...;     // legal
+  Outer.@Legal StaticNestedClass x = ...;     // legal
 \end{Verbatim}
 \preverbnegspace
 
