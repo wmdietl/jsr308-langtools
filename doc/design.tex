@@ -215,7 +215,7 @@ extension to declaration annotations (item
 \begin{Verbatim}
   new @Interned MyObject()
   new @NonEmpty @Readonly List<String>(myNonEmptyStringSet)
-  myVar . new @Tainted NestedClass()
+  myVar.new @Tainted NestedClass()
 \end{Verbatim}
 \preverbnegspace
 
@@ -270,7 +270,7 @@ It is not permitted to omit the Java type, as in
   %% We don't permit this any more:
   % If the nested type is a static type, then both the nested and
   % the outer type can be annotated individually, as in \code{@ReadOnly
-  %   Outer.\ @ReadWrite StaticNested}.
+  %   Outer.@ReadWrite StaticNested}.
 % %
 %   Here is an example:
 % \begin{itemize}
@@ -414,7 +414,7 @@ receiver.
   the receiver type can be
   written as (for example) either \code{Inner} or as \code{Outer.Inner},
   and in the latter case annotations on both parts are possible, as in
-  \code{@ReadOnly Outer .\ @Mutable Inner}.
+  \code{@ReadOnly Outer.@Mutable Inner}.
   In a constructor in an inner type, the receiver
   has a name such as \code{Outer.this}.
 
@@ -626,8 +626,8 @@ not be annotated:
 
 \preverbnegspace
 \begin{Verbatim}
-  @Illegal Outer . StaticNestedClass      // illegal!
-  @Illegal Outer . staticField            // illegal!
+  @Illegal Outer.StaticNestedClass      // illegal!
+  @Illegal Outer.staticField            // illegal!
 \end{Verbatim}
 \preverbnegspace
 
@@ -2117,8 +2117,8 @@ or the difference among
 \code{String @X [] []}, and
 \code{String [] @X []};
 or the difference among 
-\code{@X Outer .\ Inner} and
-\code{Outer .\ @X Inner}.
+\code{@X Outer.Inner} and
+\code{Outer.@X Inner}.
 The \code{type\_path} structure distinguishes among these locations.
 
 \begin{Verbatim}
@@ -2157,7 +2157,7 @@ type or a raw type written without the type arguments.
 
 In the class file, all annotations on the full type appear.  For example,
 the classfile would record the type in this \<new> expression as
-\<@A Outer.\ @B Inner>:
+\<@A Outer.@B Inner>:
 
 \preverbnegspace
 \begin{Verbatim}
