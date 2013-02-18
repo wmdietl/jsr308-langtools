@@ -266,11 +266,10 @@ public class Annotate {
                            ((MethodSymbol)method, value));
             t.type = result;
         }
-        // TODO: this should be a TypeCompound if "a" is a JCTypeAnnotation.
-        // However, how do we find the correct position?
+        // TODO: this should be a TypeCompound if "a" has Tag.TYPE_ANNOTATION.
+        // Also, see enterTypeAnnotation.
         Attribute.Compound ac = new Attribute.Compound(a.type, buf.toList());
-        // TODO: is this something we want? Who would use it?
-        // a.attribute = ac;
+        a.attribute = ac;
         return ac;
     }
 

@@ -1088,7 +1088,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 isFirst = true;
             }
         }
-        annotate.afterRepeated(TypeAnnotations.organizeTypeAnnotationsSignatures(syms, names, log, tree));
+        TypeAnnotations.organizeTypeAnnotationsSignatures(syms, names, log, tree, annotate);
     }
 
     private void actualEnterTypeAnnotations(final List<JCAnnotation> annotations,
@@ -1197,6 +1197,26 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             scan(tree.defaultValue);
             // Do not annotate the body, just the signature.
             // scan(tree.body);
+        }
+
+        @Override
+        public void visitVarDef(final JCVariableDecl tree) {
+            if (sym.kind == Kinds.VAR) {
+                // Don't visit a parameter once when the sym is the method
+                // and once when the sym is the parameter.
+                scan(tree.mods);
+                scan(tree.vartype);
+            }
+            scan(tree.init);
+        }
+
+        @Override
+        public void visitNewClass(JCNewClass tree) {
+            if (tree.def == null) {
+                // For an anonymous class instantiation the class
+                // will be visited separately.
+                super.visitNewClass(tree);
+            }
         }
     }
 
