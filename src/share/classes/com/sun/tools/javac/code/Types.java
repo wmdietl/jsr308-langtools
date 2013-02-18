@@ -101,7 +101,11 @@ public class Types {
         return instance;
     }
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     protected Types(Context context) {
+        uid = ++uidCounter;
         context.put(typesKey, this);
         syms = Symtab.instance(context);
         names = Names.instance(context);
@@ -117,6 +121,11 @@ public class Types {
         diags = JCDiagnostic.Factory.instance(context);
         functionDescriptorLookupError = new FunctionDescriptorLookupError();
         noWarnings = new Warner(null);
+    }
+
+    @Override
+    public String toString() {
+        return "Types#" + uid;
     }
     // </editor-fold>
 
