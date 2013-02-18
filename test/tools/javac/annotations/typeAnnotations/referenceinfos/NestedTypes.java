@@ -831,4 +831,27 @@ public class NestedTypes {
                 "  }\n" +
                 "}}\n";
     }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = CLASS_EXTENDS,
+                genericLocation = {}, typeIndex = -1),
+        @TADescription(annotation = "TB", type = CLASS_EXTENDS,
+                genericLocation = {3, 0}, typeIndex = -1),
+        @TADescription(annotation = "TC", type = CLASS_EXTENDS,
+                genericLocation = {3, 1}, typeIndex = -1),
+        @TADescription(annotation = "TD", type = CLASS_EXTENDS,
+                genericLocation = {1, 0}, typeIndex = -1),
+        @TADescription(annotation = "TE", type = CLASS_EXTENDS,
+                genericLocation = {1, 0, 3, 0}, typeIndex = -1),
+        @TADescription(annotation = "TF", type = CLASS_EXTENDS,
+                genericLocation = {1, 0, 3, 1}, typeIndex = -1)
+    })
+    @TestClass("GOuter$GInner$Test")
+    public String testExtends1() {
+        return "class GOuter<A, B> {\n" +
+                "  class GInner<X, Y> {\n" +
+                "    class Test extends @TA GOuter<@TB String, @TC String>.@TD GInner<@TE String, @TF String> {}" +
+                "  }" +
+                "}";
+    }
 }

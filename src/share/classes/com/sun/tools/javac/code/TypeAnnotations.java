@@ -49,12 +49,14 @@ import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntry;
 import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntryKind;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCBlock;
 import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCExpression;
 import com.sun.tools.javac.tree.JCTree.JCMethodDecl;
+import com.sun.tools.javac.tree.JCTree.JCNewClass;
 import com.sun.tools.javac.tree.JCTree.JCTypeApply;
 import com.sun.tools.javac.tree.JCTree.JCVariableDecl;
 import com.sun.tools.javac.tree.TreeScanner;
@@ -81,17 +83,18 @@ public class TypeAnnotations {
      * determine the correct positions for type annotations.
      * This version only visits types in signatures and should be
      * called from MemberEnter.
-     * The method returns the Annotator object that should be added
-     * to the correct Annotate queue for later processing.
+     * The method takes the Annotate object as parameter and
+     * adds an Annotator to the correct Annotate queue for
+     * later processing.
      */
-    public static Annotator organizeTypeAnnotationsSignatures(final Symtab syms, final Names names,
-            final Log log, final JCClassDecl tree) {
-        return new Annotator() {
+    public static void organizeTypeAnnotationsSignatures(final Symtab syms, final Names names,
+            final Log log, final JCClassDecl tree, Annotate annotate) {
+        annotate.afterRepeated( new Annotator() {
             @Override
             public void enterAnnotation() {
                 new TypeAnnotationPositions(syms, names, log, true).scan(tree);
             }
-        };
+        } );
     }
 
     /**
@@ -102,9 +105,103 @@ public class TypeAnnotations {
         new TypeAnnotationPositions(syms, names, log, false).scan(tree);
     }
 
-    private static class TypeAnnotationPositions extends TreeScanner {
+    public enum AnnotationType { DECLARATION, TYPE, BOTH };
 
-        private enum AnnotationType { DECLARATION, TYPE, BOTH };
+    /**
+     * Determine whether an annotation is a declaration annotation,
+     * a type annotation, or both.
+     */
+    public static AnnotationType annotationType(Symtab syms, Names names,
+            Attribute.Compound a, Symbol s) {
+        Attribute.Compound atTarget =
+            a.type.tsym.attribute(syms.annotationTargetType.tsym);
+        if (atTarget == null) {
+            return inferTargetMetaInfo(a, s);
+        }
+        Attribute atValue = atTarget.member(names.value);
+        if (!(atValue instanceof Attribute.Array)) {
+            Assert.error("annotationType(): bad @Target argument " + atValue +
+                    " (" + atValue.getClass() + ")");
+            return AnnotationType.DECLARATION; // error recovery
+        }
+        Attribute.Array arr = (Attribute.Array) atValue;
+        boolean isDecl = false, isType = false;
+        for (Attribute app : arr.values) {
+            if (!(app instanceof Attribute.Enum)) {
+                Assert.error("annotationType(): unrecognized Attribute kind " + app +
+                        " (" + app.getClass() + ")");
+                isDecl = true;
+                continue;
+            }
+            Attribute.Enum e = (Attribute.Enum) app;
+            if (e.value.name == names.TYPE) {
+                if (s.kind == Kinds.TYP)
+                    isDecl = true;
+            } else if (e.value.name == names.FIELD) {
+                if (s.kind == Kinds.VAR &&
+                        s.owner.kind != Kinds.MTH)
+                    isDecl = true;
+            } else if (e.value.name == names.METHOD) {
+                if (s.kind == Kinds.MTH &&
+                        !s.isConstructor())
+                    isDecl = true;
+            } else if (e.value.name == names.PARAMETER) {
+                if (s.kind == Kinds.VAR &&
+                        s.owner.kind == Kinds.MTH &&
+                        (s.flags() & Flags.PARAMETER) != 0)
+                    isDecl = true;
+            } else if (e.value.name == names.CONSTRUCTOR) {
+                if (s.kind == Kinds.MTH &&
+                        s.isConstructor())
+                    isDecl = true;
+            } else if (e.value.name == names.LOCAL_VARIABLE) {
+                if (s.kind == Kinds.VAR &&
+                        s.owner.kind == Kinds.MTH &&
+                        (s.flags() & Flags.PARAMETER) == 0)
+                    isDecl = true;
+            } else if (e.value.name == names.ANNOTATION_TYPE) {
+                if (s.kind == Kinds.TYP &&
+                        (s.flags() & Flags.ANNOTATION) != 0)
+                    isDecl = true;
+            } else if (e.value.name == names.PACKAGE) {
+                if (s.kind == Kinds.PCK)
+                    isDecl = true;
+            } else if (e.value.name == names.TYPE_USE) {
+                if (s.kind == Kinds.TYP ||
+                        s.kind == Kinds.VAR ||
+                        (s.kind == Kinds.MTH && !s.isConstructor() &&
+                        !s.type.getReturnType().hasTag(TypeTag.VOID)) ||
+                        (s.kind == Kinds.MTH && s.isConstructor()))
+                    isType = true;
+            } else if (e.value.name == names.TYPE_PARAMETER) {
+                /* Irrelevant in this case */
+                // TYPE_PARAMETER doesn't aid in distinguishing between
+                // Type annotations and declaration annotations on an
+                // Element
+            } else {
+                Assert.error("annotationType(): unrecognized Attribute name " + e.value.name +
+                        " (" + e.value.name.getClass() + ")");
+                isDecl = true;
+            }
+        }
+        if (isDecl && isType) {
+            return AnnotationType.BOTH;
+        } else if (isType) {
+            return AnnotationType.TYPE;
+        } else {
+            return AnnotationType.DECLARATION;
+        }
+    }
+
+    /** Infer the target annotation kind, if none is give.
+     * We only infer declaration annotations.
+     */
+    private static AnnotationType inferTargetMetaInfo(Attribute.Compound a, Symbol s) {
+        return AnnotationType.DECLARATION;
+    }
+
+
+    private static class TypeAnnotationPositions extends TreeScanner {
 
         private final Symtab syms;
         private final Names names;
@@ -154,7 +251,7 @@ public class TypeAnnotations {
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
 
             for (Attribute.Compound a : annotations) {
-                switch (annotationType(a, sym)) {
+                switch (annotationType(syms, names, a, sym)) {
                 case DECLARATION:
                     declAnnos.append(a);
                     break;
@@ -480,94 +577,6 @@ public class TypeAnnotations {
             return new Attribute.TypeCompound(a, p);
         }
 
-        private AnnotationType annotationType(Attribute.Compound a, Symbol s) {
-            Attribute.Compound atTarget =
-                a.type.tsym.attribute(syms.annotationTargetType.tsym);
-            if (atTarget == null) {
-                return inferTargetMetaInfo(a, s);
-            }
-            Attribute atValue = atTarget.member(names.value);
-            if (!(atValue instanceof Attribute.Array)) {
-                Assert.error("annotationType(): bad @Target argument " + atValue +
-                        " (" + atValue.getClass() + ")");
-                return AnnotationType.DECLARATION; // error recovery
-            }
-            Attribute.Array arr = (Attribute.Array) atValue;
-            boolean isDecl = false, isType = false;
-            for (Attribute app : arr.values) {
-                if (!(app instanceof Attribute.Enum)) {
-                    Assert.error("annotationType(): unrecognized Attribute kind " + app +
-                            " (" + app.getClass() + ")");
-                    isDecl = true;
-                    continue;
-                }
-                Attribute.Enum e = (Attribute.Enum) app;
-                if (e.value.name == names.TYPE) {
-                    if (s.kind == Kinds.TYP)
-                        isDecl = true;
-                } else if (e.value.name == names.FIELD) {
-                    if (s.kind == Kinds.VAR &&
-                            s.owner.kind != Kinds.MTH)
-                        isDecl = true;
-                } else if (e.value.name == names.METHOD) {
-                    if (s.kind == Kinds.MTH &&
-                            !s.isConstructor())
-                        isDecl = true;
-                } else if (e.value.name == names.PARAMETER) {
-                    if (s.kind == Kinds.VAR &&
-                            s.owner.kind == Kinds.MTH &&
-                            (s.flags() & Flags.PARAMETER) != 0)
-                        isDecl = true;
-                } else if (e.value.name == names.CONSTRUCTOR) {
-                    if (s.kind == Kinds.MTH &&
-                            s.isConstructor())
-                        isDecl = true;
-                } else if (e.value.name == names.LOCAL_VARIABLE) {
-                    if (s.kind == Kinds.VAR &&
-                            s.owner.kind == Kinds.MTH &&
-                            (s.flags() & Flags.PARAMETER) == 0)
-                        isDecl = true;
-                } else if (e.value.name == names.ANNOTATION_TYPE) {
-                    if (s.kind == Kinds.TYP &&
-                            (s.flags() & Flags.ANNOTATION) != 0)
-                        isDecl = true;
-                } else if (e.value.name == names.PACKAGE) {
-                    if (s.kind == Kinds.PCK)
-                        isDecl = true;
-                } else if (e.value.name == names.TYPE_USE) {
-                    if (s.kind == Kinds.TYP ||
-                            s.kind == Kinds.VAR ||
-                            (s.kind == Kinds.MTH && !s.isConstructor() &&
-                            !s.type.getReturnType().hasTag(TypeTag.VOID)) ||
-                            (s.kind == Kinds.MTH && s.isConstructor()))
-                        isType = true;
-                } else if (e.value.name == names.TYPE_PARAMETER) {
-                    /* Irrelevant in this case */
-                    // TYPE_PARAMETER doesn't aid in distinguishing between
-                    // Type annotations and declaration annotations on an
-                    // Element
-                } else {
-                    Assert.error("annotationType(): unrecognized Attribute name " + e.value.name +
-                            " (" + e.value.name.getClass() + ")");
-                    isDecl = true;
-                }
-            }
-            if (isDecl && isType) {
-                return AnnotationType.BOTH;
-            } else if (isType) {
-                return AnnotationType.TYPE;
-            } else {
-                return AnnotationType.DECLARATION;
-            }
-        }
-
-        /** Infer the target annotation kind, if none is give.
-         * We only infer declaration annotations.
-         */
-        private static AnnotationType inferTargetMetaInfo(Attribute.Compound a, Symbol s) {
-            return AnnotationType.DECLARATION;
-        }
-
 
         /* This is the beginning of the second part of organizing
          * type annotations: determine the type annotation positions.
@@ -596,7 +605,21 @@ public class TypeAnnotations {
 
                 case NEW_CLASS:
                     JCNewClass frameNewClass = (JCNewClass)frame;
-                    if (frameNewClass.typeargs.contains(tree)) {
+                    if (frameNewClass.def != null) {
+                        // Special handling for anonymous class instantiations
+                        JCClassDecl frameClassDecl = frameNewClass.def;
+                        if (frameClassDecl.extending == tree) {
+                            p.type = TargetType.CLASS_EXTENDS;
+                            p.type_index = -1;
+                        } else if (frameClassDecl.implementing.contains(tree)) {
+                            p.type = TargetType.CLASS_EXTENDS;
+                            p.type_index = frameClassDecl.implementing.indexOf(tree);
+                        } else {
+                            // In contrast to CLASS below, typarams cannot occur here.
+                            Assert.error("Could not determine position of tree " + tree +
+                                    " within frame " + frame);
+                        }
+                    } else if (frameNewClass.typeargs.contains(tree)) {
                         p.type = TargetType.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT;
                         p.type_index = frameNewClass.typeargs.indexOf(tree);
                     } else {
@@ -649,6 +672,8 @@ public class TypeAnnotations {
                 }
 
                 case PARAMETERIZED_TYPE: {
+                    List<JCTree> newPath = path.tail;
+
                     if (((JCTypeApply)frame).clazz == tree) {
                         // generic: RAW; noop
                     } else if (((JCTypeApply)frame).arguments.contains(tree)) {
@@ -656,13 +681,21 @@ public class TypeAnnotations {
                         int arg = taframe.arguments.indexOf(tree);
                         p.location = p.location.prepend(new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg));
 
-                        locateNestedTypes(taframe.type, p);
+                        Type typeToUse;
+                        if (newPath.tail != null && newPath.tail.head.hasTag(Tag.NEWCLASS)) {
+                            // If we are within an anonymous class instantiation, use its type,
+                            // because it contains a correctly nested type. 
+                            typeToUse = newPath.tail.head.type;
+                        } else {
+                            typeToUse = taframe.type;
+                        }
+
+                        locateNestedTypes(typeToUse, p);
                     } else {
                         Assert.error("Could not determine type argument position of tree " + tree +
                                 " within frame " + frame);
                     }
 
-                    List<JCTree> newPath = path.tail;
                     resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                     return;
                 }
@@ -779,6 +812,9 @@ public class TypeAnnotations {
                             break;
                         default:
                             Assert.error("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
+                    }
+                    if (v.getKind() != ElementKind.FIELD) {
+                        v.owner.annotations.appendUniqueTypes(v.getTypeAnnotationMirrors());
                     }
                     return;
 
@@ -910,7 +946,9 @@ public class TypeAnnotations {
                 return;
             }
             if (sigOnly) {
-                {
+                if (!tree.mods.annotations.isEmpty()) {
+                    // Nothing to do for separateAnnotationsKinds if
+                    // there are no annotations of either kind.
                     TypeAnnotationPosition pos = new TypeAnnotationPosition();
                     pos.type = TargetType.METHOD_RETURN;
                     if (tree.sym.isConstructor()) {
@@ -923,7 +961,10 @@ public class TypeAnnotations {
                                 tree.sym, pos);
                     }
                 }
-                if (tree.recvparam != null && tree.recvparam.sym != null) {
+                if (tree.recvparam != null && tree.recvparam.sym != null &&
+                        !tree.recvparam.mods.annotations.isEmpty()) {
+                    // Nothing to do for separateAnnotationsKinds if
+                    // there are no annotations of either kind.
                     // TODO: make sure there are no declaration annotations.
                     TypeAnnotationPosition pos = new TypeAnnotationPosition();
                     pos.type = TargetType.METHOD_RECEIVER;
@@ -933,11 +974,15 @@ public class TypeAnnotations {
                 }
                 int i = 0;
                 for (JCVariableDecl param : tree.params) {
-                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.METHOD_FORMAL_PARAMETER;
-                    pos.parameter_index = i;
-                    pos.pos = param.vartype.pos;
-                    separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
+                    if (!param.mods.annotations.isEmpty()) {
+                        // Nothing to do for separateAnnotationsKinds if
+                        // there are no annotations of either kind.
+                        TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                        pos.type = TargetType.METHOD_FORMAL_PARAMETER;
+                        pos.parameter_index = i;
+                        pos.pos = param.vartype.pos;
+                        separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
+                    }
                     ++i;
                 }
             }
@@ -964,7 +1009,10 @@ public class TypeAnnotations {
          */
         @Override
         public void visitVarDef(final JCVariableDecl tree) {
-            if (tree.sym == null) {
+            if (tree.mods.annotations.isEmpty()) {
+                // Nothing to do for separateAnnotationsKinds if
+                // there are no annotations of either kind.
+            } else if (tree.sym == null) {
                 // Something is wrong already. Quietly ignore.
             } else if (tree.sym.getKind() == ElementKind.PARAMETER) {
                 // Parameters are handled in visitMethodDef above.
@@ -1028,6 +1076,24 @@ public class TypeAnnotations {
         public void visitTypeParameter(JCTypeParameter tree) {
             findPosition(tree, peek2(), tree.annotations);
             super.visitTypeParameter(tree);
+        }
+
+        @Override
+        public void visitNewClass(JCNewClass tree) {
+            if (tree.def != null &&
+                    !tree.def.mods.annotations.isEmpty()) {
+                JCClassDecl classdecl = tree.def;
+                TypeAnnotationPosition pos = new TypeAnnotationPosition();
+                pos.type = TargetType.CLASS_EXTENDS;
+                pos.pos = tree.pos;
+                separateAnnotationsKinds(classdecl, classdecl.sym.type, classdecl.sym, pos);
+            }
+
+            scan(tree.encl);
+            scan(tree.typeargs);
+            scan(tree.clazz);
+            scan(tree.args);
+            scan(tree.def);
         }
 
         @Override
