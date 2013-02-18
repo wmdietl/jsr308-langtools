@@ -89,12 +89,6 @@ public class TypeAnnotations {
      */
     public static void organizeTypeAnnotationsSignatures(final Symtab syms, final Names names,
             final Log log, final JCClassDecl tree, Annotate annotate) {
-        if (tree.name == names.empty) {
-            // Nothing to do for anonymous classes; later we will analyze a
-            // NEW_CLASS instead of this CLASS tree.
-            return;
-        }
-
         annotate.afterRepeated( new Annotator() {
             @Override
             public void enterAnnotation() {
