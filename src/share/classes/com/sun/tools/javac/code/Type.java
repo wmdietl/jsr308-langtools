@@ -706,7 +706,7 @@ public class Type implements PrimitiveType {
                     return s.toString();
                 } else if (sym.name.isEmpty()) {
                     String s;
-                    ClassType norm = (ClassType) tsym.type;
+                    ClassType norm = (ClassType) tsym.type.unannotatedType();
                     if (norm == null) {
                         s = Log.getLocalizedString("anonymous.class", (Object)null);
                     } else if (norm.interfaces_field != null && norm.interfaces_field.nonEmpty()) {
