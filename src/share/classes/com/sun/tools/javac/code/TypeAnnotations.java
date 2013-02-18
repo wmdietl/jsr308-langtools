@@ -678,6 +678,8 @@ public class TypeAnnotations {
                 }
 
                 case PARAMETERIZED_TYPE: {
+                    List<JCTree> newPath = path.tail;
+
                     if (((JCTypeApply)frame).clazz == tree) {
                         // generic: RAW; noop
                     } else if (((JCTypeApply)frame).arguments.contains(tree)) {
@@ -685,13 +687,21 @@ public class TypeAnnotations {
                         int arg = taframe.arguments.indexOf(tree);
                         p.location = p.location.prepend(new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg));
 
-                        locateNestedTypes(taframe.type, p);
+                        Type typeToUse;
+                        if (newPath.tail != null && newPath.tail.head.hasTag(Tag.NEWCLASS)) {
+                            // If we are within an anonymous class instantiation, use its type,
+                            // because it contains a correctly nested type. 
+                            typeToUse = newPath.tail.head.type;
+                        } else {
+                            typeToUse = taframe.type;
+                        }
+
+                        locateNestedTypes(typeToUse, p);
                     } else {
                         Assert.error("Could not determine type argument position of tree " + tree +
                                 " within frame " + frame);
                     }
 
-                    List<JCTree> newPath = path.tail;
                     resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                     return;
                 }
