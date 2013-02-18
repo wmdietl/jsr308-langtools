@@ -1324,7 +1324,6 @@ public class Check {
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
-            validateAnnotations(tree.annotations, tree.type.tsym);
             tree.underlyingType.accept(this);
         }
 

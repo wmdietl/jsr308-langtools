@@ -4191,15 +4191,12 @@ public class Attr extends JCTree.Visitor {
         tree.accept(typeAnnotationsValidator);
     }
     //where
-    private final JCTree.Visitor typeAnnotationsValidator =
-        new TreeScanner() {
+    private final JCTree.Visitor typeAnnotationsValidator = new TreeScanner() {
+
+        private boolean checkAllAnnotations = false;
+
         public void visitAnnotation(JCAnnotation tree) {
-            if (tree.hasTag(TYPE_ANNOTATION)) {
-                // TODO: It seems to WMD as if the annotation in
-                // parameters, in particular also the recvparam, are never
-                // of type JCTypeAnnotation and therefore never checked!
-                // Luckily this check doesn't really do anything that isn't
-                // also done elsewhere.
+            if (tree.hasTag(TYPE_ANNOTATION) || checkAllAnnotations) {
                 chk.validateTypeAnnotation(tree, false);
             }
             super.visitAnnotation(tree);
@@ -4247,9 +4244,30 @@ public class Attr extends JCTree.Visitor {
                 validateAnnotatedType(tree.clazz, tree.clazz.type);
             super.visitTypeTest(tree);
         }
-        // TODO: what else do we need?
-        // public void visitNewClass(JCNewClass tree) {
-        // public void visitNewArray(JCNewArray tree) {
+        public void visitNewClass(JCNewClass tree) {
+            if (tree.clazz.hasTag(ANNOTATED_TYPE)) {
+                boolean prevCheck = this.checkAllAnnotations;
+                try {
+                    this.checkAllAnnotations = true;
+                    scan(((JCAnnotatedType)tree.clazz).annotations);
+                } finally {
+                    this.checkAllAnnotations = prevCheck;
+                }
+            }
+            super.visitNewClass(tree);
+        }
+        public void visitNewArray(JCNewArray tree) {
+            if (tree.elemtype != null && tree.elemtype.hasTag(ANNOTATED_TYPE)) {
+                boolean prevCheck = this.checkAllAnnotations;
+                try {
+                    this.checkAllAnnotations = true;
+                    scan(((JCAnnotatedType)tree.elemtype).annotations);
+                } finally {
+                    this.checkAllAnnotations = prevCheck;
+                }
+            }
+            super.visitNewArray(tree);
+        }
 
         /* I would want to model this after
          * com.sun.tools.javac.comp.Check.Validator.visitSelectInternal(JCFieldAccess)
