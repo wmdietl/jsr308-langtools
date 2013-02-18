@@ -1202,7 +1202,7 @@ public class Check {
 
     /** Validate a type expression. That is,
      *  check that all type arguments of a parametric type are within
-     *  their bounds. This must be done in a second phase after type attributon
+     *  their bounds. This must be done in a second phase after type attribution
      *  since a class might have a subclass as type parameter bound. E.g:
      *
      *  <pre>{@code
@@ -1324,6 +1324,7 @@ public class Check {
 
         @Override
         public void visitAnnotatedType(JCAnnotatedType tree) {
+            validateAnnotations(tree.annotations, tree.type.tsym);
             tree.underlyingType.accept(this);
         }
 
