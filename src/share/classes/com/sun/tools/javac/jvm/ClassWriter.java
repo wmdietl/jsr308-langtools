@@ -871,7 +871,8 @@ public class ClassWriter extends ClassFile {
                     // For method parameters we get the annotation twice! Once with
                     // a valid position, once unknown.
                     // TODO: find a cleaner solution.
-                    // System.err.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
+                    PrintWriter pw = log.getWriter(Log.WriterKind.ERROR);
+                    pw.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
                     continue;
                 }
             }
