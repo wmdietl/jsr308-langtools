@@ -2129,6 +2129,11 @@ public class Attr extends JCTree.Visitor {
                     tree.constructor,
                     localEnv,
                     new ResultInfo(VAL, newMethodTemplate(syms.voidType, argtypes, typeargtypes)));
+            } else {
+                if (tree.clazz.hasTag(ANNOTATED_TYPE)) {
+                    checkForDeclarationAnnotations(((JCAnnotatedType) tree.clazz).annotations,
+                            tree.clazz.type.tsym);
+                }
             }
 
             if (tree.constructor != null && tree.constructor.kind == MTH)
@@ -2190,6 +2195,20 @@ public class Attr extends JCTree.Visitor {
                 }
             }
 
+    private void checkForDeclarationAnnotations(List<? extends JCAnnotation> annotations,
+            Symbol sym) {
+        // Ensure that no declaration annotations are present.
+        // Note that a tree type might be an AnnotatedType with
+        // empty annotations, if only declaration annotations were given.
+        // This method will raise an error for such a type.
+        for (JCAnnotation ai : annotations) {
+            if (TypeAnnotations.annotationType(syms, names, ai.attribute, sym) == TypeAnnotations.AnnotationType.DECLARATION) {
+                log.error(ai.pos(), "annotation.type.not.applicable");
+            }
+        }
+    }
+
+
     /** Make an attributed null check tree.
      */
     public JCExpression makeNullCheck(JCExpression arg) {
@@ -2215,6 +2234,10 @@ public class Attr extends JCTree.Visitor {
             for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                 attribExpr(l.head, localEnv, syms.intType);
                 owntype = new ArrayType(owntype, syms.arrayClass);
+            }
+            if (tree.elemtype.hasTag(ANNOTATED_TYPE)) {
+                checkForDeclarationAnnotations(((JCAnnotatedType) tree.elemtype).annotations,
+                        tree.elemtype.type.tsym);
             }
         } else {
             // we are seeing an untyped aggregate { ... }
@@ -3858,7 +3881,14 @@ public class Attr extends JCTree.Visitor {
 
         ListBuffer<Attribute.TypeCompound> buf = ListBuffer.lb();
         for (JCAnnotation anno : annotations) {
-            buf.append((Attribute.TypeCompound) anno.attribute);
+            if (anno.attribute != null) {
+                // TODO: this null-check is only needed for an obscure
+                // ordering issue, where annotate.flush is called when
+                // the attribute is not set yet. For an example failure
+                // try the referenceinfos/NestedTypes.java test.
+                // Any better solutions?
+                buf.append((Attribute.TypeCompound) anno.attribute);
+            }
         }
         return buf.toList();
     }
@@ -4189,9 +4219,13 @@ public class Attr extends JCTree.Visitor {
             // I would say it's safe to skip.
             if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
                 if (tree.recvparam != null) {
-                    // TODO: better error message. Is the pos good?
-                    log.error(tree.recvparam.pos(), "annotation.type.not.applicable");
+                    log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable");
                 }
+            }
+            if (tree.recvparam != null &&
+                    tree.recvparam.vartype.type.getKind() != TypeKind.ERROR) {
+                checkForDeclarationAnnotations(tree.recvparam.mods.annotations,
+                        tree.recvparam.vartype.type.tsym);
             }
             if (tree.restype != null && tree.restype.type != null) {
                 validateAnnotatedType(tree.restype, tree.restype.type);
