@@ -101,7 +101,10 @@ syntax.  Pluggable type-checking is made <em>easy</em> by the
 <a href="http://types.cs.washington.edu/checker-framework/">Checker
 Framework</a>.  It includes several example type qualifiers that you can
 start using right away, and it enables you to create your own new compiler
-plug-ins that check user-defined type qualifiers.
+plug-ins that check user-defined type qualifiers.  If you want to use the
+Checker Framework, we recommend that you
+<a href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#installation">install</a>
+it rather than following the instructions on this webpage.
 </p>
 
 <p>
@@ -132,7 +135,10 @@ compiler is updated for to support type annotations.)
 The <b>easiest</b> way to install the Type Annotations compiler, which is sufficient
 for most users, is to <a
 href="http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#installation">install
-the Checker Framework binary distribution</a>.
+the Checker Framework</a>.
+The Checker Framework contains the Type Annotations compiler, so if you
+install the Checker Framework (from its distribution, or building it from
+source), you do not need the instructions on this webpage.
 </p>
 
 <p>
@@ -287,8 +293,8 @@ javac -version
     and confirm that the output contains the
     string <code>jsr308</code>, such as <code>javac 1.8.0-jsr308-1.1.1</code>.
     <br />
-    If the output is does not contain <code>jsr308</code> 
-    (e.g., <code>javac 1.8.0-ea</code>), but you are using the
+    If the output does not contain <code>jsr308</code> 
+    (e.g., it is <code>javac 1.8.0-ea</code>), but you are using the
     correct <code>javac</code> binary (in <code>jsr308-langtools/dist/bin</code>), 
     then it is possible that
     <code>tools.jar</code> is on your classpath.  You should either remove
