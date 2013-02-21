@@ -3360,7 +3360,7 @@ public class Attr extends JCTree.Visitor {
                         Type normOuter = site;
                         if (normOuter.hasTag(CLASS)) {
                             normOuter = types.asEnclosingSuper(site, ownOuter.tsym);
-                            if (site.getKind() == TypeKind.ANNOTATED) {
+                            if (site.isAnnotated()) {
                                 // Propagate any type annotations.
                                 // TODO: should asEnclosingSuper do this?
                                 // Note that the type annotations in site will be updated
@@ -4305,7 +4305,7 @@ public class Attr extends JCTree.Visitor {
             validateAnnotatedType(errtree, type);
             if (type.tsym != null &&
                     type.tsym.isStatic() &&
-                    type.getAnnotations().nonEmpty()) {
+                    type.getAnnotationMirrors().nonEmpty()) {
                     // Enclosing static classes cannot have type annotations.
                 log.error(errtree.pos(), "cant.annotate.static.class");
             }
