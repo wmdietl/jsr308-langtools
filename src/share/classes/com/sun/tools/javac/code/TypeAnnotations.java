@@ -925,11 +925,15 @@ public class TypeAnnotations {
         // This flag is used to prevent from visiting inner classes.
         private boolean isInClass = false;
 
+        // If we are visiting an anonymous class, we need to visit enclosed
+        // class declarations, as they are not visited otherwise.
+        private boolean isAnonClass = false;
+
         @Override
         public void visitClassDef(JCClassDecl tree) {
             if (isInClass)
                 return;
-            isInClass = true;
+            isInClass = !isAnonClass;
             if (sigOnly) {
                 scan(tree.mods);
                 scan(tree.typarams);
@@ -1098,6 +1102,13 @@ public class TypeAnnotations {
             scan(tree.typeargs);
             scan(tree.clazz);
             scan(tree.args);
+
+            // Visit the class decl once with sigOnly true...
+            TypeAnnotationPositions tap = new TypeAnnotationPositions(syms, names, log, true);
+            // and noting that we are in an anonymous class.
+            tap.isAnonClass = true;
+            tap.scan(tree.def);
+            // Also visit the class decl with sigOnly false.
             scan(tree.def);
         }
 
