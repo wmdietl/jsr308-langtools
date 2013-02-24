@@ -1091,6 +1091,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         TypeAnnotations.organizeTypeAnnotationsSignatures(syms, names, log, tree, annotate);
     }
 
+    /*
+     * If the symbol is non-null, attach the type annotation to it.
+     */
     private void actualEnterTypeAnnotations(final List<JCAnnotation> annotations,
             final Env<AttrContext> env,
             final Symbol s) {
@@ -1123,8 +1126,10 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             }
         }
 
-        s.annotations.appendTypeAttributesWithCompletion(
-                annotate.new AnnotateRepeatedContext<Attribute.TypeCompound>(env, annotated, pos, log, true));
+        if (s != null) {
+            s.annotations.appendTypeAttributesWithCompletion(
+                    annotate.new AnnotateRepeatedContext<Attribute.TypeCompound>(env, annotated, pos, log, true));
+        }
     }
 
     public void typeAnnotate(final JCTree tree, final Env<AttrContext> env, final Symbol sym) {

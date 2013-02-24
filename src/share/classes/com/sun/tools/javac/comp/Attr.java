@@ -766,7 +766,12 @@ public class Attr extends JCTree.Visitor {
         JavaFileObject prevSource = log.useSource(env.toplevel.sourcefile);
 
         try {
-            memberEnter.typeAnnotate(initializer, env, env.info.enclVar);
+            // Use null as symbol to not attach the type annotation to any symbol.
+            // The initializer will later also be visited and then we'll attach
+            // to the symbol.
+            // This prevents having multiple type annotations, just because of
+            // lazy constant value evaluation.
+            memberEnter.typeAnnotate(initializer, env, null);
             annotate.flush();
             Type itype = attribExpr(initializer, env, type);
             if (itype.constValue() != null)
