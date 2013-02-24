@@ -1110,6 +1110,18 @@ public class Attr extends JCTree.Visitor {
             memberEnter.typeAnnotate(tree, localEnv, localEnv.info.scope.owner);
             annotate.flush();
 
+            {
+                // Store init and clinit type annotations with the ClassSymbol
+                // to allow output in Gen.normalizeDefs.
+                ClassSymbol cs = (ClassSymbol)env.info.scope.owner;
+                List<Attribute.TypeCompound> tas = localEnv.info.scope.owner.getRawTypeAttributes();
+                if ((tree.flags & STATIC) != 0) {
+                    cs.clinit_type_annotations = cs.clinit_type_annotations.appendList(tas);
+                } else {
+                    cs.init_type_annotations = cs.init_type_annotations.appendList(tas);
+                }
+            }
+
             attribStats(tree.stats, localEnv);
         } else {
             // Create a new local environment with a local scope.
