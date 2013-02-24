@@ -854,4 +854,25 @@ public class NestedTypes {
                 "  }" +
                 "}";
     }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = CLASS_TYPE_PARAMETER,
+                genericLocation = {}, paramIndex = 0),
+        @TADescription(annotation = "TB", type = CLASS_TYPE_PARAMETER_BOUND,
+                genericLocation = {}, paramIndex = 0, boundIndex = 0),
+        @TADescription(annotation = "TC", type = FIELD,
+                genericLocation = {}),
+        @TADescription(annotation = "TD", type = FIELD,
+                genericLocation = {3, 0})
+    })
+    @TestClass("Test$1Nested")
+    public String testNestedInMethod1() {
+        return "class Test {\n" + 
+                "  void foobar() {\n" +
+                "    class Nested<@TA X extends @TB Object> {\n" +
+                "      @TC List<@TD Object> f;\n" +
+                "    }\n" +
+                "  }" +
+                "}";
+    }
 }
