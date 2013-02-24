@@ -1211,6 +1211,13 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         }
 
         @Override
+        public void visitClassDef(JCClassDecl tree) {
+            // We can only hit a classdef if it is declared within
+            // a method. Ignore it - the class will be visited
+            // separately later.
+        }
+
+        @Override
         public void visitNewClass(JCNewClass tree) {
             if (tree.def == null) {
                 // For an anonymous class instantiation the class
