@@ -825,6 +825,11 @@ public class TypeAnnotations {
                         // not care about inner types.
                         JCAnnotatedType atypetree = (JCAnnotatedType) frame;
                         final Type utype = atypetree.underlyingType.type;
+                        if (utype == null) {
+                            // This might happen during DeferredAttr;
+                            // we will be back later.
+                            return;
+                        }
                         Symbol tsym = utype.tsym;
                         if (tsym.getKind().equals(ElementKind.TYPE_PARAMETER) ||
                                 utype.getKind().equals(TypeKind.WILDCARD) ||
@@ -1154,7 +1159,11 @@ public class TypeAnnotations {
         private static void setTypeAnnotationPos(List<JCAnnotation> annotations,
                 TypeAnnotationPosition position) {
             for (JCAnnotation anno : annotations) {
-                ((Attribute.TypeCompound) anno.attribute).position = position;
+                // attribute might be null during DeferredAttr;
+                // we will be back later.
+                if (anno.attribute != null) {
+                    ((Attribute.TypeCompound) anno.attribute).position = position;
+                }
             }
         }
     }
