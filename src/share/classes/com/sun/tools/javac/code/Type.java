@@ -26,7 +26,6 @@
 package com.sun.tools.javac.code;
 
 import com.sun.tools.javac.model.JavacAnnoConstructs;
-import com.sun.tools.javac.model.JavacTypes;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -34,7 +33,6 @@ import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 
-import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.type.*;
 
 import com.sun.tools.javac.code.Symbol.*;
@@ -248,7 +246,7 @@ public class Type implements PrimitiveType {
     public Type baseType() {
         return this;
     }
-    
+
     public boolean isAnnotated() {
         return false;
     }
@@ -781,7 +779,7 @@ public class Type implements PrimitiveType {
             return
                 getEnclosingType().isErroneous() ||
                 isErroneous(getTypeArguments()) ||
-                this != tsym.type && tsym.type.isErroneous();
+                this != tsym.type.unannotatedType() && tsym.type.isErroneous();
         }
 
         public boolean isParameterized() {
@@ -1593,7 +1591,7 @@ public class Type implements PrimitiveType {
                     "Can't annotate already annotated type: " + underlyingType +
                     "; adding: " + typeAnnotations);
         }
-        
+
         @Override 
         public boolean isAnnotated() {
             return true;

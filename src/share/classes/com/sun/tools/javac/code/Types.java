@@ -26,15 +26,12 @@
 package com.sun.tools.javac.code;
 
 import java.lang.ref.SoftReference;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
 import com.sun.tools.javac.code.Lint.LintCategory;
