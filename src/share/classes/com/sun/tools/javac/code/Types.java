@@ -26,15 +26,12 @@
 package com.sun.tools.javac.code;
 
 import java.lang.ref.SoftReference;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
-
-import javax.lang.model.type.TypeKind;
 
 import com.sun.tools.javac.code.Attribute.RetentionPolicy;
 import com.sun.tools.javac.code.Lint.LintCategory;
@@ -2091,7 +2088,7 @@ public class Types {
             @Override
             public Type visitAnnotatedType(AnnotatedType t, Boolean recurse) {
                 Type erased = erasure(t.underlyingType, recurse);
-                if (erased.getKind() == TypeKind.ANNOTATED) {
+                if (erased.isAnnotated()) {
                     // This can only happen when the underlying type is a
                     // type variable and the upper bound of it is annotated.
                     // The annotation on the type variable overrides the one
