@@ -74,6 +74,10 @@ public class ClassWriter extends ClassFile {
 
     private final Options options;
 
+    /** Switch: debugging output for JSR 308-related operations.
+     */
+    private boolean debugJSR308;
+
     /** Switch: verbose output.
      */
     private boolean verbose;
@@ -189,6 +193,7 @@ public class ClassWriter extends ClassFile {
         fileManager = context.get(JavaFileManager.class);
         signatureGen = new CWSignatureGenerator(types);
 
+        debugJSR308    = options.isSet("TA:writer");
         verbose        = options.isSet(VERBOSE);
         scramble       = options.isSet("-scramble");
         scrambleAll    = options.isSet("-scrambleAll");
@@ -908,6 +913,9 @@ public class ClassWriter extends ClassFile {
     }
 
     void writeTypeAnnotation(Attribute.TypeCompound c) {
+        if (debugJSR308)
+            System.out.println("TA: writing " + c + " at " + c.position
+                    + " in " + log.currentSourceFile());
         writePosition(c.position);
         writeCompoundAttribute(c);
     }
