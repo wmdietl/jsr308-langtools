@@ -1095,7 +1095,21 @@ public class TypeAnnotations {
                 TypeAnnotationPosition pos = new TypeAnnotationPosition();
                 pos.type = TargetType.CLASS_EXTENDS;
                 pos.pos = tree.pos;
-                separateAnnotationsKinds(classdecl, classdecl.sym.type, classdecl.sym, pos);
+                if (classdecl.extending == tree.clazz) {
+                    pos.type_index = -1;
+                } else if (classdecl.implementing.contains(tree.clazz)) {
+                    pos.type_index = classdecl.implementing.indexOf(tree.clazz);
+                } else {
+                    // In contrast to CLASS elsewhere, typarams cannot occur here.
+                    Assert.error("Could not determine position of tree " + tree);
+                }
+                Type before = classdecl.sym.type;
+                separateAnnotationsKinds(classdecl, tree.clazz.type, classdecl.sym, pos);
+
+                // classdecl.sym.type now contains an annotated type, which
+                // is not what we want there.
+                // TODO: should we put this type somewhere in the superclass/interface?
+                classdecl.sym.type = before;
             }
 
             scan(tree.encl);
