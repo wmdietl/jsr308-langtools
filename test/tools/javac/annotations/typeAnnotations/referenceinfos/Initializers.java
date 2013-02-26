@@ -83,4 +83,13 @@ public class Initializers {
 
     // TODO: test interaction with several constructors, especially non-initial constuctors.
     // I don't think this kind of test is possible here.
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = CAST,
+                typeIndex = 0, offset = ReferenceInfoUtil.IGNORE_VALUE),
+    })
+    public String lazyConstantCast1() {
+        return "class Test { public static final Object o = (@TA Object) null; }";
+    }
+
 }

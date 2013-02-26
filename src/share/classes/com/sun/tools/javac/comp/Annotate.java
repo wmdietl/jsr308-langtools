@@ -356,10 +356,14 @@ public class Annotate {
     Attribute.TypeCompound enterTypeAnnotation(JCAnnotation a,
             Type expected,
             Env<AttrContext> env) {
-        Attribute.Compound c = enterAnnotation(a, expected, env);
-        Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
-        a.attribute = tc;
-        return tc;
+        if (a.attribute == null) {
+            Attribute.Compound c = enterAnnotation(a, expected, env);
+            Attribute.TypeCompound tc = new Attribute.TypeCompound(c.type, c.values, new TypeAnnotationPosition());
+            a.attribute = tc;
+            return tc;
+        } else {
+            return (Attribute.TypeCompound) a.attribute;
+        }
     }
 
     /* *********************************
