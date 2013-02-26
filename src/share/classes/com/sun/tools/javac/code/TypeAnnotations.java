@@ -594,7 +594,13 @@ public class TypeAnnotations {
 
             switch (frame.getKind()) {
                 case TYPE_CAST:
+                    JCTypeCast frameTC = (JCTypeCast) frame;
                     p.type = TargetType.CAST;
+                    if (frameTC.clazz.hasTag(Tag.TYPEINTERSECTION)) {
+                        // This case was already handled by INTERSECTION_TYPE
+                    } else {
+                        p.type_index = 0;
+                    }
                     p.pos = frame.pos;
                     return;
 
@@ -604,7 +610,7 @@ public class TypeAnnotations {
                     return;
 
                 case NEW_CLASS:
-                    JCNewClass frameNewClass = (JCNewClass)frame;
+                    JCNewClass frameNewClass = (JCNewClass) frame;
                     if (frameNewClass.def != null) {
                         // Special handling for anonymous class instantiations
                         JCClassDecl frameClassDecl = frameNewClass.def;
@@ -1172,8 +1178,8 @@ public class TypeAnnotations {
             if (!annotations.isEmpty()) {
                 /*
                 System.out.println("Finding pos for: " + annotations);
-                System.out.println("    tree: " + tree);
-                System.out.println("    frame: " + frame);
+                System.out.println("    tree: " + tree + " kind: " + tree.getKind());
+                System.out.println("    frame: " + frame + " kind: " + frame.getKind());
                 */
                 TypeAnnotationPosition p = new TypeAnnotationPosition();
                 resolveFrame(tree, frame, frames.toList(), p);
