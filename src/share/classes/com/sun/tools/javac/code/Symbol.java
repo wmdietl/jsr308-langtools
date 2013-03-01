@@ -483,12 +483,12 @@ public abstract class Symbol implements Element {
      */
     @Deprecated
     public <A extends java.lang.annotation.Annotation> A getAnnotation(Class<A> annoType) {
-        return JavacElements.getAnnotation(this, annoType);
+        return JavacAnnoConstructs.getAnnotation(this, annoType);
     }
 
     // This method is part of the javax.lang.model API, do not use this in javac code.
     public <A extends java.lang.annotation.Annotation> A[] getAnnotationsByType(Class<A> annoType) {
-        return JavacElements.getAnnotations(this, annoType);
+        return JavacAnnoConstructs.getAnnotations(this, annoType);
     }
 
     // TODO: getEnclosedElements should return a javac List, fix in FilteredMemberList
@@ -782,6 +782,14 @@ public abstract class Symbol implements Element {
          */
         public Pool pool;
 
+        /** The type attributes of initializers in this class.
+         */
+        public List<Attribute.TypeCompound> init_type_annotations = List.<Attribute.TypeCompound>nil();
+
+        /** The type attributes of class initializers in this class.
+         */
+        public List<Attribute.TypeCompound> clinit_type_annotations = List.<Attribute.TypeCompound>nil();
+
         public ClassSymbol(long flags, Name name, Type type, Symbol owner) {
             super(flags, name, type, owner);
             this.members_field = null;
@@ -935,11 +943,12 @@ public abstract class Symbol implements Element {
         }
 
         /**
-         * @deprecated this method should never be used by javac internally.
+         * Since this method works in terms of the runtime representation
+         * of annotations, it should never be used by javac internally.
          */
-        @Override @Deprecated
+        @Override
         public <A extends java.lang.annotation.Annotation> A getAnnotation(Class<A> annoType) {
-            return JavacElements.getAnnotation(this, annoType);
+            return JavacAnnoConstructs.getAnnotation(this, annoType);
         }
 
         public <R, P> R accept(ElementVisitor<R, P> v, P p) {
@@ -1442,6 +1451,10 @@ public abstract class Symbol implements Element {
 
         public <R, P> R accept(Symbol.Visitor<R, P> v, P p) {
             return v.visitMethodSymbol(this, p);
+        }
+        
+        public Type getReceiverType() {
+            return asType().getReceiverType();
         }
 
         public Type getReturnType() {

@@ -632,7 +632,7 @@ public class ClassWriter extends ClassFile {
             acount++;
         }
         acount += writeJavaAnnotations(sym.getRawAttributes());
-        acount += writeTypeAnnotations(sym.getRawTypeAttributes());
+        acount += writeTypeAnnotations(sym.getRawTypeAttributes(), false);
         return acount;
     }
 
@@ -759,7 +759,7 @@ public class ClassWriter extends ClassFile {
         return attrCount;
     }
 
-    int writeTypeAnnotations(List<Attribute.TypeCompound> typeAnnos) {
+    int writeTypeAnnotations(List<Attribute.TypeCompound> typeAnnos, boolean inCode) {
         if (typeAnnos.isEmpty()) return 0;
 
         ListBuffer<Attribute.TypeCompound> visibles = ListBuffer.lb();
@@ -793,10 +793,13 @@ public class ClassWriter extends ClassFile {
                     // For method parameters we get the annotation twice! Once with
                     // a valid position, once unknown.
                     // TODO: find a cleaner solution.
-                    // System.err.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
+                    PrintWriter pw = log.getWriter(Log.WriterKind.ERROR);
+                    pw.println("ClassWriter: Position UNKNOWN in type annotation: " + tc);
                     continue;
                 }
             }
+            if (tc.position.type.isLocal() != inCode)
+                continue;
             if (!tc.position.emitToClassfile())
                 continue;
             switch (types.getRetention(tc)) {
@@ -1240,6 +1243,9 @@ public class ClassWriter extends ClassFile {
             endAttr(alenIdx);
             acount++;
         }
+
+        acount += writeTypeAnnotations(code.meth.getRawTypeAttributes(), true);
+
         endAttrs(acountIdx, acount);
     }
     //where
@@ -1626,7 +1632,7 @@ public class ClassWriter extends ClassFile {
             out = null;
         } finally {
             if (out != null) {
-                // if we are propogating an exception, delete the file
+                // if we are propagating an exception, delete the file
                 out.close();
                 outFile.delete();
                 outFile = null;
@@ -1740,7 +1746,7 @@ public class ClassWriter extends ClassFile {
 
         acount += writeFlagAttrs(c.flags());
         acount += writeJavaAnnotations(c.getRawAttributes());
-        acount += writeTypeAnnotations(c.getRawTypeAttributes());
+        acount += writeTypeAnnotations(c.getRawTypeAttributes(), false);
         acount += writeEnclosingMethodAttribute(c);
         acount += writeExtraClassAttributes(c);
 
