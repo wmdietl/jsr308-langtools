@@ -272,6 +272,10 @@ public class TypeAnnotations {
             sym.annotations.reset();
             sym.annotations.setDeclarationAttributes(declAnnos.toList());
 
+            if (typeAnnos.isEmpty()) {
+                return;
+            }
+
             List<Attribute.TypeCompound> typeAnnotations = typeAnnos.toList();
 
             if (type == null) {
@@ -279,6 +283,11 @@ public class TypeAnnotations {
                 // This is used for constructor return annotations, for which
                 // no appropriate type exists.
                 sym.annotations.appendUniqueTypes(typeAnnotations);
+                return;
+            }
+
+            if (leftmostTypeAnnotationsEqual(type, typeAnnotations)) {
+                // TODO: hackish - see comment with called method.
                 return;
             }
 
@@ -305,6 +314,33 @@ public class TypeAnnotations {
                 // on the owner.
                 sym.owner.annotations.appendUniqueTypes(sym.getTypeAnnotationMirrors());
             }
+        }
+
+        // For a class declarations within an anonymous class
+        // declaration the body has been visited before.
+        // Don't try to annotate the type again, which would crash.
+        // This happens for type annotations that are also declaration
+        // annotations - they will appear in sym.getRawAttributes()
+        // and then because they are kind BOTH will be type and
+        // declaration annotations.
+        // TODO: find a nicer solution - not visiting the declaration twice.
+        // However, I didn't manage without breaking other test cases.
+        private static boolean leftmostTypeAnnotationsEqual(Type type, List<Attribute.TypeCompound> typeAnnotations) {
+            Type leftmost = type;
+            while (true) {
+                if (leftmost.getKind() == TypeKind.ARRAY) {
+                    leftmost = leftmost.unannotatedType();
+                    leftmost = ((ArrayType)leftmost).getComponentType();
+                } else if (leftmost.getKind() == TypeKind.DECLARED &&
+                        leftmost.getEnclosingType() != null &&
+                        leftmost.getEnclosingType().getKind() == TypeKind.DECLARED) {
+                    leftmost = leftmost.getEnclosingType();
+                } else {
+                    break;
+                }
+            }
+            // Comparing the length is enough to notice duplicate calls.
+            return leftmost.getAnnotationMirrors().length() == typeAnnotations.length();
         }
 
         // This method has a similar purpose as
