@@ -770,11 +770,11 @@ public class ClassWriter {
                 break;
             // class extends or implements clause
             case CLASS_EXTENDS:
-                out.writeByte(p.type_index);
+                out.writeShort(p.type_index);
                 break;
             // throws
             case THROWS:
-                out.writeByte(p.type_index);
+                out.writeShort(p.type_index);
                 break;
             // method parameter
             case METHOD_FORMAL_PARAMETER:
