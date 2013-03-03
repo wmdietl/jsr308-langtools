@@ -751,7 +751,7 @@ public class ClassWriter {
                 break;
             // exception parameter
             case EXCEPTION_PARAMETER:
-                out.writeByte(p.exception_index);
+                out.writeShort(p.exception_index);
                 break;
             // method receiver
             case METHOD_RECEIVER:

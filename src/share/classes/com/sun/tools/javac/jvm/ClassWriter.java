@@ -939,7 +939,7 @@ public class ClassWriter extends ClassFile {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            databuf.appendByte(p.exception_index);
+            databuf.appendChar(p.exception_index);
             break;
         // method receiver
         case METHOD_RECEIVER:
