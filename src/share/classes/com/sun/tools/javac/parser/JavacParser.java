@@ -2013,7 +2013,7 @@ public class JavacParser implements Parser {
     /** Creator = [Annotations] Qualident [TypeArguments] ( ArrayCreatorRest | ClassCreatorRest )
      */
     JCExpression creator(int newpos, List<JCExpression> typeArgs) {
-        List<JCAnnotation> newAnnotations = typeAnnotationsOpt();
+        List<JCAnnotation> newAnnotations = annotationsOpt(Tag.ANNOTATION);
 
         switch (token.kind) {
         case BYTE: case SHORT: case CHAR: case INT: case LONG: case FLOAT:
@@ -2029,11 +2029,6 @@ public class JavacParser implements Parser {
         default:
         }
         JCExpression t = qualident(true);
-
-        // handle type annotations for non primitive arrays
-        if (newAnnotations.nonEmpty()) {
-            t = insertAnnotationsToMostInner(t, newAnnotations, false);
-        }
 
         int oldmode = mode;
         mode = TYPE;
@@ -2068,6 +2063,11 @@ public class JavacParser implements Parser {
         }
         mode = oldmode;
         if (token.kind == LBRACKET || token.kind == MONKEYS_AT) {
+            // handle type annotations for non primitive arrays
+            if (newAnnotations.nonEmpty()) {
+                t = insertAnnotationsToMostInner(t, newAnnotations, false);
+            }
+
             JCExpression e = arrayCreatorRest(newpos, t);
             if (diamondFound) {
                 reportSyntaxError(lastTypeargsPos, "cannot.create.array.with.diamond");
@@ -2092,8 +2092,18 @@ public class JavacParser implements Parser {
             if (newClass.def != null) {
                 assert newClass.def.mods.annotations.isEmpty();
                 if (newAnnotations.nonEmpty()) {
+                    // Add type and declaration annotations to the new class;
+                    // com.sun.tools.javac.code.TypeAnnotations.TypeAnnotationPositions.visitNewClass(JCNewClass)
+                    // will later remove all type annotations and only leave the
+                    // declaration annotations.
                     newClass.def.mods.pos = earlier(newClass.def.mods.pos, newAnnotations.head.pos);
-                    newClass.def.mods.annotations = List.convert(JCAnnotation.class, newAnnotations);
+                    newClass.def.mods.annotations = newAnnotations;
+                }
+            } else {
+                // handle type annotations for instantiations
+                if (newAnnotations.nonEmpty()) {
+                    t = insertAnnotationsToMostInner(t, newAnnotations, false);
+                    newClass.clazz = t;
                 }
             }
             return newClass;

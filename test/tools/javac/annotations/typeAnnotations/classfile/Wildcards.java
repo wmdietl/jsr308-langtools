@@ -48,7 +48,7 @@ public class Wildcards extends ClassfileTestHelper {
             test(cf, f);
         }
         for (Method m: cf.methods) {
-            test(cf, m);
+            test(cf, m,false);
         }
 
         countAnnotations();

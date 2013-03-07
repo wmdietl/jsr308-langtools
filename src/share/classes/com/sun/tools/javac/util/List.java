@@ -37,7 +37,7 @@ import java.util.NoSuchElementException;
 /** A class for generic linked lists. Links are supposed to be
  *  immutable, the only exception being the incremental construction of
  *  lists via ListBuffers.  List is the main container class in
- *  GJC. Most data structures and algorthms in GJC use lists rather
+ *  GJC. Most data structures and algorithms in GJC use lists rather
  *  than arrays.
  *
  *  <p>Lists are always trailed by a sentinel element, whose head and tail
