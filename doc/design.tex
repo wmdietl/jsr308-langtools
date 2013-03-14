@@ -460,25 +460,13 @@ possible to annotate the receiver's type:
   }
 \end{Verbatim}
 
-An example of an inner constructor with both a result and a receiver
-annotation is:
-
-\preverbnegspace
-\begin{Verbatim}
-class Outer {
-  class Inner {
-    @Result Inner(@Receiver Outer Outer.this, boolean b) { }
-  }
-}
-\end{Verbatim}
-
   An anonymous class has no name for its innermost class, so it is not
   possible to annotate the receiver of its constructor or methods.
   If you need to do so, re-write the
   anonymous class into a named class and then use a receiver parameter.
 
   A method in an inner class (or a constructor in an
-  inner class that is in an inner class) has multiple receivers:  one for
+  inner class) has multiple receivers:  one for
   each containing class.  For a method, the receivers are named \<this>,
   \<Outer.this>, etc.  Only the innermost receiver may be written as a
   formal parameter.  This restriction does not limit expressiveness, because
@@ -504,6 +492,23 @@ It has three receivers (JLS \ahref{\jlsFifteenNine}{\S15.9}).
 One is referred to as \<this> and has type \<@C Inner>.
 One is referred to as \<Middle.this> and has type \<@B Middle>.
 One is referred to as \<Outer.this> and has type \<@A Outer>.
+
+A constructor has no receiver, unless the constructor is in an inner class.
+Within an inner class constructor, the receiver has a name such as
+\<Outer.this>, and \<this> refers to the result.  (By contrast, within a
+method \<this> refers to the receiver.)
+An example of an inner constructor with both a result and a receiver
+annotation is:
+
+\preverbnegspace
+\begin{Verbatim}
+class Outer {
+  class Inner {
+    @Result Inner(@Receiver Outer Outer.this, boolean b) { }
+  }
+}
+\end{Verbatim}
+
 
 It is not permitted to write a declaration annotation on the
 receiver (\code{this}) formal parameter declaration.
