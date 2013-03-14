@@ -1440,6 +1440,12 @@ Runtime[In]VisibleTypeAnnotations_attribute {
 
 A type annotation is stored in a \RuntimeInOrVisibleTypeAnnotations attribute
 on the smallest enclosing class, field, method, or \<Code> structure.
+Type annotations in the body of an initializer appear with the code that
+performs the initialization, not on the field that is being initialized.
+Type annotations in the body of instance initializer appear on on all
+initial constructors, and type annotations in the body of a class
+initializer appear on the \<clinit> symbol.
+
 
 A type annotation written on a declaration's type (e.g., on a field type or
 on a method return type)
