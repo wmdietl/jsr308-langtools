@@ -1906,6 +1906,7 @@ These annotations are attached to a single bytecode, not a bytecode range
 single value, not about the behavior of a code block.
 
 
+\attributelocation{containing an \code{offset\_target}}{\code{Code} attribute}
 
 % The Java compiler must emit a \code{checkcast} bytecode for any annotated
 % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
@@ -1926,18 +1927,12 @@ single value, not about the behavior of a code block.
 
 \subsubsection{Casts and type arguments to constructor/method invocation/references\label{class-file:ext:ri:cast}\label{class-file:ext:ri:con-typearg}\label{class-file:ext:ri:mref-typearg}\label{class-file:ext:ri:cref-typearg}}
 
-\targetinfocontentspartial{a cast or a type argument in a constructor/method
-  call/reference} contains ane \code{invocation\_type\_argument\_target} or
-\code{method\_reference\_type\_argument}:
+\targetinfocontents{a cast or a type argument in a constructor/method
+  call/reference}{type\_argument\_target}
 
 \preverbnegspace
 \begin{Verbatim}
-    invocation_type_argument_target {
-        u2 offset;
-        u1 type_argument_index;
-    };
-
-    method_type_argument_target {
+    type_argument_target {
         u2 offset;
         u1 type_argument_index;
     };
