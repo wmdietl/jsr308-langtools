@@ -1921,12 +1921,18 @@ single value, not about the behavior of a code block.
 
 \subsubsection{Casts and type arguments to constructor/method invocation/references\label{class-file:ext:ri:cast}\label{class-file:ext:ri:con-typearg}\label{class-file:ext:ri:mref-typearg}\label{class-file:ext:ri:cref-typearg}}
 
-\targetinfocontents{a cast or a type argument in a constructor/method
-  call/reference}{invocation\_type\_argument\_target or method\_reference\_type\_argument}
+\targetinfocontentspartial{a cast or a type argument in a constructor/method
+  call/reference} contains ane \code{invocation\_type\_argument\_target} or
+\code{method\_reference\_type\_argument}:
 
 \preverbnegspace
 \begin{Verbatim}
-    type_argument_target {
+    invocation_type_argument_target {
+        u2 offset;
+        u1 type_argument_index;
+    };
+
+    method_type_argument_target {
         u2 offset;
         u1 type_argument_index;
     };
