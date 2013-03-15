@@ -31,10 +31,31 @@ The current development version of the specification is available in the
 <!-- See Makefile for documentation of how to compute a new changelog entry.
 -->
 
-  <dt><a href="java-annotation-design-20130202.html">2 February 2013</a></dt>
+  <dt><a href="java-annotation-design-20130315.html">15 March 2013</a></dt>
   <dd>
-    Change method_reference_receiver to method_reference, and change
-    constructor_reference_receiver to constructor_reference.
+    Classfile changes:
+    <ul>
+      <li>
+        Type annotations on the body of an initializer appear with the
+        initializer code, not with the field being initialized.
+      </li>
+      <li>
+	Change <tt>method_reference_receiver</tt> to
+        <tt>method_reference</tt>, and change 
+	<tt>constructor_reference_receiver</tt> to
+        <tt>constructor_reference</tt>. 
+      </li>
+      <li>
+        Change <tt>invocation_type_argument_target</tt> and
+        <tt>method_reference_type_argument</tt> to <tt>type_argument_target</tt>.
+      </li>
+    </ul>
+    Clarifications:
+    <ul>
+      <li>
+        Clarify the meaning of the receiver of an inner class constructor.
+      </li>
+    </ul>
   </dd>
 
   <dt><a href="java-annotation-design-20130202.html">2 February 2013</a></dt>
