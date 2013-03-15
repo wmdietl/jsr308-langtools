@@ -3,11 +3,14 @@ on Java types").
 
 Also see file README-jsr308.html .
 
-To copy the documents to the website:
+To copy some documents to the website (but NOT THE SPECIFICATION!), run
+  make web
+
+To make a new release of the specification, on the website:
 1. See the comments in the Makefile for instructions regarding how to
 update the jsr308-changes.html file.
 2. Run
-  make web
+  make web-spec
 3. See the results at
   http://types.cs.washington.edu/jsr308/
 
