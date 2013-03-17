@@ -1,12 +1,10 @@
 /*
- * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Oracle designates this
- * particular file as subject to the "Classpath" exception as provided
- * by Oracle in the LICENSE file that accompanied this code.
+ * published by the Free Software Foundation.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -23,26 +21,23 @@
  * questions.
  */
 
-package javax.lang.model.type;
-
-import java.util.List;
-
-import javax.lang.model.element.AnnotationMirror;
-
-/**
- * Represents an annotated type.
- *
- * As of the {@link javax.lang.model.SourceVersion#RELEASE_8
- * RELEASE_8} source version, annotated types can appear for all
- * type uses.
- *
- * @author Werner Dietl
- * @since 1.8
+/*
+ * @test
+ * @bug 8009360
+ * @summary AssertionError from type annotation on member of anonymous class
+ * @compile T8009360.java
  */
-public interface AnnotatedType extends TypeMirror,
-    DeclaredType, TypeVariable, WildcardType,
-    PrimitiveType, ArrayType {
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-    List<? extends AnnotationMirror> getAnnotations();
-    TypeMirror getUnderlyingType();
+class Test1<T> {
+    Object mtest( Test1<T> t){ return null; }
+    public void test() {
+        mtest( new Test1<T>() {
+                @A String odata1 = "test";
+           });
+   }
 }
+
+@Target({TYPE_USE,FIELD}) @interface A { }
