@@ -158,13 +158,14 @@ ${jsr308_spec}/java-annotation-design.pdf: design.pdf ${jsr308_spec} ${PLUME_BIN
 
 ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
-# We don't know which of the two files will be created
-	-\cp -f design001.gif ${jsr308_spec}
-	-\cp -f design001.png ${jsr308_spec}
-	-\cp -f design002.gif ${jsr308_spec}
-	-\cp -f design002.png ${jsr308_spec}
-	-\cp -f design003.gif ${jsr308_spec}
-	-\cp -f design003.png ${jsr308_spec}
+# We don't know which of the two files will be created (.gif or .png), so
+# copy both just to be safe.
+	if [ -a design001.gif ]; then cp design001.gif ${jsr308_spec}; fi;
+	if [ -a design001.png ]; then cp design001.png ${jsr308_spec}; fi;
+	if [ -a design002.gif ]; then cp design002.gif ${jsr308_spec}; fi;
+	if [ -a design002.png ]; then cp design002.png ${jsr308_spec}; fi;
+	if [ -a design003.gif ]; then cp design003.gif ${jsr308_spec}; fi;
+	if [ -a design003.png ]; then cp design003.png ${jsr308_spec}; fi;
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
