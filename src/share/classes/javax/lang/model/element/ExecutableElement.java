@@ -88,17 +88,6 @@ public interface ExecutableElement extends Element, Parameterizable {
     TypeMirror getReceiverType();
 
     /**
-     * Returns the type of this executable's receiver parameter,
-     * or {@link javax.lang.model.type.NoType NoType} 
-     * (kind {@link javax.lang.model.type.TypeKind#NONE NONE}) 
-     * if the ExecutableType represents the type of an executable 
-     * which is a static method or an initializer (static or instance)
-     * 
-     * @return the type of this executable's receiver parameter
-     */
-    TypeMirror getReceiverType();
-
-    /**
      * Returns {@code true} if this method or constructor accepts a variable
      * number of arguments and returns {@code false} otherwise.
      *

@@ -1457,10 +1457,6 @@ public abstract class Symbol implements Element {
             return asType().getReceiverType();
         }
 
-        public Type getReceiverType() {
-            return asType().getReceiverType();
-        }
-
         public Type getReturnType() {
             return asType().getReturnType();
         }
