@@ -25,7 +25,6 @@
 
 package com.sun.tools.javac.code;
 
-import com.sun.tools.javac.model.JavacAnnoConstructs;
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -36,6 +35,8 @@ import java.util.Set;
 import javax.lang.model.type.*;
 
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.model.JavacAnnoConstructs;
+import com.sun.tools.javac.model.JavacTypes;
 import com.sun.tools.javac.util.*;
 import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
@@ -274,7 +275,7 @@ public class Type implements PrimitiveType {
         @SuppressWarnings("unchecked")
         A[] tmp = (A[]) java.lang.reflect.Array.newInstance(annotationType, 0);
         return tmp;
-    } 
+    }
 
     /** Return the base types of a list of types.
      */
@@ -1560,11 +1561,11 @@ public class Type implements PrimitiveType {
     }
 
     public static class AnnotatedType extends Type
-            implements 
+            implements
                 javax.lang.model.type.ArrayType,
                 javax.lang.model.type.DeclaredType,
-                javax.lang.model.type.PrimitiveType, 
-                javax.lang.model.type.TypeVariable, 
+                javax.lang.model.type.PrimitiveType,
+                javax.lang.model.type.TypeVariable,
                 javax.lang.model.type.WildcardType {
         /** The type annotations on this type.
          */
@@ -1610,7 +1611,7 @@ public class Type implements PrimitiveType {
         @Override
         public <A extends Annotation> A[] getAnnotationsByType(Class<A> annotationType) {
             return JavacAnnoConstructs.getAnnotationsByType(this, annotationType);
-        } 
+        }
 
         @Override
         public TypeKind getKind() {

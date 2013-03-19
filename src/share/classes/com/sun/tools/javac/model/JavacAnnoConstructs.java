@@ -49,7 +49,7 @@ import static com.sun.tools.javac.code.TypeTag.CLASS;
 public class JavacAnnoConstructs {
 
     // <editor-fold defaultstate="collapsed" desc="Symbols">
-    
+
     /**
      * An internal-use utility that creates a runtime view of an
      * annotation. This is the implementation of
@@ -81,7 +81,7 @@ public class JavacAnnoConstructs {
 
         return null;
     }
-    
+
     // Helper to getAnnotation[s]
     private static <A extends Annotation> Attribute.Compound getAttributeOnClass(ClassSymbol annotated,
                                                                 Class<A> annoType) {
@@ -146,7 +146,7 @@ public class JavacAnnoConstructs {
                 container = rawAttributes[i];
             }
         }
-        
+
         // Deal with inherited annotations
         if (annotated.kind == Kinds.TYP &&
                 (annotated instanceof ClassSymbol)) {
@@ -214,11 +214,11 @@ public class JavacAnnoConstructs {
 
         return arr;
     }
-    
+
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Types">
-    
+
     /**
      * An internal-use utility that creates a runtime view of an
      * annotation. This is the implementation of
@@ -231,7 +231,7 @@ public class JavacAnnoConstructs {
         Attribute.Compound c = getAttribute(annotated, annoType);
         return c == null ? null : AnnotationProxyMaker.generateAnnotation(c, annoType);
     }
-    
+
     // Helper to getAnnotation[s]
     private static <A extends Annotation> Attribute.Compound getAttribute(Type annotated,
                                                                           Class<A> annoType) {
@@ -331,8 +331,8 @@ public class JavacAnnoConstructs {
             arr[insert + i] = AnnotationProxyMaker.generateAnnotation(contained[i], annoType);
 
         return arr;
-    } 
-    
+    }
+
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="Container support">
@@ -353,7 +353,7 @@ public class JavacAnnoConstructs {
             return null;
         }
     }
-    
+
     private static Method initValueElementMethod() {
         if (REPEATABLE_CLASS == null)
             return null;
@@ -399,7 +399,7 @@ public class JavacAnnoConstructs {
         }
         return null;
     }
-    
+
     // Helper to getAnnotations
     private static Attribute[] unpackAttributes(Attribute.Compound container) {
         // We now have an instance of the container,
@@ -407,6 +407,6 @@ public class JavacAnnoConstructs {
         // contained type or null
         return ((Attribute.Array)container.member(container.type.tsym.name.table.names.value)).values;
     }
-    
+
     // </editor-fold>
 }

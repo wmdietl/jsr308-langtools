@@ -78,13 +78,21 @@ public interface ExecutableType extends TypeMirror {
     List<? extends TypeMirror> getParameterTypes();
 
     /**
-     * Returns the type of this executable's receiver parameter,
-     * or {@link javax.lang.model.type.NoType NoType} 
-     * (kind {@link javax.lang.model.type.TypeKind#NONE NONE}) 
-     * if the ExecutableType represents the type of an executable 
-     * which is a static method or an initializer (static or instance)
-     * 
-     * @return the type of this executable's receiver parameter
+     * Returns the receiver type of this executable,
+     * or {@link javax.lang.model.type.NoType NoType} with
+     * kind {@link javax.lang.model.type.TypeKind#NONE NONE}
+     * if the executable has no receiver type.
+     *
+     * An executable which is an instance method, or a constructor of an
+     * inner class, has a receiver type derived from the {@linkplain
+     * #getEnclosingElement declaring type}.
+     *
+     * An executable which is a static method, or a constructor of a
+     * non-inner class, or an initializer (static or instance), has no
+     * receiver type.
+     *
+     * @return the receiver type of this executable
+     * @since 1.8
      */
     TypeMirror getReceiverType();
 

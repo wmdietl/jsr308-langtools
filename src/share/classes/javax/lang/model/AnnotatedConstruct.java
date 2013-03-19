@@ -43,7 +43,7 @@ public interface AnnotatedConstruct {
      * Returns the annotations that are directly present on this
      * element or type use.
      *
-     * @return the annotations directly present on this element or type;
+     * @return the annotations directly present on this element or type use;
      *          an empty list if there are none
      */
     List<? extends AnnotationMirror> getAnnotationMirrors();
@@ -97,10 +97,10 @@ public interface AnnotatedConstruct {
     <A extends Annotation> A getAnnotation(Class<A> annotationType);
 
     /**
-     * Returns annotations that are <em>present</em> on this element.
+     * Returns annotations that are <em>present</em> on this element or type use.
      *
-     * If there are no annotations <em>present</em> on this element, the return
-     * value is an array of length 0.
+     * If there are no annotations <em>present</em> on this element or type use,
+     * the return value is an array of length 0.
      *
      * The difference between this method and {@link #getAnnotation(Class)}
      * is that this method detects if its argument is a <em>repeatable
