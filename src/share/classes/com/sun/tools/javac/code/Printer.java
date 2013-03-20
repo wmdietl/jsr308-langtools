@@ -204,8 +204,9 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
             if (arrel.isAnnotated()) {
                 sb.append(' ');
                 sb.append(arrel.getAnnotationMirrors());
+                sb.append(' ');
             }
-            sb.append(" []");
+            sb.append("[]");
             arrel = arrel.unannotatedType();
             arrel = ((ArrayType) arrel).elemtype;
         }
