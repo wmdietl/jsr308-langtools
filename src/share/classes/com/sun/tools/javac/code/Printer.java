@@ -276,6 +276,8 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
                         t.typeAnnotations +
                         " " + t.underlyingType;
             } else {
+                // TODO: this prints "@A java.lang.Object". How can we easily
+                // split of the package name? Nested types are handled above.
                 return t.typeAnnotations + " " + visit(t.underlyingType, locale);
             }
         } else {
