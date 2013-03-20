@@ -782,6 +782,14 @@ public abstract class Symbol implements Element {
          */
         public Pool pool;
 
+        /** The type attributes of initializers in this class.
+         */
+        public List<Attribute.TypeCompound> init_type_annotations = List.<Attribute.TypeCompound>nil();
+
+        /** The type attributes of class initializers in this class.
+         */
+        public List<Attribute.TypeCompound> clinit_type_annotations = List.<Attribute.TypeCompound>nil();
+
         public ClassSymbol(long flags, Name name, Type type, Symbol owner) {
             super(flags, name, type, owner);
             this.members_field = null;
@@ -1444,7 +1452,7 @@ public abstract class Symbol implements Element {
         public <R, P> R accept(Symbol.Visitor<R, P> v, P p) {
             return v.visitMethodSymbol(this, p);
         }
-
+        
         public Type getReceiverType() {
             return asType().getReceiverType();
         }

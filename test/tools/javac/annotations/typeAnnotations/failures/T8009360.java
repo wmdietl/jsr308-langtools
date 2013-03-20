@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,28 +23,21 @@
 
 /*
  * @test
- * @bug 8006775
- * @summary Ensure that nested classes/methods work
- * @author Werner Dietl
- * @compile Nesting.java
+ * @bug 8009360
+ * @summary AssertionError from type annotation on member of anonymous class
+ * @compile T8009360.java
  */
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE_USE)
-@interface A { }
-
-class Nesting {
-    void top(@A Nesting this) {}
-
-    class B {
-        void inB(@A B this) {}
-    }
-
-    void meth(@A Nesting this) {
-        class C {
-            void inMethod(@A C this) {}
-        }
-    }
+class Test1<T> {
+    Object mtest( Test1<T> t){ return null; }
+    public void test() {
+        mtest( new Test1<T>() {
+                @A String odata1 = "test";
+           });
+   }
 }
+
+@Target({TYPE_USE,FIELD}) @interface A { }
