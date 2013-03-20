@@ -954,7 +954,7 @@ public class Attr extends JCTree.Visitor {
                     {
                         // Make sure the receiver parameter name is as expected
                         String fnd = tree.recvparam.nameexpr.toString();
-                        String exp = recvtype.toString() + '.' + names._this.toString();
+                        String exp = recvtype.unannotatedType().toString() + '.' + names._this.toString();
                         if (!exp.endsWith(fnd)) {
                             log.error(tree.recvparam.pos(), "receiver.parameter.wrong.name", exp, fnd);
                         }
