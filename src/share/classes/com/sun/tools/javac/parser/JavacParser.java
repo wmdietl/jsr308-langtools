@@ -262,7 +262,7 @@ public class JavacParser implements Parser {
 
     /** The type of the method receiver, as specified by a first "this" parameter.
      */
-    JCVariableDecl receiverParam;
+    JCReceiverVariableDecl receiverParam;
 
 
     /** When terms are parsed, the mode determines which is expected:
@@ -2997,7 +2997,22 @@ public class JavacParser implements Parser {
             syntaxError(pos, "expected", IDENTIFIER);
             name = token.name();
         } else {
-            name = ident();
+            if (allowThisIdent) {
+                JCExpression pn = qualident(false);
+                if (pn.hasTag(Tag.IDENT) && !((JCIdent)pn).name.contentEquals(TokenKind.THIS.name)) {
+                    name = ((JCIdent)pn).name;
+                } else {
+                    if ((mods.flags & Flags.VARARGS) != 0) {
+                        log.error(token.pos, "varargs.and.receiver");
+                    }
+                    if (token.kind == LBRACKET) {
+                        log.error(token.pos, "array.and.receiver");
+                    }
+                    return toP(F.at(pos).ReceiverVarDef(mods, pn, type));
+                }
+            } else {
+                name = ident();
+            }
         }
         if ((mods.flags & Flags.VARARGS) != 0 &&
                 token.kind == LBRACKET) {
@@ -3485,7 +3500,7 @@ public class JavacParser implements Parser {
         if (isInterface && (mods.flags & Flags.STATIC) != 0) {
             checkStaticInterfaceMethods();
         }
-        JCVariableDecl prevReceiverParam = this.receiverParam;
+        JCReceiverVariableDecl prevReceiverParam = this.receiverParam;
         try {
             this.receiverParam = null;
             // Parsing formalParameters sets the receiverParam, if present
@@ -3610,8 +3625,8 @@ public class JavacParser implements Parser {
         if (token.kind != RPAREN) {
             this.allowThisIdent = true;
             lastParam = formalParameter(lambdaParameters);
-            if (lastParam.name.contentEquals(TokenKind.THIS.name)) {
-                this.receiverParam = lastParam;
+            if (lastParam instanceof JCReceiverVariableDecl) {
+                this.receiverParam = (JCReceiverVariableDecl) lastParam;
             } else {
                 params.append(lastParam);
             }
