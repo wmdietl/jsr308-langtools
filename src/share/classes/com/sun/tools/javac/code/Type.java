@@ -1686,7 +1686,10 @@ public class Type implements PrimitiveType {
 
         @Override
         public String toString() {
-            // TODO more logic for arrays, etc.
+            // This method is only used for internal debugging output.
+            // See
+            // com.sun.tools.javac.code.Printer.visitAnnotatedType(AnnotatedType, Locale)
+            // for the user-visible logic.
             if (typeAnnotations != null &&
                     !typeAnnotations.isEmpty()) {
                 return "(" + typeAnnotations.toString() + " :: " + underlyingType.toString() + ")";
@@ -1698,9 +1701,13 @@ public class Type implements PrimitiveType {
         @Override
         public boolean contains(Type t)          { return underlyingType.contains(t); }
 
-        // TODO: attach annotations?
         @Override
-        public Type withTypeVar(Type t)          { return underlyingType.withTypeVar(t); }
+        public Type withTypeVar(Type t) {
+            // Don't create a new AnnotatedType, as 'this' will
+            // get its annotations set later.
+            underlyingType = underlyingType.withTypeVar(t);
+            return this;
+        }
 
         // TODO: attach annotations?
         @Override

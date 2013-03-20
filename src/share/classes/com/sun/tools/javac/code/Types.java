@@ -1037,7 +1037,7 @@ public class Types {
                     if (s.tag == TYPEVAR) {
                         //type-substitution does not preserve type-var types
                         //check that type var symbols and bounds are indeed the same
-                        return sameTypeVars((TypeVar)t, (TypeVar)s);
+                        return sameTypeVars((TypeVar)t.unannotatedType(), (TypeVar)s.unannotatedType());
                     }
                     else {
                         //special case for s == ? super X, where upper(s) = u
@@ -3755,9 +3755,9 @@ public class Types {
                !currentS.isEmpty()) {
             if (currentS.head != currentT.head) {
                 captured = true;
-                WildcardType Ti = (WildcardType)currentT.head;
+                WildcardType Ti = (WildcardType)currentT.head.unannotatedType();
                 Type Ui = currentA.head.getUpperBound();
-                CapturedType Si = (CapturedType)currentS.head;
+                CapturedType Si = (CapturedType)currentS.head.unannotatedType();
                 if (Ui == null)
                     Ui = syms.objectType;
                 switch (Ti.kind) {
@@ -3794,6 +3794,7 @@ public class Types {
             ListBuffer<Type> result = lb();
             for (Type t : types) {
                 if (t.tag == WILDCARD) {
+                    t = t.unannotatedType();
                     Type bound = ((WildcardType)t).getExtendsBound();
                     if (bound == null)
                         bound = syms.objectType;

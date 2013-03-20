@@ -1,5 +1,5 @@
-StaticThings.java:52:32: compiler.err.receiver.parameter.not.applicable
-StaticThings.java:54:37: compiler.err.receiver.parameter.not.applicable
-StaticThings.java:33:26: compiler.err.receiver.parameter.not.applicable
-StaticThings.java:36:28: compiler.err.receiver.parameter.not.applicable
+StaticThings.java:52:32: compiler.err.receiver.parameter.not.applicable.static: Nested2 this
+StaticThings.java:54:37: compiler.err.receiver.parameter.not.applicable.static: Test.Nested2 this
+StaticThings.java:33:26: compiler.err.receiver.parameter.not.applicable.static: Test this
+StaticThings.java:36:28: compiler.err.receiver.parameter.not.applicable.static: Test this
 4 errors

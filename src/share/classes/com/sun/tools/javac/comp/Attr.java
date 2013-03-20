@@ -938,10 +938,31 @@ public class Attr extends JCTree.Visitor {
                 Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
                 attribType(tree.recvparam, newEnv);
                 chk.validate(tree.recvparam, newEnv);
-                if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
+                if (tree.name == names.init) {
+                    // In a constructor
+                    Type outertype = m.owner.owner.type;
+                    Type recvtype = tree.recvparam.type;
+                    if (outertype.getKind() != TypeKind.DECLARED) {
+                        // e.g. PACKAGE for top-level class
+                        log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.constructor.toplevel.class", tree.recvparam);
+                    }
+                    if (!(recvtype == outertype || types.isSameType(recvtype, outertype))) {
+                        // The == covers the common non-generic case, but for generic classes we need isSameType;
+                        // note that equals didn't work.
+                        log.error(tree.recvparam.pos(), "incorrect.constructor.receiver.type", outertype, recvtype);
+                    }
+                    {
+                        // Make sure the receiver parameter name is as expected
+                        String fnd = tree.recvparam.nameexpr.toString();
+                        String exp = recvtype.unannotatedType().toString() + '.' + names._this.toString();
+                        if (!exp.endsWith(fnd)) {
+                            log.error(tree.recvparam.pos(), "receiver.parameter.wrong.name", exp, fnd);
+                        }
+                    }
+                } else if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
                     // The == covers the common non-generic case, but for generic classes we need isSameType;
                     // note that equals didn't work.
-                    log.error(tree.recvparam.pos(), "incorrect.receiver.type");
+                    log.error(tree.recvparam.pos(), "incorrect.receiver.type", m.owner.type, tree.recvparam.type);
                 }
             }
 
@@ -3738,6 +3759,12 @@ public class Attr extends JCTree.Visitor {
                     }
                 }
                 owntype = new ClassType(clazzOuter, actuals, clazztype.tsym);
+                if (clazztype.isAnnotated()) {
+                    // Use the same AnnotatedType, because it will have
+                    // its annotations set later.
+                    ((AnnotatedType)clazztype).underlyingType = owntype;
+                    owntype = clazztype;
+                }
             } else {
                 if (formals.length() != 0) {
                     log.error(tree.pos(), "wrong.number.type.args",
@@ -4274,7 +4301,7 @@ public class Attr extends JCTree.Visitor {
             // I would say it's safe to skip.
             if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
                 if (tree.recvparam != null) {
-                    log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable");
+                    log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.static", tree.recvparam);
                 }
             }
             if (tree.recvparam != null &&
