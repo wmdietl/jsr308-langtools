@@ -49,6 +49,8 @@
 
 %HEVEA \def\strut{\relax}
 
+%HEVEA \newcommand{\etalchar}[1]{$^{#1}$}
+
 %BEGIN LATEX
 \RecustomVerbatimEnvironment{Verbatim}{Verbatim}{fontsize=\smaller}
 %END LATEX
@@ -716,11 +718,18 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \nt{InterfaceMethodOrFieldDecl}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
 \\
+\nt{LocalVariableDeclarationStatement}: \\
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclarators} \term{;}
+\\
 \nt{Resource}: \\
 \qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression} \\
 \\
 \nt{ForVarControl}: \\
 \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
+\\
+\nt{AnnotationTypeElementRest}: \\
+\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{AnnotationMethodOrConstantRest} \term{;} \\
+\qquad       \ldots \\
 \\
 \new{\nt{QualifiedTypeList}}: \\
 \qquad        \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} }
