@@ -42,7 +42,6 @@ import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
-import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
 
 /**
@@ -732,7 +731,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         /** type parameters */
         public List<JCTypeParameter> typarams;
         /** receiver parameter */
-        public JCVariableDecl recvparam;
+        public JCReceiverVariableDecl recvparam;
         /** value parameters */
         public List<JCVariableDecl> params;
         /** exceptions thrown by this method */
@@ -747,7 +746,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                             Name name,
                             JCExpression restype,
                             List<JCTypeParameter> typarams,
-                            JCVariableDecl recvparam,
+                            JCReceiverVariableDecl recvparam,
                             List<JCVariableDecl> params,
                             List<JCExpression> thrown,
                             JCBlock body,
@@ -780,7 +779,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public List<JCVariableDecl> getParameters() {
             return params;
         }
-        public JCVariableDecl getReceiverParameter() { return recvparam; }
+        public JCReceiverVariableDecl getReceiverParameter() { return recvparam; }
         public List<JCExpression> getThrows() {
             return thrown;
         }
@@ -845,7 +844,30 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         }
     }
 
-      /**
+    /**
+     * A receiver variable declaration:
+     *   C this
+     *   Outer Outer.this
+     */
+    public static class JCReceiverVariableDecl extends JCVariableDecl {
+        /** variable name expression */
+        public JCExpression nameexpr;
+        protected JCReceiverVariableDecl(JCModifiers mods,
+                         JCExpression nameexpr,
+                         JCExpression vartype) {
+            super(mods, null, vartype, null, null);
+            this.nameexpr = nameexpr;
+            if (nameexpr.hasTag(Tag.IDENT)) {
+                this.name = ((JCIdent)nameexpr).name;
+            } else {
+                // Only other option is qualified name x.y.this;
+                this.name = ((JCFieldAccess)nameexpr).name;
+            }
+        }
+        // TODO: do we want a separate tag?
+    }
+
+    /**
      * A no-op statement ";".
      */
     public static class JCSkip extends JCStatement implements EmptyStatementTree {
@@ -2413,7 +2435,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                             Name name,
                             JCExpression restype,
                             List<JCTypeParameter> typarams,
-                            JCVariableDecl recvparam,
+                            JCReceiverVariableDecl recvparam,
                             List<JCVariableDecl> params,
                             List<JCExpression> thrown,
                             JCBlock body,

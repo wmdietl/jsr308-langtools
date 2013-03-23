@@ -918,6 +918,9 @@ public class Pretty extends JCTree.Visitor {
                 printExprs(tree.typeargs);
                 print(">");
             }
+            if (tree.def != null && tree.def.mods.annotations.nonEmpty()) {
+                printTypeAnnotations(tree.def.mods.annotations);
+            }
             printExpr(tree.clazz);
             print("(");
             printExprs(tree.args);
