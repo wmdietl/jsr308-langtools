@@ -1655,24 +1655,33 @@ public class LambdaToMethod extends TreeTranslator {
              * synthetic lambda body
              */
             Symbol translate(Name name, final Symbol sym, LambdaSymbolKind skind) {
+                Symbol ret;
                 switch (skind) {
                     case CAPTURED_THIS:
-                        return sym;  // self represented
+                        ret = sym;  // self represented
+                        break;
                     case TYPE_VAR:
                         // Just erase the type var
-                        return new VarSymbol(sym.flags(), name,
+                        ret = new VarSymbol(sym.flags(), name,
                                 types.erasure(sym.type), sym.owner);
+                        break;
                     case CAPTURED_VAR:
-                        return new VarSymbol(SYNTHETIC | FINAL, name, types.erasure(sym.type), translatedSym) {
+                        ret = new VarSymbol(SYNTHETIC | FINAL, name, types.erasure(sym.type), translatedSym) {
                             @Override
                             public Symbol baseSymbol() {
                                 //keep mapping with original captured symbol
                                 return sym;
                             }
                         };
+                        break;
                     default:
-                        return makeSyntheticVar(FINAL, name, types.erasure(sym.type), translatedSym);
+                        ret = makeSyntheticVar(FINAL, name, types.erasure(sym.type), translatedSym);
                 }
+                if (ret != sym) {
+                    ret.annotations.setDeclarationAttributes(sym.getRawAttributes());
+                    ret.annotations.setTypeAttributes(sym.getRawTypeAttributes());
+                }
+                return ret;
             }
 
             void addSymbol(Symbol sym, LambdaSymbolKind skind) {
