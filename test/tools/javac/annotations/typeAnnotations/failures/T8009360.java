@@ -35,9 +35,13 @@ class Test1<T> {
     Object mtest( Test1<T> t){ return null; }
     public void test() {
         mtest( new Test1<T>() {
-                @A String odata1 = "test";
+                @A String data1 = "test";    //ok
+                @A @A String data2 = "test"; //ok
+                @A @B String data3 = "test"; //AssertionError
            });
    }
 }
 
-@Target({TYPE_USE,FIELD}) @interface A { }
+@Target({TYPE_USE,FIELD}) @Repeatable( AC.class) @interface A { }
+@Target({TYPE_USE,FIELD}) @interface AC { A[] value(); }
+@Target({TYPE_USE}) @interface B { }
