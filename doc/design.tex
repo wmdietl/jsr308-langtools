@@ -35,7 +35,7 @@
 
 \def\codesize{\smaller}
 %HEVEA \def\codesize{\relax}
-\newcommand{\code}[1]{\ifmmode{\mbox{\codesize\ttfamily{#1}}}\else{\codesize\ttfamily #1}\fi}
+\newcommand{\code}[1]{{\ifmmode{\mbox{\codesize\ttfamily{#1}}}\else{\codesize\ttfamily #1}\fi}}
 \def\<#1>{\code{#1}}
 % Text size is \small
 % \small and \footnotesize are the same size!!  And seem to be the same as
