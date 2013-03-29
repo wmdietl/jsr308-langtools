@@ -29,6 +29,8 @@
 \newcommand{\ttrcb}{\texttt{\char "7D}}
 \newcommand{\ttbs}{\texttt{\char "5C}}
 
+\newcommand{\preverbnegspace}{\vspace{-5pt}}
+
 \begin{document}
 
 \def\codesize{\smaller}
@@ -115,7 +117,7 @@ Detection''~\cite{JSR305}.
 % .)
 
 This proposal does not change the compile-time, load-time, or run-time
-semantics of Java.  It does not change the abilities of Java annotation
+semantics of Java.  It does not directly change the abilities of Java annotation
 processors as defined in JSR 269~\cite{JSR269}.
 % or of instrumentation agents~\cite{JSR163}.
 The proposal merely makes annotations more general --- and thus more useful
@@ -152,8 +154,6 @@ see \myurl{http://types.cs.washington.edu/jsr308/jsr308-faq.html}.
 
 
 \section{Java language syntax extensions\label{syntax}}
-
-\newcommand{\preverbnegspace}{\vspace{-5pt}}
 
 \subsection{Source locations for annotations on types\label{type-annotation-locations}}
 
@@ -368,8 +368,13 @@ possible on the constructor result.
 (Note that the result of a constructor is different from the receiver.  The
 receiver only exists for inner class constructors, as in
 \code{theReceiver.new InnerClass()}.  The receiver is the containing
-object, and in the body of the constructor it is referred to as
-\code{\emph{Supertype}.this}.  In the constructor body, the result is referred to as
+object.
+Note that the receiver of an inner class constructor does not cause run-time
+dispatching as other receivers do.
+In the body of the constructor, the receiver is referred to as
+\code{\emph{Supertype}.this}, and there can be multiple receivers for
+multiply-nested inner classes.
+  In the constructor body, the result is referred to as
 \code{this}.  In any non-constructor, the receiver (if any) is referred to
 as \code{this}.)
 % \end{itemize}
@@ -998,6 +1003,20 @@ within angle brackets as for generics.
 
 
 
+\subsubsection{Syntax of annotations on qualified types\label{qualified-type-syntax}}
+
+The syntax to annotate a qualitied type use is (for example) 
+\<java.lang.@NonNull String> or \<Outer. @NonNull StaticNestedClass>.
+An alternative would be to write the annotation before the full type
+instead of the simple name, as in \<@NonNull java.lang.String> or
+\<@NonNull Outer.StaticNestedClass>.  The alternative would require type
+resolution to determine which component of the qualified name is being
+annotated (and whether a given component is a package name, a class, etc.).
+% The alternative has a much uglier and more complex implementation.
+We wish to keep the grammar unambiguous, to put each annotation near the
+thing being annotated, and not to preclude future extensions such as
+annotations on package names or outer classes.
+% Finally, use of fully-qualified names in Java source code is uncommon.
 
 
 \subsection{Target meta-annotations for type annotations\label{target-meta-annotation}}
@@ -1498,8 +1517,8 @@ The JSR 308 changes apply to class file version 52 and higher.
 For backward compatibility, JSR 308 uses new attributes for storing
 the type annotations.  In other words, JSR 308 merely reserves the
 names of a few new attributes and specifies their layout.
-JVMs ignore unknown
-attributes.
+If the new attributes appear in a 51.0 or earlier
+class file, the JVM ignores them.
 JSR 308 does
 not alter the way that existing annotations on classes, methods, method formal parameters,
 and fields are stored in the class file.
@@ -1667,9 +1686,10 @@ type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
   % By contrast, declaration annotations other than type parameter
   % declarations appear in in \code{annotation} attributes in the class file.
   % 
-  The symbolic constants appear in the enums
-  \code{com.sun.tools.javac.code.TargetType} and
-  \code{com.sun.tools.classfile.TypeAnnotation.TargetType}.
+  %% This implementation detail is out of place for this document.
+  %   The symbolic constants appear in the enums
+  %   \code{com.sun.tools.javac.code.TargetType} and
+  %   \code{com.sun.tools.classfile.TypeAnnotation.TargetType}.
 }
 \end{figure}
 
@@ -1978,7 +1998,8 @@ creates the target expression instead.  This approach permits code
 generation for existing compilers to be unaffected.
 
 If the compiler eliminates an annotated cast, it is required to retain the
-annotations on the cast in the class file.  When a cast is removed, the
+annotations on the cast in the class file (if the annotation type has at
+least \<RetentionPolicy.CLASS> retention).  When a cast is removed, the
 compiler may need to adjust (the locations of) the annotations, to account
 for the relationship between the expression's type and the casted-to type.
 Consider:
@@ -2253,7 +2274,9 @@ toolchain, and it promotes the maintainability and simplicity of the
 modifications. Second, since annotations do not affect the runtime
 semantics of a program, applications written with custom type
 qualifiers are backward-compatible with the vanilla JDK\@.
-No modifications to the virtual machine are necessary.
+No modifications to the virtual machine are necessary,
+other than the changes to the class file format discussed in
+Section~\ref{class-file}.
 
 Four compiler plug-ins that perform type qualifier type-checking, all built
 using JSR 308, are distributed at the JSR 308 webpage,
