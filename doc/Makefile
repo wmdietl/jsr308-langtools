@@ -143,7 +143,7 @@ design.html: design.tex design.dvi design.bbl
 	mv design.html design.html-with-htoc
 	hevea-retarget-crossrefs < design.html-with-htoc > design.html
 	rm -f design.html-with-htoc
-# 	
+# Next 3 lines deal with Hevea's inability to process line numbers when using fancyvrb package
 	mv design.html design.html-without-verbatim-linerefs
 	hevea-add-verbatim-linenos design.aux design.html-without-verbatim-linerefs > design.html
 	rm -f design.html-without-verbatim-linerefs
