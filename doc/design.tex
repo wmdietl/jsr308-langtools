@@ -1751,6 +1751,14 @@ A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 otherwise, in the attributes table of a \code{ClassFile} structure if it
 targets a class declaration type parameter.
 
+(These declaration annotations appear in 
+\RuntimeInOrVisibleTypeAnnotations attributes, rather than 
+\RuntimeInOrVisibleAnnotations attributes, because genericss are not
+well-handled by the classfile.  For example, the \<Signature> attribute of
+of a generic class/method cannot store attributes, much less index them to
+indicate which type parameter is being annotated.  The additional location
+information in a \<type\_annotation> is necessary.)
+
 
 \subsubsection{Class supertypes:  \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
 
@@ -1759,9 +1767,7 @@ targets a class declaration type parameter.
 
 \preverbnegspace
 \begin{Verbatim}
-    supertype_target {
-        u2 supertype_index;
-    };
+    supertype_target { u2 supertype_index; };
 \end{Verbatim}
 
 \code{supertype\_index} is \code{-1} (\code{65535}) if the annotation is on the
