@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,28 +23,26 @@
 
 /*
  * @test
- * @bug 8006775
- * @summary Ensure that nested classes/methods work
- * @author Werner Dietl
- * @compile Nesting.java
+ * @summary type-annotation on array level in nested class results in NPE
+ * @bug 8008751
+ * @compile T8008751.java
  */
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
+import java.util.List;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE_USE)
-@interface A { }
-
-class Nesting {
-    void top(@A Nesting this) {}
-
-    class B {
-        void inB(@A B this) {}
-    }
-
-    void meth(@A Nesting this) {
-        class C {
-            void inMethod(@A C this) {}
-        }
-    }
+class T8008751 {
+    Object mtest( T8008751 t){ return null;  }
+    public void test() {
+       mtest( new T8008751() {
+                class InnerAnon {
+                    @A("ok") String s = (@A("ok") String)( new @A("ok") Object());
+                    @A("ok") Object @A("NPE")[] [] ia_sa1 = null;
+                }
+                // If not instanciated, no crash.
+                InnerAnon IA = new InnerAnon();
+           });
+   }
 }
+@Retention(RUNTIME) @Target(TYPE_USE)  @interface A { String value(); }
