@@ -1502,23 +1502,25 @@ Annotations that target instructions are those in
 Figure~\ref{tbl:target_types} with \<target\_type> $\ge$ 0x40; see below
 for details.
 
-No changes are made to the StackMapTable that stores the types of elements
-on the stack.
-% Doing so would eliminates the need for pluggable type-checking on byte code
-% to perform type qualifier inference for local variables and stack elements,
-% much as byte code verification does not need to perform type inference for
-% local variables and stack elements.
-% StackMapTable is the attribute that defines these.  They are differential
-% and rather tricky, but we'll just copy that format.  There is no public
-% API, just a defined classfile format.
-No changes are made to the Exception table.
+%% Avoid saying everywhere that something *doesn't* change.
+% No changes are made to the StackMapTable that stores the types of elements
+% on the stack.
+% % Doing so would eliminate the need for pluggable type-checking on byte code
+% % to perform type qualifier inference for local variables and stack elements,
+% % much as byte code verification does not need to perform type inference for
+% % local variables and stack elements.
+% % StackMapTable is the attribute that defines these.  They are differential
+% % and rather tricky, but we'll just copy that format.  There is no public
+% % API, just a defined classfile format.
+% No changes are made to the Exception table.
 Local variable type annotations are stored in the class file, see
 Section~\ref{class-file:ext:ri:localvar}.
 
-The VM does not have to validate all the constraints in
-Section~\ref{class-file:ext:target_info}, such as that offsets point to the
-right type of instruction.  The VM does not do format checking (JVMS 4.8)
-on attributes used solely for reflection.
+%% Avoid saying everywhere that something *doesn't* change.
+% The VM does not have to validate all the constraints in
+% Section~\ref{class-file:ext:target_info}, such as that offsets point to the
+% right type of instruction.  The VM does not do format checking (JVMS 4.8)
+% on attributes used solely for reflection.
 
 The JSR 308 changes apply to class file version 52 and higher.
 
@@ -3121,7 +3123,7 @@ A JavaCOP type checker must be programmed in a combination of Java and
 JavaCOP's own declarative pattern-matching and rule-based language.
 JavaCOP's authors have defined parts of over a dozen
 type-checkers in their language.  Their paper does not report that they have
-run any of these type-checkers on a real program; this is due to
+run any of these type-checkers on a non-trivial program; this is due to
 limitations that make JavaCOP impractical (so far) for real use.
 
 
