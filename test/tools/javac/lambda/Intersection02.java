@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,27 +23,19 @@
 
 /*
  * @test
- * @bug 8009360
- * @summary AssertionError from type annotation on member of anonymous class
- * @compile T8009360.java
+ * @bug 8010101
+ * @summary Intersection type cast issues redundant unchecked warning
+ * @compile/fail/ref=Intersection02.out -Werror -Xlint:unchecked -XDrawDiagnostics Intersection02.java
  */
-import java.lang.annotation.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
+import java.io.Serializable;
+import java.util.List;
 
-class Test1<T> {
-    Object mtest( Test1<T> t){ return null; }
-    public void test() {
-        mtest( new Test1<T>() {
-                @A String data1 = "test";    // ok
-                @A @A String data2 = "test"; // ok
-                @A @B String data3 = "test"; // was AssertionError
-                @B @C String data4 = "test"; // was AssertionError
-           });
-   }
+class Intersection02 {
+
+    interface P<X> { }
+
+    void test(List<String> ls) {
+        Object o1 = (List<String> & Serializable)ls;
+        Object o2 = (List<String> & Serializable & P<String>)ls;
+    }
 }
-
-@Target({TYPE_USE,FIELD}) @Repeatable( AC.class) @interface A { }
-@Target({TYPE_USE,FIELD}) @interface AC { A[] value(); }
-@Target({TYPE_USE}) @interface B { }
-@Target({TYPE_USE, FIELD}) @interface C { }

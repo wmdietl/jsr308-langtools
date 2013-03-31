@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,27 +23,16 @@
 
 /*
  * @test
- * @bug 8009360
- * @summary AssertionError from type annotation on member of anonymous class
- * @compile T8009360.java
+ * @bug 8009820
+ * @summary AssertionError when compiling java code with two identical static imports
+ * @compile DoubleStaticImport.java
  */
-import java.lang.annotation.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
 
-class Test1<T> {
-    Object mtest( Test1<T> t){ return null; }
+import static java.lang.Thread.holdsLock;
+import static java.lang.Thread.holdsLock; //dup
+
+class DoubleStaticImport {
     public void test() {
-        mtest( new Test1<T>() {
-                @A String data1 = "test";    // ok
-                @A @A String data2 = "test"; // ok
-                @A @B String data3 = "test"; // was AssertionError
-                @B @C String data4 = "test"; // was AssertionError
-           });
-   }
+        holdsLock(null);
+    }
 }
-
-@Target({TYPE_USE,FIELD}) @Repeatable( AC.class) @interface A { }
-@Target({TYPE_USE,FIELD}) @interface AC { A[] value(); }
-@Target({TYPE_USE}) @interface B { }
-@Target({TYPE_USE, FIELD}) @interface C { }

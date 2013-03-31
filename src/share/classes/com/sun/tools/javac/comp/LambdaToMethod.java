@@ -403,18 +403,6 @@ public class LambdaToMethod extends TreeTranslator {
                 Symbol translatedSym = lambdaContext.getSymbolMap(CAPTURED_VAR).get(tree.sym);
                 result = make.Ident(translatedSym).setType(tree.type);
             } else {
-                if (tree.sym.owner.kind == Kinds.TYP) {
-                    for (Map.Entry<Symbol, Symbol> encl_entry : lambdaContext.getSymbolMap(CAPTURED_THIS).entrySet()) {
-                        if (tree.sym.isMemberOf((ClassSymbol) encl_entry.getKey(), types)) {
-                            JCExpression enclRef = make.Ident(encl_entry.getValue());
-                            result = tree.sym.name == names._this
-                                    ? enclRef.setType(tree.type)
-                                    : make.Select(enclRef, tree.sym).setType(tree.type);
-                            result = tree;
-                            return;
-                        }
-                    }
-                }
                 //access to untranslated symbols (i.e. compile-time constants,
                 //members defined inside the lambda body, etc.) )
                 super.visitIdent(tree);
@@ -1038,14 +1026,14 @@ public class LambdaToMethod extends TreeTranslator {
             } else if (refSym.enclClass().isInterface()) {
                 return ClassFile.REF_invokeInterface;
             } else {
-                return ClassFile.REF_invokeVirtual;
+                return (refSym.flags() & PRIVATE) != 0 ?
+                        ClassFile.REF_invokeSpecial :
+                        ClassFile.REF_invokeVirtual;
             }
         }
     }
 
-    // </editor-fold>
-
-    // <editor-fold defaultstate="collapsed" desc="Lambda/reference analyzer">\
+    // <editor-fold defaultstate="collapsed" desc="Lambda/reference analyzer">
     /**
      * This visitor collects information about translation of a lambda expression.
      * More specifically, it keeps track of the enclosing contexts and captured locals
@@ -1334,6 +1322,7 @@ public class LambdaToMethod extends TreeTranslator {
             // the generated lambda method will not have type yet, but the
             // enclosing method's name will have been generated with this same
             // method, so it will be unique and never be overloaded.
+            Assert.check(owner.type != null || directlyEnclosingLambda() != null);
             if (owner.type != null) {
                 int methTypeHash = methodSig(owner.type).hashCode();
                 buf.append(Integer.toHexString(methTypeHash));
@@ -1654,50 +1643,59 @@ public class LambdaToMethod extends TreeTranslator {
              * Translate a symbol of a given kind into something suitable for the
              * synthetic lambda body
              */
-            Symbol translate(String name, final Symbol sym, LambdaSymbolKind skind) {
+            Symbol translate(Name name, final Symbol sym, LambdaSymbolKind skind) {
+                Symbol ret;
                 switch (skind) {
                     case CAPTURED_THIS:
-                        return sym;  // self represented
+                        ret = sym;  // self represented
+                        break;
                     case TYPE_VAR:
                         // Just erase the type var
-                        return new VarSymbol(sym.flags(), names.fromString(name),
+                        ret = new VarSymbol(sym.flags(), name,
                                 types.erasure(sym.type), sym.owner);
+                        break;
                     case CAPTURED_VAR:
-                        return new VarSymbol(SYNTHETIC | FINAL, names.fromString(name), types.erasure(sym.type), translatedSym) {
+                        ret = new VarSymbol(SYNTHETIC | FINAL, name, types.erasure(sym.type), translatedSym) {
                             @Override
                             public Symbol baseSymbol() {
                                 //keep mapping with original captured symbol
                                 return sym;
                             }
                         };
+                        break;
                     default:
-                        return makeSyntheticVar(FINAL, name, types.erasure(sym.type), translatedSym);
+                        ret = makeSyntheticVar(FINAL, name, types.erasure(sym.type), translatedSym);
                 }
+                if (ret != sym) {
+                    ret.annotations.setDeclarationAttributes(sym.getRawAttributes());
+                    ret.annotations.setTypeAttributes(sym.getRawTypeAttributes());
+                }
+                return ret;
             }
 
             void addSymbol(Symbol sym, LambdaSymbolKind skind) {
                 Map<Symbol, Symbol> transMap = null;
-                String preferredName;
+                Name preferredName;
                 switch (skind) {
                     case CAPTURED_THIS:
                         transMap = capturedThis;
-                        preferredName = "encl$" + capturedThis.size();
+                        preferredName = names.fromString("encl$" + capturedThis.size());
                         break;
                     case CAPTURED_VAR:
                         transMap = capturedLocals;
-                        preferredName = "cap$" + capturedLocals.size();
+                        preferredName = names.fromString("cap$" + capturedLocals.size());
                         break;
                     case LOCAL_VAR:
                         transMap = lambdaLocals;
-                        preferredName = sym.name.toString();
+                        preferredName = sym.name;
                         break;
                     case PARAM:
                         transMap = lambdaParams;
-                        preferredName = sym.name.toString();
+                        preferredName = sym.name;
                         break;
                     case TYPE_VAR:
                         transMap = typeVars;
-                        preferredName = sym.name.toString();
+                        preferredName = sym.name;
                         break;
                     default: throw new AssertionError();
                 }

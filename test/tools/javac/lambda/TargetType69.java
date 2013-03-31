@@ -23,27 +23,29 @@
 
 /*
  * @test
- * @bug 8009360
- * @summary AssertionError from type annotation on member of anonymous class
- * @compile T8009360.java
+ * @bug 8010303
+ * @summary Graph inference: missing incorporation step causes spurious inference error
+ * @compile TargetType68.java
  */
-import java.lang.annotation.*;
-import static java.lang.annotation.RetentionPolicy.*;
-import static java.lang.annotation.ElementType.*;
+import java.util.*;
 
-class Test1<T> {
-    Object mtest( Test1<T> t){ return null; }
-    public void test() {
-        mtest( new Test1<T>() {
-                @A String data1 = "test";    // ok
-                @A @A String data2 = "test"; // ok
-                @A @B String data3 = "test"; // was AssertionError
-                @B @C String data4 = "test"; // was AssertionError
-           });
-   }
+class TargetType68 {
+
+    interface Function<X,Y> {
+        Y m(X x);
+    }
+
+    abstract class TabulationAssertion<T, U> { }
+
+    class GroupedMapAssertion<K, M1 extends Map<K, ?>> extends TabulationAssertion<Integer, M1> {
+        GroupedMapAssertion(Function<Integer, K> classifier) { }
+    }
+
+
+    <T, M2 extends Map> void exerciseMapTabulation(Function<T, ? extends M2> collector,
+                                                             TabulationAssertion<T, M2> assertion)  { }
+
+    void test(Function<Integer, Integer> classifier, Function<Integer, Map<Integer, List<Integer>>> coll) {
+        exerciseMapTabulation(coll, new GroupedMapAssertion<>(classifier));
+    }
 }
-
-@Target({TYPE_USE,FIELD}) @Repeatable( AC.class) @interface A { }
-@Target({TYPE_USE,FIELD}) @interface AC { A[] value(); }
-@Target({TYPE_USE}) @interface B { }
-@Target({TYPE_USE, FIELD}) @interface C { }

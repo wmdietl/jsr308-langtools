@@ -287,11 +287,6 @@ public class TypeAnnotations {
                 return;
             }
 
-            if (leftmostTypeAnnotationsEqual(type, typeAnnotations)) {
-                // TODO: hackish - see comment with called method.
-                return;
-            }
-
             // type is non-null and annotations are added to that type
             type = typeWithAnnotations(typetree, type, typeAnnotations, log);
 
@@ -315,33 +310,6 @@ public class TypeAnnotations {
                 // on the owner.
                 sym.owner.annotations.appendUniqueTypes(sym.getTypeAnnotationMirrors());
             }
-        }
-
-        // For a class declarations within an anonymous class
-        // declaration the body has been visited before.
-        // Don't try to annotate the type again, which would crash.
-        // This happens for type annotations that are also declaration
-        // annotations - they will appear in sym.getRawAttributes()
-        // and then because they are kind BOTH will be type and
-        // declaration annotations.
-        // TODO: find a nicer solution - not visiting the declaration twice.
-        // However, I didn't manage without breaking other test cases.
-        private static boolean leftmostTypeAnnotationsEqual(Type type, List<Attribute.TypeCompound> typeAnnotations) {
-            Type leftmost = type;
-            while (true) {
-                if (leftmost.getKind() == TypeKind.ARRAY) {
-                    leftmost = leftmost.unannotatedType();
-                    leftmost = ((ArrayType)leftmost).getComponentType();
-                } else if (leftmost.getKind() == TypeKind.DECLARED &&
-                        leftmost.getEnclosingType() != null &&
-                        leftmost.getEnclosingType().getKind() == TypeKind.DECLARED) {
-                    leftmost = leftmost.getEnclosingType();
-                } else {
-                    break;
-                }
-            }
-            // Comparing the length is enough to notice duplicate calls.
-            return leftmost.getAnnotationMirrors().length() == typeAnnotations.length();
         }
 
         // This method has a similar purpose as
@@ -977,15 +945,11 @@ public class TypeAnnotations {
         // This flag is used to prevent from visiting inner classes.
         private boolean isInClass = false;
 
-        // If we are visiting an anonymous class, we need to visit enclosed
-        // class declarations, as they are not visited otherwise.
-        private boolean isAnonClass = false;
-
         @Override
         public void visitClassDef(JCClassDecl tree) {
             if (isInClass)
                 return;
-            isInClass = !isAnonClass;
+
             if (sigOnly) {
                 scan(tree.mods);
                 scan(tree.typarams);
@@ -1206,12 +1170,6 @@ public class TypeAnnotations {
             scan(tree.clazz);
             scan(tree.args);
 
-            // Visit the class decl once with sigOnly true...
-            TypeAnnotationPositions tap = new TypeAnnotationPositions(syms, names, log, true);
-            // and noting that we are in an anonymous class.
-            tap.isAnonClass = true;
-            tap.scan(tree.def);
-            // Also visit the class decl with sigOnly false.
             scan(tree.def);
         }
 

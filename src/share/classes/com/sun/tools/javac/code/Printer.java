@@ -274,10 +274,8 @@ public abstract class Printer implements Type.Visitor<String, Locale>, Symbol.Vi
                 return visit(t.underlyingType.getEnclosingType(), locale) +
                         ". " +
                         t.typeAnnotations +
-                        " " + t.underlyingType;
+                        " " + className((ClassType)t.underlyingType, false, locale);
             } else {
-                // TODO: this prints "@A java.lang.Object". How can we easily
-                // split of the package name? Nested types are handled above.
                 return t.typeAnnotations + " " + visit(t.underlyingType, locale);
             }
         } else {
