@@ -426,11 +426,16 @@ receiver.
   In a constructor in an inner type, the receiver
   has a name such as \code{Outer.this}.
 
-  The optional receiver parameter has no effect on execution --- it only
+  The optional receiver parameter has no effect on generated code nor on
+  execution --- it only
   serves as a place to write annotations on the receiver.  The compiler
   generates the same bytecodes, and reflection returns the same results
   regarding number of method formal parameters, whether or not the optional
-  receiver parameter is present.
+  receiver parameter is present.  The receiver
+  parameter is not persisted as a formal parameter in the bytecode.
+  If the receiver parameter is annotated by
+  a type annotation, then those annotations persist in a 
+  \<*TypeAnnotations> attribute in \<method\_info>.
 
 
   As an example, here are the standard definitions for \code{toString} and \code{equals}:
