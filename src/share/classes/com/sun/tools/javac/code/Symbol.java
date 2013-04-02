@@ -1452,7 +1452,7 @@ public abstract class Symbol implements Element {
         public <R, P> R accept(Symbol.Visitor<R, P> v, P p) {
             return v.visitMethodSymbol(this, p);
         }
-        
+
         public Type getReceiverType() {
             return asType().getReceiverType();
         }

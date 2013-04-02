@@ -1593,7 +1593,7 @@ public class Type implements PrimitiveType {
                     "; adding: " + typeAnnotations);
         }
 
-        @Override 
+        @Override
         public boolean isAnnotated() {
             return true;
         }
