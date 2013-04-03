@@ -21,36 +21,35 @@
  * questions.
  */
 
+/*
+ * @test
+ * @bug 8008762
+ * @summary Type annotation on inner class in anonymous class 
+ *          shows up as regular annotation
+ */
 import java.lang.annotation.*;
-import java.io.*;
-import java.net.URL;
-import java.util.List;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
 import com.sun.tools.classfile.*;
 
-/*
- * @test ClassLiterals
- * @summary test that new type arguments are emitted to classfile
- */
-
-public class NewTypeArguments extends ClassfileTestHelper{
+public class T8008762 extends ClassfileTestHelper{
     public static void main(String[] args) throws Exception {
-        new NewTypeArguments().run();
+        new T8008762().run();
     }
 
     public void run() throws Exception {
-        expected_tinvisibles = 3;
-        expected_tvisibles = 0;
+        expected_tinvisibles = 0;
+        expected_tvisibles = 4;
 
-        ClassFile cf = getClassFile("NewTypeArguments$Test.class");
+        ClassFile cf = getClassFile("T8008762$Test$1$InnerAnon.class");
         test(cf);
         for (Field f : cf.fields) {
-            test(cf, f);
+            test(cf, f, false);
         }
-        for (Method m: cf.methods) {
-            test(cf, m, true);
+        for (Method m : cf.methods) {
+            test(cf, m, false);
         }
-
         countAnnotations();
 
         if (errors > 0)
@@ -60,13 +59,17 @@ public class NewTypeArguments extends ClassfileTestHelper{
 
     /*********************** Test class *************************/
     static class Test {
-        @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-        @interface A {}
-        <E> Test(E e) {}
-
-        void test() {
-            new <@A String> Test(null);
-            new <@A List<@A String>> Test(null);
+        Object mtest( Test t){ return null; }
+        public void test() {
+          mtest( new Test() {
+                class InnerAnon { // Test1$1$InnerAnon.class
+                  @A @B String ai_data = null;
+                  @A @B String ai_m(){ return null; };
+                }
+               InnerAnon IA = new InnerAnon();
+            });
         }
+        @Retention(RUNTIME) @Target(TYPE_USE) @interface A { }
+        @Retention(RUNTIME) @Target(TYPE_USE) @interface B { }
     }
 }
