@@ -949,6 +949,7 @@ public class TypeAnnotations {
         public void visitClassDef(JCClassDecl tree) {
             if (isInClass)
                 return;
+            isInClass = true;
 
             if (sigOnly) {
                 scan(tree.mods);
