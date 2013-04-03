@@ -41,8 +41,8 @@ validate:
 webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
 #	$(MAKE) checklinks
 
-# Warning!  "make web" makes a public release!
-web: \
+# Warning!  "make web" makes a public release if you do not override jsr308_www!
+web-no-checks: \
 ${jsr308_www} \
 ${jsr308_www}/jsr308-webpage.html \
 ${jsr308_www}/jsr308-faq.html \
@@ -52,6 +52,8 @@ ${jsr308_www}/changelog-jsr308.txt \
 ${jsr308_www}/favicon-jsr308.png \
 ${jsr308_www}/java-type-qualifiers.pdf \
 ${jsr308_www}/java-type-qualifiers.html
+
+web: web-no-checks
 	$(MAKE) checklinks
 
 # Make a release of the specification.
