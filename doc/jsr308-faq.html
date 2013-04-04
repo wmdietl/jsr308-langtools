@@ -11,25 +11,25 @@
 <h1>Type annotations FAQ</h1>
 
 <p>
-These are some common questions about the <a href="./">Type Annotations
+These are some common questions about the <a href="../">Type Annotations
 (JSR 308)</a> extension to Java.  Feel free to
-<a href="./#Support">suggest</a> improvements to the answers, or other
+<a href="../#Support">suggest</a> improvements to the answers, or other
 questions to include here.
 </p>
 
 <p>
 <b>Before you read this FAQ</b>, please read either the
-<a href="specification/java-annotation-design.html">Type Annotations
+<a href="../../specification/java-annotation-design.html">Type Annotations
 Specification</a> (if you are most interested in the language syntax) or
 the
-<a href="../checker-framework/current/checkers-manual.html">Checker Framework Manual</a>
+<a href="../../checker-framework/current/checkers-manual.html">Checker Framework Manual</a>
 (if you are most interested in pluggable type-checking).  Then, if you
 still have questions, you can see whether this FAQ answers them.
 </p>
 
 <p>
 There is a separate 
-<a href="../checker-framework/current/checkers-manual.html#faq">FAQ for pluggable type-checking</a>.
+<a href="../../checker-framework/current/checkers-manual.html#faq">FAQ for pluggable type-checking</a>.
 </p>
 
 <!--
@@ -112,9 +112,9 @@ type-checkers are useful, and you probably will too.
 
 <p>
 For more details, see the
-<a href="../checker-framework/current/checkers-manual.html">Checker Framework Manual</a> and
+<a href="../../checker-framework/current/checkers-manual.html">Checker Framework Manual</a> and
 also section
-<a href="specification/java-annotation-design.html#type-qualifiers">Example
+<a href="../../specification/java-annotation-design.html#type-qualifiers">Example
 use of type annotations:  Type qualifiers</a> in the Type Annotations
 Specification.
 </p>
@@ -133,7 +133,7 @@ comprehend and often led to real bugs.
 
 <p>
 You don't have to take our word for it, though.  You can try the
-<a href="../checker-framework/current/checkers-manual.html">Checker Framework</a> for yourself.
+<a href="../../checker-framework/current/checkers-manual.html">Checker Framework</a> for yourself.
 </p>
 
 <p>
@@ -212,7 +212,7 @@ type-checkers; a pluggable type-checker is a separate tool.
 
 <p>
 There is a separate 
-<a href="../checker-framework/current/checkers-manual.html#faq">FAQ for pluggable type-checking</a>.
+<a href="../../checker-framework/current/checkers-manual.html#faq">FAQ for pluggable type-checking</a>.
 </p>
 
 
@@ -270,7 +270,7 @@ Pluggable type-checking would be impractical without the Type Annotations
 (JSR 308) language syntax.  Given the new syntax, pluggable type-checking
 can be implemented entirely by libraries, and there is no need for it to be
 an official part of the Java language.  The
-<a href="../checker-framework/current/checkers-manual.html">Checker Framework</a> is an example
+<a href="../../checker-framework/current/checkers-manual.html">Checker Framework</a> is an example
 of a library that enables you to create and use pluggable type-checkers.
 </p>
 
@@ -322,7 +322,7 @@ This also gives you an easy way to convince your colleagues to try type
 annotations and the Checker Framework, or to use the framework and the
 checkers even if your colleagues do not want to.
 For more details, see section
-<a href="../checker-framework/current/checkers-manual.html#annotations-in-comments">Writing
+<a href="../../checker-framework/current/checkers-manual.html#annotations-in-comments">Writing
 annotations in comments for backward compatibility</a> in the Checker
 Framework Manual.
 </p>
@@ -363,7 +363,7 @@ compilers, see the <a href="README-jsr308.html#openjdk-differences">Type
 <p>
 We have had successful reports from users of Linux, MacOS, and Windows.  If you
 have trouble installing or running the tools, please report a bug.  The
-<a href="./#Support">Support</a> section of the <a href="./">Type
+<a href="../#Support">Support</a> section of the <a href="../">Type
 Annotations webpage</a> explains how.
 </p>
 
@@ -373,7 +373,7 @@ Annotations webpage</a> explains how.
 <p>
 Yes, several IDEs support type annotations, and more IDEs are being
 extended to support type annotations.  See the 
-<a href="../checker-framework/current/checkers-manual.html#running">Running a checker</a> section of the
+<a href="../../checker-framework/current/checkers-manual.html#running">Running a checker</a> section of the
 Checker Framework Manual.
 </p>
 
@@ -381,7 +381,7 @@ Checker Framework Manual.
 <h3 id="bug-reporting">How do I file a bug report?</h3>
 
 <p>
-See the <a href="./#Support">Support</a> section of the <a href="./">Type
+See the <a href="../#Support">Support</a> section of the <a href="../">Type
 Annotations webpage</a>.
 </p>
 
@@ -396,7 +396,7 @@ Annotations webpage</a>.
 An annotation before a method sometimes refers to the return type, and
 sometimes to the method itself.  There is never any ambiguity regarding
 which is intended.  See section <a
-href="specification/java-annotation-design.html#target-meta-annotation">Target meta-annotations for type annotations</a> in the Type Annotations specification.
+href="../../specification/java-annotation-design.html#target-meta-annotation">Target meta-annotations for type annotations</a> in the Type Annotations specification.
 </p>
 
 
@@ -422,10 +422,10 @@ objects.
 <p>
 If you are skeptical of the <em>usefulness</em> of the annotations, see
 section <a
-href="specification/java-annotation-design.html#type-annotation-use-cases">Uses
+href="../../specification/java-annotation-design.html#type-annotation-use-cases">Uses
 for annotations on types</a> in the Type Annotations specification.
 Also, section <a
-href="specification/java-annotation-design.html#receivers">Receivers</a> in
+href="../../specification/java-annotation-design.html#receivers">Receivers</a> in
 the Type Annotations explains that receiver annotations have been necessary
 in every type system built to date.
 </p>
@@ -434,7 +434,7 @@ in every type system built to date.
 If you are skeptical of the <em>syntax</em> of <em>array annotations</em>, then
 perhaps you really don't like Java's array syntax.  The annotation
 extension is a logical extension of Java's syntax; see section <a
-href="specification/java-annotation-design.html#array-syntax">Syntax of
+href="../../specification/java-annotation-design.html#array-syntax">Syntax of
 array annotations</a> in the Type Annotations specification.
 </p>
 
@@ -571,7 +571,7 @@ Last updated: July 3, 2012.
 </p>
 
 <p>
-Back to the <a href="./">Type annotations (JSR 308) webpage</a>.
+Back to the <a href="../../">Type annotations (JSR 308) webpage</a>.
 </p>
 
 </body>
