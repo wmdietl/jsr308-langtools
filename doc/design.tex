@@ -1983,6 +1983,11 @@ appears in the \<exception\_table> slot of the \<Code> attribute).
     };
 \end{Verbatim}
 
+In a multi-catch, each exception parameter may have different annotations,
+and this correspondence is maintained in the classfile.  For example, a
+compiler might create one exception table entry per disjunct, and annotate
+each one with the appropriate annotations.
+
 \attributelocation{containing a \code{catch\_target}}{\code{Code} attribute}
 
 
