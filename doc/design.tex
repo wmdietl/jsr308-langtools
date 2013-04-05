@@ -684,10 +684,10 @@ the rules of Section~\ref{type-annotation-locations}.
 Additions are \underline{underlined}.
 % , and deletions \sout{crossed out}.
 
-Infelicities in the Java grammar make this section somewhat long.
-Some improvements are
-possible (for instance, by slightly refactoring the Java grammar), but this
-version attempts to minimize changes to existing grammar productions.
+% Infelicities in the Java grammar make this section somewhat long.
+% Some improvements are
+% possible (for instance, by slightly refactoring the Java grammar), but this
+% version attempts to minimize changes to existing grammar productions.
 
 
 % The original grammar appears at
@@ -709,6 +709,8 @@ version attempts to minimize changes to existing grammar productions.
 
 \newcommand{\basictypename}{\alt{ \term{byte} \altor{} \term{short} \altor{} \term{char} \altor{} \term{int} \altor{} \term{long} \altor{} \term{float} \altor{} \term{double} \altor{} \term{boolean} }}
 
+\begin{enumerate}
+\item
 \begin{enumerate}
 \item
 Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
@@ -740,9 +742,6 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \nt{AnnotationTypeElementRest}: \\
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{AnnotationMethodOrConstantRest} \term{;} \\
 \qquad       \ldots \\
-\\
-\new{\nt{QualifiedTypeList}}: \\
-\qquad        \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} \multi{ \term{,}   \new{\opt{\nt{Annotations}}} \nt{UnannReferenceType} }
 \end{tabbing}
 
 % \nt{QualifiedTypeList} was \nt{QualifiedIdentifierList} in the Java SE 7
@@ -768,8 +767,65 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 %     FormalParameterDecls:
 %             [final] Type FormalParameterDeclsRest]
 
+\item
+Annotations can be written on a non-parameterized, non-array type as used
+in an annotation (\<@\emph{Foo}>), \<throws> clause, or \<catch> clause.
+The JLS grammar uses \nt{QualifiedIdentifer} in such places, but the
+grammar also uses \nt{QualifiedIdentifer} in \<package> statements, where
+it is non-annotatable.  This is confusing, so we refactor the grammar to
+make the non-terminal names and the rules more uniform.  With these
+changes, it it possible to eliminate the \nt{QualifiedIdentiferList}
+grammar production, which is no longer used.
+
+\label{sec:qualified-type-list}
+
+\begin{tabbing}
+\qquad \= \kill
+\new{\nt{QualifiedType}}: \\
+\qquad        \new{\opt{\nt{Annotations}} \nt{UnannQualifiedType}} \\
+ \\
+\new{\nt{UnannQualifiedType}}: \\
+\qquad        \nt{Identifier} \multi{ \term{.} \opt{\nt{Annotations}} \nt{Identifier} } \\
+ \\
+\new{\nt{QualifiedTypeList}}: \\
+\qquad        \nt{QualifiedType} \multi{ \term{,} \nt{QualifiedType} } \\
+\\
+\nt{CatchType}: \\
+\qquad        \new{\nt{UnannQualifiedType}} \multi{ \term{|} \new{\nt{QualifiedType}} }
+\\
+\nt{MethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}} \alt{ \nt{Block} \altor{} \term{;} } \\
+ \\
+\nt{VoidMethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \alt{ \nt{Block} \altor{} \term{;} } \\
+ \\
+\nt{ConstructorDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \nt{Block} \\
+ \\
+\nt{InterfaceMethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;} \\
+ \\
+\nt{VoidInterfaceMethodDeclaratorRest}: \\
+\qquad            \nt{FormalParameters} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;} \\
+\end{tabbing}
+
+The \nt{CatchType} rule implies that it is possible to write annotations on
+each disjunct of a multi-catch.  However, there is no syntactic sugar that
+permits a programmer to write an annotation that applies to each disjunct; the
+programmer would have to duplicate the annotation for each disjunct.
+
+
+
 % \item
-Annotations are permitted on the simple name in a static nested class.
+% Annotations may appear at the beginning of a disjunctive type, before a
+% vertical bar, or at the beginning of a conjunctive type, before an ampersand:
+% 
+% \todo{give the grammar rules: catch, extends, others?}
+
+
+
+\item
+Annotations are permitted on the simple name in a static nested class:
 
 \begin{tabbing}
 \qquad \= \kill
@@ -777,8 +833,9 @@ Annotations are permitted on the simple name in a static nested class.
 \qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
  \\
 \new{\nt{UnannReferenceType}}: \\
-\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ . \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}}
+\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ \term{.} \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}}
 \end{tabbing}
+\end{enumerate}
 
 \item
 Annotations may appear on the wildcard in any type argument.
@@ -791,19 +848,15 @@ A wildcard is the declaration of an anonymous (unnamed) type parameter.
 \end{tabbing}
 
 
-% \item
-% Annotations may appear at the beginning of a disjunctive type, before a
-% vertical bar, or at the beginning of a conjunctive type, before an ampersand:
-% 
-% \todo{give the grammar rules: catch, extends, others?}
-
-
 \item
 To permit annotations on levels of an array (in declarations, not
 constructors), change ``\multi{\term{[]}}''  to
 ``\multi{\new{\opt{\nt{Annotations}}} \term{[]}}''.
 (This was abstracted out as
 ``\nt{BracketsOpt}'' in the 2nd edition of the JLS~\cite{GoslingJSB2000}.)
+Two such changes (in \nt{MethodDeclaratorRest} and
+\nt{InterfaceMethodDeclaratorRest}) already appeared above in
+point~\ref{sec:qualified-type-list}.
 
 \begin{tabbing}
 \qquad \= \kill
@@ -812,12 +865,6 @@ constructors), change ``\multi{\term{[]}}''  to
  \\
 \nt{VariableDeclaratorId}: \\
 \qquad       \nt{Identifier} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
- \\
-\nt{MethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedTypeList}} \alt{ \nt{Block} \altor{} \term{;} } \\
- \\
-\nt{InterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{QualifiedTypeList}}   \term{;} \\
  \\
 \nt{ConstantDeclaratorRest}: \\
 \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}}
