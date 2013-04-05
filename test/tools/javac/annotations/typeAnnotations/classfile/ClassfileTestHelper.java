@@ -66,12 +66,12 @@ public class ClassfileTestHelper {
     }
 
     ClassFile getClassFile(URL url) throws IOException, ConstantPoolException {
-            InputStream in = url.openStream();
-            try {
-                return ClassFile.read(in);
-            } finally {
-                in.close();
-            }
+        InputStream in = url.openStream();
+        try {
+            return ClassFile.read(in);
+        } finally {
+            in.close();
+        }
     }
 
     /************ Helper annotations counting methods ******************/
@@ -96,7 +96,7 @@ public class ClassfileTestHelper {
             test("CODE",cf, f, null, Attribute.RuntimeInvisibleAnnotations, false);
         }
     }
-    
+
     void test(ClassFile cf, Field f) {
         test(cf, f, false);
     }
@@ -115,7 +115,7 @@ public class ClassfileTestHelper {
             test("MCODE",cf, null, m, Attribute.RuntimeInvisibleAnnotations, false);
         }
     }
-    
+
     // default to not looking in code attribute
     void test(ClassFile cf, Method m ) {
         test(cf, m, false);
