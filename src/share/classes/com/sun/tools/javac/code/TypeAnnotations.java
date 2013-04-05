@@ -1171,7 +1171,8 @@ public class TypeAnnotations {
             scan(tree.clazz);
             scan(tree.args);
 
-            scan(tree.def);
+            // The class body will already be scanned.
+            // scan(tree.def);
         }
 
         @Override
@@ -1241,6 +1242,11 @@ public class TypeAnnotations {
                     ((Attribute.TypeCompound) anno.attribute).position = position;
                 }
             }
+        }
+
+        @Override
+        public String toString() {
+            return super.toString() + ": sigOnly: " + sigOnly;
         }
     }
 }
