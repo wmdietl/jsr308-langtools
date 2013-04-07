@@ -20,37 +20,28 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
-
+/*
+ * @test
+ * @summary Repeated type-annotations on type parm of local variable 
+ *          are not written to classfile.
+ * @bug 8008769
+ */
 import java.lang.annotation.*;
-import java.io.*;
-import java.net.URL;
-import java.util.List;
-
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 import com.sun.tools.classfile.*;
 
-/*
- * @test ClassLiterals
- * @summary test that new type arguments are emitted to classfile
- */
-
-public class NewTypeArguments extends ClassfileTestHelper{
+public class T8008769 extends ClassfileTestHelper{
     public static void main(String[] args) throws Exception {
-        new NewTypeArguments().run();
+        new T8008769().run();
     }
 
     public void run() throws Exception {
-        expected_tinvisibles = 3;
-        expected_tvisibles = 0;
-
-        ClassFile cf = getClassFile("NewTypeArguments$Test.class");
-        test(cf);
-        for (Field f : cf.fields) {
-            test(cf, f);
-        }
-        for (Method m: cf.methods) {
+        expected_tvisibles = 4;
+        ClassFile cf = getClassFile("T8008769$Test.class");
+        for (Method m : cf.methods) {
             test(cf, m, true);
         }
-
         countAnnotations();
 
         if (errors > 0)
@@ -59,14 +50,15 @@ public class NewTypeArguments extends ClassfileTestHelper{
     }
 
     /*********************** Test class *************************/
-    static class Test {
-        @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
-        @interface A {}
-        <E> Test(E e) {}
-
-        void test() {
-            new <@A String> Test(null);
-            new <@A List<@A String>> Test(null);
-        }
+    static class Test<T> {
+        public void test() {
+            Test<@A @B String>    t0 = new Test<>(); // 2 ok
+            Test<@B @B String>    t1 = new Test<>(); // 1 missing
+            Test<@A @A @A String> t2 = new Test<>(); // 1 missing
+       }
     }
+    @Retention(RUNTIME) @Target(TYPE_USE) @Repeatable( AC.class ) @interface A { }
+    @Retention(RUNTIME) @Target(TYPE_USE) @Repeatable( BC.class ) @interface B { }
+    @Retention(RUNTIME) @Target(TYPE_USE) @interface AC { A[] value(); }
+    @Retention(RUNTIME) @Target(TYPE_USE) @interface BC { B[] value(); }    
 }

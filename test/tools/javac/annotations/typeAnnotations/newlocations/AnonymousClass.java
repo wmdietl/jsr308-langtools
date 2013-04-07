@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,52 +21,25 @@
  * questions.
  */
 
+import java.lang.annotation.*;
+
 /*
  * @test
- * @bug 8006775
- * @summary the receiver parameter has the type of the surrounding class
+ * @bug 1234567
+ * @summary new type annotation location: anonymous class creation
  * @author Werner Dietl
- * @compile/fail/ref=WrongType.out -XDrawDiagnostics WrongType.java
+ * @compile AnonymousClass.java
  */
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Target;
-
-@Target(ElementType.TYPE_USE)
-@interface A {}
-
-class WrongType {
-  Object f;
-
-  void good1(@A WrongType this) {}
-
-  void good2(@A WrongType this) {
-    this.f = null;
-    Object o = this.f;
-  }
-
-  void bad1(@A Object this) {}
-
-  void bad2(@A Object this) {
-    this.f = null;
-    Object o = this.f;
-  }
-
-  void wow(@A XYZ this) {
-    this.f = null;
-  }
-
-  class Inner {
-    void good1(@A Inner this) {}
-    void good2(@A WrongType.Inner this) {}
-
-    void outerOnly(@A WrongType this) {}
-    void wrongInner(@A Object this) {}
-    void badOuter(@A Outer.Inner this) {}
-    void badInner(@A WrongType.XY this) {}
-  }
-
-  class Generics<X> {
-    <Y> void m(Generics<Y> this) {}
-  }
+class AnonymousClass {
+    Object o1 = new @TA Object() { };
+    // Declaration annotations are also allowed.
+    Object o2 = new @TA @DA Object() { };
 }
+
+@interface DA { }
+
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
+@interface TA { }
+
+@Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})
+@interface TB { }
