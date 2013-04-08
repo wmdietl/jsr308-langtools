@@ -733,7 +733,7 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
 \\
 \nt{LocalVariableDeclarationStatement}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclarators} \term{;}
+\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclarators} \term{;} \\
 \\
 \nt{Resource}: \\
 \qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression} \\
@@ -793,7 +793,7 @@ grammar production, which is no longer used.
 \qquad        \nt{QualifiedType} \multi{ \term{,} \nt{QualifiedType} } \\
 \\
 \nt{CatchType}: \\
-\qquad        \new{\nt{UnannQualifiedType}} \multi{ \term{|} \new{\nt{QualifiedType}} }
+\qquad        \new{\nt{UnannQualifiedType}} \multi{ \term{|} \new{\nt{QualifiedType}} } \\
 \\
 \nt{MethodDeclaratorRest}: \\
 \qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}} \alt{ \nt{Block} \altor{} \term{;} } \\
