@@ -67,6 +67,7 @@
 \hyphenation{Pecht-chan-ski}
 
 \urldef{\jlsEightEightFour}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-8.html#jls-8.8.4}
+\urldef{\jlsFourteenTwenty}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-14.html#jls-14.20}
 \urldef{\jlsFifteenEightThree}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.8.3}
 \urldef{\jlsFifteenEightFour}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.8.4}
 \urldef{\jlsFifteenNine}\url{http://docs.oracle.com/javase/specs/jls/se7/html/jls-15.html#jls-15.9}
@@ -771,7 +772,8 @@ Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 
 \item
 Annotations can be written on a non-parameterized, non-array type as used
-in an annotation (\<@\emph{Foo}>), \<throws> clause, or \<catch> clause.
+in a \<throws> clause, or \<catch> clause.
+% but NOT in annotation (\<@\emph{Foo}>)!
 The JLS grammar uses \nt{QualifiedIdentifer} in such places, but the
 grammar also uses \nt{QualifiedIdentifer} in \<package> statements, where
 it is non-annotatable.  This is confusing, so we refactor the grammar to
@@ -811,10 +813,13 @@ grammar production, which is no longer used.
 \qquad            \nt{FormalParameters} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;} \\
 \end{tabbing}
 
-The \nt{CatchType} rule implies that it is possible to write annotations on
-each disjunct of a multi-catch.  However, there is no syntactic sugar that
-permits a programmer to write an annotation that applies to each disjunct; the
-programmer would have to duplicate the annotation for each disjunct.
+The CatchType rule allows each exception type in a union of types (JLS
+\ahref{\jlsFourteenTwenty}{\S14.20}) to be annotated independently.  There
+is no syntax to indicate that an annotation applies to every exception type
+in a union of types.
+% the programmer would have to duplicate the annotation for each disjunct.
+% , but a higher level tool might choose to act as if the
+% first annotation in a union of types applies to every type in the union.
 
 
 
