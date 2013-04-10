@@ -1069,7 +1069,7 @@ within angle brackets as for generics.
 
 \subsubsection{Syntax of annotations on qualified types\label{qualified-type-syntax}}
 
-The syntax to annotate a qualitied type use is (for example) 
+The syntax to annotate a qualified type use is (for example) 
 \<java.lang.@NonNull String> or \<Outer. @NonNull StaticNestedClass>.
 An alternative would be to write the annotation before the full type
 instead of the simple name, as in \<@NonNull java.lang.String> or
@@ -1171,8 +1171,12 @@ compiler issues the error even if no annotation processor is being run.)
 
 A programmer could write a \code{@Target} meta-annotation indicating that an
 annotation is \emph{both} a type annotation and a declaration annotation.
-We have not found an example where such a meta-annotation is desirable;
-although it is legal, it is considered bad style.
+We have not found an example where such a meta-annotation is desirable for
+a newly-created annotation; although it is legal, it is considered bad style.
+(By contrast, when migrating from Java SE 7 and older annotation
+processors to Java SE 8 and newer annotation processors, it may be
+desirable for the annotation to be both a type annotation and a declaration
+annotation, for reasons of backward compatibility.)
 For example, suppose that a programmer wrote 
 
 \preverbnegspace
@@ -1814,7 +1818,7 @@ targets a class declaration type parameter.
 
 (These declaration annotations appear in 
 \RuntimeInOrVisibleTypeAnnotations attributes, rather than 
-\RuntimeInOrVisibleAnnotations attributes, because genericss are not
+\RuntimeInOrVisibleAnnotations attributes, because generics are not
 well-handled by the classfile.  For example, the \<Signature> attribute of
 of a generic class/method cannot store attributes, much less index them to
 indicate which type parameter is being annotated.  The additional location
@@ -3720,4 +3724,11 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 %  LocalWords:  0x18 0x19 0x1A 0x1B 0x1C 0x1D 0x1E 0x1F 0x80 0x81 0x82 2x5 0x80
 %  LocalWords:  0x83 0x84 0x85 0x86 0x87 0x88 0x89 0x8A 0x8B 0x8C 0x8D 0x82
 %  LocalWords:  0x8E 0x8F 308's 0x00 0x01 0x02 0x03 innerMethod 0x86 0x00 0x84
-% LocalWords:  0x88 0x8A 0x8C 0x8E 0x90 0x92 308's multi
+% LocalWords:  0x88 0x8A 0x8C 0x8E 0x90 0x92 308's multi classfiles MyType
+%%  LocalWords:  TypeAnnotations LocalVariableDeclarationStatement 2x5
+%%  LocalWords:  VariableDeclarators AnnotationTypeElementRest CatchType
+%%  LocalWords:  AnnotationMethodOrConstantRest QualifiedIdentifer 0x40
+%%  LocalWords:  QualifiedIdentiferList UnannQualifiedType 0x00 0x01 0x10
+%%  LocalWords:  StaticNestedClass 0x11 0x12 0x13 0x14 0x15 0x16 0x17 0x41
+%%  LocalWords:  0x42 0x43 0x44 0x45 0x46 0x47 0x48 0x49 0x4A 0x4B 308's
+%%  LocalWords:  RetentionPolicy
