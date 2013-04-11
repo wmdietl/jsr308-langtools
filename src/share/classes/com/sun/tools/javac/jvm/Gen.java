@@ -309,7 +309,15 @@ public class Gen extends JCTree.Visitor {
      */
     int makeRef(DiagnosticPosition pos, Type type) {
         checkDimension(pos, type);
-        return pool.put(type.hasTag(CLASS) ? (Object)type.tsym : (Object)type);
+        if (type.isAnnotated()) {
+            // Treat annotated types separately - we don't want
+            // to collapse all of them - at least for annotated
+            // exceptions.
+            // TODO: review this.
+            return pool.put((Object)type);
+        } else {
+            return pool.put(type.hasTag(CLASS) ? (Object)type.tsym : (Object)type);
+        }
     }
 
     /** Check if the given type is an array with too many dimensions.
@@ -1554,6 +1562,11 @@ public class Gen extends JCTree.Visitor {
                         registerCatch(tree.pos(),
                                       startpc,  end, code.curPc(),
                                       catchType);
+                        if (subCatch.type.isAnnotated()) {
+                            // All compounds share the same position, simply update the
+                            // first one.
+                            subCatch.type.getAnnotationMirrors().head.position.type_index = catchType;
+                        }
                     }
                     gaps = gaps.tail;
                     startpc = gaps.head.intValue();
@@ -1565,6 +1578,11 @@ public class Gen extends JCTree.Visitor {
                         registerCatch(tree.pos(),
                                       startpc, endpc, code.curPc(),
                                       catchType);
+                        if (subCatch.type.isAnnotated()) {
+                            // All compounds share the same position, simply update the
+                            // first one.
+                            subCatch.type.getAnnotationMirrors().head.position.type_index = catchType;
+                        }
                     }
                 }
                 VarSymbol exparam = tree.param.sym;

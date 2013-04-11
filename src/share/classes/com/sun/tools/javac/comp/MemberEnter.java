@@ -616,6 +616,9 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             if (TreeInfo.isEnumInit(tree)) {
                 attr.attribIdentAsEnumType(localEnv, (JCIdent)tree.vartype);
             } else {
+                // Make sure type annotations are processed.
+                // But we don't have a symbol to attach them to yet - use null.
+                typeAnnotate(tree.vartype, env, null);
                 attr.attribType(tree.vartype, localEnv);
             }
         } finally {
@@ -650,7 +653,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
             enclScope.enter(v);
         }
         annotateLater(tree.mods.annotations, localEnv, v);
-        typeAnnotate(tree.vartype, env, tree.sym);
+        typeAnnotate(tree.vartype, env, v);
         annotate.flush();
         v.pos = tree.pos;
     }

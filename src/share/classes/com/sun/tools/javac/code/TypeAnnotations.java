@@ -378,9 +378,20 @@ public class TypeAnnotations {
                     TypeAnnotationPosition p = a.position;
                     p.location = p.location.prependList(depth.toList());
                 }
+                typetree.type = toreturn;
                 return toreturn;
             } else if (type.hasTag(TypeTag.TYPEVAR)) {
                 // Nothing to do for type variables.
+                return type;
+            } else if (type.getKind() == TypeKind.UNION) {
+                // There is a TypeKind, but no TypeTag.
+                JCTypeUnion tutree = (JCTypeUnion) typetree;
+                JCExpression fst = tutree.alternatives.get(0);
+                Type res = typeWithAnnotations(fst, fst.type, annotations, log);
+                fst.type = res;
+                // TODO: do we want to set res as first element in uct.alternatives?
+                // UnionClassType uct = (com.sun.tools.javac.code.Type.UnionClassType)type;
+                // Return the un-annotated union-type.
                 return type;
             } else {
                 Type enclTy = type;
@@ -459,6 +470,7 @@ public class TypeAnnotations {
                 }
 
                 Type ret = typeWithAnnotations(type, enclTy, annotations);
+                typetree.type = ret;
                 return ret;
             }
         }
@@ -858,8 +870,6 @@ public class TypeAnnotations {
                 }
 
                 case UNION_TYPE: {
-                    // TODO: can we store any information here to help in
-                    // determining the final position?
                     List<JCTree> newPath = path.tail;
                     resolveFrame(newPath.head, newPath.tail.head, newPath, p);
                     return;
