@@ -479,7 +479,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
      */
     protected boolean werror;
 
-    /** Switch: is annotation processing requested explitly via
+    /** Switch: is annotation processing requested explicitly via
      * CompilationTask.setProcessors?
      */
     protected boolean explicitAnnotationProcessingRequested = false;
