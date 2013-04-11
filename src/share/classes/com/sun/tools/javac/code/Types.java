@@ -1019,6 +1019,9 @@ public class Types {
                 isSameTypeStrict.visit(t, s) :
                 isSameTypeLoose.visit(t, s);
     }
+    public boolean isSameAnnotatedType(Type t, Type s) {
+        return isSameAnnotatedType.visit(t, s);
+    }
     // where
         abstract class SameTypeVisitor extends TypeRelation {
 
@@ -1151,7 +1154,9 @@ public class Types {
          * Standard type-equality relation - type variables are considered
          * equals if they share the same type symbol.
          */
-        TypeRelation isSameTypeLoose = new SameTypeVisitor() {
+        TypeRelation isSameTypeLoose = new LooseSameTypeVisitor();
+
+        private class LooseSameTypeVisitor extends SameTypeVisitor {
             @Override
             boolean sameTypeVars(TypeVar tv1, TypeVar tv2) {
                 return tv1.tsym == tv2.tsym && visit(tv1.getUpperBound(), tv2.getUpperBound());
@@ -1185,6 +1190,23 @@ public class Types {
                     return t.kind == t2.kind &&
                             isSameType(t.type, t2.type, true);
                 }
+            }
+        };
+
+        /**
+         * A version of LooseSameTypeVisitor that takes AnnotatedTypes
+         * into account.
+         */
+        TypeRelation isSameAnnotatedType = new LooseSameTypeVisitor() {
+            @Override
+            public Boolean visitAnnotatedType(AnnotatedType t, Type s) {
+                if (!s.isAnnotated())
+                    return false;
+                if (!t.getAnnotationMirrors().containsAll(s.getAnnotationMirrors()))
+                    return false;
+                if (!s.getAnnotationMirrors().containsAll(t.getAnnotationMirrors()))
+                    return false;
+                return visit(t.underlyingType, s);
             }
         };
     // </editor-fold>
@@ -4238,7 +4260,7 @@ public class Types {
 
         public boolean equals(Object obj) {
             return (obj instanceof UniqueType) &&
-                types.isSameType(type, ((UniqueType)obj).type);
+                types.isSameAnnotatedType(type, ((UniqueType)obj).type);
         }
 
         public String toString() {
