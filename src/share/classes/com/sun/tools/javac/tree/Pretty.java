@@ -562,8 +562,10 @@ public class Pretty extends JCTree.Visitor {
                         vartype = ((JCAnnotatedType)vartype).underlyingType;
                     }
                     printExpr(((JCArrayTypeTree) vartype).elemtype);
-                    if (tas != null)
+                    if (tas != null) {
+                        print(' ');
                         printTypeAnnotations(tas);
+                    }
                     print("... " + tree.name);
                 } else {
                     printExpr(tree.vartype);
@@ -950,6 +952,7 @@ public class Pretty extends JCTree.Visitor {
                 List<List<JCAnnotation>> da = tree.dimAnnotations;
                 for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                     if (da.size() > i) {
+                        print(' ');
                         printTypeAnnotations(da.get(i));
                     }
                     print("[");
@@ -959,6 +962,7 @@ public class Pretty extends JCTree.Visitor {
                 }
                 if (tree.elems != null) {
                     if (isElemAnnoType) {
+                        print(' ');
                         printTypeAnnotations(((JCAnnotatedType)tree.elemtype).annotations);
                     }
                     print("[]");
@@ -1265,6 +1269,7 @@ public class Pretty extends JCTree.Visitor {
                 JCAnnotatedType atype = (JCAnnotatedType) elem;
                 elem = atype.underlyingType;
                 if (!elem.hasTag(TYPEARRAY)) break;
+                print(' ');
                 printTypeAnnotations(atype.annotations);
             }
             print("[]");
@@ -1383,6 +1388,7 @@ public class Pretty extends JCTree.Visitor {
             } else if (tree.underlyingType.getKind() == JCTree.Kind.ARRAY_TYPE) {
                 JCArrayTypeTree array = (JCArrayTypeTree) tree.underlyingType;
                 printBaseElementType(tree);
+                print(' ');
                 printTypeAnnotations(tree.annotations);
                 print("[]");
                 JCExpression elem = array.elemtype;
