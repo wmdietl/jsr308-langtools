@@ -30,6 +30,8 @@ import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.JCDiagnostic.DiagnosticPosition;
 import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.code.*;
+import com.sun.tools.javac.code.Attribute.TypeCompound;
+import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.comp.*;
 import com.sun.tools.javac.tree.*;
 
@@ -47,7 +49,6 @@ import static com.sun.tools.javac.jvm.ByteCodes.*;
 import static com.sun.tools.javac.jvm.CRTFlags.*;
 import static com.sun.tools.javac.main.Option.*;
 import static com.sun.tools.javac.tree.JCTree.Tag.*;
-import static com.sun.tools.javac.tree.JCTree.Tag.BLOCK;
 
 /** This pass maps flat Java (i.e. without inner classes) to bytecodes.
  *
@@ -308,7 +309,15 @@ public class Gen extends JCTree.Visitor {
      */
     int makeRef(DiagnosticPosition pos, Type type) {
         checkDimension(pos, type);
-        return pool.put(type.hasTag(CLASS) ? (Object)type.tsym : (Object)type);
+        if (type.isAnnotated()) {
+            // Treat annotated types separately - we don't want
+            // to collapse all of them - at least for annotated
+            // exceptions.
+            // TODO: review this.
+            return pool.put((Object)type);
+        } else {
+            return pool.put(type.hasTag(CLASS) ? (Object)type.tsym : (Object)type);
+        }
     }
 
     /** Check if the given type is an array with too many dimensions.
@@ -456,7 +465,9 @@ public class Gen extends JCTree.Visitor {
      */
     List<JCTree> normalizeDefs(List<JCTree> defs, ClassSymbol c) {
         ListBuffer<JCStatement> initCode = new ListBuffer<JCStatement>();
+        ListBuffer<Attribute.TypeCompound> initTAs = new ListBuffer<Attribute.TypeCompound>();
         ListBuffer<JCStatement> clinitCode = new ListBuffer<JCStatement>();
+        ListBuffer<Attribute.TypeCompound> clinitTAs = new ListBuffer<Attribute.TypeCompound>();
         ListBuffer<JCTree> methodDefs = new ListBuffer<JCTree>();
         // Sort definitions into three listbuffers:
         //  - initCode for instance initializers
@@ -486,6 +497,7 @@ public class Gen extends JCTree.Visitor {
                             Assignment(sym, vdef.init);
                         initCode.append(init);
                         endPosTable.replaceTree(vdef, init);
+                        initTAs.addAll(getAndRemoveNonFieldTAs(sym));
                     } else if (sym.getConstValue() == null) {
                         // Initialize class (static) variables only if
                         // they are not compile-time constants.
@@ -493,6 +505,7 @@ public class Gen extends JCTree.Visitor {
                             Assignment(sym, vdef.init);
                         clinitCode.append(init);
                         endPosTable.replaceTree(vdef, init);
+                        clinitTAs.addAll(getAndRemoveNonFieldTAs(sym));
                     } else {
                         checkStringConstant(vdef.init.pos(), sym.getConstValue());
                     }
@@ -505,8 +518,10 @@ public class Gen extends JCTree.Visitor {
         // Insert any instance initializers into all constructors.
         if (initCode.length() != 0) {
             List<JCStatement> inits = initCode.toList();
+            initTAs.addAll(c.init_type_annotations);
+            List<Attribute.TypeCompound> initTAlist = initTAs.toList();
             for (JCTree t : methodDefs) {
-                normalizeMethod((JCMethodDecl)t, inits);
+                normalizeMethod((JCMethodDecl)t, inits, initTAlist);
             }
         }
         // If there are class initializers, create a <clinit> method
@@ -524,9 +539,26 @@ public class Gen extends JCTree.Visitor {
             JCBlock block = make.at(clinitStats.head.pos()).Block(0, clinitStats);
             block.endpos = TreeInfo.endPos(clinitStats.last());
             methodDefs.append(make.MethodDef(clinit, block));
+            clinit.annotations.appendUniqueTypes(clinitTAs.toList());
+            clinit.annotations.appendUniqueTypes(c.clinit_type_annotations);
         }
         // Return all method definitions.
         return methodDefs.toList();
+    }
+
+    private List<Attribute.TypeCompound> getAndRemoveNonFieldTAs(VarSymbol sym) {
+        List<TypeCompound> tas = sym.getRawTypeAttributes();
+        ListBuffer<Attribute.TypeCompound> fieldTAs = new ListBuffer<Attribute.TypeCompound>();
+        ListBuffer<Attribute.TypeCompound> nonfieldTAs = new ListBuffer<Attribute.TypeCompound>();
+        for (TypeCompound ta : tas) {
+            if (ta.position.type == TargetType.FIELD) {
+                fieldTAs.add(ta);
+            } else {
+                nonfieldTAs.add(ta);
+            }
+        }
+        sym.annotations.setTypeAttributes(fieldTAs.toList());
+        return nonfieldTAs.toList();
     }
 
     /** Check a constant value and report if it is a string that is
@@ -546,8 +578,9 @@ public class Gen extends JCTree.Visitor {
      *  @param md        The tree potentially representing a
      *                   constructor's definition.
      *  @param initCode  The list of instance initializer statements.
+     *  @param initTAs  Type annotations from the initializer expression.
      */
-    void normalizeMethod(JCMethodDecl md, List<JCStatement> initCode) {
+    void normalizeMethod(JCMethodDecl md, List<JCStatement> initCode, List<TypeCompound> initTAs) {
         if (md.name == names.init && TreeInfo.isInitialConstructor(md)) {
             // We are seeing a constructor that does not call another
             // constructor of the same class.
@@ -581,6 +614,8 @@ public class Gen extends JCTree.Visitor {
             md.body.stats = newstats.toList();
             if (md.body.endpos == Position.NOPOS)
                 md.body.endpos = TreeInfo.endPos(md.body.stats.last());
+
+            md.sym.annotations.appendUniqueTypes(initTAs);
         }
     }
 
@@ -1527,6 +1562,11 @@ public class Gen extends JCTree.Visitor {
                         registerCatch(tree.pos(),
                                       startpc,  end, code.curPc(),
                                       catchType);
+                        if (subCatch.type.isAnnotated()) {
+                            // All compounds share the same position, simply update the
+                            // first one.
+                            subCatch.type.getAnnotationMirrors().head.position.type_index = catchType;
+                        }
                     }
                     gaps = gaps.tail;
                     startpc = gaps.head.intValue();
@@ -1538,6 +1578,11 @@ public class Gen extends JCTree.Visitor {
                         registerCatch(tree.pos(),
                                       startpc, endpc, code.curPc(),
                                       catchType);
+                        if (subCatch.type.isAnnotated()) {
+                            // All compounds share the same position, simply update the
+                            // first one.
+                            subCatch.type.getAnnotationMirrors().head.position.type_index = catchType;
+                        }
                     }
                 }
                 VarSymbol exparam = tree.param.sym;
