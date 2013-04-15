@@ -158,15 +158,7 @@ public class CombinationsTargetTest3 extends ClassfileTestHelper {
                 et2 + ", src=" + source;
 
         // Skip failing cases with bug ID's
-        //8010015 type-annotations on field of inner class in lambda expression
-        if(source.equals(srce.src7)) {
-            skippedTests.add(testDef +
-                "\n--8010015 type-annotations on field of inner" +
-                " class in lambda expression.");
-            return;
-        } //8005681 repeated type-annotations on new/cast/array in
-          // inner class in lambda expression."
-         else if ((source.equals(srce.src2) || source.equals(srce.src4) ||
+        if ((source.equals(srce.src2) || source.equals(srce.src4) ||
             source.equals(srce.src5)) &&
             (ABmix || (Arepeats && BDrepeats))) {
                 skippedTests.add(testDef +
