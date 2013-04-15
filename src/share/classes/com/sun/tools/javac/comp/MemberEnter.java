@@ -1160,7 +1160,7 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
 
         @Override
         public void visitVarDef(final JCVariableDecl tree) {
-            if (sym.kind == Kinds.VAR) {
+            if (sym != null && sym.kind == Kinds.VAR) {
                 // Don't visit a parameter once when the sym is the method
                 // and once when the sym is the parameter.
                 scan(tree.mods);
