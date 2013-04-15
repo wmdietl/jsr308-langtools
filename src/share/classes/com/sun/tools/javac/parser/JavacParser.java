@@ -3551,18 +3551,24 @@ public class JavacParser implements Parser {
         ListBuffer<JCExpression> ts = new ListBuffer<JCExpression>();
 
         List<JCAnnotation> typeAnnos = typeAnnotationsOpt();
-        if (!typeAnnos.isEmpty())
-            ts.append(toP(F.at(typeAnnos.head.pos).AnnotatedType(typeAnnos, qualident(true))));
-        else
-            ts.append(qualident(true));
+        JCExpression qi = qualident(true);
+        if (!typeAnnos.isEmpty()) {
+            JCExpression at = insertAnnotationsToMostInner(qi, typeAnnos, false);
+            ts.append(at);
+        } else {
+            ts.append(qi);
+        }
         while (token.kind == COMMA) {
             nextToken();
 
             typeAnnos = typeAnnotationsOpt();
-            if (!typeAnnos.isEmpty())
-                ts.append(toP(F.at(typeAnnos.head.pos).AnnotatedType(typeAnnos, qualident(true))));
-            else
-                ts.append(qualident(true));
+            qi = qualident(true);
+            if (!typeAnnos.isEmpty()) {
+                JCExpression at = insertAnnotationsToMostInner(qi, typeAnnos, false);
+                ts.append(at);
+            } else {
+                ts.append(qi);
+            }
         }
         return ts.toList();
     }
