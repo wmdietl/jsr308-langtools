@@ -2256,10 +2256,10 @@ struct type_path_entry {
     // 0: annotation is deeper in this array type
     // 1: annotation is deeper in this nested type
     // 2: annotation is on the bound of this wildcard type arg
-    // 3: annotation is on the i'th type arg of this parameterized type
+    // 3: annotation is on a type argument of this parameterized type
   u1 type_argument_index;
-    // 0: ignore me
-    // non-0: the 1st, 2nd, etc type arg of this parameterized type
+    // 0, if type_path_kind is 0, 1, or 2
+    // the 0-based index of the type arg in this parameterized type, if type_path_kind is 3
 }
 \end{Verbatim}
 
