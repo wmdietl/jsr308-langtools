@@ -27,6 +27,7 @@ package com.sun.tools.javac.code;
 
 import java.util.Iterator;
 
+import com.sun.tools.javac.tree.JCTree.JCLambda;
 import com.sun.tools.javac.util.*;
 
 /** A type annotation position.
@@ -145,8 +146,17 @@ public class TypeAnnotationPosition {
     // For class extends, implements, and throws clauses
     public int type_index = Integer.MIN_VALUE;
 
-    // For exception parameters, index into exception table
+    // For exception parameters, index into exception table.
+    // In com.sun.tools.javac.jvm.Gen.genCatch we first set the type_index
+    // to the catch type index - that value is only temporary.
+    // Then in com.sun.tools.javac.jvm.Code.fillExceptionParameterPositions
+    // we use that value to determine the exception table index.
     public int exception_index = Integer.MIN_VALUE;
+
+    // If this type annotation is within a lambda expression,
+    // store a pointer to the lambda expression tree in order
+    // to allow a later translation to the right method.
+    public JCLambda onLambda = null;
 
     public TypeAnnotationPosition() {}
 
@@ -257,6 +267,11 @@ public class TypeAnnotationPosition {
 
         sb.append(", pos = ");
         sb.append(pos);
+
+        if (onLambda != null) {
+            sb.append(", onLambda hash = ");
+            sb.append(onLambda.hashCode());
+        }
 
         sb.append(']');
         return sb.toString();
