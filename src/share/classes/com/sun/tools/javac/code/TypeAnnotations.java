@@ -1209,6 +1209,7 @@ public class TypeAnnotations {
             // int i = dimAnnosCount == 0 ? 0 : dimAnnosCount - 1;
             // TODO: is depth.size == i here?
             JCExpression elemType = tree.elemtype;
+            depth = depth.append(TypePathEntry.ARRAY);
             while (elemType != null) {
                 if (elemType.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                     JCAnnotatedType at = (JCAnnotatedType)elemType;
@@ -1216,12 +1217,15 @@ public class TypeAnnotations {
                     p.type = TargetType.NEW;
                     p.pos = tree.pos;
                     p.onLambda = currentLambda;
-                    p.location = p.location.appendList(depth.toList());
+                    locateNestedTypes(elemType.type, p);
+                    p.location = p.location.prependList(depth.toList());
                     setTypeAnnotationPos(at.annotations, p);
                     elemType = at.underlyingType;
                 } else if (elemType.hasTag(JCTree.Tag.TYPEARRAY)) {
                     depth = depth.append(TypePathEntry.ARRAY);
                     elemType = ((JCArrayTypeTree)elemType).elemtype;
+                } else if (elemType.hasTag(JCTree.Tag.SELECT)) {
+                    elemType = ((JCFieldAccess)elemType).selected;
                 } else {
                     break;
                 }
