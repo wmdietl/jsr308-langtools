@@ -201,7 +201,7 @@ public class Types {
                     WildcardType unb = new WildcardType(syms.objectType,
                                                         BoundKind.UNBOUND,
                                                         syms.boundClass,
-                                                        (TypeVar)parms.head);
+                                                        (TypeVar)parms.head.unannotatedType());
                     if (!containsType(args.head, unb))
                         return false;
                     parms = parms.tail;
@@ -265,7 +265,7 @@ public class Types {
                         List<Type> opens = openVars.toList();
                         ListBuffer<Type> qs = new ListBuffer<Type>();
                         for (List<Type> iter = opens; iter.nonEmpty(); iter = iter.tail) {
-                            qs.append(new WildcardType(syms.objectType, BoundKind.UNBOUND, syms.boundClass, (TypeVar) iter.head));
+                            qs.append(new WildcardType(syms.objectType, BoundKind.UNBOUND, syms.boundClass, (TypeVar) iter.head.unannotatedType()));
                         }
                         res = subst(res, opens, qs.toList());
                     }
@@ -578,12 +578,12 @@ public class Types {
             //simply replace the wildcards with its bound
             for (Type t : formalInterface.getTypeArguments()) {
                 if (actualTypeargs.head.hasTag(WILDCARD)) {
-                    WildcardType wt = (WildcardType)actualTypeargs.head;
+                    WildcardType wt = (WildcardType)actualTypeargs.head.unannotatedType();
                     Type bound;
                     switch (wt.kind) {
                         case EXTENDS:
                         case UNBOUND:
-                            CapturedType capVar = (CapturedType)capturedTypeargs.head;
+                            CapturedType capVar = (CapturedType)capturedTypeargs.head.unannotatedType();
                             //use declared bound if it doesn't depend on formal type-args
                             bound = capVar.bound.containsAny(capturedSite.getTypeArguments()) ?
                                     wt.type : capVar.bound;
@@ -1128,7 +1128,7 @@ public class Types {
                 if (!s.hasTag(WILDCARD)) {
                     return false;
                 } else {
-                    WildcardType t2 = (WildcardType)s;
+                    WildcardType t2 = (WildcardType)s.unannotatedType();
                     return t.kind == t2.kind &&
                             isSameType(t.type, t2.type, true);
                 }
@@ -1159,7 +1159,7 @@ public class Types {
         case UNDETVAR:
             if (s.tag == WILDCARD) {
                 UndetVar undetvar = (UndetVar)t;
-                WildcardType wt = (WildcardType)s;
+                WildcardType wt = (WildcardType)s.unannotatedType();
                 switch(wt.kind) {
                     case UNBOUND: //similar to ? extends Object
                     case EXTENDS: {
@@ -1226,7 +1226,7 @@ public class Types {
 
             private Type U(Type t) {
                 while (t.tag == WILDCARD) {
-                    WildcardType w = (WildcardType)t;
+                    WildcardType w = (WildcardType)t.unannotatedType();
                     if (w.isSuperBound())
                         return w.bound == null ? syms.objectType : w.bound.bound;
                     else
@@ -1237,7 +1237,7 @@ public class Types {
 
             private Type L(Type t) {
                 while (t.tag == WILDCARD) {
-                    WildcardType w = (WildcardType)t;
+                    WildcardType w = (WildcardType)t.unannotatedType();
                     if (w.isExtendsBound())
                         return syms.botType;
                     else
@@ -1295,15 +1295,15 @@ public class Types {
         };
 
     public boolean isCaptureOf(Type s, WildcardType t) {
-        if (s.tag != TYPEVAR || !((TypeVar)s).isCaptured())
+        if (s.tag != TYPEVAR || !((TypeVar)s.unannotatedType()).isCaptured())
             return false;
-        return isSameWildcard(t, ((CapturedType)s).wildcard);
+        return isSameWildcard(t, ((CapturedType)s.unannotatedType()).wildcard);
     }
 
     public boolean isSameWildcard(WildcardType t, Type s) {
         if (s.tag != WILDCARD)
             return false;
-        WildcardType w = (WildcardType)s;
+        WildcardType w = (WildcardType)s.unannotatedType();
         return w.kind == t.kind && w.type == t.type;
     }
 
@@ -1392,8 +1392,8 @@ public class Types {
 
                 if (t.isCompound() || s.isCompound()) {
                     return !t.isCompound() ?
-                            visitIntersectionType((IntersectionClassType)s, t, true) :
-                            visitIntersectionType((IntersectionClassType)t, s, false);
+                            visitIntersectionType((IntersectionClassType)s.unannotatedType(), t, true) :
+                            visitIntersectionType((IntersectionClassType)t.unannotatedType(), s, false);
                 }
 
                 if (s.tag == CLASS || s.tag == ARRAY) {
@@ -3089,7 +3089,7 @@ public class Types {
             for (Type t : tvars) {
                 if (!first) s.append(", ");
                 first = false;
-                appendTyparamString(((TypeVar)t), s);
+                appendTyparamString(((TypeVar)t.unannotatedType()), s);
             }
             s.append('>');
             return s.toString();
@@ -3862,7 +3862,7 @@ public class Types {
 
     private boolean giveWarning(Type from, Type to) {
         List<Type> bounds = to.isCompound() ?
-                ((IntersectionClassType)to).getComponents() : List.of(to);
+                ((IntersectionClassType)to.unannotatedType()).getComponents() : List.of(to);
         for (Type b : bounds) {
             Type subFrom = asSub(from, b.tsym);
             if (b.isParameterized() &&
@@ -4127,7 +4127,7 @@ public class Types {
 
         Type B(Type t) {
             while (t.tag == WILDCARD) {
-                WildcardType w = (WildcardType)t;
+                WildcardType w = (WildcardType)t.unannotatedType();
                 t = high ?
                     w.getExtendsBound() :
                     w.getSuperBound();
