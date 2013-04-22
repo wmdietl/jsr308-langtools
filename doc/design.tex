@@ -1169,41 +1169,64 @@ compiler issues the error even if no annotation processor is being run.)
 %   specified usage restriction.
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
-A programmer could write a \code{@Target} meta-annotation indicating that an
-annotation is \emph{both} a type annotation and a declaration annotation.
-We have not found an example where such a meta-annotation is desirable for
-a newly-created annotation; although it is legal, it is considered bad style.
-(By contrast, when migrating from Java SE 7 and older annotation
-processors to Java SE 8 and newer annotation processors, it may be
-desirable for the annotation to be both a type annotation and a declaration
-annotation, for reasons of backward compatibility.)
-For example, suppose that a programmer wrote 
+As a mare extended example, suppose that you had defined the following annotations:
 
-\preverbnegspace
 \begin{Verbatim}
-  @Target({ ElementType.TYPE_USE, ElementType.METHOD })
-  public @interface SillyAnnotation { ... }
+  @Target({TYPE_USE}) @interface TAnno { }
+  @Target({METHOD}) @interface MAnno { }
+  @Target({METHOD, TYPE_USE}) @interface MTAnno { }
+  @Target({FIELD}) @interface FAnno { }
+  @Target({FIELD, TYPE_USE}) @interface FTAnno { }
 \end{Verbatim}
 
-\noindent
-If \<@SillyAnnotation> were written before a non-\<void> method, then
-the annotation would apply to both the return type and the
-method declaration.  The annotation appears twice in the AST
-during annotation processing, and it appears twice in the classfile.
+Then the following code example shows which annotations are legal and which
+are illegal; it also shows, for each legal source-code annotation, how many
+annotations appear in the AST during annotation processing and in the
+classfile.
 % In other words, a Java 7 and a Java 8 compiler would
 % produce classfiles with different numbers of annotations.
+
+\begin{Verbatim}
+  @FAnno Object field4;              // legal, one field annotation
+  @TAnno Object field5;              // legal, one type annotation
+  @FTAnno Object field6;             // legal, one field annotation and one type annotation
+  @FAnno java.lang.Object field7;    // legal, one field annotation
+  @TAnno java.lang.Object field8;    // illegal
+  @FTAnno java.lang.Object field9;   // legal, one field annotation
+  java.lang. @FAnno Object field10;  // illegal
+  java.lang. @TAnno Object field11;  // legal, one type annotation
+  java.lang. @FTAnno Object field12  // legal, one type annotation
+
+  @MAnno void myMethod1() { ... }                // legal, one method annotation
+  @TAnno void myMethod2() { ... }                // illegal
+  @MTAnno void myMethod3() { ... }               // legal, one method annotation
+  @MAnno Object myMethod4() { ... }              // legal, one method annotation
+  @TAnno Object myMethod5() { ... }              // legal, one type annotation
+  @MTAnno Object myMethod6() { ... }             // legal, one method annotation and one type annotation
+  @MAnno java.lang.Object myMethod7() { ... }    // legal, one method annotation
+  @TAnno java.lang.Object myMethod8() { ... }    // illegal
+  @MTAnno java.lang.Object myMethod9() { ... }   // legal, one method annotation
+  java.lang. @MAnno Object myMethod10() { ... }  // illegal
+  java.lang. @TAnno Object myMethod11() { ... }  // legal, one type annotation
+  java.lang. @MTAnno Object myMethod12() { ... } // legal, one type annotation
+\end{Verbatim}
+
+
+Note from the above examples that a programmer is permitted to write can
+write a \code{@Target} meta-annotation indicating that an annotation, such
+as \<@FTAnno> or \<@MTAnno>, is \emph{both} a type annotation and a
+declaration annotation.
+We have not found an example where such a meta-annotation is desirable for
+a newly-created annotation; although it is legal, it is considered bad style.
+% Are Colin's examples about effect systems a counterexample?
+By contrast, when migrating from Java SE 7 and older annotation
+processors to Java SE 8 and newer annotation processors, it may be
+desirable for the annotation to be both a type annotation and a declaration
+annotation, for reasons of backward compatibility.
+
 A tool that reads a classfile and writes Java-like output, such as Javadoc
 or a decompiler, must take care not to write an annotation twice in the
-decompiled code, as in ``\code{@SillyAnnotation @SillyAnnotation int m()}\ldots''.
-% Is this rule a good idea??  Or should we use this rule:
-%   It is legal to write \<@A void foo() \ttlcb\ ...\ \ttrcb>, where \<@A> is
-%   meta-annotated with \<@Target(\ttlcb ElementType.TYPE\_USE, ElementType.METHOD\ttrcb)>
-%    or \<@A> has no \<@Target> meta-annotation; in either case, the \<@A>
-%   annotation is applied only to the method declaration.  The code construct
-%   would have been illegal if \<@A> were a type annotation.
-If you write \<@SillyAnnotation> on a \<void>-returning method, then
-it applies only to the declaration, because it is not written in a type
-annotation position.
+decompiled code, as in ``\code{@FTAnno @FTAnno Object field6;}''.
 
 
 
