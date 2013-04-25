@@ -28,6 +28,7 @@ import java.util.Map;
 
 import com.sun.tools.classfile.Attribute;
 import com.sun.tools.classfile.ClassFile;
+import com.sun.tools.classfile.Code_attribute;
 import com.sun.tools.classfile.TypeAnnotation;
 import com.sun.tools.classfile.Field;
 import com.sun.tools.classfile.Method;
@@ -89,6 +90,20 @@ public class ReferenceInfoUtil {
             assert attr instanceof RuntimeTypeAnnotations_attribute;
             RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
             annos.addAll(Arrays.asList(tAttr.annotations));
+        }
+
+        int cindex = m.attributes.getIndex(cf.constant_pool, Attribute.Code);
+        if (cindex != -1) {
+            Attribute cattr = m.attributes.get(cindex);
+            assert cattr instanceof Code_attribute;
+            Code_attribute cAttr = (Code_attribute)cattr;
+            index = cAttr.attributes.getIndex(cf.constant_pool, name);
+            if (index != -1) {
+                Attribute attr = cAttr.attributes.get(index);
+                assert attr instanceof RuntimeTypeAnnotations_attribute;
+                RuntimeTypeAnnotations_attribute tAttr = (RuntimeTypeAnnotations_attribute)attr;
+                annos.addAll(Arrays.asList(tAttr.annotations));
+            }
         }
     }
 
