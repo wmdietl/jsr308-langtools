@@ -286,6 +286,17 @@ public class TypeAnnotationPosition {
         return !type.isLocal() || isValidOffset;
     }
 
+
+    public boolean matchesPos(int pos) {
+        return this.pos == pos;
+    }
+
+    public void updatePosOffset(int to) {
+        offset = to;
+        lvarOffset = new int[]{to};
+        isValidOffset = true;
+    }
+
     /**
      * Decode the binary representation for a type path and set
      * the {@code location} field.

@@ -539,7 +539,10 @@ public class Gen extends JCTree.Visitor {
             JCBlock block = make.at(clinitStats.head.pos()).Block(0, clinitStats);
             block.endpos = TreeInfo.endPos(clinitStats.last());
             methodDefs.append(make.MethodDef(clinit, block));
+
+            if (!clinitTAs.isEmpty())
             clinit.annotations.appendUniqueTypes(clinitTAs.toList());
+            if (!c.clinit_type_annotations.isEmpty())
             clinit.annotations.appendUniqueTypes(c.clinit_type_annotations);
         }
         // Return all method definitions.
@@ -1828,42 +1831,44 @@ public class Gen extends JCTree.Visitor {
         result = items.makeStackItem(pt);
     }
 
-   private void setTypeAnnotationPositions(int treePos) {
-       MethodSymbol meth = code.meth;
+    private void setTypeAnnotationPositions(int treePos) {
+        MethodSymbol meth = code.meth;
+        boolean initOrClinit = code.meth.getKind() == javax.lang.model.element.ElementKind.CONSTRUCTOR
+                || code.meth.getKind() == javax.lang.model.element.ElementKind.STATIC_INIT;
 
-       for (Attribute.TypeCompound ta : meth.getRawTypeAttributes()) {
-           if (ta.position.pos == treePos) {
-               ta.position.offset = code.cp;
-               ta.position.lvarOffset = new int[] { code.cp };
-               ta.position.isValidOffset = true;
-           }
-       }
+        for (Attribute.TypeCompound ta : meth.getRawTypeAttributes()) {
+            if (ta.hasUnknownPosition())
+                ta.tryFixPosition();
 
-       if (code.meth.getKind() != javax.lang.model.element.ElementKind.CONSTRUCTOR
-               && code.meth.getKind() != javax.lang.model.element.ElementKind.STATIC_INIT)
-           return;
+            if (ta.position.matchesPos(treePos))
+                ta.position.updatePosOffset(code.cp);
+        }
 
-       for (Attribute.TypeCompound ta : meth.owner.getRawTypeAttributes()) {
-           if (ta.position.pos == treePos) {
-               ta.position.offset = code.cp;
-               ta.position.lvarOffset = new int[] { code.cp };
-               ta.position.isValidOffset = true;
-           }
-       }
+        if (!initOrClinit)
+            return;
 
-       ClassSymbol clazz = meth.enclClass();
-       for (Symbol s : new com.sun.tools.javac.model.FilteredMemberList(clazz.members())) {
-           if (!s.getKind().isField())
-               continue;
-           for (Attribute.TypeCompound ta : s.getRawTypeAttributes()) {
-               if (ta.position.pos == treePos) {
-                   ta.position.offset = code.cp;
-                   ta.position.lvarOffset = new int[] { code.cp };
-                   ta.position.isValidOffset = true;
-               }
-           }
-       }
-   }
+        for (Attribute.TypeCompound ta : meth.owner.getRawTypeAttributes()) {
+            if (ta.hasUnknownPosition())
+                ta.tryFixPosition();
+
+            if (ta.position.matchesPos(treePos))
+                ta.position.updatePosOffset(code.cp);
+        }
+
+        ClassSymbol clazz = meth.enclClass();
+        for (Symbol s : new com.sun.tools.javac.model.FilteredMemberList(clazz.members())) {
+            if (!s.getKind().isField())
+                continue;
+
+            for (Attribute.TypeCompound ta : s.getRawTypeAttributes()) {
+                if (ta.hasUnknownPosition())
+                    ta.tryFixPosition();
+
+                if (ta.position.matchesPos(treePos))
+                    ta.position.updatePosOffset(code.cp);
+            }
+        }
+    }
 
     public void visitNewClass(JCNewClass tree) {
         // Enclosing instances or anonymous classes should have been eliminated

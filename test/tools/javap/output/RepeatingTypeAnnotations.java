@@ -121,7 +121,6 @@ public class RepeatingTypeAnnotations extends Tester {
      */
 
     @TestCase
-    @ignore // 8008082:missing type annotation for cast
     public static class TC1 extends RepeatingTypeAnnotations {
         public TC1() {
             setSrc(" /* TC1 */ ",
@@ -129,7 +128,7 @@ public class RepeatingTypeAnnotations extends Tester {
                    "    public @A @A @A Object o = (@A @A @A String) Test.so;");
             verify("RuntimeInvisibleTypeAnnotations",
                    "0: #25(#26=[@#27(),@#27(),@#27()]): FIELD",
-                   "1: #25(#26=[@#27(),@#27(),@#27()]): CAST, offset=5");
+                   "0: #25(#26=[@#27(),@#27(),@#27()]): CAST, offset=5, type_index=0");
         }
     }
 
@@ -180,7 +179,6 @@ public class RepeatingTypeAnnotations extends Tester {
     }
 
     @TestCase
-    @ignore // 8008082:missing type annotation for cast
     public static class TC5 extends RepeatingTypeAnnotations {
         public TC5() {
             setSrc(" /* TC5 */ ",
@@ -188,7 +186,7 @@ public class RepeatingTypeAnnotations extends Tester {
                    "    public static @A @A @A Object o = (@B @B @B String) Test.so;");
             verify("RuntimeInvisibleTypeAnnotations",
                    "0: #25(#26=[@#27(),@#27(),@#27()]): FIELD",
-                   "1: #28(#26=[@#29(),@#29(),@#29()]): CAST, offset=5, type_index=0");
+                   "0: #36(#26=[@#37(),@#37(),@#37()]): CAST, offset=5, type_index=0");
         }
     }
 
@@ -227,7 +225,7 @@ public class RepeatingTypeAnnotations extends Tester {
             setSrc(" /* TC8 */ ",
                    "    static String so = \"hello world\";",
                    "    public static @A @B @C Object o = (@C @B @A String) Test.so;");
-                   
+
             verify("RuntimeVisibleTypeAnnotations",
                    "RuntimeInvisibleTypeAnnotations",
                    "0: #25(): FIELD",
@@ -240,7 +238,6 @@ public class RepeatingTypeAnnotations extends Tester {
     }
 
     @TestCase
-    @ignore // 8008082:missing type annotation for cast
     public static class TC9 extends RepeatingTypeAnnotations {
         public TC9() {
             setSrc(" /* TC9 */ ",
@@ -248,10 +245,11 @@ public class RepeatingTypeAnnotations extends Tester {
                    "        @A @A @A String ls = (@B @B @B String) o;",
                    "    }");
             verify("RuntimeInvisibleTypeAnnotations",
-                   "0: #34(#35=[@#36(),@#36(),@#36()]): METHOD_FORMAL_PARAMETER, param_index=0",
-                   "1: #36(): METHOD_FORMAL_PARAMETER, param_index=1",
-                   "2: #37(#35=[@#38(),@#38(),@#38()]): CAST, offset=4, type_index=0",
-                   "3: #34(#35=[@#36(),@#36(),@#36()]): LOCAL_VARIABLE, {start_pc=10, length=1, index=5}");
+                   "0: #34(#35=[@#36(),@#36(),@#36()]): CAST, offset=4, type_index=0",
+                   "1: #37(#35=[@#38(),@#38(),@#38()]): LOCAL_VARIABLE, {start_pc=10, length=1, index=5}",
+                   "RuntimeInvisibleTypeAnnotations",
+                   "0: #37(#35=[@#38(),@#38(),@#38()]): METHOD_FORMAL_PARAMETER, param_index=0",
+                   "1: #38(): METHOD_FORMAL_PARAMETER, param_index=1");
         }
     }
 
@@ -319,7 +317,6 @@ public class RepeatingTypeAnnotations extends Tester {
     }
 
     @TestCase
-    @ignore // 8008082:missing type annotation for cast
     public static class TC13 extends RepeatingTypeAnnotations {
         public TC13() {
             setSrc(" /* TC13 */ ",
@@ -328,12 +325,13 @@ public class RepeatingTypeAnnotations extends Tester {
                    "        return (@A @A @A String) o;",
                    "    }");
             verify("RuntimeInvisibleTypeAnnotations",
-                   "0: #36(#37=[@#38(),@#38(),@#38()]): METHOD_RETURN",
-                   "1: #36(#37=[@#38(),@#38(),@#38()]): METHOD_FORMAL_PARAMETER, param_index=0",
-                   "2: #38(): METHOD_FORMAL_PARAMETER, param_index=1",
-                   "3: #39(#37=[@#40(),@#40(),@#40()]): CAST, offset=0, type_index=0",
-                   "4: #36(#37=[@#38(),@#38(),@#38()]): CAST, offset=6, type_index=0",
-                   "5: #36(#37=[@#38(),@#38(),@#38()]): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}");
+                   "0: #36(#37=[@#38(),@#38(),@#38()]): CAST, offset=0, type_index=0",
+                   "1: #39(#37=[@#40(),@#40(),@#40()]): CAST, offset=6, type_index=0",
+                   "2: #39(#37=[@#40(),@#40(),@#40()]): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
+                    "RuntimeInvisibleTypeAnnotations",
+                   "0: #39(#37=[@#40(),@#40(),@#40()]): METHOD_RETURN",
+                   "1: #39(#37=[@#40(),@#40(),@#40()]): METHOD_FORMAL_PARAMETER, param_index=0",
+                   "2: #40(): METHOD_FORMAL_PARAMETER, param_index=1");
         }
     }
 
@@ -345,19 +343,22 @@ public class RepeatingTypeAnnotations extends Tester {
                    "        @A @A @B String ls = (@B @A @B String) o;",
                    "        return (@A @B @B String) o;",
                    "    }");
-           verify("RuntimeInvisibleTypeAnnotations:",
-                  "0: #36(#37=[@#38(),@#38()]): CAST, offset=0, type_index=0",
-                  "1: #39(): CAST, offset=0, type_index=0",
+           verify(
+                    "RuntimeInvisibleTypeAnnotations:",
+                    "0: #36(#37=[@#38(),@#38()]): CAST, offset=0, type_index=0",
+                    "1: #39(): CAST, offset=0, type_index=0",
                   "2: #39(): CAST, offset=6, type_index=0",
                   "3: #36(#37=[@#38(),@#38()]): CAST, offset=6, type_index=0",
                   "4: #40(#37=[@#39(),@#39()]): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
                   "5: #38(): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
+                    "RuntimeInvisibleTypeAnnotations:",
                   "0: #39(): METHOD_RETURN",
                   "1: #36(#37=[@#38(),@#38()]): METHOD_RETURN",
                   "2: #40(#37=[@#39(),@#39()]): METHOD_FORMAL_PARAMETER, param_index=0",
                   "3: #38(): METHOD_FORMAL_PARAMETER, param_index=0",
                   "4: #39(): METHOD_FORMAL_PARAMETER, param_index=1",
-                  "5: #38(): METHOD_FORMAL_PARAMETER, param_index=1");
+                    "5: #38(): METHOD_FORMAL_PARAMETER, param_index=1"
+                 );
         }
     }
 
@@ -369,21 +370,24 @@ public class RepeatingTypeAnnotations extends Tester {
                    "        @C @C @A String ls = (@A @A @C String) o;",
                    "        return (@C @B @B String) o;",
                    "    }");
-            verify("RuntimeVisibleTypeAnnotations",
-                   "RuntimeInvisibleTypeAnnotations",
-                   "0: #36(): CAST, offset=0, type_index=0",
+            verify(
+                    "RuntimeVisibleTypeAnnotations:",
+                    "0: #36(): CAST, offset=0, type_index=0",
                    "1: #36(): CAST, offset=6, type_index=0",
                    "2: #37(#38=[@#36(),@#36()]): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
-                   "0: #40(#38=[@#41(),@#41()]): CAST, offset=0, type_index=0",
+                    "RuntimeInvisibleTypeAnnotations:",
+                    "0: #40(#38=[@#41(),@#41()]): CAST, offset=0, type_index=0",
                    "1: #42(#38=[@#43(),@#43()]): CAST, offset=6, type_index=0",
                    "2: #41(): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
+                    "RuntimeVisibleTypeAnnotations:",
                    "0: #36(): METHOD_RETURN",
                    "1: #37(#38=[@#36(),@#36()]): METHOD_FORMAL_PARAMETER, param_index=0",
+                    "RuntimeInvisibleTypeAnnotations:",
                    "0: #40(#38=[@#41(),@#41()]): METHOD_RETURN",
                    "1: #41(): METHOD_FORMAL_PARAMETER, param_index=0",
                    "2: #41(): METHOD_FORMAL_PARAMETER, param_index=1",
-                   "3: #43(): METHOD_FORMAL_PARAMETER, param_index=1");
-
+                    "3: #43(): METHOD_FORMAL_PARAMETER, param_index=1"
+                    );
         }
     }
 
@@ -395,25 +399,29 @@ public class RepeatingTypeAnnotations extends Tester {
                    "        @A @B @C String ls = (@C @A @B String) o;",
                    "        return (@B @A @C String) o;",
                    "    }");
-            verify("RuntimeVisibleTypeAnnotations",
-                   "RuntimeInvisibleTypeAnnotations",
-                   "0: #36(): CAST, offset=0, type_index=0",
+            verify(
+                    "RuntimeVisibleTypeAnnotations:",
+                    "0: #36(): CAST, offset=0, type_index=0",
                    "1: #36(): CAST, offset=6, type_index=0",
                    "2: #36(): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
-                   "0: #38(): CAST, offset=0, type_index=0",
-                   "1: #39(): CAST, offset=0, type_index=0",
+                    "RuntimeInvisibleTypeAnnotations:",
+                    "0: #38(): CAST, offset=0, type_index=0",
+                    "1: #39(): CAST, offset=0, type_index=0",
                    "2: #39(): CAST, offset=6, type_index=0",
                    "3: #38(): CAST, offset=6, type_index=0",
                    "4: #38(): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
                    "5: #39(): LOCAL_VARIABLE, {start_pc=6, length=5, index=5}",
+                    "RuntimeVisibleTypeAnnotations:",
                    "0: #36(): METHOD_RETURN",
                    "1: #36(): METHOD_FORMAL_PARAMETER, param_index=0",
                    "2: #36(): METHOD_FORMAL_PARAMETER, param_index=1",
+                    "RuntimeInvisibleTypeAnnotations:",
                    "0: #38(): METHOD_RETURN",
                    "1: #39(): METHOD_RETURN",
                    "2: #38(): METHOD_FORMAL_PARAMETER, param_index=0",
                    "3: #39(): METHOD_FORMAL_PARAMETER, param_index=0",
-                   "4: #38(): METHOD_FORMAL_PARAMETER, param_index=1");
+                    "4: #38(): METHOD_FORMAL_PARAMETER, param_index=1"
+                  );
         }
     }
 }

@@ -707,7 +707,7 @@ public class TypeAnnotations {
                         Type typeToUse;
                         if (newPath.tail != null && newPath.tail.head.hasTag(Tag.NEWCLASS)) {
                             // If we are within an anonymous class instantiation, use its type,
-                            // because it contains a correctly nested type. 
+                            // because it contains a correctly nested type.
                             typeToUse = newPath.tail.head.type;
                         } else {
                             typeToUse = taframe.type;
@@ -837,7 +837,7 @@ public class TypeAnnotations {
                             Assert.error("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
                     }
                     if (v.getKind() != ElementKind.FIELD) {
-                        v.owner.annotations.appendUniqueTypes(v.getTypeAnnotationMirrors());
+                        v.owner.annotations.appendUniqueTypes(v.getRawTypeAttributes());
                     }
                     return;
 
