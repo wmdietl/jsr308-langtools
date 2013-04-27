@@ -951,7 +951,7 @@ public class Pretty extends JCTree.Visitor {
                 int i = 0;
                 List<List<JCAnnotation>> da = tree.dimAnnotations;
                 for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
-                    if (da.size() > i) {
+                    if (da.size() > i && !da.get(i).isEmpty()) {
                         print(' ');
                         printTypeAnnotations(da.get(i));
                     }
