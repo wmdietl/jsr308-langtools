@@ -20,13 +20,13 @@ change to any of the langtools commands.
 
 The Type Annotations compiler includes one non-standard option
  -XDTA:spacesincomments
-that is documented in the Checker Framework manual [1].
+that is documented in the Checker Framework Manual [1].
 
 Additionally, the compiler recognizes one more environment variable/property:
   jsr308.import
 The value needs to be a package or a type name.  The parser inserts
 import statements for the package/class to all compiled classes.
-This is discussed in the Checker Framework manual [2].
+This is discussed in the Checker Framework Manual [2].
 
 Finally, the compiler includes some hidden options for debugging:
  -XDTA:parser    parsing annotations in JavacParser
