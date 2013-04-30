@@ -2075,10 +2075,13 @@ method invocation or a method reference.  These annotations
 are attached to a single bytecode, not a bytecode range.
 
 \code{type\_argument\_index} specifies the index of the type argument in the
-expression.
+expression.  
+For a constructor/method invocation, \code{type\_argument\_index} specifies
+the index of a type argument in the list of explicit non-wildcard type
+arguments, such as
+\code{x.<@Foo String>m()} or \code{new <@Foo String> @Bar A()}.
 
-
-It may seem odd that instanceof uses  \code{target\_info} of
+It might seem odd that instanceof uses \code{target\_info} of
 \code{offset\_target}, whereas cast uses \code{type\_argument\_index},
 which has an additional \code{type\_argument\_index} field.  The reason is
 to distinguish which component of a conjunctive cast an annotation is on,
@@ -2117,14 +2120,6 @@ originally attached to the first type argument of \<C>.
 
 
 \attributelocation{containing a \code{type\_argument\_target}}{\code{Code} attribute}
-
-
-
-TODO: \code{type\_argument\_index} specifies the index of a type argument in the list
-       of explicit non-wildcard type arguments passed to the
-       constructor/method invocation.
-       e.g. \code{x.<@Foo String>m()}
-       e.g. \code{new <@Foo String> @Bar A()}
 
 
 
