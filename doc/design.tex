@@ -2095,8 +2095,8 @@ arguments, such as
 It might seem odd that instanceof uses \code{target\_info} of
 \code{offset\_target}, whereas cast uses \code{type\_argument\_index},
 which has an additional \code{type\_argument\_index} field.  The reason is
-to distinguish which component of a conjunctive cast an annotation is on,
-as in \<(@A T \& @B U) x>.
+to distinguish where an annotation appears within a cast to an intersection
+type, as in \<(@A T \& @B U) x>.
 
 For an annotated cast, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
