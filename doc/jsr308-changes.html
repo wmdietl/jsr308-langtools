@@ -43,11 +43,27 @@ The current development version of the specification is available in the
 	<em>UnannQualifiedType</em>, and <em>QualifiedTypeList</em>.
       </li>
     </ul>
+
+    Classfile changes:
+    <ul>
+      <li>
+        Remove unused target_info <tt>method_reference_target</tt>.
+      </li>
+    </ul>
+
     Clarifications:
     <ul>
       <li>
         Give examples of interaction between multiple <tt>@Target</tt>
         meta-annotations and fully-qualified type names.
+      </li>
+      <li>
+        Explain why instanceof uses <tt>offset_target</tt> but cast uses
+        <tt>type_argument_target</tt>.
+      </li>
+      <li>
+        Move examples of classfile annotations, which are not normative,
+        into an appendix so that Section 3 contains only normative text.
       </li>
     </ul>
   </dd>
@@ -67,9 +83,6 @@ The current development version of the specification is available in the
     <ul>
       <li>
         Fix bug in <tt>type_path_entry</tt> struct definition comments.
-      </li>
-      <li>
-        Remove unused target_info <tt>method_reference_target</tt>.
       </li>
     </ul>
 
@@ -94,14 +107,6 @@ The current development version of the specification is available in the
       <li>
         Remove text that says no changes are made, to reduce confusion and
         make it easier to integrate the text into the JLS.
-      </li>
-      <li>
-        Explain why instanceof uses <tt>offset_target</tt> but cast uses
-        <tt>type_argument_target</tt>.
-      </li>
-      <li>
-        Move examples of classfile annotations, which are not normative,
-        into an appendix so that Section 3 contains only normative text.
       </li>
     </ul>
 
