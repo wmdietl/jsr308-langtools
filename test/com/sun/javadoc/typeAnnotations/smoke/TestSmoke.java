@@ -24,8 +24,7 @@
 /*
  * @test
  * @bug 8006735
- * @ignore
- * @summary  Smoke test for ensuring that annotations are emited to javadoc
+ * @summary  Smoke test for ensuring that annotations are emitted to javadoc
  *
  * @author   Mahmood Ali <mali>
  * @library  ../../lib/
@@ -37,7 +36,7 @@
 public class TestSmoke extends JavadocTester {
 
     //Test information.
-    private static final String BUG_ID = "NOT_SPECIFIED_YET";
+    private static final String BUG_ID = "8006735";
 
     //Javadoc arguments.
     private static final String[] ARGS = new String[] {
@@ -46,46 +45,46 @@ public class TestSmoke extends JavadocTester {
 
     //Input for string search tests.
     private static final String[][] TEST = {
-        {BUG_ID + FS + "pkg" + FS + "T0x1C.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x1D.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x06.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x0B.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x0F.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x20.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x22.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x10.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x10A.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x12.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x11.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x12.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x13.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x15.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x14.html", "@DA"},
-        {BUG_ID + FS + "pkg" + FS + "T0x16.html", "@DA"}
+        {BUG_ID + FS + "pkg" + FS + "T0x15.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x16.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x1C.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x1D.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x20.html", "@DA"},
+        {BUG_ID + FS + "pkg" + FS + "T0x22.html", "@DA"}
     };
 
     private static final String[][] NEGATED_TEST = {
-        {BUG_ID + FS + "pkg" + FS + "T0x1C.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x1D.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x00.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x01.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x02.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x04.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x08.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x06.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x08.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x0B.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x0F.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x20.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x22.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x10.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x10A.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x12.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x11.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x12.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x13.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x15.html", "@A"},
         {BUG_ID + FS + "pkg" + FS + "T0x14.html", "@A"},
-        {BUG_ID + FS + "pkg" + FS + "T0x16.html", "@A"}
+        {BUG_ID + FS + "pkg" + FS + "T0x15.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x16.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x1C.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x1D.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x20.html", "@A"},
+        {BUG_ID + FS + "pkg" + FS + "T0x22.html", "@A"}
     };
 
     /**
