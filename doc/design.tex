@@ -246,6 +246,7 @@ annotation follows the explicit type arguments (JLS
 \preverbnegspace
 \begin{Verbatim}
   myString = (@NonNull String) myObject;
+  x = (@Immutable Cloneable & @Julian Date) y;
 \end{Verbatim}
 \preverbnegspace
 It is not permitted to omit the Java type, as in
@@ -2091,7 +2092,13 @@ are attached to a single bytecode, not a bytecode range.
 expression.
 
 
-For annotated casts, the attribute may be attached to a
+It may seem odd that instanceof uses  \code{target\_info} of
+\code{offset\_target}, whereas cast uses \code{type\_argument\_index},
+which has an additional \code{type\_argument\_index} field.  The reason is
+to distinguish which component of a conjunctive cast an annotation is on,
+as in \<(@A T \& @B U) x>.
+
+For an annotated cast, the attribute may be attached to a
 \code{checkcast} bytecode, or to any other bytecode.  The rationale for
 this is that the Java compiler is permitted to omit \code{checkcast}
 bytecodes for casts that are guaranteed to be no-ops.  For example, a
