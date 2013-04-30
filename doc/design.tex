@@ -1891,20 +1891,6 @@ If the programmer-supplied upper bound of the type variable is an
 interface, it is treated as the second bound, and the implicit first bound
 is \code{java.lang.Object}.
 
-Consider the following
-example:
-
-\preverbnegspace
-\begin{Verbatim}
-  <T extends @A Object & @B Comparable, U extends @C Cloneable>
-\end{Verbatim}
-
-\noindent
-Here
-\code{@A} has \code{type\_parameter\_index} 0 and \code{bound\_index} 0,
-\code{@B} has \code{type\_parameter\_index} 0 and \code{bound\_index} 1, and
-\code{@C} has \code{type\_parameter\_index} 1 and \code{bound\_index} 1.
-
 A \RuntimeInOrVisibleTypeAnnotations attribute containing a
 \code{type\_parameter\_bound\_target} appears in the attributes table of a
 \code{method\_info} structure if it targets a method type parameter bound,
@@ -2152,6 +2138,110 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
 
 % See test/tools/javac/annotations/typeAnnotations/referenceinfos/FromSpecification.java
 
+
+The \code{type\_path} structure identifies a part of a compound type.
+In a compound type (a parameterized, wildcard, array, or nested type),
+there are multiple places that an annotation may appear.
+For example, consider the difference among
+\code{@X Map<String, Object>},
+\code{Map<@X String, Object>}, and
+\code{Map<String, @X Object>};
+or the difference among
+\code{Foo<@X ? extends T>} and
+\code{Foo<? extends @X T>};
+or the difference among 
+\code{@X String [] []},
+\code{String @X [] []}, and
+\code{String [] @X []};
+or the difference among 
+\code{@X Outer.Inner} and
+\code{Outer.@X Inner}.
+The \code{type\_path} structure distinguishes among these locations.
+
+\begin{Verbatim}
+struct type_path {
+  u1              path_length;
+  type_path_entry path[path_length];
+}
+
+struct type_path_entry {
+  u1 type_path_kind;
+    // 0: annotation is deeper in this array type
+    // 1: annotation is deeper in this nested type
+    // 2: annotation is on the bound of this wildcard type arg
+    // 3: annotation is on a type argument of this parameterized type
+  u1 type_argument_index;
+    // 0, if type_path_kind is 0, 1, or 2
+    // the 0-based index of the type arg in this parameterized type, if type_path_kind is 3
+}
+\end{Verbatim}
+
+% TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
+
+When \code{type\_path\_kind} is 0, 1, or 2, then
+\code{type\_argument\_index} must be 0.
+
+If the compound type is viewed as a tree, then 
+the \code{type\_path} structure represents a path in that tree.
+% , from the top down or the ``outside in''.
+
+The \code{type\_path} that is stored in the class file is with respect to the full type, not the
+source code representation.  In the source code, a type can be abbreviated
+or partially written out, such as a nested type written without the outer
+type or a raw type written without the type arguments.
+
+In the class file, all annotations on the full type appear.  For example,
+the classfile would record the type in this \<new> expression as
+\<@A Outer.@B Inner>:
+
+\preverbnegspace
+\begin{Verbatim}
+  @A Outer f1 = ...
+  ... f1.new @B Inner() ...
+\end{Verbatim}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Non-normative text follows
+%%%
+
+\label{page:non-normative-start}
+
+\appendix
+
+
+\section{Examples of classfile structure\label{classfile-examples}}
+
+These examples are not normative, so they are at the end of the
+specification to keep
+
+
+\subsection{Examples of type parameter bounds\label{classfile-examples-type-parameter-bounds}}
+
+Here is an example of type parameter bounds
+(Section~\ref{class-file:ext:ri:tpbound}).
+
+Consider the following
+example:
+
+\preverbnegspace
+\begin{Verbatim}
+  <T extends @A Object & @B Comparable, U extends @C Cloneable>
+\end{Verbatim}
+
+\noindent
+Here
+\code{@A} has \code{type\_parameter\_index} 0 and \code{bound\_index} 0,
+\code{@B} has \code{type\_parameter\_index} 0 and \code{bound\_index} 1, and
+\code{@C} has \code{type\_parameter\_index} 1 and \code{bound\_index} 1.
+
+
+\subsection{Examples of the \code{type\_path} structure\label{classfile-examples-type_path}}
+
+Figure~\ref{tbl:locations} shows some examples of the \code{type\_path}
+structure (Section~\ref{class-file:ext:type_path}).
+
+
 \begin{figure}[tp!]
 \begin{center}
 
@@ -2257,77 +2347,7 @@ TODO: \code{type\_argument\_index} specifies the index of a type argument in the
   }
 \end{figure}
 
-The \code{type\_path} structure identifies a part of a compound type.
-In a compound type (a parameterized, wildcard, array, or nested type),
-there are multiple places that an annotation may appear.
-For example, consider the difference among
-\code{@X Map<String, Object>},
-\code{Map<@X String, Object>}, and
-\code{Map<String, @X Object>};
-or the difference among
-\code{Foo<@X ? extends T>} and
-\code{Foo<? extends @X T>};
-or the difference among 
-\code{@X String [] []},
-\code{String @X [] []}, and
-\code{String [] @X []};
-or the difference among 
-\code{@X Outer.Inner} and
-\code{Outer.@X Inner}.
-The \code{type\_path} structure distinguishes among these locations.
 
-\begin{Verbatim}
-struct type_path {
-  u1              path_length;
-  type_path_entry path[path_length];
-}
-
-struct type_path_entry {
-  u1 type_path_kind;
-    // 0: annotation is deeper in this array type
-    // 1: annotation is deeper in this nested type
-    // 2: annotation is on the bound of this wildcard type arg
-    // 3: annotation is on a type argument of this parameterized type
-  u1 type_argument_index;
-    // 0, if type_path_kind is 0, 1, or 2
-    // the 0-based index of the type arg in this parameterized type, if type_path_kind is 3
-}
-\end{Verbatim}
-
-% TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
-
-When \code{type\_path\_kind} is 0, 1, or 2, then
-\code{type\_argument\_index} must be 0.
-
-If the compound type is viewed as a tree, then 
-the \code{type\_path} structure represents a path in that tree.
-% , from the top down or the ``outside in''.
-
-Figure~\ref{tbl:locations} shows some examples.
-
-The \code{type\_path} that is stored in the class file is with respect to the full type, not the
-source code representation.  In the source code, a type can be abbreviated
-or partially written out, such as a nested type written without the outer
-type or a raw type written without the type arguments.
-
-In the class file, all annotations on the full type appear.  For example,
-the classfile would record the type in this \<new> expression as
-\<@A Outer.@B Inner>:
-
-\preverbnegspace
-\begin{Verbatim}
-  @A Outer f1 = ...
-  ... f1.new @B Inner() ...
-\end{Verbatim}
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Non-normative text follows
-%%%
-
-\label{page:non-normative-start}
-
-\appendix
 
 \section{Example use of type annotations:  Type qualifiers\label{type-qualifiers}}
 
