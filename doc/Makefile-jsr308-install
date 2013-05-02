@@ -52,7 +52,7 @@ JSR308 ?= ${HOME}/jsr308
 
 # Override to obtain a development release or a test release.
 JSR308_WEB ?= http://types.cs.washington.edu/checker-framework/current
-JSR308_BUILD := 1.6.2
+JSR308_BUILD := 1.6.3
 
 # export MAKEFILE_DIR
 export JSR308
