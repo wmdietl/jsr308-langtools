@@ -49,6 +49,7 @@ import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntry;
 import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntryKind;
 import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.Annotate.Annotator;
 import com.sun.tools.javac.tree.JCTree;
@@ -292,16 +293,33 @@ public class TypeAnnotations {
 
             if (sym.getKind() == ElementKind.METHOD) {
                 sym.type.asMethodType().restype = type;
+            } else if (sym.getKind() == ElementKind.PARAMETER) {
+                sym.type = type;
+                if (sym.getQualifiedName().equals(names._this)) {
+                    sym.owner.type.asMethodType().recvtype = type;
+                    // note that the typeAnnotations will also be added to the owner below.
+                } else {
+                    MethodType methType = sym.owner.type.asMethodType();
+                    List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
+                    List<Type> oldArgs = methType.argtypes;
+                    ListBuffer<Type> newArgs = new ListBuffer<Type>();
+                    while (params.nonEmpty()) {
+                        if (params.head == sym) {
+                            newArgs.add(type);
+                        } else {
+                            newArgs.add(oldArgs.head);
+                        }
+                        oldArgs = oldArgs.tail;
+                        params = params.tail;
+                    }
+                    methType.argtypes = newArgs.toList();
+                }
             } else {
                 sym.type = type;
             }
 
             sym.annotations.appendUniqueTypes(typeAnnotations);
-            if (sym.getKind() == ElementKind.PARAMETER &&
-                    sym.getQualifiedName().equals(names._this)) {
-                sym.owner.type.asMethodType().recvtype = type;
-                // note that the typeAnnotations will also be added to the owner below.
-            }
+
             if (sym.getKind() == ElementKind.PARAMETER ||
                     sym.getKind() == ElementKind.LOCAL_VARIABLE ||
                     sym.getKind() == ElementKind.RESOURCE_VARIABLE ||
