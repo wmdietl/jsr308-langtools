@@ -24,7 +24,7 @@
 /*
  * @test
  * @bug 8006735
- * @summary  Smoke test for ensuring that annotations are emited to javadoc
+ * @summary  Smoke test for ensuring that annotations are emitted to javadoc
  *
  * @author   Mahmood Ali <mali>
  * @library  ../../lib/
