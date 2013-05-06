@@ -46,19 +46,11 @@ public class TestSmoke extends JavadocTester {
     //Input for string search tests.
     private static final String[][] TEST = {
         {BUG_ID + FS + "pkg" + FS + "T0x1C.html", "@DA"},
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x1D.html", "@DA"},
-        */
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x0D.html", "@DA"},
-        */
         {BUG_ID + FS + "pkg" + FS + "T0x06.html", "@DA"},
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x0B.html", "@DA"},
-        */
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x0F.html", "@DA"},
-        */
         /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x20.html", "@DA"},
         */
@@ -68,15 +60,9 @@ public class TestSmoke extends JavadocTester {
         {BUG_ID + FS + "pkg" + FS + "T0x10.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x10A.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x12.html", "@DA"},
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x11.html", "@DA"},
-        */
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x13.html", "@DA"},
-        */
-        /* @ignore 8013406: Test cases fail in javadoc test TestSmoke.java
         {BUG_ID + FS + "pkg" + FS + "T0x15.html", "@DA"},
-        */
         {BUG_ID + FS + "pkg" + FS + "T0x14.html", "@DA"},
         {BUG_ID + FS + "pkg" + FS + "T0x16.html", "@DA"}
     };
