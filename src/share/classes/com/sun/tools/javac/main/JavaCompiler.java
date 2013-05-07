@@ -1665,6 +1665,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                     throw new FatalError(msg, e);
                 }
             }
+            closeables = List.nil();
         }
     }
 
