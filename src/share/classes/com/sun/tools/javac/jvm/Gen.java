@@ -518,7 +518,7 @@ public class Gen extends JCTree.Visitor {
         // Insert any instance initializers into all constructors.
         if (initCode.length() != 0) {
             List<JCStatement> inits = initCode.toList();
-            initTAs.addAll(c.init_type_annotations);
+            initTAs.addAll(c.annotations.getInitTypeAttributes());
             List<Attribute.TypeCompound> initTAlist = initTAs.toList();
             for (JCTree t : methodDefs) {
                 normalizeMethod((JCMethodDecl)t, inits, initTAlist);
@@ -541,9 +541,9 @@ public class Gen extends JCTree.Visitor {
             methodDefs.append(make.MethodDef(clinit, block));
 
             if (!clinitTAs.isEmpty())
-            clinit.annotations.appendUniqueTypes(clinitTAs.toList());
-            if (!c.clinit_type_annotations.isEmpty())
-            clinit.annotations.appendUniqueTypes(c.clinit_type_annotations);
+                clinit.annotations.appendUniqueTypes(clinitTAs.toList());
+            if (!c.annotations.getClassInitTypeAttributes().isEmpty())
+                clinit.annotations.appendUniqueTypes(c.annotations.getClassInitTypeAttributes());
         }
         // Return all method definitions.
         return methodDefs.toList();

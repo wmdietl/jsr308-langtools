@@ -1144,9 +1144,9 @@ public class Attr extends JCTree.Visitor {
                 ClassSymbol cs = (ClassSymbol)env.info.scope.owner;
                 List<Attribute.TypeCompound> tas = localEnv.info.scope.owner.getRawTypeAttributes();
                 if ((tree.flags & STATIC) != 0) {
-                    cs.clinit_type_annotations = cs.clinit_type_annotations.appendList(tas);
+                    cs.annotations.appendClassInitTypeAttributes(tas);
                 } else {
-                    cs.init_type_annotations = cs.init_type_annotations.appendList(tas);
+                    cs.annotations.appendInitTypeAttributes(tas);
                 }
             }
 
