@@ -28,7 +28,6 @@ package com.sun.tools.javadoc;
 import com.sun.javadoc.*;
 
 import com.sun.tools.javac.code.Attribute;
-import com.sun.tools.javac.code.Symbol.*;
 
 import static com.sun.tools.javac.code.TypeTag.BOOLEAN;
 
