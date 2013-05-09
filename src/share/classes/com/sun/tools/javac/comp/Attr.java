@@ -953,14 +953,6 @@ public class Attr extends JCTree.Visitor {
                         // note that equals didn't work.
                         log.error(tree.recvparam.pos(), "incorrect.constructor.receiver.type", outertype, recvtype);
                     }
-                    {
-                        // Make sure the receiver parameter name is as expected
-                        String fnd = tree.recvparam.nameexpr.toString();
-                        String exp = recvtype.unannotatedType().toString() + '.' + names._this.toString();
-                        if (!exp.endsWith(fnd)) {
-                            log.error(tree.recvparam.pos(), "receiver.parameter.wrong.name", exp, fnd);
-                        }
-                    }
                 } else if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
                     // The == covers the common non-generic case, but for generic classes we need isSameType;
                     // note that equals didn't work.
@@ -1144,9 +1136,9 @@ public class Attr extends JCTree.Visitor {
                 ClassSymbol cs = (ClassSymbol)env.info.scope.owner;
                 List<Attribute.TypeCompound> tas = localEnv.info.scope.owner.getRawTypeAttributes();
                 if ((tree.flags & STATIC) != 0) {
-                    cs.clinit_type_annotations = cs.clinit_type_annotations.appendList(tas);
+                    cs.annotations.appendClassInitTypeAttributes(tas);
                 } else {
-                    cs.init_type_annotations = cs.init_type_annotations.appendList(tas);
+                    cs.annotations.appendInitTypeAttributes(tas);
                 }
             }
 
@@ -4359,15 +4351,6 @@ public class Attr extends JCTree.Visitor {
             // super.visitTypeParameter(tree);
         }
         public void visitMethodDef(JCMethodDecl tree) {
-            // Static methods cannot have receiver type annotations.
-            // In test case FailOver15.java, the nested method getString has
-            // a null sym, because an unknown class is instantiated.
-            // I would say it's safe to skip.
-            if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
-                if (tree.recvparam != null) {
-                    log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.static", tree.recvparam);
-                }
-            }
             if (tree.recvparam != null &&
                     tree.recvparam.vartype.type.getKind() != TypeKind.ERROR) {
                 checkForDeclarationAnnotations(tree.recvparam.mods.annotations,

@@ -620,6 +620,8 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 // But we don't have a symbol to attach them to yet - use null.
                 typeAnnotate(tree.vartype, env, null);
                 attr.attribType(tree.vartype, localEnv);
+                if (tree.nameexpr != null)
+                    attr.attribExpr(tree.nameexpr, localEnv);
             }
         } finally {
             chk.setDeferredLintHandler(prevLintHandler);

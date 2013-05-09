@@ -36,7 +36,6 @@ import javax.lang.model.type.*;
 
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.model.JavacAnnoConstructs;
-import com.sun.tools.javac.model.JavacTypes;
 import com.sun.tools.javac.util.*;
 import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;

@@ -29,7 +29,6 @@ import com.sun.javadoc.*;
 
 import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.tree.JCTree.*;
 
 /**
  * Represents an element of an annotation type.
