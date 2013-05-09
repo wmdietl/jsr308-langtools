@@ -2349,6 +2349,10 @@ public class Flow {
 
         @Override
         public void visitIdent(JCIdent tree) {
+            if (tree == null || tree.sym == null) {
+                System.err.println("tree " + tree + " sym " + (tree == null ? null : tree.sym));
+                Thread.dumpStack();
+            } 
             if (tree.sym.kind == VAR) {
                 checkEffectivelyFinal(tree, (VarSymbol)tree.sym);
             }

@@ -27,6 +27,7 @@
  * @summary Additional functionality test of task and JSR 269
  * @author  Peter von der Ah\u00e9
  * @library ./lib
+ * @build ToolTester
  * @run main TestJavacTaskScanner TestJavacTaskScanner.java
  */
 
@@ -110,7 +111,8 @@ public class TestJavacTaskScanner extends ToolTester {
         DeclaredType type = (DeclaredType)task.parseType("List<String>", clazz);
         for (Element member : elements.getAllMembers((TypeElement)type.asElement())) {
             TypeMirror mt = types.asMemberOf(type, member);
-            System.out.format("%s : %s -> %s%n", member.getSimpleName(), member.asType(), mt);
+            System.out.format("type#%d: %s : %s -> %s%n", 
+		numParseTypeElements, member.getSimpleName(), member.asType(), mt);
             numParseTypeElements++;
         }
     }
@@ -122,7 +124,8 @@ public class TestJavacTaskScanner extends ToolTester {
 
     private void testGetAllMembers(TypeElement clazz) {
         for (Element member : elements.getAllMembers(clazz)) {
-            System.out.format("%s : %s%n", member.getSimpleName(), member.asType());
+            System.out.format("elem#%d: %s : %s%n", 
+		numAllMembers, member.getSimpleName(), member.asType());
             numAllMembers++;
         }
     }
