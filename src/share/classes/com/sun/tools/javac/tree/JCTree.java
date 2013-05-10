@@ -863,29 +863,6 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
     }
 
     /**
-     * A receiver variable declaration:
-     *   C this
-     *   Outer Outer.this
-     */
-    public static class JCReceiverVariableDecl extends JCVariableDecl {
-        /** variable name expression */
-        public JCExpression nameexpr;
-        protected JCReceiverVariableDecl(JCModifiers mods,
-                         JCExpression nameexpr,
-                         JCExpression vartype) {
-            super(mods, null, vartype, null, null);
-            this.nameexpr = nameexpr;
-            if (nameexpr.hasTag(Tag.IDENT)) {
-                this.name = ((JCIdent)nameexpr).name;
-            } else {
-                // Only other option is qualified name x.y.this;
-                this.name = ((JCFieldAccess)nameexpr).name;
-            }
-        }
-        // TODO: do we want a separate tag?
-    }
-
-    /**
      * A no-op statement ";".
      */
     public static class JCSkip extends JCStatement implements EmptyStatementTree {
