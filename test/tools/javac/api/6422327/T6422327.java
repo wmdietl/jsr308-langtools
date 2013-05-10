@@ -27,6 +27,8 @@
  * @summary JSR 199: JavaCompilerTool can compile and generate '.class' of non '.java' files
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
+ * @run main T6422327
  */
 
 import java.io.File;

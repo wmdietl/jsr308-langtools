@@ -27,6 +27,7 @@
  * @summary JSR 199: confusing help message with compiler API
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6423003.java
  * @run main T6423003
  */

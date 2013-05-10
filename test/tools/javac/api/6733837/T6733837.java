@@ -27,6 +27,8 @@
  * @summary Compiler API ignores locale settings
  * @author  Maurizio Cimadamore
  * @library ../lib
+ * @build ToolTester
+ * @run main T6733837
  */
 
 import java.io.StringWriter;

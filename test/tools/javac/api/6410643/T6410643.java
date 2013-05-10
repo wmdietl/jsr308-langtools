@@ -27,6 +27,8 @@
  * @summary JSR 199: The method JavaCompilerTool.run fails to handle null arguments
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
+ * @run main T6410643
  */
 
 import javax.tools.JavaFileObject;

@@ -163,7 +163,7 @@ public class TestJavacTaskScanner extends ToolTester {
         StandardJavaFileManager fm = tool.getStandardFileManager(dl, null, encoding);
         try {
             fm.setLocation(SOURCE_PATH,  Arrays.asList(test_src));
-            fm.setLocation(CLASS_PATH,   Arrays.asList(test_classes, javac_classes));
+            fm.setLocation(CLASS_PATH,   join(test_class_path, Arrays.asList(javac_classes)));
             fm.setLocation(CLASS_OUTPUT, Arrays.asList(test_classes));
         } catch (IOException e) {
             throw new AssertionError(e);

@@ -27,6 +27,7 @@
  * @summary javac deposits package-info.class in bogus directory
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6440528.java
  * @run main T6440528
  */

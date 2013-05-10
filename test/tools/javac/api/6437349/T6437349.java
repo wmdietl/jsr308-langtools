@@ -26,6 +26,7 @@
  * @bug     6437349
  * @summary JSR 199: JavaFileObject.isNameCompatible() will give true with some incompatible kinds
  * @library ../lib
+ * @build ToolTester
  * @compile T6437349.java
  * @run main T6437349
  */

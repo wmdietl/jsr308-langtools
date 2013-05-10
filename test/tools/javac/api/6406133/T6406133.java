@@ -27,6 +27,8 @@
  * @summary Compiler API ignores locale settings
  * @author  Maurizio Cimadamore
  * @library ../lib
+ * @build ToolTester
+ * @run main T6406133
  */
 
 import javax.tools.*;

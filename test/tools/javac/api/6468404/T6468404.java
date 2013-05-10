@@ -28,6 +28,7 @@
  * @author  jesse.glick@...
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6468404.java
  * @run main T6468404
  */

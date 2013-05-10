@@ -27,6 +27,7 @@
  * @summary JSR 199: FileObject should support user-friendly names via getName()
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6411310.java
  * @run main T6411310
  */

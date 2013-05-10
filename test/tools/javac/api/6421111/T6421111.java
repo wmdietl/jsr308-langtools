@@ -27,6 +27,7 @@
  * @summary NullPointerException thrown when retrieving bounds for the type parameter
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile -Xlint:all T6421111.java
  * @run main T6421111
  */

@@ -27,6 +27,7 @@
  * @summary Ensure 6400208, 6400225, and 6400267 are tested
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6411333.java
  * @run main T6411333
  */

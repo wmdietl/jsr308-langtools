@@ -27,6 +27,7 @@
  * @summary Various bugs fixed while writing Compiler API Guide
  * @author  Peter von der Ah\u0081
  * @library ../lib
+ * @build ToolTester
  * @compile Test.java
  * @run main Test
  */

@@ -27,6 +27,8 @@
  * @summary diagnostic output should optionally include source line
  * @author  Maurizio Cimadamore
  * @library ../lib
+ * @build ToolTester
+ * @run main T6731573
  */
 
 import java.io.*;

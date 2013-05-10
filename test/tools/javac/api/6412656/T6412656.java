@@ -27,6 +27,8 @@
  * @summary JSR 199: pass annotation processor instances to compiler
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
+ * @run main T6412656
  */
 
 import java.util.Set;

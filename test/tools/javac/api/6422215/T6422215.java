@@ -27,6 +27,8 @@
  * @summary JSR 199: What happens if a directory is missing
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
+ * @run main T6422215
  */
 
 import java.io.File;

@@ -27,6 +27,7 @@
  * @summary JSR 199: JavaFileManager.hasLocation(Location)
  * @author  Peter von der Ah\u00e9
  * @library ../lib
+ * @build ToolTester
  * @compile T6418694.java
  * @run main T6418694
  */
