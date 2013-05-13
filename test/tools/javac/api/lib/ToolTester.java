@@ -77,29 +77,4 @@ public class ToolTester {
         result.addAll(b);
         return result;
     }
-
-    protected List<File> pathToFiles(String path, List<File> defaultPath) {
-        List<File> files = new ArrayList<>();
-        for (String f: path.split(File.pathSeparator)) {
-            if (f.isEmpty())
-                continue;
-            File file = new File(f);
-            if (file.exists())
-		files.add(file);
-        }
-        if (files.isEmpty())
-            files.addAll(defaultPath);
-	return files;
-    }
-
-    protected <T> List<T> join(List<T> a, List<T> b) {
-        if (a.isEmpty())
-	    return b;
-        if (b.isEmpty())
-	    return a;
-        List<T> result = new ArrayList<>();
-        result.addAll(a);
-        result.addAll(b);
-        return result;
-    } 
 }
