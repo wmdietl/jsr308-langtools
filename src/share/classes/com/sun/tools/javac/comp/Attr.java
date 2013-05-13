@@ -940,24 +940,6 @@ public class Attr extends JCTree.Visitor {
                 Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
                 attribType(tree.recvparam, newEnv);
                 chk.validate(tree.recvparam, newEnv);
-                if (tree.name == names.init) {
-                    // In a constructor
-                    Type outertype = m.owner.owner.type;
-                    Type recvtype = tree.recvparam.type;
-                    if (outertype.getKind() != TypeKind.DECLARED) {
-                        // e.g. PACKAGE for top-level class
-                        log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.constructor.toplevel.class", tree.recvparam);
-                    }
-                    if (!(recvtype == outertype || types.isSameType(recvtype, outertype))) {
-                        // The == covers the common non-generic case, but for generic classes we need isSameType;
-                        // note that equals didn't work.
-                        log.error(tree.recvparam.pos(), "incorrect.constructor.receiver.type", outertype, recvtype);
-                    }
-                } else if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
-                    // The == covers the common non-generic case, but for generic classes we need isSameType;
-                    // note that equals didn't work.
-                    log.error(tree.recvparam.pos(), "incorrect.receiver.type", m.owner.type, tree.recvparam.type);
-                }
             }
 
             // annotation method checks

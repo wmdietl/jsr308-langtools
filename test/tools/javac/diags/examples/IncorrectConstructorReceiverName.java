@@ -21,10 +21,10 @@
  * questions.
  */
 
-// key: compiler.err.incorrect.constructor.receiver.type
+// key: compiler.err.incorrect.constructor.receiver.name
 
-class IncorrectConstructorReceiverType {
+class IncorrectConstructorReceiverName {
     class Inner {
-        Inner(Object IncorrectConstructorReceiverType.this) { }
+        Inner(IncorrectConstructorReceiverName this) { }
     }
 }
