@@ -31,9 +31,7 @@ import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Scope;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.util.List;
-import com.sun.tools.javac.util.Names;
 
 /**
  * Represents an annotation type.
@@ -92,7 +90,6 @@ public class AnnotationTypeDocImpl
      * Elements are always public, so no need to filter them.
      */
     public AnnotationTypeElementDoc[] elements() {
-        Names names = tsym.name.table.names;
         List<AnnotationTypeElementDoc> elements = List.nil();
         for (Scope.Entry e = tsym.members().elems; e != null; e = e.sibling) {
             if (e.sym != null && e.sym.kind == Kinds.MTH) {

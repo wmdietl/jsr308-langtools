@@ -25,10 +25,8 @@
 
 package com.sun.tools.javadoc;
 
-
 import javax.tools.JavaFileObject;
 
-import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.comp.Enter;
