@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,47 +23,31 @@
 
 /*
  * @test
- * @bug      4802275 4967243
- * @summary  Make sure param tags are still printed even though they do not
- *           match up with a real parameters.
- *           Make sure inheritDoc cannot be used in an invalid param tag.
- * @author   jamieh
+ * @bug      8011288
+ * @summary  Erratic/inconsistent indentation of signatures
  * @library  ../lib/
  * @build    JavadocTester
- * @build    TestParamTaglet
- * @run main TestParamTaglet
+ * @run main TestIndentation
  */
 
-public class TestParamTaglet extends JavadocTester {
+public class TestIndentation extends JavadocTester {
 
     //Test information.
-    private static final String BUG_ID = "4802275-4967243";
+    private static final String BUG_ID = "8011288";
 
     //Javadoc arguments.
     private static final String[] ARGS = new String[] {
-        "-d", BUG_ID, "-sourcepath", SRC_DIR, "pkg"
+        "-d", BUG_ID, "-sourcepath", SRC_DIR, "p"
     };
 
     //Input for string search tests.
     private static final String[][] TEST = {
-        //Regular param tags.
-        {BUG_ID + FS + "pkg" + FS + "C.html",
-            "<span class=\"strong\">Parameters:</span></dt>" + NL + "<dd><code>param1</code> - testing 1 2 3.</dd>" +
-                NL + "<dd><code>param2</code> - testing 1 2 3."
-        },
-        //Param tags that don't match with any real parameters.
-        {BUG_ID + FS + "pkg" + FS + "C.html",
-            "<span class=\"strong\">Parameters:</span></dt>" + NL + "<dd><code><I>p1</I></code> - testing 1 2 3.</dd>" +
-                NL + "<dd><code><I>p2</I></code> - testing 1 2 3."
-        },
-        //{@inherit} doc misuse does not cause doclet to throw exception.
-        // Param is printed with nothing inherited.
-        //XXX: in the future when Configuration is available during doc inheritence,
-        //print a warning for this mistake.
-        {BUG_ID + FS + "pkg" + FS + "C.html",
-            "<code><I>inheritBug</I></code> -"
-        },
-
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          "<pre>public&nbsp;&lt;T&gt;&nbsp;void&nbsp;m(T&nbsp;t1," },
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          NL + "                  T&nbsp;t2)" },
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          NL + "           throws java.lang.Exception" }
     };
     private static final String[][] NEGATED_TEST = NO_TEST;
 
@@ -72,7 +56,7 @@ public class TestParamTaglet extends JavadocTester {
      * @param args the array of command line arguments.
      */
     public static void main(String[] args) {
-        TestParamTaglet tester = new TestParamTaglet();
+        TestIndentation tester = new TestIndentation();
         run(tester, ARGS, TEST, NEGATED_TEST);
         tester.printSummary();
     }

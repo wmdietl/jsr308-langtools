@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -23,33 +23,16 @@
  * questions.
  */
 
-package com.sun.tools.doclets.internal.toolkit.taglets;
-
-import com.sun.javadoc.*;
-import com.sun.tools.doclets.internal.toolkit.Content;
-
-/**
- * A taglet that represents the @deprecated tag.
- *
- *  <p><b>This is NOT part of any supported API.
- *  If you write code that depends on this, you do so at your own risk.
- *  This code and its internal interfaces are subject to change or
- *  deletion without notice.</b>
- *
- * @author Jamie Ho
- * @since 1.5
+/*
+ * @test
+ * @bug 8006140
+ * @summary Javac NPE compiling Lambda expression on initialization expression of static field in interface
+ * @compile LambdaInterfaceStaticField.java
  */
 
-public class DeprecatedTaglet extends BaseTaglet{
-
-    public DeprecatedTaglet() {
-        name = "deprecated";
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public Content getTagletOutput(Doc holder, TagletWriter writer) {
-        return writer.deprecatedTagOutput(holder);
-    }
+interface LambdaInterfaceStaticField {
+  interface I {
+     int m();
+  }
+  public static final I fld = () -> 5;
 }

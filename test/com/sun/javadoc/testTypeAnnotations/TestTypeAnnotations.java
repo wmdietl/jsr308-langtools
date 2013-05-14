@@ -95,17 +95,17 @@ public class TestTypeAnnotations extends JavadocTester {
         {BUG_ID + FS + "typeannos" + FS + "Complex1.html",
             "class <span class=\"strong\">Complex1&lt;K extends <a href=\"../" +
             "typeannos/ClassParamA.html\" title=\"annotation in typeannos\">" +
-            "@ClassParamA</a> java.lang.String & java.lang.Runnable&gt;</span>"
+            "@ClassParamA</a> java.lang.String &amp; java.lang.Runnable&gt;</span>"
         },
         {BUG_ID + FS + "typeannos" + FS + "Complex2.html",
             "class <span class=\"strong\">Complex2&lt;K extends java.lang." +
-            "String & <a href=\"../typeannos/ClassParamB.html\" title=\"" +
+            "String &amp; <a href=\"../typeannos/ClassParamB.html\" title=\"" +
             "annotation in typeannos\">@ClassParamB</a> java.lang.Runnable&gt;</span>"
         },
         {BUG_ID + FS + "typeannos" + FS + "ComplexBoth.html",
             "class <span class=\"strong\">ComplexBoth&lt;K extends <a href=\"" +
             "../typeannos/ClassParamA.html\" title=\"annotation in typeannos\"" +
-            ">@ClassParamA</a> java.lang.String & <a href=\"../typeannos/" +
+            ">@ClassParamA</a> java.lang.String &amp; <a href=\"../typeannos/" +
             "ClassParamA.html\" title=\"annotation in typeannos\">@ClassParamA" +
             "</a> java.lang.Runnable&gt;</span>"
         },
@@ -246,14 +246,14 @@ public class TestTypeAnnotations extends JavadocTester {
         // Test for type annotations on throws (Throws.java).
         {BUG_ID + FS + "typeannos" + FS + "ThrDefaultUnmodified.html",
             "<pre>void&nbsp;oneException()" + NL +
-            "            throws <a href=\"../typeannos/ThrA.html\" title=\"" +
+            "           throws <a href=\"../typeannos/ThrA.html\" title=\"" +
             "annotation in typeannos\">@ThrA</a> java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "ThrDefaultUnmodified.html",
             "<pre>void&nbsp;twoExceptions()" + NL +
-            "             throws <a href=\"../typeannos/ThrA.html\" title=\"" +
+            "            throws <a href=\"../typeannos/ThrA.html\" title=\"" +
             "annotation in typeannos\">@ThrA</a> java.lang.RuntimeException," + NL +
-            "                    <a href=\"../typeannos/ThrA.html\" title=\"" +
+            "                   <a href=\"../typeannos/ThrA.html\" title=\"" +
             "annotation in typeannos\">@ThrA</a> java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "ThrPublicModified.html",
@@ -270,16 +270,16 @@ public class TestTypeAnnotations extends JavadocTester {
         },
         {BUG_ID + FS + "typeannos" + FS + "ThrWithValue.html",
             "<pre>void&nbsp;oneException()" + NL +
-            "            throws <a href=\"../typeannos/ThrB.html\" title=\"" +
+            "           throws <a href=\"../typeannos/ThrB.html\" title=\"" +
             "annotation in typeannos\">@ThrB</a>(<a href=\"../typeannos/" +
             "ThrB.html#value()\">value</a>=\"m\") java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "ThrWithValue.html",
             "<pre>void&nbsp;twoExceptions()" + NL +
-            "             throws <a href=\"../typeannos/ThrB.html\" title=\"" +
+            "            throws <a href=\"../typeannos/ThrB.html\" title=\"" +
             "annotation in typeannos\">@ThrB</a>(<a href=\"../typeannos/" +
             "ThrB.html#value()\">value</a>=\"m\") java.lang.RuntimeException," + NL +
-            "                    <a href=\"../typeannos/ThrA.html\" title=\"" +
+            "                   <a href=\"../typeannos/ThrA.html\" title=\"" +
             "annotation in typeannos\">@ThrA</a> java.lang.Exception</pre>"
         },
 
@@ -322,7 +322,7 @@ public class TestTypeAnnotations extends JavadocTester {
         {BUG_ID + FS + "typeannos" + FS + "DefaultUnmodified.html",
             "<pre>void&nbsp;withException(<a href=\"../typeannos/RcvrA.html\" " +
             "title=\"annotation in typeannos\">@RcvrA</a>&nbsp;" +
-            "DefaultUnmodified&nbsp;this)" + NL + "             throws java." +
+            "DefaultUnmodified&nbsp;this)" + NL + "            throws java." +
             "lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "DefaultUnmodified.html",
@@ -336,8 +336,8 @@ public class TestTypeAnnotations extends JavadocTester {
             "<pre>&lt;T extends java.lang.Runnable&gt;&nbsp;void&nbsp;accept(" +
             "<a href=\"../typeannos/RcvrA.html\" title=\"annotation in " +
             "typeannos\">@RcvrA</a>&nbsp;DefaultUnmodified&nbsp;this," + NL +
-            "                                         T&nbsp;r)" + NL +
-            "      throws java.lang.Exception</pre>"
+            "                                           T&nbsp;r)" + NL +
+            "                                    throws java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "PublicModified.html",
             "<pre>public final&nbsp;java.lang.String&nbsp;nonVoid(<a href=\"" +
@@ -348,16 +348,16 @@ public class TestTypeAnnotations extends JavadocTester {
             "<pre>public final&nbsp;&lt;T extends java.lang.Runnable&gt;&nbsp;" +
             "void&nbsp;accept(<a href=\"../typeannos/RcvrA.html\" title=\"" +
             "annotation in typeannos\">@RcvrA</a>&nbsp;PublicModified&nbsp;this," + NL +
-            "                                         T&nbsp;r)" + NL +
-            "                  throws java.lang.Exception</pre>"
+            "                                                        T&nbsp;r)" + NL +
+            "                                                 throws java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "WithValue.html",
             "<pre>&lt;T extends java.lang.Runnable&gt;&nbsp;void&nbsp;accept(" +
             "<a href=\"../typeannos/RcvrB.html\" title=\"annotation in " +
             "typeannos\">@RcvrB</a>(<a href=\"../typeannos/RcvrB.html#value()\">" +
             "value</a>=\"m\")&nbsp;WithValue&nbsp;this," + NL +
-            "                                         T&nbsp;r)" + NL +
-            "      throws java.lang.Exception</pre>"
+            "                                           T&nbsp;r)" + NL +
+            "                                    throws java.lang.Exception</pre>"
         },
         {BUG_ID + FS + "typeannos" + FS + "WithFinal.html",
             "<pre>java.lang.String&nbsp;nonVoid(<a href=\"../typeannos/RcvrB." +
