@@ -128,7 +128,7 @@ public class CombinationsTargetTest2 extends ClassfileTestHelper {
  // 8008928 - src4,5 - this change cause crash with t-a on anon class)
             || (source.equals(srce.src4) || source.equals(srce.src5))
           ) {
-            System.out.println(testDef + 
+            System.out.println(testDef +
                        "\n    8005681-skip repeated annotations on new,array,cast");
             return;
         }

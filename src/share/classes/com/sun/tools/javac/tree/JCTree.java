@@ -814,7 +814,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
         public JCExpression init;
         /** symbol */
         public VarSymbol sym;
-        
+
         protected JCVariableDecl(JCModifiers mods,
                          Name name,
                          JCExpression vartype,
@@ -826,7 +826,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
             this.init = init;
             this.sym = sym;
         }
-        
+
         protected JCVariableDecl(JCModifiers mods,
                          JCExpression nameexpr,
                          JCExpression vartype) {
@@ -839,7 +839,7 @@ public abstract class JCTree implements Tree, Cloneable, DiagnosticPosition {
                 this.name = ((JCFieldAccess)nameexpr).name;
             }
         }
-        
+
         @Override
         public void accept(Visitor v) { v.visitVarDef(this); }
 

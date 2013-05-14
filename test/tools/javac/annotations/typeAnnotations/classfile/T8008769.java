@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -22,7 +22,7 @@
  */
 /*
  * @test
- * @summary Repeated type-annotations on type parm of local variable 
+ * @summary Repeated type-annotations on type parm of local variable
  *          are not written to classfile.
  * @bug 8008769
  */
@@ -60,5 +60,5 @@ public class T8008769 extends ClassfileTestHelper{
     @Retention(RUNTIME) @Target(TYPE_USE) @Repeatable( AC.class ) @interface A { }
     @Retention(RUNTIME) @Target(TYPE_USE) @Repeatable( BC.class ) @interface B { }
     @Retention(RUNTIME) @Target(TYPE_USE) @interface AC { A[] value(); }
-    @Retention(RUNTIME) @Target(TYPE_USE) @interface BC { B[] value(); }    
+    @Retention(RUNTIME) @Target(TYPE_USE) @interface BC { B[] value(); }
 }

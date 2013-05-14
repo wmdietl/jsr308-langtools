@@ -27,7 +27,7 @@
  * @summary Annotations on types
  * @library /tools/javac/lib
  * @build JavacTestingAbstractProcessor DPrinter BasicAnnoTests
- * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java 
+ * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java
  */
 
 import java.io.PrintWriter;
@@ -87,8 +87,8 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
 
     int errors;
 
-    /** 
-     * Scan an element looking for declarations annotated with @Test. 
+    /**
+     * Scan an element looking for declarations annotated with @Test.
      * Run a TestTypeScanner on the annotations that are found.
      */
     class TestElementScanner extends ElementScanner<Void,Void> {
@@ -183,8 +183,8 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
         return null;
     }
 
-    /** 
-     * Get a specific value from an annotation mirror. 
+    /**
+     * Get a specific value from an annotation mirror.
      */
     static AnnotationValue getValue(AnnotationMirror anno, String name) {
         Map<? extends ExecutableElement, ? extends AnnotationValue> map = anno.getElementValues();
@@ -192,7 +192,7 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             if (e.getKey().getSimpleName().contentEquals(name)) {
                 return e.getValue();
             }
-        } 
+        }
         return null;
     }
 
@@ -201,13 +201,13 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
      * one sufficient for our needs.
      */
     static class TypeScanner<R, P> extends SimpleTypeVisitor<R, P> {
-        @Override 
+        @Override
         public R visitArray(ArrayType t, P p) {
             scan(t.getComponentType(), p);
             return super.visitArray(t, p);
         }
 
-        @Override 
+        @Override
         public R visitExecutable(ExecutableType t, P p) {
             scan(t.getReceiverType());
             //out.println("  params: " + t.getParameterTypes());
@@ -219,14 +219,14 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             return super.visitExecutable(t, p);
         }
 
-        @Override 
+        @Override
         public R visitTypeVariable(TypeVariable t, P p) {
             scan(t.getLowerBound(), p);
             scan(t.getUpperBound(), p);
             return super.visitTypeVariable(t, p);
         }
 
-        @Override 
+        @Override
         public R visitWildcard(WildcardType t, P p) {
             scan(t.getExtendsBound(), p);
             scan(t.getSuperBound(), p);
@@ -245,7 +245,7 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             if (iter == null)
                 return DEFAULT_VALUE;
             R result = DEFAULT_VALUE;
-            for (TypeMirror t: iter) 
+            for (TypeMirror t: iter)
                 result = scan(t, p);
             return result;
         }

@@ -111,8 +111,8 @@ public class TestJavacTaskScanner extends ToolTester {
         DeclaredType type = (DeclaredType)task.parseType("List<String>", clazz);
         for (Element member : elements.getAllMembers((TypeElement)type.asElement())) {
             TypeMirror mt = types.asMemberOf(type, member);
-            System.out.format("type#%d: %s : %s -> %s%n", 
-		numParseTypeElements, member.getSimpleName(), member.asType(), mt);
+            System.out.format("type#%d: %s : %s -> %s%n",
+                numParseTypeElements, member.getSimpleName(), member.asType(), mt);
             numParseTypeElements++;
         }
     }
@@ -124,8 +124,8 @@ public class TestJavacTaskScanner extends ToolTester {
 
     private void testGetAllMembers(TypeElement clazz) {
         for (Element member : elements.getAllMembers(clazz)) {
-            System.out.format("elem#%d: %s : %s%n", 
-		numAllMembers, member.getSimpleName(), member.asType());
+            System.out.format("elem#%d: %s : %s%n",
+                numAllMembers, member.getSimpleName(), member.asType());
             numAllMembers++;
         }
     }

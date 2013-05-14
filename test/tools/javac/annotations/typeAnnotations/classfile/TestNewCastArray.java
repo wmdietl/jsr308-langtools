@@ -22,7 +22,7 @@
  */
 
 /*
- * @test 
+ * @test
  * @bug 8005681
  * @summary Repeated annotations on new,array,cast.
  */
@@ -31,9 +31,9 @@ import java.io.*;
 import java.util.List;
 import com.sun.tools.classfile.*;
 
-import java.lang.annotation.*; 
-import static java.lang.annotation.RetentionPolicy.*; 
-import static java.lang.annotation.ElementType.*; 
+import java.lang.annotation.*;
+import static java.lang.annotation.RetentionPolicy.*;
+import static java.lang.annotation.ElementType.*;
 
 public class TestNewCastArray {
     int errors = 0;
@@ -42,9 +42,9 @@ public class TestNewCastArray {
     // 'b' tests fail with only even numbers of annotations (8005681).
     String[] testclasses = {"Test1",
         "Test2a", "Test3a", "Test4a", "Test5a",
-        "Test2b", "Test3b", "Test4b", "Test5b" 
+        "Test2b", "Test3b", "Test4b", "Test5b"
     };
-    
+
     public static void main(String[] args) throws Exception {
         new TestNewCastArray().run();
     }
@@ -86,7 +86,7 @@ public class TestNewCastArray {
             case "METHOD":
                 index = m.attributes.getIndex(cf.constant_pool, name);
                 memberName = m.getName(cf.constant_pool);
-                if(index != -1) 
+                if(index != -1)
                     attr = m.attributes.get(index);
                 break;
             case "MCODE":
@@ -97,15 +97,15 @@ public class TestNewCastArray {
                     attr = m.attributes.get(index);
                     assert attr instanceof Code_attribute;
                     cAttr = (Code_attribute)attr;
-                    index = cAttr.attributes.getIndex(cf.constant_pool, name); 
-                    if(index!= -1) 
+                    index = cAttr.attributes.getIndex(cf.constant_pool, name);
+                    if(index!= -1)
                         attr = cAttr.attributes.get(index);
                 }
-                break;                
+                break;
             case "FIELD":
                 index = f.attributes.getIndex(cf.constant_pool, name);
                 memberName = f.getName(cf.constant_pool);
-                if(index != -1) 
+                if(index != -1)
                     attr = f.attributes.get(index);
                 break;
             case "CODE":
@@ -116,11 +116,11 @@ public class TestNewCastArray {
                     attr = cf.attributes.get(index);
                     assert attr instanceof Code_attribute;
                     cAttr = (Code_attribute)attr;
-                    index = cAttr.attributes.getIndex(cf.constant_pool, name); 
-                    if(index!= -1) 
+                    index = cAttr.attributes.getIndex(cf.constant_pool, name);
+                    if(index!= -1)
                         attr = cAttr.attributes.get(index);
                 }
-                break;                
+                break;
             default:
                 break;
         }
@@ -135,7 +135,7 @@ public class TestNewCastArray {
         }
         if(memberName.compareTo("<init>")==0) memberName=clazz+memberName;
         switch ( memberName ) {
-            //METHOD: 
+            //METHOD:
             case "Test1<init>": expected=0; break;
             case "testr22_22": expected=4; break;
             case "testr11_11": expected=4; break;
@@ -180,12 +180,12 @@ public class TestNewCastArray {
             case "Test4a<init>": cexpected=4; break;
             case "nS_21": cexpected = 0; break;
             case "nS_12": cexpected = 0; break;
-            
+
             case "Test4b<init>": cexpected=4; break;
             case "nS20":  cexpected = 0; break;
             case "nS02":  cexpected = 0; break;
             case "nS22":  cexpected = 0; break;
-            
+
             case "Test5a<init>": cexpected=4; break;
             case "ci11": expected = 0; break;
             case "ci21": expected = 0; break;
@@ -235,24 +235,24 @@ public class TestNewCastArray {
     static class Test1 {
         Test1(){}
         // OK expect 5, got 5
-        String @A @A @B @B[] @A @A @B @B [] testr22_22(Test1 this, String param, String ... vararg) { 
-            String [][] sarray = new String [2][2]; 
-            return sarray; 
-        } 
-        // OK expect 5, got 5
-        String @A @B [] @A @B [] testr11_11(Test1 this, String param, String ... vararg) { 
-            String [][] sarray = new String [2][2]; 
-            return sarray; 
+        String @A @A @B @B[] @A @A @B @B [] testr22_22(Test1 this, String param, String ... vararg) {
+            String [][] sarray = new String [2][2];
+            return sarray;
         }
         // OK expect 5, got 5
-        String @A @B @B []@B @B @A[] testr12_21(Test1 this, String param, String ... vararg) { 
-            String [][] sarray = new String [2][2]; 
-            return sarray; 
+        String @A @B [] @A @B [] testr11_11(Test1 this, String param, String ... vararg) {
+            String [][] sarray = new String [2][2];
+            return sarray;
+        }
+        // OK expect 5, got 5
+        String @A @B @B []@B @B @A[] testr12_21(Test1 this, String param, String ... vararg) {
+            String [][] sarray = new String [2][2];
+            return sarray;
         }
         // OK expect 3, got 3
-        String @A @A [] @B @B [] testr20_02(Test1 this, String param, String ... vararg) { 
-            String [][] sarray = new String [2][2]; 
-            return sarray; 
+        String @A @A [] @B @B [] testr20_02(Test1 this, String param, String ... vararg) {
+            String [][] sarray = new String [2][2];
+            return sarray;
         }
     }
 
@@ -291,7 +291,7 @@ public class TestNewCastArray {
         String[][] test22_22_22_22(Test2b this, String param, String ... vararg) {
             String @A @A @B @B [] @A @A @B @B [] sarray = new String @A @A @B @B [2] @A @A @B @B [2];
             return sarray;
-        } 
+        }
 
         void test_new3() { String nS20 = new @A @A String("Hello");       }
         void test_new4() { String nS02 = new @B @B String("Hello");       }
@@ -354,7 +354,7 @@ public class TestNewCastArray {
         Integer ci11 = (@A @B Integer)o;       // OK expect 3, got 3
         Integer ci21 = (@A @A @B Integer)o;    // OK expect 3, got 3
     }
-   
+
     static class Test5b {
         Test5b(){}
         Object o = new Integer(1);
@@ -367,9 +367,9 @@ public class TestNewCastArray {
 @Retention(RUNTIME) @Target({TYPE_USE}) @Repeatable( AC.class ) @interface A { }
 @Retention(RUNTIME) @Target({TYPE_USE}) @Repeatable( BC.class ) @interface B { }
 @Retention(RUNTIME) @Target({FIELD}) @Repeatable( FC.class ) @interface F { }
-@Retention(RUNTIME) @Target({TYPE_USE}) @interface AC { A[] value(); } 
-@Retention(RUNTIME) @Target({TYPE_USE}) @interface BC { B[] value(); } 
-@Retention(RUNTIME) @Target({FIELD}) @interface FC { F[] value(); } 
+@Retention(RUNTIME) @Target({TYPE_USE}) @interface AC { A[] value(); }
+@Retention(RUNTIME) @Target({TYPE_USE}) @interface BC { B[] value(); }
+@Retention(RUNTIME) @Target({FIELD}) @interface FC { F[] value(); }
 
 }
 
