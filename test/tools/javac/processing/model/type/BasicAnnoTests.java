@@ -27,7 +27,7 @@
  * @summary Annotations on types
  * @library /tools/javac/lib
  * @build JavacTestingAbstractProcessor DPrinter BasicAnnoTests
- * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java 
+ * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java
  */
 
 import java.io.PrintWriter;
@@ -63,7 +63,7 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
     DPrinter dprinter;
     PrintWriter out;
     boolean verbose = true;
-    
+
     @Override
     public void init(ProcessingEnvironment pEnv) {
         super.init(pEnv);
@@ -79,16 +79,16 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
         }
         return true;
     }
-    
+
     void error(Element e, String msg) {
         messager.printMessage(Kind.ERROR, msg, e);
         errors++;
     }
 
     int errors;
-    
-    /** 
-     * Scan an element looking for declarations annotated with @Test. 
+
+    /**
+     * Scan an element looking for declarations annotated with @Test.
      * Run a TestTypeScanner on the annotations that are found.
      */
     class TestElementScanner extends ElementScanner<Void,Void> {
@@ -109,7 +109,7 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             return super.scan(elem, ignore);
         }
     }
-    
+
     /**
      * Scan the type of an element, looking for an annotation
      * to match the expected annotation specified in the @Test annotation.
@@ -119,12 +119,12 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
         AnnotationMirror test;
         int count = 0;
         boolean found = false;
-        
+
         TestTypeScanner(Element elem, AnnotationMirror test) {
             this.elem = elem;
             this.test = test;
         }
-        
+
         @Override
         Void scan(TypeMirror t, Void ignore) {
             if (t == null)
@@ -134,22 +134,23 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             if (count == getPosn(test)) {
                 String annoType = getAnnoType(test);
                 AnnotationMirror anno = getAnnotation(t, annoType);
-                if (anno == null)
+                if (anno == null) {
                     error(elem, "annotation not found on " + count + ": " + t);
-                else {
+                } else {
                     String v = getValue(anno, "value").toString();
                     if (v.equals(getExpect(test))) {
                         out.println("found " + anno + " as expected");
                         found = true;
-                    } else
+                    } else {
                         error(elem, "Unexpected value: " + v + ", expected: " + getExpect(test));
+                    }
                 }
             }
             count++;
             return super.scan(t, ignore);
         }
     }
-        
+
     /** Get the position value from an @Test annotation mirror. */
     static int getPosn(AnnotationMirror test) {
         AnnotationValue v = getValue(test, "posn");
@@ -168,7 +169,7 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
         TypeMirror m = (TypeMirror) v.getValue();
         return m.toString();
     }
-    
+
     /**
      * Get a specific annotation mirror from an annotated construct.
      */
@@ -182,8 +183,8 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
         return null;
     }
 
-    /** 
-     * Get a specific value from an annotation mirror. 
+    /**
+     * Get a specific value from an annotation mirror.
      */
     static AnnotationValue getValue(AnnotationMirror anno, String name) {
         Map<? extends ExecutableElement, ? extends AnnotationValue> map = anno.getElementValues();
@@ -191,22 +192,22 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             if (e.getKey().getSimpleName().contentEquals(name)) {
                 return e.getValue();
             }
-        } 
+        }
         return null;
     }
-    
+
     /**
      * The Language Model API does not provide a type scanner, so provide
      * one sufficient for our needs.
      */
     static class TypeScanner<R, P> extends SimpleTypeVisitor<R, P> {
-        @Override 
+        @Override
         public R visitArray(ArrayType t, P p) {
             scan(t.getComponentType(), p);
             return super.visitArray(t, p);
         }
-        
-        @Override 
+
+        @Override
         public R visitExecutable(ExecutableType t, P p) {
             scan(t.getReceiverType());
             //out.println("  params: " + t.getParameterTypes());
@@ -217,34 +218,34 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             scan(t.getThrownTypes(), p);
             return super.visitExecutable(t, p);
         }
-        
-        @Override 
+
+        @Override
         public R visitTypeVariable(TypeVariable t, P p) {
             scan(t.getLowerBound(), p);
             scan(t.getUpperBound(), p);
             return super.visitTypeVariable(t, p);
         }
-        
-        @Override 
+
+        @Override
         public R visitWildcard(WildcardType t, P p) {
             scan(t.getExtendsBound(), p);
             scan(t.getSuperBound(), p);
             return super.visitWildcard(t, p);
         }
-        
+
         R scan(TypeMirror t) {
             return scan(t, null);
         }
-        
+
         R scan(TypeMirror t, P p) {
             return (t == null) ? DEFAULT_VALUE : t.accept(this, p);
         }
-        
+
         R scan(Iterable<? extends TypeMirror> iter, P p) {
             if (iter == null)
                 return DEFAULT_VALUE;
             R result = DEFAULT_VALUE;
-            for (TypeMirror t: iter) 
+            for (TypeMirror t: iter)
                 result = scan(t, p);
             return result;
         }
@@ -263,24 +264,24 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
     /** Type annotation to use in test cases. */
     @Target(ElementType.TYPE_USE)
     public @interface TA {
-	int value();
+        int value();
     }
 
-    @Test(posn=0, annoType=TA.class, expect="1")  
+    @Test(posn=0, annoType=TA.class, expect="1")
     public @TA(1) int f1;
-    
-    @Test(posn=0, annoType=TA.class, expect="2")  
+
+    @Test(posn=0, annoType=TA.class, expect="2")
     public int @TA(2) [] f2;
-    
-    @Test(posn=1, annoType=TA.class, expect="3")  
+
+    @Test(posn=1, annoType=TA.class, expect="3")
     public @TA(3) int [] f3;
-    
-    @Test(posn=1, annoType=TA.class, expect="4")  
+
+    @Test(posn=1, annoType=TA.class, expect="4")
     public int m1(@TA(4) float a) throws Exception { return 0; }
-    
-    @Test(posn=2, annoType=TA.class, expect="5")  
+
+    @Test(posn=2, annoType=TA.class, expect="5")
     public @TA(5) int m2(float a) throws Exception { return 0; }
-    
-    @Test(posn=3, annoType=TA.class, expect="6")  
+
+    @Test(posn=3, annoType=TA.class, expect="6")
     public int m3(float a) throws @TA(6) Exception { return 0; }
 }

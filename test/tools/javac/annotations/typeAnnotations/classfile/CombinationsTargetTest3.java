@@ -118,7 +118,7 @@ public class CombinationsTargetTest3 extends ClassfileTestHelper {
         };
         // Added ElementType's. All set; not permuted (so far) for this test
         String et = "TYPE,FIELD,METHOD,PARAMETER,CONSTRUCTOR,LOCAL_VARIABLE";
- 
+
         // test loop
         for(Boolean[] bCombo : bRepeat) {
             As=bCombo[0]; BDs=bCombo[1]; ABMix=bCombo[2];
@@ -518,7 +518,7 @@ public class CombinationsTargetTest3 extends ClassfileTestHelper {
             case src9: //(repeating)type annotations on static method of interface
                 /*
                  *  class Test90{
-                 *    interface I  { 
+                 *    interface I  {
                  *      static @A @B @A @B String m() { @A @B @A @B String ret = "I.m"; return ret; }
                  *    }
                  *  }

@@ -940,32 +940,6 @@ public class Attr extends JCTree.Visitor {
                 Env<AttrContext> newEnv = memberEnter.methodEnv(tree, env);
                 attribType(tree.recvparam, newEnv);
                 chk.validate(tree.recvparam, newEnv);
-                if (tree.name == names.init) {
-                    // In a constructor
-                    Type outertype = m.owner.owner.type;
-                    Type recvtype = tree.recvparam.type;
-                    if (outertype.getKind() != TypeKind.DECLARED) {
-                        // e.g. PACKAGE for top-level class
-                        log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.constructor.toplevel.class", tree.recvparam);
-                    }
-                    if (!(recvtype == outertype || types.isSameType(recvtype, outertype))) {
-                        // The == covers the common non-generic case, but for generic classes we need isSameType;
-                        // note that equals didn't work.
-                        log.error(tree.recvparam.pos(), "incorrect.constructor.receiver.type", outertype, recvtype);
-                    }
-                    {
-                        // Make sure the receiver parameter name is as expected
-                        String fnd = tree.recvparam.nameexpr.toString();
-                        String exp = recvtype.unannotatedType().toString() + '.' + names._this.toString();
-                        if (!exp.endsWith(fnd)) {
-                            log.error(tree.recvparam.pos(), "receiver.parameter.wrong.name", exp, fnd);
-                        }
-                    }
-                } else if (!(tree.recvparam.type == m.owner.type || types.isSameType(tree.recvparam.type, m.owner.type))) {
-                    // The == covers the common non-generic case, but for generic classes we need isSameType;
-                    // note that equals didn't work.
-                    log.error(tree.recvparam.pos(), "incorrect.receiver.type", m.owner.type, tree.recvparam.type);
-                }
             }
 
             // annotation method checks
@@ -1082,7 +1056,10 @@ public class Attr extends JCTree.Visitor {
         Lint prevLint = chk.setLint(lint);
 
         // Check that the variable's declared type is well-formed.
-        chk.validate(tree.vartype, env);
+        boolean isImplicitLambdaParameter = env.tree.hasTag(LAMBDA) &&
+                ((JCLambda)env.tree).paramKind == JCLambda.ParameterKind.IMPLICIT &&
+                (tree.sym.flags() & PARAMETER) != 0;
+        chk.validate(tree.vartype, env, !isImplicitLambdaParameter);
         deferredLintHandler.flush(tree.pos());
 
         try {
@@ -1144,9 +1121,9 @@ public class Attr extends JCTree.Visitor {
                 ClassSymbol cs = (ClassSymbol)env.info.scope.owner;
                 List<Attribute.TypeCompound> tas = localEnv.info.scope.owner.getRawTypeAttributes();
                 if ((tree.flags & STATIC) != 0) {
-                    cs.clinit_type_annotations = cs.clinit_type_annotations.appendList(tas);
+                    cs.annotations.appendClassInitTypeAttributes(tas);
                 } else {
-                    cs.init_type_annotations = cs.init_type_annotations.appendList(tas);
+                    cs.annotations.appendInitTypeAttributes(tas);
                 }
             }
 
@@ -1376,7 +1353,7 @@ public class Attr extends JCTree.Visitor {
                         //check that resource type cannot throw InterruptedException
                         checkAutoCloseable(resource.pos(), localEnv, resource.type);
 
-                        VarSymbol var = (VarSymbol)TreeInfo.symbolFor(resource);
+                        VarSymbol var = ((JCVariableDecl) resource).sym;
                         var.setData(ElementKind.RESOURCE_VARIABLE);
                     } else {
                         attribTree(resource, tryEnv, twrResult);
@@ -2370,7 +2347,7 @@ public class Attr extends JCTree.Visitor {
                     Type argType = arityMismatch ?
                             syms.errType :
                             actuals.head;
-                    params.head.vartype = make.Type(argType);
+                    params.head.vartype = make.at(params.head).Type(argType);
                     params.head.sym = null;
                     actuals = actuals.isEmpty() ?
                             actuals :
@@ -2417,7 +2394,8 @@ public class Attr extends JCTree.Visitor {
                     for (JCDiagnostic deferredDiag : lambdaDeferredHandler.getDiagnostics()) {
                         if (deferredDiag.getKind() == JCDiagnostic.Kind.ERROR) {
                             resultInfo.checkContext
-                                    .report(that, diags.fragment("bad.arg.types.in.lambda", TreeInfo.types(that.params)));
+                                    .report(that, diags.fragment("bad.arg.types.in.lambda", TreeInfo.types(that.params),
+                                    deferredDiag)); //hidden diag parameter
                             //we mark the lambda as erroneous - this is crucial in the recovery step
                             //as parameter-dependent type error won't be reported in that stage,
                             //meaning that a lambda will be deemed erroeneous only if there is
@@ -2667,10 +2645,11 @@ public class Attr extends JCTree.Visitor {
                 return;
             }
 
-            if (TreeInfo.isStaticSelector(that.expr, names) &&
-                    (that.getMode() != ReferenceMode.NEW || !that.expr.type.isRaw())) {
-                //if the qualifier is a type, validate it
-                chk.validate(that.expr, env);
+            if (TreeInfo.isStaticSelector(that.expr, names)) {
+                //if the qualifier is a type, validate it; raw warning check is
+                //omitted as we don't know at this stage as to whether this is a
+                //raw selector (because of inference)
+                chk.validate(that.expr, env, false);
             }
 
             //attrib type-arguments
@@ -2755,6 +2734,13 @@ public class Attr extends JCTree.Visitor {
             }
 
             if (resultInfo.checkContext.deferredAttrContext().mode == AttrMode.CHECK) {
+
+                if (that.getMode() == ReferenceMode.INVOKE &&
+                        TreeInfo.isStaticSelector(that.expr, names) &&
+                        that.kind.isUnbound() &&
+                        !desc.getParameterTypes().head.isParameterized()) {
+                    chk.checkRaw(that.expr, localEnv);
+                }
 
                 if (!that.kind.isUnbound() &&
                         that.getMode() == ReferenceMode.INVOKE &&
@@ -4359,15 +4345,6 @@ public class Attr extends JCTree.Visitor {
             // super.visitTypeParameter(tree);
         }
         public void visitMethodDef(JCMethodDecl tree) {
-            // Static methods cannot have receiver type annotations.
-            // In test case FailOver15.java, the nested method getString has
-            // a null sym, because an unknown class is instantiated.
-            // I would say it's safe to skip.
-            if (tree.sym != null && (tree.sym.flags() & Flags.STATIC) != 0) {
-                if (tree.recvparam != null) {
-                    log.error(tree.recvparam.pos(), "receiver.parameter.not.applicable.static", tree.recvparam);
-                }
-            }
             if (tree.recvparam != null &&
                     tree.recvparam.vartype.type.getKind() != TypeKind.ERROR) {
                 checkForDeclarationAnnotations(tree.recvparam.mods.annotations,

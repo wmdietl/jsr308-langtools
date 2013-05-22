@@ -28,7 +28,6 @@ import com.sun.tools.javac.tree.*;
 import com.sun.tools.javac.tree.JCTree.*;
 import com.sun.tools.javac.tree.JCTree.JCMemberReference.ReferenceKind;
 import com.sun.tools.javac.tree.TreeMaker;
-import com.sun.tools.javac.tree.TreeScanner;
 import com.sun.tools.javac.tree.TreeTranslator;
 import com.sun.tools.javac.code.Attribute;
 import com.sun.tools.javac.code.Kinds;
@@ -42,7 +41,7 @@ import com.sun.tools.javac.code.Symtab;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Type.MethodType;
 import com.sun.tools.javac.code.Types;
-import com.sun.tools.javac.comp.LambdaToMethod.LambdaAnalyzer.*;
+import com.sun.tools.javac.comp.LambdaToMethod.LambdaAnalyzerPreprocessor.*;
 import com.sun.tools.javac.comp.Lower.BasicFreeVarCollector;
 import com.sun.tools.javac.jvm.*;
 import com.sun.tools.javac.util.*;
@@ -79,7 +78,7 @@ public class LambdaToMethod extends TreeTranslator {
     private Env<AttrContext> attrEnv;
 
     /** the analyzer scanner */
-    private LambdaAnalyzer analyzer;
+    private LambdaAnalyzerPreprocessor analyzer;
 
     /** map from lambda trees to translation contexts */
     private Map<JCTree, TranslationContext<?>> contextMap;
@@ -154,7 +153,7 @@ public class LambdaToMethod extends TreeTranslator {
         make = TreeMaker.instance(context);
         types = Types.instance(context);
         transTypes = TransTypes.instance(context);
-        analyzer = new LambdaAnalyzer();
+        analyzer = new LambdaAnalyzerPreprocessor();
     }
     // </editor-fold>
 
@@ -165,7 +164,7 @@ public class LambdaToMethod extends TreeTranslator {
         return translate(tree, newContext != null ? newContext : context);
     }
 
-    public <T extends JCTree> T translate(T tree, TranslationContext<?> newContext) {
+    <T extends JCTree> T translate(T tree, TranslationContext<?> newContext) {
         TranslationContext<?> prevContext = context;
         try {
             context = newContext;
@@ -176,7 +175,7 @@ public class LambdaToMethod extends TreeTranslator {
         }
     }
 
-    public <T extends JCTree> List<T> translate(List<T> trees, TranslationContext<?> newContext) {
+    <T extends JCTree> List<T> translate(List<T> trees, TranslationContext<?> newContext) {
         ListBuffer<T> buf = ListBuffer.lb();
         for (T tree : trees) {
             buf.append(translate(tree, newContext));
@@ -204,7 +203,7 @@ public class LambdaToMethod extends TreeTranslator {
     public void visitClassDef(JCClassDecl tree) {
         if (tree.sym.owner.kind == PCK) {
             //analyze class
-            analyzer.analyzeClass(tree);
+            tree = analyzer.analyzeAndPreprocessClass(tree);
         }
         KlassInfo prevKlassInfo = kInfo;
         try {
@@ -550,15 +549,24 @@ public class LambdaToMethod extends TreeTranslator {
     /** Make an attributed class instance creation expression.
      *  @param ctype    The class type.
      *  @param args     The constructor arguments.
+     *  @param cons     The constructor symbol
      */
-    JCNewClass makeNewClass(Type ctype, List<JCExpression> args) {
+    JCNewClass makeNewClass(Type ctype, List<JCExpression> args, Symbol cons) {
         JCNewClass tree = make.NewClass(null,
             null, make.QualIdent(ctype.tsym), args, null);
-        tree.constructor = rs.resolveConstructor(
-            null, attrEnv, ctype, TreeInfo.types(args), List.<Type>nil());
+        tree.constructor = cons;
         tree.type = ctype;
         return tree;
     }
+
+    /** Make an attributed class instance creation expression.
+     *  @param ctype    The class type.
+     *  @param args     The constructor arguments.
+     */
+    JCNewClass makeNewClass(Type ctype, List<JCExpression> args) {
+        return makeNewClass(ctype, args,
+                rs.resolveConstructor(null, attrEnv, ctype, TreeInfo.types(args), List.<Type>nil()));
+     }
 
     private void addDeserializationCase(int implMethodKind, Symbol refSym, Type targetType, MethodSymbol samSym,
             DiagnosticPosition pos, List<Object> staticArgs, MethodType indyType) {
@@ -1038,8 +1046,9 @@ public class LambdaToMethod extends TreeTranslator {
      * This visitor collects information about translation of a lambda expression.
      * More specifically, it keeps track of the enclosing contexts and captured locals
      * accessed by the lambda being translated (as well as other useful info).
+     * It also translates away problems for LambdaToMethod.
      */
-    class LambdaAnalyzer extends TreeScanner {
+    class LambdaAnalyzerPreprocessor extends TreeTranslator {
 
         /** the frame stack - used to reconstruct translation info about enclosing scopes */
         private List<Frame> frameStack;
@@ -1066,10 +1075,10 @@ public class LambdaToMethod extends TreeTranslator {
         private Map<ClassSymbol, Symbol> clinits =
                 new HashMap<ClassSymbol, Symbol>();
 
-        private void analyzeClass(JCClassDecl tree) {
+        private JCClassDecl analyzeAndPreprocessClass(JCClassDecl tree) {
             frameStack = List.nil();
             localClassDefs = new HashMap<Symbol, JCClassDecl>();
-            scan(tree);
+            return translate(tree);
         }
 
         @Override
@@ -1173,7 +1182,7 @@ public class LambdaToMethod extends TreeTranslator {
                     frameStack.head.addLocal(param.sym);
                 }
                 contextMap.put(tree, context);
-                scan(tree.body);
+                super.visitLambda(tree);
                 context.complete();
             }
             finally {
@@ -1239,17 +1248,65 @@ public class LambdaToMethod extends TreeTranslator {
                     };
                     fvc.scan(localCDef);
                 }
-            }
+        }
 
+        /**
+         * Method references to local class constructors, may, if the local
+         * class references local variables, have implicit constructor
+         * parameters added in Lower; As a result, the invokedynamic bootstrap
+         * information added in the LambdaToMethod pass will have the wrong
+         * signature. Hooks between Lower and LambdaToMethod have been added to
+         * handle normal "new" in this case. This visitor converts potentially
+         * effected method references into a lambda containing a normal "new" of
+         * the class.
+         *
+         * @param tree
+         */
         @Override
         public void visitReference(JCMemberReference tree) {
-            scan(tree.getQualifierExpression());
-            contextMap.put(tree, makeReferenceContext(tree));
+            if (tree.getMode() == ReferenceMode.NEW
+                    && tree.kind != ReferenceKind.ARRAY_CTOR
+                    && tree.sym.owner.isLocal()) {
+                MethodSymbol consSym = (MethodSymbol) tree.sym;
+                List<Type> ptypes = ((MethodType) consSym.type).getParameterTypes();
+                Type classType = consSym.owner.type;
+
+                // Build lambda parameters
+                // partially cloned from TreeMaker.Params until 8014021 is fixed
+                Symbol owner = owner();
+                ListBuffer<JCVariableDecl> paramBuff = new ListBuffer<JCVariableDecl>();
+                int i = 0;
+                for (List<Type> l = ptypes; l.nonEmpty(); l = l.tail) {
+                    paramBuff.append(make.Param(make.paramName(i++), l.head, owner));
+                }
+                List<JCVariableDecl> params = paramBuff.toList();
+
+                // Make new-class call
+                JCNewClass nc = makeNewClass(classType, make.Idents(params));
+                nc.pos = tree.pos;
+
+                // Make lambda holding the new-class call
+                JCLambda slam = make.Lambda(params, nc);
+                slam.descriptorType = tree.descriptorType;
+                slam.targets = tree.targets;
+                slam.type = tree.type;
+                slam.pos = tree.pos;
+
+                // Now it is a lambda, process as such
+                visitLambda(slam);
+            } else {
+                super.visitReference(tree);
+                contextMap.put(tree, makeReferenceContext(tree));
+            }
         }
 
         @Override
         public void visitSelect(JCFieldAccess tree) {
-            if (context() != null && lambdaSelectSymbolFilter(tree.sym)) {
+            if (context() != null && tree.sym.kind == VAR &&
+                        (tree.sym.name == names._this ||
+                         tree.sym.name == names._super)) {
+                // A select of this or super means, if we are in a lambda,
+                // we much have an instance context
                 TranslationContext<?> localContext = context();
                 while (localContext != null) {
                     if (localContext.tree.hasTag(LAMBDA)) {
@@ -1259,10 +1316,8 @@ public class LambdaToMethod extends TreeTranslator {
                     }
                     localContext = localContext.prev;
                 }
-                scan(tree.selected);
-            } else {
-                super.visitSelect(tree);
             }
+            super.visitSelect(tree);
         }
 
         @Override
@@ -1502,13 +1557,6 @@ public class LambdaToMethod extends TreeTranslator {
                     && sym.name != names.init;
         }
 
-        private boolean lambdaSelectSymbolFilter(Symbol sym) {
-            return (sym.kind == VAR || sym.kind == MTH) &&
-                        !sym.isStatic() &&
-                        (sym.name == names._this ||
-                        sym.name == names._super);
-        }
-
         /**
          * This is used to filter out those new class expressions that need to
          * be qualified with an enclosing tree
@@ -1741,12 +1789,13 @@ public class LambdaToMethod extends TreeTranslator {
                 }
                 boolean inInterface = translatedSym.owner.isInterface();
                 boolean thisReferenced = !getSymbolMap(CAPTURED_THIS).isEmpty();
-                boolean needInstance = thisReferenced || inInterface;
 
-                // If instance access isn't needed, make it static
-                // Interface methods much be public default methods, otherwise make it private
-                translatedSym.flags_field = SYNTHETIC | (needInstance? 0 : STATIC) |
-                        (inInterface? PUBLIC | DEFAULT : PRIVATE);
+                // If instance access isn't needed, make it static.
+                // Interface instance methods must be default methods.
+                // Awaiting VM channges, default methods are public
+                translatedSym.flags_field = SYNTHETIC |
+                        ((inInterface && thisReferenced)? PUBLIC : PRIVATE) |
+                        (thisReferenced? (inInterface? DEFAULT : 0) : STATIC);
 
                 //compute synthetic params
                 ListBuffer<JCVariableDecl> params = ListBuffer.lb();

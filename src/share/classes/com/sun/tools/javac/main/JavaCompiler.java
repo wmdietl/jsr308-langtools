@@ -1614,6 +1614,9 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 log.warning("proc.use.proc.or.implicit");
         }
         chk.reportDeferredDiagnostics();
+        if (log.compressedOutput) {
+            log.mandatoryNote(null, "compressed.diags");
+        }
     }
 
     /** Close the compiler, flushing the logs
@@ -1665,6 +1668,7 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                     throw new FatalError(msg, e);
                 }
             }
+            closeables = List.nil();
         }
     }
 

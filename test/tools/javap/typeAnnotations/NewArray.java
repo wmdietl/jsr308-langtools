@@ -69,7 +69,7 @@ public class NewArray {
             attr = m.attributes.get(index);
             assert attr instanceof Code_attribute;
             cAttr = (Code_attribute)attr;
-            index = cAttr.attributes.getIndex(cf.constant_pool, name); 
+            index = cAttr.attributes.getIndex(cf.constant_pool, name);
             if(index!= -1) {
                 attr = cAttr.attributes.get(index);
                 assert attr instanceof RuntimeTypeAnnotations_attribute;

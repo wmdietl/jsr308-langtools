@@ -21,10 +21,32 @@
  * questions.
  */
 
-// key: compiler.err.receiver.parameter.wrong.name
+/*
+ * @test
+ * @bug 8013485
+ * @summary Annotations that gets a clinit can't be verified for correct elements in a second compilation unit
+ * @compile AnnoWithClinit1.java
+ */
 
-class ReceiverParameterWrongName {
-    class Inner {
-        Inner(ReceiverParameterWrongName foo.this) { }
-    }
+public @interface AnnoWithClinit1 {
+    Foo f = new Foo();
+
+    @AnnoWithClinit1
+    static class C {} // this is in the same CU so there wont be a
+                      // <clinit> when the this anno instance is checked
+
+    class Foo {}
 }
+
+
+@AnnoWithClinit1
+class BarAnnoClinit1 {}
+
+@interface AAnnoClinit1 {
+    Runnable r2 = new Runnable() { public void run() { }};
+    String str1();
+    String str2withdefault() default "bar";
+}
+
+@AAnnoClinit1(str1="value")
+class TestAnnoClinit1 { }

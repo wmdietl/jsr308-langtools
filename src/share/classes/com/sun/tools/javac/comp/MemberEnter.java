@@ -620,6 +620,22 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
                 // But we don't have a symbol to attach them to yet - use null.
                 typeAnnotate(tree.vartype, env, null);
                 attr.attribType(tree.vartype, localEnv);
+                if (tree.nameexpr != null) {
+                    attr.attribExpr(tree.nameexpr, localEnv);
+                    MethodSymbol m = localEnv.enclMethod.sym;
+                    if (m.isConstructor()) {
+                        Type outertype = m.owner.owner.type;
+                        if (outertype.hasTag(TypeTag.CLASS)) {
+                            checkType(tree.vartype, outertype, "incorrect.constructor.receiver.type");
+                            checkType(tree.nameexpr, outertype, "incorrect.constructor.receiver.name");
+                        } else {
+                            log.error(tree, "receiver.parameter.not.applicable.constructor.toplevel.class");
+                        }
+                    } else {
+                        checkType(tree.vartype, m.owner.type, "incorrect.receiver.type");
+                        checkType(tree.nameexpr, m.owner.type, "incorrect.receiver.name");
+                    }
+                }
             }
         } finally {
             chk.setDeferredLintHandler(prevLintHandler);
@@ -656,6 +672,12 @@ public class MemberEnter extends JCTree.Visitor implements Completer {
         typeAnnotate(tree.vartype, env, v);
         annotate.flush();
         v.pos = tree.pos;
+    }
+    // where
+    void checkType(JCTree tree, Type type, String diag) {
+        if (!tree.type.isErroneous() && !types.isSameType(tree.type, type)) {
+            log.error(tree, diag, type, tree.type);
+        }
     }
 
     /** Create a fresh environment for a variable's initializer.

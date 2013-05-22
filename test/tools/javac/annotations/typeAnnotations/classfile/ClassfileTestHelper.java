@@ -135,7 +135,7 @@ public class ClassfileTestHelper {
                 case "FIELD":
                     name = f.getName(cf.constant_pool);
                     index = f.attributes.getIndex(cf.constant_pool, annName);
-                    if(index!= -1) 
+                    if(index!= -1)
                         attr = f.attributes.get(index);
                     break;
                 case "CODE":
@@ -146,15 +146,15 @@ public class ClassfileTestHelper {
                         attr = cf.attributes.get(index);
                         assert attr instanceof Code_attribute;
                         cAttr = (Code_attribute)attr;
-                        index = cAttr.attributes.getIndex(cf.constant_pool, annName); 
-                        if(index!= -1) 
+                        index = cAttr.attributes.getIndex(cf.constant_pool, annName);
+                        if(index!= -1)
                             attr = cAttr.attributes.get(index);
                     }
                     break;
                 case "METHOD":
                     name = m.getName(cf.constant_pool);
                     index = m.attributes.getIndex(cf.constant_pool, annName);
-                    if(index!= -1) 
+                    if(index!= -1)
                         attr = m.attributes.get(index);
                     break;
                 case "MCODE":
@@ -165,8 +165,8 @@ public class ClassfileTestHelper {
                         attr = m.attributes.get(index);
                         assert attr instanceof Code_attribute;
                         cAttr = (Code_attribute)attr;
-                        index = cAttr.attributes.getIndex(cf.constant_pool, annName); 
-                        if(index!= -1) 
+                        index = cAttr.attributes.getIndex(cf.constant_pool, annName);
+                        if(index!= -1)
                             attr = cAttr.attributes.get(index);
                     }
                     break;

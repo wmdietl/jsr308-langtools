@@ -270,7 +270,7 @@ public class JavacParser implements Parser {
 
     /** The type of the method receiver, as specified by a first "this" parameter.
      */
-    JCReceiverVariableDecl receiverParam;
+    JCVariableDecl receiverParam;
 
 
     /** When terms are parsed, the mode determines which is expected:
@@ -3010,7 +3010,7 @@ public class JavacParser implements Parser {
         } else {
             if (allowThisIdent) {
                 JCExpression pn = qualident(false);
-                if (pn.hasTag(Tag.IDENT) && !((JCIdent)pn).name.contentEquals(TokenKind.THIS.name)) {
+                if (pn.hasTag(Tag.IDENT) && ((JCIdent)pn).name != names._this) {
                     name = ((JCIdent)pn).name;
                 } else {
                     if ((mods.flags & Flags.VARARGS) != 0) {
@@ -3552,7 +3552,7 @@ public class JavacParser implements Parser {
         if (isInterface && (mods.flags & Flags.STATIC) != 0) {
             checkStaticInterfaceMethods();
         }
-        JCReceiverVariableDecl prevReceiverParam = this.receiverParam;
+        JCVariableDecl prevReceiverParam = this.receiverParam;
         try {
             this.receiverParam = null;
             // Parsing formalParameters sets the receiverParam, if present
@@ -3683,8 +3683,8 @@ public class JavacParser implements Parser {
         if (token.kind != RPAREN) {
             this.allowThisIdent = true;
             lastParam = formalParameter(lambdaParameters);
-            if (lastParam instanceof JCReceiverVariableDecl) {
-                this.receiverParam = (JCReceiverVariableDecl) lastParam;
+            if (lastParam.nameexpr != null) {
+                this.receiverParam = lastParam;
             } else {
                 params.append(lastParam);
             }

@@ -25,6 +25,6 @@
 
 class IncorrectConstructorReceiverType {
     class Inner {
-        Inner(Object this) { }
+        Inner(Object IncorrectConstructorReceiverType.this) { }
     }
 }

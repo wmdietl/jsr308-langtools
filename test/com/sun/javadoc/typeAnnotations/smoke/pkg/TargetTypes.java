@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -44,6 +44,11 @@ import java.io.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @interface DA {}
+
+@Target(TYPE_PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@interface DTPA {}
 
 /** typecast */
 class T0x00 {
@@ -205,10 +210,25 @@ class T0x1D<T> {
 }
 
 /** method type parameter */
-class T0x20<T, U> {
-    <@A @DA T, @A @DA U> void m0x20() {}
+class T0x20 {
+    <@A @DA T> void m0x20() {}
+}
+
+class T0x20A {
+    <@A @DTPA T> void m0x20A() {}
+}
+
+class T0x20B {
+    <T> void m0x20B(@A @DA T p) {}
 }
 
 /** class type parameter */
-class T0x22<@A @DA T, @A @DA U> {
+class T0x22<@A @DA T> {
+}
+
+class T0x22A<@A @DTPA T> {
+}
+
+class T0x22B<T> {
+    @A @DA T f;
 }

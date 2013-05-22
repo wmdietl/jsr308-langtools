@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -154,11 +154,11 @@ public class List<A> extends AbstractCollection<A> implements java.util.List<A> 
     }
 
     public static <A> List<A> from(Iterable<? extends A> coll) {
-        List<A> xs = nil();
+        ListBuffer<A> xs = ListBuffer.lb();
         for (A a : coll) {
-            xs = new List<A>(a, xs);
+            xs.append(a);
         }
-        return xs;
+        return xs.toList();
     }
 
     /** Construct a list consisting of a given number of identical elements.

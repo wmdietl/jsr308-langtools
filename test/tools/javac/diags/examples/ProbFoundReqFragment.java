@@ -21,8 +21,24 @@
  * questions.
  */
 
-// key: compiler.err.receiver.parameter.not.applicable.static
+// key: compiler.err.prob.found.req
+// key: compiler.misc.prob.found.req
+// key: compiler.misc.inconvertible.types
+// key: compiler.misc.invalid.mref
+// key: compiler.misc.kindname.method
+// key: compiler.misc.count.error
+// key: compiler.err.error
+// run: backdoor
 
-class ReceiverParameterNotApplicableStatic {
-    static void m(ReceiverParameterNotApplicableStatic this) { }
+class ProbFoundReqFragment {
+
+    interface I {
+        void g(int i);
+    }
+
+    void m(String s) { }
+
+    void test() {
+        I i = this::m;
+    }
 }

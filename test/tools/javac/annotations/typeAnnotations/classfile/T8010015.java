@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2009, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2009, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -20,21 +20,23 @@
  * or visit www.oracle.com if you need additional information or have any
  * questions.
  */
+
 /*
  * @test
  * @summary Wrong classfile attribution in inner class of lambda expression.
  * @bug 8010015
  */
+
 import java.lang.annotation.*;
 import static java.lang.annotation.RetentionPolicy.*;
 import static java.lang.annotation.ElementType.*;
 import com.sun.tools.classfile.*;
 
 /*
- * A type-annotations on a field in an inner class not in a lambda expression 
- * results in RuntimeTypeAnnotations_attibute and RuntimeAnnotations_attribute. 
- * On a field in an innner class in a lambda expression, it leaves off the 
- * RuntimeAnnotations_attribute. 
+ * A type-annotations on a field in an inner class not in a lambda expression
+ * results in RuntimeTypeAnnotations_attibute and RuntimeAnnotations_attribute.
+ * On a field in an innner class in a lambda expression, it leaves off the
+ * RuntimeAnnotations_attribute.
  */
 public class T8010015 extends ClassfileTestHelper{
     public static void main(String[] args) throws Exception {

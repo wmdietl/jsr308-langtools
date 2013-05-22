@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,34 +21,25 @@
  * questions.
  */
 
-import javax.tools.annotation.GenerateNativeHeader;
+/*
+ * @test
+ * @bug 8013485
+ * @summary Annotations that gets a clinit can't be verified for correct elements in a second compilation unit
+ * @compile/fail/ref=AnnoWithClinitFail.out -XDrawDiagnostics AnnoWithClinitFail.java
+ */
 
-@GenerateNativeHeader
-public class TestClass3 {
-    public int tc3;
+public @interface AnnoWithClinitFail {
+    Foo f = new Foo();
 
-    public class Inner1 {
-        public int tc3i1;
+    String foo();
+    String bar() default "bar";
 
-        public class Inner1A {
-            public int tc3i1i1a;
-        }
+    @AnnoWithClinitFail
+    static class C {} // this is in the same CU so there wont be a
+                      // <clinit> when the this anno instance is checked
 
-        public class Inner1B {
-            public int tc3i1i1b;
-        }
-    }
-
-    public class Inner2 {
-        public int tc321;
-
-        public class Inner2A {
-            public int tc3i2i2a;
-        }
-
-        public class Inner2B {
-            public int tc3i2i2b;
-        }
-    }
+    class Foo {}
 }
 
+@AnnoWithClinitFail
+class TestAnnoWithClinitFail { }
