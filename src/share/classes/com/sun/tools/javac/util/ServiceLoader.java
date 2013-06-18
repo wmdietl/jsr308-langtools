@@ -70,7 +70,7 @@ public final class ServiceLoader<S>
     private ClassLoader loader;
 
     // Cached providers, in instantiation order
-    private LinkedHashMap<String,S> providers = new LinkedHashMap<>();
+    private LinkedHashMap<String,S> providers = new LinkedHashMap<String,S>();
 
     // The current lazy-lookup iterator
     private LazyIterator lookupIterator;
