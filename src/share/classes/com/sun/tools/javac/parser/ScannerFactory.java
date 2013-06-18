@@ -70,8 +70,10 @@ public class ScannerFactory {
         this.names = Names.instance(context);
         this.source = Source.instance(context);
         this.tokens = Tokens.instance(context);
-        this.annotationsincomments = this.source.allowTypeAnnotations();
+
         Options options = Options.instance(context);
+        this.annotationsincomments = this.source.allowTypeAnnotations() &&
+                options.get("TA:noannotationsincomments") == null;
         this.spacesincomments = options.get("TA:spacesincomments") != null;
         this.debugJSR308 = options.get("TA:scanner") != null;
     }
