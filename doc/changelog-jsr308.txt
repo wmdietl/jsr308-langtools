@@ -1,6 +1,17 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.6.5, 1 Jul 2013
+
+Functionality:
+  Add -XDTA:noannotationsincomments option to turn off annotations
+  in comments.
+
+Base build
+  Updated to OpenJDK 8 tl/langtools and type-annotations/langtools
+  as of 31 Jun 2013.
+
+----------------------------------------------------------------------
 Version 1.6.4, 1 Jun 2013
 
 Base build
