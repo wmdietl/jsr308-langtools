@@ -9,7 +9,7 @@ Functionality:
 
 Base build
   Updated to OpenJDK 8 tl/langtools and type-annotations/langtools
-  as of 31 Jun 2013.
+  as of 30 Jun 2013.
 
 ----------------------------------------------------------------------
 Version 1.6.4, 1 Jun 2013
