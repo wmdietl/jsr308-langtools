@@ -52,8 +52,8 @@ There is a separate
       <li><a href="#pluggable-types">Pluggable type-checking</a></li>
       <li><a href="#language">Java language status</a>
         <ul>
-          <li><a href="#inclusion-in-java">Are type annotations part of the Java language?</a></li>
-          <li><a href="#checkers-in-java">Is pluggable type-checking (such as supported by the Checker Framework) included in JSR 308 or the Java language?</a></li>
+          <li><a href="#type-annotations-in-java">Are type annotations part of the Java language?</a></li>
+          <li><a href="#pluggable-type-checking-in-java">Is pluggable type-checking (such as supported by the Checker Framework) included in JSR 308 or the Java language?</a></li>
           <li><a href="#license">What is the license for the Type Annotations specification?</a></li>
         </ul></li>
       <li><a href="#tools">Tool support</a>
@@ -219,7 +219,7 @@ There is a separate
 <h2 id="language">Java language status</h2>
 
 
-<h3 id="inclusion-in-java">Are type annotations part of the Java language?</h3>
+<h3 id="type-annotations-in-java">Are type annotations part of the Java language?</h3>
 
 <p>
 Type annotations are planned as part of Java SE 8.
@@ -256,7 +256,7 @@ distributed <a href="./">standalone</a> or as part of the
 -->
 
 
-<h3 id="checkers-in-java">Is pluggable type-checking (such as supported by the Checker Framework) included in JSR 308 or the Java language?</h3>
+<h3 id="pluggable-type-checking-in-java">Is pluggable type-checking (such as supported by the Checker Framework) included in JSR 308 or the Java language?</h3>
 
 <p>
 The Java language defines an annotation processing capability (JSR 269).
@@ -319,8 +319,8 @@ Java compiler, which will ignore the type annotations.  The Type
 Annotations compiler produces bytecodes that are identical to those
 produced by javac, so the <tt>.class</tt> files can be used in any JVM.
 This also gives you an easy way to convince your colleagues to try type
-annotations and the Checker Framework, or to use the framework and the
-checkers even if your colleagues do not want to.
+annotations and the Checker Framework, or to use a
+type-checker even if your colleagues do not want to.
 For more details, see section
 <a href="../../checker-framework/current/checkers-manual.html#annotations-in-comments">Writing
 annotations in comments for backward compatibility</a> in the Checker
@@ -567,7 +567,7 @@ JCP codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: July 3, 2012.
+Last updated: July 2, 2013.
 </p>
 
 <p>

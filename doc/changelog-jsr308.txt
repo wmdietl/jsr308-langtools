@@ -399,7 +399,7 @@ Base build
 Version 0.9.3, 23 Jun 2009
 
 Bug fixes
-  Fixed a bug related to exposing package annotation to type checkers
+  Fixed a bug related to exposing package annotation to type-checkers
 
 Base build
   Updated to OpenJDK langtools build 61

@@ -8,6 +8,15 @@
 </head>
 <body>
 
+<!--
+  ***************************************************************************
+  
+  This document is now obsolete; it has been folded into the Checker
+  Framework manual.  Also, there is now a separate tutorial.
+
+  ***************************************************************************
+-->
+
 <h1>Get Started</h1>
 
 <p>
@@ -36,8 +45,8 @@ detail.
 
 <h2>Requirements</h2>
 
-Running the Checkers requires JDK 6 to be installed.  You can get JDK
-6 from
+Running the Checker Framework requires JDK 7 to be installed.  You can get JDK
+7 from
 <a href="http://www.oracle.com/technetwork/java/javase/downloads/">Oracle</a>
 or elsewhere.  If you are using Apple Mac OS X, you can either use
 <a href="http://developer.apple.com/java">Apple's implementation</a> or
@@ -63,7 +72,7 @@ or elsewhere.  If you are using Apple Mac OS X, you can either use
   </li>
 </ol>
 
-<h2>Running the Checkers</h2>
+<h2>Running a Checker</h2>
 
 <p>
 The Checker Framework distribution includes many checkers.  This tutorial
@@ -93,7 +102,7 @@ public class GetStarted {
 }
   </pre></li>
 
-  <li>Run the nullness checker on the class.
+  <li>Run the Nullness Checker on the class.
   <pre>jsr308-javac -processor checkers.nullness.NullnessChecker GetStarted.java</pre>
   The compilation should end without any errors.
   </li>
@@ -101,7 +110,7 @@ public class GetStarted {
   <li>Let's introduce an error now.  Modify ref assignment to:
   <pre>  @NonNull Object ref = null;</pre></li>
 
-  <li>Rerun the nullness checker again, like before.  This run should emit
+  <li>Rerun the Nullness Checker again, like before.  This run should emit
   the following error:
   <pre>
 GetStarted.java:5: incompatible types.
@@ -126,7 +135,7 @@ that would write a type, including generics and casts.
 <hr />
 
 <p>
-Last updated: April 2, 2011.
+Last updated: July 3, 2013.
 </p>
 
 <p>

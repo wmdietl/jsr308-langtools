@@ -2056,7 +2056,7 @@ single value, not about the behavior of a code block.
 % system (which sees a cast from
 % \code{String} to \code{String}), but it may be significant to the type
 % system for the qualified types
-% % ; for example, it may be needed for load-time type checking.
+% % ; for example, it may be needed for load-time type-checking.
 % Retaining the \code{checkcast} bytecodes does not change
 % behavior, and is unlikely to affect performance.  A JIT will eliminate the
 % cast, leading to no runtime performance penalty, and the impact on class
@@ -2417,14 +2417,14 @@ No modifications to the virtual machine are necessary,
 other than the changes to the class file format discussed in
 Section~\ref{class-file}.
 
-Four compiler plug-ins that perform type qualifier type-checking, all built
+Over a dozen compiler plug-ins that perform type qualifier type-checking, all built
 using JSR 308, are distributed at the JSR 308 webpage,
-\myurl{http://types.cs.washington.edu/jsr308/}.  The four checkers, respectively,
+\myurl{http://types.cs.washington.edu/jsr308/}.  These checkers
 help to prevent and detect null pointer errors (via a \code{@NonNull}
 annotation), equality-checking errors (via a \code{@Interned} annotation),
 mutation errors (via the Javari~\cite{BirkaE2004,TschantzE2005} type
-system), and mutation errors (via the IGJ~\cite{ZibinPAAKE2007} type
-system).  A paper~\cite{PapiACPE2008} discusses experience
+system), mutation errors (via the IGJ~\cite{ZibinPAAKE2007} type
+system), and much more.  Two papers~\cite{PapiACPE2008,DietlDEMS2011} discuss experience
 in which these plug-ins exposed bugs in real programs.
 
 
@@ -3240,7 +3240,7 @@ JavaCOP~\cite{AndreaeNMM2006} is a framework for implementing pluggable
 type systems in Java.  Whereas JSR 308 uses standard
 interfaces such as the Tree API and the JSR 269 annotation processing
 framework, JavaCOP defines its own incompatible variants.
-A JavaCOP type checker must be programmed in a combination of Java and
+A JavaCOP type-checker must be programmed in a combination of Java and
 JavaCOP's own declarative pattern-matching and rule-based language.
 JavaCOP's authors have defined parts of over a dozen
 type-checkers in their language.  Their paper does not report that they have
