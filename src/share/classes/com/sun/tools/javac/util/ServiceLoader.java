@@ -362,7 +362,7 @@ public final class ServiceLoader<S>
     public static <S> ServiceLoader<S> load(Class<S> service,
                                             ClassLoader loader)
     {
-        return new ServiceLoader<>(service, loader);
+        return new ServiceLoader<S>(service, loader);
     }
 
     /**
