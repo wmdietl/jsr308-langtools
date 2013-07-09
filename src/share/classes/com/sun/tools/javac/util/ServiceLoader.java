@@ -170,7 +170,7 @@ public final class ServiceLoader<S>
     {
         InputStream in = null;
         BufferedReader r = null;
-        ArrayList<String> names = new ArrayList<>();
+        ArrayList<String> names = new ArrayList<String>();
         try {
             // The problem is that by default, streams opened with
             // u.openInputStream use a cached reference to a JarFile, which
