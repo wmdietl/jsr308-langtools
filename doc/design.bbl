@@ -135,6 +135,14 @@ Joe Darcy.
 \newblock \url{http://jcp.org/en/jsr/detail?id=269}, May~17, 2006.
 \newblock Public review version.
 
+\bibitem[DDE{\etalchar{+}}11]{DietlDEMS2011}
+Werner Dietl, Stephanie Dietzel, Michael~D. Ernst, K{\i}van{\c{c}} Mu{\c{s}}lu,
+  and Todd Schiller.
+\newblock Building and using pluggable type-checkers.
+\newblock In {\em ICSE'11, Proceedings of the 33rd International Conference on
+  Software Engineering}, pages 681--690, Waikiki, Hawaii, USA, May~25--27,
+  2011.
+
 \bibitem[Det96]{Detlefs96}
 David~L. Detlefs.
 \newblock An overview of the {E}xtended {S}tatic {C}hecking system.
@@ -350,7 +358,7 @@ Umesh Shankar, Kunal Talwar, Jeffrey~S. Foster, and David Wagner.
 \bibitem[SW01]{SkoglundW2001}
 Mats Skoglund and Tobias Wrigstad.
 \newblock A mode system for read-only references in {Java}.
-\newblock In {\em FTfJP'2001: 3rd Workshop on Formal Techniques for Java-like
+\newblock In {\em FTfJP 2001: 3rd Workshop on Formal Techniques for Java-like
   Programs}, Glasgow, Scotland, June~18, 2001.
 
 \bibitem[TE05]{TschantzE2005}
