@@ -17,7 +17,7 @@ class CantAnnotateStaticClass {
         class Inner {}
     }
 
-    // 8 errors:
+    // Errors:
     @A Outer.Inner f1;
     @A Outer.Inner f1r() { return null; }
     void f1p(@A Outer.Inner p) { }
@@ -31,6 +31,8 @@ class CantAnnotateStaticClass {
     void f2c(Object o) {
         Object l = (List<@A Outer.Inner>) o;
     }
+
+    @A CantAnnotateStaticClass . Outer fo;
 
     // OK:
     @A Outer g1;
