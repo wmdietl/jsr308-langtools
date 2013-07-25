@@ -161,17 +161,7 @@ public class Context {
         return Context.<T>uncheckedCast(o);
     }
 
-    static int instanceCount = 0;
-    int id;
-
-    @Override
-    public String toString() {
-        return "Context#" + id;
-    }
-
-    public Context() {
-        id = ++instanceCount;
-    }
+    public Context() {}
 
     /**
      * The table of preregistered factories.

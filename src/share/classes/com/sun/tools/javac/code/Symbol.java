@@ -60,9 +60,6 @@ import static com.sun.tools.javac.code.TypeTag.TYPEVAR;
 public abstract class Symbol implements Element {
     // public Throwable debug = new Throwable();
 
-    private static int uidCounter = 0;
-    private final int uid;
-
     /** The kind of this symbol.
      *  @see Kinds
      */
@@ -248,7 +245,6 @@ public abstract class Symbol implements Element {
         this.completer = null;
         this.erasure_field = null;
         this.name = name;
-        uid = ++uidCounter;
     }
 
     /** Clone this symbol with new owner.
@@ -268,11 +264,6 @@ public abstract class Symbol implements Element {
     public String toString() {
         return name.toString();
     }
-
-    public String toStringDebug() {
-        return name.toString() + " " + getClass().getSimpleName() + "#" + uid;
-    }
-
 
     /** A Java source description of the location of this symbol; used for
      *  error reporting.

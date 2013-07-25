@@ -160,7 +160,7 @@ public abstract class Type implements TypeMirror {
     }
 
     public static List<Type> getModelTypes(List<Type> ts) {
-        ListBuffer<Type> lb = new ListBuffer<Type>();
+        ListBuffer<Type> lb = new ListBuffer<>();
         for (Type t: ts)
             lb.append(t.getModelType());
         return lb.toList();

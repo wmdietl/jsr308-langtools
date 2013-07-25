@@ -78,7 +78,6 @@ public class JavacElements implements Elements {
      */
     protected JavacElements(Context context) {
         setContext(context);
-        uid = ++uidCounter;
     }
 
     /**
@@ -606,30 +605,4 @@ public class JavacElements implements Elements {
             throw new IllegalArgumentException(o.toString());
         return clazz.cast(o);
     }
-
-    private static int uidCounter = 0;
-    private final int uid;
-
-    @Override
-    public String toString() {
-        return "JavacElements#" + uid;
-    }
-
-    public String dump(String varname) {
-        return dump(varname, "");
-    }
-
-    public String dump(String varname, String indent) {
-        StringBuilder sb = new StringBuilder();
-        dump(varname, indent, sb);
-        return sb.toString();
-    }
-
-    public void dump(String varname, String indent, StringBuilder sb) {
-        sb.append(String.format("%s%s = %s%n", indent, varname, this));
-        sb.append(String.format("%s  %s.javaCompiler = %s%n", indent, varname, this.javaCompiler));
-        sb.append(String.format("%s  %s.types = %s%n", indent, varname, this.types));
-        sb.append(String.format("%s  %s.enter = %s%n", indent, varname, this.enter));
-    }
-
 }
