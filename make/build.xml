@@ -1248,7 +1248,7 @@
             <attribute name="name"/>
             <attribute name="includes"/>
             <attribute name="options" default=""/>
-            <attribute name="source" default="1.5"/> <!-- FIXME -->
+            <attribute name="source" default="1.7"/>
             <sequential>
                 <property name="javadoc.options" value=""/> <!-- default, can be overridden per user or per project -->
                 <!-- Note: even with this default value, includes
