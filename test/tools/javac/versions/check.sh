@@ -28,6 +28,9 @@
 # @build CheckClassFileVersion
 # @run shell check.sh 
 
+# UW local change: ignore this test, because we changed default
+# source/target options. Undo change when we decide to not do so.
+
 TESTJAVA=${TESTJAVA:?}
 TC=${TESTCLASSES-.}
 
