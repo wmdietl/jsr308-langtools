@@ -839,6 +839,8 @@ public class JavaTokenizer {
                 return parens == 0;
             } else if (!Character.isJavaIdentifierPart(lch) &&
                     !Character.isWhitespace(lch) &&
+                    lch != '.' && // separator in fully-qualified annotation name
+                    // TODO: this also allows /*@A...*/ which should not be recognized.
                     !spacesincomments &&
                     parens == 0 &&
                     !stringLit) {
