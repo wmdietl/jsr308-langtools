@@ -1,7 +1,6 @@
 /*
  * @test /nodynamiccopyright/
  * @bug 8006733 8006775
- * @ignore 8013409: test failures for type annotations
  * @summary A static outer class cannot be annotated.
  * @author Werner Dietl
  * @compile/fail/ref=CantAnnotateStaticClass.out -XDrawDiagnostics CantAnnotateStaticClass.java
@@ -18,7 +17,7 @@ class CantAnnotateStaticClass {
         class Inner {}
     }
 
-    // 8 errors:
+    // Errors:
     @A Outer.Inner f1;
     @A Outer.Inner f1r() { return null; }
     void f1p(@A Outer.Inner p) { }
@@ -32,6 +31,8 @@ class CantAnnotateStaticClass {
     void f2c(Object o) {
         Object l = (List<@A Outer.Inner>) o;
     }
+
+    @A CantAnnotateStaticClass . Outer fo;
 
     // OK:
     @A Outer g1;
