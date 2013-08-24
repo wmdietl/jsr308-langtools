@@ -1282,6 +1282,10 @@ public class JavaCompiler implements ClassReader.SourceCompleter {
                 return;
 
             if (relax || compileStates.isDone(env, CompileState.FLOW)) {
+                // In relaxed mode, mark FLOW as done to prevent infinite loops.
+                if (!compileStates.isDone(env, CompileState.FLOW)) {
+                    compileStates.put(env, CompileState.FLOW);
+                }
                 results.add(env);
                 return;
             }
