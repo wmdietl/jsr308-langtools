@@ -219,6 +219,10 @@ public abstract class Type implements TypeMirror {
     public Type baseType() {
         return this;
     }
+    
+    public Type annotatedType(List<Attribute.TypeCompound> annos) {
+        return new AnnotatedType(annos, this);
+    }
 
     public boolean isAnnotated() {
         return false;
@@ -233,7 +237,7 @@ public abstract class Type implements TypeMirror {
     }
 
     @Override
-    public List<? extends Attribute.TypeCompound> getAnnotationMirrors() {
+    public List<Attribute.TypeCompound> getAnnotationMirrors() {
         return List.nil();
     }
 
@@ -1837,7 +1841,7 @@ public abstract class Type implements TypeMirror {
         }
 
         @Override
-        public List<? extends Attribute.TypeCompound> getAnnotationMirrors() {
+        public List<Attribute.TypeCompound> getAnnotationMirrors() {
             return typeAnnotations;
         }
 
@@ -1970,10 +1974,8 @@ public abstract class Type implements TypeMirror {
         public TypeMirror getComponentType()     { return ((ArrayType)underlyingType).getComponentType(); }
 
         // The result is an ArrayType, but only in the model sense, not the Type sense.
-        public AnnotatedType makeVarargs() {
-            AnnotatedType atype = new AnnotatedType(((ArrayType)underlyingType).makeVarargs());
-            atype.typeAnnotations = this.typeAnnotations;
-            return atype;
+        public Type makeVarargs() {
+            return ((ArrayType) underlyingType).makeVarargs().annotatedType(typeAnnotations);
         }
 
         @Override
