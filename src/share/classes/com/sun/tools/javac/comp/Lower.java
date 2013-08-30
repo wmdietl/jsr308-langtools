@@ -2812,8 +2812,7 @@ public class Lower extends TreeTranslator {
             } else {
                 // Create a new AnnotatedType to have the correct tag.
                 AnnotatedType oldat = (AnnotatedType) tree.type;
-                tree.type = new AnnotatedType(tree.underlyingType.type);
-                ((AnnotatedType) tree.type).typeAnnotations = oldat.typeAnnotations;
+                tree.type = tree.underlyingType.type.annotatedType(oldat.typeAnnotations);
             }
         }
         result = tree;
