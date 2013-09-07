@@ -2216,7 +2216,7 @@ public class Types {
                     // on the bound.
                     erased = ((AnnotatedType)erased).underlyingType;
                 }
-                return new AnnotatedType(t.typeAnnotations, erased);
+                return erased.annotatedType(t.typeAnnotations);
             }
         };
 
