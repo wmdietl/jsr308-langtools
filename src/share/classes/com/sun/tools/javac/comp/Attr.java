@@ -3963,7 +3963,7 @@ public class Attr extends JCTree.Visitor {
         TypeVar typeVar = (TypeVar) tree.type;
 
         if (tree.annotations != null && tree.annotations.nonEmpty()) {
-            AnnotatedType antype = new AnnotatedType(typeVar);
+            Type antype = typeVar.annotatedType(List.<Attribute.TypeCompound>nil());
             annotateType(antype, tree.annotations);
             tree.type = antype;
         }
@@ -4066,7 +4066,7 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotatedType(JCAnnotatedType tree) {
         Type underlyingType = attribType(tree.getUnderlyingType(), env);
         this.attribAnnotationTypes(tree.annotations, env);
-        AnnotatedType antype = new AnnotatedType(underlyingType);
+        Type antype = underlyingType.annotatedType(List.<Attribute.TypeCompound>nil());
         annotateType(antype, tree.annotations);
         result = tree.type = antype;
     }
@@ -4074,7 +4074,8 @@ public class Attr extends JCTree.Visitor {
     /**
      * Apply the annotations to the particular type.
      */
-    public void annotateType(final AnnotatedType type, final List<JCAnnotation> annotations) {
+    public void annotateType(final Type type, final List<JCAnnotation> annotations) {
+        Assert.check(type instanceof AnnotatedType);
         if (annotations.isEmpty())
             return;
         annotate.typeAnnotation(new Annotate.Annotator() {
@@ -4085,7 +4086,7 @@ public class Attr extends JCTree.Visitor {
             @Override
             public void enterAnnotation() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
-                type.typeAnnotations = compounds;
+                ((AnnotatedType) type).typeAnnotations = compounds;
             }
         });
     }
