@@ -1806,25 +1806,19 @@ public abstract class Type implements TypeMirror {
                 javax.lang.model.type.WildcardType {
         /** The type annotations on this type.
          */
-        public List<Attribute.TypeCompound> typeAnnotations;
+        private List<Attribute.TypeCompound> typeAnnotations;
 
         /** The underlying type that is annotated.
          */
-        public Type underlyingType;
+        private Type underlyingType;
 
-        public AnnotatedType(Type underlyingType) {
-            super(underlyingType.tsym);
-            this.typeAnnotations = List.nil();
-            this.underlyingType = underlyingType;
-            Assert.check(!underlyingType.isAnnotated(),
-                    "Can't annotate already annotated type: " + underlyingType);
-        }
-
-        public AnnotatedType(List<Attribute.TypeCompound> typeAnnotations,
+        protected AnnotatedType(List<Attribute.TypeCompound> typeAnnotations,
                 Type underlyingType) {
             super(underlyingType.tsym);
             this.typeAnnotations = typeAnnotations;
             this.underlyingType = underlyingType;
+            Assert.check(typeAnnotations != null && typeAnnotations.nonEmpty(),
+                    "Can't create AnnotatedType without annotations: " + underlyingType);
             Assert.check(!underlyingType.isAnnotated(),
                     "Can't annotate already annotated type: " + underlyingType +
                     "; adding: " + typeAnnotations);
