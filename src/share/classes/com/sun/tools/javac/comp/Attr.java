@@ -3516,15 +3516,6 @@ public class Attr extends JCTree.Visitor {
                         Type normOuter = site;
                         if (normOuter.hasTag(CLASS)) {
                             normOuter = types.asEnclosingSuper(site, ownOuter.tsym);
-                            if (site.isAnnotated()) {
-                                // Propagate any type annotations.
-                                // TODO: should asEnclosingSuper do this?
-                                // Note that the type annotations in site will be updated
-                                // by annotateType. Therefore, modify site instead
-                                // of creating a new AnnotatedType.
-                                ((AnnotatedType)site).underlyingType = normOuter;
-                                normOuter = site;
-                            }
                         }
                         if (normOuter == null) // perhaps from an import
                             normOuter = types.erasure(ownOuter);
@@ -3883,12 +3874,6 @@ public class Attr extends JCTree.Visitor {
                     }
                 }
                 owntype = new ClassType(clazzOuter, actuals, clazztype.tsym);
-                if (clazztype.isAnnotated()) {
-                    // Use the same AnnotatedType, because it will have
-                    // its annotations set later.
-                    ((AnnotatedType)clazztype).underlyingType = owntype;
-                    owntype = clazztype;
-                }
             } else {
                 if (formals.length() != 0) {
                     log.error(tree.pos(), "wrong.number.type.args",
@@ -3954,9 +3939,7 @@ public class Attr extends JCTree.Visitor {
         TypeVar typeVar = (TypeVar) tree.type;
 
         if (tree.annotations != null && tree.annotations.nonEmpty()) {
-            AnnotatedType antype = new AnnotatedType(typeVar);
-            annotateType(antype, tree.annotations);
-            tree.type = antype;
+            annotateType(tree, tree.annotations);
         }
 
         if (!typeVar.bound.isErroneous()) {
@@ -4057,26 +4040,28 @@ public class Attr extends JCTree.Visitor {
     public void visitAnnotatedType(JCAnnotatedType tree) {
         Type underlyingType = attribType(tree.getUnderlyingType(), env);
         this.attribAnnotationTypes(tree.annotations, env);
-        AnnotatedType antype = new AnnotatedType(underlyingType);
-        annotateType(antype, tree.annotations);
-        result = tree.type = antype;
+        annotateType(tree, tree.annotations);
+        result = tree.type = underlyingType;
     }
 
     /**
      * Apply the annotations to the particular type.
      */
-    public void annotateType(final AnnotatedType type, final List<JCAnnotation> annotations) {
-        if (annotations.isEmpty())
-            return;
+    public void annotateType(final JCTree tree, final List<JCAnnotation> annotations) {
+        // Callers ensure this.
+        // Assert.check(annotations != null && annotations.nonEmpty());
         annotate.typeAnnotation(new Annotate.Annotator() {
             @Override
             public String toString() {
-                return "annotate " + annotations + " onto " + type;
+                return "annotate " + annotations + " onto " + tree;
             }
             @Override
             public void enterAnnotation() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
-                type.typeAnnotations = compounds;
+                if (annotations.size() == compounds.size()) {
+                    // All annotations were successfully converted into compounds
+                    tree.type = tree.type.unannotatedType().annotatedType(compounds);
+                }
             }
         });
     }
