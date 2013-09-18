@@ -1,3 +1,2 @@
 TypeVariableMissingTA.java:39:40: compiler.err.cant.resolve: kindname.class, MISSING, , 
-TypeVariableMissingTA.java:39:39: compiler.err.annotation.type.not.applicable
-2 errors
+1 error
