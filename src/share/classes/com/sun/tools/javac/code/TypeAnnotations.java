@@ -360,25 +360,15 @@ public class TypeAnnotations {
                 return type;
             }
             if (type.hasTag(TypeTag.ARRAY)) {
+                Type.ArrayType arType = (Type.ArrayType) type.unannotatedType();
+                Type.ArrayType tomodify = new Type.ArrayType(null, arType.tsym);
                 Type toreturn;
-                Type.ArrayType tomodify;
-                Type.ArrayType arType;
-                {
-                    Type touse = type;
-                    if (type.isAnnotated()) {
-                        Type.AnnotatedType atype = (Type.AnnotatedType)type;
-                        toreturn = new Type.AnnotatedType(atype.underlyingType);
-                        ((Type.AnnotatedType)toreturn).typeAnnotations = atype.typeAnnotations;
-                        touse = atype.underlyingType;
-                        arType = (Type.ArrayType) touse;
-                        tomodify = new Type.ArrayType(null, arType.tsym);
-                        ((Type.AnnotatedType)toreturn).underlyingType = tomodify;
-                    } else {
-                        arType = (Type.ArrayType) touse;
-                        tomodify = new Type.ArrayType(null, arType.tsym);
-                        toreturn = tomodify;
-                    }
+                if (type.isAnnotated()) {
+                    toreturn = tomodify.annotatedType(type.getAnnotationMirrors());
+                } else {
+                    toreturn = tomodify;
                 }
+
                 JCArrayTypeTree arTree = arrayTypeTree(typetree);
 
                 ListBuffer<TypePathEntry> depth = new ListBuffer<>();
@@ -386,12 +376,10 @@ public class TypeAnnotations {
                 while (arType.elemtype.hasTag(TypeTag.ARRAY)) {
                     if (arType.elemtype.isAnnotated()) {
                         Type.AnnotatedType aelemtype = (Type.AnnotatedType) arType.elemtype;
-                        Type.AnnotatedType newAT = new Type.AnnotatedType(aelemtype.underlyingType);
-                        tomodify.elemtype = newAT;
-                        newAT.typeAnnotations = aelemtype.typeAnnotations;
-                        arType = (Type.ArrayType) aelemtype.underlyingType;
+                        arType = (Type.ArrayType) aelemtype.unannotatedType();
+                        ArrayType prevToMod = tomodify;
                         tomodify = new Type.ArrayType(null, arType.tsym);
-                        newAT.underlyingType = tomodify;
+                        prevToMod.elemtype = (Type.AnnotatedType) tomodify.annotatedType(arType.elemtype.getAnnotationMirrors());
                     } else {
                         arType = (Type.ArrayType) arType.elemtype;
                         tomodify.elemtype = new Type.ArrayType(null, arType.tsym);
@@ -542,7 +530,7 @@ public class TypeAnnotations {
                     // assert that t.constValue() == null?
                     if (t == stopAt ||
                         t.getEnclosingType() == Type.noType) {
-                        return new AnnotatedType(s, t);
+                        return t.annotatedType(s);
                     } else {
                         ClassType ret = new ClassType(t.getEnclosingType().accept(this, s),
                                 t.typarams_field, t.tsym);
@@ -557,12 +545,12 @@ public class TypeAnnotations {
 
                 @Override
                 public Type visitAnnotatedType(AnnotatedType t, List<TypeCompound> s) {
-                    return new AnnotatedType(t.typeAnnotations, t.underlyingType.accept(this, s));
+                    return t.unannotatedType().accept(this, s).annotatedType(t.getAnnotationMirrors());
                 }
 
                 @Override
                 public Type visitWildcardType(WildcardType t, List<TypeCompound> s) {
-                    return new AnnotatedType(s, t);
+                    return t.annotatedType(s);
                 }
 
                 @Override
@@ -585,12 +573,12 @@ public class TypeAnnotations {
 
                 @Override
                 public Type visitTypeVar(TypeVar t, List<TypeCompound> s) {
-                    return new AnnotatedType(s, t);
+                    return t.annotatedType(s);
                 }
 
                 @Override
                 public Type visitCapturedType(CapturedType t, List<TypeCompound> s) {
-                    return new AnnotatedType(s, t);
+                    return t.annotatedType(s);
                 }
 
                 @Override
@@ -607,12 +595,12 @@ public class TypeAnnotations {
 
                 @Override
                 public Type visitErrorType(ErrorType t, List<TypeCompound> s) {
-                    return new AnnotatedType(s, t);
+                    return t.annotatedType(s);
                 }
 
                 @Override
                 public Type visitType(Type t, List<TypeCompound> s) {
-                    return new AnnotatedType(s, t);
+                    return t.annotatedType(s);
                 }
             };
 
