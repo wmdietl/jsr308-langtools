@@ -23,24 +23,17 @@
 
 /*
  * @test
- * @bug 8023768
- * @summary Type annotations on a type variable, where the bound of
- *   the type variable is an annotated type variable,
- *   need to be processed correctly.
+ * @bug 1234567
+ * @summary A missing annotation type in a type variable bound
+ *     should result in the same errors with and without an
+ *     annotation processor.
  * @author Werner Dietl
- * @compile TypeVariableCycleTest.java
+ *
+ * @compile DummyProcessor.java
+ * @compile/fail/ref=TypeVariableMissingTA.out -XDrawDiagnostics TypeVariableMissingTA.java
+ * @compile/fail/ref=TypeVariableMissingTA.out -XDrawDiagnostics -cp . -processor DummyProcessor TypeVariableMissingTA.java
  */
 
 import java.lang.annotation.*;
 
-class TypeVariableCycleTest<CTV> {
-    <MTV extends  @TA CTV> MTV cast(CTV p) {
-        return (@TB MTV) p;
-    }
-}
-
-@Target(ElementType.TYPE_USE)
-@interface TA {}
-
-@Target(ElementType.TYPE_USE)
-@interface TB {}
+class TypeVariableMissingTA<T extends @MISSING Object> {}
