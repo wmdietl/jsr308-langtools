@@ -21,21 +21,23 @@
  * questions.
  */
 
-// key: compiler.err.cant.annotate.static.class
+// key: compiler.err.cant.type.annotate.scoping
 
 import java.lang.annotation.*;
 
-class CantAnnotateStaticClass {
+class CantAnnotateScoping {
     @Target(ElementType.TYPE_USE)
-    @interface A {}
+    @interface TA {}
+    @Target(ElementType.TYPE_USE)
+    @interface TB {}
 
-    static class Outer {
-        class Inner {}
+    interface Outer {
+        interface Inner {}
     }
 
     // Error:
-    @A Outer.Inner f;
+    @TA @TB Outer.Inner f;
 
     // OK:
-    @A Outer g;
+    @TA @TB Outer g;
 }

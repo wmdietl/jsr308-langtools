@@ -4409,13 +4409,14 @@ public class Attr extends JCTree.Visitor {
     //where
     private final JCTree.Visitor typeAnnotationsValidator = new TreeScanner() {
 
-        private boolean checkAllAnnotations = false;
-
         public void visitAnnotation(JCAnnotation tree) {
-            if (tree.hasTag(TYPE_ANNOTATION) || checkAllAnnotations) {
-                chk.validateTypeAnnotation(tree, false);
-            }
+            chk.validateTypeAnnotation(tree, false);
             super.visitAnnotation(tree);
+        }
+        public void visitAnnotatedType(JCAnnotatedType tree) {
+            if (!tree.underlyingType.type.isErroneous()) {
+                super.visitAnnotatedType(tree);
+            }
         }
         public void visitTypeParameter(JCTypeParameter tree) {
             chk.validateTypeAnnotations(tree.annotations, true);
@@ -4438,7 +4439,7 @@ public class Attr extends JCTree.Visitor {
         }
         public void visitVarDef(final JCVariableDecl tree) {
             if (tree.sym != null && tree.sym.type != null)
-                validateAnnotatedType(tree, tree.sym.type);
+                validateAnnotatedType(tree.vartype, tree.sym.type);
             super.visitVarDef(tree);
         }
         public void visitTypeCast(JCTypeCast tree) {
@@ -4452,27 +4453,13 @@ public class Attr extends JCTree.Visitor {
             super.visitTypeTest(tree);
         }
         public void visitNewClass(JCNewClass tree) {
-            if (tree.clazz.hasTag(ANNOTATED_TYPE)) {
-                boolean prevCheck = this.checkAllAnnotations;
-                try {
-                    this.checkAllAnnotations = true;
-                    scan(((JCAnnotatedType)tree.clazz).annotations);
-                } finally {
-                    this.checkAllAnnotations = prevCheck;
-                }
-            }
+            if (tree.clazz.type != null)
+                validateAnnotatedType(tree.clazz, tree.clazz.type);
             super.visitNewClass(tree);
         }
         public void visitNewArray(JCNewArray tree) {
-            if (tree.elemtype != null && tree.elemtype.hasTag(ANNOTATED_TYPE)) {
-                boolean prevCheck = this.checkAllAnnotations;
-                try {
-                    this.checkAllAnnotations = true;
-                    scan(((JCAnnotatedType)tree.elemtype).annotations);
-                } finally {
-                    this.checkAllAnnotations = prevCheck;
-                }
-            }
+            if (tree.elemtype != null && tree.elemtype.type != null)
+                validateAnnotatedType(tree.elemtype, tree.elemtype.type);
             super.visitNewArray(tree);
         }
 
@@ -4485,21 +4472,95 @@ public class Attr extends JCTree.Visitor {
          * can occur.
          */
         private void validateAnnotatedType(final JCTree errtree, final Type type) {
-            if (type.getEnclosingType() != null &&
-                    type != type.getEnclosingType()) {
-                validateEnclosingAnnotatedType(errtree, type.getEnclosingType());
+            // System.out.println("Attr.validateAnnotatedType: " + errtree + " type: " + type);
+
+            if (type.isPrimitiveOrVoid()) {
+                return;
             }
-            for (Type targ : type.getTypeArguments()) {
-                validateAnnotatedType(errtree, targ);
-            }
-        }
-        private void validateEnclosingAnnotatedType(final JCTree errtree, final Type type) {
-            validateAnnotatedType(errtree, type);
-            if (type.tsym != null &&
-                    type.tsym.isStatic() &&
-                    type.getAnnotationMirrors().nonEmpty()) {
-                    // Enclosing static classes cannot have type annotations.
-                log.error(errtree.pos(), "cant.annotate.static.class");
+
+            JCTree enclTr = errtree;
+            Type enclTy = type;
+
+            boolean repeat = true;
+            while (repeat) {
+                if (enclTr.hasTag(TYPEAPPLY)) {
+                    List<Type> tyargs = enclTy.getTypeArguments();
+                    List<JCExpression> trargs = ((JCTypeApply)enclTr).getTypeArguments();
+                    if (trargs.length() > 0) {
+                        // Nothing to do for diamonds
+                        if (tyargs.length() == trargs.length()) {
+                            for (int i = 0; i < tyargs.length(); ++i) {
+                                validateAnnotatedType(trargs.get(i), tyargs.get(i));
+                            }
+                        }
+                        // If the lengths don't match, it's either a diamond
+                        // or some nested type that redundantly provides
+                        // type arguments in the tree.
+                    }
+
+                    // Look at the clazz part of a generic type
+                    enclTr = ((JCTree.JCTypeApply)enclTr).clazz;
+                }
+
+                if (enclTr.hasTag(SELECT)) {
+                    enclTr = ((JCTree.JCFieldAccess)enclTr).getExpression();
+                    if (enclTy != null &&
+                            !enclTy.hasTag(NONE)) {
+                        enclTy = enclTy.getEnclosingType();
+                    }
+                } else if (enclTr.hasTag(ANNOTATED_TYPE)) {
+                    JCAnnotatedType at = (JCTree.JCAnnotatedType) enclTr;
+                    if (enclTy == null ||
+                            enclTy.hasTag(NONE)) {
+                        if (at.getAnnotations().size() == 1) {
+                            log.error(at.underlyingType.pos(), "cant.type.annotate.scoping.1", at.getAnnotations().head.attribute);
+                        } else {
+                            ListBuffer<Attribute.Compound> comps = new ListBuffer<Attribute.Compound>();
+                            for (JCAnnotation an : at.getAnnotations()) {
+                                comps.add(an.attribute);
+                            }
+                            log.error(at.underlyingType.pos(), "cant.type.annotate.scoping", comps.toList());
+                        }
+                        repeat = false;
+                    }
+                    enclTr = at.underlyingType;
+                    // enclTy doesn't need to be changed
+                } else if (enclTr.hasTag(IDENT)) {
+                    repeat = false;
+                } else if (enclTr.hasTag(JCTree.Tag.WILDCARD)) {
+                    JCWildcard wc = (JCWildcard) enclTr;
+                    if (wc.getKind() == JCTree.Kind.EXTENDS_WILDCARD) {
+                        validateAnnotatedType(wc.getBound(), ((WildcardType)enclTy.unannotatedType()).getExtendsBound());
+                    } else if (wc.getKind() == JCTree.Kind.SUPER_WILDCARD) {
+                        validateAnnotatedType(wc.getBound(), ((WildcardType)enclTy.unannotatedType()).getSuperBound());
+                    } else {
+                        // Nothing to do for UNBOUND
+                    }
+                    repeat = false;
+                } else if (enclTr.hasTag(TYPEARRAY)) {
+                    JCArrayTypeTree art = (JCArrayTypeTree) enclTr;
+                    validateAnnotatedType(art.getType(), ((ArrayType)enclTy.unannotatedType()).getComponentType());
+                    repeat = false;
+                } else if (enclTr.hasTag(TYPEUNION)) {
+                    JCTypeUnion ut = (JCTypeUnion) enclTr;
+                    for (JCTree t : ut.getTypeAlternatives()) {
+                        validateAnnotatedType(t, t.type);
+                    }
+                    repeat = false;
+                } else if (enclTr.hasTag(TYPEINTERSECTION)) {
+                    JCTypeIntersection it = (JCTypeIntersection) enclTr;
+                    for (JCTree t : it.getBounds()) {
+                        validateAnnotatedType(t, t.type);
+                    }
+                    repeat = false;
+                } else if (enclTr.getKind() == JCTree.Kind.PRIMITIVE_TYPE) {
+                    // This happens in test TargetTypeTest52.java
+                    // Is there anything to do?
+                    repeat = false;
+                } else {
+                    Assert.error("Unexpected tree: " + enclTr + " with kind: " + enclTr.getKind() +
+                            " within: "+ errtree + " with kind: " + errtree.getKind());
+                }
             }
         }
     };

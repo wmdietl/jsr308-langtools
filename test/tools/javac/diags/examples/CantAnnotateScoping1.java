@@ -21,21 +21,21 @@
  * questions.
  */
 
-// key: compiler.err.cant.annotate.nested.type
+// key: compiler.err.cant.type.annotate.scoping.1
 
 import java.lang.annotation.*;
 
-class CantAnnotateStaticClass {
+class CantAnnotateNestedType {
     @Target(ElementType.TYPE_USE)
-    @interface A {}
+    @interface TA {}
 
     interface Outer {
         interface Inner {}
     }
 
     // Error:
-    @A Outer.Inner f;
+    @TA Outer.Inner f;
 
     // OK:
-    @A Outer g;
+    @TA Outer g;
 }
