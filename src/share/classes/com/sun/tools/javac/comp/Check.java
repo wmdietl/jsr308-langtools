@@ -2713,7 +2713,8 @@ public class Check {
         Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
 
-        if (!a.annotationType.type.isErroneous() &&
+        if (a.hasTag(TYPE_ANNOTATION) &&
+                !a.annotationType.type.isErroneous() &&
                 !isTypeAnnotation(a, isTypeParameter)) {
             log.error(a.pos(), "annotation.type.not.applicable");
         }
