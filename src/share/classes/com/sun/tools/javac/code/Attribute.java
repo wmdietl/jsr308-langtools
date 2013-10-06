@@ -219,6 +219,7 @@ public abstract class Attribute implements AnnotationValue {
 
     public static class TypeCompound extends Compound {
         public TypeAnnotationPosition position;
+
         public TypeCompound(Compound compound,
                 TypeAnnotationPosition position) {
             this(compound.type, compound.values, position);
@@ -231,7 +232,7 @@ public abstract class Attribute implements AnnotationValue {
         }
 
         public boolean hasUnknownPosition() {
-            return position == null || position.type == TargetType.UNKNOWN;
+            return position.type == TargetType.UNKNOWN;
         }
 
         public boolean isContainerTypeCompound() {
