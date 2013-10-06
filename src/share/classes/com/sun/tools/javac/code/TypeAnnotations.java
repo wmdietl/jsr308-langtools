@@ -272,6 +272,7 @@ public class TypeAnnotations {
             List<Attribute.Compound> annotations = sym.getRawAttributes();
             ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
+            ListBuffer<Attribute.TypeCompound> onlyTypeAnnos = new ListBuffer<Attribute.TypeCompound>();
 
             for (Attribute.Compound a : annotations) {
                 switch (annotationType(a, sym)) {
@@ -287,6 +288,8 @@ public class TypeAnnotations {
                 case TYPE: {
                     Attribute.TypeCompound ta = toTypeCompound(a, pos);
                     typeAnnos.append(ta);
+                    // Also keep track which annotations are only type annotations
+                    onlyTypeAnnos.append(ta);
                     break;
                 }
                 }
@@ -310,7 +313,7 @@ public class TypeAnnotations {
             }
 
             // type is non-null and annotations are added to that type
-            type = typeWithAnnotations(typetree, type, typeAnnotations);
+            type = typeWithAnnotations(typetree, type, typeAnnotations, onlyTypeAnnos.toList());
 
             if (sym.getKind() == ElementKind.METHOD) {
                 sym.type.asMethodType().restype = type;
@@ -362,9 +365,10 @@ public class TypeAnnotations {
         // As a side effect the method sets the type annotation position of "annotations".
         // Note that it is assumed that all annotations share the same position.
         private Type typeWithAnnotations(final JCTree typetree, final Type type,
-                final List<Attribute.TypeCompound> annotations) {
-            // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s)%n",
-            //         typetree, type, annotations);
+                final List<Attribute.TypeCompound> annotations,
+                final List<Attribute.TypeCompound> onlyTypeAnnotations) {
+            // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s, onlyTypeAnnotations: %s)%n",
+            //         typetree, type, annotations, onlyTypeAnnotations);
             if (annotations.isEmpty()) {
                 return type;
             }
@@ -397,7 +401,7 @@ public class TypeAnnotations {
                     arTree = arrayTypeTree(arTree.elemtype);
                     depth = depth.append(TypePathEntry.ARRAY);
                 }
-                Type arelemType = typeWithAnnotations(arTree.elemtype, arType.elemtype, annotations);
+                Type arelemType = typeWithAnnotations(arTree.elemtype, arType.elemtype, annotations, onlyTypeAnnotations);
                 tomodify.elemtype = arelemType;
                 {
                     // All annotations share the same position; modify the first one.
@@ -414,7 +418,7 @@ public class TypeAnnotations {
                 // There is a TypeKind, but no TypeTag.
                 JCTypeUnion tutree = (JCTypeUnion) typetree;
                 JCExpression fst = tutree.alternatives.get(0);
-                Type res = typeWithAnnotations(fst, fst.type, annotations);
+                Type res = typeWithAnnotations(fst, fst.type, annotations, onlyTypeAnnotations);
                 fst.type = res;
                 // TODO: do we want to set res as first element in uct.alternatives?
                 // UnionClassType uct = (com.sun.tools.javac.code.Type.UnionClassType)type;
@@ -453,14 +457,23 @@ public class TypeAnnotations {
                  * but nothing more exists.
                  */
                 if (enclTy != null &&
-                        enclTy.getKind() == TypeKind.NONE &&
-                        (enclTr.getKind() == JCTree.Kind.IDENTIFIER ||
-                         enclTr.getKind() == JCTree.Kind.MEMBER_SELECT ||
-                         enclTr.getKind() == JCTree.Kind.PARAMETERIZED_TYPE ||
-                         enclTr.getKind() == JCTree.Kind.ANNOTATED_TYPE)) {
-                    // TODO: also if it's "java. @A lang.Object", that is,
-                    // if it's on a package?
-                    log.error(enclTr.pos(), "cant.annotate.nested.type", enclTr.toString());
+                        enclTy.hasTag(TypeTag.NONE)) {
+                    switch (onlyTypeAnnotations.size()) {
+                    case 0:
+                        // Don't issue an error if all type annotations are
+                        // also declaration annotations.
+                        // If the annotations are also declaration annotations, they are
+                        // illegal as type annotations but might be legal as declaration annotations.
+                        // The normal declaration annotation checks make sure that the use is valid.
+                        break;
+                    case 1:
+                        log.error(typetree.pos(), "cant.type.annotate.scoping.1",
+                                onlyTypeAnnotations);
+                        break;
+                    default:
+                        log.error(typetree.pos(), "cant.type.annotate.scoping",
+                                onlyTypeAnnotations);
+                    }
                     return type;
                 }
 
