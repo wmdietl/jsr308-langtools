@@ -1877,7 +1877,7 @@ public class ClassReader {
         }
     }
 
-    class AnnotationDefaultCompleter extends AnnotationDeproxy implements Annotate.Annotator {
+    class AnnotationDefaultCompleter extends AnnotationDeproxy implements Annotate.Worker {
         final MethodSymbol sym;
         final Attribute value;
         final JavaFileObject classFile = currentClassFile;
@@ -1889,8 +1889,8 @@ public class ClassReader {
             this.sym = sym;
             this.value = value;
         }
-        // implement Annotate.Annotator.enterAnnotation()
-        public void enterAnnotation() {
+        // implement Annotate.Worker.run()
+        public void run() {
             JavaFileObject previousClassFile = currentClassFile;
             try {
                 // Reset the interim value set earlier in
@@ -1904,7 +1904,7 @@ public class ClassReader {
         }
     }
 
-    class AnnotationCompleter extends AnnotationDeproxy implements Annotate.Annotator {
+    class AnnotationCompleter extends AnnotationDeproxy implements Annotate.Worker {
         final Symbol sym;
         final List<CompoundAnnotationProxy> l;
         final JavaFileObject classFile;
@@ -1917,8 +1917,8 @@ public class ClassReader {
             this.l = l;
             this.classFile = currentClassFile;
         }
-        // implement Annotate.Annotator.enterAnnotation()
-        public void enterAnnotation() {
+        // implement Annotate.Worker.run()
+        public void run() {
             JavaFileObject previousClassFile = currentClassFile;
             try {
                 currentClassFile = classFile;
@@ -1955,7 +1955,7 @@ public class ClassReader {
         }
 
         @Override
-        public void enterAnnotation() {
+        public void run() {
             JavaFileObject previousClassFile = currentClassFile;
             try {
                 currentClassFile = classFile;
@@ -1993,11 +1993,15 @@ public class ClassReader {
                 (flags & ABSTRACT) == 0 && !name.equals(names.clinit)) {
             if (majorVersion > Target.JDK1_8.majorVersion ||
                     (majorVersion == Target.JDK1_8.majorVersion && minorVersion >= Target.JDK1_8.minorVersion)) {
-                currentOwner.flags_field |= DEFAULT;
-                flags |= DEFAULT | ABSTRACT;
+                if ((flags & STATIC) == 0) {
+                    currentOwner.flags_field |= DEFAULT;
+                    flags |= DEFAULT | ABSTRACT;
+                }
             } else {
                 //protect against ill-formed classfiles
-                throw new CompletionFailure(currentOwner, "default method found in pre JDK 8 classfile");
+                throw badClassFile((flags & STATIC) == 0 ? "invalid.default.interface" : "invalid.static.interface",
+                                   Integer.toString(majorVersion),
+                                   Integer.toString(minorVersion));
             }
         }
         if (name == names.init && currentOwner.hasOuterInstance()) {

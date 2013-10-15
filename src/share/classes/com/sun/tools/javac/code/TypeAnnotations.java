@@ -49,7 +49,8 @@ import com.sun.tools.javac.code.TypeAnnotationPosition.TypePathEntryKind;
 import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Symbol.MethodSymbol;
 import com.sun.tools.javac.comp.Annotate;
-import com.sun.tools.javac.comp.Annotate.Annotator;
+import com.sun.tools.javac.comp.Annotate.Worker;
+import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.tree.JCTree;
@@ -71,6 +72,7 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
+import com.sun.tools.javac.util.Options;
 
 /**
  * Contains operations specific to processing type annotations.
@@ -94,6 +96,8 @@ public class TypeAnnotations {
     final Names names;
     final Symtab syms;
     final Annotate annotate;
+    final Attr attr;
+    private final boolean typeAnnoAsserts;
 
     protected TypeAnnotations(Context context) {
         context.put(typeAnnosKey, this);
@@ -101,6 +105,9 @@ public class TypeAnnotations {
         log = Log.instance(context);
         syms = Symtab.instance(context);
         annotate = Annotate.instance(context);
+        attr = Attr.instance(context);
+        Options options = Options.instance(context);
+        typeAnnoAsserts = options.isSet("TypeAnnotationAsserts");
     }
 
     /**
@@ -109,17 +116,32 @@ public class TypeAnnotations {
      * This version only visits types in signatures and should be
      * called from MemberEnter.
      * The method takes the Annotate object as parameter and
-     * adds an Annotator to the correct Annotate queue for
+     * adds an Annotate.Worker to the correct Annotate queue for
      * later processing.
      */
     public void organizeTypeAnnotationsSignatures(final Env<AttrContext> env, final JCClassDecl tree) {
-        annotate.afterRepeated( new Annotator() {
+        annotate.afterRepeated( new Worker() {
             @Override
-            public void enterAnnotation() {
+            public void run() {
                 JavaFileObject oldSource = log.useSource(env.toplevel.sourcefile);
 
                 try {
                     new TypeAnnotationPositions(true).scan(tree);
+                } finally {
+                    log.useSource(oldSource);
+                }
+            }
+        } );
+    }
+
+    public void validateTypeAnnotationsSignatures(final Env<AttrContext> env, final JCClassDecl tree) {
+        annotate.validate(new Worker() { //validate annotations
+            @Override
+            public void run() {
+                JavaFileObject oldSource = log.useSource(env.toplevel.sourcefile);
+
+                try {
+                    attr.validateTypeAnnotations(tree, true);
                 } finally {
                     log.useSource(oldSource);
                 }
@@ -265,10 +287,6 @@ public class TypeAnnotations {
          */
         private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym,
                 TypeAnnotationPosition pos) {
-            /*
-            System.out.printf("separateAnnotationsKinds(typetree: %s, type: %s, symbol: %s, pos: %s%n",
-                    typetree, type, sym, pos);
-            */
             List<Attribute.Compound> annotations = sym.getRawAttributes();
             ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
             ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
@@ -1024,9 +1042,11 @@ public class TypeAnnotations {
         @Override
         public void visitMethodDef(final JCMethodDecl tree) {
             if (tree.sym == null) {
-                // Something most be wrong, e.g. a class not found.
-                // Quietly ignore. (See test FailOver15.java)
+                if (typeAnnoAsserts) {
+                    Assert.error("Visiting tree node before memberEnter");
+                } else {
                 return;
+            }
             }
             if (sigOnly) {
                 if (!tree.mods.annotations.isEmpty()) {
@@ -1130,6 +1150,9 @@ public class TypeAnnotations {
                 // Nothing to do for separateAnnotationsKinds if
                 // there are no annotations of either kind.
             } else if (tree.sym == null) {
+                if (typeAnnoAsserts) {
+                    Assert.error("Visiting tree node before memberEnter");
+                }
                 // Something is wrong already. Quietly ignore.
             } else if (tree.sym.getKind() == ElementKind.PARAMETER) {
                 // Parameters are handled in visitMethodDef or visitLambda.
@@ -1283,9 +1306,9 @@ public class TypeAnnotations {
         private void findPosition(JCTree tree, JCTree frame, List<JCAnnotation> annotations) {
             if (!annotations.isEmpty()) {
                 /*
-                System.out.println("Finding pos for: " + annotations);
-                System.out.println("    tree: " + tree + " kind: " + tree.getKind());
-                System.out.println("    frame: " + frame + " kind: " + frame.getKind());
+                System.err.println("Finding pos for: " + annotations);
+                System.err.println("    tree: " + tree + " kind: " + tree.getKind());
+                System.err.println("    frame: " + frame + " kind: " + frame.getKind());
                 */
                 TypeAnnotationPosition p = new TypeAnnotationPosition();
                 p.onLambda = currentLambda;

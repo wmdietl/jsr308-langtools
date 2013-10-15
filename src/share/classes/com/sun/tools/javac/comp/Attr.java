@@ -792,17 +792,19 @@ public class Attr extends JCTree.Visitor {
         Type t = tree.type != null ?
             tree.type :
             attribType(tree, env);
-        return checkBase(t, tree, env, classExpected, interfaceExpected, checkExtensible);
+        return checkBase(t, tree, env, classExpected, interfaceExpected, false, checkExtensible);
     }
     Type checkBase(Type t,
                    JCTree tree,
                    Env<AttrContext> env,
                    boolean classExpected,
-                   boolean interfaceOrArrayExpected,
+                   boolean interfacesOnlyExpected,
+                   boolean interfacesOrArraysExpected,
                    boolean checkExtensible) {
         if (t.isErroneous())
             return t;
-        if (t.hasTag(TYPEVAR) && !classExpected && !interfaceOrArrayExpected) {
+        if (t.hasTag(TYPEVAR) && !classExpected &&
+            !interfacesOrArraysExpected && !interfacesOnlyExpected) {
             // check that type variable is already visible
             if (t.getUpperBound() == null) {
                 log.error(tree.pos(), "illegal.forward.ref");
@@ -814,9 +816,14 @@ public class Attr extends JCTree.Visitor {
             t = chk.checkClassOrArrayType(tree.pos(), t,
                                           checkExtensible|!allowGenerics);
         }
-        if (interfaceOrArrayExpected &&
-            !(t.tsym.isInterface() || t.getTag() == ARRAY)) {
+        if (interfacesOnlyExpected && !t.tsym.isInterface()) {
             log.error(tree.pos(), "intf.expected.here");
+            // return errType is necessary since otherwise there might
+            // be undetected cycles which cause attribution to loop
+            return types.createErrorType(t);
+        } else if (interfacesOrArraysExpected &&
+            !(t.tsym.isInterface() || t.getTag() == ARRAY)) {
+            log.error(tree.pos(), "intf.or.array.expected.here");
             // return errType is necessary since otherwise there might
             // be undetected cycles which cause attribution to loop
             return types.createErrorType(t);
@@ -958,12 +965,6 @@ public class Attr extends JCTree.Visitor {
                 chk.validateAnnotationType(tree.restype);
                 // ensure that annotation method does not clash with members of Object/Annotation
                 chk.validateAnnotationMethod(tree.pos(), m);
-
-                if (tree.defaultValue != null) {
-                    // if default value is an annotation, check it is a well-formed
-                    // annotation value (e.g. no duplicate values, no missing values, etc.)
-                    chk.validateAnnotationTree(tree.defaultValue);
-                }
             }
 
             for (List<JCExpression> l = tree.thrown; l.nonEmpty(); l = l.tail)
@@ -1025,7 +1026,6 @@ public class Attr extends JCTree.Visitor {
 
             localEnv.info.scope.leave();
             result = tree.type = m.type;
-            chk.validateAnnotations(tree.mods.annotations, m);
         }
         finally {
             chk.setLint(prevLint);
@@ -1083,7 +1083,6 @@ public class Attr extends JCTree.Visitor {
                 }
             }
             result = tree.type = v.type;
-            chk.validateAnnotations(tree.mods.annotations, v);
         }
         finally {
             chk.setLint(prevLint);
@@ -3971,7 +3970,7 @@ public class Attr extends JCTree.Visitor {
         Set<Type> boundSet = new HashSet<Type>();
         if (bounds.nonEmpty()) {
             // accept class or interface or typevar as first bound.
-            bounds.head.type = checkBase(bounds.head.type, bounds.head, env, false, false, false);
+            bounds.head.type = checkBase(bounds.head.type, bounds.head, env, false, false, false, false);
             boundSet.add(types.erasure(bounds.head.type));
             if (bounds.head.type.isErroneous()) {
                 return bounds.head.type;
@@ -3987,7 +3986,7 @@ public class Attr extends JCTree.Visitor {
                 // if first bound was a class or interface, accept only interfaces
                 // as further bounds.
                 for (JCExpression bound : bounds.tail) {
-                    bound.type = checkBase(bound.type, bound, env, false, true, false);
+                    bound.type = checkBase(bound.type, bound, env, false, false, true, false);
                     if (bound.type.isErroneous()) {
                         bounds = List.of(bound);
                     }
@@ -4068,13 +4067,13 @@ public class Attr extends JCTree.Visitor {
     public void annotateType(final JCTree tree, final List<JCAnnotation> annotations) {
         // Callers ensure this.
         // Assert.check(annotations != null && annotations.nonEmpty());
-        annotate.typeAnnotation(new Annotate.Annotator() {
+        annotate.typeAnnotation(new Annotate.Worker() {
             @Override
             public String toString() {
                 return "annotate " + annotations + " onto " + tree;
             }
             @Override
-            public void enterAnnotation() {
+            public void run() {
                 List<Attribute.TypeCompound> compounds = fromAnnotations(annotations);
                 if (annotations.size() == compounds.size()) {
                     // All annotations were successfully converted into compounds
@@ -4133,7 +4132,6 @@ public class Attr extends JCTree.Visitor {
         JCCompilationUnit toplevel = env.toplevel;
         try {
             annotate.flush();
-            chk.validateAnnotations(toplevel.packageAnnotations, toplevel.packge);
         } catch (CompletionFailure ex) {
             chk.completionError(toplevel.pos(), ex);
         }
@@ -4218,6 +4216,7 @@ public class Attr extends JCTree.Visitor {
 
                 chk.checkDeprecatedAnnotation(env.tree.pos(), c);
                 chk.checkClassOverrideEqualsAndHashIfNeeded(env.tree.pos(), c);
+                chk.checkFunctionalInterface((JCClassDecl) env.tree, c);
             } finally {
                 env.info.returnResult = prevReturnRes;
                 log.useSource(prev);
@@ -4235,9 +4234,6 @@ public class Attr extends JCTree.Visitor {
     private void attribClassBody(Env<AttrContext> env, ClassSymbol c) {
         JCClassDecl tree = (JCClassDecl)env.tree;
         Assert.check(c == tree.sym);
-
-        // Validate annotations
-        chk.validateAnnotations(tree.mods.annotations, c);
 
         // Validate type parameters, supertype and interfaces.
         attribStats(tree.typarams, env);
@@ -4339,7 +4335,7 @@ public class Attr extends JCTree.Visitor {
             typeAnnotations.organizeTypeAnnotationsBodies(tree);
 
             // Check type annotations applicability rules
-            validateTypeAnnotations(tree);
+            validateTypeAnnotations(tree, false);
         }
     }
         // where
@@ -4414,11 +4410,16 @@ public class Attr extends JCTree.Visitor {
         return types.capture(type);
     }
 
-    private void validateTypeAnnotations(JCTree tree) {
-        tree.accept(typeAnnotationsValidator);
+    public void validateTypeAnnotations(JCTree tree, boolean sigOnly) {
+        tree.accept(new TypeAnnotationsValidator(sigOnly));
     }
     //where
-    private final JCTree.Visitor typeAnnotationsValidator = new TreeScanner() {
+    private final class TypeAnnotationsValidator extends TreeScanner {
+
+        private final boolean sigOnly;
+        public TypeAnnotationsValidator(boolean sigOnly) {
+            this.sigOnly = sigOnly;
+        }
 
         public void visitAnnotation(JCAnnotation tree) {
             chk.validateTypeAnnotation(tree, false);
@@ -4446,12 +4447,26 @@ public class Attr extends JCTree.Visitor {
             if (tree.restype != null && tree.restype.type != null) {
                 validateAnnotatedType(tree.restype, tree.restype.type);
             }
-            super.visitMethodDef(tree);
+            if (sigOnly) {
+                scan(tree.mods);
+                scan(tree.restype);
+                scan(tree.typarams);
+                scan(tree.recvparam);
+                scan(tree.params);
+                scan(tree.thrown);
+            } else {
+                scan(tree.defaultValue);
+                scan(tree.body);
+            }
         }
         public void visitVarDef(final JCVariableDecl tree) {
             if (tree.sym != null && tree.sym.type != null)
                 validateAnnotatedType(tree.vartype, tree.sym.type);
-            super.visitVarDef(tree);
+            scan(tree.mods);
+            scan(tree.vartype);
+            if (!sigOnly) {
+                scan(tree.init);
+            }
         }
         public void visitTypeCast(JCTypeCast tree) {
             if (tree.clazz != null && tree.clazz.type != null)
@@ -4472,6 +4487,29 @@ public class Attr extends JCTree.Visitor {
             if (tree.elemtype != null && tree.elemtype.type != null)
                 validateAnnotatedType(tree.elemtype, tree.elemtype.type);
             super.visitNewArray(tree);
+        }
+
+        @Override
+        public void visitClassDef(JCClassDecl tree) {
+            if (sigOnly) {
+                scan(tree.mods);
+                scan(tree.typarams);
+                scan(tree.extending);
+                scan(tree.implementing);
+            }
+            for (JCTree member : tree.defs) {
+                if (member.hasTag(Tag.CLASSDEF)) {
+                    continue;
+                }
+                scan(member);
+            }
+        }
+
+        @Override
+        public void visitBlock(JCBlock tree) {
+            if (!sigOnly) {
+                scan(tree.stats);
+            }
         }
 
         /* I would want to model this after
