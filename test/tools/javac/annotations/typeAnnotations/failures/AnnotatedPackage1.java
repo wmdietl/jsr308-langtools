@@ -7,7 +7,9 @@
  * @compile/fail/ref=AnnotatedPackage1.out -XDrawDiagnostics AnnotatedPackage1.java
  */
 
-package name.@A p1.p2;
+package name. @A p1.p2;
+
+import java.lang.annotation.*;
 
 import java.lang.annotation.*;
 
