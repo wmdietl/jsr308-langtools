@@ -224,10 +224,6 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
     public Type baseType() {
         return this;
     }
-    
-    public Type annotatedType(List<Attribute.TypeCompound> annos) {
-        return new AnnotatedType(annos, this);
-    }
 
     public Type annotatedType(List<Attribute.TypeCompound> annos) {
         return new AnnotatedType(annos, this);
