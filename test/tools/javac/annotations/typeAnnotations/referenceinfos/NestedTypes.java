@@ -867,7 +867,7 @@ public class NestedTypes {
     })
     @TestClass("Test$1Nested")
     public String testNestedInMethod1() {
-        return "class Test {\n" + 
+        return "class Test {\n" +
                 "  void foobar() {\n" +
                 "    class Nested<@TA X extends @TB Object> {\n" +
                 "      @TC List<@TD Object> f;\n" +
