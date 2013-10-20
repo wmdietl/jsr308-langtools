@@ -21,14 +21,16 @@
  * questions.
  */
 
-import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
-
 /*
  * @test
+ * @bug 8026791
  * @summary Test population of reference info for constructor results
  * @compile -g Driver.java ReferenceInfoUtil.java Constructors.java
  * @run main Driver Constructors
  */
+
+import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
+
 public class Constructors {
 
     @TADescriptions({
