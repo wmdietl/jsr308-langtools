@@ -82,7 +82,7 @@ The JSR 308 webpage is \myurl{http://types.cs.washington.edu/jsr308/}.
 It contains the
 \ahref{http://types.cs.washington.edu/jsr308/specification/java-annotation-design.html}{latest version}
 % latest version
-of this document, along
+of this document and of the \ahref{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf}{JLS and JVMS changes for JSR 308}, along
 with other information such as a FAQ, the reference implementation, and
 sample annotation processors.
 
@@ -103,7 +103,13 @@ Such a generalization removes
 limitations of Java's annotation
 system, and it enables new uses of annotations.
 
-This document specifies the \emph{syntax} of extended Java annotations in
+This document is a companion to a separate document that gives the changes
+to the Java Language Specification and the Java Virtual Machine
+Specification.  That document is available at
+\url{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf} and
+is referred to by this document.
+
+The JSR 308 specification defines the \emph{syntax} of extended Java annotations in
 Java source code and how those annotations are represented in classfiles.
 However, this document makes no commitment as to the \emph{semantics} of any
 particular annotation type.  As with Java's
@@ -121,7 +127,7 @@ Detection''~\cite{JSR305}.
 % %END LATEX
 % .)
 
-This proposal does not change the compile-time, load-time, or run-time
+JSR 308 does not change the compile-time, load-time, or run-time
 semantics of Java.  It does not directly change the abilities of Java annotation
 processors as defined in JSR 269~\cite{JSR269}.
 % or of instrumentation agents~\cite{JSR163}.
@@ -136,7 +142,7 @@ normative part and a
 non-normative part.
 The normative part specifies the changes to
 the Java language syntax (Section~\ref{syntax}) and
-the class file format (Section~\ref{class-file}).
+the class file format (Section~\ref{class-file}); it is primarily references to the \ahref{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf}{JLS and JVMS changes}.
 %
 The non-normative part
 motivates annotations on types by presenting one
@@ -684,256 +690,259 @@ scoping mechanism rather than a use of a type.
 
 \subsection{Java language grammar changes\label{grammar}}
 
-This section
-gives changes to the \ahref{http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html}{grammar} of the Java
-language~\cite[ch.~18]{GoslingJSBB2012}, organized in the same way as
-the rules of Section~\ref{type-annotation-locations}.
-Additions are \underline{underlined}.
-% , and deletions \sout{crossed out}.
+See the changes to the Java Language Specification in \url{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf}.
 
-% Infelicities in the Java grammar make this section somewhat long.
-% Some improvements are
-% possible (for instance, by slightly refactoring the Java grammar), but this
-% version attempts to minimize changes to existing grammar productions.
-
-
-% The original grammar appears at
-% http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html
-% (older: http://java.sun.com/docs/books/jls/third_edition/html/syntax.html)
-
-% The BNF for the spec does not have to be the same as the BNF for the
-% implementation.  An example is that the BNF does not address the ">>" issue
-% in generics, even though that's important for an implementation.
-
-
-\newcommand{\term}[1]{\code{#1}}         % terminal
-\newcommand{\nt}[1]{\emph{#1}}           % non-terminal
-\newcommand{\opt}[1]{\emph{[}#1\emph{]}} % optional (zero or one)
-\newcommand{\multi}[1]{\emph{\{}#1\emph{\}}} % multiple (any number)
-\newcommand{\alt}[1]{\emph{(}#1\emph{)}} % alternatives
-\newcommand{\altor}[1]{\ensuremath{\mathit{|}}} % alternatives separator
-\newcommand{\new}[1]{\underline{#1}}     % additions
-
-\newcommand{\basictypename}{\alt{ \term{byte} \altor{} \term{short} \altor{} \term{char} \altor{} \term{int} \altor{} \term{long} \altor{} \term{float} \altor{} \term{double} \altor{} \term{boolean} }}
-
-\begin{enumerate}
-\item
-\begin{enumerate}
-\item
-Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{Type}: \\
-\qquad \new{\opt{\nt{Annotations}} \nt{UnannType}} \\
- \\
-\new{\nt{UnannType}}: \\
-\qquad    \basictypename{} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
-\qquad    \nt{\new{Unann}ReferenceType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
- \\
-\nt{MethodOrFieldDecl}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
- \\
-\nt{InterfaceMethodOrFieldDecl}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
-\\
-\nt{LocalVariableDeclarationStatement}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclarators} \term{;} \\
-\\
-\nt{Resource}: \\
-\qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression} \\
-\\
-\nt{ForVarControl}: \\
-\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
-\\
-\nt{AnnotationTypeElementRest}: \\
-\qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{AnnotationMethodOrConstantRest} \term{;} \\
-\qquad       \ldots \\
-\end{tabbing}
-
-% \nt{QualifiedTypeList} was \nt{QualifiedIdentifierList} in the Java SE 7
-% Edition of the JLS\@.
-
-% Optionally, two uses of
-%   ``\opt{\nt{Annotations}} \nt{Type}''
-% can be simplified to
-%   ``\nt{Type}''.
-% (in ForVarControl, FormalParameterDecls).
+% This section
+% gives changes to the \ahref{http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html}{grammar} of the Java
+% language~\cite[ch.~18]{GoslingJSBB2012}, organized in the same way as
+% the rules of Section~\ref{type-annotation-locations}.
+% Additions are \underline{underlined}.
+% % , and deletions \sout{crossed out}.
 % 
-% OLD:
-%     ForVarControl
-%             [final] [Annotations] Type Identifier ForVarControlRest
-% NEW:
-%     ForVarControl
-%             [final] Type Identifier ForVarControlRest
+% % Infelicities in the Java grammar make this section somewhat long.
+% % Some improvements are
+% % possible (for instance, by slightly refactoring the Java grammar), but this
+% % version attempts to minimize changes to existing grammar productions.
 % 
-% OLD:
-%     FormalParameterDecls:
-%             [final] [Annotations] Type FormalParameterDeclsRest]
-% NEW:
-%     FormalParameterDecls:
-%             [final] Type FormalParameterDeclsRest]
-
-\item
-Annotations can be written on a non-parameterized, non-array type as used
-in a \<throws> clause, or \<catch> clause.
-% but NOT in annotation (\<@\emph{Foo}>)!
-The JLS grammar uses \nt{QualifiedIdentifer} in such places, but the
-grammar also uses \nt{QualifiedIdentifer} in \<package> statements, where
-it is non-annotatable.  This is confusing, so we refactor the grammar to
-make the non-terminal names and the rules more uniform.  With these
-changes, it it possible to eliminate the \nt{QualifiedIdentiferList}
-grammar production, which is no longer used.
-
-\label{sec:qualified-type-list}
-
-\begin{tabbing}
-\qquad \= \kill
-\new{\nt{QualifiedType}}: \\
-\qquad        \new{\opt{\nt{Annotations}} \nt{UnannQualifiedType}} \\
- \\
-\new{\nt{UnannQualifiedType}}: \\
-\qquad        \nt{Identifier} \multi{ \term{.} \opt{\nt{Annotations}} \nt{Identifier} } \\
- \\
-\new{\nt{QualifiedTypeList}}: \\
-\qquad        \nt{QualifiedType} \multi{ \term{,} \nt{QualifiedType} } \\
-\\
-\nt{CatchType}: \\
-\qquad        \new{\nt{UnannQualifiedType}} \multi{ \term{|} \new{\nt{QualifiedType}} } \\
-\\
-\nt{MethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}} \alt{ \nt{Block} \altor{} \term{;} } \\
- \\
-\nt{VoidMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \alt{ \nt{Block} \altor{} \term{;} } \\
- \\
-\nt{ConstructorDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \nt{Block} \\
- \\
-\nt{InterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;} \\
- \\
-\nt{VoidInterfaceMethodDeclaratorRest}: \\
-\qquad            \nt{FormalParameters} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;}
-\end{tabbing}
-
-The CatchType rule allows each exception type in a union of types (JLS
-\ahref{\jlsFourteenTwenty}{\S14.20}) to be annotated independently.  There
-is no syntax to indicate that an annotation applies to every exception type
-in a union of types.
-% the programmer would have to duplicate the annotation for each disjunct.
-% , but a higher level tool might choose to act as if the
-% first annotation in a union of types applies to every type in the union.
-
-
-
+% 
+% % The original grammar appears at
+% % http://docs.oracle.com/javase/specs/jls/se7/html/jls-18.html
+% % (older: http://java.sun.com/docs/books/jls/third_edition/html/syntax.html)
+% 
+% % The BNF for the spec does not have to be the same as the BNF for the
+% % implementation.  An example is that the BNF does not address the ">>" issue
+% % in generics, even though that's important for an implementation.
+% 
+% 
+% \newcommand{\term}[1]{\code{#1}}         % terminal
+% \newcommand{\nt}[1]{\emph{#1}}           % non-terminal
+% \newcommand{\opt}[1]{\emph{[}#1\emph{]}} % optional (zero or one)
+% \newcommand{\multi}[1]{\emph{\{}#1\emph{\}}} % multiple (any number)
+% \newcommand{\alt}[1]{\emph{(}#1\emph{)}} % alternatives
+% \newcommand{\altor}[1]{\ensuremath{\mathit{|}}} % alternatives separator
+% \newcommand{\new}[1]{\underline{#1}}     % additions
+% 
+% \newcommand{\basictypename}{\alt{ \term{byte} \altor{} \term{short} \altor{} \term{char} \altor{} \term{int} \altor{} \term{long} \altor{} \term{float} \altor{} \term{double} \altor{} \term{boolean} }}
+% 
+% \begin{enumerate}
 % \item
-% Annotations may appear at the beginning of a disjunctive type, before a
-% vertical bar, or at the beginning of a conjunctive type, before an ampersand:
+% \begin{enumerate}
+% \item
+% Any \nt{Type} may be prefixed by \opt{\nt{Annotations}}:
 % 
-% \todo{give the grammar rules: catch, extends, others?}
-
-
-
-\item
-Annotations are permitted on the simple name in a static nested class:
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{ReferenceType}: \\
-\qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
- \\
-\new{\nt{UnannReferenceType}}: \\
-\qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ \term{.} \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}}
-\end{tabbing}
-\end{enumerate}
-
-\item
-Annotations may appear on the wildcard in any type argument.
-A wildcard is the declaration of an anonymous (unnamed) type parameter.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeArgument}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
-\end{tabbing}
-
-
-\item
-To permit annotations on levels of an array (in declarations, not
-constructors), change ``\multi{\term{[]}}''  to
-``\multi{\new{\opt{\nt{Annotations}}} \term{[]}}''.
-(This was abstracted out as
-``\nt{BracketsOpt}'' in the 2nd edition of the JLS~\cite{GoslingJSB2000}.)
-Two such changes (in \nt{MethodDeclaratorRest} and
-\nt{InterfaceMethodDeclaratorRest}) already appeared above in
-point~\ref{sec:qualified-type-list}.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{VariableDeclaratorRest}: \\
-\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
- \\
-\nt{VariableDeclaratorId}: \\
-\qquad       \nt{Identifier} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
- \\
-\nt{ConstantDeclaratorRest}: \\
-\qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}}
-\end{tabbing}
-
-Annotations may also appear on varargs (\code{...}):
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{FormalParameterDecls}: \\
-\qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
- \\
-\nt{FormalParameterDeclsRest}: \\
-\qquad       \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId}
-\end{tabbing}
-
-
-\item
-No grammar changes are required to support type annotations on constructor
-result types.
-
-
-\item
-The receiver may be expressed explicitly.
-Then, annotations appear on the receiver type in the normal way.
-If the receiver is not expressed explicitly, then its type cannot be annotated.
-% The receiver \<this> is implicitly \<final>.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{FormalParameters}: \\
-\qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
-\\
-\new{\nt{FormalParameterOrReceiverDecls}}: \\
-\qquad        \nt{Type} \opt{\nt{Identifier} \term{.}} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
-\qquad        \nt{FormalParameterDecls}
-\end{tabbing}
-
-
-\item
-An annotation may appear on the type parameter
-declaration in a class or method declaration.
-
-\begin{tabbing}
-\qquad \= \kill
-\nt{TypeParameter}: \\
-\qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
-\end{tabbing}
-
-\end{enumerate}
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{Type}: \\
+% \qquad \new{\opt{\nt{Annotations}} \nt{UnannType}} \\
+%  \\
+% \new{\nt{UnannType}}: \\
+% \qquad    \basictypename{} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+% \qquad    \nt{\new{Unann}ReferenceType} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+%  \\
+% \nt{MethodOrFieldDecl}: \\
+% \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{MethodOrFieldRest} \\
+%  \\
+% \nt{InterfaceMethodOrFieldDecl}: \\
+% \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{InterfaceMethodOrFieldRest} \\
+% \\
+% \nt{LocalVariableDeclarationStatement}: \\
+% \qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclarators} \term{;} \\
+% \\
+% \nt{Resource}: \\
+% \qquad        \multi{\nt{VariableModifier}} \nt{\new{Unann}ReferenceType} \nt{VariableDeclaratorId} \term{=} \nt{Expression} \\
+% \\
+% \nt{ForVarControl}: \\
+% \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{VariableDeclaratorId} \nt{ForVarControlRest} \\
+% \\
+% \nt{AnnotationTypeElementRest}: \\
+% \qquad       \nt{\new{Unann}Type} \nt{Identifier} \nt{AnnotationMethodOrConstantRest} \term{;} \\
+% \qquad       \ldots \\
+% \end{tabbing}
+% 
+% % \nt{QualifiedTypeList} was \nt{QualifiedIdentifierList} in the Java SE 7
+% % Edition of the JLS\@.
+% 
+% % Optionally, two uses of
+% %   ``\opt{\nt{Annotations}} \nt{Type}''
+% % can be simplified to
+% %   ``\nt{Type}''.
+% % (in ForVarControl, FormalParameterDecls).
+% % 
+% % OLD:
+% %     ForVarControl
+% %             [final] [Annotations] Type Identifier ForVarControlRest
+% % NEW:
+% %     ForVarControl
+% %             [final] Type Identifier ForVarControlRest
+% % 
+% % OLD:
+% %     FormalParameterDecls:
+% %             [final] [Annotations] Type FormalParameterDeclsRest]
+% % NEW:
+% %     FormalParameterDecls:
+% %             [final] Type FormalParameterDeclsRest]
+% 
+% \item
+% Annotations can be written on a non-parameterized, non-array type as used
+% in a \<throws> clause, or \<catch> clause.
+% % but NOT in annotation (\<@\emph{Foo}>)!
+% The JLS grammar uses \nt{QualifiedIdentifer} in such places, but the
+% grammar also uses \nt{QualifiedIdentifer} in \<package> statements, where
+% it is non-annotatable.  This is confusing, so we refactor the grammar to
+% make the non-terminal names and the rules more uniform.  With these
+% changes, it it possible to eliminate the \nt{QualifiedIdentiferList}
+% grammar production, which is no longer used.
+% 
+% \label{sec:qualified-type-list}
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \new{\nt{QualifiedType}}: \\
+% \qquad        \new{\opt{\nt{Annotations}} \nt{UnannQualifiedType}} \\
+%  \\
+% \new{\nt{UnannQualifiedType}}: \\
+% \qquad        \nt{Identifier} \multi{ \term{.} \opt{\nt{Annotations}} \nt{Identifier} } \\
+%  \\
+% \new{\nt{QualifiedTypeList}}: \\
+% \qquad        \nt{QualifiedType} \multi{ \term{,} \nt{QualifiedType} } \\
+% \\
+% \nt{CatchType}: \\
+% \qquad        \new{\nt{UnannQualifiedType}} \multi{ \term{|} \new{\nt{QualifiedType}} } \\
+% \\
+% \nt{MethodDeclaratorRest}: \\
+% \qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}} \alt{ \nt{Block} \altor{} \term{;} } \\
+%  \\
+% \nt{VoidMethodDeclaratorRest}: \\
+% \qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \alt{ \nt{Block} \altor{} \term{;} } \\
+%  \\
+% \nt{ConstructorDeclaratorRest}: \\
+% \qquad            \nt{FormalParameters} \opt{ \term{throws} Qualified\new{Type}List } \nt{Block} \\
+%  \\
+% \nt{InterfaceMethodDeclaratorRest}: \\
+% \qquad            \nt{FormalParameters} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;} \\
+%  \\
+% \nt{VoidInterfaceMethodDeclaratorRest}: \\
+% \qquad            \nt{FormalParameters} \opt{\term{throws} \nt{Qualified\new{Type}List}}   \term{;}
+% \end{tabbing}
+% 
+% The CatchType rule allows each exception type in a union of types (JLS
+% \ahref{\jlsFourteenTwenty}{\S14.20}) to be annotated independently.  There
+% is no syntax to indicate that an annotation applies to every exception type
+% in a union of types.
+% % the programmer would have to duplicate the annotation for each disjunct.
+% % , but a higher level tool might choose to act as if the
+% % first annotation in a union of types applies to every type in the union.
+% 
+% 
+% 
+% % \item
+% % Annotations may appear at the beginning of a disjunctive type, before a
+% % vertical bar, or at the beginning of a conjunctive type, before an ampersand:
+% % 
+% % \todo{give the grammar rules: catch, extends, others?}
+% 
+% 
+% 
+% \item
+% Annotations are permitted on the simple name in a static nested class:
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{ReferenceType}: \\
+% \qquad \new{\opt{\nt{Annotations}} \nt{UnannReferenceType}} \\
+%  \\
+% \new{\nt{UnannReferenceType}}: \\
+% \qquad            \nt{Identifier} \opt{\nt{TypeArguments}} \multi{ \term{.} \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\nt{TypeArguments}}}
+% \end{tabbing}
+% \end{enumerate}
+% 
+% \item
+% Annotations may appear on the wildcard in any type argument.
+% A wildcard is the declaration of an anonymous (unnamed) type parameter.
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{TypeArgument}: \\
+% \qquad            \new{\opt{\nt{Annotations}}} \term{?}\ \opt{\nt{(} \term{extends} \altor{} \term{super} \nt{)} \nt{Type}}
+% \end{tabbing}
+% 
+% 
+% \item
+% To permit annotations on levels of an array (in declarations, not
+% constructors), change ``\multi{\term{[]}}''  to
+% ``\multi{\new{\opt{\nt{Annotations}}} \term{[]}}''.
+% (This was abstracted out as
+% ``\nt{BracketsOpt}'' in the 2nd edition of the JLS~\cite{GoslingJSB2000}.)
+% Two such changes (in \nt{MethodDeclaratorRest} and
+% \nt{InterfaceMethodDeclaratorRest}) already appeared above in
+% point~\ref{sec:qualified-type-list}.
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{VariableDeclaratorRest}: \\
+% \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}} \\
+%  \\
+% \nt{VariableDeclaratorId}: \\
+% \qquad       \nt{Identifier} \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \\
+%  \\
+% \nt{ConstantDeclaratorRest}: \\
+% \qquad        \multi{\new{\opt{\nt{Annotations}}} \term{[]}} \opt{\term{=} \nt{VariableInitializer}}
+% \end{tabbing}
+% 
+% Annotations may also appear on varargs (\code{...}):
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{FormalParameterDecls}: \\
+% \qquad       \multi{\nt{VariableModifier}} \nt{\new{Unann}Type} \nt{FormalParameterDeclsRest} \\
+%  \\
+% \nt{FormalParameterDeclsRest}: \\
+% \qquad       \nt{VariableDeclaratorId} \opt{\term{,} \nt{FormalParameterDecls}} \\
+% \qquad        \new{\opt{\nt{Annotations}}} \term{...} \nt{VariableDeclaratorId}
+% \end{tabbing}
+% 
+% 
+% \item
+% No grammar changes are required to support type annotations on constructor
+% result types.
+% 
+% 
+% \item
+% The receiver may be expressed explicitly.
+% Then, annotations appear on the receiver type in the normal way.
+% If the receiver is not expressed explicitly, then its type cannot be annotated.
+% % The receiver \<this> is implicitly \<final>.
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{FormalParameters}: \\
+% \qquad        \term{(} \opt{\nt{FormalParameter\new{OrReceiver}Decls}} \term{)} \\
+% \\
+% \new{\nt{FormalParameterOrReceiverDecls}}: \\
+% \qquad        \nt{Type} \opt{\nt{Identifier} \term{.}} \term{this} \opt{\term{,} \nt{FormalParameterDecls}} \\
+% \qquad        \nt{FormalParameterDecls}
+% \end{tabbing}
+% 
+% 
+% \item
+% An annotation may appear on the type parameter
+% declaration in a class or method declaration.
+% 
+% \begin{tabbing}
+% \qquad \= \kill
+% \nt{TypeParameter}: \\
+% \qquad            \new{\opt{\nt{Annotations}}} \nt{Identifier} \opt{\term{extends} \nt{Bound}}
+% \end{tabbing}
+% 
+% \end{enumerate}
 
 
 The grammar permits modifiers, declaration annotations, and type annotation
 to be freely intermixed at any location where all are permitted (such as
 before a field declaration or a non-\<void>-returning method).  It is
 strongly recommended that type annotations be written immediately before
-the type, after declaration annotations and modifiers.
+the type, after declaration annotations and modifiers rather than
+intermixed with them.
 
 
 \subsubsection{Syntax of array annotations\label{array-syntax}}
@@ -1184,7 +1193,7 @@ compiler issues the error even if no annotation processor is being run.)
 %   specified usage restriction.
 % (See http://download.oracle.com/javase/6/docs/api/java/lang/annotation/Target.html .)
 
-As a mare extended example, suppose that you had defined the following annotations:
+As a more extended example, suppose that you had defined the following annotations:
 
 \begin{Verbatim}
   @Target({TYPE_USE}) @interface TAnno { }
@@ -1555,8 +1564,8 @@ structurally identical to the \RuntimeVisibleAnnotations and
 exception: rather than an array of \code{annotation} elements,
 \RuntimeVisibleTypeAnnotations and
 \RuntimeInvisibleTypeAnnotations contain an array of
-\extendedannotation elements, which are described in
-Section~\ref{class-file:ext}.
+\extendedannotation elements.
+% , which are described in Section~\ref{class-file:ext}.
 
 \preverbnegspace
 \begin{Verbatim}
@@ -1594,9 +1603,11 @@ attribute; annotations on type parameters are stored with the method or class.
 In the \<annotations> array, annotations that target instructions must be
 sorted in increasing order of bytecode offset.  Other annotations can be in
 any order, and may be interleaved with instruction annotations.
-Annotations that target instructions are those in
-Figure~\ref{tbl:target_types} with \<target\_type> $\ge$ 0x40; see below
-for details.
+Annotations that target instructions 
+% are those in Figure~\ref{tbl:target_types} with
+have
+\<target\_type> $\ge$ 0x40.
+% ; see below for details.
 
 %% Avoid saying everywhere that something *doesn't* change.
 % No changes are made to the StackMapTable that stores the types of elements
@@ -1609,8 +1620,9 @@ for details.
 % % and rather tricky, but we'll just copy that format.  There is no public
 % % API, just a defined classfile format.
 % No changes are made to the Exception table.
-Local variable type annotations are stored in the class file, see
-Section~\ref{class-file:ext:ri:localvar}.
+Local variable type annotations are, regrettably, not stored in the class file.
+% , see
+% Section~\ref{class-file:ext:ri:localvar}.
 
 %% Avoid saying everywhere that something *doesn't* change.
 % The VM does not have to validate all the constraints in
@@ -1644,568 +1656,576 @@ it; however, they can represent properties of it by referring to the
 bytecode (including referring to specific instructions, or bytecode offsets).
 
 
-\subsection{The \code{type\_annotation} structure\label{class-file:ext}}
 
-The \extendedannotation structure has the following format:
+\paragraph{Class file format changes}
+See the changes to the Java Virtual Machine Specification in \url{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf}.
+
+
+
+
+% \subsection{The \code{type\_annotation} structure\label{class-file:ext}}
+% 
+% The \extendedannotation structure has the following format:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+% type_annotation {
+%     // New fields in JSR 308:
+%     u1 target_type;    // the type of the targeted program element, see Section 3.2
+%     union {
+%         type_parameter_target;
+%         supertype_target;
+%         type_parameter_bound_target;
+%         empty_target;
+%         method_formal_parameter_target;
+%         throws_target;
+%         localvar_target;
+%         catch_target;
+%         offset_target;
+%         type_argument_target;
+%     } target_info;     // identifies the targeted program element, see Section 3.3
+%     type_path target_path; // identifies targeted type in a compound type (array, generic, etc.), see Section 3.4
+%     // Original fields from "annotation" structure:
+%     u2 type_index;
+%     u2 num_element_value_pairs;
+%     {
+%         u2 element_name_index;
+%         element_value value;
+%     } element_value_pairs[num_element_value_pairs];
+% }
+% \end{Verbatim}
+% 
+% % TODO: These are no longer used; is that what I want?
+% %%        field_target;
+% %%        typeindex_target;
+% 
+% 
+% We first briefly recap
+% the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmYBB2012}.
+% 
+% \begin{itemize}
+% \item \code{type\_index} is an index into the constant pool indicating the
+%   annotation type for this annotation.
+% \item \code{num\_element\_value\_pairs} is a count of the
+%   \code{element\_value\_pairs} that follow.
+% \item Each \code{element\_value\_pairs} table entry represents a single
+%   element-value pair in the annotation (in the source code, these are the
+%   arguments to the annotation):  \code{element\_name\_index} is a
+%   constant pool entry for the name of the annotation type element, and
+%   \code{value} is the corresponding value~\cite[\S 4.8.15.1]{LindholmYBB2012}.
+% \end{itemize}
+% 
+% Compared to \code{annotation},
+% the \extendedannotation structure contains two additional fields.
+% These fields implement a discriminated (tagged) union type:
+% field \code{target\_type} is the tag (see
+% Section~\ref{class-file:ext:target_type}), and its value determines the
+% size and
+% contents of \code{target\_info} (see Section~\ref{class-file:ext:target_info}).
+% Section~\ref{class-file:ext:type_path} describes how the classfile
+% indicates a part of a compound type.
+% 
+% 
+% \subsection{The \code{target\_type} field:  the type of annotated element\label{class-file:ext:target_type}\label{target_type}}
+% 
+% The \code{target\_type} field denotes the type of program element that
+% the annotation targets, such as whether the annotation is on a field, a
+% method receiver, a cast, or some other location.
+% Figure~\ref{tbl:target_types} gives the value of \code{target\_type} for
+% every possible annotation location.
+% 
+% 
+% \begin{figure}[thp!]
+% \begin{center}
+% \begin{tabular}{|l|l|c|c|}
+% \multicolumn{4}{l}{Targets for type parameter declarations (\<ElementType.TYPE\_PARAMETER>):} \\
+% \hline
+% {\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+% %% The canonical location for this information is
+% %%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
+% %% so whenever that is updated, this table should be as well.
+% class type parameter & \code{CLASS\_TYPE\_PARAMETER}
+% & \code{0x00} & \S\ref{class-file:ext:ri:mtp} \\
+% method type parameter & \code{METHOD\_TYPE\_PARAMETER}
+% & \code{0x01} & \S\ref{class-file:ext:ri:mtp} \\
+% \hline
+% \multicolumn{4}{c}{~} \\
+% \multicolumn{4}{l}{Targets for type uses that may be externally visible in
+%   classes and members (\<ElementType.TYPE\_USE>):} \\
+% \hline
+% {\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+% class \code{extends}/\code{implements} & \code{CLASS\_EXTENDS}
+% & \code{0x10} & \S\ref{class-file:ext:ri:extends} \\
+% class type parameter bound & \code{CLASS\_TYPE\_PARAMETER\_BOUND}
+% & \code{0x11} & \S\ref{class-file:ext:ri:tpbound} \\
+% method type parameter bound & \code{METHOD\_TYPE\_PARAMETER\_BOUND}
+% & \code{0x12} & \S\ref{class-file:ext:ri:tpbound} \\
+% field type & \code{FIELD}
+% & \code{0x13} & \S\ref{class-file:ext:ri:return} \\
+% method return type & \code{METHOD\_RETURN}
+% & \code{0x14} & \S\ref{class-file:ext:ri:return} \\
+% method receiver type & \code{METHOD\_RECEIVER}
+% & \code{0x15} & \S\ref{class-file:ext:ri:receiver} \\
+% method formal parameter type & \code{METHOD\_FORMAL\_PARAMETER}
+% & \code{0x16} & \S\ref{class-file:ext:ri:formal-parameters} \\
+% exception type in \code{throws} & \code{THROWS}
+% & \code{0x17} & \S\ref{class-file:ext:ri:throws} \\
+% \hline
+% \multicolumn{4}{c}{~} \\
+% \multicolumn{4}{l}{Targets for type uses that occur only within code blocks (\<ElementType.TYPE\_USE>):} \\
+% \hline
+% {\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
+% local variable type & \code{LOCAL\_VARIABLE}
+% & \code{0x40} & \S\ref{class-file:ext:ri:localvar} \\
+% resource variable type & \code{RESOURCE\_VARIABLE}
+% & \code{0x41} & \S\ref{class-file:ext:ri:localvar} \\
+% exception parameter type & \code{EXCEPTION\_PARAMETER}
+% & \code{0x42} & \S\ref{class-file:ext:ri:catch} \\
+% type test (\code{instanceof}) & \code{INSTANCEOF}
+% & \code{0x43} & \S\ref{class-file:ext:ri:instanceof} \\
+% object creation (\code{new}) & \code{NEW}
+% & \code{0x44} & \S\ref{class-file:ext:ri:new} \\
+% constructor reference receiver & \code{CONSTRUCTOR\_REFERENCE}
+% & \code{0x45} & \S\ref{class-file:ext:ri:cref-receiver} \\
+% method reference receiver & \code{METHOD\_REFERENCE}
+% & \code{0x46} & \S\ref{class-file:ext:ri:mref-receiver} \\
+% cast & \code{CAST}
+% & \code{0x47} & \S\ref{class-file:ext:ri:cast} \\
+% type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMENT}
+% & \code{0x48} & \S\ref{class-file:ext:ri:con-typearg} \\
+% type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
+% & \code{0x49} & \S\ref{class-file:ext:ri:con-typearg} \\
+% type argument in constructor reference & \code{CONSTRUCTOR\_REFERENCE\_TYPE\_ARGUMENT}
+% & \code{0x4A} & \S\ref{class-file:ext:ri:cref-typearg} \\
+% type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
+% & \code{0x4B} & \S\ref{class-file:ext:ri:mref-typearg} \\
+% \hline
+% \end{tabular}
+% \end{center}
+% %BEGIN LATEX
+% \vspace{-10pt}
+% %END LATEX
+% \caption{\label{tbl:target_types}
+%   Values of \code{target\_type} for each possible target of JSR 308's new
+%   annotations.  All of these appear in \extendedannotation attributes
+%   in the class file.
+%   % By contrast, declaration annotations other than type parameter
+%   % declarations appear in in \code{annotation} attributes in the class file.
+%   % 
+%   %% This implementation detail is out of place for this document.
+%   %   The symbolic constants appear in the enums
+%   %   \code{com.sun.tools.javac.code.TargetType} and
+%   %   \code{com.sun.tools.classfile.TypeAnnotation.TargetType}.
+% }
+% \end{figure}
+% 
+% 
+% \subsection{The \code{target\_info} field:  identifying a program element\label{class-file:ext:target_info}}
+% 
+% \code{target\_info} is a structure that contains enough information to
+% uniquely identify the target of a given annotation.  A different
+% \code{target\_type} may require a different set of fields, so the structure
+% of the \code{target\_info} is determined by the value of
+% \code{target\_type}.
+% 
+% % , and in some cases the size of \code{target\_info} is zero ...
+% 
+% All indexes count from zero.
+% 
+% See Section~\ref{class-file:ext:type_path} for indicating a specific part
+% of a compound type:  a parameterized, wildcard, array, or nested type.
+% 
+% 
+% \newcommand{\targetinfocontents}[2]{
+%   When the annotation's target is #1, \code{target\_info} contains one
+%   \code{#2}:
+% %, which has the following structure:
+% }
+% 
+% \newcommand{\targetinfocontentspartial}[1]{
+%   When the annotation's target is #1, \code{target\_info}}
+% 
+% \newcommand{\attributelocation}[2]{
+% A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes table of a #2.}
+% 
+% 
+% 
+% 
+% 
+% 
+% \subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
+% 
+% \targetinfocontents{a type parameter of a class or method}{type\_parameter\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     type_parameter_target {
+%         u1 type_parameter_index;
+%     };
+% \end{Verbatim}
+% 
+% \code{type\_parameter\_index} specifies the 0-based index of the type parameter.
+% 
+% A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+% \code{type\_parameter\_target} appears in the attributes table of a
+% \code{method\_info} structure if it targets a method type parameter,
+% otherwise, in the attributes table of a \code{ClassFile} structure if it
+% targets a class declaration type parameter.
+% 
+% (These declaration annotations appear in 
+% \RuntimeInOrVisibleTypeAnnotations attributes, rather than 
+% \RuntimeInOrVisibleAnnotations attributes, because generics are not
+% well-handled by the classfile.  For example, the \<Signature> attribute of
+% of a generic class/method cannot store attributes, much less index them to
+% indicate which type parameter is being annotated.  The additional location
+% information in a \<type\_annotation> is necessary.)
+% 
+% 
+% \subsubsection{Class supertypes:  \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
+% 
+% \targetinfocontents{a type in an \code{extends} or
+% \code{implements} clause}{\code{supertype\_target}}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     supertype_target { u2 supertype_index; };
+% \end{Verbatim}
+% 
+% \code{supertype\_index} is \code{-1} (\code{65535}) if the annotation is on the
+% superclass type.  Otherwise, \code{supertype\_index} specifies the 0-based index of the
+% targeted type in the
+% \code{interfaces} array field of the \code{ClassFile} structure;
+% simply the value $i$ is used if the annotation is on the $i$th
+% superinterface type.
+% 
+% \attributelocation{containing a
+% \code{supertype\_target}}{\code{ClassFile} structure}
+% 
+% 
+% \subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
+% 
+% \targetinfocontents{a bound of a type parameter of a class or
+% method}{type\_parameter\_bound\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     type_parameter_bound_target {
+%         u1 type_parameter_index;
+%         u1 bound_index;
+%     };
+% \end{Verbatim}
+% 
+% \code{type\_parameter\_index} specifies the index of the type parameter, while
+% \code{bound\_index} specifies the index of the bound.  Indexes start at 0.
+% Bound index 0 is always a class, not interface, type.
+% If the programmer-supplied upper bound of the type variable is an
+% interface, it is treated as the second bound, and the implicit first bound
+% is \code{java.lang.Object}.
+% 
+% A \RuntimeInOrVisibleTypeAnnotations attribute containing a
+% \code{type\_parameter\_bound\_target} appears in the attributes table of a
+% \code{method\_info} structure if it targets a method type parameter bound,
+% otherwise, in the attributes table of a \code{ClassFile} structure if it
+% targets a class declaration type parameter bound.
+% 
+% 
+% \subsubsection{Method return type, receiver, and fields\label{class-file:ext:ri:return}\label{class-file:ext:ri:receiver}}
+% 
+% % TODO: Specify methodorfield_target
+% When the type annotation's target is a method return type, a constructor
+% result (which is stored in the same place, using the \code{METHOD\_RETURN}
+% enum of \code{TargetType}), a receiver type (for an instance method or for an inner class
+% constructor), or a field, \code{target\_info} is empty.
+% More formally, it contains \code{empty\_target}:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     empty_target {
+%     };
+% \end{Verbatim}
+% 
+% % TODO: Make the following paragraph consistent with the rest
+% \attributelocation{targeting a field type}{\code{field\_info} structure}
+% \attributelocation{targeting a method return type, constructor result
+%   type, or receiver}{\code{method\_info} structure}
+% 
+% 
+% \subsubsection{Method formal parameters\label{class-file:ext:ri:formal-parameters}}
+% 
+% \targetinfocontentspartial{a method formal parameter type} contains one \code{method\_formal\_parameter\_target}, which
+% indicates which of the method's formal parameters is being annotated:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     method_formal_parameter_target {
+%         u1 method_formal_parameter_index;
+%     };
+% \end{Verbatim}
+% 
+% The index indicates the $i$th formal parameter type of the method
+% descriptor of the enclosing \code{method\_info} structure.
+% 
+% \attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
+% 
+% 
+% \subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
+% 
+% \targetinfocontents{a type in a \code{throws} clause}{throws\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     throws_target {
+%         u2 throws_type_index;
+%     };
+% \end{Verbatim}
+% 
+% \code{throws\_type\_index} specifies the index of the exception type in the
+% clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
+% simply the value $i$ denotes an annotation on the $i$th exception
+% type.
+% 
+% \attributelocation{containing a \code{throws\_target}}{\code{method\_info} structure}
+% 
+% 
+% \subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
+% 
+% \targetinfocontents{a local variable or resource variable type}{localvar\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     localvar_target {
+%         u2 table_length;
+%         {
+%             u2 start_pc;
+%             u2 length;
+%             u2 index;
+%         } table[table_length];
+%     };
+% \end{Verbatim}
+% 
+% The \code{table\_length} field specifies the number of entries in the
+% \code{table} array; multiple entries are necessary because a compiler is
+% permitted to break a single variable into multiple live ranges with different
+% local variable indices.
+% The \code{start\_pc} and \code{length} fields specify the variable's
+% live range in the bytecodes of the local variable's containing method
+% (from offset \code{start\_pc}, inclusive, to offset \code{start\_pc +
+%   length}, exclusive).  The
+% \code{index} field stores the local variable's index in that method.
+% These fields are similar to those of the optional
+% \code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmYBB2012}.
+% 
+% Storing local variable type annotations in the class file raises certain
+% challenges.  For example, live ranges are not isomorphic to local
+% variables.  Note that a local variable with no live range might not appear in
+% the class file; that is OK, because it is irrelevant to the program.
+% 
+% \attributelocation{containing a \code{localvar\_target}}{\code{Code} attribute}
+% 
+% 
+% \subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
+% 
+% \targetinfocontentspartial{an exception parameter (the exception type
+% in a \<catch> statement)} indicates an offset in the exception table (which
+% appears in the \<exception\_table> slot of the \<Code> attribute).
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     catch_target {
+%         u2 exception_table_index;
+%     };
+% \end{Verbatim}
+% 
+% In a multi-catch, each exception parameter may have different annotations,
+% and this correspondence is maintained in the classfile.  For example, a
+% compiler might create one exception table entry per disjunct, and annotate
+% each one with the appropriate annotations.
+% 
+% \attributelocation{containing a \code{catch\_target}}{\code{Code} attribute}
+% 
+% 
+% \subsubsection{Type tests, object creation, and method/constructor references\label{class-file:ext:ri:instanceof}\label{class-file:ext:ri:new}\label{class-file:ext:ri:mref-receiver}\label{class-file:ext:ri:cref-receiver}}
+% 
+% \targetinfocontents{an \code{instanceof}
+% expression, a \code{new} expression, or a method or constructor reference receiver}{offset\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     offset_target {
+%         u2 offset;
+%     };
+% \end{Verbatim}
+% 
+% The \code{offset} field denotes the offset (i.e., within the bytecodes
+% of the containing method) of the \code{instanceof} bytecode emitted for the type tests,
+% the \code{new} bytecode emitted for the object creation expression, or the
+% instruction that implements a method/constructor reference.
+% These annotations are attached to a single bytecode, not a bytecode range
+% (or ranges):  the annotation provides information about the type of a
+% single value, not about the behavior of a code block.
+% 
+% 
+% \attributelocation{containing an \code{offset\_target}}{\code{Code} attribute}
+% 
+% % The Java compiler must emit a \code{checkcast} bytecode for any annotated
+% % cast, so that there is a target for the \code{offset} field.  Ordinarily, a
+% % Java compiler is permitted to omit \code{checkcast} bytecodes for casts
+% % that are guaranteed to be no-ops.  For example, a cast from \code{String}
+% % to \code{@NonNull String} may be a no-op for the underlying Java type
+% % system (which sees a cast from
+% % \code{String} to \code{String}), but it may be significant to the type
+% % system for the qualified types
+% % % ; for example, it may be needed for load-time type-checking.
+% % Retaining the \code{checkcast} bytecodes does not change
+% % behavior, and is unlikely to affect performance.  A JIT will eliminate the
+% % cast, leading to no runtime performance penalty, and the impact on class
+% % file size is minimal, especially when compared to the size of the
+% % annotations themselves.  No \code{checkcast} bytecode need be emitted for
+% % un-annotated type casts.
+% 
+% 
+% \subsubsection{Casts and type arguments to constructor/method invocation/references\label{class-file:ext:ri:cast}\label{class-file:ext:ri:con-typearg}\label{class-file:ext:ri:mref-typearg}\label{class-file:ext:ri:cref-typearg}}
+% 
+% \targetinfocontents{a cast or a type argument in a constructor/method
+%   call/reference}{type\_argument\_target}
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%     type_argument_target {
+%         u2 offset;
+%         u1 type_argument_index;
+%     };
+% \end{Verbatim}
+% 
+% The \code{offset} field denotes the offset (i.e., within the bytecodes
+% of the containing method) of the \code{new} bytecode emitted for
+% constructor call, or the
+% % \code{invoke\{dynamic|interface|special|static|virtual\}} bytecode emitted for
+% instruction that implements a
+% method invocation or a method reference.  These annotations
+% are attached to a single bytecode, not a bytecode range.
+% 
+% \code{type\_argument\_index} specifies the index of the type argument in the
+% expression.  
+% For a constructor/method invocation, \code{type\_argument\_index} specifies
+% the index of a type argument in the list of explicit non-wildcard type
+% arguments, such as
+% \code{x.<@Foo String>m()} or \code{new <@Foo String> @Bar A()}.
+% 
+% It might seem odd that instanceof uses \code{target\_info} of
+% \code{offset\_target}, whereas cast uses \code{type\_argument\_index},
+% which has an additional \code{type\_argument\_index} field.  The reason is
+% to distinguish where an annotation appears within a cast to an intersection
+% type, as in \<(@A T \& @B U) x>.
+% 
+% For an annotated cast, the attribute may be attached to a
+% \code{checkcast} bytecode, or to any other bytecode.  The rationale for
+% this is that the Java compiler is permitted to omit \code{checkcast}
+% bytecodes for casts that are guaranteed to be no-ops.  For example, a
+% cast from \code{String} to \code{@NonNull String} may be a no-op for the
+% underlying Java type system (which sees a cast from \code{String} to
+% \code{String}).  If the compiler omits the \code{checkcast} bytecode, the
+% \code{@NonNull} attribute would be attached to the (last) bytecode that
+% creates the target expression instead.  This approach permits code
+% generation for existing compilers to be unaffected.
+% 
+% If the compiler eliminates an annotated cast, it is required to retain the
+% annotations on the cast in the class file (if the annotation type has at
+% least \<RetentionPolicy.CLASS> retention).  When a cast is removed, the
+% compiler may need to adjust (the locations of) the annotations, to account
+% for the relationship between the expression's type and the casted-to type.
+% Consider:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   class C<S, T> { ... }
+%   class D<A, B> extends C<B, A> { ... }
+%   ...
+%   ... (C<@A1 X, @A2 Y>) myD ...
+% \end{Verbatim}
+% 
+% \noindent
+% The compiler may leave out the upcast, but in that case it must record that
+% \<@A1> is attached to the second type argument of \<D>, even though it was
+% originally attached to the first type argument of \<C>.
+% 
+% 
+% \attributelocation{containing a \code{type\_argument\_target}}{\code{Code} attribute}
+% 
+% 
+% 
+% \subsection{The \code{type\_path} structure:  Identifying part of a compound type\label{class-file:ext:type_path}}
+% 
+% \newcommand{\tpath}[2]{\codefootnotesize{path\_length: #1; path: [#2]}}
+% \newcommand{\tarray}{\codefootnotesize{ARRAY(0, 0)}}
+% \newcommand{\tinner}{\codefootnotesize{INNER\_TYPE(1, 0)}}
+% \newcommand{\twildcard}{\codefootnotesize{WILDCARD(2, 0)}}
+% \newcommand{\ttypearg}[1]{\codefootnotesize{TYPE\_ARGUMENT(3, #1)}}
+% 
+% % See test/tools/javac/annotations/typeAnnotations/referenceinfos/FromSpecification.java
+% 
+% 
+% The \code{type\_path} structure identifies a part of a compound type.
+% In a compound type (a parameterized, wildcard, array, or nested type),
+% there are multiple places that an annotation may appear.
+% For example, consider the difference among
+% \code{@X Map<String, Object>},
+% \code{Map<@X String, Object>}, and
+% \code{Map<String, @X Object>};
+% or the difference among
+% \code{Foo<@X ? extends T>} and
+% \code{Foo<? extends @X T>};
+% or the difference among 
+% \code{@X String [] []},
+% \code{String @X [] []}, and
+% \code{String [] @X []};
+% or the difference among 
+% \code{@X Outer.Inner} and
+% \code{Outer.@X Inner}.
+% The \code{type\_path} structure distinguishes among these locations.
+% 
+% \begin{Verbatim}
+% struct type_path {
+%   u1              path_length;
+%   type_path_entry path[path_length];
+% }
+% 
+% struct type_path_entry {
+%   u1 type_path_kind;
+%     // 0: annotation is deeper in this array type
+%     // 1: annotation is deeper in this nested type
+%     // 2: annotation is on the bound of this wildcard type arg
+%     // 3: annotation is on a type argument of this parameterized type
+%   u1 type_argument_index;
+%     // 0, if type_path_kind is 0, 1, or 2
+%     // the 0-based index of the type arg in this parameterized type, if type_path_kind is 3
+% }
+% \end{Verbatim}
+% 
+% % TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
+% 
+% When \code{type\_path\_kind} is 0, 1, or 2, then
+% \code{type\_argument\_index} must be 0.
+% 
+% If the compound type is viewed as a tree, then 
+% the \code{type\_path} structure represents a path in that tree.
+% % , from the top down or the ``outside in''.
+% 
+% The \code{type\_path} that is stored in the class file is with respect to the full type, not the
+% source code representation.  In the source code, a type can be abbreviated
+% or partially written out, such as a nested type written without the outer
+% type or a raw type written without the type arguments.
+% 
+% In the class file, all annotations on the full type appear.  For example,
+% the classfile would record the type in this \<new> expression as
+% \<@A Outer.@B Inner>:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   @A Outer f1 = ...
+%   ... f1.new @B Inner() ...
+% \end{Verbatim}
 
-\preverbnegspace
-\begin{Verbatim}
-type_annotation {
-    // New fields in JSR 308:
-    u1 target_type;    // the type of the targeted program element, see Section 3.2
-    union {
-        type_parameter_target;
-        supertype_target;
-        type_parameter_bound_target;
-        empty_target;
-        method_formal_parameter_target;
-        throws_target;
-        localvar_target;
-        catch_target;
-        offset_target;
-        type_argument_target;
-    } target_info;     // identifies the targeted program element, see Section 3.3
-    type_path target_path; // identifies targeted type in a compound type (array, generic, etc.), see Section 3.4
-    // Original fields from "annotation" structure:
-    u2 type_index;
-    u2 num_element_value_pairs;
-    {
-        u2 element_name_index;
-        element_value value;
-    } element_value_pairs[num_element_value_pairs];
-}
-\end{Verbatim}
-
-% TODO: These are no longer used; is that what I want?
-%%        field_target;
-%%        typeindex_target;
-
-
-We first briefly recap
-the three fields of \code{annotation}~\cite[\S 4.8.15]{LindholmYBB2012}.
-
-\begin{itemize}
-\item \code{type\_index} is an index into the constant pool indicating the
-  annotation type for this annotation.
-\item \code{num\_element\_value\_pairs} is a count of the
-  \code{element\_value\_pairs} that follow.
-\item Each \code{element\_value\_pairs} table entry represents a single
-  element-value pair in the annotation (in the source code, these are the
-  arguments to the annotation):  \code{element\_name\_index} is a
-  constant pool entry for the name of the annotation type element, and
-  \code{value} is the corresponding value~\cite[\S 4.8.15.1]{LindholmYBB2012}.
-\end{itemize}
-
-Compared to \code{annotation},
-the \extendedannotation structure contains two additional fields.
-These fields implement a discriminated (tagged) union type:
-field \code{target\_type} is the tag (see
-Section~\ref{class-file:ext:target_type}), and its value determines the
-size and
-contents of \code{target\_info} (see Section~\ref{class-file:ext:target_info}).
-Section~\ref{class-file:ext:type_path} describes how the classfile
-indicates a part of a compound type.
-
-
-\subsection{The \code{target\_type} field:  the type of annotated element\label{class-file:ext:target_type}\label{target_type}}
-
-The \code{target\_type} field denotes the type of program element that
-the annotation targets, such as whether the annotation is on a field, a
-method receiver, a cast, or some other location.
-Figure~\ref{tbl:target_types} gives the value of \code{target\_type} for
-every possible annotation location.
-
-
-\begin{figure}[thp!]
-\begin{center}
-\begin{tabular}{|l|l|c|c|}
-\multicolumn{4}{l}{Targets for type parameter declarations (\<ElementType.TYPE\_PARAMETER>):} \\
-\hline
-{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
-%% The canonical location for this information is
-%%   langtools/src/share/classes/com/sun/tools/javac/comp/TargetType.java
-%% so whenever that is updated, this table should be as well.
-class type parameter & \code{CLASS\_TYPE\_PARAMETER}
-& \code{0x00} & \S\ref{class-file:ext:ri:mtp} \\
-method type parameter & \code{METHOD\_TYPE\_PARAMETER}
-& \code{0x01} & \S\ref{class-file:ext:ri:mtp} \\
-\hline
-\multicolumn{4}{c}{~} \\
-\multicolumn{4}{l}{Targets for type uses that may be externally visible in
-  classes and members (\<ElementType.TYPE\_USE>):} \\
-\hline
-{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
-class \code{extends}/\code{implements} & \code{CLASS\_EXTENDS}
-& \code{0x10} & \S\ref{class-file:ext:ri:extends} \\
-class type parameter bound & \code{CLASS\_TYPE\_PARAMETER\_BOUND}
-& \code{0x11} & \S\ref{class-file:ext:ri:tpbound} \\
-method type parameter bound & \code{METHOD\_TYPE\_PARAMETER\_BOUND}
-& \code{0x12} & \S\ref{class-file:ext:ri:tpbound} \\
-field type & \code{FIELD}
-& \code{0x13} & \S\ref{class-file:ext:ri:return} \\
-method return type & \code{METHOD\_RETURN}
-& \code{0x14} & \S\ref{class-file:ext:ri:return} \\
-method receiver type & \code{METHOD\_RECEIVER}
-& \code{0x15} & \S\ref{class-file:ext:ri:receiver} \\
-method formal parameter type & \code{METHOD\_FORMAL\_PARAMETER}
-& \code{0x16} & \S\ref{class-file:ext:ri:formal-parameters} \\
-exception type in \code{throws} & \code{THROWS}
-& \code{0x17} & \S\ref{class-file:ext:ri:throws} \\
-\hline
-\multicolumn{4}{c}{~} \\
-\multicolumn{4}{l}{Targets for type uses that occur only within code blocks (\<ElementType.TYPE\_USE>):} \\
-\hline
-{\bf Annotation target} & {\bf \code{TargetType} enum constant} & {\bf \code{target\_type} value} & {\bf \code{target\_info} definition} \\ \hline
-local variable type & \code{LOCAL\_VARIABLE}
-& \code{0x40} & \S\ref{class-file:ext:ri:localvar} \\
-resource variable type & \code{RESOURCE\_VARIABLE}
-& \code{0x41} & \S\ref{class-file:ext:ri:localvar} \\
-exception parameter type & \code{EXCEPTION\_PARAMETER}
-& \code{0x42} & \S\ref{class-file:ext:ri:catch} \\
-type test (\code{instanceof}) & \code{INSTANCEOF}
-& \code{0x43} & \S\ref{class-file:ext:ri:instanceof} \\
-object creation (\code{new}) & \code{NEW}
-& \code{0x44} & \S\ref{class-file:ext:ri:new} \\
-constructor reference receiver & \code{CONSTRUCTOR\_REFERENCE}
-& \code{0x45} & \S\ref{class-file:ext:ri:cref-receiver} \\
-method reference receiver & \code{METHOD\_REFERENCE}
-& \code{0x46} & \S\ref{class-file:ext:ri:mref-receiver} \\
-cast & \code{CAST}
-& \code{0x47} & \S\ref{class-file:ext:ri:cast} \\
-type argument in constructor call & \code{CONSTRUCTOR\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x48} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in method call & \code{METHOD\_INVOCATION\_TYPE\_ARGUMENT}
-& \code{0x49} & \S\ref{class-file:ext:ri:con-typearg} \\
-type argument in constructor reference & \code{CONSTRUCTOR\_REFERENCE\_TYPE\_ARGUMENT}
-& \code{0x4A} & \S\ref{class-file:ext:ri:cref-typearg} \\
-type argument in method reference & \code{METHOD\_REFERENCE\_TYPE\_ARGUMENT}
-& \code{0x4B} & \S\ref{class-file:ext:ri:mref-typearg} \\
-\hline
-\end{tabular}
-\end{center}
-%BEGIN LATEX
-\vspace{-10pt}
-%END LATEX
-\caption{\label{tbl:target_types}
-  Values of \code{target\_type} for each possible target of JSR 308's new
-  annotations.  All of these appear in \extendedannotation attributes
-  in the class file.
-  % By contrast, declaration annotations other than type parameter
-  % declarations appear in in \code{annotation} attributes in the class file.
-  % 
-  %% This implementation detail is out of place for this document.
-  %   The symbolic constants appear in the enums
-  %   \code{com.sun.tools.javac.code.TargetType} and
-  %   \code{com.sun.tools.classfile.TypeAnnotation.TargetType}.
-}
-\end{figure}
-
-
-\subsection{The \code{target\_info} field:  identifying a program element\label{class-file:ext:target_info}}
-
-\code{target\_info} is a structure that contains enough information to
-uniquely identify the target of a given annotation.  A different
-\code{target\_type} may require a different set of fields, so the structure
-of the \code{target\_info} is determined by the value of
-\code{target\_type}.
-
-% , and in some cases the size of \code{target\_info} is zero ...
-
-All indexes count from zero.
-
-See Section~\ref{class-file:ext:type_path} for indicating a specific part
-of a compound type:  a parameterized, wildcard, array, or nested type.
-
-
-\newcommand{\targetinfocontents}[2]{
-  When the annotation's target is #1, \code{target\_info} contains one
-  \code{#2}:
-%, which has the following structure:
-}
-
-\newcommand{\targetinfocontentspartial}[1]{
-  When the annotation's target is #1, \code{target\_info}}
-
-\newcommand{\attributelocation}[2]{
-A \RuntimeInOrVisibleTypeAnnotations attribute #1 appears in the attributes table of a #2.}
-
-
-
-
-
-
-\subsubsection{Type parameters\label{class-file:ext:ri:mtp}}
-
-\targetinfocontents{a type parameter of a class or method}{type\_parameter\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    type_parameter_target {
-        u1 type_parameter_index;
-    };
-\end{Verbatim}
-
-\code{type\_parameter\_index} specifies the 0-based index of the type parameter.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{type\_parameter\_target} appears in the attributes table of a
-\code{method\_info} structure if it targets a method type parameter,
-otherwise, in the attributes table of a \code{ClassFile} structure if it
-targets a class declaration type parameter.
-
-(These declaration annotations appear in 
-\RuntimeInOrVisibleTypeAnnotations attributes, rather than 
-\RuntimeInOrVisibleAnnotations attributes, because generics are not
-well-handled by the classfile.  For example, the \<Signature> attribute of
-of a generic class/method cannot store attributes, much less index them to
-indicate which type parameter is being annotated.  The additional location
-information in a \<type\_annotation> is necessary.)
-
-
-\subsubsection{Class supertypes:  \code{extends} and \code{implements} clauses\label{class-file:ext:ri:extends}}
-
-\targetinfocontents{a type in an \code{extends} or
-\code{implements} clause}{\code{supertype\_target}}
-
-\preverbnegspace
-\begin{Verbatim}
-    supertype_target { u2 supertype_index; };
-\end{Verbatim}
-
-\code{supertype\_index} is \code{-1} (\code{65535}) if the annotation is on the
-superclass type.  Otherwise, \code{supertype\_index} specifies the 0-based index of the
-targeted type in the
-\code{interfaces} array field of the \code{ClassFile} structure;
-simply the value $i$ is used if the annotation is on the $i$th
-superinterface type.
-
-\attributelocation{containing a
-\code{supertype\_target}}{\code{ClassFile} structure}
-
-
-\subsubsection{Type parameter bounds\label{class-file:ext:ri:tpbound}}
-
-\targetinfocontents{a bound of a type parameter of a class or
-method}{type\_parameter\_bound\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    type_parameter_bound_target {
-        u1 type_parameter_index;
-        u1 bound_index;
-    };
-\end{Verbatim}
-
-\code{type\_parameter\_index} specifies the index of the type parameter, while
-\code{bound\_index} specifies the index of the bound.  Indexes start at 0.
-Bound index 0 is always a class, not interface, type.
-If the programmer-supplied upper bound of the type variable is an
-interface, it is treated as the second bound, and the implicit first bound
-is \code{java.lang.Object}.
-
-A \RuntimeInOrVisibleTypeAnnotations attribute containing a
-\code{type\_parameter\_bound\_target} appears in the attributes table of a
-\code{method\_info} structure if it targets a method type parameter bound,
-otherwise, in the attributes table of a \code{ClassFile} structure if it
-targets a class declaration type parameter bound.
-
-
-\subsubsection{Method return type, receiver, and fields\label{class-file:ext:ri:return}\label{class-file:ext:ri:receiver}}
-
-% TODO: Specify methodorfield_target
-When the type annotation's target is a method return type, a constructor
-result (which is stored in the same place, using the \code{METHOD\_RETURN}
-enum of \code{TargetType}), a receiver type (for an instance method or for an inner class
-constructor), or a field, \code{target\_info} is empty.
-More formally, it contains \code{empty\_target}:
-
-\preverbnegspace
-\begin{Verbatim}
-    empty_target {
-    };
-\end{Verbatim}
-
-% TODO: Make the following paragraph consistent with the rest
-\attributelocation{targeting a field type}{\code{field\_info} structure}
-\attributelocation{targeting a method return type, constructor result
-  type, or receiver}{\code{method\_info} structure}
-
-
-\subsubsection{Method formal parameters\label{class-file:ext:ri:formal-parameters}}
-
-\targetinfocontentspartial{a method formal parameter type} contains one \code{method\_formal\_parameter\_target}, which
-indicates which of the method's formal parameters is being annotated:
-
-\preverbnegspace
-\begin{Verbatim}
-    method_formal_parameter_target {
-        u1 method_formal_parameter_index;
-    };
-\end{Verbatim}
-
-The index indicates the $i$th formal parameter type of the method
-descriptor of the enclosing \code{method\_info} structure.
-
-\attributelocation{containing a \code{method\_formal\_parameter\_target}}{\code{method\_info} structure}
-
-
-\subsubsection{\code{throws} clauses\label{class-file:ext:ri:throws}}
-
-\targetinfocontents{a type in a \code{throws} clause}{throws\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    throws_target {
-        u2 throws_type_index;
-    };
-\end{Verbatim}
-
-\code{throws\_type\_index} specifies the index of the exception type in the
-clause in \code{exception\_index\_table} of \code{Exceptions\_attribute};
-simply the value $i$ denotes an annotation on the $i$th exception
-type.
-
-\attributelocation{containing a \code{throws\_target}}{\code{method\_info} structure}
-
-
-\subsubsection{Local variables and resource variables\label{class-file:ext:ri:localvar}}
-
-\targetinfocontents{a local variable or resource variable type}{localvar\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    localvar_target {
-        u2 table_length;
-        {
-            u2 start_pc;
-            u2 length;
-            u2 index;
-        } table[table_length];
-    };
-\end{Verbatim}
-
-The \code{table\_length} field specifies the number of entries in the
-\code{table} array; multiple entries are necessary because a compiler is
-permitted to break a single variable into multiple live ranges with different
-local variable indices.
-The \code{start\_pc} and \code{length} fields specify the variable's
-live range in the bytecodes of the local variable's containing method
-(from offset \code{start\_pc}, inclusive, to offset \code{start\_pc +
-  length}, exclusive).  The
-\code{index} field stores the local variable's index in that method.
-These fields are similar to those of the optional
-\code{LocalVariableTable} attribute~\cite[\S 4.8.12]{LindholmYBB2012}.
-
-Storing local variable type annotations in the class file raises certain
-challenges.  For example, live ranges are not isomorphic to local
-variables.  Note that a local variable with no live range might not appear in
-the class file; that is OK, because it is irrelevant to the program.
-
-\attributelocation{containing a \code{localvar\_target}}{\code{Code} attribute}
-
-
-\subsubsection{Exception parameters (\<catch> clauses)\label{class-file:ext:ri:catch}}
-
-\targetinfocontentspartial{an exception parameter (the exception type
-in a \<catch> statement)} indicates an offset in the exception table (which
-appears in the \<exception\_table> slot of the \<Code> attribute).
-
-\preverbnegspace
-\begin{Verbatim}
-    catch_target {
-        u2 exception_table_index;
-    };
-\end{Verbatim}
-
-In a multi-catch, each exception parameter may have different annotations,
-and this correspondence is maintained in the classfile.  For example, a
-compiler might create one exception table entry per disjunct, and annotate
-each one with the appropriate annotations.
-
-\attributelocation{containing a \code{catch\_target}}{\code{Code} attribute}
-
-
-\subsubsection{Type tests, object creation, and method/constructor references\label{class-file:ext:ri:instanceof}\label{class-file:ext:ri:new}\label{class-file:ext:ri:mref-receiver}\label{class-file:ext:ri:cref-receiver}}
-
-\targetinfocontents{an \code{instanceof}
-expression, a \code{new} expression, or a method or constructor reference receiver}{offset\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    offset_target {
-        u2 offset;
-    };
-\end{Verbatim}
-
-The \code{offset} field denotes the offset (i.e., within the bytecodes
-of the containing method) of the \code{instanceof} bytecode emitted for the type tests,
-the \code{new} bytecode emitted for the object creation expression, or the
-instruction that implements a method/constructor reference.
-These annotations are attached to a single bytecode, not a bytecode range
-(or ranges):  the annotation provides information about the type of a
-single value, not about the behavior of a code block.
-
-
-\attributelocation{containing an \code{offset\_target}}{\code{Code} attribute}
-
-% The Java compiler must emit a \code{checkcast} bytecode for any annotated
-% cast, so that there is a target for the \code{offset} field.  Ordinarily, a
-% Java compiler is permitted to omit \code{checkcast} bytecodes for casts
-% that are guaranteed to be no-ops.  For example, a cast from \code{String}
-% to \code{@NonNull String} may be a no-op for the underlying Java type
-% system (which sees a cast from
-% \code{String} to \code{String}), but it may be significant to the type
-% system for the qualified types
-% % ; for example, it may be needed for load-time type-checking.
-% Retaining the \code{checkcast} bytecodes does not change
-% behavior, and is unlikely to affect performance.  A JIT will eliminate the
-% cast, leading to no runtime performance penalty, and the impact on class
-% file size is minimal, especially when compared to the size of the
-% annotations themselves.  No \code{checkcast} bytecode need be emitted for
-% un-annotated type casts.
-
-
-\subsubsection{Casts and type arguments to constructor/method invocation/references\label{class-file:ext:ri:cast}\label{class-file:ext:ri:con-typearg}\label{class-file:ext:ri:mref-typearg}\label{class-file:ext:ri:cref-typearg}}
-
-\targetinfocontents{a cast or a type argument in a constructor/method
-  call/reference}{type\_argument\_target}
-
-\preverbnegspace
-\begin{Verbatim}
-    type_argument_target {
-        u2 offset;
-        u1 type_argument_index;
-    };
-\end{Verbatim}
-
-The \code{offset} field denotes the offset (i.e., within the bytecodes
-of the containing method) of the \code{new} bytecode emitted for
-constructor call, or the
-% \code{invoke\{dynamic|interface|special|static|virtual\}} bytecode emitted for
-instruction that implements a
-method invocation or a method reference.  These annotations
-are attached to a single bytecode, not a bytecode range.
-
-\code{type\_argument\_index} specifies the index of the type argument in the
-expression.  
-For a constructor/method invocation, \code{type\_argument\_index} specifies
-the index of a type argument in the list of explicit non-wildcard type
-arguments, such as
-\code{x.<@Foo String>m()} or \code{new <@Foo String> @Bar A()}.
-
-It might seem odd that instanceof uses \code{target\_info} of
-\code{offset\_target}, whereas cast uses \code{type\_argument\_index},
-which has an additional \code{type\_argument\_index} field.  The reason is
-to distinguish where an annotation appears within a cast to an intersection
-type, as in \<(@A T \& @B U) x>.
-
-For an annotated cast, the attribute may be attached to a
-\code{checkcast} bytecode, or to any other bytecode.  The rationale for
-this is that the Java compiler is permitted to omit \code{checkcast}
-bytecodes for casts that are guaranteed to be no-ops.  For example, a
-cast from \code{String} to \code{@NonNull String} may be a no-op for the
-underlying Java type system (which sees a cast from \code{String} to
-\code{String}).  If the compiler omits the \code{checkcast} bytecode, the
-\code{@NonNull} attribute would be attached to the (last) bytecode that
-creates the target expression instead.  This approach permits code
-generation for existing compilers to be unaffected.
-
-If the compiler eliminates an annotated cast, it is required to retain the
-annotations on the cast in the class file (if the annotation type has at
-least \<RetentionPolicy.CLASS> retention).  When a cast is removed, the
-compiler may need to adjust (the locations of) the annotations, to account
-for the relationship between the expression's type and the casted-to type.
-Consider:
-
-\preverbnegspace
-\begin{Verbatim}
-  class C<S, T> { ... }
-  class D<A, B> extends C<B, A> { ... }
-  ...
-  ... (C<@A1 X, @A2 Y>) myD ...
-\end{Verbatim}
-
-\noindent
-The compiler may leave out the upcast, but in that case it must record that
-\<@A1> is attached to the second type argument of \<D>, even though it was
-originally attached to the first type argument of \<C>.
-
-
-\attributelocation{containing a \code{type\_argument\_target}}{\code{Code} attribute}
-
-
-
-\subsection{The \code{type\_path} structure:  Identifying part of a compound type\label{class-file:ext:type_path}}
-
-\newcommand{\tpath}[2]{\codefootnotesize{path\_length: #1; path: [#2]}}
-\newcommand{\tarray}{\codefootnotesize{ARRAY(0, 0)}}
-\newcommand{\tinner}{\codefootnotesize{INNER\_TYPE(1, 0)}}
-\newcommand{\twildcard}{\codefootnotesize{WILDCARD(2, 0)}}
-\newcommand{\ttypearg}[1]{\codefootnotesize{TYPE\_ARGUMENT(3, #1)}}
-
-% See test/tools/javac/annotations/typeAnnotations/referenceinfos/FromSpecification.java
-
-
-The \code{type\_path} structure identifies a part of a compound type.
-In a compound type (a parameterized, wildcard, array, or nested type),
-there are multiple places that an annotation may appear.
-For example, consider the difference among
-\code{@X Map<String, Object>},
-\code{Map<@X String, Object>}, and
-\code{Map<String, @X Object>};
-or the difference among
-\code{Foo<@X ? extends T>} and
-\code{Foo<? extends @X T>};
-or the difference among 
-\code{@X String [] []},
-\code{String @X [] []}, and
-\code{String [] @X []};
-or the difference among 
-\code{@X Outer.Inner} and
-\code{Outer.@X Inner}.
-The \code{type\_path} structure distinguishes among these locations.
-
-\begin{Verbatim}
-struct type_path {
-  u1              path_length;
-  type_path_entry path[path_length];
-}
-
-struct type_path_entry {
-  u1 type_path_kind;
-    // 0: annotation is deeper in this array type
-    // 1: annotation is deeper in this nested type
-    // 2: annotation is on the bound of this wildcard type arg
-    // 3: annotation is on a type argument of this parameterized type
-  u1 type_argument_index;
-    // 0, if type_path_kind is 0, 1, or 2
-    // the 0-based index of the type arg in this parameterized type, if type_path_kind is 3
-}
-\end{Verbatim}
-
-% TODO: what about having BOTH lower_bound and upper_bound for wildcard_path??
-
-When \code{type\_path\_kind} is 0, 1, or 2, then
-\code{type\_argument\_index} must be 0.
-
-If the compound type is viewed as a tree, then 
-the \code{type\_path} structure represents a path in that tree.
-% , from the top down or the ``outside in''.
-
-The \code{type\_path} that is stored in the class file is with respect to the full type, not the
-source code representation.  In the source code, a type can be abbreviated
-or partially written out, such as a nested type written without the outer
-type or a raw type written without the type arguments.
-
-In the class file, all annotations on the full type appear.  For example,
-the classfile would record the type in this \<new> expression as
-\<@A Outer.@B Inner>:
-
-\preverbnegspace
-\begin{Verbatim}
-  @A Outer f1 = ...
-  ... f1.new @B Inner() ...
-\end{Verbatim}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2217,142 +2237,144 @@ the classfile would record the type in this \<new> expression as
 \appendix
 
 
-\section{Examples of classfile structure\label{classfile-examples}}
+%% Also moved to the JVMS.
 
-These examples are not normative, so they are at the end of the
-specification to keep
-
-
-\subsection{Examples of type parameter bounds\label{classfile-examples-type-parameter-bounds}}
-
-Here is an example of type parameter bounds
-(Section~\ref{class-file:ext:ri:tpbound}).
-
-Consider the following
-example:
-
-\preverbnegspace
-\begin{Verbatim}
-  <T extends @A Object & @B Comparable, U extends @C Cloneable>
-\end{Verbatim}
-
-\noindent
-Here
-\code{@A} has \code{type\_parameter\_index} 0 and \code{bound\_index} 0,
-\code{@B} has \code{type\_parameter\_index} 0 and \code{bound\_index} 1, and
-\code{@C} has \code{type\_parameter\_index} 1 and \code{bound\_index} 1.
-
-
-\subsection{Examples of the \code{type\_path} structure\label{classfile-examples-type_path}}
-
-Figure~\ref{tbl:locations} shows some examples of the \code{type\_path}
-structure (Section~\ref{class-file:ext:type_path}).
-
-
-\begin{figure}[tp!]
-\begin{center}
-
-\code{@A Map<@B ? extends @C String, @D List<@E Object>>}
-\\
-\code{@I String @F [] @G [] @H []}
-\\
-\code{@M O1.@L O2.@K O3.@J NestedStatic}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-% \resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
-
-\begin{tabular}{|c|l|}
-\hline
-\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \tpath{0}{} \\
-\code{@B}       & \tpath{1}{\ttypearg{0}} \\
-\code{@C}       & \tpath{2}{\ttypearg{0}, \twildcard}  \\
-\code{@D}       & \tpath{1}{\ttypearg{1}}  \\
-\code{@E}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}}  \\
-
-\code{@F}       & \tpath{0}{} \\
-\code{@G}       & \tpath{1}{\tarray} \\
-\code{@H}       & \tpath{2}{\tarray, \tarray} \\
-\code{@I}       & \tpath{3}{\tarray, \tarray, \tarray} \\
-
-\code{@J}       & \tpath{3}{\tinner, \tinner, \tinner} \\
-\code{@K}       & \tpath{2}{\tinner, \tinner} \\
-\code{@L}       & \tpath{1}{\tinner} \\
-\code{@M}       & \tpath{0}{} \\
-\hline
-\end{tabular}
-
-%BEGIN LATEX
-~ \\ ~
-%END LATEX
-
-\code{@A Map<@B Comparable<@F Object @C [] @D [] @E []>, @G List<@H Document>>}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-% % The table is not top-aligned if I increase the size.  I don't know why.
-% \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
-% ~~
-\begin{tabular}{|c|l|}
-\hline
-\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \tpath{0}{} \\
-\code{@B}       & \tpath{1}{\ttypearg{0}} \\
-\code{@C}       & \tpath{2}{\ttypearg{0}, \ttypearg{0}} \\
-\code{@D}       & \tpath{3}{\ttypearg{0}, \ttypearg{0}, \tarray} \\
-\code{@E}       & \tpath{4}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray} \\
-\code{@F}       & \tpath{5}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray, \tarray} \\
-\code{@G}       & \tpath{1}{\ttypearg{1}} \\
-\code{@H}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}} \\
-\hline
-\end{tabular}
-
-%BEGIN LATEX
-~ \\ ~
-%END LATEX
-
-\code{@H O1.@E O2<@F S, @G T>.@D O3.@A Nested<@B U, @C V>}
-
-%BEGIN LATEX
-~
-%END LATEX
-
-% \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
-% ~~
-\begin{tabular}{|c|l|}
-\hline
-\bf{Anno.} & \bf{\code{type\_path}} \\ \hline
-\code{@A}       & \tpath{3}{\tinner, \tinner, \tinner} \\
-\code{@B}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{0}} \\
-\code{@C}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{1}} \\
-\code{@D}       & \tpath{2}{\tinner, \tinner} \\
-\code{@E}       & \tpath{1}{\tinner} \\
-\code{@F}       & \tpath{2}{\tinner, \ttypearg{0}} \\
-\code{@G}       & \tpath{2}{\tinner, \ttypearg{1}} \\
-\code{@H}       & \tpath{0}{} \\
-\hline
-\end{tabular}
-
-\end{center}
-\caption{\label{tbl:locations}
-  Example values of the \code{target\_path}
-  field, which is of type \code{type\_path}.
-  \newline
-  The top of the figure shows examples of each of parameterized types,
-  array types, and nested types.  The middle shows the interaction between
-  parameterized types and array types.  The bottom shows the interaction
-  between parameterized types and nested types.
-  \newline
-  For clarity, we use a meaningful name for each \code{type\_path\_entry},
-  in addition to the raw bytes.
-  % TODO: re-define the \t macros to change this.
-  }
-\end{figure}
+% \section{Examples of classfile structure\label{classfile-examples}}
+% 
+% % These examples are not normative, so they are at the end of the
+% % specification to keep
+% 
+% 
+% \subsection{Examples of type parameter bounds\label{classfile-examples-type-parameter-bounds}}
+% 
+% Here is an example of type parameter bounds
+% (Section~\ref{class-file:ext:ri:tpbound}).
+% 
+% Consider the following
+% example:
+% 
+% \preverbnegspace
+% \begin{Verbatim}
+%   <T extends @A Object & @B Comparable, U extends @C Cloneable>
+% \end{Verbatim}
+% 
+% \noindent
+% Here
+% \code{@A} has \code{type\_parameter\_index} 0 and \code{bound\_index} 0,
+% \code{@B} has \code{type\_parameter\_index} 0 and \code{bound\_index} 1, and
+% \code{@C} has \code{type\_parameter\_index} 1 and \code{bound\_index} 1.
+% 
+% 
+% \subsection{Examples of the \code{type\_path} structure\label{classfile-examples-type_path}}
+% 
+% Figure~\ref{tbl:locations} shows some examples of the \code{type\_path}
+% structure (Section~\ref{class-file:ext:type_path}).
+% 
+% 
+% \begin{figure}[tp!]
+% \begin{center}
+% 
+% \code{@A Map<@B ? extends @C String, @D List<@E Object>>}
+% \\
+% \code{@I String @F [] @G [] @H []}
+% \\
+% \code{@M O1.@L O2.@K O3.@J NestedStatic}
+% 
+% %BEGIN LATEX
+% ~
+% %END LATEX
+% 
+% % \resizebox{\columnwidth}{!}{\includegraphics{figures/type-tree}}
+% 
+% \begin{tabular}{|c|l|}
+% \hline
+% \bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+% \code{@A}       & \tpath{0}{} \\
+% \code{@B}       & \tpath{1}{\ttypearg{0}} \\
+% \code{@C}       & \tpath{2}{\ttypearg{0}, \twildcard}  \\
+% \code{@D}       & \tpath{1}{\ttypearg{1}}  \\
+% \code{@E}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}}  \\
+% 
+% \code{@F}       & \tpath{0}{} \\
+% \code{@G}       & \tpath{1}{\tarray} \\
+% \code{@H}       & \tpath{2}{\tarray, \tarray} \\
+% \code{@I}       & \tpath{3}{\tarray, \tarray, \tarray} \\
+% 
+% \code{@J}       & \tpath{3}{\tinner, \tinner, \tinner} \\
+% \code{@K}       & \tpath{2}{\tinner, \tinner} \\
+% \code{@L}       & \tpath{1}{\tinner} \\
+% \code{@M}       & \tpath{0}{} \\
+% \hline
+% \end{tabular}
+% 
+% %BEGIN LATEX
+% ~ \\ ~
+% %END LATEX
+% 
+% \code{@A Map<@B Comparable<@F Object @C [] @D [] @E []>, @G List<@H Document>>}
+% 
+% %BEGIN LATEX
+% ~
+% %END LATEX
+% 
+% % % The table is not top-aligned if I increase the size.  I don't know why.
+% % \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree3}}
+% % ~~
+% \begin{tabular}{|c|l|}
+% \hline
+% \bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+% \code{@A}       & \tpath{0}{} \\
+% \code{@B}       & \tpath{1}{\ttypearg{0}} \\
+% \code{@C}       & \tpath{2}{\ttypearg{0}, \ttypearg{0}} \\
+% \code{@D}       & \tpath{3}{\ttypearg{0}, \ttypearg{0}, \tarray} \\
+% \code{@E}       & \tpath{4}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray} \\
+% \code{@F}       & \tpath{5}{\ttypearg{0}, \ttypearg{0}, \tarray, \tarray, \tarray} \\
+% \code{@G}       & \tpath{1}{\ttypearg{1}} \\
+% \code{@H}       & \tpath{2}{\ttypearg{1}, \ttypearg{0}} \\
+% \hline
+% \end{tabular}
+% 
+% %BEGIN LATEX
+% ~ \\ ~
+% %END LATEX
+% 
+% \code{@H O1.@E O2<@F S, @G T>.@D O3.@A Nested<@B U, @C V>}
+% 
+% %BEGIN LATEX
+% ~
+% %END LATEX
+% 
+% % \resizebox{.4\columnwidth}{!}{\includegraphics{figures/type-tree2}}
+% % ~~
+% \begin{tabular}{|c|l|}
+% \hline
+% \bf{Anno.} & \bf{\code{type\_path}} \\ \hline
+% \code{@A}       & \tpath{3}{\tinner, \tinner, \tinner} \\
+% \code{@B}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{0}} \\
+% \code{@C}       & \tpath{4}{\tinner, \tinner, \tinner, \ttypearg{1}} \\
+% \code{@D}       & \tpath{2}{\tinner, \tinner} \\
+% \code{@E}       & \tpath{1}{\tinner} \\
+% \code{@F}       & \tpath{2}{\tinner, \ttypearg{0}} \\
+% \code{@G}       & \tpath{2}{\tinner, \ttypearg{1}} \\
+% \code{@H}       & \tpath{0}{} \\
+% \hline
+% \end{tabular}
+% 
+% \end{center}
+% \caption{\label{tbl:locations}
+%   Example values of the \code{target\_path}
+%   field, which is of type \code{type\_path}.
+%   \newline
+%   The top of the figure shows examples of each of parameterized types,
+%   array types, and nested types.  The middle shows the interaction between
+%   parameterized types and array types.  The bottom shows the interaction
+%   between parameterized types and nested types.
+%   \newline
+%   For clarity, we use a meaningful name for each \code{type\_path\_entry},
+%   in addition to the raw bytes.
+%   % TODO: re-define the \t macros to change this.
+%   }
+% \end{figure}
 
 
 
@@ -3338,7 +3360,9 @@ These tools include:
 
   The JSR 269 (annotation processing) model
   represents type annotations that are visible down to class member
-  declarations (the top of Figure~\ref{tbl:target_types}), but not within a
+  declarations,
+  % (the top of Figure~\ref{tbl:target_types}),
+  but not within a
   method, such as on individual statements and expressions.
 
 \item
@@ -3765,7 +3789,7 @@ Framework, which builds on the Type Annotations syntax, at JavaOne 2009.
 % LocalWords:  GenericsStackIncrement identifierStack getDeclaredAnnotations
 % LocalWords:  ReceiverNonNull superclasses TypeArgument runtime newMap ernst
 % LocalWords:  Nonnegative typedefs unabbrev reusability typedef getstatic init
-% LocalWords:  QualifiedType toArray localvar ReadWrite 
+% LocalWords:  QualifiedType toArray localvar ReadWrite  2x5 308's
 % LocalWords:  ClassFile clinit StackMapTable StaticNested boolean var1 
 % LocalWords:  ReferenceType VariableModifier UnannReferenceType OrReceiver
 % LocalWords:  FormalParameter Decls FormalParameterOrReceiverDecls nestings

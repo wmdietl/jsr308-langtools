@@ -211,17 +211,6 @@ David Greenfieldboyce and Jeffrey~S. Foster.
   \url{http://www.cs.umd.edu/Grad/scholarlypapers/papers/greenfiledboyce.pdf},
   August~8, 2005.
 
-\bibitem[GJS{\etalchar{+}}12]{GoslingJSBB2012}
-James Gosling, Bill Joy, Guy Steele, Gilad Bracha, and Alex Buckley.
-\newblock {\em The Java Language Specification}.
-\newblock \url{http://docs.oracle.com/javase/specs/jls/se7/jls7.pdf}, {Java SE
-  7} edition, 2012.
-
-\bibitem[GJSB00]{GoslingJSB2000}
-James Gosling, Bill Joy, Guy Steele, and Gilad Bracha.
-\newblock {\em The Java Language Specification}.
-\newblock Addison Wesley, Boston, MA, second edition, 2000.
-
 \bibitem[GPB{\etalchar{+}}06]{Goetz2006}
 Brian Goetz, Tim Peierls, Joshua Bloch, Joseph Bowbeer, David Holmes, and Doug
   Lea.
