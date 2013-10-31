@@ -68,7 +68,6 @@ ${jsr308_www} \
 ${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
-${jsr308_spec}/jsr308.pdf \
 ${jsr308_spec}/java-annotation-extensions.pdf \
 ${jsr308_spec}/java-annotation-extensions.html \
 ${jsr308_spec}/jsr308-changes.html
@@ -175,9 +174,6 @@ ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_B
 	if [ -a design003.gif ]; then cp design003.gif ${jsr308_spec}; fi;
 	if [ -a design003.png ]; then cp design003.png ${jsr308_spec}; fi;
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
-
-${jsr308_spec}/jsr308.pdf: jsr308.pdf
-	\cp -f $< $@
 
 ###########################################################################
 
