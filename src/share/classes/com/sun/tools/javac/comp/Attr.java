@@ -250,6 +250,14 @@ public class Attr extends JCTree.Visitor {
         Type owntype = found;
         if (!owntype.hasTag(ERROR) && !resultInfo.pt.hasTag(METHOD) && !resultInfo.pt.hasTag(FORALL)) {
             if (allowPoly && inferenceContext.free(found)) {
+                if ((ownkind & ~resultInfo.pkind) == 0) {
+                    owntype = resultInfo.check(tree, inferenceContext.asFree(owntype));
+                } else {
+                    log.error(tree.pos(), "unexpected.type",
+                            kindNames(resultInfo.pkind),
+                            kindName(ownkind));
+                    owntype = types.createErrorType(owntype);
+                }
                 inferenceContext.addFreeTypeListener(List.of(found, resultInfo.pt), new FreeTypeListener() {
                     @Override
                     public void typesInferred(InferenceContext inferenceContext) {
@@ -510,6 +518,15 @@ public class Attr extends JCTree.Visitor {
 
         protected ResultInfo dup(CheckContext newContext) {
             return new ResultInfo(pkind, pt, newContext);
+        }
+
+        @Override
+        public String toString() {
+            if (pt != null) {
+                return pt.toString();
+            } else {
+                return "";
+            }
         }
     }
 
@@ -2237,7 +2254,8 @@ public class Attr extends JCTree.Visitor {
         // empty annotations, if only declaration annotations were given.
         // This method will raise an error for such a type.
         for (JCAnnotation ai : annotations) {
-            if (typeAnnotations.annotationType(ai.attribute, sym) == TypeAnnotations.AnnotationType.DECLARATION) {
+            if (!ai.type.isErroneous() &&
+                typeAnnotations.annotationType(ai.attribute, sym) == TypeAnnotations.AnnotationType.DECLARATION) {
                 log.error(ai.pos(), "annotation.type.not.applicable");
             }
         }
@@ -4079,8 +4097,9 @@ public class Attr extends JCTree.Visitor {
     }
 
     private static List<Attribute.TypeCompound> fromAnnotations(List<JCAnnotation> annotations) {
-        if (annotations.isEmpty())
+        if (annotations.isEmpty()) {
             return List.nil();
+        }
 
         ListBuffer<Attribute.TypeCompound> buf = new ListBuffer<>();
         for (JCAnnotation anno : annotations) {
@@ -4092,6 +4111,10 @@ public class Attr extends JCTree.Visitor {
                 // Any better solutions?
                 buf.append((Attribute.TypeCompound) anno.attribute);
             }
+            // Eventually we will want to throw an exception here, but
+            // we can't do that just yet, because it gets triggered
+            // when attempting to attach an annotation that isn't
+            // defined.
         }
         return buf.toList();
     }
