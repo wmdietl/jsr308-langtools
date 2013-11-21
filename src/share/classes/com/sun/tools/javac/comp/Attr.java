@@ -4436,8 +4436,7 @@ public class Attr extends JCTree.Visitor {
                 checkForDeclarationAnnotations(((JCAnnotatedType) tree.clazz).annotations,
                         tree.clazz.type.tsym);
             }
-            if (tree.def != null &&
-                    tree.def.mods != null) {
+            if (tree.def != null) {
                 checkForDeclarationAnnotations(tree.def.mods.annotations, tree.clazz.type.tsym);
             }
             if (tree.clazz.type != null) {
