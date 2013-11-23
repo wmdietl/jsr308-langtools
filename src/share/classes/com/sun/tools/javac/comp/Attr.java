@@ -28,7 +28,6 @@ package com.sun.tools.javac.comp;
 import java.util.*;
 
 import javax.lang.model.element.ElementKind;
-import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 import com.sun.source.tree.IdentifierTree;
@@ -2163,11 +2162,6 @@ public class Attr extends JCTree.Visitor {
                     tree.constructor,
                     localEnv,
                     new ResultInfo(pkind, newMethodTemplate(syms.voidType, argtypes, typeargtypes)));
-            } else {
-                if (tree.clazz.hasTag(ANNOTATED_TYPE)) {
-                    checkForDeclarationAnnotations(((JCAnnotatedType) tree.clazz).annotations,
-                            tree.clazz.type.tsym);
-                }
             }
 
             if (tree.constructor != null && tree.constructor.kind == MTH)
@@ -2229,21 +2223,6 @@ public class Attr extends JCTree.Visitor {
                 }
             }
 
-    private void checkForDeclarationAnnotations(List<? extends JCAnnotation> annotations,
-            Symbol sym) {
-        // Ensure that no declaration annotations are present.
-        // Note that a tree type might be an AnnotatedType with
-        // empty annotations, if only declaration annotations were given.
-        // This method will raise an error for such a type.
-        for (JCAnnotation ai : annotations) {
-            if (!ai.type.isErroneous() &&
-                typeAnnotations.annotationType(ai.attribute, sym) == TypeAnnotations.AnnotationType.DECLARATION) {
-                log.error(ai.pos(), "annotation.type.not.applicable");
-            }
-        }
-    }
-
-
     /** Make an attributed null check tree.
      */
     public JCExpression makeNullCheck(JCExpression arg) {
@@ -2269,10 +2248,6 @@ public class Attr extends JCTree.Visitor {
             for (List<JCExpression> l = tree.dims; l.nonEmpty(); l = l.tail) {
                 attribExpr(l.head, localEnv, syms.intType);
                 owntype = new ArrayType(owntype, syms.arrayClass);
-            }
-            if (tree.elemtype.hasTag(ANNOTATED_TYPE)) {
-                checkForDeclarationAnnotations(((JCAnnotatedType) tree.elemtype).annotations,
-                        tree.elemtype.type.tsym);
             }
         } else {
             // we are seeing an untyped aggregate { ... }
@@ -4418,7 +4393,7 @@ public class Attr extends JCTree.Visitor {
         }
         public void visitMethodDef(JCMethodDecl tree) {
             if (tree.recvparam != null &&
-                    tree.recvparam.vartype.type.getKind() != TypeKind.ERROR) {
+                    !tree.recvparam.vartype.type.isErroneous()) {
                 checkForDeclarationAnnotations(tree.recvparam.mods.annotations,
                         tree.recvparam.vartype.type.tsym);
             }
@@ -4457,17 +4432,28 @@ public class Attr extends JCTree.Visitor {
             super.visitTypeTest(tree);
         }
         public void visitNewClass(JCNewClass tree) {
-            if (tree.clazz.type != null)
+            if (tree.clazz.hasTag(ANNOTATED_TYPE)) {
+                checkForDeclarationAnnotations(((JCAnnotatedType) tree.clazz).annotations,
+                        tree.clazz.type.tsym);
+            }
+            if (tree.def != null) {
+                checkForDeclarationAnnotations(tree.def.mods.annotations, tree.clazz.type.tsym);
+            }
+            if (tree.clazz.type != null) {
                 validateAnnotatedType(tree.clazz, tree.clazz.type);
+            }
             super.visitNewClass(tree);
         }
         public void visitNewArray(JCNewArray tree) {
-            if (tree.elemtype != null && tree.elemtype.type != null)
+            if (tree.elemtype != null && tree.elemtype.type != null) {
+                if (tree.elemtype.hasTag(ANNOTATED_TYPE)) {
+                    checkForDeclarationAnnotations(((JCAnnotatedType) tree.elemtype).annotations,
+                            tree.elemtype.type.tsym);
+                }
                 validateAnnotatedType(tree.elemtype, tree.elemtype.type);
+            }
             super.visitNewArray(tree);
         }
-
-        @Override
         public void visitClassDef(JCClassDecl tree) {
             if (sigOnly) {
                 scan(tree.mods);
@@ -4482,8 +4468,6 @@ public class Attr extends JCTree.Visitor {
                 scan(member);
             }
         }
-
-        @Override
         public void visitBlock(JCBlock tree) {
             if (!sigOnly) {
                 scan(tree.stats);
@@ -4586,6 +4570,20 @@ public class Attr extends JCTree.Visitor {
                 } else {
                     Assert.error("Unexpected tree: " + enclTr + " with kind: " + enclTr.getKind() +
                             " within: "+ errtree + " with kind: " + errtree.getKind());
+                }
+            }
+        }
+
+        private void checkForDeclarationAnnotations(List<? extends JCAnnotation> annotations,
+                Symbol sym) {
+            // Ensure that no declaration annotations are present.
+            // Note that a tree type might be an AnnotatedType with
+            // empty annotations, if only declaration annotations were given.
+            // This method will raise an error for such a type.
+            for (JCAnnotation ai : annotations) {
+                if (!ai.type.isErroneous() &&
+                        typeAnnotations.annotationType(ai.attribute, sym) == TypeAnnotations.AnnotationType.DECLARATION) {
+                    log.error(ai.pos(), "annotation.type.not.applicable");
                 }
             }
         }
