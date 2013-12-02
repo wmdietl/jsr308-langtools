@@ -1,11 +1,11 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
-Version 1.7.1, 11 Nov 2013
+Version 1.7.1, 2 Dec 2013
 
 Base build
   Updated to OpenJDK 8 tl/langtools and type-annotations/langtools
-  as of 10 Nov 2013.
+  as of 1 Dec 2013.
 
 ----------------------------------------------------------------------
 Version 1.7.0, 21 Oct 2013
