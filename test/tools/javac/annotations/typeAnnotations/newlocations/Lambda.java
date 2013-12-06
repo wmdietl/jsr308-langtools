@@ -57,6 +57,12 @@ public class Lambda {
     LambdaInt2 getLambda() {
         return (@TA Object x, @TB Object y) -> { @TA Object l = null; System.out.println("We have: " + (@TB Object) x); };
     }
+
+    java.util.function.IntUnaryOperator x = (@TA int y) -> 1; 
+
+    java.util.function.IntUnaryOperator foo() {
+        return (@TA int y) -> 2;
+    }
 }
 
 @Target({ElementType.TYPE_USE, ElementType.TYPE_PARAMETER})

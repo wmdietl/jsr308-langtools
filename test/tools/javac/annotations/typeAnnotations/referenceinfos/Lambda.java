@@ -285,4 +285,15 @@ public class Lambda {
                 "  }" +
                 "}";
     }
+
+    @TADescriptions({
+        @TADescription(annotation = "TA", type = METHOD_FORMAL_PARAMETER,
+                paramIndex = 0)
+    })
+    public String lambdaField1() {
+        return
+                "class Test {" +
+                "  java.util.function.IntUnaryOperator field = (@TA int y) -> 1;" +
+                "}";
+    }
 }
