@@ -25,6 +25,7 @@
  * @test
  * @bug     1234567
  * @summary Annotations on types
+ * @ignore Test will be fixed in Java 8 update release.
  * @library /tools/javac/lib
  * @build JavacTestingAbstractProcessor DPrinter BasicAnnoTests
  * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java
