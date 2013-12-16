@@ -72,7 +72,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
-import com.sun.tools.javac.util.Options;
 
 /**
  * Contains operations specific to processing type annotations.
@@ -105,7 +104,6 @@ public class TypeAnnotations {
         syms = Symtab.instance(context);
         annotate = Annotate.instance(context);
         attr = Attr.instance(context);
-        Options options = Options.instance(context);
     }
 
     /**
@@ -348,20 +346,28 @@ public class TypeAnnotations {
                     sym.owner.type.asMethodType().recvtype = type;
                     // note that the typeAnnotations will also be added to the owner below.
                 } else {
-                    MethodType methType = sym.owner.type.asMethodType();
-                    List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
-                    List<Type> oldArgs = methType.argtypes;
-                    ListBuffer<Type> newArgs = new ListBuffer<Type>();
-                    while (params.nonEmpty()) {
-                        if (params.head == sym) {
-                            newArgs.add(type);
-                        } else {
-                            newArgs.add(oldArgs.head);
+                    // TODO: don't do anything if sym is a lambda parameter.
+                    // How can we check for that?
+                    if (sym.owner.type != null) {
+                        MethodType methType = sym.owner.type.asMethodType();
+                        List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
+                        List<Type> oldArgs = methType.argtypes;
+                        ListBuffer<Type> newArgs = new ListBuffer<Type>();
+                        boolean found = false;
+                        while (params.nonEmpty()) {
+                            if (params.head == sym) {
+                                newArgs.add(type);
+                                found = true;
+                            } else {
+                                newArgs.add(oldArgs.head);
+                            }
+                            oldArgs = oldArgs.tail;
+                            params = params.tail;
                         }
-                        oldArgs = oldArgs.tail;
-                        params = params.tail;
+                        if (found) {
+                            methType.argtypes = newArgs.toList();
+                        }
                     }
-                    methType.argtypes = newArgs.toList();
                 }
             } else {
                 sym.type = type;
