@@ -72,7 +72,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
-import com.sun.tools.javac.util.Options;
 
 /**
  * Contains operations specific to processing type annotations.
@@ -104,7 +103,6 @@ public class TypeAnnotations {
         syms = Symtab.instance(context);
         annotate = Annotate.instance(context);
         attr = Attr.instance(context);
-        Options options = Options.instance(context);
     }
 
     /**
@@ -351,16 +349,21 @@ public class TypeAnnotations {
                     List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
                     List<Type> oldArgs = methType.argtypes;
                     ListBuffer<Type> newArgs = new ListBuffer<>();
+                    boolean found = false;
                     while (params.nonEmpty()) {
                         if (params.head == sym) {
                             newArgs.add(type);
+                            found = true;
                         } else {
                             newArgs.add(oldArgs.head);
                         }
                         oldArgs = oldArgs.tail;
                         params = params.tail;
                     }
-                    methType.argtypes = newArgs.toList();
+                    if (found) {
+                        methType.argtypes = newArgs.toList();
+                    }
+                    // Should we raise an error if !found?
                 }
             } else {
                 sym.type = type;

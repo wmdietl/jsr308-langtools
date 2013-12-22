@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.sun.tools.javac.util.Position.LineMap;
-import com.sun.tools.javac.parser.JavaTokenizer.*;
 
 import static com.sun.tools.javac.parser.Tokens.*;
 
