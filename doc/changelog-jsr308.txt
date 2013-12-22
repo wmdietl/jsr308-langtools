@@ -1,6 +1,16 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.7.2, 2 Jan 2014
+
+jsr308-langtools is now based on OpenJDK 9 source.
+The build now requires at least Java 7.
+
+Base build
+  Updated to OpenJDK 9 dev/langtools and type-annotations/langtools
+  as of 1 Jan 2014.
+
+----------------------------------------------------------------------
 Version 1.7.1, 6 Dec 2013
 
 Base build
