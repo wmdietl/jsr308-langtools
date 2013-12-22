@@ -1210,14 +1210,14 @@ public class ClassReader {
                 }
             },
 
-            // JSR 308 local change: keep compatible with 1.5. Use V49 instead of V52.
-            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+            // JSR 308 local change: keep compatible with JDK 7. Use V51 instead of V52.
+            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
 
-            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V49, CLASS_OR_MEMBER_ATTRIBUTE) {
+            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
