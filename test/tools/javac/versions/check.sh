@@ -24,8 +24,12 @@
 # @test
 # @bug 4981566 5028634 5094412 6304984 7025786 7025789 8001112 8028545 8000961
 # @summary Check interpretation of -target and -source options
+# @ignore
 # @build CheckClassFileVersion
 # @run shell check.sh 
+
+# UW local change: ignore this test, because we changed default
+# source/target options. Undo change when we decide to not do so.
 
 TESTJAVA=${TESTJAVA:?}
 TC=${TESTCLASSES-.}
