@@ -47,7 +47,7 @@ import static com.sun.tools.javac.util.RichDiagnosticFormatter.RichConfiguration
 
 /**
  * A rich diagnostic formatter is a formatter that provides better integration
- * with javac's type system. A diagostic is first preprocessed in order to keep
+ * with javac's type system. A diagnostic is first preprocessed in order to keep
  * track of each types/symbols in it; after these informations are collected,
  * the diagnostic is rendered using a standard formatter, whose type/symbol printer
  * has been replaced by a more refined version provided by this rich formatter.
