@@ -349,21 +349,16 @@ public class TypeAnnotations {
                     List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
                     List<Type> oldArgs = methType.argtypes;
                     ListBuffer<Type> newArgs = new ListBuffer<>();
-                    boolean found = false;
                     while (params.nonEmpty()) {
                         if (params.head == sym) {
                             newArgs.add(type);
-                            found = true;
                         } else {
                             newArgs.add(oldArgs.head);
                         }
                         oldArgs = oldArgs.tail;
                         params = params.tail;
                     }
-                    if (found) {
-                        methType.argtypes = newArgs.toList();
-                    }
-                    // Should we raise an error if !found?
+                    methType.argtypes = newArgs.toList();
                 }
             } else {
                 sym.type = type;
