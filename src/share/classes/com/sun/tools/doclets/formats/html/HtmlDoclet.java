@@ -115,6 +115,12 @@ public class HtmlDoclet extends AbstractDoclet {
         boolean nodeprecated = configuration.nodeprecated;
         performCopy(configuration.helpfile);
         performCopy(configuration.stylesheetfile);
+        copyResourceFile("background.gif");
+        copyResourceFile("tab.gif");
+        copyResourceFile("titlebar.gif");
+        copyResourceFile("titlebar_end.gif");
+        copyResourceFile("activetitlebar.gif");
+        copyResourceFile("activetitlebar_end.gif");
         // do early to reduce memory footprint
         if (configuration.classuse) {
             ClassUseWriter.generate(configuration, classtree);
@@ -306,6 +312,16 @@ public class HtmlDoclet extends AbstractDoclet {
             DocErrorReporter reporter) {
         docletToStart = new HtmlDoclet();
         return docletToStart.configuration.validOptions(options, reporter);
+    }
+
+    /**
+     * Copy a file in the resources directory to the destination directory.
+     * @param resource   The name of the resource file to copy
+     */
+    private void copyResourceFile(String resource) {
+        DocPath p = DocPaths.RESOURCES.resolve(resource);
+        DocFile f = DocFile.createFileForOutput(configuration, p);
+        f.copyResource(p, false, false);
     }
 
     private void performCopy(String filename) {
