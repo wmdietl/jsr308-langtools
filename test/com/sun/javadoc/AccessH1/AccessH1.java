@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 4636667 7052425 8016549
+ * @bug 4636667 7052425
  * @summary  Use <H1, <H2>, and <H3> in proper sequence for accessibility
  * @author dkramer
  * @run main AccessH1
@@ -85,7 +85,7 @@ public class AccessH1 {
     private static final String[][] testArray = {
         // Test the style sheet
         {
-            "h1 {" + LS + "    font-size:20px;" + LS +
+            "h1 {" + LS + "    font-size:1.8em;" + LS +
             "}",
             TMPDEST_DIR1 + "stylesheet.css"
         },
