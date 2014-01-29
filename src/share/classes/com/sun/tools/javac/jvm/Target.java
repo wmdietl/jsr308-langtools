@@ -104,7 +104,12 @@ public enum Target {
         this.minorVersion = minorVersion;
     }
 
-    public static final Target DEFAULT = JDK1_9;
+    /*
+     * JSR 308 local change: use JDK 1.7 as the default target.
+     * This allows us to run the compiled code on >= JDK 1.7 VMs.
+     * For the official version, use the original JDK1_9.
+     */
+    public static final Target DEFAULT = JDK1_7;
 
     public static Target lookup(String name) {
         return tab.get(name);
