@@ -2739,7 +2739,7 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
-        Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
+        Assert.checkNonNull(a.type); // , "annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
 
         if (a.hasTag(TYPE_ANNOTATION) &&
