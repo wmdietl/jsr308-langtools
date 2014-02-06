@@ -25,8 +25,8 @@
  * @test
  * @bug     1234567
  * @summary Annotations on types
+ * @ignore Test will be fixed in Java 8 update release.
  * @library /tools/javac/lib
- * @ignore
  * @build JavacTestingAbstractProcessor DPrinter BasicAnnoTests
  * @compile/process -processor BasicAnnoTests -proc:only BasicAnnoTests.java
  */
@@ -47,6 +47,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
@@ -234,6 +235,12 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
             return super.visitWildcard(t, p);
         }
 
+        @Override
+        public R visitDeclared(DeclaredType t, P p) {
+            scan(t.getTypeArguments(), p);
+            return super.visitDeclared(t, p);
+        }
+
         R scan(TypeMirror t) {
             return scan(t, null);
         }
@@ -285,4 +292,10 @@ public class BasicAnnoTests extends JavacTestingAbstractProcessor {
 
     @Test(posn=3, annoType=TA.class, expect="6")
     public int m3(float a) throws @TA(6) Exception { return 0; }
+
+    @Test(posn=1, annoType=TA.class, expect="7")
+    public java.util.List<@TA(7) String> f7;
+
+    @Test(posn=2, annoType=TA.class, expect="8")
+    public void m8(java.util.List<@TA(8) String> a) { }
 }
