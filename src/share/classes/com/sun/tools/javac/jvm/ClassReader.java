@@ -199,6 +199,10 @@ public class ClassReader {
     /** The minor version number of the class file being read. */
     int minorVersion;
 
+    /** Switch: debug output for JSR 308-related operations.
+     */
+    boolean debugJSR308;
+
     /** A table to hold the constant pool indices for method parameter
      * names, as given in LocalVariableTable attributes.
      */
@@ -279,6 +283,7 @@ public class ClassReader {
             : null;
 
         typevars = new Scope(syms.noSymbol);
+        debugJSR308 = options.isSet("TA:reader");
 
         lintClassfile = Lint.instance(context).isEnabled(LintCategory.CLASSFILE);
 
@@ -1169,13 +1174,14 @@ public class ClassReader {
                 }
             },
 
-            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
+            // JSR 308 local change: keep compatible with JDK 7. Use V51 instead of V52.
+            new AttributeReader(names.RuntimeVisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
             },
 
-            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V52, CLASS_OR_MEMBER_ATTRIBUTE) {
+            new AttributeReader(names.RuntimeInvisibleTypeAnnotations, V51, CLASS_OR_MEMBER_ATTRIBUTE) {
                 protected void read(Symbol sym, int attrLen) {
                     attachTypeAnnotations(sym);
                 }
@@ -1459,6 +1465,10 @@ public class ClassReader {
     TypeAnnotationProxy readTypeAnnotation() {
         TypeAnnotationPosition position = readPosition();
         CompoundAnnotationProxy proxy = readCompoundAnnotation();
+
+        if (debugJSR308)
+            System.out.println("TA: reading: " + proxy + " @ " + position
+                    + " in " + log.currentSourceFile());
 
         return new TypeAnnotationProxy(proxy, position);
     }
@@ -2009,6 +2019,9 @@ public class ClassReader {
             try {
                 currentClassFile = classFile;
                 List<Attribute.TypeCompound> newList = deproxyTypeCompoundList(proxies);
+                if (debugJSR308)
+                    System.out.println("TA: reading: adding " + newList
+                      + " to symbol " + sym + " in " + log.currentSourceFile());
                 sym.setTypeAttributes(newList.prependList(sym.getRawTypeAttributes()));
             } finally {
                 currentClassFile = previousClassFile;
