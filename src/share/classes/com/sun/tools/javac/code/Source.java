@@ -105,13 +105,23 @@ public enum Source {
         this.name = name;
     }
 
-    public static final Source DEFAULT = JDK1_9;
+    /* JSR 308 local change: use 1.8 as default source
+     * level to allow running without a bootclasspath
+     * argument.
+     */
+    public static final Source DEFAULT = JDK1_8;
 
     public static Source lookup(String name) {
         return tab.get(name);
     }
 
     public Target requiredTarget() {
+        /* JSR 308 local change: allow targets starting from 1.7
+         * for source from 1.7. This allows the use of type annotations
+         * and still generate 1.7 compatible code.
+         */
+        if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
+
         if (this.compareTo(JDK1_9) >= 0) return Target.JDK1_9;
         if (this.compareTo(JDK1_8) >= 0) return Target.JDK1_8;
         if (this.compareTo(JDK1_7) >= 0) return Target.JDK1_7;
