@@ -134,8 +134,8 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(t.toString());
         Type unboxed = types.unboxedType((Type) t);
         if (! unboxed.isPrimitive())    // only true primitives, not void
-            throw new IllegalArgumentException(t.toString());
-        return (PrimitiveType)unboxed;
+            throw new IllegalArgumentException(String.format("unboxed (%s) is not primitive:  t=%s, this=%s, this.types=%s", unboxed, t, this, this.types));
+        return (PrimitiveType) unboxed;
     }
 
     public TypeMirror capture(TypeMirror t) {
