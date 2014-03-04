@@ -1,0 +1,5 @@
+Test01.java:13:8: compiler.err.cant.resolve.location: kindname.class, AnnoStringBad, , , (compiler.misc.location: kindname.class, Test01, null)
+Test01.java:20:8: compiler.err.cant.resolve.location: kindname.class, AnnoStringBad, , , (compiler.misc.location: kindname.class, Test01, null)
+Test01.java:23:16: compiler.err.prob.found.req: (compiler.misc.inconvertible.types: java.lang.String, int)
+Test01.java:27:8: compiler.err.cant.resolve.location: kindname.class, AnnoStringBad, , , (compiler.misc.location: kindname.class, Test01, null)
+4 errors
