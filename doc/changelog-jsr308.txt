@@ -1,6 +1,11 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.7.5, 05 Mar 2014
+
+No changes. Version increased to match Checker Framework.
+
+----------------------------------------------------------------------
 Version 1.7.4, 19 Feb 2014
 
 Base build
