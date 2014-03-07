@@ -21,8 +21,11 @@
  * questions.
  */
 
-// key: compiler.err.varargs.must.be.last
+package pkg1;
 
-class VarargMustBeLast {
-    public void invalidVarArg(String... invalidVarArg, String extra) { }
-}
+/**
+ * Class 2 refers to <a href='http://download.oracle.com/javase/8/docs/technotes/guides/indexC2.html'>Here</a>.
+ * This is a single quoted link.
+ */
+public class C2 extends C1 {}
+

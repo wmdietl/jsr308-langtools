@@ -21,8 +21,9 @@
  * questions.
  */
 
-// key: compiler.err.varargs.must.be.last
+package pkg1;
 
-class VarargMustBeLast {
-    public void invalidVarArg(String... invalidVarArg, String extra) { }
-}
+/**
+ * Class 1. This is a test.
+ */
+public class C1 {}
