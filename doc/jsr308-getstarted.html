@@ -93,7 +93,7 @@ To run a checker on a source file, use the following command
   <code>GetStarted</code>.
 
   <pre>
-import checkers.nullness.quals.*;
+import org.checkerframework.checker.nullness.qual.*;
 
 public class GetStarted {
     void sample() {
@@ -103,7 +103,7 @@ public class GetStarted {
   </pre></li>
 
   <li>Run the Nullness Checker on the class.
-  <pre>jsr308-javac -processor checkers.nullness.NullnessChecker GetStarted.java</pre>
+  <pre>jsr308-javac -processor org.checkerframework.checker.nullness.NullnessChecker GetStarted.java</pre>
   The compilation should end without any errors.
   </li>
 

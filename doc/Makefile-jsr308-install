@@ -65,7 +65,7 @@ export MAKEFILE := ${MAKEFILE_DIR}/Makefile-jsr308-install
 export JAVA_HOME := ${JSR308}/jdk1.7.0
 export PATH := ${JAVA_HOME}/bin:${PATH}
 
-export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.7.0/lib/tools.jar:${JSR308}/checker-framework/checkers/binary/checkers.jar
+export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.7.0/lib/tools.jar:${JSR308}/checker-framework/checker/dist/checker.jar
 
 UNAME := $(shell uname)
 
@@ -95,7 +95,7 @@ veryclean: clean-checker-framework clean-langtools clean-jdk1.7.0
 
 .PHONY : clean-checker-framework
 clean-checker-framework:
-	rm -rf checkers.zip checkers .install-checker-framework
+	rm -rf checker.zip checkers .install-checker-framework
 
 .PHONY : clean-langtools
 clean-langtools:
@@ -184,9 +184,9 @@ checkers:
 
 test-checker-framework:
 	cd checkers && ant all-tests
-	cd checkers && javac -processor checkers.nullness.NullnessChecker examples/NullnessExample.java
+	cd checkers && javac -processor org.checkerframework.checker.nullness.NullnessChecker examples/NullnessExample.java
 	@echo "The following command is expected to issue warnings."
-	-cd checkers && javac -processor checkers.nullness.NullnessChecker examples/NullnessExampleWithWarnings.java
+	-cd checkers && javac -processor org.checkerframework.checker.nullness.NullnessChecker examples/NullnessExampleWithWarnings.java
 	@echo "The previous command was expected to issue warnings."
 
 ###

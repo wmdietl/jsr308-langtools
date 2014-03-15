@@ -977,7 +977,7 @@
 
     <property environment="env"/>
     <presetdef name="jsr308.javac" >
-      <javac fork="yes" executable="${env.CHECKERS}/binary/javac">
+      <javac fork="yes" executable="${env.CHECKERS}/bin/javac">
         <!-- JSR308 related compiler arguments -->
         <compilerarg value="-version"/>
         <!-- optional, so .class files work with older JVMs: <compilerarg line="-target 5"/> -->
@@ -985,8 +985,8 @@
         <compilerarg line="-Awarns -Xmaxwarns 10000"/>
 
         <classpath>
-          <pathelement location="${env.CHECKERS}/binary/checkers.jar"/>
-          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checkers/binary/checkers.jar"/> -->
+          <pathelement location="${env.CHECKERS}/dist/checker.jar"/>
+          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checker/bin/checker.jar"/> -->
         </classpath>
       </javac>
     </presetdef>
@@ -1051,8 +1051,8 @@
                     <!-- <compilerarg line="${javac.lint.opts}"/> -->
 
                     <!-- Checker Framework command-line arguments -->
-                    <compilerarg line="-processor checkers.interning.InterningChecker"/>
-                    <compilerarg value="-J-Djsr308_imports=checkers.interning.quals.*"/>
+                    <compilerarg line="-processor org.checkerframework.checker.interning.InterningChecker"/>
+                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.interning.qual.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
@@ -1129,8 +1129,8 @@
                     <!-- <compilerarg line="${javac.lint.opts}"/> -->
 
                     <!-- Checker Framework command-line arguments -->
-                    <compilerarg line="-processor checkers.nullness.NullnessChecker"/>
-                    <compilerarg value="-J-Djsr308_imports=checkers.nullness.quals.*"/>
+                    <compilerarg line="-processor org.checkerframework.checker.nullness.NullnessChecker"/>
+                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.nullness.qual.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
