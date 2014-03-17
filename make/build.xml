@@ -977,7 +977,7 @@
 
     <property environment="env"/>
     <presetdef name="jsr308.javac" >
-      <javac fork="yes" executable="${env.CHECKERS}/bin/javac">
+      <javac fork="yes" executable="${env.CHECKERFRAMEWORK}/checker/bin/javac">
         <!-- JSR308 related compiler arguments -->
         <compilerarg value="-version"/>
         <!-- optional, so .class files work with older JVMs: <compilerarg line="-target 5"/> -->
@@ -985,7 +985,7 @@
         <compilerarg line="-Awarns -Xmaxwarns 10000"/>
 
         <classpath>
-          <pathelement location="${env.CHECKERS}/dist/checker.jar"/>
+          <pathelement location="${env.CHECKERFRAMEWORK}/checker/dist/checker.jar"/>
           <!-- <pathelement location="/home/mernst/research/types/checker-framework/checker/bin/checker.jar"/> -->
         </classpath>
       </javac>
