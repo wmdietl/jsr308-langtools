@@ -25,7 +25,6 @@
 
 package javax.tools;
 
-import java.io.File;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.Locale;
