@@ -159,7 +159,7 @@ public class TypeAnnotationPosition {
     // the catch type index.  Then in
     // com.sun.tools.javac.jvm.Code.fillExceptionParameterPositions we
     // use that value to determine the exception table index.
-    private int exception_index = Integer.MIN_VALUE;
+    public int exception_index = Integer.MIN_VALUE;
 
     // If this type annotation is within a lambda expression,
     // store a pointer to the lambda expression tree in order
