@@ -62,10 +62,10 @@ export DARWIN_TAR_BASENAME := openjdk7-darwin-i386-20080820
 export DARWIN_TAR := ${DARWIN_TAR_BASENAME}.tar.bz2
 export MAKEFILE := ${MAKEFILE_DIR}/Makefile-jsr308-install
 
-export JAVA_HOME := ${JSR308}/jdk1.7.0
+export JAVA_HOME := ${JSR308}/jdk1.8.0
 export PATH := ${JAVA_HOME}/bin:${PATH}
 
-export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.7.0/lib/tools.jar:${JSR308}/checker-framework/checker/dist/checker.jar
+export CLASSPATH := ${CLASSPATH}:${JSR308}/jdk1.8.0/lib/tools.jar:${JSR308}/checker-framework/checker/dist/checker.jar
 
 UNAME := $(shell uname)
 
@@ -80,7 +80,7 @@ chdir_then_install : ${JSR308}
 	$(MAKE) -C ${JSR308} -f ${MAKEFILE} install
 
 # By default, do all downloads before any installation.
-install: download .install-jdk1.7.0 test-jdk1.7.0 .install-langtools .install-checker-framework test-checker-framework
+install: download .install-jdk1.8.0 test-jdk1.8.0 .install-langtools .install-checker-framework test-checker-framework
 
 ${JSR308}:
 	mkdir -p ${JSR308}
@@ -91,7 +91,7 @@ ${JSR308}:
 
 .PHONY : clean
 clean: clean-checker-framework clean-langtools 
-veryclean: clean-checker-framework clean-langtools clean-jdk1.7.0
+veryclean: clean-checker-framework clean-langtools clean-jdk1.8.0
 
 .PHONY : clean-checker-framework
 clean-checker-framework:
@@ -101,20 +101,20 @@ clean-checker-framework:
 clean-langtools:
 	rm -rf jsr308-langtools.zip jsr308-langtools .install-langtools
 
-.PHONY : clean-jdk1.7.0
-clean-jdk1.7.0:
-	rm -rf jdk1.7.0 .install-jdk1.7.0
+.PHONY : clean-jdk1.8.0
+clean-jdk1.8.0:
+	rm -rf jdk1.8.0 .install-jdk1.8.0
 
 ###
 ### Downloading
 ###
 
-download: download-jdk1.7.0 download-jsr308-langtools download-checker-framework
+download: download-jdk1.8.0 download-jsr308-langtools download-checker-framework
 
 ${JDK_7_BIN}:
-	$(MAKE) -f ${MAKEFILE} download-jdk1.7.0
-.PHONY : download-jdk1.7.0
-download-jdk1.7.0:
+	$(MAKE) -f ${MAKEFILE} download-jdk1.8.0
+.PHONY : download-jdk1.8.0
+download-jdk1.8.0:
 ifeq ($(UNAME),Darwin)
 # As of 2008-09-18, binaries are only available for Intel x86, not PowerPC.
 # Users of PowerPC need to build OpenJDK themselves (if they can?).
@@ -142,37 +142,37 @@ download-checker-framework:
 
 # One reason for the indirection is that executing the binary or untarring
 # creates a directory with an older date than the file.
-jdk1.7.0:
-	$(MAKE) -f ${MAKEFILE} .install-jdk1.7.0
+jdk1.8.0:
+	$(MAKE) -f ${MAKEFILE} .install-jdk1.8.0
 
 ifeq ($(UNAME),Darwin)
-.install-jdk1.7.0: ${DARWIN_TAR}
+.install-jdk1.8.0: ${DARWIN_TAR}
 	tar xfj ${DARWIN_TAR}
-	ln -s -f ${DARWIN_TAR_BASENAME} jdk1.7.0
-	touch .install-jdk1.7.0
+	ln -s -f ${DARWIN_TAR_BASENAME} jdk1.8.0
+	touch .install-jdk1.8.0
 else
-.install-jdk1.7.0: ${JDK_7_BIN}
+.install-jdk1.8.0: ${JDK_7_BIN}
 	chmod +x ${JDK_7_BIN}
 	yes | MORE='-1000 -l' ./${JDK_7_BIN}
-	touch .install-jdk1.7.0
+	touch .install-jdk1.8.0
 endif
 
-test-jdk1.7.0:
+test-jdk1.8.0:
 	@echo javac version: `javac -version 2>&1`
-# The output should start with "javac 1.7.0"
-	javac -version 2>&1 | grep 'javac 1.7.0'
+# The output should start with "javac 1.8.0"
+	javac -version 2>&1 | grep 'javac 1.8.0'
 
 langtools:
 	$(MAKE) -f ${MAKEFILE} .install-langtools
 .install-langtools: jsr308-langtools.zip
-	$(MAKE) -f ${MAKEFILE} test-jdk1.7.0
+	$(MAKE) -f ${MAKEFILE} test-jdk1.8.0
 	unzip -q -o jsr308-langtools.zip
 	cd jsr308-langtools/binary && yes | ant install
 	touch .install-langtools
 
 test-langtools:
 	@echo javac version: `javac -version 2>&1`
-	/usr/bin/test "`javac -version 2>&1`" = "javac 1.7.0-jsr308-${JSR308_BUILD}"
+	/usr/bin/test "`javac -version 2>&1`" = "javac 1.8.0-jsr308-${JSR308_BUILD}"
 
 checkers:
 	$(MAKE) -f ${MAKEFILE} .install-checker-framework
