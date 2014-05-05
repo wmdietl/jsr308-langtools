@@ -25,6 +25,7 @@
 
 package com.sun.tools.javac.code;
 
+import java.util.Arrays;
 import java.util.Iterator;
 
 import com.sun.tools.javac.tree.JCTree.JCLambda;
@@ -383,6 +384,27 @@ public class TypeAnnotationPosition {
         this.type_index = type_index;
         this.bound_index = bound_index;
         this.location = location;
+    }
+
+    /**
+     * Create a new TypeAnnotationPosition with the same values as the input, deeply copied.
+     *
+     * @param tapos The input value.
+     * @return A new copy of the input.
+     */
+    public static TypeAnnotationPosition copy(final TypeAnnotationPosition tapos) {
+        TypeAnnotationPosition res = new TypeAnnotationPosition(tapos.type, tapos.pos, tapos.parameter_index,
+                tapos.onLambda, tapos.type_index, tapos.bound_index, List.from(tapos.location));
+        res.isValidOffset = tapos.isValidOffset;
+        res.exception_index = tapos.exception_index;
+        if (tapos.lvarIndex != null)
+            res.lvarIndex = Arrays.copyOf(tapos.lvarIndex, tapos.lvarIndex.length);
+        if (tapos.lvarLength != null)
+            res.lvarLength = Arrays.copyOf(tapos.lvarLength, tapos.lvarLength.length);
+        if (tapos.lvarOffset != null)
+            res.lvarOffset = Arrays.copyOf(tapos.lvarOffset, tapos.lvarOffset.length);
+        res.offset = tapos.offset;
+        return res;
     }
 
     /**
