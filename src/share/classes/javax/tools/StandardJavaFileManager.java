@@ -27,7 +27,6 @@ package javax.tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
 
 /**
  * File manager based on {@linkplain File java.io.File}.  A common way
