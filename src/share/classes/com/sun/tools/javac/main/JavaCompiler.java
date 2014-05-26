@@ -1302,6 +1302,10 @@ public class JavaCompiler {
                 return;
 
             if (relax) {
+                // In relaxed mode, mark FLOW as done to prevent infinite loops.
+                if (!compileStates.isDone(env, CompileState.FLOW)) {
+                    compileStates.put(env, CompileState.FLOW);
+                }
                 results.add(env);
                 return;
             }
