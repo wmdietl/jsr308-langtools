@@ -88,8 +88,8 @@ ${jsr308_spec}/jsr308-changes.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks: ${PLUME_BIN}
-	${CHECKLINK} -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
-	${CHECKLINK} -q -r -e `cat ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
+	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
+	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
 
 
 ###########################################################################
