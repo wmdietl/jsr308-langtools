@@ -162,6 +162,7 @@ public class JavacParser implements Parser {
         this.allowIntersectionTypesInCast = source.allowIntersectionTypesInCast();
         this.allowTypeAnnotations = source.allowTypeAnnotations();
         this.allowAnnotationsAfterTypeParams = source.allowAnnotationsAfterTypeParams();
+        this.allowTypeAnnotationsOnlyInComments = source.allowTypeAnnotationsOnlyInComments();
         this.keepDocComments = keepDocComments;
         docComments = newDocCommentTable(keepDocComments, fac);
         this.keepLineMap = keepLineMap;
@@ -266,6 +267,12 @@ public class JavacParser implements Parser {
     /** Switch: should we allow annotations after the method type parameters?
      */
     boolean allowAnnotationsAfterTypeParams;
+
+    /** JSR 308 local change: should we allow type annotations only in
+     * special comments?
+     * Applies to both allowTypeAnnotations and allowAnnotationsAfterTypeParams.
+     */
+    boolean allowTypeAnnotationsOnlyInComments;
 
     /** Switch: is "this" allowed as an identifier?
      * This is needed to parse receiver types.
@@ -4129,14 +4136,21 @@ public class JavacParser implements Parser {
             allowStaticInterfaceMethods = true;
         }
     }
+    // JSR 308 local change: true iff we don't require type annotations in comments or
+    // we are in a special annotation comment.
+    private boolean typeAnnotationsOnlyInComments() {
+        return !allowTypeAnnotationsOnlyInComments  ||
+                (S instanceof Scanner &&
+                ((Scanner)S).inAnnotationComment());
+    }
     void checkTypeAnnotations() {
-        if (!allowTypeAnnotations) {
+        if (!allowTypeAnnotations || !typeAnnotationsOnlyInComments()) {
             log.error(token.pos, "type.annotations.not.supported.in.source", source.name);
             allowTypeAnnotations = true;
         }
     }
     void checkAnnotationsAfterTypeParams(int pos) {
-        if (!allowAnnotationsAfterTypeParams) {
+        if (!allowAnnotationsAfterTypeParams || !typeAnnotationsOnlyInComments()) {
             log.error(pos, "annotations.after.type.params.not.supported.in.source", source.name);
             allowAnnotationsAfterTypeParams = true;
         }
