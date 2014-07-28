@@ -72,8 +72,8 @@ public class ScannerFactory {
 
         Options options = Options.instance(context);
         this.annotationsincomments = this.source.allowTypeAnnotations() &&
-                options.get("TA:noannotationsincomments") == null;
-        this.spacesincomments = options.get("TA:spacesincomments") != null;
+                options.isUnset("TA:noannotationsincomments");
+        this.spacesincomments = options.isSet("TA:spacesincomments");
     }
 
     public Scanner newScanner(CharSequence input, boolean keepDocComments) {
