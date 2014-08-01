@@ -3,7 +3,9 @@ For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 Version 1.8.4, 1 Aug 2014
 
-No changes. Version increased to match Checker Framework.
+Made it possible to compile Java 8 lambdas on a Java 7 JDK.
+This feature is for type-checking only. The compiled code
+still requires a Java 8 JVM to execute.
 
 ----------------------------------------------------------------------
 
