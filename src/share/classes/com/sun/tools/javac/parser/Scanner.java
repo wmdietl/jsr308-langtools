@@ -133,4 +133,10 @@ public class Scanner implements Lexer {
     public void errPos(int pos) {
         tokenizer.errPos(pos);
     }
+
+    // JSR 308 local change: add query method whether we are in
+    // special (magic or voodoo) annotation comments.
+    boolean inAnnotationComment() {
+        return tokenizer.magicID || tokenizer.voodoo;
+    }
 }

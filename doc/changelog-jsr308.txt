@@ -1,6 +1,20 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.8.5, 1 Sep 2014
+
+Change default target version to 8.
+Allow type annotations in source versions 6 and 7 only if they appear
+in annotation comments.
+To obtain a strictly backwards-compatible Java 6/7 compiler, provide
+the -XDTA:noannotationsincomments option.
+Read type annotations out of version 6 bytecode.
+
+This fixes Issues 54 and 55.
+
+No updates to base build.
+
+----------------------------------------------------------------------
 Version 1.8.4, 1 Aug 2014
 
 Made it possible to compile Java 8 lambdas on a Java 7 JDK.
@@ -8,7 +22,6 @@ This feature is for type-checking only. The compiled code
 still requires a Java 8 JVM to execute.
 
 ----------------------------------------------------------------------
-
 Version 1.8.3, 1 Jul 2014
 
 No changes. Version increased to match Checker Framework.
