@@ -237,8 +237,7 @@ public enum Source {
      * only in comments.
      */
     public boolean allowTypeAnnotationsOnlyInComments() {
-        return compareTo(JDK1_6) == 0 ||
-                compareTo(JDK1_7) == 0;
+        return compareTo(JDK1_7) <= 0;
     }
     public boolean allowRepeatedAnnotations() {
         return compareTo(JDK1_8) >= 0;
