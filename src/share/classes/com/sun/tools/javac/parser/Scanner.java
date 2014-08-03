@@ -137,6 +137,7 @@ public class Scanner implements Lexer {
     // JSR 308 local change: add query method whether we are in
     // special (magic or voodoo) annotation comments.
     boolean inAnnotationComment() {
-        return tokenizer.magicID || tokenizer.voodoo;
+        return tokenizer.magic || tokenizer.magicAt || tokenizer.magicID ||
+                tokenizer.voodoo;
     }
 }
