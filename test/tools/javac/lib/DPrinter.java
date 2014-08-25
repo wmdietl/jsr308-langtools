@@ -403,7 +403,7 @@ public class DPrinter {
                 printType("type", sym.type, Details.SUMMARY);
                 printType("erasure", sym.erasure_field, Details.SUMMARY);
                 sym.accept(symVisitor, null);
-                printAnnotations("annotations", sym.getAnnotations(), Details.SUMMARY);
+                printAnnotations("annotations", sym.getMetadata(), Details.SUMMARY);
                 indent(-1);
             }
         }
@@ -529,9 +529,13 @@ public class DPrinter {
     public class TreeVisitor extends JCTree.Visitor {
         @Override
         public void visitTopLevel(JCCompilationUnit tree) {
-            printList("packageAnnotations", tree.packageAnnotations);
-            printTree("pid", tree.pid);
+            printList("packageAnnotations", tree.getPackageAnnotations());
             printList("defs", tree.defs);
+        }
+
+        @Override
+        public void visitPackageDef(JCPackageDecl tree) {
+            printTree("pid", tree.pid);
         }
 
         @Override
@@ -945,12 +949,6 @@ public class DPrinter {
      * visit method for its superclass.
      */
     public class TypeVisitor implements Type.Visitor<Void,Void> {
-        public Void visitAnnotatedType(AnnotatedType type, Void ignore) {
-            printList("typeAnnotations", type.getAnnotationMirrors());
-            printType("underlyingType", type.unannotatedType(), Details.FULL);
-            return visitType(type, null);
-        }
-
         public Void visitArrayType(ArrayType type, Void ignore) {
             printType("elemType", type.elemtype, Details.FULL);
             return visitType(type, null);

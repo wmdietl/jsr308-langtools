@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2012, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -55,7 +55,7 @@ public class MirroredTypesException extends RuntimeException {
      */
     MirroredTypesException(String message, TypeMirror type) {
         super(message);
-        List<TypeMirror> tmp = (new ArrayList<TypeMirror>());
+        List<TypeMirror> tmp = (new ArrayList<>());
         tmp.add(type);
         types = Collections.unmodifiableList(tmp);
     }
@@ -68,7 +68,7 @@ public class MirroredTypesException extends RuntimeException {
     public MirroredTypesException(List<? extends TypeMirror> types) {
         super("Attempt to access Class objects for TypeMirrors " +
               (types = // defensive copy
-               new ArrayList<TypeMirror>(types)).toString() );
+               new ArrayList<>(types)).toString() );
         this.types = Collections.unmodifiableList(types);
     }
 
@@ -85,6 +85,10 @@ public class MirroredTypesException extends RuntimeException {
 
     /**
      * Explicitly set all transient fields.
+     * @param s the serial stream
+     * @throws ClassNotFoundException for a missing class during
+     * deserialization
+     * @throws IOException for an IO problem during deserialization
      */
     private void readObject(ObjectInputStream s)
         throws IOException, ClassNotFoundException {

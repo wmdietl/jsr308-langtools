@@ -67,7 +67,7 @@ public enum Source {
     /** 1.7 introduced try-with-resources, multi-catch, string switch, etc. */
     JDK1_7("1.7"),
 
-    /** 1.8 covers the to be determined language features that will be added in JDK 8. */
+    /** 1.8 lambda expressions and default methods. */
     JDK1_8("1.8");
 
     private static final Context.Key<Source> sourceKey
@@ -216,10 +216,20 @@ public enum Source {
         return compareTo(JDK1_8) >= 0;
     }
     public boolean allowTypeAnnotations() {
-        return compareTo(JDK1_8) >= 0;
+        // JSR 308 local change: allow type annotations starting in JDK 1.6.
+        // We are using allowTypeAnnotationsOnlyInComments to ensure that in
+        // 1.6 and 1.7 type annotations are only in comments. 
+        return compareTo(JDK1_6) >= 0;
     }
     public boolean allowAnnotationsAfterTypeParams() {
-        return compareTo(JDK1_8) >= 0;
+        // JSR 308 local change: see above.
+        return compareTo(JDK1_6) >= 0;
+    }
+    /* JSR 308 local change: whether to allow type annotations
+     * only in comments.
+     */
+    public boolean allowTypeAnnotationsOnlyInComments() {
+        return compareTo(JDK1_7) <= 0;
     }
     public boolean allowRepeatedAnnotations() {
         return compareTo(JDK1_8) >= 0;

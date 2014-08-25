@@ -31,6 +31,7 @@ import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
+import com.sun.tools.javac.util.Options;
 
 
 /**
@@ -43,8 +44,7 @@ import com.sun.tools.javac.util.Names;
  */
 public class ScannerFactory {
     /** The context key for the scanner factory. */
-    public static final Context.Key<ScannerFactory> scannerFactoryKey =
-        new Context.Key<ScannerFactory>();
+    public static final Context.Key<ScannerFactory> scannerFactoryKey = new Context.Key<>();
 
     /** Get the Factory instance for this context. */
     public static ScannerFactory instance(Context context) {
@@ -59,6 +59,9 @@ public class ScannerFactory {
     final Source source;
     final Tokens tokens;
 
+    final boolean annotationsincomments;
+    final boolean spacesincomments;
+
     /** Create a new scanner factory. */
     protected ScannerFactory(Context context) {
         context.put(scannerFactoryKey, this);
@@ -66,6 +69,11 @@ public class ScannerFactory {
         this.names = Names.instance(context);
         this.source = Source.instance(context);
         this.tokens = Tokens.instance(context);
+
+        Options options = Options.instance(context);
+        this.annotationsincomments = this.source.allowTypeAnnotations() &&
+                options.isUnset("TA:noannotationsincomments");
+        this.spacesincomments = options.isSet("TA:spacesincomments");
     }
 
     public Scanner newScanner(CharSequence input, boolean keepDocComments) {

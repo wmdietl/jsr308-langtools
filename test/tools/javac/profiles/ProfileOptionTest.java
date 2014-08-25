@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 8004182
+ * @bug 8004182 8028545
  * @summary Add support for profiles in javac
  */
 
@@ -110,7 +110,7 @@ public class ProfileOptionTest {
             }
 
             for (Profile p: Profile.values()) {
-                List<String> opts = new ArrayList<String>();
+                List<String> opts = new ArrayList<>();
                 opts.addAll(Arrays.asList("-source", t.name, "-target", t.name));
                 opts.add("-Xlint:-options"); // dont warn about no -bootclasspath
                 if (p != Profile.DEFAULT)
@@ -128,6 +128,7 @@ public class ProfileOptionTest {
 
                 switch (t) {
                     case JDK1_8:
+                    case JDK1_9:
                         if (!out.isEmpty())
                             error("unexpected output from compiler");
                         break;
@@ -183,8 +184,7 @@ public class ProfileOptionTest {
                 com.sun.security.auth.PolicyFile.class); // specifically included in 3
 
         init(Profile.DEFAULT,
-                java.beans.BeanInfo.class,
-                javax.management.remote.rmi._RMIServer_Stub.class); // specifically excluded in 3
+                java.beans.BeanInfo.class);
     }
 
     void init(Profile p, Class<?>... classes) {

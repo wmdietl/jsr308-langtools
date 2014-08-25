@@ -51,7 +51,7 @@ public class Analyzer {
         PACKAGE,
         CLASS,
         VERBOSE
-    };
+    }
 
     /**
      * Filter to be applied when analyzing the dependencies from the given archives.

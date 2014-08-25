@@ -101,9 +101,20 @@ public class JavacServer {
      */
     private static synchronized PortFile getPortFile(String filename) throws FileNotFoundException {
         if (allPortFiles == null) {
-            allPortFiles = new HashMap<String, PortFile>();
+            allPortFiles = new HashMap<>();
         }
         PortFile pf = allPortFiles.get(filename);
+
+        // Port file known. Does it still exist?
+        if (pf != null) {
+            try {
+                if (!pf.exists())
+                    pf = null;
+            } catch (IOException ioex) {
+                ioex.printStackTrace();
+            }
+        }
+
         if (pf == null) {
             pf = new PortFile(filename);
             allPortFiles.put(filename, pf);
@@ -305,7 +316,7 @@ public class JavacServer {
                     // We could not connect to the server. Try again.
                     attempts++;
                     try {
-                        Thread.sleep(WAIT_BETWEEN_CONNECT_ATTEMPTS);
+                        Thread.sleep(WAIT_BETWEEN_CONNECT_ATTEMPTS * 1000);
                     } catch (InterruptedException e) {
                     }
                 }
@@ -371,7 +382,7 @@ public class JavacServer {
             // If the java/sh/cmd launcher fails the failure will be captured by stdouterr because of the redirection here.
             String[] cmd = {"/bin/sh", "-c", sjavac + " >> " + stdouterrfile + " 2>&1"};
             if (!(new File("/bin/sh")).canExecute()) {
-                ArrayList<String> wincmd = new ArrayList<String>();
+                ArrayList<String> wincmd = new ArrayList<>();
                 wincmd.add("cmd");
                 wincmd.add("/c");
                 wincmd.add("start");
@@ -567,7 +578,7 @@ public class JavacServer {
                 }
                 if (l.length() > 1 && l.charAt(0) == '+') {
                     String pkg = l.substring(1);
-                    lastUriSet = new HashSet<URI>();
+                    lastUriSet = new HashSet<>();
                     packageArtifacts.put(pkg, lastUriSet);
                 } else if (l.length() > 1 && lastUriSet != null) {
                     lastUriSet.add(new URI(l.substring(1)));
@@ -585,14 +596,14 @@ public class JavacServer {
                 }
                 if (l.length() > 1 && l.charAt(0) == '+') {
                     String pkg = l.substring(1);
-                    lastPackageSet = new HashSet<String>();
+                    lastPackageSet = new HashSet<>();
                     packageDependencies.put(pkg, lastPackageSet);
                 } else if (l.length() > 1 && lastPackageSet != null) {
                     lastPackageSet.add(l.substring(1));
                 }
             }
             // Load package pubapis
-            Map<String, StringBuffer> tmp = new HashMap<String, StringBuffer>();
+            Map<String, StringBuffer> tmp = new HashMap<>();
             StringBuffer lastPublicApi = null;
             for (;;) {
                 String l = in.readLine();

@@ -46,22 +46,31 @@ public interface ClassDoc extends ProgramElementDoc, Type {
     /**
      * Return true if this class is abstract.  Return true
      * for all interfaces.
+     *
+     * @return true if this class is abstract.  Return true
+     *         for all interfaces.
      */
     boolean isAbstract();
 
     /**
      * Return true if this class implements or interface extends
-     * <code>java.io.Serializable</code>.
+     * {@code java.io.Serializable}.
      *
-     * Since <code>java.io.Externalizable</code> extends
-     * <code>java.io.Serializable</code>,
+     * Since {@code java.io.Externalizable} extends
+     * {@code java.io.Serializable},
      * Externalizable objects are also Serializable.
+     *
+     * @return true if this class implements or interface extends
+     *         {@code java.io.Serializable}.
      */
     boolean isSerializable();
 
     /**
      * Return true if this class implements or interface extends
-     * <code>java.io.Externalizable</code>.
+     * {@code java.io.Externalizable}.
+     *
+     * @return true if this class implements or interface extends
+     *         {@code java.io.Externalizable}.
      */
     boolean isExternalizable();
 
@@ -78,14 +87,14 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Return the Serializable fields of this class or interface.
      * <p>
      * Return either a list of default fields documented by
-     * <code>serial</code> tag<br>
-     * or return a single <code>FieldDoc</code> for
-     * <code>serialPersistentField</code> member.
-     * There should be a <code>serialField</code> tag for
-     * each Serializable field defined by an <code>ObjectStreamField</code>
-     * array component of <code>serialPersistentField</code>.
+     * {@code serial} tag<br>
+     * or return a single {@code FieldDoc} for
+     * {@code serialPersistentField} member.
+     * There should be a {@code serialField} tag for
+     * each Serializable field defined by an {@code ObjectStreamField}
+     * array component of {@code serialPersistentField}.
      *
-     * @return an array of <code>FieldDoc</code> objects for the Serializable
+     * @return an array of {@code FieldDoc} objects for the Serializable
      *         fields of this class or interface.
      *
      * @see #definesSerializableFields()
@@ -95,7 +104,10 @@ public interface ClassDoc extends ProgramElementDoc, Type {
 
     /**
      *  Return true if Serializable fields are explicitly defined with
-     *  the special class member <code>serialPersistentFields</code>.
+     *  the special class member {@code serialPersistentFields}.
+     *
+     * @return true if Serializable fields are explicitly defined with
+     *         the special class member {@code serialPersistentFields}.
      *
      * @see #serializableFields()
      * @see SerialFieldTag
@@ -107,7 +119,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * interface.
      *
      * <p> <i>This method cannot accommodate certain generic type constructs.
-     * The <code>superclassType</code> method should be used instead.</i>
+     * The {@code superclassType} method should be used instead.</i>
      *
      * @return the ClassDoc for the superclass of this class, null if
      *         there is no superclass.
@@ -118,7 +130,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
     /**
      * Return the superclass of this class.  Return null if this is an
      * interface.  A superclass is represented by either a
-     * <code>ClassDoc</code> or a <code>ParametrizedType</code>.
+     * {@code ClassDoc} or a {@code ParametrizedType}.
      *
      * @return the superclass of this class, or null if there is no superclass.
      * @since 1.5
@@ -128,7 +140,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
     /**
      * Test whether this class is a subclass of the specified class.
      * If this is an interface, return false for all classes except
-     * <code>java.lang.Object</code> (we must keep this unexpected
+     * {@code java.lang.Object} (we must keep this unexpected
      * behavior for compatibility reasons).
      *
      * @param cd the candidate superclass.
@@ -143,7 +155,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Return an empty array if there are no interfaces.
      *
      * <p> <i>This method cannot accommodate certain generic type constructs.
-     * The <code>interfaceTypes</code> method should be used instead.</i>
+     * The {@code interfaceTypes} method should be used instead.</i>
      *
      * @return an array of ClassDoc objects representing the interfaces.
      * @see #interfaceTypes
@@ -157,7 +169,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Return an empty array if there are no interfaces.
      *
      * @return an array of interfaces, each represented by a
-     *         <code>ClassDoc</code> or a <code>ParametrizedType</code>.
+     *         {@code ClassDoc} or a {@code ParametrizedType}.
      * @since 1.5
      */
     Type[] interfaceTypes();
@@ -219,7 +231,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Return
      * <a href="{@docRoot}/com/sun/javadoc/package-summary.html#included">included</a>
      * methods in this class or interface.
-     * Same as <code>methods(true)</code>.
+     * Same as {@code methods(true)}.
      *
      * @return an array of MethodDoc objects representing the included
      *         methods in this class or interface.  Does not include
@@ -237,6 +249,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      *               modifier option.
      *               Specify false to include all methods regardless of
      *               access modifier option.
+     *
      * @return       an array of MethodDoc objects representing the included
      *               methods in this class or interface.
      */
@@ -275,7 +288,7 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * <a href="{@docRoot}/com/sun/javadoc/package-summary.html#included">included</a>
      * nested classes and interfaces within this class or interface.
      * This includes both static and non-static nested classes.
-     * (This method should have been named <code>nestedClasses()</code>,
+     * (This method should have been named {@code nestedClasses()},
      * as inner classes are technically non-static.)  Anonymous and local classes
      * or interfaces are not included.
      *
@@ -306,6 +319,8 @@ public interface ClassDoc extends ProgramElementDoc, Type {
      * Search order: 1) qualified name, 2) nested in this class or interface,
      * 3) in this package, 4) in the class imports, 5) in the package imports.
      * Return the ClassDoc if found, null if not found.
+     * @param className Specify the class name to find as a String.
+     * @return the ClassDoc if found, null if not found.
      */
     ClassDoc findClass(String className);
 

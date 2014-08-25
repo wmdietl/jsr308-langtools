@@ -178,7 +178,7 @@ public class ConfigurationImpl extends Configuration {
     /**
      * Collected set of doclint options
      */
-    public Set<String> doclintOpts = new LinkedHashSet<String>();
+    public Set<String> doclintOpts = new LinkedHashSet<>();
 
     /**
      * Unique Resource Handler for this package.
@@ -286,12 +286,12 @@ public class ConfigurationImpl extends Configuration {
             }
         }
         if (root.specifiedClasses().length > 0) {
-            Map<String,PackageDoc> map = new HashMap<String,PackageDoc>();
+            Map<String,PackageDoc> map = new HashMap<>();
             PackageDoc pd;
             ClassDoc[] classes = root.classes();
-            for (int i = 0; i < classes.length; i++) {
-                pd = classes[i].containingPackage();
-                if(! map.containsKey(pd.name())) {
+            for (ClassDoc aClass : classes) {
+                pd = aClass.containingPackage();
+                if (!map.containsKey(pd.name())) {
                     map.put(pd.name(), pd);
                 }
             }
@@ -495,15 +495,15 @@ public class ConfigurationImpl extends Configuration {
         if (createoverview) {
             topFile = DocPaths.OVERVIEW_SUMMARY;
         } else {
-            if (packages.length == 1 && packages[0].name().equals("")) {
+            if (packages.size() == 1 && packages.first().name().equals("")) {
                 if (root.classes().length > 0) {
                     ClassDoc[] classarr = root.classes();
                     Arrays.sort(classarr);
                     ClassDoc cd = getValidClass(classarr);
                     topFile = DocPath.forClass(cd);
                 }
-            } else {
-                topFile = DocPath.forPackage(packages[0]).resolve(DocPaths.PACKAGE_SUMMARY);
+            } else if (!packages.isEmpty()) {
+                topFile = DocPath.forPackage(packages.first()).resolve(DocPaths.PACKAGE_SUMMARY);
             }
         }
     }
@@ -512,18 +512,17 @@ public class ConfigurationImpl extends Configuration {
         if (!nodeprecated) {
             return classarr[0];
         }
-        for (int i = 0; i < classarr.length; i++) {
-            if (classarr[i].tags("deprecated").length == 0) {
-                return classarr[i];
+        for (ClassDoc cd : classarr) {
+            if (cd.tags("deprecated").length == 0) {
+                return cd;
             }
         }
         return null;
     }
 
     protected boolean checkForDeprecation(RootDoc root) {
-        ClassDoc[] classarr = root.classes();
-        for (int i = 0; i < classarr.length; i++) {
-            if (isGeneratedDoc(classarr[i])) {
+        for (ClassDoc cd : root.classes()) {
+            if (isGeneratedDoc(cd)) {
                 return true;
             }
         }
@@ -535,7 +534,7 @@ public class ConfigurationImpl extends Configuration {
      * packages is more than one. Sets {@link #createoverview} field to true.
      */
     protected void setCreateOverview() {
-        if ((overview || packages.length > 1) && !nooverview) {
+        if ((overview || packages.size() > 1) && !nooverview) {
             createoverview = true;
         }
     }

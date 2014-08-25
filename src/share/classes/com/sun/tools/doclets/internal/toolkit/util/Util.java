@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,10 @@
 package com.sun.tools.doclets.internal.toolkit.util;
 
 import java.io.*;
+import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Target;
+import java.text.Collator;
 import java.util.*;
 import javax.tools.StandardLocation;
 
@@ -47,7 +50,6 @@ import com.sun.tools.javac.util.StringUtils;
  * @author Jamie Ho
  */
 public class Util {
-
     /**
      * Return array of class members whose documentation is to be generated.
      * If the member is deprecated do not include such a member in the
@@ -74,10 +76,10 @@ public class Util {
      */
     public static List<ProgramElementDoc> excludeDeprecatedMembersAsList(
         ProgramElementDoc[] members) {
-        List<ProgramElementDoc> list = new ArrayList<ProgramElementDoc>();
-        for (int i = 0; i < members.length; i++) {
-            if (members[i].tags("deprecated").length == 0) {
-                list.add(members[i]);
+        List<ProgramElementDoc> list = new ArrayList<>();
+        for (ProgramElementDoc member : members) {
+            if (member.tags("deprecated").length == 0) {
+                list.add(member);
             }
         }
         Collections.sort(list);
@@ -102,8 +104,8 @@ public class Util {
      * @return boolean True if non-public member found, false otherwise.
      */
     public static boolean nonPublicMemberFound(ProgramElementDoc[] members) {
-        for (int i = 0; i < members.length; i++) {
-            if (!members[i].isPublic()) {
+        for (ProgramElementDoc member : members) {
+            if (!member.isPublic()) {
                 return true;
             }
         }
@@ -119,9 +121,9 @@ public class Util {
      */
     public static MethodDoc findMethod(ClassDoc cd, MethodDoc method) {
         MethodDoc[] methods = cd.methods();
-        for (int i = 0; i < methods.length; i++) {
-            if (executableMembersEqual(method, methods[i])) {
-                return methods[i];
+        for (MethodDoc m : methods) {
+            if (executableMembersEqual(method, m)) {
+                return m;
 
             }
         }
@@ -241,9 +243,7 @@ public class Util {
 
                 first = false;
             }
-        } catch (SecurityException exc) {
-            throw new DocletAbortException(exc);
-        } catch (IOException exc) {
+        } catch (SecurityException | IOException exc) {
             throw new DocletAbortException(exc);
         }
     }
@@ -273,7 +273,9 @@ public class Util {
      */
     public static List<Type> getAllInterfaces(Type type,
             Configuration configuration, boolean sort) {
-        Map<ClassDoc,Type> results = sort ? new TreeMap<ClassDoc,Type>() : new LinkedHashMap<ClassDoc,Type>();
+        Map<ClassDoc,Type> results = sort ?
+                new TreeMap<ClassDoc,Type>() :
+                new LinkedHashMap<ClassDoc,Type>();
         Type[] interfaceTypes = null;
         Type superType = null;
         if (type instanceof ParameterizedType) {
@@ -287,29 +289,26 @@ public class Util {
             superType = type.asClassDoc().superclassType();
         }
 
-        for (int i = 0; i < interfaceTypes.length; i++) {
-            Type interfaceType = interfaceTypes[i];
+        for (Type interfaceType : interfaceTypes) {
             ClassDoc interfaceClassDoc = interfaceType.asClassDoc();
-            if (! (interfaceClassDoc.isPublic() ||
-                (configuration == null ||
-                isLinkable(interfaceClassDoc, configuration)))) {
+            if (!(interfaceClassDoc.isPublic() ||
+                  (configuration == null ||
+                   isLinkable(interfaceClassDoc, configuration)))) {
                 continue;
             }
             results.put(interfaceClassDoc, interfaceType);
-            List<Type> superInterfaces = getAllInterfaces(interfaceType, configuration, sort);
-            for (Iterator<Type> iter = superInterfaces.iterator(); iter.hasNext(); ) {
-                Type t = iter.next();
+            for (Type t : getAllInterfaces(interfaceType, configuration, sort)) {
                 results.put(t.asClassDoc(), t);
             }
         }
         if (superType == null)
-            return new ArrayList<Type>(results.values());
+            return new ArrayList<>(results.values());
         //Try walking the tree.
         addAllInterfaceTypes(results,
             superType,
             interfaceTypesOf(superType),
             false, configuration);
-        List<Type> resultsList = new ArrayList<Type>(results.values());
+        List<Type> resultsList = new ArrayList<>(results.values());
         if (sort) {
                 Collections.sort(resultsList, new TypeComparator());
         }
@@ -351,20 +350,18 @@ public class Util {
     private static void addAllInterfaceTypes(Map<ClassDoc,Type> results, Type type,
             Type[] interfaceTypes, boolean raw,
             Configuration configuration) {
-        for (int i = 0; i < interfaceTypes.length; i++) {
-            Type interfaceType = interfaceTypes[i];
+        for (Type interfaceType : interfaceTypes) {
             ClassDoc interfaceClassDoc = interfaceType.asClassDoc();
-            if (! (interfaceClassDoc.isPublic() ||
-                (configuration != null &&
-                isLinkable(interfaceClassDoc, configuration)))) {
+            if (!(interfaceClassDoc.isPublic() ||
+                  (configuration != null &&
+                   isLinkable(interfaceClassDoc, configuration)))) {
                 continue;
             }
             if (raw)
                 interfaceType = interfaceType.asClassDoc();
             results.put(interfaceClassDoc, interfaceType);
             List<Type> superInterfaces = getAllInterfaces(interfaceType, configuration);
-            for (Iterator<Type> iter = superInterfaces.iterator(); iter.hasNext(); ) {
-                Type superInterface = iter.next();
+            for (Type superInterface : superInterfaces) {
                 results.put(superInterface.asClassDoc(), superInterface);
             }
         }
@@ -429,10 +426,9 @@ public class Util {
      * @return true return true if it should be documented and false otherwise.
      */
     public static boolean isDocumentedAnnotation(AnnotationTypeDoc annotationDoc) {
-        AnnotationDesc[] annotationDescList = annotationDoc.annotations();
-        for (int i = 0; i < annotationDescList.length; i++) {
-            if (annotationDescList[i].annotationType().qualifiedName().equals(
-                   java.lang.annotation.Documented.class.getName())){
+        for (AnnotationDesc anno : annotationDoc.annotations()) {
+            if (anno.annotationType().qualifiedName().equals(
+                    Documented.class.getName())) {
                 return true;
             }
         }
@@ -448,13 +444,12 @@ public class Util {
             || !(elems[0].value().value() instanceof AnnotationValue[]))
             return true;    // error recovery
 
-        AnnotationValue[] values = (AnnotationValue[])elems[0].value().value();
-        for (int i = 0; i < values.length; i++) {
-            Object value = values[i].value();
+        for (AnnotationValue aValue : (AnnotationValue[])elems[0].value().value()) {
+            Object value = aValue.value();
             if (!(value instanceof FieldDoc))
                 return true; // error recovery
 
-            FieldDoc eValue = (FieldDoc)value;
+            FieldDoc eValue = (FieldDoc) value;
             if (Util.isJava5DeclarationElementType(eValue)) {
                 return true;
             }
@@ -480,10 +475,10 @@ public class Util {
         // Annotations with no target are treated as declaration as well
         if (annotationDescList.length==0)
             return true;
-        for (int i = 0; i < annotationDescList.length; i++) {
-            if (annotationDescList[i].annotationType().qualifiedName().equals(
-                    java.lang.annotation.Target.class.getName())) {
-                if (isDeclarationTarget(annotationDescList[i]))
+        for (AnnotationDesc anno : annotationDescList) {
+            if (anno.annotationType().qualifiedName().equals(
+                    Target.class.getName())) {
+                if (isDeclarationTarget(anno))
                     return true;
             }
         }
@@ -602,7 +597,7 @@ public class Util {
      * @return the text with all tabs expanded
      */
     public static String replaceTabs(Configuration configuration, String text) {
-        if (text.indexOf("\t") == -1)
+        if (!text.contains("\t"))
             return text;
 
         final int tabLength = configuration.sourcetab;
@@ -664,32 +659,30 @@ public class Util {
      */
     public static void setEnumDocumentation(Configuration configuration,
             ClassDoc classDoc) {
-        MethodDoc[] methods = classDoc.methods();
-        for (int j = 0; j < methods.length; j++) {
-            MethodDoc currentMethod = methods[j];
+        for (MethodDoc currentMethod : classDoc.methods()) {
             if (currentMethod.name().equals("values") &&
-                    currentMethod.parameters().length == 0) {
+                currentMethod.parameters().length == 0) {
                 StringBuilder sb = new StringBuilder();
                 sb.append(configuration.getText("doclet.enum_values_doc.main", classDoc.name()));
                 sb.append("\n@return ");
                 sb.append(configuration.getText("doclet.enum_values_doc.return"));
                 currentMethod.setRawCommentText(sb.toString());
             } else if (currentMethod.name().equals("valueOf") &&
-                    currentMethod.parameters().length == 1) {
+                     currentMethod.parameters().length == 1) {
                 Type paramType = currentMethod.parameters()[0].type();
                 if (paramType != null &&
-                        paramType.qualifiedTypeName().equals(String.class.getName())) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(configuration.getText("doclet.enum_valueof_doc.main", classDoc.name()));
-                sb.append("\n@param name ");
-                sb.append(configuration.getText("doclet.enum_valueof_doc.param_name"));
-                sb.append("\n@return ");
-                sb.append(configuration.getText("doclet.enum_valueof_doc.return"));
-                sb.append("\n@throws IllegalArgumentException ");
-                sb.append(configuration.getText("doclet.enum_valueof_doc.throws_ila"));
-                sb.append("\n@throws NullPointerException ");
-                sb.append(configuration.getText("doclet.enum_valueof_doc.throws_npe"));
-                currentMethod.setRawCommentText(sb.toString());
+                    paramType.qualifiedTypeName().equals(String.class.getName())) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(configuration.getText("doclet.enum_valueof_doc.main", classDoc.name()));
+                    sb.append("\n@param name ");
+                    sb.append(configuration.getText("doclet.enum_valueof_doc.param_name"));
+                    sb.append("\n@return ");
+                    sb.append(configuration.getText("doclet.enum_valueof_doc.return"));
+                    sb.append("\n@throws IllegalArgumentException ");
+                    sb.append(configuration.getText("doclet.enum_valueof_doc.throws_ila"));
+                    sb.append("\n@throws NullPointerException ");
+                    sb.append(configuration.getText("doclet.enum_valueof_doc.throws_npe"));
+                    currentMethod.setRawCommentText(sb.toString());
                 }
             }
         }
@@ -710,9 +703,9 @@ public class Util {
             annotationDescList = ((PackageDoc)doc).annotations();
         else
             annotationDescList = ((ProgramElementDoc)doc).annotations();
-        for (int i = 0; i < annotationDescList.length; i++) {
-            if (annotationDescList[i].annotationType().qualifiedName().equals(
-                   java.lang.Deprecated.class.getName())){
+        for (AnnotationDesc anno : annotationDescList) {
+            if (anno.annotationType().qualifiedName().equals(
+                    Deprecated.class.getName())) {
                 return true;
             }
         }
@@ -753,8 +746,7 @@ public class Util {
         if (!javafx) {
             return classes;
         }
-        final List<ClassDoc> filteredOutClasses =
-                new ArrayList<ClassDoc>(classes.length);
+        final List<ClassDoc> filteredOutClasses = new ArrayList<>(classes.length);
         for (ClassDoc classDoc : classes) {
             if (classDoc.isPrivate() || classDoc.isPackagePrivate()) {
                 continue;
@@ -788,5 +780,162 @@ public class Util {
                 elt.name().contentEquals(ElementType.PACKAGE.name()) ||
                 elt.name().contentEquals(ElementType.PARAMETER.name()) ||
                 elt.name().contentEquals(ElementType.TYPE.name());
+    }
+
+    /**
+     * A general purpose String comparator, which compares two Strings using a Collator
+     * strength of "SECONDARY", thus providing  optimum case insensitive comparisons in
+     * most Locales.
+     *
+     * @param s1 first String to compare.
+     * @param s2 second String to compare.
+     * @return a negative integer, zero, or a positive integer as the first
+     *         argument is less than, equal to, or greater than the second.
+     */
+    public static int compareStrings(String s1, String s2) {
+        Collator collator = Collator.getInstance();
+        collator.setStrength(Collator.SECONDARY);
+        return collator.compare(s1, s2);
+    }
+
+    /**
+     * A comparator for index file uses, this sorts first on names, then on
+     * parameter types and finally on the fully qualified name.
+     * @return a comparator for index file use
+     */
+    public static Comparator<Doc> makeComparatorForIndexUse() {
+        return new Util.DocComparator<Doc>() {
+            /**
+             * compare two given Doc entities, first sort on name, if
+             * applicable on the method's parameter types, and finally on the
+             * fully qualified name of the entity.
+             *
+             * @param d1 - a Doc element.
+             * @param d2 - a Doc element.
+             * @return a negative integer, zero, or a positive integer as the first
+             *         argument is less than, equal to, or greater than the second.
+             */
+            public int compare(Doc d1, Doc d2) {
+                int result = compareStrings(d1.name(), d2.name());
+                if (result != 0) {
+                    return result;
+                }
+                if (d1 instanceof ExecutableMemberDoc && d2 instanceof ExecutableMemberDoc) {
+                    result = compareExecutableMembers(
+                            (ExecutableMemberDoc) d1,
+                            (ExecutableMemberDoc) d2);
+                    if (result != 0) {
+                        return result;
+                    }
+                }
+                if (d1 instanceof ProgramElementDoc && d2 instanceof ProgramElementDoc) {
+                    return compareProgramElementDoc((ProgramElementDoc)d1, (ProgramElementDoc)d2);
+                }
+                return 0;
+            }
+        };
+    }
+
+    /**
+     * Comparator for ClassUse representations, this sorts on member names,
+     * fully qualified member names and then the parameter types if applicable.
+     * @return a comparator to sort classes and members for class use
+     */
+    public static Comparator<Doc> makeComparatorForClassUse() {
+        return new Util.DocComparator<Doc>() {
+            /**
+             * compare two given Doc entities, first sort on name, and if
+             * applicable on the fully qualified name, and finally if applicable
+             * on the parameter types.
+             * @param d1 - a Doc element.
+             * @param d2 - a Doc element.
+             * @return a negative integer, zero, or a positive integer as the first
+             *         argument is less than, equal to, or greater than the second.
+             */
+            public int compare(Doc d1, Doc d2) {
+                int result = compareStrings(d1.name(), d2.name());
+                if (result != 0) {
+                    return result;
+                }
+                if (d1 instanceof ProgramElementDoc && d2 instanceof ProgramElementDoc) {
+                    result = compareProgramElementDoc((ProgramElementDoc) d1, (ProgramElementDoc) d2);
+                    if (result != 0) {
+                        return result;
+                    }
+                }
+                if (d1 instanceof ExecutableMemberDoc && d2 instanceof ExecutableMemberDoc) {
+                    return compareExecutableMembers((ExecutableMemberDoc)d1, (ExecutableMemberDoc)d2);
+                }
+                return 0;
+            }
+        };
+    }
+
+    /**
+     * A general purpose comparator to sort Doc entities, basically provides the building blocks
+     * for creating specific comparators for an use-case.
+     * @param <T> a Doc entity
+     */
+    static abstract class DocComparator<T extends Doc> implements Comparator<Doc> {
+        /**
+         * compares two parameter arrays by comparing each Type of the parameter in the array,
+         * as possible, if the matched strings are identical, and  have mismatched array lengths
+         * then compare the lengths.
+         * @param params1 the first parameter array.
+         * @param params2 the first parameter array.
+         * @return a negative integer, zero, or a positive integer as the first
+         *         argument is less than, equal to, or greater than the second.
+         */
+        protected int compareParameters(Parameter[] params1, Parameter[] params2) {
+            if (params1.length == 0 && params2.length == 0) {
+                return 0;
+            }
+            // try to compare as many as possible
+            for (int i = 0; i < params1.length && i < params2.length; i++) {
+                int result = compareStrings(params1[i].typeName(), params2[i].typeName());
+                if (result != 0) {
+                    return result;
+                }
+            }
+            return Integer.compare(params1.length, params2.length);
+        }
+
+        /**
+         * Compares two MemberDocs, typically the name of a method,
+         * field or constructor.
+         * @param e1 the first MemberDoc.
+         * @param e2 the second MemberDoc.
+         * @return a negative integer, zero, or a positive integer as the first
+         *         argument is less than, equal to, or greater than the second.
+         */
+        protected int compareMembers(MemberDoc e1, MemberDoc e2) {
+            return compareStrings(e1.name(), e2.name());
+        }
+
+        /**
+         * Compares two ExecutableMemberDocs such as methods and constructors,
+         * as well as the parameters the entity might take.
+         * @param m1 the first ExecutableMemberDoc.
+         * @param m2 the second  ExecutableMemberDoc.
+         * @return a negative integer, zero, or a positive integer as the first
+         *         argument is less than, equal to, or greater than the second.
+         */
+        protected int compareExecutableMembers(ExecutableMemberDoc m1, ExecutableMemberDoc m2) {
+            int result = compareMembers(m1, m2);
+            if (result == 0)
+                result = compareParameters(m1.parameters(), m2.parameters());
+            return result;
+        }
+
+        /**
+         * Compares the fully qualified names of the entities
+         * @param p1 the first ProgramElementDoc.
+         * @param p2 the first ProgramElementDoc.
+         * @return a negative integer, zero, or a positive integer as the first
+         *         argument is less than, equal to, or greater than the second.
+         */
+        protected int compareProgramElementDoc(ProgramElementDoc p1, ProgramElementDoc p2) {
+            return compareStrings(p1.qualifiedName(), p2.qualifiedName());
+        }
     }
 }

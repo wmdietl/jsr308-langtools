@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -406,8 +406,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             head.addContent(meta);
         }
         if (metakeywords != null) {
-            for (int i=0; i < metakeywords.length; i++) {
-                Content meta = HtmlTree.META("keywords", metakeywords[i]);
+            for (String metakeyword : metakeywords) {
+                Content meta = HtmlTree.META("keywords", metakeyword);
                 head.addContent(meta);
             }
         }
@@ -521,9 +521,9 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             if (configuration.createoverview) {
                 navList.addContent(getNavLinkContents());
             }
-            if (configuration.packages.length == 1) {
-                navList.addContent(getNavLinkPackage(configuration.packages[0]));
-            } else if (configuration.packages.length > 1) {
+            if (configuration.packages.size() == 1) {
+                navList.addContent(getNavLinkPackage(configuration.packages.first()));
+            } else if (configuration.packages.size() > 1) {
                 navList.addContent(getNavLinkPackage());
             }
             navList.addContent(getNavLinkClass());
@@ -913,7 +913,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      * @return package name content
      */
     public Content getPackageName(PackageDoc packageDoc) {
-        return packageDoc == null || packageDoc.name().length() == 0 ?
+        return packageDoc == null || packageDoc.name().isEmpty() ?
             defaultPackageLabel :
             getPackageLabel(packageDoc.name());
     }
@@ -1010,9 +1010,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
     public Content getPackageLink(PackageDoc pkg, Content label) {
         boolean included = pkg != null && pkg.isIncluded();
         if (! included) {
-            PackageDoc[] packages = configuration.packages;
-            for (int i = 0; i < packages.length; i++) {
-                if (packages[i].equals(pkg)) {
+            for (PackageDoc p : configuration.packages) {
+                if (p.equals(pkg)) {
                     included = true;
                     break;
                 }
@@ -1441,7 +1440,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
                 }
             }
             if (configuration.currentcd != containing) {
-                refMemName = containing.name() + "." + refMemName;
+                refMemName = (refMem instanceof ConstructorDoc) ?
+                        refMemName : containing.name() + "." + refMemName;
             }
             if (refMem instanceof ExecutableMemberDoc) {
                 if (refMemName.indexOf('(') < 0) {
@@ -1711,9 +1711,13 @@ public class HtmlDocletWriter extends HtmlDocWriter {
                     //might be missing '>' character because the href has an inline tag.
                     break;
                 }
-                if (textBuff.substring(begin, end).indexOf("\"") != -1){
-                    begin = textBuff.indexOf("\"", begin) + 1;
-                    end = textBuff.indexOf("\"", begin +1);
+
+                String quote = textBuff.substring(begin, end);
+                quote = quote.contains("\"") ? "\"" :
+                        quote.contains("\'") ? "\'" : null;
+                if (quote != null) {
+                    begin = textBuff.indexOf(quote, begin) + 1;
+                    end = textBuff.indexOf(quote, begin +1);
                     if (begin == 0 || end == -1){
                         //Link is missing a quote.
                         break;
@@ -1736,7 +1740,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
         return text;
     }
 
-    static final Set<String> blockTags = new HashSet<String>();
+    static final Set<String> blockTags = new HashSet<>();
     static {
         for (HtmlTag t: HtmlTag.values()) {
             if (t.blockType == HtmlTag.BlockType.BLOCK)
@@ -1942,17 +1946,17 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      */
     public List<Content> getAnnotations(int indent, AnnotationDesc[] descList, boolean linkBreak,
             boolean isJava5DeclarationLocation) {
-        List<Content> results = new ArrayList<Content>();
+        List<Content> results = new ArrayList<>();
         ContentBuilder annotation;
-        for (int i = 0; i < descList.length; i++) {
-            AnnotationTypeDoc annotationDoc = descList[i].annotationType();
+        for (AnnotationDesc aDesc : descList) {
+            AnnotationTypeDoc annotationDoc = aDesc.annotationType();
             // If an annotation is not documented, do not add it to the list. If
             // the annotation is of a repeatable type, and if it is not documented
             // and also if its container annotation is not documented, do not add it
             // to the list. If an annotation of a repeatable type is not documented
             // but its container is documented, it will be added to the list.
-            if (! Util.isDocumentedAnnotation(annotationDoc) &&
-                    (!isAnnotationDocumented && !isContainerDocumented)) {
+            if (!Util.isDocumentedAnnotation(annotationDoc) &&
+                (!isAnnotationDocumented && !isContainerDocumented)) {
                 continue;
             }
             /* TODO: check logic here to correctly handle declaration
@@ -1963,13 +1967,13 @@ public class HtmlDocletWriter extends HtmlDocWriter {
             annotation = new ContentBuilder();
             isAnnotationDocumented = false;
             LinkInfoImpl linkInfo = new LinkInfoImpl(configuration,
-                LinkInfoImpl.Kind.ANNOTATION, annotationDoc);
-            AnnotationDesc.ElementValuePair[] pairs = descList[i].elementValues();
+                                                     LinkInfoImpl.Kind.ANNOTATION, annotationDoc);
+            AnnotationDesc.ElementValuePair[] pairs = aDesc.elementValues();
             // If the annotation is synthesized, do not print the container.
-            if (descList[i].isSynthesized()) {
-                for (int j = 0; j < pairs.length; j++) {
-                    AnnotationValue annotationValue = pairs[j].value();
-                    List<AnnotationValue> annotationTypeValues = new ArrayList<AnnotationValue>();
+            if (aDesc.isSynthesized()) {
+                for (AnnotationDesc.ElementValuePair pair : pairs) {
+                    AnnotationValue annotationValue = pair.value();
+                    List<AnnotationValue> annotationTypeValues = new ArrayList<>();
                     if (annotationValue.value() instanceof AnnotationValue[]) {
                         AnnotationValue[] annotationArray =
                                 (AnnotationValue[]) annotationValue.value();
@@ -1992,7 +1996,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
                 if (pairs.length == 1 && isAnnotationDocumented) {
                     AnnotationValue[] annotationArray =
                             (AnnotationValue[]) (pairs[0].value()).value();
-                    List<AnnotationValue> annotationTypeValues = new ArrayList<AnnotationValue>();
+                    List<AnnotationValue> annotationTypeValues = new ArrayList<>();
                     annotationTypeValues.addAll(Arrays.asList(annotationArray));
                     String sep = "";
                     for (AnnotationValue av : annotationTypeValues) {
@@ -2005,12 +2009,12 @@ public class HtmlDocletWriter extends HtmlDocWriter {
                 // repeatable type annotation is not documented, print the container.
                 else {
                     addAnnotations(annotationDoc, linkInfo, annotation, pairs,
-                        indent, false);
+                                   indent, false);
                 }
             }
             else {
                 addAnnotations(annotationDoc, linkInfo, annotation, pairs,
-                        indent, linkBreak);
+                               indent, linkBreak);
             }
             annotation.addContent(linkBreak ? DocletConstants.NL : "");
             results.add(annotation);
@@ -2050,7 +2054,7 @@ public class HtmlDocletWriter extends HtmlDocWriter {
                         pairs[j].element(), pairs[j].element().name(), false));
                 annotation.addContent("=");
                 AnnotationValue annotationValue = pairs[j].value();
-                List<AnnotationValue> annotationTypeValues = new ArrayList<AnnotationValue>();
+                List<AnnotationValue> annotationTypeValues = new ArrayList<>();
                 if (annotationValue.value() instanceof AnnotationValue[]) {
                     AnnotationValue[] annotationArray =
                             (AnnotationValue[]) annotationValue.value();
@@ -2082,8 +2086,8 @@ public class HtmlDocletWriter extends HtmlDocWriter {
      */
     private boolean isAnnotationArray(AnnotationDesc.ElementValuePair[] pairs) {
         AnnotationValue annotationValue;
-        for (int j = 0; j < pairs.length; j++) {
-            annotationValue = pairs[j].value();
+        for (AnnotationDesc.ElementValuePair pair : pairs) {
+            annotationValue = pair.value();
             if (annotationValue.value() instanceof AnnotationValue[]) {
                 AnnotationValue[] annotationArray =
                         (AnnotationValue[]) annotationValue.value();

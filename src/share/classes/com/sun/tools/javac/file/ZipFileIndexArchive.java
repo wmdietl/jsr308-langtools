@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2011, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -107,10 +107,6 @@ public class ZipFileIndexArchive implements Archive {
          */
         ZipFileIndex.Entry entry;
 
-        /** The InputStream for this zip entry (file.)
-         */
-        InputStream inputStream = null;
-
         /** The name of the zip file where this entry resides.
          */
         File zipName;
@@ -146,11 +142,8 @@ public class ZipFileIndexArchive implements Archive {
 
         @Override
         public InputStream openInputStream() throws IOException {
-            if (inputStream == null) {
-                Assert.checkNonNull(entry); // see constructor
-                inputStream = new ByteArrayInputStream(zfIndex.read(entry));
-            }
-            return inputStream;
+            Assert.checkNonNull(entry); // see constructor
+            return new ByteArrayInputStream(zfIndex.read(entry));
         }
 
         @Override
@@ -162,8 +155,7 @@ public class ZipFileIndexArchive implements Archive {
         public CharBuffer getCharContent(boolean ignoreEncodingErrors) throws IOException {
             CharBuffer cb = fileManager.getCachedContent(this);
             if (cb == null) {
-                InputStream in = new ByteArrayInputStream(zfIndex.read(entry));
-                try {
+                try (InputStream in = new ByteArrayInputStream(zfIndex.read(entry))) {
                     ByteBuffer bb = fileManager.makeByteBuffer(in);
                     JavaFileObject prev = fileManager.log.useSource(this);
                     try {
@@ -174,8 +166,6 @@ public class ZipFileIndexArchive implements Archive {
                     fileManager.recycleByteBuffer(bb); // save for next time
                     if (!ignoreEncodingErrors)
                         fileManager.cache(this, cb);
-                } finally {
-                    in.close();
                 }
             }
             return cb;

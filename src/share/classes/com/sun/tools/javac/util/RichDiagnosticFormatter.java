@@ -47,7 +47,7 @@ import static com.sun.tools.javac.util.RichDiagnosticFormatter.RichConfiguration
 
 /**
  * A rich diagnostic formatter is a formatter that provides better integration
- * with javac's type system. A diagostic is first preprocessed in order to keep
+ * with javac's type system. A diagnostic is first preprocessed in order to keep
  * track of each types/symbols in it; after these informations are collected,
  * the diagnostic is rendered using a standard formatter, whose type/symbol printer
  * has been replaced by a more refined version provided by this rich formatter.
@@ -97,7 +97,7 @@ public class RichDiagnosticFormatter extends
         this.diags = JCDiagnostic.Factory.instance(context);
         this.types = Types.instance(context);
         this.messages = JavacMessages.instance(context);
-        whereClauses = new EnumMap<WhereClauseKind, Map<Type, JCDiagnostic>>(WhereClauseKind.class);
+        whereClauses = new EnumMap<>(WhereClauseKind.class);
         configuration = new RichConfiguration(Options.instance(context), formatter);
         for (WhereClauseKind kind : WhereClauseKind.values())
             whereClauses.put(kind, new LinkedHashMap<Type, JCDiagnostic>());
@@ -279,7 +279,7 @@ public class RichDiagnosticFormatter extends
     protected class ClassNameSimplifier {
 
         /* table for keeping track of all short name usages */
-        Map<Name, List<Symbol>> nameClashes = new HashMap<Name, List<Symbol>>();
+        Map<Name, List<Symbol>> nameClashes = new HashMap<>();
 
         /**
          * Add a name usage to the simplifier's internal cache
@@ -322,7 +322,7 @@ public class RichDiagnosticFormatter extends
             }
             return name;
         }
-    };
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="rich printer">
@@ -437,7 +437,7 @@ public class RichDiagnosticFormatter extends
                 return ms;
             }
         }
-    };
+    }
     // </editor-fold>
 
     // <editor-fold defaultstate="collapsed" desc="type scanner">
@@ -704,7 +704,7 @@ public class RichDiagnosticFormatter extends
             /** full class names simplification (where possible) */
             SIMPLE_NAMES,
             /** type-variable names disambiguation */
-            UNIQUE_TYPEVAR_NAMES;
+            UNIQUE_TYPEVAR_NAMES
         }
     }
 }

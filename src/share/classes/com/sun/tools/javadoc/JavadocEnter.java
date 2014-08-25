@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,6 +27,7 @@ package com.sun.tools.javadoc;
 
 import javax.tools.JavaFileObject;
 
+import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol.*;
 import com.sun.tools.javac.comp.Enter;
@@ -47,7 +48,7 @@ import com.sun.tools.javac.util.List;
  *  @author Neal Gafter
  */
 public class JavadocEnter extends Enter {
-    public static JavadocEnter instance0(Context context) {
+    public static JavadocEnter instance(Context context) {
         Enter instance = context.get(enterKey);
         if (instance == null)
             instance = new JavadocEnter(context);
@@ -84,7 +85,9 @@ public class JavadocEnter extends Enter {
     public void visitTopLevel(JCCompilationUnit tree) {
         super.visitTopLevel(tree);
         if (tree.sourcefile.isNameCompatible("package-info", JavaFileObject.Kind.SOURCE)) {
-            docenv.makePackageDoc(tree.packge, docenv.getTreePath(tree));
+            JCPackageDecl pd = tree.getPackage();
+            TreePath tp = pd == null ? docenv.getTreePath(tree) : docenv.getTreePath(tree, pd);
+            docenv.makePackageDoc(tree.packge, tp);
         }
     }
 

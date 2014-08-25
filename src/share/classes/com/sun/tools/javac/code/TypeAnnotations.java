@@ -32,7 +32,6 @@ import javax.lang.model.type.TypeKind;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.Attribute.TypeCompound;
-import com.sun.tools.javac.code.Type.AnnotatedType;
 import com.sun.tools.javac.code.Type.ArrayType;
 import com.sun.tools.javac.code.Type.CapturedType;
 import com.sun.tools.javac.code.Type.ClassType;
@@ -72,7 +71,6 @@ import com.sun.tools.javac.util.List;
 import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Names;
-import com.sun.tools.javac.util.Options;
 
 /**
  * Contains operations specific to processing type annotations.
@@ -82,8 +80,7 @@ import com.sun.tools.javac.util.Options;
  * and determine the TypeAnnotationPositions for all type annotations.
  */
 public class TypeAnnotations {
-    protected static final Context.Key<TypeAnnotations> typeAnnosKey =
-        new Context.Key<TypeAnnotations>();
+    protected static final Context.Key<TypeAnnotations> typeAnnosKey = new Context.Key<>();
 
     public static TypeAnnotations instance(Context context) {
         TypeAnnotations instance = context.get(typeAnnosKey);
@@ -105,7 +102,6 @@ public class TypeAnnotations {
         syms = Symtab.instance(context);
         annotate = Annotate.instance(context);
         attr = Attr.instance(context);
-        Options options = Options.instance(context);
     }
 
     /**
@@ -155,7 +151,7 @@ public class TypeAnnotations {
         new TypeAnnotationPositions(false).scan(tree);
     }
 
-    public enum AnnotationType { DECLARATION, TYPE, BOTH };
+    public enum AnnotationType { DECLARATION, TYPE, BOTH }
 
     /**
      * Determine whether an annotation is a declaration annotation,
@@ -286,9 +282,9 @@ public class TypeAnnotations {
         private void separateAnnotationsKinds(JCTree typetree, Type type, Symbol sym,
                 TypeAnnotationPosition pos) {
             List<Attribute.Compound> annotations = sym.getRawAttributes();
-            ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<Attribute.Compound>();
-            ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<Attribute.TypeCompound>();
-            ListBuffer<Attribute.TypeCompound> onlyTypeAnnos = new ListBuffer<Attribute.TypeCompound>();
+            ListBuffer<Attribute.Compound> declAnnos = new ListBuffer<>();
+            ListBuffer<Attribute.TypeCompound> typeAnnos = new ListBuffer<>();
+            ListBuffer<Attribute.TypeCompound> onlyTypeAnnos = new ListBuffer<>();
 
             for (Attribute.Compound a : annotations) {
                 switch (annotationType(a, sym)) {
@@ -332,7 +328,6 @@ public class TypeAnnotations {
                 // Note that we don't use the result, the call to
                 // typeWithAnnotations side-effects the type annotation positions.
                 // This is important for constructors of nested classes.
-
                 sym.appendUniqueTypeAttributes(typeAnnotations);
                 return;
             }
@@ -351,7 +346,7 @@ public class TypeAnnotations {
                     MethodType methType = sym.owner.type.asMethodType();
                     List<VarSymbol> params = ((MethodSymbol)sym.owner).params;
                     List<Type> oldArgs = methType.argtypes;
-                    ListBuffer<Type> newArgs = new ListBuffer<Type>();
+                    ListBuffer<Type> newArgs = new ListBuffer<>();
                     while (params.nonEmpty()) {
                         if (params.head == sym) {
                             newArgs.add(type);
@@ -392,14 +387,15 @@ public class TypeAnnotations {
         private Type typeWithAnnotations(final JCTree typetree, final Type type,
                 final List<Attribute.TypeCompound> annotations,
                 final List<Attribute.TypeCompound> onlyTypeAnnotations) {
-            // System.out.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s, onlyTypeAnnotations: %s)%n",
+            //System.err.printf("typeWithAnnotations(typetree: %s, type: %s, annotations: %s, onlyTypeAnnotations: %s)%n",
             //         typetree, type, annotations, onlyTypeAnnotations);
             if (annotations.isEmpty()) {
                 return type;
             }
             if (type.hasTag(TypeTag.ARRAY)) {
-                Type.ArrayType arType = (Type.ArrayType) type.unannotatedType();
-                Type.ArrayType tomodify = new Type.ArrayType(null, arType.tsym);
+                Type.ArrayType arType = (Type.ArrayType) type;
+                Type.ArrayType tomodify = new Type.ArrayType(null, arType.tsym,
+                                                             Type.noAnnotations);
                 Type toreturn;
                 if (type.isAnnotated()) {
                     toreturn = tomodify.annotatedType(type.getAnnotationMirrors());
@@ -414,13 +410,15 @@ public class TypeAnnotations {
                 while (arType.elemtype.hasTag(TypeTag.ARRAY)) {
                     if (arType.elemtype.isAnnotated()) {
                         Type aelemtype = arType.elemtype;
-                        arType = (Type.ArrayType) aelemtype.unannotatedType();
+                        arType = (Type.ArrayType) aelemtype;
                         ArrayType prevToMod = tomodify;
-                        tomodify = new Type.ArrayType(null, arType.tsym);
+                        tomodify = new Type.ArrayType(null, arType.tsym,
+                                                      Type.noAnnotations);
                         prevToMod.elemtype = tomodify.annotatedType(arType.elemtype.getAnnotationMirrors());
                     } else {
                         arType = (Type.ArrayType) arType.elemtype;
-                        tomodify.elemtype = new Type.ArrayType(null, arType.tsym);
+                        tomodify.elemtype = new Type.ArrayType(null, arType.tsym,
+                                                               Type.noAnnotations);
                         tomodify = (Type.ArrayType) tomodify.elemtype;
                     }
                     arTree = arrayTypeTree(arTree.elemtype);
@@ -570,6 +568,7 @@ public class TypeAnnotations {
         private Type typeWithAnnotations(final Type type,
                 final Type stopAt,
                 final List<Attribute.TypeCompound> annotations) {
+            //System.err.println("typeWithAnnotations " + type + " " + annotations + " stopAt " + stopAt);
             Visitor<Type, List<TypeCompound>> visitor =
                     new Type.Visitor<Type, List<Attribute.TypeCompound>>() {
                 @Override
@@ -580,7 +579,8 @@ public class TypeAnnotations {
                         return t.annotatedType(s);
                     } else {
                         ClassType ret = new ClassType(t.getEnclosingType().accept(this, s),
-                                t.typarams_field, t.tsym);
+                                                      t.typarams_field, t.tsym,
+                                                      t.getAnnotationMirrors());
                         ret.all_interfaces_field = t.all_interfaces_field;
                         ret.allparams_field = t.allparams_field;
                         ret.interfaces_field = t.interfaces_field;
@@ -591,18 +591,14 @@ public class TypeAnnotations {
                 }
 
                 @Override
-                public Type visitAnnotatedType(AnnotatedType t, List<TypeCompound> s) {
-                    return t.unannotatedType().accept(this, s).annotatedType(t.getAnnotationMirrors());
-                }
-
-                @Override
                 public Type visitWildcardType(WildcardType t, List<TypeCompound> s) {
                     return t.annotatedType(s);
                 }
 
                 @Override
                 public Type visitArrayType(ArrayType t, List<TypeCompound> s) {
-                    ArrayType ret = new ArrayType(t.elemtype.accept(this, s), t.tsym);
+                    ArrayType ret = new ArrayType(t.elemtype.accept(this, s), t.tsym,
+                                                  t.getAnnotationMirrors());
                     return ret;
                 }
 
@@ -664,8 +660,15 @@ public class TypeAnnotations {
          * type annotations: determine the type annotation positions.
          */
 
-        private void resolveFrame(JCTree tree, JCTree frame,
-                List<JCTree> path, TypeAnnotationPosition p) {
+        // This method is considered deprecated, and will be removed
+        // in the near future.  Don't use it for anything new.
+        private TypeAnnotationPosition
+            resolveFrame(JCTree tree,
+                         JCTree frame,
+                         List<JCTree> path,
+                         JCLambda currentLambda,
+                         int outer_type_index,
+                         ListBuffer<TypePathEntry> location) {
             /*
             System.out.println("Resolving tree: " + tree + " kind: " + tree.getKind());
             System.out.println("    Framing tree: " + frame + " kind: " + frame.getKind());
@@ -676,87 +679,101 @@ public class TypeAnnotations {
 
             switch (frame.getKind()) {
                 case TYPE_CAST:
-                    JCTypeCast frameTC = (JCTypeCast) frame;
-                    p.type = TargetType.CAST;
-                    if (frameTC.clazz.hasTag(Tag.TYPEINTERSECTION)) {
-                        // This case was already handled by INTERSECTION_TYPE
-                    } else {
-                        p.type_index = 0;
-                    }
-                    p.pos = frame.pos;
-                    return;
+                    return TypeAnnotationPosition.typeCast(location.toList(),
+                                                           currentLambda,
+                                                           outer_type_index,
+                                                           frame.pos);
 
                 case INSTANCE_OF:
-                    p.type = TargetType.INSTANCEOF;
-                    p.pos = frame.pos;
-                    return;
+                    return TypeAnnotationPosition.instanceOf(location.toList(),
+                                                             currentLambda,
+                                                             frame.pos);
 
                 case NEW_CLASS:
-                    JCNewClass frameNewClass = (JCNewClass) frame;
+                    final JCNewClass frameNewClass = (JCNewClass) frame;
                     if (frameNewClass.def != null) {
                         // Special handling for anonymous class instantiations
-                        JCClassDecl frameClassDecl = frameNewClass.def;
+                        final JCClassDecl frameClassDecl = frameNewClass.def;
                         if (frameClassDecl.extending == tree) {
-                            p.type = TargetType.CLASS_EXTENDS;
-                            p.type_index = -1;
+                            return TypeAnnotationPosition
+                                .classExtends(location.toList(), currentLambda,
+                                              frame.pos);
                         } else if (frameClassDecl.implementing.contains(tree)) {
-                            p.type = TargetType.CLASS_EXTENDS;
-                            p.type_index = frameClassDecl.implementing.indexOf(tree);
+                            final int type_index =
+                                frameClassDecl.implementing.indexOf(tree);
+                            return TypeAnnotationPosition
+                                .classExtends(location.toList(), currentLambda,
+                                              type_index, frame.pos);
                         } else {
                             // In contrast to CLASS below, typarams cannot occur here.
-                            Assert.error("Could not determine position of tree " + tree +
-                                    " within frame " + frame);
+                            throw new AssertionError("Could not determine position of tree " + tree +
+                                                     " within frame " + frame);
                         }
                     } else if (frameNewClass.typeargs.contains(tree)) {
-                        p.type = TargetType.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT;
-                        p.type_index = frameNewClass.typeargs.indexOf(tree);
+                        final int type_index =
+                            frameNewClass.typeargs.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .constructorInvocationTypeArg(location.toList(),
+                                                          currentLambda,
+                                                          type_index,
+                                                          frame.pos);
                     } else {
-                        p.type = TargetType.NEW;
+                        return TypeAnnotationPosition
+                            .newObj(location.toList(), currentLambda,
+                                    frame.pos);
                     }
-                    p.pos = frame.pos;
-                    return;
 
                 case NEW_ARRAY:
-                    p.type = TargetType.NEW;
-                    p.pos = frame.pos;
-                    return;
+                    return TypeAnnotationPosition
+                        .newObj(location.toList(), currentLambda, frame.pos);
 
                 case ANNOTATION_TYPE:
                 case CLASS:
                 case ENUM:
                 case INTERFACE:
-                    p.pos = frame.pos;
                     if (((JCClassDecl)frame).extending == tree) {
-                        p.type = TargetType.CLASS_EXTENDS;
-                        p.type_index = -1;
+                        return TypeAnnotationPosition
+                            .classExtends(location.toList(), currentLambda,
+                                          frame.pos);
                     } else if (((JCClassDecl)frame).implementing.contains(tree)) {
-                        p.type = TargetType.CLASS_EXTENDS;
-                        p.type_index = ((JCClassDecl)frame).implementing.indexOf(tree);
+                        final int type_index =
+                            ((JCClassDecl)frame).implementing.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .classExtends(location.toList(), currentLambda,
+                                          type_index, frame.pos);
                     } else if (((JCClassDecl)frame).typarams.contains(tree)) {
-                        p.type = TargetType.CLASS_TYPE_PARAMETER;
-                        p.parameter_index = ((JCClassDecl)frame).typarams.indexOf(tree);
+                        final int parameter_index =
+                            ((JCClassDecl)frame).typarams.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .typeParameter(location.toList(), currentLambda,
+                                           parameter_index, frame.pos);
                     } else {
-                        Assert.error("Could not determine position of tree " + tree +
-                                " within frame " + frame);
+                        throw new AssertionError("Could not determine position of tree " +
+                                                 tree + " within frame " + frame);
                     }
-                    return;
 
                 case METHOD: {
-                    JCMethodDecl frameMethod = (JCMethodDecl) frame;
-                    p.pos = frame.pos;
+                    final JCMethodDecl frameMethod = (JCMethodDecl) frame;
                     if (frameMethod.thrown.contains(tree)) {
-                        p.type = TargetType.THROWS;
-                        p.type_index = frameMethod.thrown.indexOf(tree);
+                        final int type_index = frameMethod.thrown.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .methodThrows(location.toList(), currentLambda,
+                                          type_index, frame.pos);
                     } else if (frameMethod.restype == tree) {
-                        p.type = TargetType.METHOD_RETURN;
+                        return TypeAnnotationPosition
+                            .methodReturn(location.toList(), currentLambda,
+                                          frame.pos);
                     } else if (frameMethod.typarams.contains(tree)) {
-                        p.type = TargetType.METHOD_TYPE_PARAMETER;
-                        p.parameter_index = frameMethod.typarams.indexOf(tree);
+                        final int parameter_index =
+                            frameMethod.typarams.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .methodTypeParameter(location.toList(),
+                                                 currentLambda,
+                                                 parameter_index, frame.pos);
                     } else {
-                        Assert.error("Could not determine position of tree " + tree +
-                                " within frame " + frame);
+                        throw new AssertionError("Could not determine position of tree " + tree +
+                                                 " within frame " + frame);
                     }
-                    return;
                 }
 
                 case PARAMETERIZED_TYPE: {
@@ -767,25 +784,30 @@ public class TypeAnnotations {
                     } else if (((JCTypeApply)frame).arguments.contains(tree)) {
                         JCTypeApply taframe = (JCTypeApply) frame;
                         int arg = taframe.arguments.indexOf(tree);
-                        p.location = p.location.prepend(new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT, arg));
+                        location = location.prepend(
+                            new TypePathEntry(TypePathEntryKind.TYPE_ARGUMENT,
+                                              arg));
 
                         Type typeToUse;
-                        if (newPath.tail != null && newPath.tail.head.hasTag(Tag.NEWCLASS)) {
-                            // If we are within an anonymous class instantiation, use its type,
-                            // because it contains a correctly nested type.
+                        if (newPath.tail != null &&
+                            newPath.tail.head.hasTag(Tag.NEWCLASS)) {
+                            // If we are within an anonymous class
+                            // instantiation, use its type, because it
+                            // contains a correctly nested type.
                             typeToUse = newPath.tail.head.type;
                         } else {
                             typeToUse = taframe.type;
                         }
 
-                        locateNestedTypes(typeToUse, p);
+                        location = locateNestedTypes(typeToUse, location);
                     } else {
-                        Assert.error("Could not determine type argument position of tree " + tree +
-                                " within frame " + frame);
+                        throw new AssertionError("Could not determine type argument position of tree " + tree +
+                                                 " within frame " + frame);
                     }
 
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index, location);
                 }
 
                 case MEMBER_REFERENCE: {
@@ -794,117 +816,140 @@ public class TypeAnnotations {
                     if (mrframe.expr == tree) {
                         switch (mrframe.mode) {
                         case INVOKE:
-                            p.type = TargetType.METHOD_REFERENCE;
-                            break;
+                            return TypeAnnotationPosition
+                                .methodRef(location.toList(), currentLambda,
+                                           frame.pos);
                         case NEW:
-                            p.type = TargetType.CONSTRUCTOR_REFERENCE;
-                            break;
+                            return TypeAnnotationPosition
+                                .constructorRef(location.toList(),
+                                                currentLambda,
+                                                frame.pos);
                         default:
-                            Assert.error("Unknown method reference mode " + mrframe.mode +
-                                    " for tree " + tree + " within frame " + frame);
+                            throw new AssertionError("Unknown method reference mode " + mrframe.mode +
+                                                     " for tree " + tree + " within frame " + frame);
                         }
-                        p.pos = frame.pos;
                     } else if (mrframe.typeargs != null &&
                             mrframe.typeargs.contains(tree)) {
-                        int arg = mrframe.typeargs.indexOf(tree);
-                        p.type_index = arg;
+                        final int type_index = mrframe.typeargs.indexOf(tree);
                         switch (mrframe.mode) {
                         case INVOKE:
-                            p.type = TargetType.METHOD_REFERENCE_TYPE_ARGUMENT;
-                            break;
+                            return TypeAnnotationPosition
+                                .methodRefTypeArg(location.toList(),
+                                                  currentLambda,
+                                                  type_index, frame.pos);
                         case NEW:
-                            p.type = TargetType.CONSTRUCTOR_REFERENCE_TYPE_ARGUMENT;
-                            break;
+                            return TypeAnnotationPosition
+                                .constructorRefTypeArg(location.toList(),
+                                                       currentLambda,
+                                                       type_index, frame.pos);
                         default:
-                            Assert.error("Unknown method reference mode " + mrframe.mode +
-                                    " for tree " + tree + " within frame " + frame);
+                            throw new AssertionError("Unknown method reference mode " + mrframe.mode +
+                                                   " for tree " + tree + " within frame " + frame);
                         }
-                        p.pos = frame.pos;
                     } else {
-                        Assert.error("Could not determine type argument position of tree " + tree +
-                                " within frame " + frame);
+                        throw new AssertionError("Could not determine type argument position of tree " + tree +
+                                               " within frame " + frame);
                     }
-                    return;
                 }
 
                 case ARRAY_TYPE: {
-                    ListBuffer<TypePathEntry> index = new ListBuffer<>();
-                    index = index.append(TypePathEntry.ARRAY);
+                    location = location.prepend(TypePathEntry.ARRAY);
                     List<JCTree> newPath = path.tail;
                     while (true) {
                         JCTree npHead = newPath.tail.head;
                         if (npHead.hasTag(JCTree.Tag.TYPEARRAY)) {
                             newPath = newPath.tail;
-                            index = index.append(TypePathEntry.ARRAY);
+                            location = location.prepend(TypePathEntry.ARRAY);
                         } else if (npHead.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                             newPath = newPath.tail;
                         } else {
                             break;
                         }
                     }
-                    p.location = p.location.prependList(index.toList());
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index, location);
                 }
 
                 case TYPE_PARAMETER:
                     if (path.tail.tail.head.hasTag(JCTree.Tag.CLASSDEF)) {
-                        JCClassDecl clazz = (JCClassDecl)path.tail.tail.head;
-                        p.type = TargetType.CLASS_TYPE_PARAMETER_BOUND;
-                        p.parameter_index = clazz.typarams.indexOf(path.tail.head);
-                        p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
-                        if (((JCTypeParameter)frame).bounds.get(0).type.isInterface()) {
-                            // Account for an implicit Object as bound 0
-                            p.bound_index += 1;
-                        }
+                        final JCClassDecl clazz =
+                            (JCClassDecl)path.tail.tail.head;
+                        final int parameter_index =
+                            clazz.typarams.indexOf(path.tail.head);
+                        final int bound_index =
+                            ((JCTypeParameter)frame).bounds.get(0)
+                            .type.isInterface() ?
+                            ((JCTypeParameter)frame).bounds.indexOf(tree) + 1:
+                            ((JCTypeParameter)frame).bounds.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .typeParameterBound(location.toList(),
+                                                currentLambda,
+                                                parameter_index, bound_index,
+                                                frame.pos);
                     } else if (path.tail.tail.head.hasTag(JCTree.Tag.METHODDEF)) {
-                        JCMethodDecl method = (JCMethodDecl)path.tail.tail.head;
-                        p.type = TargetType.METHOD_TYPE_PARAMETER_BOUND;
-                        p.parameter_index = method.typarams.indexOf(path.tail.head);
-                        p.bound_index = ((JCTypeParameter)frame).bounds.indexOf(tree);
-                        if (((JCTypeParameter)frame).bounds.get(0).type.isInterface()) {
-                            // Account for an implicit Object as bound 0
-                            p.bound_index += 1;
-                        }
+                        final JCMethodDecl method =
+                            (JCMethodDecl)path.tail.tail.head;
+                        final int parameter_index =
+                            method.typarams.indexOf(path.tail.head);
+                        final int bound_index =
+                            ((JCTypeParameter)frame).bounds.get(0)
+                            .type.isInterface() ?
+                            ((JCTypeParameter)frame).bounds.indexOf(tree) + 1:
+                            ((JCTypeParameter)frame).bounds.indexOf(tree);
+                        return TypeAnnotationPosition
+                            .methodTypeParameterBound(location.toList(),
+                                                      currentLambda,
+                                                      parameter_index,
+                                                      bound_index,
+                                                      frame.pos);
                     } else {
-                        Assert.error("Could not determine position of tree " + tree +
-                                " within frame " + frame);
+                        throw new AssertionError("Could not determine position of tree " + tree +
+                                                 " within frame " + frame);
                     }
-                    p.pos = frame.pos;
-                    return;
 
                 case VARIABLE:
                     VarSymbol v = ((JCVariableDecl)frame).sym;
-                    p.pos = frame.pos;
-                    switch (v.getKind()) {
-                        case LOCAL_VARIABLE:
-                            p.type = TargetType.LOCAL_VARIABLE;
-                            break;
-                        case FIELD:
-                            p.type = TargetType.FIELD;
-                            break;
-                        case PARAMETER:
-                            if (v.getQualifiedName().equals(names._this)) {
-                                // TODO: Intro a separate ElementKind?
-                                p.type = TargetType.METHOD_RECEIVER;
-                            } else {
-                                p.type = TargetType.METHOD_FORMAL_PARAMETER;
-                                p.parameter_index = methodParamIndex(path, frame);
-                            }
-                            break;
-                        case EXCEPTION_PARAMETER:
-                            p.type = TargetType.EXCEPTION_PARAMETER;
-                            break;
-                        case RESOURCE_VARIABLE:
-                            p.type = TargetType.RESOURCE_VARIABLE;
-                            break;
-                        default:
-                            Assert.error("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
-                    }
                     if (v.getKind() != ElementKind.FIELD) {
                         v.owner.appendUniqueTypeAttributes(v.getRawTypeAttributes());
                     }
-                    return;
+                    switch (v.getKind()) {
+                        case LOCAL_VARIABLE:
+                            return TypeAnnotationPosition
+                                .localVariable(location.toList(), currentLambda,
+                                               frame.pos);
+                        case FIELD:
+                            return TypeAnnotationPosition.field(location.toList(),
+                                                                currentLambda,
+                                                                frame.pos);
+                        case PARAMETER:
+                            if (v.getQualifiedName().equals(names._this)) {
+                                return TypeAnnotationPosition
+                                    .methodReceiver(location.toList(),
+                                                    currentLambda,
+                                                    frame.pos);
+                            } else {
+                                final int parameter_index =
+                                    methodParamIndex(path, frame);
+                                return TypeAnnotationPosition
+                                    .methodParameter(location.toList(),
+                                                     currentLambda,
+                                                     parameter_index,
+                                                     frame.pos);
+                            }
+                        case EXCEPTION_PARAMETER:
+                            return TypeAnnotationPosition
+                                .exceptionParameter(location.toList(),
+                                                    currentLambda,
+                                                    frame.pos);
+                        case RESOURCE_VARIABLE:
+                            return TypeAnnotationPosition
+                                .resourceVariable(location.toList(),
+                                                  currentLambda,
+                                                  frame.pos);
+                        default:
+                            throw new AssertionError("Found unexpected type annotation for variable: " + v + " with kind: " + v.getKind());
+                    }
 
                 case ANNOTATED_TYPE: {
                     if (frame == tree) {
@@ -913,11 +958,7 @@ public class TypeAnnotations {
                         // not care about inner types.
                         JCAnnotatedType atypetree = (JCAnnotatedType) frame;
                         final Type utype = atypetree.underlyingType.type;
-                        if (utype == null) {
-                            // This might happen during DeferredAttr;
-                            // we will be back later.
-                            return;
-                        }
+                        Assert.checkNonNull(utype);
                         Symbol tsym = utype.tsym;
                         if (tsym.getKind().equals(ElementKind.TYPE_PARAMETER) ||
                                 utype.getKind().equals(TypeKind.WILDCARD) ||
@@ -926,83 +967,89 @@ public class TypeAnnotations {
                             // class/method as enclosing elements.
                             // There is actually nothing to do for them.
                         } else {
-                            locateNestedTypes(utype, p);
+                            location = locateNestedTypes(utype, location);
                         }
                     }
                     List<JCTree> newPath = path.tail;
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index, location);
                 }
 
                 case UNION_TYPE: {
                     List<JCTree> newPath = path.tail;
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index, location);
                 }
 
                 case INTERSECTION_TYPE: {
                     JCTypeIntersection isect = (JCTypeIntersection)frame;
-                    p.type_index = isect.bounds.indexOf(tree);
-                    List<JCTree> newPath = path.tail;
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    final List<JCTree> newPath = path.tail;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        isect.bounds.indexOf(tree), location);
                 }
 
                 case METHOD_INVOCATION: {
                     JCMethodInvocation invocation = (JCMethodInvocation)frame;
                     if (!invocation.typeargs.contains(tree)) {
-                        Assert.error("{" + tree + "} is not an argument in the invocation: " + invocation);
+                        throw new AssertionError("{" + tree + "} is not an argument in the invocation: " + invocation);
                     }
                     MethodSymbol exsym = (MethodSymbol) TreeInfo.symbol(invocation.getMethodSelect());
+                    final int type_index = invocation.typeargs.indexOf(tree);
                     if (exsym == null) {
-                        Assert.error("could not determine symbol for {" + invocation + "}");
+                        throw new AssertionError("could not determine symbol for {" + invocation + "}");
                     } else if (exsym.isConstructor()) {
-                        p.type = TargetType.CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT;
+                        return TypeAnnotationPosition
+                            .constructorInvocationTypeArg(location.toList(),
+                                                          currentLambda,
+                                                          type_index,
+                                                          invocation.pos);
                     } else {
-                        p.type = TargetType.METHOD_INVOCATION_TYPE_ARGUMENT;
+                        return TypeAnnotationPosition
+                            .methodInvocationTypeArg(location.toList(),
+                                                     currentLambda,
+                                                     type_index,
+                                                     invocation.pos);
                     }
-                    p.pos = invocation.pos;
-                    p.type_index = invocation.typeargs.indexOf(tree);
-                    return;
                 }
 
                 case EXTENDS_WILDCARD:
                 case SUPER_WILDCARD: {
                     // Annotations in wildcard bounds
-                    p.location = p.location.prepend(TypePathEntry.WILDCARD);
-                    List<JCTree> newPath = path.tail;
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    final List<JCTree> newPath = path.tail;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index,
+                                        location.prepend(TypePathEntry.WILDCARD));
                 }
 
                 case MEMBER_SELECT: {
-                    List<JCTree> newPath = path.tail;
-                    resolveFrame(newPath.head, newPath.tail.head, newPath, p);
-                    return;
+                    final List<JCTree> newPath = path.tail;
+                    return resolveFrame(newPath.head, newPath.tail.head,
+                                        newPath, currentLambda,
+                                        outer_type_index, location);
                 }
 
                 default:
-                    Assert.error("Unresolved frame: " + frame + " of kind: " + frame.getKind() +
-                            "\n    Looking for tree: " + tree);
-                    return;
+                    throw new AssertionError("Unresolved frame: " + frame +
+                                             " of kind: " + frame.getKind() +
+                                             "\n    Looking for tree: " + tree);
             }
         }
 
-        private void locateNestedTypes(Type type, TypeAnnotationPosition p) {
-            // The number of "steps" to get from the full type to the
-            // left-most outer type.
-            ListBuffer<TypePathEntry> depth = new ListBuffer<>();
-
+        private ListBuffer<TypePathEntry>
+            locateNestedTypes(Type type,
+                              ListBuffer<TypePathEntry> depth) {
             Type encl = type.getEnclosingType();
             while (encl != null &&
                     encl.getKind() != TypeKind.NONE &&
                     encl.getKind() != TypeKind.ERROR) {
-                depth = depth.append(TypePathEntry.INNER_TYPE);
+                depth = depth.prepend(TypePathEntry.INNER_TYPE);
                 encl = encl.getEnclosingType();
             }
-            if (depth.nonEmpty()) {
-                p.location = p.location.prependList(depth.toList());
-            }
+            return depth;
         }
 
         private int methodParamIndex(List<JCTree> path, JCTree param) {
@@ -1053,18 +1100,18 @@ public class TypeAnnotations {
             }
             if (sigOnly) {
                 if (!tree.mods.annotations.isEmpty()) {
-                    // Nothing to do for separateAnnotationsKinds if
-                    // there are no annotations of either kind.
-                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.METHOD_RETURN;
                     if (tree.sym.isConstructor()) {
-                        pos.pos = tree.pos;
-                        // Use null to mark that the annotations go with the symbol.
+                        final TypeAnnotationPosition pos =
+                            TypeAnnotationPosition.methodReturn(tree.pos);
+                        // Use null to mark that the annotations go
+                        // with the symbol.
                         separateAnnotationsKinds(tree, null, tree.sym, pos);
                     } else {
-                        pos.pos = tree.restype.pos;
-                        separateAnnotationsKinds(tree.restype, tree.sym.type.getReturnType(),
-                                tree.sym, pos);
+                        final TypeAnnotationPosition pos =
+                            TypeAnnotationPosition.methodReturn(tree.restype.pos);
+                        separateAnnotationsKinds(tree.restype,
+                                                 tree.sym.type.getReturnType(),
+                                                 tree.sym, pos);
                     }
                 }
                 if (tree.recvparam != null && tree.recvparam.sym != null &&
@@ -1072,22 +1119,22 @@ public class TypeAnnotations {
                     // Nothing to do for separateAnnotationsKinds if
                     // there are no annotations of either kind.
                     // TODO: make sure there are no declaration annotations.
-                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.METHOD_RECEIVER;
-                    pos.pos = tree.recvparam.vartype.pos;
-                    separateAnnotationsKinds(tree.recvparam.vartype, tree.recvparam.sym.type,
-                            tree.recvparam.sym, pos);
+                    final TypeAnnotationPosition pos =
+                        TypeAnnotationPosition.methodReceiver(tree.recvparam.vartype.pos);
+                    separateAnnotationsKinds(tree.recvparam.vartype,
+                                             tree.recvparam.sym.type,
+                                             tree.recvparam.sym, pos);
                 }
                 int i = 0;
                 for (JCVariableDecl param : tree.params) {
                     if (!param.mods.annotations.isEmpty()) {
                         // Nothing to do for separateAnnotationsKinds if
                         // there are no annotations of either kind.
-                        TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                        pos.type = TargetType.METHOD_FORMAL_PARAMETER;
-                        pos.parameter_index = i;
-                        pos.pos = param.vartype.pos;
-                        separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
+                        final TypeAnnotationPosition pos =
+                            TypeAnnotationPosition.methodParameter(i, param.vartype.pos);
+                        separateAnnotationsKinds(param.vartype,
+                                                 param.sym.type,
+                                                 param.sym, pos);
                     }
                     ++i;
                 }
@@ -1124,11 +1171,9 @@ public class TypeAnnotations {
                     if (!param.mods.annotations.isEmpty()) {
                         // Nothing to do for separateAnnotationsKinds if
                         // there are no annotations of either kind.
-                        TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                        pos.type = TargetType.METHOD_FORMAL_PARAMETER;
-                        pos.parameter_index = i;
-                        pos.pos = param.vartype.pos;
-                        pos.onLambda = tree;
+                        final TypeAnnotationPosition pos =
+                            TypeAnnotationPosition.methodParameter(tree, i,
+                                                                   param.vartype.pos);
                         separateAnnotationsKinds(param.vartype, param.sym.type, param.sym, pos);
                     }
                     ++i;
@@ -1158,28 +1203,24 @@ public class TypeAnnotations {
                 // Parameters are handled in visitMethodDef or visitLambda.
             } else if (tree.sym.getKind() == ElementKind.FIELD) {
                 if (sigOnly) {
-                    TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                    pos.type = TargetType.FIELD;
-                    pos.pos = tree.pos;
+                    TypeAnnotationPosition pos =
+                        TypeAnnotationPosition.field(tree.pos);
                     separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
                 }
             } else if (tree.sym.getKind() == ElementKind.LOCAL_VARIABLE) {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.LOCAL_VARIABLE;
-                pos.pos = tree.pos;
-                pos.onLambda = currentLambda;
+                final TypeAnnotationPosition pos =
+                    TypeAnnotationPosition.localVariable(currentLambda,
+                                                         tree.pos);
                 separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
             } else if (tree.sym.getKind() == ElementKind.EXCEPTION_PARAMETER) {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.EXCEPTION_PARAMETER;
-                pos.pos = tree.pos;
-                pos.onLambda = currentLambda;
+                final TypeAnnotationPosition pos =
+                    TypeAnnotationPosition.exceptionParameter(currentLambda,
+                                                              tree.pos);
                 separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
             } else if (tree.sym.getKind() == ElementKind.RESOURCE_VARIABLE) {
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.RESOURCE_VARIABLE;
-                pos.pos = tree.pos;
-                pos.onLambda = currentLambda;
+                final TypeAnnotationPosition pos =
+                    TypeAnnotationPosition.resourceVariable(currentLambda,
+                                                            tree.pos);
                 separateAnnotationsKinds(tree.vartype, tree.sym.type, tree.sym, pos);
             } else if (tree.sym.getKind() == ElementKind.ENUM_CONSTANT) {
                 // No type annotations can occur here.
@@ -1223,17 +1264,15 @@ public class TypeAnnotations {
 
         private void copyNewClassAnnotationsToOwner(JCNewClass tree) {
             Symbol sym = tree.def.sym;
-            TypeAnnotationPosition pos = new TypeAnnotationPosition();
-            ListBuffer<Attribute.TypeCompound> newattrs =
-                new ListBuffer<Attribute.TypeCompound>();
+            final TypeAnnotationPosition pos =
+                TypeAnnotationPosition.newObj(tree.pos);
+            ListBuffer<Attribute.TypeCompound> newattrs = new ListBuffer<>();
 
             for (Attribute.TypeCompound old : sym.getRawTypeAttributes()) {
                 newattrs.append(new Attribute.TypeCompound(old.type, old.values,
                                                            pos));
             }
 
-            pos.type = TargetType.NEW;
-            pos.pos = tree.pos;
             sym.owner.appendUniqueTypeAttributes(newattrs.toList());
         }
 
@@ -1242,16 +1281,16 @@ public class TypeAnnotations {
             if (tree.def != null &&
                     !tree.def.mods.annotations.isEmpty()) {
                 JCClassDecl classdecl = tree.def;
-                TypeAnnotationPosition pos = new TypeAnnotationPosition();
-                pos.type = TargetType.CLASS_EXTENDS;
-                pos.pos = tree.pos;
+                TypeAnnotationPosition pos;
+
                 if (classdecl.extending == tree.clazz) {
-                    pos.type_index = -1;
+                    pos = TypeAnnotationPosition.classExtends(tree.pos);
                 } else if (classdecl.implementing.contains(tree.clazz)) {
-                    pos.type_index = classdecl.implementing.indexOf(tree.clazz);
+                    final int index = classdecl.implementing.indexOf(tree.clazz);
+                    pos = TypeAnnotationPosition.classExtends(index, tree.pos);
                 } else {
                     // In contrast to CLASS elsewhere, typarams cannot occur here.
-                    Assert.error("Could not determine position of tree " + tree);
+                    throw new AssertionError("Could not determine position of tree " + tree);
                 }
                 Type before = classdecl.sym.type;
                 separateAnnotationsKinds(classdecl, tree.clazz.type, classdecl.sym, pos);
@@ -1279,14 +1318,16 @@ public class TypeAnnotations {
 
             // handle annotations associated with dimensions
             for (int i = 0; i < dimAnnosCount; ++i) {
-                TypeAnnotationPosition p = new TypeAnnotationPosition();
-                p.pos = tree.pos;
-                p.onLambda = currentLambda;
-                p.type = TargetType.NEW;
+                ListBuffer<TypePathEntry> location =
+                    new ListBuffer<TypePathEntry>();
                 if (i != 0) {
                     depth = depth.append(TypePathEntry.ARRAY);
-                    p.location = p.location.appendList(depth.toList());
+                    location = location.appendList(depth.toList());
                 }
+                final TypeAnnotationPosition p =
+                    TypeAnnotationPosition.newObj(location.toList(),
+                                                  currentLambda,
+                                                  tree.pos);
 
                 setTypeAnnotationPos(tree.dimAnnotations.get(i), p);
             }
@@ -1299,12 +1340,14 @@ public class TypeAnnotations {
             while (elemType != null) {
                 if (elemType.hasTag(JCTree.Tag.ANNOTATED_TYPE)) {
                     JCAnnotatedType at = (JCAnnotatedType)elemType;
-                    TypeAnnotationPosition p = new TypeAnnotationPosition();
-                    p.type = TargetType.NEW;
-                    p.pos = tree.pos;
-                    p.onLambda = currentLambda;
-                    locateNestedTypes(elemType.type, p);
-                    p.location = p.location.prependList(depth.toList());
+                    final ListBuffer<TypePathEntry> locationbuf =
+                        locateNestedTypes(elemType.type,
+                                          new ListBuffer<TypePathEntry>());
+                    final List<TypePathEntry> location =
+                        locationbuf.toList().prependList(depth.toList());
+                    final TypeAnnotationPosition p =
+                        TypeAnnotationPosition.newObj(location, currentLambda,
+                                                      tree.pos);
                     setTypeAnnotationPos(at.annotations, p);
                     elemType = at.underlyingType;
                 } else if (elemType.hasTag(JCTree.Tag.TYPEARRAY)) {
@@ -1326,9 +1369,9 @@ public class TypeAnnotations {
                 System.err.println("    tree: " + tree + " kind: " + tree.getKind());
                 System.err.println("    frame: " + frame + " kind: " + frame.getKind());
                 */
-                TypeAnnotationPosition p = new TypeAnnotationPosition();
-                p.onLambda = currentLambda;
-                resolveFrame(tree, frame, frames.toList(), p);
+                final TypeAnnotationPosition p =
+                    resolveFrame(tree, frame, frames.toList(), currentLambda, 0,
+                                 new ListBuffer<TypePathEntry>());
                 setTypeAnnotationPos(annotations, p);
             }
         }

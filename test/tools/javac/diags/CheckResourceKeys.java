@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,6 +31,7 @@ import java.io.*;
 import java.util.*;
 import javax.tools.*;
 import com.sun.tools.classfile.*;
+import com.sun.tools.javac.code.Lint.LintCategory;
 
 /**
  * Compare string constants in javac classes against keys in javac resource bundles.
@@ -156,6 +157,20 @@ public class CheckResourceKeys {
             if (needToInvestigate.contains(rk))
                 continue;
 
+            //check lint description keys:
+            if (s.startsWith("opt.Xlint.desc.")) {
+                String option = s.substring(15);
+                boolean found = false;
+
+                for (LintCategory lc : LintCategory.values()) {
+                    if (option.equals(lc.option))
+                        found = true;
+                }
+
+                if (found)
+                    continue;
+            }
+
             error("Resource key not found in code: " + rk);
         }
     }
@@ -271,9 +286,13 @@ public class CheckResourceKeys {
             // -XD option names
             "process.packages",
             "ignore.symbol.file",
+            // type annotations extensions
+            "jsr308.imports",
+            "invalid.anno.comment.char",
             // prefix/embedded strings
             "compiler.",
             "compiler.misc.",
+            "opt.Xlint.desc.",
             "count.",
             "illegal.",
             "javac.",

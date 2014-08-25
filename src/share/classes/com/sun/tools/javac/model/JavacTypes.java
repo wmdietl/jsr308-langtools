@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -48,8 +48,8 @@ import com.sun.tools.javac.util.*;
  */
 public class JavacTypes implements javax.lang.model.util.Types {
 
-    private Symtab syms;
-    private Types types;
+    private final Symtab syms;
+    private final Types types;
 
     public static JavacTypes instance(Context context) {
         JavacTypes instance = context.get(JavacTypes.class);
@@ -58,18 +58,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
         return instance;
     }
 
-    /**
-     * Public for use only by JavacProcessingEnvironment
-     */
     protected JavacTypes(Context context) {
-        setContext(context);
-    }
-
-    /**
-     * Use a new context.  May be called from outside to update
-     * internal state for a new annotation-processing round.
-     */
-    public void setContext(Context context) {
         context.put(JavacTypes.class, this);
         syms = Symtab.instance(context);
         types = Types.instance(context);
@@ -134,8 +123,8 @@ public class JavacTypes implements javax.lang.model.util.Types {
             throw new IllegalArgumentException(t.toString());
         Type unboxed = types.unboxedType((Type) t);
         if (! unboxed.isPrimitive())    // only true primitives, not void
-            throw new IllegalArgumentException(t.toString());
-        return (PrimitiveType)unboxed;
+            throw new IllegalArgumentException(String.format("unboxed (%s) is not primitive:  t=%s, this=%s, this.types=%s", unboxed, t, this, this.types));
+        return (PrimitiveType) unboxed;
     }
 
     public TypeMirror capture(TypeMirror t) {
@@ -179,7 +168,8 @@ public class JavacTypes implements javax.lang.model.util.Types {
         case PACKAGE:
             throw new IllegalArgumentException(componentType.toString());
         }
-        return new Type.ArrayType((Type) componentType, syms.arrayClass);
+        return new Type.ArrayType((Type) componentType, syms.arrayClass,
+                                  Type.noAnnotations);
     }
 
     public WildcardType getWildcardType(TypeMirror extendsBound,
@@ -204,7 +194,8 @@ public class JavacTypes implements javax.lang.model.util.Types {
         case DECLARED:
         case ERROR:
         case TYPEVAR:
-            return new Type.WildcardType(bound, bkind, syms.boundClass);
+            return new Type.WildcardType(bound, bkind, syms.boundClass,
+                                         Type.noAnnotations);
         default:
             throw new IllegalArgumentException(bound.toString());
         }
@@ -246,7 +237,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
                 throw new IllegalArgumentException(
                 "Incorrect number of type arguments");
 
-            ListBuffer<Type> targs = new ListBuffer<Type>();
+            ListBuffer<Type> targs = new ListBuffer<>();
             for (TypeMirror t : typeArgs) {
                 if (!(t instanceof ReferenceType || t instanceof WildcardType))
                     throw new IllegalArgumentException(t.toString());
@@ -254,7 +245,8 @@ public class JavacTypes implements javax.lang.model.util.Types {
             }
             // TODO: Would like a way to check that type args match formals.
 
-            return (DeclaredType) new Type.ClassType(outer, targs.toList(), sym);
+            return (DeclaredType) new Type.ClassType(outer, targs.toList(), sym,
+                                                     Type.noAnnotations);
         }
 
     /**
@@ -314,7 +306,7 @@ public class JavacTypes implements javax.lang.model.util.Types {
         MethodSymbol m = (MethodSymbol) elem;
         ClassSymbol origin = (ClassSymbol) m.owner;
 
-        Set<MethodSymbol> results = new LinkedHashSet<MethodSymbol>();
+        Set<MethodSymbol> results = new LinkedHashSet<>();
         for (Type t : types.closure(origin.type)) {
             if (t != origin.type) {
                 ClassSymbol c = (ClassSymbol) t.tsym;

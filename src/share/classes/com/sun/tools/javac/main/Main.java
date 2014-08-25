@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -393,8 +393,8 @@ public class Main {
         if (options == null)
             options = Options.instance(context); // creates a new one
 
-        filenames = new LinkedHashSet<File>();
-        classnames = new ListBuffer<String>();
+        filenames = new LinkedHashSet<>();
+        classnames = new ListBuffer<>();
         JavaCompiler comp = null;
         /*
          * TODO: Logic below about what is an acceptable command line
@@ -453,15 +453,13 @@ public class Main {
                 JavacProcessingEnvironment pEnv = JavacProcessingEnvironment.instance(context);
                 ClassLoader cl = pEnv.getProcessorClassLoader();
                 ServiceLoader<Plugin> sl = ServiceLoader.load(Plugin.class, cl);
-                Set<List<String>> pluginsToCall = new LinkedHashSet<List<String>>();
+                Set<List<String>> pluginsToCall = new LinkedHashSet<>();
                 for (String plugin: plugins.split("\\x00")) {
                     pluginsToCall.add(List.from(plugin.split("\\s+")));
                 }
                 JavacTask task = null;
-                Iterator<Plugin> iter = sl.iterator();
-                while (iter.hasNext()) {
-                    Plugin plugin = iter.next();
-                    for (List<String> p: pluginsToCall) {
+                for (Plugin plugin : sl) {
+                    for (List<String> p : pluginsToCall) {
                         if (plugin.getName().equals(p.head)) {
                             pluginsToCall.remove(p);
                             try {
@@ -488,7 +486,7 @@ public class Main {
             String xdoclint = options.get(XDOCLINT);
             String xdoclintCustom = options.get(XDOCLINT_CUSTOM);
             if (xdoclint != null || xdoclintCustom != null) {
-                Set<String> doclintOpts = new LinkedHashSet<String>();
+                Set<String> doclintOpts = new LinkedHashSet<>();
                 if (xdoclint != null)
                     doclintOpts.add(DocLint.XMSGS_OPTION);
                 if (xdoclintCustom != null) {
@@ -506,6 +504,11 @@ public class Main {
                     new DocLint().init(t, doclintOpts.toArray(new String[doclintOpts.size()]));
                     comp.keepComments = true;
                 }
+            }
+
+            if (options.get(XSTDOUT) != null) {
+                // Stdout reassigned - ask compiler to close it when it is done
+                comp.closeables = comp.closeables.prepend(log.getWriter(WriterKind.NOTICE));
             }
 
             fileManager = context.get(JavaFileManager.class);
@@ -640,14 +643,11 @@ public class Main {
                 final String algorithm = "MD5";
                 byte[] digest;
                 MessageDigest md = MessageDigest.getInstance(algorithm);
-                DigestInputStream in = new DigestInputStream(url.openStream(), md);
-                try {
+                try (DigestInputStream in = new DigestInputStream(url.openStream(), md)) {
                     byte[] buf = new byte[8192];
                     int n;
                     do { n = in.read(buf); } while (n > 0);
                     digest = md.digest();
-                } finally {
-                    in.close();
                 }
                 StringBuilder sb = new StringBuilder();
                 for (byte b: digest)

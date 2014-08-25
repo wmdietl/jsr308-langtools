@@ -4666,7 +4666,7 @@ public class Attr extends JCTree.Visitor {
                 }
             }
         }
-    };
+    }
 
     // <editor-fold desc="post-attribution visitor">
 

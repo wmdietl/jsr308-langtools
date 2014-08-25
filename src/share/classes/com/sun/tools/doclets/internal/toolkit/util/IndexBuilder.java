@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -51,7 +51,7 @@ public class IndexBuilder {
      * Mapping of each Unicode Character with the member list containing
      * members with names starting with it.
      */
-    private Map<Character,List<Doc>> indexmap = new HashMap<Character,List<Doc>>();
+    private Map<Character,List<Doc>> indexmap = new HashMap<>();
 
     /**
      * Don't generate deprecated information if true.
@@ -70,27 +70,6 @@ public class IndexBuilder {
 
     // make ProgramElementDoc[] when new toArray is available
     protected final Object[] elements;
-
-    /**
-     * A comparator used to sort classes and members.
-     * Note:  Maybe this compare code belongs in the tool?
-     */
-    private class DocComparator implements Comparator<Doc> {
-        public int compare(Doc d1, Doc d2) {
-            String doc1 = d1.name();
-            String doc2 = d2.name();
-            int compareResult;
-            if ((compareResult = doc1.compareToIgnoreCase(doc2)) != 0) {
-                return compareResult;
-            } else if (d1 instanceof ProgramElementDoc && d2 instanceof ProgramElementDoc) {
-                 doc1 = (((ProgramElementDoc) d1).qualifiedName());
-                 doc2 = (((ProgramElementDoc) d2).qualifiedName());
-                 return doc1.compareToIgnoreCase(doc2);
-            } else {
-                return 0;
-            }
-        }
-    }
 
     /**
      * Constructor. Build the index map.
@@ -132,8 +111,8 @@ public class IndexBuilder {
      * sort each element which is a list.
      */
     protected void sortIndexMap() {
-        for (Iterator<List<Doc>> it = indexmap.values().iterator(); it.hasNext(); ) {
-            Collections.sort(it.next(), new DocComparator());
+        for (List<Doc> docs : indexmap.values()) {
+            Collections.sort(docs, Util.makeComparatorForIndexUse());
         }
     }
 
@@ -149,10 +128,9 @@ public class IndexBuilder {
         ClassDoc[] classes = root.classes();
         if (!classesOnly) {
             if (packages.length == 0) {
-                Set<PackageDoc> set = new HashSet<PackageDoc>();
-                PackageDoc pd;
-                for (int i = 0; i < classes.length; i++) {
-                    pd = classes[i].containingPackage();
+                Set<PackageDoc> set = new HashSet<>();
+                for (ClassDoc aClass : classes) {
+                    PackageDoc pd = aClass.containingPackage();
                     if (pd != null && pd.name().length() > 0) {
                         set.add(pd);
                     }
@@ -164,9 +142,9 @@ public class IndexBuilder {
         }
         adjustIndexMap(classes);
         if (!classesOnly) {
-            for (int i = 0; i < classes.length; i++) {
-                if (shouldAddToIndexMap(classes[i])) {
-                    putMembersInIndexMap(classes[i]);
+            for (ClassDoc aClass : classes) {
+                if (shouldAddToIndexMap(aClass)) {
+                    putMembersInIndexMap(aClass);
                 }
             }
         }
@@ -194,19 +172,19 @@ public class IndexBuilder {
      * @param elements Array of members.
      */
     protected void adjustIndexMap(Doc[] elements) {
-        for (int i = 0; i < elements.length; i++) {
-            if (shouldAddToIndexMap(elements[i])) {
-                String name = elements[i].name();
-                char ch = (name.length()==0)?
-                    '*' :
-                    Character.toUpperCase(name.charAt(0));
-                Character unicode = new Character(ch);
+        for (Doc element : elements) {
+            if (shouldAddToIndexMap(element)) {
+                String name = element.name();
+                char ch = (name.length() == 0) ?
+                          '*' :
+                          Character.toUpperCase(name.charAt(0));
+                Character unicode = ch;
                 List<Doc> list = indexmap.get(unicode);
                 if (list == null) {
-                    list = new ArrayList<Doc>();
+                    list = new ArrayList<>();
                     indexmap.put(unicode, list);
                 }
-                list.add(elements[i]);
+                list.add(element);
             }
         }
     }

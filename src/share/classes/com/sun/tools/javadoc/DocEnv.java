@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2000, 2013, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2000, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,11 +37,19 @@ import com.sun.tools.doclint.DocLint;
 import com.sun.tools.javac.api.BasicJavacTask;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.code.Symbol.*;
+import com.sun.tools.javac.code.Symbol.ClassSymbol;
+import com.sun.tools.javac.code.Symbol.CompletionFailure;
+import com.sun.tools.javac.code.Symbol.MethodSymbol;
+import com.sun.tools.javac.code.Symbol.PackageSymbol;
+import com.sun.tools.javac.code.Symbol.VarSymbol;
 import com.sun.tools.javac.code.Type.ClassType;
 import com.sun.tools.javac.comp.Check;
+import com.sun.tools.javac.comp.Enter;
 import com.sun.tools.javac.file.JavacFileManager;
 import com.sun.tools.javac.tree.JCTree;
-import com.sun.tools.javac.tree.JCTree.*;
+import com.sun.tools.javac.tree.JCTree.JCClassDecl;
+import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
+import com.sun.tools.javac.tree.JCTree.JCPackageDecl;
 import com.sun.tools.javac.util.Context;
 import com.sun.tools.javac.util.Names;
 
@@ -62,8 +70,7 @@ import com.sun.tools.javac.util.Names;
  * @author Scott Seligman (generics)
  */
 public class DocEnv {
-    protected static final Context.Key<DocEnv> docEnvKey =
-        new Context.Key<DocEnv>();
+    protected static final Context.Key<DocEnv> docEnvKey = new Context.Key<>();
 
     public static DocEnv instance(Context context) {
         DocEnv instance = context.get(docEnvKey);
@@ -72,21 +79,21 @@ public class DocEnv {
         return instance;
     }
 
-    private Messager messager;
-
     DocLocale doclocale;
 
+    private final Messager messager;
+
     /** Predefined symbols known to the compiler. */
-    Symtab syms;
+    final Symtab syms;
 
     /** Referenced directly in RootDocImpl. */
-    JavadocClassReader reader;
+    private final ClassFinder finder;
 
     /** Javadoc's own version of the compiler's enter phase. */
-    JavadocEnter enter;
+    final Enter enter;
 
     /** The name table. */
-    Names names;
+    private Names names;
 
     /** The encoding name. */
     private String encoding;
@@ -110,7 +117,7 @@ public class DocEnv {
     Context context;
     DocLint doclint;
 
-    WeakHashMap<JCTree, TreePath> treePaths = new WeakHashMap<JCTree, TreePath>();
+    WeakHashMap<JCTree, TreePath> treePaths = new WeakHashMap<>();
 
     /** Allow documenting from class files? */
     boolean docClasses = false;
@@ -140,10 +147,10 @@ public class DocEnv {
 
         messager = Messager.instance0(context);
         syms = Symtab.instance(context);
-        reader = JavadocClassReader.instance0(context);
-        enter = JavadocEnter.instance0(context);
+        finder = JavadocClassFinder.instance(context);
+        enter = JavadocEnter.instance(context);
         names = Names.instance(context);
-        externalizableSym = reader.enterClass(names.fromString("java.io.Externalizable"));
+        externalizableSym = syms.enterClass(names.fromString("java.io.Externalizable"));
         chk = Check.instance(context);
         types = Types.instance(context);
         fileManager = context.get(JavaFileManager.class);
@@ -177,7 +184,7 @@ public class DocEnv {
      */
     public ClassDocImpl loadClass(String name) {
         try {
-            ClassSymbol c = reader.loadClass(names.fromString(name));
+            ClassSymbol c = finder.loadClass(names.fromString(name));
             return getClassDoc(c);
         } catch (CompletionFailure ex) {
             chk.completionError(null, ex);
@@ -544,8 +551,7 @@ public class DocEnv {
         messager.exit();
     }
 
-    protected Map<PackageSymbol, PackageDocImpl> packageMap =
-            new HashMap<PackageSymbol, PackageDocImpl>();
+    protected Map<PackageSymbol, PackageDocImpl> packageMap = new HashMap<>();
     /**
      * Return the PackageDoc of this package symbol.
      */
@@ -571,8 +577,7 @@ public class DocEnv {
     }
 
 
-    protected Map<ClassSymbol, ClassDocImpl> classMap =
-            new HashMap<ClassSymbol, ClassDocImpl>();
+    protected Map<ClassSymbol, ClassDocImpl> classMap = new HashMap<>();
     /**
      * Return the ClassDoc (or a subtype) of this class symbol.
      */
@@ -613,8 +618,7 @@ public class DocEnv {
         return (tree.mods.flags & Flags.ANNOTATION) != 0;
     }
 
-    protected Map<VarSymbol, FieldDocImpl> fieldMap =
-            new HashMap<VarSymbol, FieldDocImpl>();
+    protected Map<VarSymbol, FieldDocImpl> fieldMap = new HashMap<>();
     /**
      * Return the FieldDoc of this var symbol.
      */
@@ -638,8 +642,7 @@ public class DocEnv {
         }
     }
 
-    protected Map<MethodSymbol, ExecutableMemberDocImpl> methodMap =
-            new HashMap<MethodSymbol, ExecutableMemberDocImpl>();
+    protected Map<MethodSymbol, ExecutableMemberDocImpl> methodMap = new HashMap<>();
     /**
      * Create a MethodDoc for this MethodSymbol.
      * Should be called only on symbols representing methods.
@@ -748,6 +751,13 @@ public class DocEnv {
         return p;
     }
 
+    TreePath getTreePath(JCCompilationUnit toplevel, JCPackageDecl tree) {
+        TreePath p = treePaths.get(tree);
+        if (p == null)
+            treePaths.put(tree, p = new TreePath(getTreePath(toplevel), tree));
+        return p;
+    }
+
     TreePath getTreePath(JCCompilationUnit toplevel, JCClassDecl tree) {
         TreePath p = treePaths.get(tree);
         if (p == null)
@@ -805,7 +815,7 @@ public class DocEnv {
     }
 
     void initDoclint(Collection<String> opts, Collection<String> customTagNames) {
-        ArrayList<String> doclintOpts = new ArrayList<String>();
+        ArrayList<String> doclintOpts = new ArrayList<>();
 
         for (String opt: opts) {
             doclintOpts.add(opt == null ? DocLint.XMSGS_OPTION : DocLint.XMSGS_CUSTOM_PREFIX + opt);

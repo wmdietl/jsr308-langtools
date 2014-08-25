@@ -45,6 +45,7 @@ import com.sun.tools.javac.comp.Env;
 import com.sun.tools.javac.jvm.ClassReader;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.util.*;
+
 import static com.sun.tools.javac.code.BoundKind.*;
 import static com.sun.tools.javac.code.Flags.*;
 import static com.sun.tools.javac.code.Scope.*;
@@ -722,7 +723,7 @@ public class Types {
                    !overridesObjectMethod(origin, sym) &&
                    (interfaceCandidates(origin.type, (MethodSymbol)sym).head.flags() & DEFAULT) == 0;
        }
-    };
+    }
 
     // <editor-fold defaultstate="collapsed" desc="isSubtype">
     /**
@@ -2807,7 +2808,7 @@ public class Types {
                             s.isInheritedIn(site.tsym, Types.this) &&
                             overrideEquivalent(memberType(site, s), memberType(site, msym));
                 }
-            };
+            }
     // </editor-fold>
 
     /**
@@ -2863,7 +2864,7 @@ public class Types {
             public Boolean visitErrorType(ErrorType t, Type s) {
                 return false;
             }
-        };
+        }
 
         TypeRelation hasSameArgs_strict = new HasSameArgs(true);
         TypeRelation hasSameArgs_nonstrict = new HasSameArgs(false);

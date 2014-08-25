@@ -450,7 +450,7 @@ public class Infer {
         class ImplicitArgType extends DeferredAttr.DeferredTypeMap {
 
             public ImplicitArgType(Symbol msym, Resolve.MethodResolutionPhase phase) {
-                (rs.deferredAttr).super(AttrMode.SPECULATIVE, msym, phase);
+                rs.deferredAttr.super(AttrMode.SPECULATIVE, msym, phase);
             }
 
             public Type apply(Type t) {
@@ -603,7 +603,7 @@ public class Infer {
                     uv.listener = null;
                 }
             }
-        };
+        }
 
         /** max number of incorporation rounds */
         static final int MAX_INCORPORATION_STEPS = 100;
@@ -1094,7 +1094,7 @@ public class Infer {
                 return !t.isErroneous() && !inferenceContext.free(t) &&
                         !t.hasTag(BOT);
             }
-        };
+        }
 
     /**
      * This enumeration defines all possible bound-checking related errors.
@@ -1212,7 +1212,7 @@ public class Infer {
             if (g.nodes.isEmpty()) {
                 //should not happen
                 throw new NodeNotFoundException(g);
-            };
+            }
             return g.nodes.get(0);
         }
 

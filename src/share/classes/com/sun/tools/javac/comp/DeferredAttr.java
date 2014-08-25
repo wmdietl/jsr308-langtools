@@ -349,7 +349,7 @@ public class DeferredAttr extends JCTree.Visitor {
         /**
          * This is the plain type-checking mode. Produces side-effects on the underlying AST node
          */
-        CHECK;
+        CHECK
     }
 
     /**
@@ -376,7 +376,7 @@ public class DeferredAttr extends JCTree.Visitor {
                         }
                         super.scan(tree);
                     }
-                };
+                }
                 PosScanner posScanner = new PosScanner();
                 posScanner.scan(newTree);
                 return posScanner.found;

@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.sun.tools.javac.util.Position.LineMap;
-import com.sun.tools.javac.parser.JavaTokenizer.*;
 
 import static com.sun.tools.javac.parser.Tokens.*;
 
@@ -56,7 +55,7 @@ public class Scanner implements Lexer {
 
     /** Buffer of saved tokens (used during lookahead)
      */
-    private List<Token> savedTokens = new ArrayList<Token>();
+    private List<Token> savedTokens = new ArrayList<>();
 
     private JavaTokenizer tokenizer;
 
@@ -133,5 +132,12 @@ public class Scanner implements Lexer {
 
     public void errPos(int pos) {
         tokenizer.errPos(pos);
+    }
+
+    // JSR 308 local change: add query method whether we are in
+    // special (magic or voodoo) annotation comments.
+    boolean inAnnotationComment() {
+        return tokenizer.magic || tokenizer.magicAt || tokenizer.magicID ||
+                tokenizer.voodoo;
     }
 }

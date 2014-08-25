@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2008, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2014, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,13 +26,15 @@
 package com.sun.tools.javac.comp;
 
 import java.util.AbstractQueue;
-import com.sun.tools.javac.util.Context;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import javax.tools.JavaFileObject;
+
+import com.sun.tools.javac.util.Context;
 
 /** A queue of all as yet unattributed classes.
  *
@@ -43,8 +45,7 @@ import javax.tools.JavaFileObject;
  */
 public class Todo extends AbstractQueue<Env<AttrContext>> {
     /** The context key for the todo list. */
-    protected static final Context.Key<Todo> todoKey =
-        new Context.Key<Todo>();
+    protected static final Context.Key<Todo> todoKey = new Context.Key<>();
 
     /** Get the Todo instance for this context. */
     public static Todo instance(Context context) {
@@ -83,6 +84,22 @@ public class Todo extends AbstractQueue<Env<AttrContext>> {
         }
     }
 
+    /**
+     * Removes all unattributed classes except those belonging to the given
+     * collection of files.
+     *
+     * @param sourceFiles The source files of the classes to keep.
+     */
+    public void retainFiles(Collection<? extends JavaFileObject> sourceFiles) {
+        for (Iterator<Env<AttrContext>> it = contents.iterator(); it.hasNext(); ) {
+            Env<AttrContext> env = it.next();
+            if (!sourceFiles.contains(env.toplevel.sourcefile)) {
+                if (contentsByFile != null) removeByFile(env);
+                it.remove();
+            }
+        }
+    }
+
     public Env<AttrContext> poll() {
         if (size() == 0)
             return null;
@@ -98,7 +115,7 @@ public class Todo extends AbstractQueue<Env<AttrContext>> {
 
     public Queue<Queue<Env<AttrContext>>> groupByFile() {
         if (contentsByFile == null) {
-            contentsByFile = new LinkedList<Queue<Env<AttrContext>>>();
+            contentsByFile = new LinkedList<>();
             for (Env<AttrContext> env: contents) {
                 addByFile(env);
             }
@@ -109,7 +126,7 @@ public class Todo extends AbstractQueue<Env<AttrContext>> {
     private void addByFile(Env<AttrContext> env) {
         JavaFileObject file = env.toplevel.sourcefile;
         if (fileMap == null)
-            fileMap = new HashMap<JavaFileObject, FileQueue>();
+            fileMap = new HashMap<>();
         FileQueue fq = fileMap.get(file);
         if (fq == null) {
             fq = new FileQueue();
@@ -132,7 +149,7 @@ public class Todo extends AbstractQueue<Env<AttrContext>> {
         }
     }
 
-    LinkedList<Env<AttrContext>> contents = new LinkedList<Env<AttrContext>>();
+    LinkedList<Env<AttrContext>> contents = new LinkedList<>();
     LinkedList<Queue<Env<AttrContext>>> contentsByFile;
     Map<JavaFileObject, FileQueue> fileMap;
 
@@ -167,6 +184,6 @@ public class Todo extends AbstractQueue<Env<AttrContext>> {
             return (fileContents.size() == 0 ? null : fileContents.get(0));
         }
 
-        LinkedList<Env<AttrContext>> fileContents = new LinkedList<Env<AttrContext>>();
+        LinkedList<Env<AttrContext>> fileContents = new LinkedList<>();
     }
 }

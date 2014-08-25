@@ -64,10 +64,20 @@ public abstract class AbstractProcessor implements Processor {
     protected ProcessingEnvironment processingEnv;
     private boolean initialized = false;
 
+    private static int uidCounter = 0;
+    private final int uid;
+
     /**
      * Constructor for subclasses to call.
      */
-    protected AbstractProcessor() {}
+    protected AbstractProcessor() {
+        uid = ++uidCounter;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "#" + uid;
+    }
 
     /**
      * If the processor class is annotated with {@link
@@ -187,7 +197,7 @@ public abstract class AbstractProcessor implements Processor {
 
     private static Set<String> arrayToSet(String[] array) {
         assert array != null;
-        Set<String> set = new HashSet<String>(array.length);
+        Set<String> set = new HashSet<>(array.length);
         for (String s : array)
             set.add(s);
         return Collections.unmodifiableSet(set);
