@@ -25,6 +25,8 @@
 
 package javax.lang.model.type;
 
+import javax.lang.model.element.*;
+
 /**
  * A visitor of types, in the style of the
  * visitor design pattern.  Classes implementing this

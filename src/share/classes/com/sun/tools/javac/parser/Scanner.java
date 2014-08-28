@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.sun.tools.javac.util.Position.LineMap;
+import com.sun.tools.javac.parser.JavaTokenizer.*;
 
 import static com.sun.tools.javac.parser.Tokens.*;
 
@@ -55,7 +56,7 @@ public class Scanner implements Lexer {
 
     /** Buffer of saved tokens (used during lookahead)
      */
-    private List<Token> savedTokens = new ArrayList<>();
+    private List<Token> savedTokens = new ArrayList<Token>();
 
     private JavaTokenizer tokenizer;
 

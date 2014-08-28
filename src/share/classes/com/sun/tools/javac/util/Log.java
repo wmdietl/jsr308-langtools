@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1999, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1999, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -53,10 +53,12 @@ import static com.sun.tools.javac.main.Option.*;
  */
 public class Log extends AbstractLog {
     /** The context key for the log. */
-    public static final Context.Key<Log> logKey = new Context.Key<>();
+    public static final Context.Key<Log> logKey
+        = new Context.Key<Log>();
 
     /** The context key for the output PrintWriter. */
-    public static final Context.Key<PrintWriter> outKey = new Context.Key<>();
+    public static final Context.Key<PrintWriter> outKey =
+        new Context.Key<PrintWriter>();
 
     /* TODO: Should unify this with prefix handling in JCDiagnostic.Factory. */
     public enum PrefixKind {
@@ -162,7 +164,7 @@ public class Log extends AbstractLog {
         }
     }
 
-    public enum WriterKind { NOTICE, WARNING, ERROR }
+    public enum WriterKind { NOTICE, WARNING, ERROR };
 
     protected PrintWriter errWriter;
 
@@ -268,7 +270,7 @@ public class Log extends AbstractLog {
 
             String ek = options.get("expectKeys");
             if (ek != null)
-                expectDiagKeys = new HashSet<>(Arrays.asList(ek.split(", *")));
+                expectDiagKeys = new HashSet<String>(Arrays.asList(ek.split(", *")));
         }
 
         private int getIntOption(Options options, Option option, int defaultValue) {
@@ -337,7 +339,7 @@ public class Log extends AbstractLog {
      *  error message more than once. For each error, a pair consisting of the
      *  source file name and source code position of the error is added to the set.
      */
-    private Set<Pair<JavaFileObject, Integer>> recorded = new HashSet<>();
+    private Set<Pair<JavaFileObject, Integer>> recorded = new HashSet<Pair<JavaFileObject,Integer>>();
 
     public boolean hasDiagnosticListener() {
         return diagListener != null;
@@ -391,6 +393,19 @@ public class Log extends AbstractLog {
     }
 
     /**
+     * Propagate the previous log's information.
+     */
+    public void initRound(Log other) {
+        this.noticeWriter = other.noticeWriter;
+        this.warnWriter = other.warnWriter;
+        this.errWriter = other.errWriter;
+        this.sourceMap = other.sourceMap;
+        this.recorded = other.recorded;
+        this.nerrors = other.nerrors;
+        this.nwarnings = other.nwarnings;
+    }
+
+    /**
      * Replace the specified diagnostic handler with the
      * handler that was current at the time this handler was created.
      * The given handler must be the currently installed handler;
@@ -420,7 +435,7 @@ public class Log extends AbstractLog {
         if (multipleErrors || file == null)
             return true;
 
-        Pair<JavaFileObject,Integer> coords = new Pair<>(file, pos);
+        Pair<JavaFileObject,Integer> coords = new Pair<JavaFileObject,Integer>(file, pos);
         boolean shouldReport = !recorded.contains(coords);
         if (shouldReport)
             recorded.add(coords);

@@ -42,8 +42,8 @@ public class XMLNode {
     XMLNode(XMLNode parent, String qname) {
         this.parent = parent;
         name = qname;
-        attrs = new HashMap<>();
-        children = new ArrayList<>();
+        attrs = new HashMap<String,String>();
+        children = new ArrayList<XMLNode>();
 
         if (parent != null)
             parent.children.add(this);

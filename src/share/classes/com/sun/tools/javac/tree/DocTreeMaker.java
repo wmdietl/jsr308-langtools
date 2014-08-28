@@ -48,7 +48,8 @@ import com.sun.tools.javac.util.Position;
 public class DocTreeMaker {
 
     /** The context key for the tree factory. */
-    protected static final Context.Key<DocTreeMaker> treeMakerKey = new Context.Key<>();
+    protected static final Context.Key<DocTreeMaker> treeMakerKey =
+        new Context.Key<DocTreeMaker>();
 
     /** Get the TreeMaker instance. */
     public static DocTreeMaker instance(Context context) {

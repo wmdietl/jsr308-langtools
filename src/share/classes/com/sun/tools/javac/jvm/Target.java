@@ -48,7 +48,7 @@ public enum Target {
     /** J2SE1.4 = Merlin. */
     JDK1_4("1.4", 48, 0),
 
-    /** JDK 5, codename Tiger. */
+    /** Tiger. */
     JDK1_5("1.5", 49, 0),
 
     /** JDK 6. */
@@ -58,12 +58,10 @@ public enum Target {
     JDK1_7("1.7", 51, 0),
 
     /** JDK 8. */
-    JDK1_8("1.8", 52, 0),
+    JDK1_8("1.8", 52, 0);
 
-    /** JDK 9, initially an alias for 8. */
-    JDK1_9("1.9", 52, 0);
-
-    private static final Context.Key<Target> targetKey = new Context.Key<>();
+    private static final Context.Key<Target> targetKey =
+        new Context.Key<Target>();
 
     public static Target instance(Context context) {
         Target instance = context.get(targetKey);
@@ -83,7 +81,7 @@ public enum Target {
     private static final Target MAX = values()[values().length - 1];
     public static Target MAX() { return MAX; }
 
-    private static final Map<String,Target> tab = new HashMap<>();
+    private static final Map<String,Target> tab = new HashMap<String,Target>();
     static {
         for (Target t : values()) {
             tab.put(t.name, t);
@@ -92,7 +90,6 @@ public enum Target {
         tab.put("6", JDK1_6);
         tab.put("7", JDK1_7);
         tab.put("8", JDK1_8);
-        tab.put("9", JDK1_9);
     }
 
     public final String name;
@@ -104,11 +101,6 @@ public enum Target {
         this.minorVersion = minorVersion;
     }
 
-    /*
-     * JSR 308 local change: use JDK 1.8 as the default target.
-     * This allows us to run the compiled code on >= JDK 1.8 VMs.
-     * For the official version, use the original JDK1_9.
-     */
     public static final Target DEFAULT = JDK1_8;
 
     public static Target lookup(String name) {

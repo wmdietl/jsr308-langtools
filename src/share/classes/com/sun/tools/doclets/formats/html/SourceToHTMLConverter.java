@@ -95,19 +95,21 @@ public class SourceToHTMLConverter {
         if (rootDoc == null || outputdir == null) {
             return;
         }
-        for (PackageDoc pd : rootDoc.specifiedPackages()) {
+        PackageDoc[] pds = rootDoc.specifiedPackages();
+        for (int i = 0; i < pds.length; i++) {
             // If -nodeprecated option is set and the package is marked as deprecated,
             // do not convert the package files to HTML.
-            if (!(configuration.nodeprecated && Util.isDeprecated(pd)))
-                convertPackage(pd, outputdir);
+            if (!(configuration.nodeprecated && Util.isDeprecated(pds[i])))
+                convertPackage(pds[i], outputdir);
         }
-        for (ClassDoc cd : rootDoc.specifiedClasses()) {
+        ClassDoc[] cds = rootDoc.specifiedClasses();
+        for (int i = 0; i < cds.length; i++) {
             // If -nodeprecated option is set and the class is marked as deprecated
             // or the containing package is deprecated, do not convert the
             // package files to HTML.
             if (!(configuration.nodeprecated &&
-                  (Util.isDeprecated(cd) || Util.isDeprecated(cd.containingPackage()))))
-                convertClass(cd, outputdir);
+                    (Util.isDeprecated(cds[i]) || Util.isDeprecated(cds[i].containingPackage()))))
+                convertClass(cds[i], outputdir);
         }
     }
 
@@ -121,13 +123,14 @@ public class SourceToHTMLConverter {
         if (pd == null) {
             return;
         }
-        for (ClassDoc cd : pd.allClasses()) {
+        ClassDoc[] cds = pd.allClasses();
+        for (int i = 0; i < cds.length; i++) {
             // If -nodeprecated option is set and the class is marked as deprecated,
             // do not convert the package files to HTML. We do not check for
             // containing package deprecation since it is already check in
             // the calling method above.
-            if (!(configuration.nodeprecated && Util.isDeprecated(cd)))
-                convertClass(cd, outputdir);
+            if (!(configuration.nodeprecated && Util.isDeprecated(cds[i])))
+                convertClass(cds[i], outputdir);
         }
     }
 
@@ -158,6 +161,7 @@ public class SourceToHTMLConverter {
                     return;
                 r = new FileReader(file);
             }
+            LineNumberReader reader = new LineNumberReader(r);
             int lineno = 1;
             String line;
             relativePath = DocPaths.SOURCE_OUTPUT
@@ -165,12 +169,14 @@ public class SourceToHTMLConverter {
                     .invert();
             Content body = getHeader();
             Content pre = new HtmlTree(HtmlTag.PRE);
-            try (LineNumberReader reader = new LineNumberReader(r)) {
+            try {
                 while ((line = reader.readLine()) != null) {
                     addLineNo(pre, lineno);
                     addLine(pre, line, lineno);
                     lineno++;
                 }
+            } finally {
+                reader.close();
             }
             addBlankLines(pre);
             Content div = HtmlTree.DIV(HtmlStyle.sourceContainer, pre);
@@ -198,8 +204,11 @@ public class SourceToHTMLConverter {
         Content htmlDocument = new HtmlDocument(htmlDocType, htmlTree);
         configuration.message.notice("doclet.Generating_0", path.getPath());
         DocFile df = DocFile.createFileForOutput(configuration, path);
-        try (Writer w = df.openWriter()) {
+        Writer w = df.openWriter();
+        try {
             htmlDocument.write(w, true);
+        } finally {
+            w.close();
         }
 
     }

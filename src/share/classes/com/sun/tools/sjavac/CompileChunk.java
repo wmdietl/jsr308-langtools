@@ -41,7 +41,7 @@ import java.util.Set;
 public class CompileChunk implements Comparable<CompileChunk> {
     public int numPackages;
     public int numDependents;
-    public Set<URI> srcs = new HashSet<>();
+    public Set<URI> srcs = new HashSet<URI>();
     public StringBuilder pkgNames = new StringBuilder();
     public String pkgFromTos = "";
 

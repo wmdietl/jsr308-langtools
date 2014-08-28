@@ -938,7 +938,7 @@ public class Resolve {
         public MethodCheck mostSpecificCheck(List<Type> actuals, boolean strict) {
             return new MostSpecificCheck(strict, actuals);
         }
-    }
+    };
 
     /**
      * Check context to be used during method applicability checks. A method check
@@ -1647,7 +1647,7 @@ public class Resolve {
                         (flags & DEFAULT) != 0 ||
                         (flags & ABSTRACT) == 0);
             }
-        }
+        };
 
     /** Find best qualified method matching given name, type and value
      *  arguments.

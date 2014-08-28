@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -24,31 +24,49 @@
 /*
  * @test
  * @bug 4693440
- * @summary Test to make sure that warning is printed when bad parameter
+ * @summary Test to make sure that warning is printed when bad paramenter
  * name is used with param.
  * @author jamieh
- * @library ../lib
+ * @library ../lib/
  * @build JavadocTester
+ * @build TestWarnBadParamNames
  * @run main TestWarnBadParamNames
  */
 
 public class TestWarnBadParamNames extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    private static final String BUG_ID = "4693440";
+    private static final String[][] TEST = {
+        {WARNING_OUTPUT, "warning - @param argument \"int\" is not a parameter name."},
+        {WARNING_OUTPUT, "warning - @param argument \"IDontExist\" is not a parameter name."},
+        {WARNING_OUTPUT, "warning - Parameter \"arg\" is documented more than once."},
+    };
+    private static final String[][] NEGATED_TEST = NO_TEST;
+    private static final String[] ARGS = new String[] {
+        "-Xdoclint:none", "-d", BUG_ID, SRC_DIR + FS + "C.java"
+    };
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestWarnBadParamNames tester = new TestWarnBadParamNames();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-Xdoclint:none",
-                "-d", "out",
-                testSrc("C.java"));
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput(Output.WARNING, true,
-                "warning - @param argument \"int\" is not a parameter name.",
-                "warning - @param argument \"IDontExist\" is not a parameter name.",
-                "warning - Parameter \"arg\" is documented more than once.");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

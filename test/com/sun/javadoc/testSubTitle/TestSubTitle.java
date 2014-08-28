@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2011, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,38 +26,57 @@
  * @bug 7010342
  * @summary Test for correct sub title generation.
  * @author Bhavesh Patel
- * @library ../lib
+ * @library ../lib/
  * @build JavadocTester
+ * @build TestSubTitle
  * @run main TestSubTitle
  */
 
 public class TestSubTitle extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    private static final String BUG_ID = "7010342";
+    private static final String[][] TEST = {
+        {BUG_ID + FS + "pkg" + FS + "package-summary.html",
+            "<div class=\"block\">This is the description of package pkg.</div>"
+        },
+        {BUG_ID + FS + "pkg" + FS + "C.html",
+            "<div class=\"subTitle\">pkg</div>"
+        }
+    };
+    private static final String[][] NEG_TEST = {
+        {BUG_ID + FS + "pkg" + FS + "package-summary.html",
+            "<p class=\"subTitle\">" + NL + "<div class=\"block\">This is the " +
+            "description of package pkg.</div>" + NL + "</p>"
+        },
+        {BUG_ID + FS + "pkg" + FS + "C.html",
+            "<p class=\"subTitle\">pkg</p>"
+        }
+    };
+    private static final String[] ARGS = new String[]{
+        "-d", BUG_ID, "-sourcepath", SRC_DIR, "pkg"
+    };
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestSubTitle tester = new TestSubTitle();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEG_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                "pkg");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("pkg/package-summary.html", true,
-            "<div class=\"block\">This is the description of package pkg.</div>");
-
-        checkOutput("pkg/C.html", true,
-            "<div class=\"subTitle\">pkg</div>");
-
-        checkOutput("pkg/package-summary.html", false,
-            "<p class=\"subTitle\">\n" +
-            "<div class=\"block\">This is the " +
-            "description of package pkg.</div>\n" +
-            "</p>");
-
-        checkOutput("pkg/C.html", false,
-            "<p class=\"subTitle\">pkg</p>");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

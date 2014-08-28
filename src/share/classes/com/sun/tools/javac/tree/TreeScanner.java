@@ -63,12 +63,9 @@ public class TreeScanner extends Visitor {
  ****************************************************************************/
 
     public void visitTopLevel(JCCompilationUnit tree) {
-        scan(tree.defs);
-    }
-
-    public void visitPackageDef(JCPackageDecl tree) {
-        scan(tree.annotations);
+        scan(tree.packageAnnotations);
         scan(tree.pid);
+        scan(tree.defs);
     }
 
     public void visitImport(JCImport tree) {

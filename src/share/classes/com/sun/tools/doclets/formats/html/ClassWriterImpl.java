@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -274,20 +274,21 @@ public class ClassWriterImpl extends SubWriterHolderWriter
         Type[] implIntfacs = classDoc.interfaceTypes();
         if (implIntfacs != null && implIntfacs.length > 0) {
             int counter = 0;
-            for (Type implType : implIntfacs) {
-                ClassDoc classDoc = implType.asClassDoc();
-                if (!(classDoc.isPublic() || Util.isLinkable(classDoc, configuration))) {
+            for (int i = 0; i < implIntfacs.length; i++) {
+                ClassDoc classDoc = implIntfacs[i].asClassDoc();
+                if (! (classDoc.isPublic() ||
+                        Util.isLinkable(classDoc, configuration))) {
                     continue;
                 }
                 if (counter == 0) {
                     pre.addContent(DocletConstants.NL);
-                    pre.addContent(isInterface ? "extends " : "implements ");
+                    pre.addContent(isInterface? "extends " : "implements ");
                 } else {
                     pre.addContent(", ");
                 }
                 Content link = getLink(new LinkInfoImpl(configuration,
-                                                        LinkInfoImpl.Kind.CLASS_SIGNATURE_PARENT_NAME,
-                                                        implType));
+                        LinkInfoImpl.Kind.CLASS_SIGNATURE_PARENT_NAME,
+                        implIntfacs[i]));
                 pre.addContent(link);
                 counter++;
             }

@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 8026564
+ * @bug 1234567
  * @summary A missing annotation type in a type variable bound
  *     should result in the same errors with and without an
  *     annotation processor.

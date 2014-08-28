@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -69,7 +69,7 @@ public class DeprecatedAPIListBuilder {
      * @param configuration the current configuration of the doclet
      */
     public DeprecatedAPIListBuilder(Configuration configuration) {
-        deprecatedLists = new ArrayList<>();
+        deprecatedLists = new ArrayList<List<Doc>>();
         for (int i = 0; i < NUM_TYPES; i++) {
             deprecatedLists.add(i, new ArrayList<Doc>());
         }
@@ -84,13 +84,17 @@ public class DeprecatedAPIListBuilder {
      * @param configuration the current configuration of the doclet.
      */
     private void buildDeprecatedAPIInfo(Configuration configuration) {
-        Set<PackageDoc> packages = configuration.packages;
-        for (PackageDoc pkg : packages) {
+        PackageDoc[] packages = configuration.packages;
+        PackageDoc pkg;
+        for (int c = 0; c < packages.length; c++) {
+            pkg = packages[c];
             if (Util.isDeprecated(pkg)) {
                 getList(PACKAGE).add(pkg);
             }
         }
-        for (ClassDoc cd : configuration.root.classes()) {
+        ClassDoc[] classes = configuration.root.classes();
+        for (int i = 0; i < classes.length; i++) {
+            ClassDoc cd = classes[i];
             if (Util.isDeprecated(cd)) {
                 if (cd.isOrdinaryClass()) {
                     getList(CLASS).add(cd);
@@ -114,7 +118,7 @@ public class DeprecatedAPIListBuilder {
             }
             if (cd.isAnnotationType()) {
                 composeDeprecatedList(getList(ANNOTATION_TYPE_MEMBER),
-                                      ((AnnotationTypeDoc) cd).elements());
+                        ((AnnotationTypeDoc) cd).elements());
             }
         }
         sortDeprecatedLists();
@@ -127,9 +131,9 @@ public class DeprecatedAPIListBuilder {
      * @param members members to be added in the list.
      */
     private void composeDeprecatedList(List<Doc> list, MemberDoc[] members) {
-        for (MemberDoc member : members) {
-            if (Util.isDeprecated(member)) {
-                list.add(member);
+        for (int i = 0; i < members.length; i++) {
+            if (Util.isDeprecated(members[i])) {
+                list.add(members[i]);
             }
         }
     }

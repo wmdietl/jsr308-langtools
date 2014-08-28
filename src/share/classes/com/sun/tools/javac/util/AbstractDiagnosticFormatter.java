@@ -156,7 +156,7 @@ public abstract class AbstractDiagnosticFormatter implements DiagnosticFormatter
      * @return a Collection whose elements are the formatted arguments of the diagnostic
      */
     protected Collection<String> formatArguments(JCDiagnostic d, Locale l) {
-        ListBuffer<String> buf = new ListBuffer<>();
+        ListBuffer<String> buf = new ListBuffer<String>();
         for (Object o : d.getArgs()) {
            buf.append(formatArgument(d, o, l));
         }
@@ -389,7 +389,7 @@ public abstract class AbstractDiagnosticFormatter implements DiagnosticFormatter
         protected boolean caretEnabled;
 
         public SimpleConfiguration(Set<DiagnosticPart> parts) {
-            multilineLimits = new HashMap<>();
+            multilineLimits = new HashMap<MultilineLimit, Integer>();
             setVisible(parts);
             setMultilineLimit(MultilineLimit.DEPTH, -1);
             setMultilineLimit(MultilineLimit.LENGTH, -1);

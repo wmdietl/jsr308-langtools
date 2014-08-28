@@ -49,11 +49,11 @@ implements CRTFlags {
 
     /** The list of CRTable entries.
      */
-    private ListBuffer<CRTEntry> entries = new ListBuffer<>();
+    private ListBuffer<CRTEntry> entries = new ListBuffer<CRTEntry>();
 
     /** The hashtable for source positions.
      */
-    private Map<Object,SourceRange> positions = new HashMap<>();
+    private Map<Object,SourceRange> positions = new HashMap<Object,SourceRange>();
 
     /** The object for ending positions stored in the parser.
      */

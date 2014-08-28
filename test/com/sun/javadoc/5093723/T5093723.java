@@ -25,24 +25,33 @@
  * @test
  * @bug      5093723
  * @summary  REGRESSION: ClassCastException in SingleIndexWriter
- * @library ../lib
+ * @library  ../lib/
  * @build    JavadocTester
+ * @build    T5093723
  * @run main T5093723
  */
 
 public class T5093723 extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    private static final String BUG_ID = "5093723";
+
+    private static final String[] ARGS = new String[] {
+        "-d", BUG_ID + ".out", "-source", "5", "-Xdoclint:none",
+        SRC_DIR + "/DocumentedClass.java",
+        SRC_DIR + "/UndocumentedClass.java"
+    };
+
+    public static void main(String... args) {
         T5093723 tester = new T5093723();
-        tester.runTests();
+        if (tester.runJavadoc(ARGS) != 0)
+          throw new AssertionError("non-zero return code from javadoc");
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-Xdoclint:none",
-                testSrc("DocumentedClass.java"),
-                testSrc("UndocumentedClass.java"));
-        checkExit(Exit.OK);
+    public String getBugId() {
+        return BUG_ID;
+    }
+
+    public String getBugName() {
+        return getClass().getName();
     }
 }

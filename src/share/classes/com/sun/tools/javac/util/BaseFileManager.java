@@ -122,7 +122,7 @@ public abstract class BaseFileManager {
                         Class.forName(classLoaderClass).asSubclass(ClassLoader.class);
                 Class<?>[] constrArgTypes = { URL[].class, ClassLoader.class };
                 Constructor<? extends ClassLoader> constr = loader.getConstructor(constrArgTypes);
-                return constr.newInstance(urls, thisClassLoader);
+                return constr.newInstance(new Object[] { urls, thisClassLoader });
             } catch (Throwable t) {
                 // ignore errors loading user-provided class loader, fall through
             }
@@ -356,7 +356,8 @@ public abstract class BaseFileManager {
         contentCache.remove(file);
     }
 
-    protected final Map<JavaFileObject, ContentCacheEntry> contentCache = new HashMap<>();
+    protected final Map<JavaFileObject, ContentCacheEntry> contentCache
+            = new HashMap<JavaFileObject, ContentCacheEntry>();
 
     protected static class ContentCacheEntry {
         final long timestamp;
@@ -364,7 +365,7 @@ public abstract class BaseFileManager {
 
         ContentCacheEntry(JavaFileObject file, CharBuffer cb) {
             this.timestamp = file.getLastModified();
-            this.ref = new SoftReference<>(cb);
+            this.ref = new SoftReference<CharBuffer>(cb);
         }
 
         boolean isValid(JavaFileObject file) {

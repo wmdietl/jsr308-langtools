@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,30 +25,53 @@
  * @test
  * @bug      8011288
  * @summary  Erratic/inconsistent indentation of signatures
- * @library  ../lib
+ * @library  ../lib/
  * @build    JavadocTester
  * @run main TestIndentation
  */
 
 public class TestIndentation extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    //Test information.
+    private static final String BUG_ID = "8011288";
+
+    //Javadoc arguments.
+    private static final String[] ARGS = new String[] {
+        "-d", BUG_ID, "-sourcepath", SRC_DIR, "p"
+    };
+
+    //Input for string search tests.
+    private static final String[][] TEST = {
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          "<pre>public&nbsp;&lt;T&gt;&nbsp;void&nbsp;m(T&nbsp;t1," },
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          NL + "                  T&nbsp;t2)" },
+        { BUG_ID + FS + "p" + FS + "Indent.html",
+          NL + "           throws java.lang.Exception" }
+    };
+    private static final String[][] NEGATED_TEST = NO_TEST;
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestIndentation tester = new TestIndentation();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                "p");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("p/Indent.html", true,
-                "<pre>public&nbsp;&lt;T&gt;&nbsp;void&nbsp;m(T&nbsp;t1,",
-                "\n"
-                + "                  T&nbsp;t2)",
-                "\n"
-                + "           throws java.lang.Exception");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

@@ -132,15 +132,19 @@ public abstract class DocFile {
      * Copy the contents of another file directly to this file.
      */
     public void copyFile(DocFile fromFile) throws IOException {
-        try (OutputStream output = openOutputStream();
-             InputStream input = fromFile.openInputStream()) {
+        InputStream input = fromFile.openInputStream();
+        OutputStream output = openOutputStream();
+        try {
             byte[] bytearr = new byte[1024];
             int len;
             while ((len = input.read(bytearr)) != -1) {
                 output.write(bytearr, 0, len);
             }
-        }
-        catch (FileNotFoundException | SecurityException exc) {
+        } catch (FileNotFoundException exc) {
+        } catch (SecurityException exc) {
+        } finally {
+            input.close();
+            output.close();
         }
     }
 
@@ -161,26 +165,35 @@ public abstract class DocFile {
             if (in == null)
                 return;
 
-            try (OutputStream out = openOutputStream()) {
+            OutputStream out = openOutputStream();
+            try {
                 if (!replaceNewLine) {
                     byte[] buf = new byte[2048];
                     int n;
-                    while ((n = in.read(buf)) > 0)
-                        out.write(buf, 0, n);
+                    while((n = in.read(buf))>0) out.write(buf,0,n);
                 } else {
-                    try (BufferedReader reader = new BufferedReader(new InputStreamReader(in));
-                         BufferedWriter writer = new BufferedWriter(configuration.docencoding == null
-                                                                    ? new OutputStreamWriter(out)
-                                                                    : new OutputStreamWriter(out, configuration.docencoding))) {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+                    BufferedWriter writer;
+                    if (configuration.docencoding == null) {
+                        writer = new BufferedWriter(new OutputStreamWriter(out));
+                    } else {
+                        writer = new BufferedWriter(new OutputStreamWriter(out,
+                                configuration.docencoding));
+                    }
+                    try {
                         String line;
                         while ((line = reader.readLine()) != null) {
                             writer.write(line);
                             writer.write(DocletConstants.NL);
                         }
+                    } finally {
+                        reader.close();
+                        writer.close();
                     }
                 }
             } finally {
                 in.close();
+                out.close();
             }
         } catch (IOException e) {
             e.printStackTrace(System.err);

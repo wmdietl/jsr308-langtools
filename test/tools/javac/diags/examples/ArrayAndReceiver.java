@@ -22,6 +22,9 @@
  */
 
 // key: compiler.err.array.and.receiver
+// key: compiler.err.expected
+// key: compiler.err.expected3
+// key: compiler.err.illegal.start.of.type
 
 class ArrayAndReceiver {
     void m(ArrayAndReceiver this[]) { }

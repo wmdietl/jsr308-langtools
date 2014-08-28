@@ -51,7 +51,8 @@ import static com.sun.tools.javac.comp.CompileStates.CompileState;
  */
 public class TransTypes extends TreeTranslator {
     /** The context key for the TransTypes phase. */
-    protected static final Context.Key<TransTypes> transTypesKey = new Context.Key<>();
+    protected static final Context.Key<TransTypes> transTypesKey =
+        new Context.Key<TransTypes>();
 
     /** Get the instance for this context. */
     public static TransTypes instance(Context context) {
@@ -87,7 +88,7 @@ public class TransTypes extends TreeTranslator {
         log = Log.instance(context);
         syms = Symtab.instance(context);
         enter = Enter.instance(context);
-        overridden = new HashMap<>();
+        overridden = new HashMap<MethodSymbol,MethodSymbol>();
         Source source = Source.instance(context);
         allowEnums = source.allowEnums();
         addBridges = source.addBridges();
@@ -748,7 +749,7 @@ public class TransTypes extends TreeTranslator {
         tree.clazz = translate(tree.clazz, null);
         Type originalTarget = tree.type;
         tree.type = erasure(tree.type);
-        tree.expr = translate(tree.expr, erasure(tree.expr.type));
+        tree.expr = translate(tree.expr, tree.type);
         if (originalTarget.isCompound()) {
             Type.IntersectionClassType ict = (Type.IntersectionClassType)originalTarget;
             for (Type c : ict.getExplicitComponents()) {
@@ -1006,7 +1007,7 @@ public class TransTypes extends TreeTranslator {
                 super.visitClassDef(tree);
                 make.at(tree.pos);
                 if (addBridges) {
-                    ListBuffer<JCTree> bridges = new ListBuffer<>();
+                    ListBuffer<JCTree> bridges = new ListBuffer<JCTree>();
                     if (false) //see CR: 6996415
                         bridges.appendList(addOverrideBridgesIfNeeded(tree, c));
                     if (allowInterfaceBridges || (tree.sym.flags() & INTERFACE) == 0) {

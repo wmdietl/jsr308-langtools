@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2010, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -28,26 +28,49 @@
  *           "Method Summary" heading should still show up since the class
  *           inherits methods.
  * @author   jamieh
- * @library  ../lib
+ * @library  ../lib/
  * @build    JavadocTester
+ * @build    TestSummaryHeading
  * @run main TestSummaryHeading
  */
 
 public class TestSummaryHeading extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    //Test information.
+    private static final String BUG_ID = "4904036";
+
+    //Javadoc arguments.
+    private static final String[] ARGS = new String[] {
+        "-d", BUG_ID, "-sourcepath", SRC_DIR, SRC_DIR + FS + "C.java"
+    };
+
+    //Input for string search tests.
+    private static final String[][] TEST = {
+        {BUG_ID + FS + "C.html",  "<h3>Method Summary</h3>"}
+    };
+    private static final String[][] NEGATED_TEST = NO_TEST;
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestSummaryHeading tester = new TestSummaryHeading();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                testSrc("C.java"));
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("C.html", true,
-                "<h3>Method Summary</h3>");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

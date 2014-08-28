@@ -7,7 +7,6 @@
  */
 
 import java.lang.annotation.*;
-
 import java.@A util.List;
 import @A java.util.Map;
 import java.util.@A HashMap;

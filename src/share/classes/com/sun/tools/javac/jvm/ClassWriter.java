@@ -63,7 +63,8 @@ import static javax.tools.StandardLocation.CLASS_OUTPUT;
  *  deletion without notice.</b>
  */
 public class ClassWriter extends ClassFile {
-    protected static final Context.Key<ClassWriter> classWriterKey = new Context.Key<>();
+    protected static final Context.Key<ClassWriter> classWriterKey =
+        new Context.Key<ClassWriter>();
 
     private final Options options;
 
@@ -291,6 +292,7 @@ public class ClassWriter extends ClassFile {
          */
         @Override
         public void assembleSig(Type type) {
+            type = type.unannotatedType();
             switch (type.getTag()) {
                 case UNINITIALIZED_THIS:
                 case UNINITIALIZED_OBJECT:
@@ -358,7 +360,7 @@ public class ClassWriter extends ClassFile {
         } else if (t.hasTag(ARRAY)) {
             return typeSig(types.erasure(t));
         } else {
-            throw new AssertionError("xClassName expects class or array type, got " + t);
+            throw new AssertionError("xClassName");
         }
     }
 
@@ -464,11 +466,11 @@ public class ClassWriter extends ClassFile {
                 poolbuf.appendChar(pool.put(names.fromString((String)value)));
             } else if (value instanceof UniqueType) {
                 Type type = ((UniqueType)value).type;
-                if (type.hasTag(METHOD)) {
+                if (type instanceof MethodType) {
                     poolbuf.appendByte(CONSTANT_MethodType);
                     poolbuf.appendChar(pool.put(typeSig((MethodType)type)));
                 } else {
-                    Assert.check(type.hasTag(ARRAY));
+                    if (type.hasTag(CLASS)) enterInner((ClassSymbol)type.tsym);
                     poolbuf.appendByte(CONSTANT_Class);
                     poolbuf.appendChar(pool.put(xClassName(type)));
                 }
@@ -686,7 +688,7 @@ public class ClassWriter extends ClassFile {
                     case SOURCE: break;
                     case CLASS: hasInvisible = true; break;
                     case RUNTIME: hasVisible = true; break;
-                    default: // /* fail soft */ throw new AssertionError(vis);
+                    default: ;// /* fail soft */ throw new AssertionError(vis);
                     }
                 }
             }
@@ -697,7 +699,7 @@ public class ClassWriter extends ClassFile {
             int attrIndex = writeAttr(names.RuntimeVisibleParameterAnnotations);
             databuf.appendByte(m.params.length());
             for (VarSymbol s : m.params) {
-                ListBuffer<Attribute.Compound> buf = new ListBuffer<>();
+                ListBuffer<Attribute.Compound> buf = new ListBuffer<Attribute.Compound>();
                 for (Attribute.Compound a : s.getRawAttributes())
                     if (types.getRetention(a) == RetentionPolicy.RUNTIME)
                         buf.append(a);
@@ -712,7 +714,7 @@ public class ClassWriter extends ClassFile {
             int attrIndex = writeAttr(names.RuntimeInvisibleParameterAnnotations);
             databuf.appendByte(m.params.length());
             for (VarSymbol s : m.params) {
-                ListBuffer<Attribute.Compound> buf = new ListBuffer<>();
+                ListBuffer<Attribute.Compound> buf = new ListBuffer<Attribute.Compound>();
                 for (Attribute.Compound a : s.getRawAttributes())
                     if (types.getRetention(a) == RetentionPolicy.CLASS)
                         buf.append(a);
@@ -735,14 +737,14 @@ public class ClassWriter extends ClassFile {
      */
     int writeJavaAnnotations(List<Attribute.Compound> attrs) {
         if (attrs.isEmpty()) return 0;
-        ListBuffer<Attribute.Compound> visibles = new ListBuffer<>();
-        ListBuffer<Attribute.Compound> invisibles = new ListBuffer<>();
+        ListBuffer<Attribute.Compound> visibles = new ListBuffer<Attribute.Compound>();
+        ListBuffer<Attribute.Compound> invisibles = new ListBuffer<Attribute.Compound>();
         for (Attribute.Compound a : attrs) {
             switch (types.getRetention(a)) {
             case SOURCE: break;
             case CLASS: invisibles.append(a); break;
             case RUNTIME: visibles.append(a); break;
-            default: // /* fail soft */ throw new AssertionError(vis);
+            default: ;// /* fail soft */ throw new AssertionError(vis);
             }
         }
 
@@ -796,7 +798,7 @@ public class ClassWriter extends ClassFile {
             case SOURCE: break;
             case CLASS: invisibles.append(tc); break;
             case RUNTIME: visibles.append(tc); break;
-            default: // /* fail soft */ throw new AssertionError(vis);
+            default: ;// /* fail soft */ throw new AssertionError(vis);
             }
         }
 
@@ -932,7 +934,7 @@ public class ClassWriter extends ClassFile {
             break;
         // exception parameter
         case EXCEPTION_PARAMETER:
-            databuf.appendChar(p.getExceptionIndex());
+            databuf.appendChar(p.exception_index);
             break;
         // method receiver
         case METHOD_RECEIVER:
@@ -1015,8 +1017,8 @@ public class ClassWriter extends ClassFile {
             if (c.name != names.empty)
                 pool.put(c.name);
             if (innerClasses == null) {
-                innerClasses = new HashSet<>();
-                innerClassesQueue = new ListBuffer<>();
+                innerClasses = new HashSet<ClassSymbol>();
+                innerClassesQueue = new ListBuffer<ClassSymbol>();
                 pool.put(names.InnerClasses);
             }
             innerClasses.add(c);
@@ -1650,7 +1652,7 @@ public class ClassWriter extends ClassFile {
         pool = c.pool;
         innerClasses = null;
         innerClassesQueue = null;
-        bootstrapMethods = new LinkedHashMap<>();
+        bootstrapMethods = new LinkedHashMap<DynamicMethod, MethodHandle>();
 
         Type supertype = types.supertype(c.type);
         List<Type> interfaces = types.interfaces(c.type);

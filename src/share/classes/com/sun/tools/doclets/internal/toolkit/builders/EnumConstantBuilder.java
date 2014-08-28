@@ -88,7 +88,8 @@ public class EnumConstantBuilder extends AbstractMemberBuilder {
                 classDoc,
                 VisibleMemberMap.ENUM_CONSTANTS,
                 configuration);
-        enumConstants = new ArrayList<>(visibleMemberMap.getMembersFor(classDoc));
+        enumConstants =
+                new ArrayList<ProgramElementDoc>(visibleMemberMap.getMembersFor(classDoc));
         if (configuration.getMemberComparator() != null) {
             Collections.sort(enumConstants, configuration.getMemberComparator());
         }

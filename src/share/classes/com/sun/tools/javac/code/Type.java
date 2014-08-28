@@ -1460,15 +1460,14 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
          * Inference variable bound kinds
          */
         public enum InferenceBound {
-            /** upper bounds */
             UPPER {
                 public InferenceBound complement() { return LOWER; }
             },
-            /** lower bounds */
+             /** lower bounds */
             LOWER {
                 public InferenceBound complement() { return UPPER; }
             },
-            /** equality constraints */
+             /** equality constraints */
             EQ {
                 public InferenceBound complement() { return EQ; }
             };

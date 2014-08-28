@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2010, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2010, 2012, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,38 +27,33 @@
  * @test
  * @bug 6851834
  * @summary This test verifies the HTML document generation for javadoc output.
- * @library ../lib
- * @build JavadocTester
  * @author Bhavesh Patel
+ * @build TestHtmlDocument
  * @run main TestHtmlDocument
  */
 
+import java.io.*;
 import com.sun.tools.doclets.formats.html.markup.*;
 
 /**
  * The class reads each file, complete with newlines, into a string to easily
  * compare the existing markup with the generated markup.
  */
-public class TestHtmlDocument extends JavadocTester {
+public class TestHtmlDocument {
+
+    private static final String BUGID = "6851834";
+    private static final String BUGNAME = "TestHtmlDocument";
+    private static final String FS = System.getProperty("file.separator");
+    private static final String LS = System.getProperty("line.separator");
+    private static String srcdir = System.getProperty("test.src", ".");
 
     // Entry point
-    public static void main(String... args) throws Exception {
-        TestHtmlDocument tester = new TestHtmlDocument();
-        tester.runTests();
-    }
-
-    @Test
-    void test() {
-        checking("markup");
+    public static void main(String[] args) throws IOException {
         // Check whether the generated markup is same as the existing markup.
-        String expected = readFile(testSrc, "testMarkup.html").replace("\n", NL);
-        String actual = generateHtmlTree();
-        if (actual.equals(expected)) {
-            passed("");
+        if (generateHtmlTree().equals(readFileToString(srcdir + FS + "testMarkup.html"))) {
+            System.out.println("\nTest passed for bug " + BUGID + " (" + BUGNAME + ")\n");
         } else {
-            failed("expected content in " + testSrc("testMarkup.html") + "\n"
-                + "Actual output:\n"
-                + actual);
+            throw new Error("\nTest failed for bug " + BUGID + " (" + BUGNAME + ")\n");
         }
     }
 
@@ -140,5 +135,26 @@ public class TestHtmlDocument extends JavadocTester {
         html.addContent(body);
         HtmlDocument htmlDoc = new HtmlDocument(htmlDocType, html);
         return htmlDoc.toString();
+    }
+
+    // Read the file into a String
+    public static String readFileToString(String filename) throws IOException {
+        File file = new File(filename);
+        if ( !file.exists() ) {
+            System.out.println("\nFILE DOES NOT EXIST: " + filename);
+        }
+        BufferedReader in = new BufferedReader(new FileReader(file));
+        StringBuilder fileString = new StringBuilder();
+        // Create an array of characters the size of the file
+        try {
+            String line;
+            while ((line = in.readLine()) != null) {
+                fileString.append(line);
+                fileString.append(LS);
+            }
+        } finally {
+            in.close();
+        }
+        return fileString.toString();
     }
 }

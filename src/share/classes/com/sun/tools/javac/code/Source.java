@@ -67,7 +67,7 @@ public enum Source {
     /** 1.7 introduced try-with-resources, multi-catch, string switch, etc. */
     JDK1_7("1.7"),
 
-    /** 1.8 lambda expressions and default methods. */
+    /** 1.8 covers the to be determined language features that will be added in JDK 8. */
     JDK1_8("1.8");
 
     private static final Context.Key<Source> sourceKey

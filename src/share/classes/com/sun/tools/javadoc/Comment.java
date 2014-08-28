@@ -50,7 +50,7 @@ class Comment {
     /**
      * sorted comments with different tags.
      */
-    private final ListBuffer<Tag> tagList = new ListBuffer<>();
+    private final ListBuffer<Tag> tagList = new ListBuffer<Tag>();
 
     /**
      * text minus any tags.
@@ -151,39 +151,29 @@ class Comment {
                     text = tx;
                 } else {
                     TagImpl tag;
-                    switch (tagName) {
-                        case "@exception":
-                        case "@throws":
-                            warnIfEmpty(tagName, tx);
-                            tag = new ThrowsTagImpl(holder, tagName, tx);
-                            break;
-                        case "@param":
-                            warnIfEmpty(tagName, tx);
-                            tag = new ParamTagImpl(holder, tagName, tx);
-                            break;
-                        case "@see":
-                            warnIfEmpty(tagName, tx);
-                            tag = new SeeTagImpl(holder, tagName, tx);
-                            break;
-                        case "@serialField":
-                            warnIfEmpty(tagName, tx);
-                            tag = new SerialFieldTagImpl(holder, tagName, tx);
-                            break;
-                        case "@return":
-                            warnIfEmpty(tagName, tx);
-                            tag = new TagImpl(holder, tagName, tx);
-                            break;
-                        case "@author":
-                            warnIfEmpty(tagName, tx);
-                            tag = new TagImpl(holder, tagName, tx);
-                            break;
-                        case "@version":
-                            warnIfEmpty(tagName, tx);
-                            tag = new TagImpl(holder, tagName, tx);
-                            break;
-                        default:
-                            tag = new TagImpl(holder, tagName, tx);
-                            break;
+                    if (tagName.equals("@exception") || tagName.equals("@throws")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new ThrowsTagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@param")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new ParamTagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@see")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new SeeTagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@serialField")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new SerialFieldTagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@return")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new TagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@author")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new TagImpl(holder, tagName, tx);
+                    } else if (tagName.equals("@version")) {
+                        warnIfEmpty(tagName, tx);
+                        tag = new TagImpl(holder, tagName, tx);
+                    } else {
+                        tag = new TagImpl(holder, tagName, tx);
                     }
                     tagList.append(tag);
                 }
@@ -218,7 +208,7 @@ class Comment {
      * Return tags of the specified kind in this comment.
      */
     Tag[] tags(String tagname) {
-        ListBuffer<Tag> found = new ListBuffer<>();
+        ListBuffer<Tag> found = new ListBuffer<Tag>();
         String target = tagname;
         if (target.charAt(0) != '@') {
             target = "@" + target;
@@ -235,7 +225,7 @@ class Comment {
      * Return throws tags in this comment.
      */
     ThrowsTag[] throwsTags() {
-        ListBuffer<ThrowsTag> found = new ListBuffer<>();
+        ListBuffer<ThrowsTag> found = new ListBuffer<ThrowsTag>();
         for (Tag next : tagList) {
             if (next instanceof ThrowsTag) {
                 found.append((ThrowsTag)next);
@@ -264,7 +254,7 @@ class Comment {
      * param tags.
      */
     private ParamTag[] paramTags(boolean typeParams) {
-        ListBuffer<ParamTag> found = new ListBuffer<>();
+        ListBuffer<ParamTag> found = new ListBuffer<ParamTag>();
         for (Tag next : tagList) {
             if (next instanceof ParamTag) {
                 ParamTag p = (ParamTag)next;
@@ -280,7 +270,7 @@ class Comment {
      * Return see also tags in this comment.
      */
     SeeTag[] seeTags() {
-        ListBuffer<SeeTag> found = new ListBuffer<>();
+        ListBuffer<SeeTag> found = new ListBuffer<SeeTag>();
         for (Tag next : tagList) {
             if (next instanceof SeeTag) {
                 found.append((SeeTag)next);
@@ -293,7 +283,7 @@ class Comment {
      * Return serialField tags in this comment.
      */
     SerialFieldTag[] serialFieldTags() {
-        ListBuffer<SerialFieldTag> found = new ListBuffer<>();
+        ListBuffer<SerialFieldTag> found = new ListBuffer<SerialFieldTag>();
         for (Tag next : tagList) {
             if (next instanceof SerialFieldTag) {
                 found.append((SerialFieldTag)next);
@@ -306,7 +296,7 @@ class Comment {
      * Return array of tags with text and inline See Tags for a Doc comment.
      */
     static Tag[] getInlineTags(DocImpl holder, String inlinetext) {
-        ListBuffer<Tag> taglist = new ListBuffer<>();
+        ListBuffer<Tag> taglist = new ListBuffer<Tag>();
         int delimend = 0, textstart = 0, len = inlinetext.length();
         boolean inPre = false;
         DocEnv docenv = holder.env;

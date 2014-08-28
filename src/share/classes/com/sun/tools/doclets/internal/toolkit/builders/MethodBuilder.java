@@ -90,7 +90,8 @@ public class MethodBuilder extends AbstractMemberBuilder {
                 VisibleMemberMap.METHODS,
                 configuration);
         methods =
-                new ArrayList<>(visibleMemberMap.getLeafClassMembers(configuration));
+                new ArrayList<ProgramElementDoc>(visibleMemberMap.getLeafClassMembers(
+                configuration));
         if (configuration.getMemberComparator() != null) {
             Collections.sort(methods, configuration.getMemberComparator());
         }

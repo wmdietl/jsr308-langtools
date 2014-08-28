@@ -219,7 +219,8 @@ public class AnnotationWriter extends BasicWriter {
                 Descriptor d = new Descriptor(index);
                 print(d.getFieldType(constant_pool));
                 return;
-            } catch (ConstantPoolException | InvalidDescriptor ignore) {
+            } catch (ConstantPoolException ignore) {
+            } catch (InvalidDescriptor ignore) {
             }
         }
 

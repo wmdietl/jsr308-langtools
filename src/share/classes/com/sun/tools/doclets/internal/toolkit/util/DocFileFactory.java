@@ -46,7 +46,8 @@ import com.sun.tools.doclets.internal.toolkit.Configuration;
  * @since 1.8
  */
 abstract class DocFileFactory {
-    private static final Map<Configuration, DocFileFactory> factories = new WeakHashMap<>();
+    private static final Map<Configuration, DocFileFactory> factories =
+            new WeakHashMap<Configuration, DocFileFactory>();
 
     /**
      * Get the appropriate factory, based on the file manager given in the

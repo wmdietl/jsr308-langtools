@@ -102,9 +102,8 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
             public int compare(File f1, File f2) {
                 return -f1.getName().compareTo(f2.getName());
             }
-        }
-    }
-
+        };
+    };
     protected SortFiles sortFiles;
 
     /**
@@ -180,7 +179,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
     }
 
     public Iterable<? extends JavaFileObject> getJavaFileObjectsFromStrings(Iterable<String> names) {
-        ListBuffer<File> files = new ListBuffer<>();
+        ListBuffer<File> files = new ListBuffer<File>();
         for (String name : names)
             files.append(new File(nullCheck(name)));
         return getJavaFileObjectsFromFiles(files.toList());
@@ -446,7 +445,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
 
     /** A directory of zip files already opened.
      */
-    Map<File, Archive> archives = new HashMap<>();
+    Map<File, Archive> archives = new HashMap<File,Archive>();
 
     private static final String[] symbolFileLocation = { "lib", "ct.sym" };
     private static final RelativeDirectory symbolFilePrefix
@@ -593,7 +592,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
         Iterable<? extends File> path = getLocation(location);
         if (path == null)
             return null;
-        ListBuffer<URL> lb = new ListBuffer<>();
+        ListBuffer<URL> lb = new ListBuffer<URL>();
         for (File f: path) {
             try {
                 lb.append(f.toURI().toURL());
@@ -619,7 +618,7 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
         if (path == null)
             return List.nil();
         RelativeDirectory subdirectory = RelativeDirectory.forPackage(packageName);
-        ListBuffer<JavaFileObject> results = new ListBuffer<>();
+        ListBuffer<JavaFileObject> results = new ListBuffer<JavaFileObject>();
 
         for (File directory : path)
             listContainer(directory, subdirectory, kinds, recurse, results);
@@ -779,9 +778,9 @@ public class JavacFileManager extends BaseFileManager implements StandardJavaFil
     {
         ArrayList<RegularFileObject> result;
         if (files instanceof Collection<?>)
-            result = new ArrayList<>(((Collection<?>)files).size());
+            result = new ArrayList<RegularFileObject>(((Collection<?>)files).size());
         else
-            result = new ArrayList<>();
+            result = new ArrayList<RegularFileObject>();
         for (File f: files)
             result.add(new RegularFileObject(this, nullCheck(f)));
         return result;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -33,6 +33,10 @@
 
 public class TemplateComplete extends JavadocTester {
 
+    //Test information.
+    private static final String BUG_ID = "<BUG ID>";
+    private static final String OUTPUT_DIR = "docs-" + BUG_ID;
+
     //Javadoc arguments.
     private static final String[] ARGS = new String[] {
         "-d", OUTPUT_DIR, "-sourcepath", SRC_DIR
@@ -47,8 +51,6 @@ public class TemplateComplete extends JavadocTester {
 
 
     //Input for file diff test.
-    private static final String DIFFDIR1 = null;
-    private static final String DIFFDIR2 = null;
     private static final String[][] FILES_TO_DIFF = {};
 
     /**
@@ -57,9 +59,23 @@ public class TemplateComplete extends JavadocTester {
      */
     public static void main(String[] args) {
         TemplateComplete tester = new TemplateComplete();
-        int actualExitCode = tester.run(ARGS, TEST, NEGATED_TEST);
+        int actualExitCode = run(tester, ARGS, TEST, NEGATED_TEST);
         tester.checkExitCode(EXPECTED_EXIT_CODE, actualExitCode);
-        tester.runDiffs(DIFFDIR1, DIFFDIR2, FILES_TO_DIFF, false);
+        tester.runDiffs(FILES_TO_DIFF, false);
         tester.printSummary();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

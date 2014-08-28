@@ -28,7 +28,6 @@ package com.sun.tools.javac.tree;
 
 
 import com.sun.source.tree.Tree;
-import com.sun.source.util.TreePath;
 import com.sun.tools.javac.code.*;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
@@ -50,7 +49,8 @@ import static com.sun.tools.javac.tree.JCTree.Tag.SYNCHRONIZED;
  *  deletion without notice.</b>
  */
 public class TreeInfo {
-    protected static final Context.Key<TreeInfo> treeInfoKey = new Context.Key<>();
+    protected static final Context.Key<TreeInfo> treeInfoKey =
+        new Context.Key<TreeInfo>();
 
     public static TreeInfo instance(Context context) {
         TreeInfo instance = context.get(treeInfoKey);
@@ -351,18 +351,6 @@ public class TreeInfo {
         return (lit.typetag == BOT);
     }
 
-    /** Return true iff this tree is a child of some annotation. */
-    public static boolean isInAnnotation(Env<?> env, JCTree tree) {
-        TreePath tp = TreePath.getPath(env.toplevel, tree);
-        if (tp != null) {
-            for (Tree t : tp) {
-                if (t.getKind() == Tree.Kind.ANNOTATION)
-                    return true;
-            }
-        }
-        return false;
-    }
-
     public static String getCommentText(Env<?> env, JCTree tree) {
         DocCommentTable docComments = (tree.hasTag(JCTree.Tag.TOPLEVEL))
                 ? ((JCCompilationUnit) tree).docComments
@@ -414,11 +402,6 @@ public class TreeInfo {
             return Position.NOPOS;
 
         switch(tree.getTag()) {
-            case PACKAGEDEF: {
-                JCPackageDecl pd = (JCPackageDecl)tree;
-                return pd.annotations.isEmpty() ? pd.pos :
-                       pd.annotations.head.pos;
-            }
             case APPLY:
                 return getStartPos(((JCMethodInvocation) tree).meth);
             case ASSIGN:
@@ -752,7 +735,7 @@ public class TreeInfo {
     /** Return the types of a list of trees.
      */
     public static List<Type> types(List<? extends JCTree> trees) {
-        ListBuffer<Type> ts = new ListBuffer<>();
+        ListBuffer<Type> ts = new ListBuffer<Type>();
         for (List<? extends JCTree> l = trees; l.nonEmpty(); l = l.tail)
             ts.append(l.head.type);
         return ts.toList();
@@ -801,8 +784,6 @@ public class TreeInfo {
         switch (node.getTag()) {
         case TOPLEVEL:
             return ((JCCompilationUnit) node).packge;
-        case PACKAGEDEF:
-            return ((JCPackageDecl) node).packge;
         case CLASSDEF:
             return ((JCClassDecl) node).sym;
         case METHODDEF:
@@ -835,7 +816,6 @@ public class TreeInfo {
     public static boolean isDeclaration(JCTree node) {
         node = skipParens(node);
         switch (node.getTag()) {
-        case PACKAGEDEF:
         case CLASSDEF:
         case METHODDEF:
         case VARDEF:

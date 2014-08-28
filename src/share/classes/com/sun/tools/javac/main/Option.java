@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2006, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -38,7 +38,6 @@ import javax.lang.model.SourceVersion;
 
 import com.sun.tools.doclint.DocLint;
 import com.sun.tools.javac.code.Lint;
-import com.sun.tools.javac.code.Lint.LintCategory;
 import com.sun.tools.javac.code.Source;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.jvm.Profile;
@@ -81,34 +80,8 @@ public enum Option {
 
     XLINT("-Xlint", "opt.Xlint", EXTENDED, BASIC),
 
-    XLINT_CUSTOM("-Xlint:", EXTENDED, BASIC, ANYOF, getXLintChoices()) {
-        private static final String LINT_KEY_FORMAT = "         %-19s %s";
-        void help(Log log, OptionKind kind) {
-            if (this.kind != kind)
-                return;
-
-            log.printRawLines(WriterKind.NOTICE,
-                              String.format(HELP_LINE_FORMAT,
-                                            log.localize(PrefixKind.JAVAC, "opt.Xlint.subopts"),
-                                            log.localize(PrefixKind.JAVAC, "opt.Xlint.suboptlist")));
-            log.printRawLines(WriterKind.NOTICE,
-                              String.format(LINT_KEY_FORMAT,
-                                            "all",
-                                            log.localize(PrefixKind.JAVAC, "opt.Xlint.all")));
-            for (LintCategory lc : LintCategory.values()) {
-                if (lc.hidden) continue;
-                log.printRawLines(WriterKind.NOTICE,
-                                  String.format(LINT_KEY_FORMAT,
-                                                lc.option,
-                                                log.localize(PrefixKind.JAVAC,
-                                                             "opt.Xlint.desc." + lc.option)));
-            }
-            log.printRawLines(WriterKind.NOTICE,
-                              String.format(LINT_KEY_FORMAT,
-                                            "none",
-                                            log.localize(PrefixKind.JAVAC, "opt.Xlint.none")));
-        }
-    },
+    XLINT_CUSTOM("-Xlint:", "opt.Xlint.suboptlist",
+            EXTENDED,   BASIC, ANYOF, getXLintChoices()),
 
     XDOCLINT("-Xdoclint", "opt.Xdoclint", EXTENDED, BASIC),
 
@@ -408,6 +381,7 @@ public enum Option {
         public boolean process(OptionHelper helper, String option, String arg) {
             try {
                 Log log = helper.getLog();
+                // TODO: this file should be closed at the end of compilation
                 log.setWriters(new PrintWriter(new FileWriter(arg), true));
             } catch (java.io.IOException e) {
                 helper.error("err.error.writing.file", arg, e);
@@ -424,8 +398,6 @@ public enum Option {
     XPRINTPROCESSORINFO("-XprintProcessorInfo", "opt.printProcessorInfo", EXTENDED, BASIC),
 
     XPREFER("-Xprefer:", "opt.prefer", EXTENDED, BASIC, ONEOF, "source", "newer"),
-
-    XXUSERPATHSFIRST("-XXuserPathsFirst", "opt.userpathsfirst", HIDDEN, BASIC),
 
     // see enum PkgInfo
     XPKGINFO("-Xpkginfo:", "opt.pkginfo", EXTENDED, BASIC, ONEOF, "always", "legacy", "nonempty"),
@@ -587,9 +559,10 @@ public enum Option {
         this(text, argsNameKey, descrKey, kind, group, null, null, doHasSuffix);
     }
 
-    Option(String text, OptionKind kind, OptionGroup group,
+    Option(String text, String descrKey,
+            OptionKind kind, OptionGroup group,
             ChoiceKind choiceKind, Map<String,Boolean> choices) {
-        this(text, null, null, kind, group, choiceKind, choices, false);
+        this(text, null, descrKey, kind, group, choiceKind, choices, false);
     }
 
     Option(String text, String descrKey,
@@ -600,7 +573,7 @@ public enum Option {
     }
     // where
         private static Map<String,Boolean> createChoices(String... choices) {
-            Map<String,Boolean> map = new LinkedHashMap<>();
+            Map<String,Boolean> map = new LinkedHashMap<String,Boolean>();
             for (String c: choices)
                 map.put(c, false);
             return map;
@@ -686,14 +659,12 @@ public enum Option {
             return process(helper, option, option);
     }
 
-    private static final String HELP_LINE_FORMAT = "  %-26s %s";
-
     void help(Log log, OptionKind kind) {
         if (this.kind != kind)
             return;
 
         log.printRawLines(WriterKind.NOTICE,
-                String.format(HELP_LINE_FORMAT,
+                String.format("  %-26s %s",
                     helpSynopsis(log),
                     log.localize(PrefixKind.JAVAC, descrKey)));
 
@@ -757,7 +728,7 @@ public enum Option {
     }
 
     private static Map<String,Boolean> getXLintChoices() {
-        Map<String,Boolean> choices = new LinkedHashMap<>();
+        Map<String,Boolean> choices = new LinkedHashMap<String,Boolean>();
         choices.put("all", false);
         for (Lint.LintCategory c : Lint.LintCategory.values())
             choices.put(c.option, c.hidden);
