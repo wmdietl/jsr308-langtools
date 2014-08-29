@@ -1,16 +1,16 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
-Version 1.8.5, 1 Sep 2014
+Version 1.8.5, 29 Aug 2014
 
 Change default target version to 8.
 Allow type annotations in source versions 6 and 7 only if they appear
 in annotation comments.
-To obtain a strictly backwards-compatible Java 6/7 compiler, provide
+To obtain a strictly standard Java 8 compiler, provide
 the -XDTA:noannotationsincomments option.
-Read type annotations out of version 6 bytecode.
-
-This fixes Issues 54 and 55.
+Read type annotations out of version 6 bytecode in addition to
+previously-existing support for version 7 and version 8 bytecode. This
+fixes Issues 54 and 55.
 
 No updates to base build.
 
