@@ -208,12 +208,6 @@ public interface Tree {
         LAMBDA_EXPRESSION(LambdaExpressionTree.class),
 
         /**
-         * Used for instances of {@link PackageTree}.
-         * @since 1.9
-         */
-        PACKAGE(PackageTree.class),
-
-        /**
          * Used for instances of {@link ParenthesizedTree}.
          */
         PARENTHESIZED(ParenthesizedTree.class),

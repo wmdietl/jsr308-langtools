@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2001, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,13 +29,12 @@ import java.io.*;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Properties;
-
-import com.sun.tools.sjavac.options.Options;
 
 /**
  * The clean properties transform should not be necessary.
@@ -52,7 +51,7 @@ public class CleanProperties implements Transformer
         // Any extra information is ignored for clean properties.
     }
 
-    public void setExtra(Options a) {
+    public void setExtra(String[] a) {
         // Any extra information is ignored for clean properties.
     }
 
@@ -98,19 +97,18 @@ public class CleanProperties implements Transformer
         }
 
         // Sort the properties in increasing key order.
-        List<String> sortedKeys = new ArrayList<>();
+        List<String> sortedKeys = new ArrayList<String>();
         for (Object key : p.keySet()) {
             sortedKeys.add((String)key);
         }
         Collections.sort(sortedKeys);
+        Iterator<String> keys = sortedKeys.iterator();
 
         // Collect the properties into a string buffer.
         StringBuilder data = new StringBuilder();
-        for (String key : sortedKeys) {
-            data.append(CompileProperties.escape(key))
-                .append(":")
-                .append(CompileProperties.escape((String) p.get(key)))
-                .append("\n");
+        while (keys.hasNext()) {
+            String key = keys.next();
+            data.append(CompileProperties.escape(key)+":"+CompileProperties.escape((String)p.get(key))+"\n");
         }
 
         String destFilename = destRoot.getPath()+File.separator+pkgNameF+File.separator+src.getName();
@@ -126,7 +124,7 @@ public class CleanProperties implements Transformer
 
         Set<URI> as = packageArtifacts.get(pkgName);
         if (as == null) {
-            as = new HashSet<>();
+            as = new HashSet<URI>();
             packageArtifacts.put(pkgName, as);
         }
         as.add(dest.toURI());

@@ -68,14 +68,14 @@ import com.sun.tools.javac.util.Names;
  * @author Neal Gafter (rewrite but not too proud)
  */
 class SerializedForm {
-    ListBuffer<MethodDoc> methods = new ListBuffer<>();
+    ListBuffer<MethodDoc> methods = new ListBuffer<MethodDoc>();
 
     /* List of FieldDocImpl - Serializable fields.
      * Singleton list if class defines Serializable fields explicitly.
      * Otherwise, list of default serializable fields.
      * 0 length list for Externalizable.
      */
-    private final ListBuffer<FieldDocImpl> fields = new ListBuffer<>();
+    private final ListBuffer<FieldDocImpl> fields = new ListBuffer<FieldDocImpl>();
 
     /* True if class specifies serializable fields explicitly.
      * using special static member, serialPersistentFields.
@@ -234,19 +234,20 @@ class SerializedForm {
                                                        DocEnv env,
                                                        ClassSymbol def) {
         Names names = def.name.table.names;
-        for (SerialFieldTag tag : spfDoc.serialFieldTags()) {
-            if (tag.fieldName() == null || tag.fieldType() == null) // ignore malformed @serialField tags
+
+        SerialFieldTag[] sfTag = spfDoc.serialFieldTags();
+        for (int i = 0; i < sfTag.length; i++) {
+            if (sfTag[i].fieldName() == null || sfTag[i].fieldType() == null) // ignore malformed @serialField tags
                 continue;
 
-            Name fieldName = names.fromString(tag.fieldName());
+            Name fieldName = names.fromString(sfTag[i].fieldName());
 
             // Look for a FieldDocImpl that is documented by serialFieldTagImpl.
-            for (Scope.Entry e = def.members().lookup(fieldName);
-                 e.scope != null; e = e.next()) {
+            for (Scope.Entry e = def.members().lookup(fieldName); e.scope != null; e = e.next()) {
                 if (e.sym.kind == Kinds.VAR) {
-                    VarSymbol f = (VarSymbol) e.sym;
+                    VarSymbol f = (VarSymbol)e.sym;
                     FieldDocImpl fdi = env.getFieldDoc(f);
-                    ((SerialFieldTagImpl) (tag)).mapToFieldDocImpl(fdi);
+                    ((SerialFieldTagImpl)(sfTag[i])).mapToFieldDocImpl(fdi);
                     break;
                 }
             }

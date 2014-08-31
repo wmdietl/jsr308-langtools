@@ -173,12 +173,12 @@ public class TagletManager {
     public TagletManager(boolean nosince, boolean showversion,
                          boolean showauthor, boolean javafx,
                          MessageRetriever message) {
-        overridenStandardTags = new HashSet<>();
-        potentiallyConflictingTags = new HashSet<>();
-        standardTags = new HashSet<>();
-        standardTagsLowercase = new HashSet<>();
-        unseenCustomTags = new HashSet<>();
-        customTags = new LinkedHashMap<>();
+        overridenStandardTags = new HashSet<String>();
+        potentiallyConflictingTags = new HashSet<String>();
+        standardTags = new HashSet<String>();
+        standardTagsLowercase = new HashSet<String>();
+        unseenCustomTags = new HashSet<String>();
+        customTags = new LinkedHashMap<String,Taglet>();
         this.nosince = nosince;
         this.showversion = showversion;
         this.showauthor = showauthor;
@@ -235,11 +235,11 @@ public class TagletManager {
 
             customTagClass = tagClassLoader.loadClass(classname);
             Method meth = customTagClass.getMethod("register",
-                                                   Map.class);
+                                                   new Class<?>[] {java.util.Map.class});
             Object[] list = customTags.values().toArray();
             Taglet lastTag = (list != null && list.length > 0)
                 ? (Taglet) list[list.length-1] : null;
-            meth.invoke(null, customTags);
+            meth.invoke(null, new Object[] {customTags});
             list = customTags.values().toArray();
             Object newLastTag = (list != null&& list.length > 0)
                 ? list[list.length-1] : null;
@@ -276,7 +276,7 @@ public class TagletManager {
      * @return the resulting array of directory and JAR file URLs
      */
     private URL[] pathToURLs(String path) {
-        Set<URL> urls = new LinkedHashSet<>();
+        Set<URL> urls = new LinkedHashSet<URL>();
         for (String s: path.split(File.pathSeparator)) {
             if (s.isEmpty()) continue;
             try {
@@ -370,37 +370,37 @@ public class TagletManager {
             return;
         }
         Taglet taglet;
-        for (Tag tag : tags) {
-            String name = tag.name();
+        for (int i = 0; i < tags.length; i++) {
+            String name = tags[i].name();
             if (name.length() > 0 && name.charAt(0) == '@') {
                 name = name.substring(1, name.length());
             }
             if (! (standardTags.contains(name) || customTags.containsKey(name))) {
                 if (standardTagsLowercase.contains(StringUtils.toLowerCase(name))) {
-                    message.warning(tag.position(), "doclet.UnknownTagLowercase", tag.name());
+                    message.warning(tags[i].position(), "doclet.UnknownTagLowercase", tags[i].name());
                     continue;
                 } else {
-                    message.warning(tag.position(), "doclet.UnknownTag", tag.name());
+                    message.warning(tags[i].position(), "doclet.UnknownTag", tags[i].name());
                     continue;
                 }
             }
             //Check if this tag is being used in the wrong location.
             if ((taglet = customTags.get(name)) != null) {
                 if (areInlineTags && ! taglet.isInlineTag()) {
-                    printTagMisuseWarn(taglet, tag, "inline");
+                    printTagMisuseWarn(taglet, tags[i], "inline");
                 }
                 if ((doc instanceof RootDoc) && ! taglet.inOverview()) {
-                    printTagMisuseWarn(taglet, tag, "overview");
+                    printTagMisuseWarn(taglet, tags[i], "overview");
                 } else if ((doc instanceof PackageDoc) && ! taglet.inPackage()) {
-                    printTagMisuseWarn(taglet, tag, "package");
+                    printTagMisuseWarn(taglet, tags[i], "package");
                 } else if ((doc instanceof ClassDoc) && ! taglet.inType()) {
-                    printTagMisuseWarn(taglet, tag, "class");
+                    printTagMisuseWarn(taglet, tags[i], "class");
                 } else if ((doc instanceof ConstructorDoc) && ! taglet.inConstructor()) {
-                    printTagMisuseWarn(taglet, tag, "constructor");
+                    printTagMisuseWarn(taglet, tags[i], "constructor");
                 } else if ((doc instanceof FieldDoc) && ! taglet.inField()) {
-                    printTagMisuseWarn(taglet, tag, "field");
+                    printTagMisuseWarn(taglet, tags[i], "field");
                 } else if ((doc instanceof MethodDoc) && ! taglet.inMethod()) {
-                    printTagMisuseWarn(taglet, tag, "method");
+                    printTagMisuseWarn(taglet, tags[i], "method");
                 }
             }
         }
@@ -414,7 +414,7 @@ public class TagletManager {
      * @param holderType the type of documentation that the misused tag was found in.
      */
     private void printTagMisuseWarn(Taglet taglet, Tag tag, String holderType) {
-        Set<String> locationsSet = new LinkedHashSet<>();
+        Set<String> locationsSet = new LinkedHashSet<String>();
         if (taglet.inOverview()) {
             locationsSet.add("overview");
         }
@@ -582,14 +582,14 @@ public class TagletManager {
      */
     private void initCustomTagletArrays() {
         Iterator<Taglet> it = customTags.values().iterator();
-        ArrayList<Taglet> pTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> tTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> fTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> cTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> mTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> iTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> oTags = new ArrayList<>(customTags.size());
-        ArrayList<Taglet> sTags = new ArrayList<>();
+        ArrayList<Taglet> pTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> tTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> fTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> cTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> mTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> iTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> oTags = new ArrayList<Taglet>(customTags.size());
+        ArrayList<Taglet> sTags = new ArrayList<Taglet>();
         Taglet current;
         while (it.hasNext()) {
             current = it.next();
@@ -707,8 +707,9 @@ public class TagletManager {
      * Initialize lowercase version of standard Javadoc tags.
      */
     private void initStandardTagsLowercase() {
-        for (String standardTag : standardTags) {
-            standardTagsLowercase.add(StringUtils.toLowerCase(standardTag));
+        Iterator<String> it = standardTags.iterator();
+        while (it.hasNext()) {
+            standardTagsLowercase.add(StringUtils.toLowerCase(it.next()));
         }
     }
 

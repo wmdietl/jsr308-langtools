@@ -94,9 +94,11 @@ public class ConstructorBuilder extends AbstractMemberBuilder {
                 classDoc,
                 VisibleMemberMap.CONSTRUCTORS,
                 configuration);
-        constructors = new ArrayList<>(visibleMemberMap.getMembersFor(classDoc));
-        for (ProgramElementDoc constructor : constructors) {
-            if (constructor.isProtected() || constructor.isPrivate()) {
+        constructors =
+                new ArrayList<ProgramElementDoc>(visibleMemberMap.getMembersFor(classDoc));
+        for (int i = 0; i < constructors.size(); i++) {
+            if (constructors.get(i).isProtected()
+                    || constructors.get(i).isPrivate()) {
                 writer.setFoundNonPubConstructor(true);
             }
         }

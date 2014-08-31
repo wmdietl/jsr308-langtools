@@ -76,16 +76,17 @@ public class PackageListWriter extends PrintWriter {
     }
 
     protected void generatePackageListFile(RootDoc root) {
-        ArrayList<String> names = new ArrayList<>();
-        for (PackageDoc pkg : configuration.packages) {
+        PackageDoc[] packages = configuration.packages;
+        ArrayList<String> names = new ArrayList<String>();
+        for (int i = 0; i < packages.length; i++) {
             // if the -nodeprecated option is set and the package is marked as
             // deprecated, do not include it in the packages list.
-            if (!(configuration.nodeprecated && Util.isDeprecated(pkg)))
-                names.add(pkg.name());
+            if (!(configuration.nodeprecated && Util.isDeprecated(packages[i])))
+                names.add(packages[i].name());
         }
         Collections.sort(names);
-        for (String name : names) {
-            println(name);
+        for (int i = 0; i < names.size(); i++) {
+            println(names.get(i));
         }
     }
 }

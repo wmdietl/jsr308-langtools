@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -105,7 +105,7 @@ public class JavacTaskImpl extends BasicJavacTask {
     }
 
     static private String[] toArray(Iterable<String> iter) {
-        ListBuffer<String> result = new ListBuffer<>();
+        ListBuffer<String> result = new ListBuffer<String>();
         if (iter != null)
             for (String s : iter)
                 result.append(s);
@@ -115,7 +115,7 @@ public class JavacTaskImpl extends BasicJavacTask {
     static private List<JavaFileObject> toList(Iterable<? extends JavaFileObject> fileObjects) {
         if (fileObjects == null)
             return List.nil();
-        ListBuffer<JavaFileObject> result = new ListBuffer<>();
+        ListBuffer<JavaFileObject> result = new ListBuffer<JavaFileObject>();
         for (JavaFileObject fo : fileObjects)
             result.append(fo);
         return result.toList();
@@ -124,7 +124,7 @@ public class JavacTaskImpl extends BasicJavacTask {
     public Main.Result doCall() {
         if (!used.getAndSet(true)) {
             initContext();
-            notYetEntered = new HashMap<>();
+            notYetEntered = new HashMap<JavaFileObject, JCCompilationUnit>();
             compilerMain.setAPIMode(true);
             result = compilerMain.compile(args, classNames, context, fileObjects, processors);
             cleanup();
@@ -160,7 +160,7 @@ public class JavacTaskImpl extends BasicJavacTask {
             initContext();
             compilerMain.log = Log.instance(context);
             compilerMain.setOptions(Options.instance(context));
-            compilerMain.filenames = new LinkedHashSet<>();
+            compilerMain.filenames = new LinkedHashSet<File>();
             Collection<File> filenames = compilerMain.processArgs(CommandLine.parse(args), classNames);
             if (filenames != null && !filenames.isEmpty())
                 throw new IllegalArgumentException("Malformed arguments " + toString(filenames, " "));
@@ -169,10 +169,10 @@ public class JavacTaskImpl extends BasicJavacTask {
             compiler.genEndPos = true;
             // NOTE: this value will be updated after annotation processing
             compiler.initProcessAnnotations(processors);
-            notYetEntered = new HashMap<>();
+            notYetEntered = new HashMap<JavaFileObject, JCCompilationUnit>();
             for (JavaFileObject file: fileObjects)
                 notYetEntered.put(file, null);
-            genList = new ListBuffer<>();
+            genList = new ListBuffer<Env<AttrContext>>();
             // endContext will be called when all classes have been generated
             // TODO: should handle the case after each phase if errors have occurred
             args = null;
@@ -289,7 +289,7 @@ public class JavacTaskImpl extends BasicJavacTask {
                     JCCompilationUnit unit = notYetEntered.remove(file);
                     if (unit != null) {
                         if (roots == null)
-                            roots = new ListBuffer<>();
+                            roots = new ListBuffer<JCCompilationUnit>();
                         roots.append(unit);
                     }
                 }
@@ -300,7 +300,7 @@ public class JavacTaskImpl extends BasicJavacTask {
             for (CompilationUnitTree cu : trees) {
                 if (cu instanceof JCCompilationUnit) {
                     if (roots == null)
-                        roots = new ListBuffer<>();
+                        roots = new ListBuffer<JCCompilationUnit>();
                     roots.append((JCCompilationUnit)cu);
                     notYetEntered.remove(cu.getSourceFile());
                 }
@@ -316,9 +316,9 @@ public class JavacTaskImpl extends BasicJavacTask {
             List<JCCompilationUnit> units = compiler.enterTrees(roots.toList());
 
             if (notYetEntered.isEmpty())
-                compiler.processAnnotations(units);
+                compiler = compiler.processAnnotations(units);
 
-            ListBuffer<TypeElement> elements = new ListBuffer<>();
+            ListBuffer<TypeElement> elements = new ListBuffer<TypeElement>();
             for (JCCompilationUnit unit : units) {
                 for (JCTree node : unit.defs) {
                     if (node.hasTag(JCTree.Tag.CLASSDEF)) {
@@ -358,7 +358,7 @@ public class JavacTaskImpl extends BasicJavacTask {
     public Iterable<? extends Element> analyze(Iterable<? extends TypeElement> classes) throws IOException {
         enter(null);  // ensure all classes have been entered
 
-        final ListBuffer<Element> results = new ListBuffer<>();
+        final ListBuffer<Element> results = new ListBuffer<Element>();
         try {
             if (classes == null) {
                 handleFlowResults(compiler.flow(compiler.attribute(compiler.todo)), results);
@@ -414,7 +414,7 @@ public class JavacTaskImpl extends BasicJavacTask {
      * @param classes a list of class elements
      */
     public Iterable<? extends JavaFileObject> generate(Iterable<? extends TypeElement> classes) throws IOException {
-        final ListBuffer<JavaFileObject> results = new ListBuffer<>();
+        final ListBuffer<JavaFileObject> results = new ListBuffer<JavaFileObject>();
         try {
             analyze(null);  // ensure all classes have been parsed, entered, and analyzed
 
@@ -468,7 +468,7 @@ public class JavacTaskImpl extends BasicJavacTask {
 
     abstract class Filter {
         void run(Queue<Env<AttrContext>> list, Iterable<? extends TypeElement> classes) {
-            Set<TypeElement> set = new HashSet<>();
+            Set<TypeElement> set = new HashSet<TypeElement>();
             for (TypeElement item: classes)
                 set.add(item);
 

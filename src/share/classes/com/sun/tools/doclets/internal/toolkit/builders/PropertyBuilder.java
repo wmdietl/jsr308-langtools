@@ -90,7 +90,7 @@ public class PropertyBuilder extends AbstractMemberBuilder {
                 VisibleMemberMap.PROPERTIES,
                 configuration);
         properties =
-                new ArrayList<>(visibleMemberMap.getMembersFor(classDoc));
+                new ArrayList<ProgramElementDoc>(visibleMemberMap.getMembersFor(classDoc));
         if (configuration.getMemberComparator() != null) {
             Collections.sort(properties, configuration.getMemberComparator());
         }

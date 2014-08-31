@@ -61,12 +61,12 @@ public class T8008762 extends ClassfileTestHelper{
     static class Test {
         Object mtest( Test t){ return null; }
         public void test() {
-            mtest( new Test() {
+          mtest( new Test() {
                 class InnerAnon { // Test1$1$InnerAnon.class
-                    @A @B String ai_data = null;
-                    @A @B String ai_m(){ return null; };
+                  @A @B String ai_data = null;
+                  @A @B String ai_m(){ return null; };
                 }
-                InnerAnon IA = new InnerAnon();
+               InnerAnon IA = new InnerAnon();
             });
         }
         @Retention(RUNTIME) @Target(TYPE_USE) @interface A { }

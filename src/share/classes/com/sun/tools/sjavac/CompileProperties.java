@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -37,8 +37,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.sun.tools.sjavac.options.Options;
-
 /**
  * Compile properties transform a properties file into a Java source file.
  * Java has built in support for reading properties from either a text file
@@ -60,7 +58,7 @@ public class CompileProperties implements Transformer
         extra = e;
     }
 
-    public void setExtra(Options a) {
+    public void setExtra(String[] a) {
     }
 
     public boolean transform(Map<String,Set<URI>> pkgSrcs,
@@ -113,7 +111,7 @@ public class CompileProperties implements Transformer
         String classname = src.getName().substring(0,dp);
 
         // Sort the properties in increasing key order.
-        List<String> sortedKeys = new ArrayList<>();
+        List<String> sortedKeys = new ArrayList<String>();
         for (Object key : p.keySet()) {
             sortedKeys.add((String)key);
         }
@@ -142,7 +140,7 @@ public class CompileProperties implements Transformer
 
         Set<URI> as = packageArtifacts.get(pkgName);
         if (as == null) {
-            as = new HashSet<>();
+            as = new HashSet<URI>();
             packageArtifacts.put(pkgName, as);
         }
         as.add(dest.toURI());

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -324,7 +324,7 @@ public class JavapTask implements DisassemblerTool.DisassemblerTask, Messages {
             Iterable<String> classes) {
         this(out, fileManager, diagnosticListener);
 
-        this.classes = new ArrayList<>();
+        this.classes = new ArrayList<String>();
         for (String classname: classes) {
             classname.getClass(); // null-check
             this.classes.add(classname);
@@ -480,7 +480,7 @@ public class JavapTask implements DisassemblerTool.DisassemblerTask, Messages {
                 handleOption(arg, iter);
             else if (allowClasses) {
                 if (classes == null)
-                    classes = new ArrayList<>();
+                    classes = new ArrayList<String>();
                 classes.add(arg);
                 while (iter.hasNext())
                     classes.add(iter.next());
@@ -728,7 +728,8 @@ public class JavapTask implements DisassemblerTool.DisassemblerTask, Messages {
                     }
 
                 };
-            } catch (URISyntaxException | IOException ignore) {
+            } catch (URISyntaxException ignore) {
+            } catch (IOException ignore) {
             }
         }
 
@@ -964,7 +965,7 @@ public class JavapTask implements DisassemblerTool.DisassemblerTask, Messages {
             // could make this a HashMap<Locale,SoftReference<ResourceBundle>>
             // and for efficiency, keep a hard reference to the bundle for the task
             // locale
-            bundles = new HashMap<>();
+            bundles = new HashMap<Locale, ResourceBundle>();
         }
 
         if (locale == null)

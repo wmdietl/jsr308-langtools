@@ -81,7 +81,7 @@ public class Env {
             else
                 return AccessKind.PACKAGE;
         }
-    }
+    };
 
     /** Message handler. */
     final Messages messages;
@@ -140,7 +140,7 @@ public class Env {
     }
 
     void setCustomTags(String cTags) {
-        customTags = new LinkedHashSet<>();
+        customTags = new LinkedHashSet<String>();
         for (String s : cTags.split(DocLint.TAGS_SEPARATOR)) {
             if (!s.isEmpty())
                 customTags.add(s);

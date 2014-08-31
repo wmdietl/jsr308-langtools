@@ -25,19 +25,12 @@
 
 package javax.lang.model.util;
 
+import java.lang.annotation.Annotation;
+import java.lang.annotation.AnnotationTypeMismatchException;
+import java.lang.annotation.IncompleteAnnotationException;
 import java.util.List;
-
-import javax.lang.model.element.Element;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.NoType;
-import javax.lang.model.type.NullType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.WildcardType;
+import javax.lang.model.element.*;
+import javax.lang.model.type.*;
 
 /**
  * Utility methods for operating on types.
@@ -139,15 +132,12 @@ public interface Types {
     boolean isSubsignature(ExecutableType m1, ExecutableType m2);
 
     /**
-     * Returns the direct supertypes of a type. The interface types, if any,
-     * will appear last in the list. For an interface type with no direct
-     * super-interfaces, a type mirror representing {@code java.lang.Object}
-     * is returned.
+     * Returns the direct supertypes of a type.  The interface types, if any,
+     * will appear last in the list.
      *
      * @param t  the type being examined
      * @return the direct supertypes, or an empty list if none
      * @throws IllegalArgumentException if given an executable or package type
-     * @jls 4.10 Subtyping
      */
     List<? extends TypeMirror> directSupertypes(TypeMirror t);
 

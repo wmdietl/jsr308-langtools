@@ -33,15 +33,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-
 import javax.tools.JavaFileManager.Location;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
 import javax.tools.StandardLocation;
 
-import com.sun.tools.javac.code.ClassFinder;
 import com.sun.tools.javac.code.Symbol.CompletionFailure;
-import com.sun.tools.javac.comp.Enter;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCClassDecl;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
@@ -69,8 +66,8 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
     DocEnv docenv;
 
     final Messager messager;
-    final ClassFinder javadocFinder;
-    final Enter javadocEnter;
+    final JavadocClassReader javadocReader;
+    final JavadocEnter javadocEnter;
     final Set<JavaFileObject> uniquefiles;
 
     /**
@@ -80,8 +77,8 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
     protected JavadocTool(Context context) {
         super(context);
         messager = Messager.instance0(context);
-        javadocFinder = JavadocClassFinder.instance(context);
-        javadocEnter = JavadocEnter.instance(context);
+        javadocReader = JavadocClassReader.instance0(context);
+        javadocEnter = JavadocEnter.instance0(context);
         uniquefiles = new HashSet<>();
     }
 
@@ -98,8 +95,8 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
     public static JavadocTool make0(Context context) {
         Messager messager = null;
         try {
-            // force the use of Javadoc's class finder
-            JavadocClassFinder.preRegister(context);
+            // force the use of Javadoc's class reader
+            JavadocClassReader.preRegister(context);
 
             // force the use of Javadoc's own enter phase
             JavadocEnter.preRegister(context);
@@ -140,12 +137,11 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
         docenv.setEncoding(encoding);
         docenv.docClasses = docClasses;
         docenv.legacyDoclet = legacyDoclet;
+        javadocReader.sourceCompleter = docClasses ? null : thisCompleter;
 
-        javadocFinder.sourceCompleter = docClasses ? null : sourceCompleter;
-
-        ListBuffer<String> names = new ListBuffer<>();
-        ListBuffer<JCCompilationUnit> classTrees = new ListBuffer<>();
-        ListBuffer<JCCompilationUnit> packTrees = new ListBuffer<>();
+        ListBuffer<String> names = new ListBuffer<String>();
+        ListBuffer<JCCompilationUnit> classTrees = new ListBuffer<JCCompilationUnit>();
+        ListBuffer<JCCompilationUnit> packTrees = new ListBuffer<JCCompilationUnit>();
 
         try {
             StandardJavaFileManager fm = docenv.fileManager instanceof StandardJavaFileManager
@@ -228,7 +224,7 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
         if (files == null) {
             Location location = docenv.fileManager.hasLocation(StandardLocation.SOURCE_PATH)
                     ? StandardLocation.SOURCE_PATH : StandardLocation.CLASS_PATH;
-            ListBuffer<JavaFileObject> lb = new ListBuffer<>();
+            ListBuffer<JavaFileObject> lb = new ListBuffer<JavaFileObject>();
             for (JavaFileObject fo: docenv.fileManager.list(
                     location, name, EnumSet.of(JavaFileObject.Kind.SOURCE), false)) {
                 String binaryName = docenv.fileManager.inferBinaryName(location, fo);
@@ -267,9 +263,10 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
             ListBuffer<String> packages,
             List<String> excludedPackages)
             throws IOException {
-        Map<String,List<JavaFileObject>> packageFiles = new HashMap<>();
+        Map<String,List<JavaFileObject>> packageFiles =
+                new HashMap<String,List<JavaFileObject>>();
 
-        Map<String,Boolean> includedPackages = new HashMap<>();
+        Map<String,Boolean> includedPackages = new HashMap<String,Boolean>();
         includedPackages.put("", true);
         for (String p: excludedPackages)
             includedPackages.put(p, false);
@@ -434,7 +431,7 @@ public class JavadocTool extends com.sun.tools.javac.main.JavaCompiler {
      * From a list of top level trees, return the list of contained class definitions
      */
     List<JCClassDecl> listClasses(List<JCCompilationUnit> trees) {
-        ListBuffer<JCClassDecl> result = new ListBuffer<>();
+        ListBuffer<JCClassDecl> result = new ListBuffer<JCClassDecl>();
         for (JCCompilationUnit t : trees) {
             for (JCTree def : t.defs) {
                 if (def.hasTag(JCTree.Tag.CLASSDEF))

@@ -112,7 +112,7 @@ public class Code {
     /** A buffer for expression catch data. Each enter is a vector
      *  of four unsigned shorts.
      */
-    ListBuffer<char[]> catchInfo = new ListBuffer<>();
+    ListBuffer<char[]> catchInfo = new ListBuffer<char[]>();
 
     /** A buffer for line number information. Each entry is a vector
      *  of two unsigned shorts.
@@ -928,7 +928,7 @@ public class Code {
         if (o instanceof Pool.MethodHandle) return syms.methodHandleType;
         if (o instanceof UniqueType) return typeForPool(((UniqueType)o).type);
         if (o instanceof Type) {
-            Type ty = (Type) o;
+            Type ty = ((Type)o).unannotatedType();
 
             if (ty instanceof Type.ArrayType) return syms.classType;
             if (ty instanceof Type.MethodType) return syms.methodTypeType;
@@ -1579,8 +1579,8 @@ public class Code {
 
     /** Add a catch clause to code.
      */
-    public void addCatch(char startPc, char endPc,
-                         char handlerPc, char catchType) {
+    public void addCatch(
+        char startPc, char endPc, char handlerPc, char catchType) {
             catchInfo.append(new char[]{startPc, endPc, handlerPc, catchType});
         }
 
@@ -1925,6 +1925,13 @@ public class Code {
             return aliveRanges.isEmpty() ? null : aliveRanges.get(aliveRanges.size() - 1);
         }
 
+        void removeLastRange() {
+            Range lastRange = lastRange();
+            if (lastRange != null) {
+                aliveRanges.remove(lastRange);
+            }
+        }
+
         @Override
         public String toString() {
             if (aliveRanges == null) {
@@ -1946,18 +1953,16 @@ public class Code {
             }
         }
 
-        public void closeRange(char end) {
-            if (isLastRangeInitialized()) {
+        public void closeRange(char length) {
+            if (isLastRangeInitialized() && length > 0) {
                 Range range = lastRange();
                 if (range != null) {
                     if (range.length == Character.MAX_VALUE) {
-                        range.length = end;
+                        range.length = length;
                     }
                 }
             } else {
-                if (!aliveRanges.isEmpty()) {
-                    aliveRanges.remove(aliveRanges.size() - 1);
-                }
+                removeLastRange();
             }
         }
 
@@ -1965,16 +1970,14 @@ public class Code {
             if (aliveRanges.isEmpty()) {
                 return false;
             }
-            Range range = lastRange();
-            return range.length == Character.MAX_VALUE;
+            return lastRange().length == Character.MAX_VALUE;
         }
 
         public boolean isLastRangeInitialized() {
             if (aliveRanges.isEmpty()) {
                 return false;
             }
-            Range range = lastRange();
-            return range.start_pc != Character.MAX_VALUE;
+            return lastRange().start_pc != Character.MAX_VALUE;
         }
 
         public Range getWidestRange() {
@@ -1988,7 +1991,7 @@ public class Code {
             }
          }
 
-    }
+    };
 
     /** Local variables, indexed by register. */
     LocalVar[] lvar;
@@ -2019,7 +2022,7 @@ public class Code {
                 }
                 if (localVar.sym == aliveLocal && localVar.lastRange() != null) {
                     char length = (char)(closingCP - localVar.lastRange().start_pc);
-                    if (length > 0 && length < Character.MAX_VALUE) {
+                    if (length < Character.MAX_VALUE) {
                         localVar.closeRange(length);
                     }
                 }
@@ -2090,12 +2093,12 @@ public class Code {
             lvar[adr].isLastRangeInitialized()) {
             LocalVar v = lvar[adr];
             char length = (char)(curCP() - v.lastRange().start_pc);
-            if (length > 0 && length < Character.MAX_VALUE) {
+            if (length < Character.MAX_VALUE) {
                 lvar[adr] = v.dup();
                 v.closeRange(length);
                 putVar(v);
             } else {
-                v.lastRange().start_pc = Character.MAX_VALUE;
+                v.removeLastRange();
             }
         }
     }
@@ -2148,28 +2151,34 @@ public class Code {
 
             for (Attribute.TypeCompound ta : lv.sym.getRawTypeAttributes()) {
                 TypeAnnotationPosition p = ta.position;
-                if (p.hasCatchType()) {
-                    final int idx = findExceptionIndex(p);
-                    if (idx == -1)
-                        Assert.error("Could not find exception index for type annotation " +
-                                     ta + " on exception parameter");
-                    p.setExceptionIndex(idx);
+                // At this point p.type_index contains the catch type index.
+                // Use that index to determine the exception table index.
+                // We can afterwards discard the type_index.
+                // A TA position is shared for all type annotations in the
+                // same location; updating one is enough.
+                // Use -666 as a marker that the exception_index was already updated.
+                if (p.type_index != -666) {
+                    p.exception_index = findExceptionIndex(p.type_index);
+                    p.type_index = -666;
                 }
             }
         }
     }
 
-    private int findExceptionIndex(TypeAnnotationPosition p) {
-        final int catchType = p.getCatchType();
-        final int startPos = p.getStartPos();
-        final int len = catchInfo.length();
+    private int findExceptionIndex(int catchType) {
+        if (catchType == Integer.MIN_VALUE) {
+            // We didn't set the catch type index correctly.
+            // This shouldn't happen.
+            // TODO: issue error?
+            return -1;
+        }
         List<char[]> iter = catchInfo.toList();
+        int len = catchInfo.length();
         for (int i = 0; i < len; ++i) {
             char[] catchEntry = iter.head;
             iter = iter.tail;
-            int ct = catchEntry[3];
-            int sp = catchEntry[0];
-            if (catchType == ct && sp == startPos) {
+            char ct = catchEntry[3];
+            if (catchType == ct) {
                 return i;
             }
         }

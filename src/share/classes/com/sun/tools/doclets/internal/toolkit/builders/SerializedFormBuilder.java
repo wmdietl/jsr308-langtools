@@ -162,8 +162,9 @@ public class SerializedFormBuilder extends AbstractBuilder {
      */
     public void buildSerializedFormSummaries(XMLNode node, Content serializedTree) {
         Content serializedSummariesTree = writer.getSerializedSummariesHeader();
-        for (PackageDoc pkg : configuration.packages) {
-            currentPackage = pkg;
+        PackageDoc[] packages = configuration.packages;
+        for (int i = 0; i < packages.length; i++) {
+            currentPackage = packages[i];
             buildChildren(node, serializedSummariesTree);
         }
         serializedTree.addContent(writer.getSerializedContent(
@@ -214,12 +215,12 @@ public class SerializedFormBuilder extends AbstractBuilder {
         Content classSerializedTree = writer.getClassSerializedHeader();
         ClassDoc[] classes = currentPackage.allClasses(false);
         Arrays.sort(classes);
-        for (ClassDoc classDoc : classes) {
-            currentClass = classDoc;
+        for (int j = 0; j < classes.length; j++) {
+            currentClass = classes[j];
             fieldWriter = writer.getSerialFieldWriter(currentClass);
             methodWriter = writer.getSerialMethodWriter(currentClass);
-            if (currentClass.isClass() && currentClass.isSerializable()) {
-                if (!serialClassInclude(currentClass)) {
+            if(currentClass.isClass() && currentClass.isSerializable()) {
+                if(!serialClassInclude(currentClass)) {
                     continue;
                 }
                 Content classTree = writer.getClassHeader(currentClass);
@@ -238,11 +239,12 @@ public class SerializedFormBuilder extends AbstractBuilder {
      */
     public void buildSerialUIDInfo(XMLNode node, Content classTree) {
         Content serialUidTree = writer.getSerialUIDInfoHeader();
-        for (FieldDoc field : currentClass.fields(false)) {
-            if (field.name().equals("serialVersionUID") &&
-                field.constantValueExpression() != null) {
+        FieldDoc[] fields = currentClass.fields(false);
+        for (int i = 0; i < fields.length; i++) {
+            if (fields[i].name().equals("serialVersionUID") &&
+                fields[i].constantValueExpression() != null) {
                 writer.addSerialUIDInfo(SERIAL_VERSION_UID_HEADER,
-                                        field.constantValueExpression(), serialUidTree);
+                        fields[i].constantValueExpression(), serialUidTree);
                 break;
             }
         }
@@ -567,9 +569,9 @@ public class SerializedFormBuilder extends AbstractBuilder {
         Tag[] serial = doc.tags("serial");
         if (serial.length > 0) {
             String serialtext = StringUtils.toLowerCase(serial[0].text());
-            if (serialtext.contains("exclude")) {
+            if (serialtext.indexOf("exclude") >= 0) {
                 return false;
-            } else if (serialtext.contains("include")) {
+            } else if (serialtext.indexOf("include") >= 0) {
                 return true;
             }
         }
@@ -583,8 +585,8 @@ public class SerializedFormBuilder extends AbstractBuilder {
      * @return true if any of the given classes have a @serialinclude tag.
      */
     private boolean serialClassFoundToDocument(ClassDoc[] classes) {
-        for (ClassDoc aClass : classes) {
-            if (serialClassInclude(aClass)) {
+        for (int i = 0; i < classes.length; i++) {
+            if (serialClassInclude(classes[i])) {
                 return true;
             }
         }

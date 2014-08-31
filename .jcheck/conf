@@ -1,1 +1,2 @@
-project=jdk9
+project=jdk8
+bugids=dup

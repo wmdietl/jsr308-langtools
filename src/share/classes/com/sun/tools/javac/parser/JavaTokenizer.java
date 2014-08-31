@@ -708,6 +708,7 @@ public class JavaTokenizer {
                         if (reader.ch == CR || reader.ch == LF)
                             lexError(pos, "illegal.line.end.in.char.lit");
                         scanLitChar(pos);
+                        char ch2 = reader.ch;
                         if (reader.ch == '\'') {
                             reader.scanChar();
                             tk = TokenKind.CHARLITERAL;
@@ -875,7 +876,7 @@ public class JavaTokenizer {
                                + new String(reader.getRawCharacters(pos, endPos))
                                + "|");
         char[] buf = reader.getRawCharacters(pos, endPos);
-        return new BasicComment<>(new UnicodeReader(fac, buf, buf.length), style);
+        return new BasicComment<UnicodeReader>(new UnicodeReader(fac, buf, buf.length), style);
     }
 
     /**

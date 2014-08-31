@@ -28,7 +28,6 @@ package com.sun.tools.javac.jvm;
 import com.sun.tools.javac.code.Kinds;
 import com.sun.tools.javac.code.Symbol;
 import com.sun.tools.javac.code.Symbol.*;
-import com.sun.tools.javac.code.TypeTag;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.Types;
 import com.sun.tools.javac.code.Types.UniqueType;
@@ -72,7 +71,7 @@ public class Pool {
         this.pp = pp;
         this.pool = pool;
         this.types = types;
-        this.indices = new HashMap<>(pool.length);
+        this.indices = new HashMap<Object,Integer>(pool.length);
         for (int i = 1; i < pp; i++) {
             if (pool[i] != null) indices.put(pool[i], i);
         }
@@ -103,11 +102,10 @@ public class Pool {
      */
     public int put(Object value) {
         value = makePoolValue(value);
-        Assert.check(!(value instanceof Type.TypeVar));
-        Assert.check(!(value instanceof Types.UniqueType &&
-                       ((UniqueType) value).type instanceof Type.TypeVar));
+//      assert !(value instanceof Type.TypeVar);
         Integer index = indices.get(value);
         if (index == null) {
+//          System.err.println("put " + value + " " + value.getClass());//DEBUG
             index = pp;
             indices.put(value, index);
             pool = ArrayUtils.ensureCapacity(pool, pp);
@@ -128,14 +126,7 @@ public class Pool {
         } else if (o instanceof VarSymbol) {
             return new Variable((VarSymbol)o, types);
         } else if (o instanceof Type) {
-            Type t = (Type)o;
-            // ClassRefs can come from ClassSymbols or from Types.
-            // Return the symbol for these types to avoid duplicates
-            // in the constant pool
-            if (t.hasTag(TypeTag.CLASS))
-                return t.tsym;
-            else
-                return new UniqueType(t, types);
+            return new UniqueType((Type)o, types);
         } else {
             return o;
         }

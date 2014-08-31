@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -269,7 +269,20 @@ public class JavacTrees extends DocTrees {
     }
 
     public JCTree getTree(Element element) {
-        return getTree(element, null);
+        Symbol symbol = (Symbol) element;
+        TypeSymbol enclosing = symbol.enclClass();
+        Env<AttrContext> env = enter.getEnv(enclosing);
+        if (env == null)
+            return null;
+        JCClassDecl classNode = env.enclClass;
+        if (classNode != null) {
+            if (TreeInfo.symbolFor(classNode) == element)
+                return classNode;
+            for (JCTree node : classNode.getMembers())
+                if (TreeInfo.symbolFor(node) == element)
+                    return node;
+        }
+        return null;
     }
 
     public JCTree getTree(Element e, AnnotationMirror a) {
@@ -385,7 +398,7 @@ public class JavacTrees extends DocTrees {
             if (ref.paramTypes == null)
                 paramTypes = null;
             else {
-                ListBuffer<Type> lb = new ListBuffer<>();
+                ListBuffer<Type> lb = new ListBuffer<Type>();
                 for (List<JCTree> l = ref.paramTypes; l.nonEmpty(); l = l.tail) {
                     JCTree tree = l.head;
                     Type t = attr.attribType(tree, env);
@@ -394,7 +407,7 @@ public class JavacTrees extends DocTrees {
                 paramTypes = lb.toList();
             }
 
-            ClassSymbol sym = (ClassSymbol) types.upperBound(tsym.type).tsym;
+            ClassSymbol sym = (ClassSymbol) types.cvarUpperBound(tsym.type).tsym;
 
             Symbol msym = (memberName == sym.name)
                     ? findConstructor(sym, paramTypes)

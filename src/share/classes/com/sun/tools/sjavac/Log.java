@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -71,20 +71,15 @@ public class Log {
         err.println(msg);
     }
 
-    static public void initializeLog(PrintStream o, PrintStream e) {
+    static public void setLogLevel(String l, PrintStream o, PrintStream e)
+        throws ProblemException {
         out = o;
         err = e;
-    }
-
-    static public void setLogLevel(String l) {
-        switch (l) {
-            case "warn": level = WARN; break;
-            case "info": level = INFO; break;
-            case "debug": level = DEBUG; break;
-            case "trace": level = TRACE; break;
-            default:
-                throw new IllegalArgumentException("No such log level \"" + l + "\"");
-        }
+        if (l.equals("warn")) level = WARN;
+        else if (l.equals("info")) level = INFO;
+        else if (l.equals("debug")) level = DEBUG;
+        else if (l.equals("trace")) level = TRACE;
+        else throw new ProblemException("No such log level \""+l+"\"");
     }
 
     static public boolean isTracing() {

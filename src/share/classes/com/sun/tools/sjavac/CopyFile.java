@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -31,8 +31,6 @@ import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
 
-import com.sun.tools.sjavac.options.Options;
-
 /**
  * The copy file transform simply copies a matching file from -src to -d .
  * Such files are typically images, xml documents and other data files.
@@ -47,7 +45,7 @@ public class CopyFile implements Transformer {
     public void setExtra(String e) {
     }
 
-    public void setExtra(Options a) {
+    public void setExtra(String[] a) {
     }
 
     public boolean transform(Map<String,Set<URI>> pkgSrcs,
@@ -87,7 +85,7 @@ public class CopyFile implements Transformer {
 
                 Set<URI> as = packageArtifacts.get(pkgName);
                 if (as == null) {
-                    as = new HashSet<>();
+                    as = new HashSet<URI>();
                     packageArtifacts.put(pkgName, as);
                 }
                 as.add(dest.toURI());

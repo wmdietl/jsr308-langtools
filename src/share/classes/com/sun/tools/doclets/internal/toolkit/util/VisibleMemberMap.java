@@ -70,19 +70,19 @@ public class VisibleMemberMap {
     /**
      * List of ClassDoc objects for which ClassMembers objects are built.
      */
-    private final List<ClassDoc> visibleClasses = new ArrayList<>();
+    private final List<ClassDoc> visibleClasses = new ArrayList<ClassDoc>();
 
     /**
      * Map for each member name on to a map which contains members with same
      * name-signature. The mapped map will contain mapping for each MemberDoc
      * onto it's respecive level string.
      */
-    private final Map<Object,Map<ProgramElementDoc,String>> memberNameMap = new HashMap<>();
+    private final Map<Object,Map<ProgramElementDoc,String>> memberNameMap = new HashMap<Object,Map<ProgramElementDoc,String>>();
 
     /**
      * Map of class and it's ClassMembers object.
      */
-    private final Map<ClassDoc,ClassMembers> classMap = new HashMap<>();
+    private final Map<ClassDoc,ClassMembers> classMap = new HashMap<ClassDoc,ClassMembers>();
 
     /**
      * Type whose visible members are requested.  This is the leaf of
@@ -100,9 +100,12 @@ public class VisibleMemberMap {
      */
     private final Configuration configuration;
 
-    private static final Map<ClassDoc, ProgramElementDoc[]> propertiesCache = new HashMap<>();
-    private static final Map<ProgramElementDoc, ProgramElementDoc> classPropertiesMap = new HashMap<>();
-    private static final Map<ProgramElementDoc, GetterSetter> getterSetterMap = new HashMap<>();
+    private static final Map<ClassDoc, ProgramElementDoc[]> propertiesCache =
+            new HashMap<ClassDoc, ProgramElementDoc[]>();
+    private static final Map<ProgramElementDoc, ProgramElementDoc> classPropertiesMap =
+            new HashMap<ProgramElementDoc, ProgramElementDoc>();
+    private static final Map<ProgramElementDoc, GetterSetter> getterSetterMap =
+            new HashMap<ProgramElementDoc, GetterSetter>();
 
     /**
      * Construct a VisibleMemberMap of the given type for the given
@@ -169,8 +172,9 @@ public class VisibleMemberMap {
      * @return the package private members inherited by the class.
      */
     private List<ProgramElementDoc> getInheritedPackagePrivateMethods(Configuration configuration) {
-        List<ProgramElementDoc> results = new ArrayList<>();
-        for (ClassDoc currentClass : visibleClasses) {
+        List<ProgramElementDoc> results = new ArrayList<ProgramElementDoc>();
+        for (Iterator<ClassDoc> iter = visibleClasses.iterator(); iter.hasNext(); ) {
+            ClassDoc currentClass = iter.next();
             if (currentClass != classdoc &&
                 currentClass.isPackagePrivate() &&
                 !Util.isLinkable(currentClass, configuration)) {
@@ -205,7 +209,7 @@ public class VisibleMemberMap {
     public List<ProgramElementDoc> getMembersFor(ClassDoc cd) {
         ClassMembers clmembers = classMap.get(cd);
         if (clmembers == null) {
-            return new ArrayList<>();
+            return new ArrayList<ProgramElementDoc>();
         }
         return clmembers.getMembers();
     }
@@ -215,13 +219,13 @@ public class VisibleMemberMap {
      * classes followed by interfaces traversed. Don't sort alphabetically.
      */
     private void sort(List<ClassDoc> list) {
-        List<ClassDoc> classes = new ArrayList<>();
-        List<ClassDoc> interfaces = new ArrayList<>();
-        for (ClassDoc cd : list) {
+        List<ClassDoc> classes = new ArrayList<ClassDoc>();
+        List<ClassDoc> interfaces = new ArrayList<ClassDoc>();
+        for (int i = 0; i < list.size(); i++) {
+            ClassDoc cd = list.get(i);
             if (cd.isClass()) {
                 classes.add(cd);
-            }
-            else {
+            } else {
                 interfaces.add(cd);
             }
         }
@@ -231,23 +235,23 @@ public class VisibleMemberMap {
     }
 
     private void fillMemberLevelMap(List<ProgramElementDoc> list, String level) {
-        for (ProgramElementDoc element : list) {
-            Object key = getMemberKey(element);
-            Map<ProgramElementDoc, String> memberLevelMap = memberNameMap.get(key);
+        for (int i = 0; i < list.size(); i++) {
+            Object key = getMemberKey(list.get(i));
+            Map<ProgramElementDoc,String> memberLevelMap = memberNameMap.get(key);
             if (memberLevelMap == null) {
-                memberLevelMap = new HashMap<>();
+                memberLevelMap = new HashMap<ProgramElementDoc,String>();
                 memberNameMap.put(key, memberLevelMap);
             }
-            memberLevelMap.put(element, level);
+            memberLevelMap.put(list.get(i), level);
         }
     }
 
     private void purgeMemberLevelMap(List<ProgramElementDoc> list, String level) {
-        for (ProgramElementDoc element : list) {
-            Object key = getMemberKey(element);
+        for (int i = 0; i < list.size(); i++) {
+            Object key = getMemberKey(list.get(i));
             Map<ProgramElementDoc, String> memberLevelMap = memberNameMap.get(key);
-            if (level.equals(memberLevelMap.get(element)))
-                memberLevelMap.remove(element);
+            if (level.equals(memberLevelMap.get(list.get(i))))
+                memberLevelMap.remove(list.get(i));
         }
     }
 
@@ -260,7 +264,7 @@ public class VisibleMemberMap {
         private Set<ProgramElementDoc> members;
 
         public ClassMember(ProgramElementDoc programElementDoc) {
-            members = new HashSet<>();
+            members = new HashSet<ProgramElementDoc>();
             members.add(programElementDoc);
         }
 
@@ -269,10 +273,11 @@ public class VisibleMemberMap {
         }
 
         public boolean isEqual(MethodDoc member) {
-            for (ProgramElementDoc element : members) {
-                if (Util.executableMembersEqual(member, (MethodDoc) element)) {
+            for (Iterator<ProgramElementDoc> iter = members.iterator(); iter.hasNext(); ) {
+                MethodDoc member2 = (MethodDoc) iter.next();
+                if (Util.executableMembersEqual(member, member2)) {
                     members.add(member);
-                    return true;
+                        return true;
                 }
             }
             return false;
@@ -294,7 +299,7 @@ public class VisibleMemberMap {
         /**
          * List of inherited members from the mapping class.
          */
-        private List<ProgramElementDoc> members = new ArrayList<>();
+        private List<ProgramElementDoc> members = new ArrayList<ProgramElementDoc>();
 
         /**
          * Level/Depth of inheritance.
@@ -340,9 +345,9 @@ public class VisibleMemberMap {
         private void mapClass() {
             addMembers(mappingClass);
             ClassDoc[] interfaces = mappingClass.interfaces();
-            for (ClassDoc anInterface : interfaces) {
+            for (int i = 0; i < interfaces.length; i++) {
                 String locallevel = level + 1;
-                ClassMembers cm = new ClassMembers(anInterface, locallevel);
+                ClassMembers cm = new ClassMembers(interfaces[i], locallevel);
                 cm.mapClass();
             }
             if (mappingClass.isClass()) {
@@ -365,13 +370,14 @@ public class VisibleMemberMap {
          */
         private void addMembers(ClassDoc fromClass) {
             List<ProgramElementDoc> cdmembers = getClassMembers(fromClass, true);
-            List<ProgramElementDoc> incllist = new ArrayList<>();
-            for (ProgramElementDoc pgmelem : cdmembers) {
+            List<ProgramElementDoc> incllist = new ArrayList<ProgramElementDoc>();
+            for (int i = 0; i < cdmembers.size(); i++) {
+                ProgramElementDoc pgmelem = cdmembers.get(i);
                 if (!found(members, pgmelem) &&
                     memberIsVisible(pgmelem) &&
                     !isOverridden(pgmelem, level) &&
                     !isTreatedAsPrivate(pgmelem)) {
-                    incllist.add(pgmelem);
+                        incllist.add(pgmelem);
                 }
             }
             if (incllist.size() > 0) {
@@ -484,18 +490,19 @@ public class VisibleMemberMap {
         private AnnotationTypeElementDoc[] filter(AnnotationTypeDoc doc,
             boolean required) {
             AnnotationTypeElementDoc[] members = doc.elements();
-            List<AnnotationTypeElementDoc> targetMembers = new ArrayList<>();
-            for (AnnotationTypeElementDoc member : members) {
-                if ((required && member.defaultValue() == null) ||
-                    ((!required) && member.defaultValue() != null)) {
-                    targetMembers.add(member);
+            List<AnnotationTypeElementDoc> targetMembers = new ArrayList<AnnotationTypeElementDoc>();
+            for (int i = 0; i < members.length; i++) {
+                if ((required && members[i].defaultValue() == null) ||
+                     ((!required) && members[i].defaultValue() != null)){
+                    targetMembers.add(members[i]);
                 }
             }
             return targetMembers.toArray(new AnnotationTypeElementDoc[]{});
         }
 
         private boolean found(List<ProgramElementDoc> list, ProgramElementDoc elem) {
-            for (ProgramElementDoc pgmelem : list) {
+            for (int i = 0; i < list.size(); i++) {
+                ProgramElementDoc pgmelem = list.get(i);
                 if (Util.matches(pgmelem, elem)) {
                     return true;
                 }
@@ -513,7 +520,10 @@ public class VisibleMemberMap {
             Map<?,String> memberLevelMap = (Map<?,String>) memberNameMap.get(getMemberKey(pgmdoc));
             if (memberLevelMap == null)
                 return false;
-            for (String mappedlevel : memberLevelMap.values()) {
+            String mappedlevel = null;
+            Iterator<String> iterator = memberLevelMap.values().iterator();
+            while (iterator.hasNext()) {
+                mappedlevel = iterator.next();
                 if (mappedlevel.equals(STARTLEVEL) ||
                     (level.startsWith(mappedlevel) &&
                      !level.equals(mappedlevel))) {
@@ -531,7 +541,7 @@ public class VisibleMemberMap {
                 return propertiesCache.get(cd);
             }
 
-            final List<MethodDoc> result = new ArrayList<>();
+            final List<MethodDoc> result = new ArrayList<MethodDoc>();
 
             for (final MethodDoc propertyMethod : allMethods) {
 
@@ -734,7 +744,8 @@ public class VisibleMemberMap {
     }
 
     private ClassMember getClassMember(MethodDoc member) {
-        for (Object key : memberNameMap.keySet()) {
+        for (Iterator<?> iter = memberNameMap.keySet().iterator(); iter.hasNext();) {
+            Object key = iter.next();
             if (key instanceof String) {
                 continue;
             } else if (((ClassMember) key).isEqual(member)) {

@@ -51,35 +51,35 @@ public class ClassTree {
      * List of baseclasses. Contains only java.lang.Object. Can be used to get
      * the mapped listing of sub-classes.
      */
-    private List<ClassDoc> baseclasses = new ArrayList<>();
+    private List<ClassDoc> baseclasses = new ArrayList<ClassDoc>();
 
     /**
     * Mapping for each Class with their SubClasses
     */
-    private Map<ClassDoc,List<ClassDoc>> subclasses = new HashMap<>();
+    private Map<ClassDoc,List<ClassDoc>> subclasses = new HashMap<ClassDoc,List<ClassDoc>>();
 
     /**
      * List of base-interfaces. Contains list of all the interfaces who do not
      * have super-interfaces. Can be used to get the mapped listing of
      * sub-interfaces.
      */
-    private List<ClassDoc> baseinterfaces = new ArrayList<>();
+    private List<ClassDoc> baseinterfaces = new ArrayList<ClassDoc>();
 
     /**
     * Mapping for each Interface with their SubInterfaces
     */
-    private Map<ClassDoc,List<ClassDoc>> subinterfaces = new HashMap<>();
+    private Map<ClassDoc,List<ClassDoc>> subinterfaces = new HashMap<ClassDoc,List<ClassDoc>>();
 
-    private List<ClassDoc> baseEnums = new ArrayList<>();
-    private Map<ClassDoc,List<ClassDoc>> subEnums = new HashMap<>();
+    private List<ClassDoc> baseEnums = new ArrayList<ClassDoc>();
+    private Map<ClassDoc,List<ClassDoc>> subEnums = new HashMap<ClassDoc,List<ClassDoc>>();
 
-    private List<ClassDoc> baseAnnotationTypes = new ArrayList<>();
-    private Map<ClassDoc,List<ClassDoc>> subAnnotationTypes = new HashMap<>();
+    private List<ClassDoc> baseAnnotationTypes = new ArrayList<ClassDoc>();
+    private Map<ClassDoc,List<ClassDoc>> subAnnotationTypes = new HashMap<ClassDoc,List<ClassDoc>>();
 
     /**
     * Mapping for each Interface with classes who implement it.
     */
-    private Map<ClassDoc,List<ClassDoc>> implementingclasses = new HashMap<>();
+    private Map<ClassDoc,List<ClassDoc>> implementingclasses = new HashMap<ClassDoc,List<ClassDoc>>();
 
     /**
      * Constructor. Build the Tree using the Root of this Javadoc run.
@@ -123,43 +123,43 @@ public class ClassTree {
      * @param configuration the current configuration of the doclet.
      */
     private void buildTree(ClassDoc[] classes, Configuration configuration) {
-        for (ClassDoc aClass : classes) {
+        for (int i = 0; i < classes.length; i++) {
             // In the tree page (e.g overview-tree.html) do not include
             // information of classes which are deprecated or are a part of a
             // deprecated package.
             if (configuration.nodeprecated &&
-                    (Util.isDeprecated(aClass) ||
-                    Util.isDeprecated(aClass.containingPackage()))) {
+                    (Util.isDeprecated(classes[i]) ||
+                    Util.isDeprecated(classes[i].containingPackage()))) {
                 continue;
             }
 
             if (configuration.javafx
-                    && aClass.tags("treatAsPrivate").length > 0) {
+                    && classes[i].tags("treatAsPrivate").length > 0) {
                 continue;
             }
 
-            if (aClass.isEnum()) {
-                processType(aClass, configuration, baseEnums, subEnums);
-            } else if (aClass.isClass()) {
-                processType(aClass, configuration, baseclasses, subclasses);
-            } else if (aClass.isInterface()) {
-                processInterface(aClass);
-                List<ClassDoc> list = implementingclasses.get(aClass);
+            if (classes[i].isEnum()) {
+                processType(classes[i], configuration, baseEnums, subEnums);
+            } else if (classes[i].isClass()) {
+                processType(classes[i], configuration, baseclasses, subclasses);
+            } else if (classes[i].isInterface()) {
+                processInterface(classes[i]);
+                List<ClassDoc> list = implementingclasses.get(classes[i]);
                 if (list != null) {
                     Collections.sort(list);
                 }
-            } else if (aClass.isAnnotationType()) {
-                processType(aClass, configuration, baseAnnotationTypes,
+            } else if (classes[i].isAnnotationType()) {
+                processType(classes[i], configuration, baseAnnotationTypes,
                     subAnnotationTypes);
             }
         }
 
         Collections.sort(baseinterfaces);
-        for (List<ClassDoc> docs : subinterfaces.values()) {
-            Collections.sort(docs);
+        for (Iterator<List<ClassDoc>> it = subinterfaces.values().iterator(); it.hasNext(); ) {
+            Collections.sort(it.next());
         }
-        for (List<ClassDoc> docs : subclasses.values()) {
-            Collections.sort(docs);
+        for (Iterator<List<ClassDoc>> it = subclasses.values().iterator(); it.hasNext(); ) {
+            Collections.sort(it.next());
         }
     }
 
@@ -190,8 +190,8 @@ public class ClassTree {
             }
         }
         List<Type> intfacs = Util.getAllInterfaces(cd, configuration);
-        for (Type intfac : intfacs) {
-            add(implementingclasses, intfac.asClassDoc(), cd);
+        for (Iterator<Type> iter = intfacs.iterator(); iter.hasNext();) {
+            add(implementingclasses, iter.next().asClassDoc(), cd);
         }
     }
 
@@ -206,11 +206,11 @@ public class ClassTree {
     private void processInterface(ClassDoc cd) {
         ClassDoc[] intfacs = cd.interfaces();
         if (intfacs.length > 0) {
-            for (ClassDoc intfac : intfacs) {
-                if (!add(subinterfaces, intfac, cd)) {
+            for (int i = 0; i < intfacs.length; i++) {
+                if (!add(subinterfaces, intfacs[i], cd)) {
                     return;
                 } else {
-                    processInterface(intfac);   // Recurse
+                    processInterface(intfacs[i]);   // Recurse
                 }
             }
         } else {
@@ -234,7 +234,7 @@ public class ClassTree {
     private boolean add(Map<ClassDoc,List<ClassDoc>> map, ClassDoc superclass, ClassDoc cd) {
         List<ClassDoc> list = map.get(superclass);
         if (list == null) {
-            list = new ArrayList<>();
+            list = new ArrayList<ClassDoc>();
             map.put(superclass, list);
         }
         if (list.contains(cd)) {
@@ -256,7 +256,7 @@ public class ClassTree {
     private List<ClassDoc> get(Map<ClassDoc,List<ClassDoc>> map, ClassDoc cd) {
         List<ClassDoc> list = map.get(cd);
         if (list == null) {
-            return new ArrayList<>();
+            return new ArrayList<ClassDoc>();
         }
         return list;
     }
@@ -341,7 +341,8 @@ public class ClassTree {
         for (int i = 0; i < list.size(); i++) {
             cd = list.get(i);
             List<ClassDoc> tlist = subs(cd, isEnum);
-            for (ClassDoc tcd : tlist) {
+            for (int j = 0; j < tlist.size(); j++) {
+                ClassDoc tcd = tlist.get(j);
                 if (!list.contains(tcd)) {
                     list.add(tcd);
                 }

@@ -63,7 +63,7 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
         if (params == null) {
             return null;
         }
-        HashMap<String,String> result = new HashMap<>();
+        HashMap<String,String> result = new HashMap<String,String>();
         for (int i = 0; i < params.length; i++) {
             String name = params[i] instanceof Parameter ?
                 ((Parameter) params[i]).name() :
@@ -106,13 +106,13 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
         Map<String, String> rankMap = getRankMap(input.isTypeVariableParamTag ?
             (Object[]) ((MethodDoc)input.element).typeParameters() :
             (Object[]) ((MethodDoc)input.element).parameters());
-        for (ParamTag tag : tags) {
-            if (rankMap.containsKey(tag.parameterName()) &&
-                rankMap.get(tag.parameterName()).equals((input.tagId))) {
+        for (int i = 0; i < tags.length; i++) {
+            if (rankMap.containsKey(tags[i].parameterName()) &&
+                    rankMap.get(tags[i].parameterName()).equals((input.tagId))) {
                 output.holder = input.element;
-                output.holderTag = tag;
+                output.holderTag = tags[i];
                 output.inlineTags = input.isFirstSentence ?
-                                    tag.firstSentenceTags() : tag.inlineTags();
+                    tags[i].firstSentenceTags() : tags[i].inlineTags();
                 return;
             }
         }
@@ -195,7 +195,7 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
     private Content getTagletOutput(boolean isNonTypeParams, Doc holder,
             TagletWriter writer, Object[] formalParameters, ParamTag[] paramTags) {
         Content result = writer.getOutputInstance();
-        Set<String> alreadyDocumented = new HashSet<>();
+        Set<String> alreadyDocumented = new HashSet<String>();
         if (paramTags.length > 0) {
             result.addContent(
                 processParamTags(isNonTypeParams, paramTags,
@@ -269,26 +269,27 @@ public class ParamTaglet extends BaseTaglet implements InheritableTaglet {
             Set<String> alreadyDocumented) {
         Content result = writer.getOutputInstance();
         if (paramTags.length > 0) {
-            for (ParamTag pt : paramTags) {
+            for (int i = 0; i < paramTags.length; ++i) {
+                ParamTag pt = paramTags[i];
                 String paramName = isNonTypeParams ?
-                                   pt.parameterName() : "<" + pt.parameterName() + ">";
-                if (!rankMap.containsKey(pt.parameterName())) {
+                    pt.parameterName() : "<" + pt.parameterName() + ">";
+                if (! rankMap.containsKey(pt.parameterName())) {
                     writer.getMsgRetriever().warning(pt.position(),
-                                                     isNonTypeParams ?
-                                                     "doclet.Parameters_warn" :
-                                                     "doclet.Type_Parameters_warn",
-                                                     paramName);
+                        isNonTypeParams ?
+                            "doclet.Parameters_warn" :
+                            "doclet.Type_Parameters_warn",
+                        paramName);
                 }
                 String rank = rankMap.get(pt.parameterName());
                 if (rank != null && alreadyDocumented.contains(rank)) {
                     writer.getMsgRetriever().warning(pt.position(),
-                                                     isNonTypeParams ?
-                                                     "doclet.Parameters_dup_warn" :
-                                                     "doclet.Type_Parameters_dup_warn",
-                                                     paramName);
+                       isNonTypeParams ?
+                           "doclet.Parameters_dup_warn" :
+                           "doclet.Type_Parameters_dup_warn",
+                       paramName);
                 }
                 result.addContent(processParamTag(isNonTypeParams, writer, pt,
-                                                  pt.parameterName(), alreadyDocumented.size() == 0));
+                     pt.parameterName(), alreadyDocumented.size() == 0));
                 alreadyDocumented.add(rank);
             }
         }

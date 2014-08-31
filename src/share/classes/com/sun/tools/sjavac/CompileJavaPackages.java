@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,16 +25,15 @@
 
 package com.sun.tools.sjavac;
 
-import java.io.PrintStream;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.Set;
 import java.util.Map;
 
-import com.sun.tools.sjavac.options.Options;
 import com.sun.tools.sjavac.server.JavacServer;
 import com.sun.tools.sjavac.server.SysInfo;
+import java.io.PrintStream;
 
 /**
  * This transform compiles a set of packages containing Java sources.
@@ -55,12 +54,13 @@ public class CompileJavaPackages implements Transformer {
     // We hope to improve this in the future.
     final static int limitOnConcurrency = 3;
 
-    Options args;
-
+    String serverSettings;
     public void setExtra(String e) {
+        serverSettings = e;
     }
 
-    public void setExtra(Options a) {
+    String[] args;
+    public void setExtra(String[] a) {
         args = a;
     }
 
@@ -82,14 +82,14 @@ public class CompileJavaPackages implements Transformer {
         boolean concurrentCompiles = true;
 
         // Fetch the id.
-        String id = Util.extractStringOption("id", args.getServerConf());
+        String id = Util.extractStringOption("id", serverSettings);
         if (id == null || id.equals("")) {
             // No explicit id set. Create a random id so that the requests can be
             // grouped properly in the server.
             id = "id"+(((new Random()).nextLong())&Long.MAX_VALUE);
         }
         // Only keep portfile and sjavac settings..
-        String psServerSettings = Util.cleanSubOptions(Util.set("portfile","sjavac","background","keepalive"), args.getServerConf());
+        String psServerSettings = Util.cleanSubOptions("--server:", Util.set("portfile","sjavac","background","keepalive"), serverSettings);
 
         // Get maximum heap size from the server!
         SysInfo sysinfo = JavacServer.connectGetSysInfo(psServerSettings, out, err);
@@ -223,7 +223,7 @@ public class CompileJavaPackages implements Transformer {
                 @Override
                 public void run() {
                                         rn[ii] = JavacServer.useServer(cleanedServerSettings,
-                                                           args.prepJavacArgs(),
+                                                           Main.removeWrapperArgs(args),
                                                                cc.srcs,
                                                            fvisible_sources,
                                                            fvisible_classes,

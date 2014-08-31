@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -36,11 +36,11 @@ public interface ExecutableMemberDoc extends MemberDoc {
     /**
      * Return exceptions this method or constructor throws.
      * If the type of the exception is a type variable, return the
-     * {@code ClassDoc} of its erasure.
+     * <code>ClassDoc</code> of its erasure.
      *
-     * <p> <i>The {@code thrownExceptions} method cannot
+     * <p> <i>The <code>thrownExceptions</code> method cannot
      * accommodate certain generic type constructs.  The
-     * {@code thrownExceptionTypes} method should be used
+     * <code>thrownExceptionTypes</code> method should be used
      * instead.</i>
      *
      * @return an array of ClassDoc[] representing the exceptions
@@ -53,23 +53,19 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * Return exceptions this method or constructor throws.
      *
      * @return an array representing the exceptions thrown by this method.
-     *         Each array element is either a {@code ClassDoc} or a
-     *         {@code TypeVariable}.
+     *         Each array element is either a <code>ClassDoc</code> or a
+     *         <code>TypeVariable</code>.
      * @since 1.5
      */
     Type[] thrownExceptionTypes();
 
     /**
      * Return true if this method is native
-     *
-     * @return true if this method is native
      */
     boolean isNative();
 
     /**
      * Return true if this method is synchronized
-     *
-     * @return true if this method is synchronized
      */
     boolean isSynchronized();
 
@@ -78,7 +74,6 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * of arguments.
      *
      * @since 1.5
-     * @return true if this method was declared to take a variable number of arguments.
      */
     public boolean isVarArgs();
 
@@ -103,8 +98,8 @@ public interface ExecutableMemberDoc extends MemberDoc {
     /**
      * Return the throws tags in this method.
      *
-     * @return an array of ThrowTag containing all {@code @exception}
-     * and {@code @throws} tags.
+     * @return an array of ThrowTag containing all <code>&#64;exception</code>
+     * and <code>&#64;throws</code> tags.
      */
     ThrowsTag[] throwsTags();
 
@@ -112,7 +107,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * Return the param tags in this method, excluding the type
      * parameter tags.
      *
-     * @return an array of ParamTag containing all {@code @param} tags
+     * @return an array of ParamTag containing all <code>&#64;param</code> tags
      * corresponding to the parameters of this method.
      */
     ParamTag[] paramTags();
@@ -120,7 +115,7 @@ public interface ExecutableMemberDoc extends MemberDoc {
     /**
      * Return the type parameter tags in this method.
      *
-     * @return an array of ParamTag containing all {@code @param} tags
+     * @return an array of ParamTag containing all <code>&#64;param</code> tags
      * corresponding to the type parameters of this method.
      * @since 1.5
      */
@@ -128,10 +123,8 @@ public interface ExecutableMemberDoc extends MemberDoc {
 
     /**
      * Get the signature. It is the parameter list, type is qualified.
-     *      For instance, for a method {@code mymethod(String x, int y)},
-     *      it will return {@code (java.lang.String,int)}.
-     *
-     * @return the parameter list where type is qualified.
+     *      For instance, for a method <code>mymethod(String x, int y)</code>,
+     *      it will return <code>(java.lang.String,int)</code>.
      */
     String signature();
 
@@ -139,10 +132,8 @@ public interface ExecutableMemberDoc extends MemberDoc {
      * get flat signature.  all types are not qualified.
      *      return a String, which is the flat signiture of this member.
      *      It is the parameter list, type is not qualified.
-     *      For instance, for a method {@code mymethod(String x, int y)},
-     *      it will return {@code (String, int)}.
-     *
-     * @return a String, which is the flat signiture of this member.
+     *      For instance, for a method <code>mymethod(String x, int y)</code>,
+     *      it will return <code>(String, int)</code>.
      */
     String flatSignature();
 

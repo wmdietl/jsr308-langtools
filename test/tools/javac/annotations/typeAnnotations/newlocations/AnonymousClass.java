@@ -25,7 +25,7 @@ import java.lang.annotation.*;
 
 /*
  * @test
- * @bug 8013852
+ * @bug 1234567
  * @summary new type annotation location: anonymous class creation
  * @author Werner Dietl
  * @compile AnonymousClass.java

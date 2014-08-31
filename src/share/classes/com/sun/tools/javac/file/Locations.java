@@ -144,7 +144,7 @@ public class Locations {
      * @return The elements of the path
      */
     private static Iterable<File> getPathEntries(String path, File emptyPathDefault) {
-        ListBuffer<File> entries = new ListBuffer<>();
+        ListBuffer<File> entries = new ListBuffer<File>();
         int start = 0;
         while (start <= path.length()) {
             int sep = path.indexOf(File.pathSeparatorChar, start);
@@ -167,7 +167,7 @@ public class Locations {
         private static final long serialVersionUID = 0;
 
         private boolean expandJarClassPaths = false;
-        private Set<File> canonicalValues = new HashSet<>();
+        private Set<File> canonicalValues = new HashSet<File>();
 
         public Path expandJarClassPaths(boolean x) {
             expandJarClassPaths = x;
@@ -510,7 +510,7 @@ public class Locations {
      */
     private class BootClassPathLocationHandler extends LocationHandler {
         private Collection<File> searchPath;
-        final Map<Option, String> optionValues = new EnumMap<>(Option.class);
+        final Map<Option, String> optionValues = new EnumMap<Option,String>(Option.class);
 
         /**
          * rt.jar as found on the default bootclasspath.
@@ -648,8 +648,8 @@ public class Locations {
     Map<Option, LocationHandler> handlersForOption;
 
     void initHandlers() {
-        handlersForLocation = new HashMap<>();
-        handlersForOption = new EnumMap<>(Option.class);
+        handlersForLocation = new HashMap<Location, LocationHandler>();
+        handlersForOption = new EnumMap<Option, LocationHandler>(Option.class);
 
         LocationHandler[] handlers = {
             new BootClassPathLocationHandler(),

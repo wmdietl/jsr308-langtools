@@ -49,7 +49,7 @@ import com.sun.tools.javac.util.StringUtils;
  * deletion without notice.</b>
  */
 @SupportedAnnotationTypes("*")
-@SupportedSourceVersion(SourceVersion.RELEASE_9)
+@SupportedSourceVersion(SourceVersion.RELEASE_8)
 public class PrintingProcessor extends AbstractProcessor {
     PrintWriter writer;
 
@@ -227,9 +227,10 @@ public class PrintingProcessor extends AbstractProcessor {
             indentation++;
 
             if (kind == ENUM) {
-                List<Element> enclosedElements = new ArrayList<>(e.getEnclosedElements());
+                List<Element> enclosedElements =
+                    new ArrayList<Element>(e.getEnclosedElements());
                 // Handle any enum constants specially before other entities.
-                List<Element> enumConstants = new ArrayList<>();
+                List<Element> enumConstants = new ArrayList<Element>();
                 for(Element element : enclosedElements) {
                     if (element.getKind() == ENUM_CONSTANT)
                         enumConstants.add(element);
@@ -332,7 +333,7 @@ public class PrintingProcessor extends AbstractProcessor {
             if (kind == ENUM_CONSTANT)
                 return;
 
-            Set<Modifier> modifiers = new LinkedHashSet<>();
+            Set<Modifier> modifiers = new LinkedHashSet<Modifier>();
             modifiers.addAll(e.getModifiers());
 
             switch (kind) {

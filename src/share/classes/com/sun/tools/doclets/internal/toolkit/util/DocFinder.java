@@ -171,7 +171,7 @@ public class DocFinder {
          * subclass of IOException.  This subclass of DocFinder.Output allows
          * multiple tag inheritence.
          */
-        public List<Tag> tagList  = new ArrayList<>();
+        public List<Tag> tagList  = new ArrayList<Tag>();
     }
 
     /**
@@ -220,8 +220,8 @@ public class DocFinder {
             //       appropriate element here.
             MethodDoc[] implementedMethods =
                 (new ImplementedMethods((MethodDoc) input.element, null)).build(false);
-            for (MethodDoc implementedMethod : implementedMethods) {
-                inheritedSearchInput.element = implementedMethod;
+            for (int i = 0; i < implementedMethods.length; i++) {
+                inheritedSearchInput.element = implementedMethods[i];
                 output = search(inheritedSearchInput);
                 output.isValidInheritDocTag = true;
                 if (output.inlineTags.length > 0) {

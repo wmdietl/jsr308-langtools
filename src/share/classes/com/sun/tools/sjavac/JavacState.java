@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 package com.sun.tools.sjavac;
 
 import java.io.*;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Set;
@@ -37,9 +36,6 @@ import java.util.HashMap;
 import java.text.SimpleDateFormat;
 import java.net.URI;
 import java.util.*;
-
-import com.sun.tools.sjavac.options.Options;
-import com.sun.tools.sjavac.options.SourceLocation;
 
 /**
  * The javac state class maintains the previous (prev) and the current (now)
@@ -121,20 +117,25 @@ public class JavacState
     // It can also map from a jar file to the set of visible classes for that jar file.
     Map<URI,Set<String>> visibleClasses;
 
-    // Setup transform that always exist.
+    // Setup two transforms that always exist.
+    private CopyFile            copyFiles = new CopyFile();
     private CompileJavaPackages compileJavaPackages = new CompileJavaPackages();
 
     // Where to send stdout and stderr.
     private PrintStream out, err;
 
-    JavacState(Options options, boolean removeJavacState, PrintStream o, PrintStream e) {
+    JavacState(String[] args, File bd, File gd, File hd, boolean permitUnidentifiedArtifacts, boolean removeJavacState,
+            PrintStream o, PrintStream e) {
         out = o;
         err = e;
-        numCores = options.getNumCores();
-        theArgs = options.getStateArgsString();
-        binDir = Util.pathToFile(options.getDestDir());
-        gensrcDir = Util.pathToFile(options.getGenSrcDir());
-        headerDir = Util.pathToFile(options.getHeaderDir());
+        numCores = Main.findNumberOption(args, "-j");
+        theArgs = "";
+        for (String a : removeArgsNotAffectingState(args)) {
+            theArgs = theArgs+a+" ";
+        }
+        binDir = bd;
+        gensrcDir = gd;
+        headerDir = hd;
         javacStateFilename = binDir.getPath()+File.separator+"javac_state";
         javacState = new File(javacStateFilename);
         if (removeJavacState && javacState.exists()) {
@@ -147,7 +148,7 @@ public class JavacState
             // We do not want to risk building a broken incremental build.
             // BUT since the makefiles still copy things straight into the bin_dir et al,
             // we avoid deleting files here, if the option --permit-unidentified-classes was supplied.
-            if (!options.isUnidentifiedArtifactPermitted()) {
+            if (!permitUnidentifiedArtifacts) {
                 deleteContents(binDir);
                 deleteContents(gensrcDir);
                 deleteContents(headerDir);
@@ -156,9 +157,9 @@ public class JavacState
         }
         prev = new BuildState();
         now = new BuildState();
-        taintedPackages = new HashSet<>();
-        recompiledPackages = new HashSet<>();
-        packagesWithChangedPublicApis = new HashSet<>();
+        taintedPackages = new HashSet<String>();
+        recompiledPackages = new HashSet<String>();
+        packagesWithChangedPublicApis = new HashSet<String>();
     }
 
     public BuildState prev() { return prev; }
@@ -196,7 +197,7 @@ public class JavacState
      * Specify which sources are visible to the compiler through -sourcepath.
      */
     public void setVisibleSources(Map<String,Source> vs) {
-        visibleSrcs = new HashSet<>();
+        visibleSrcs = new HashSet<URI>();
         for (String s : vs.keySet()) {
             Source src = vs.get(s);
             visibleSrcs.add(src.file().toURI());
@@ -207,7 +208,7 @@ public class JavacState
      * Specify which classes are visible to the compiler through -classpath.
      */
     public void setVisibleClasses(Map<String,Source> vs) {
-        visibleSrcs = new HashSet<>();
+        visibleSrcs = new HashSet<URI>();
         for (String s : vs.keySet()) {
             Source src = vs.get(s);
             visibleSrcs.add(src.file().toURI());
@@ -237,7 +238,7 @@ public class JavacState
         if (p != null) {
             return p.artifacts();
         }
-        return new HashMap<>();
+        return new HashMap<String,File>();
     }
 
     /**
@@ -300,8 +301,9 @@ public class JavacState
     /**
      * Load a javac_state file.
      */
-    public static JavacState load(Options options, PrintStream out, PrintStream err) {
-        JavacState db = new JavacState(options, false, out, err);
+    public static JavacState load(String[] args, File binDir, File gensrcDir, File headerDir,
+            boolean permitUnidentifiedArtifacts, PrintStream out, PrintStream err) {
+        JavacState db = new JavacState(args, binDir, gensrcDir, headerDir, permitUnidentifiedArtifacts, false, out, err);
         Module  lastModule = null;
         Package lastPackage = null;
         Source  lastSource = null;
@@ -368,22 +370,22 @@ public class JavacState
             noFileFound = true;
         } catch (IOException e) {
             Log.info("Dropping old javac_state because of errors when reading it.");
-            db = new JavacState(options, true, out, err);
+            db = new JavacState(args, binDir, gensrcDir, headerDir, permitUnidentifiedArtifacts, true, out, err);
             foundCorrectVerNr = true;
             newCommandLine = false;
             syntaxError = false;
     }
         if (foundCorrectVerNr == false && !noFileFound) {
             Log.info("Dropping old javac_state since it is of an old version.");
-            db = new JavacState(options, true, out, err);
+            db = new JavacState(args, binDir, gensrcDir, headerDir, permitUnidentifiedArtifacts, true, out, err);
         } else
         if (newCommandLine == true && !noFileFound) {
             Log.info("Dropping old javac_state since a new command line is used!");
-            db = new JavacState(options, true, out, err);
+            db = new JavacState(args, binDir, gensrcDir, headerDir, permitUnidentifiedArtifacts, true, out, err);
         } else
         if (syntaxError == true) {
             Log.info("Dropping old javac_state since it contains syntax errors.");
-            db = new JavacState(options, true, out, err);
+            db = new JavacState(args, binDir, gensrcDir, headerDir, permitUnidentifiedArtifacts, true, out, err);
         }
         db.prev.calculateDependents();
         return db;
@@ -419,7 +421,7 @@ public class JavacState
      * prior to propagating dependencies.
      */
     public void clearTaintedPackages() {
-        taintedPackages = new HashSet<>();
+        taintedPackages = new HashSet<String>();
     }
 
     /**
@@ -460,11 +462,17 @@ public class JavacState
      * Acquire the compile_java_packages suffix rule for .java files.
      */
     public Map<String,Transformer> getJavaSuffixRule() {
-        Map<String,Transformer> sr = new HashMap<>();
+        Map<String,Transformer> sr = new HashMap<String,Transformer>();
         sr.put(".java", compileJavaPackages);
         return sr;
     }
 
+    /**
+     * Acquire the copying transform.
+     */
+    public Transformer getCopier() {
+        return copyFiles;
+    }
 
     /**
      * If artifacts have gone missing, force a recompile of the packages
@@ -501,7 +509,7 @@ public class JavacState
      * that are not recognized as such, in the javac_state file.
      */
     public void removeUnidentifiedArtifacts() {
-        Set<File> allKnownArtifacts = new HashSet<>();
+        Set<File> allKnownArtifacts = new HashSet<File>();
         for (Package pkg : prev.packages().values()) {
             for (File f : pkg.artifacts().values()) {
                 allKnownArtifacts.add(f);
@@ -554,7 +562,7 @@ public class JavacState
      * Return those files belonging to prev, but not now.
      */
     private Set<Source> calculateRemovedSources() {
-        Set<Source> removed = new HashSet<>();
+        Set<Source> removed = new HashSet<Source>();
         for (String src : prev.sources().keySet()) {
             if (now.sources().get(src) == null) {
                 removed.add(prev.sources().get(src));
@@ -567,7 +575,7 @@ public class JavacState
      * Return those files belonging to now, but not prev.
      */
     private Set<Source> calculateAddedSources() {
-        Set<Source> added = new HashSet<>();
+        Set<Source> added = new HashSet<Source>();
         for (String src : now.sources().keySet()) {
             if (prev.sources().get(src) == null) {
                 added.add(now.sources().get(src));
@@ -583,7 +591,7 @@ public class JavacState
      * a warning!
      */
     private Set<Source> calculateModifiedSources() {
-        Set<Source> modified = new HashSet<>();
+        Set<Source> modified = new HashSet<Source>();
         for (String src : now.sources().keySet()) {
             Source n = now.sources().get(src);
             Source t = prev.sources().get(src);
@@ -619,9 +627,9 @@ public class JavacState
      * Run the copy translator only.
      */
     public void performCopying(File binDir, Map<String,Transformer> suffixRules) {
-        Map<String,Transformer> sr = new HashMap<>();
+        Map<String,Transformer> sr = new HashMap<String,Transformer>();
         for (Map.Entry<String,Transformer> e : suffixRules.entrySet()) {
-            if (e.getValue().getClass().equals(CopyFile.class)) {
+            if (e.getValue() == copyFiles) {
                 sr.put(e.getKey(), e.getValue());
             }
         }
@@ -633,13 +641,12 @@ public class JavacState
      * I.e. all translators that are not copy nor compile_java_source.
      */
     public void performTranslation(File gensrcDir, Map<String,Transformer> suffixRules) {
-        Map<String,Transformer> sr = new HashMap<>();
+        Map<String,Transformer> sr = new HashMap<String,Transformer>();
         for (Map.Entry<String,Transformer> e : suffixRules.entrySet()) {
-            Class<?> trClass = e.getValue().getClass();
-            if (trClass == CompileJavaPackages.class || trClass == CopyFile.class)
-                continue;
-
-            sr.put(e.getKey(), e.getValue());
+            if (e.getValue() != copyFiles &&
+                e.getValue() != compileJavaPackages) {
+                sr.put(e.getKey(), e.getValue());
+            }
         }
         perform(gensrcDir, sr);
     }
@@ -647,11 +654,14 @@ public class JavacState
     /**
      * Compile all the java sources. Return true, if it needs to be called again!
      */
-    public boolean performJavaCompilations(Options args,
+    public boolean performJavaCompilations(File binDir,
+                                           String serverSettings,
+                                           String[] args,
                                            Set<String> recentlyCompiled,
                                            boolean[] rcValue) {
-        Map<String,Transformer> suffixRules = new HashMap<>();
+        Map<String,Transformer> suffixRules = new HashMap<String,Transformer>();
         suffixRules.put(".java", compileJavaPackages);
+        compileJavaPackages.setExtra(serverSettings);
         compileJavaPackages.setExtra(args);
 
         rcValue[0] = perform(binDir, suffixRules);
@@ -659,7 +669,7 @@ public class JavacState
         clearTaintedPackages();
         boolean again = !packagesWithChangedPublicApis.isEmpty();
         taintPackagesDependingOnChangedPackages(packagesWithChangedPublicApis, recentlyCompiled);
-        packagesWithChangedPublicApis = new HashSet<>();
+        packagesWithChangedPublicApis = new HashSet<String>();
         return again && rcValue[0];
     }
 
@@ -669,12 +679,12 @@ public class JavacState
     private void addFileToTransform(Map<Transformer,Map<String,Set<URI>>> gs, Transformer t, Source s) {
         Map<String,Set<URI>> fs = gs.get(t);
         if (fs == null) {
-            fs = new HashMap<>();
+            fs = new HashMap<String,Set<URI>>();
             gs.put(t, fs);
         }
         Set<URI> ss = fs.get(s.pkg().name());
         if (ss == null) {
-            ss = new HashSet<>();
+            ss = new HashSet<URI>();
             fs.put(s.pkg().name(), ss);
         }
         ss.add(s.file().toURI());
@@ -688,7 +698,7 @@ public class JavacState
     {
         boolean rc = true;
         // Group sources based on transforms. A source file can only belong to a single transform.
-        Map<Transformer,Map<String,Set<URI>>> groupedSources = new HashMap<>();
+        Map<Transformer,Map<String,Set<URI>>> groupedSources = new HashMap<Transformer,Map<String,Set<URI>>>();
         for (Source src : now.sources().values()) {
             Transformer t = suffixRules.get(src.suffix());
                if (t != null) {
@@ -702,12 +712,9 @@ public class JavacState
             Transformer t = e.getKey();
             Map<String,Set<URI>> srcs = e.getValue();
             // These maps need to be synchronized since multiple threads will be writing results into them.
-            Map<String,Set<URI>> packageArtifacts =
-                    Collections.synchronizedMap(new HashMap<String,Set<URI>>());
-            Map<String,Set<String>> packageDependencies =
-                    Collections.synchronizedMap(new HashMap<String,Set<String>>());
-            Map<String,String> packagePublicApis =
-                    Collections.synchronizedMap(new HashMap<String, String>());
+            Map<String,Set<URI>> packageArtifacts = Collections.synchronizedMap(new HashMap<String,Set<URI>>());
+            Map<String,Set<String>> packageDependencies = Collections.synchronizedMap(new HashMap<String,Set<String>>());
+            Map<String,String> packagePublicApis = Collections.synchronizedMap(new HashMap<String,String>());
 
             boolean  r = t.transform(srcs,
                                      visibleSrcs,
@@ -763,7 +770,7 @@ public class JavacState
      * Utility method to recursively find all files below a directory.
      */
     private static Set<File> findAllFiles(File dir) {
-        Set<File> foundFiles = new HashSet<>();
+        Set<File> foundFiles = new HashSet<File>();
         if (dir == null) {
             return foundFiles;
         }
@@ -796,17 +803,14 @@ public class JavacState
 
         if (makefileSourceList == null) return;
 
-        Set<String> calculatedSources = new HashSet<>();
-        Set<String> listedSources = new HashSet<>();
+        Set<String> calculatedSources = new HashSet<String>();
+        Set<String> listedSources = new HashSet<String>();
 
         // Create a set of filenames with full paths.
         for (Source s : now.sources().values()) {
             // Don't include link only sources when comparing sources to compile
             if (!s.isLinkedOnly()) {
-                String path = s.file().getPath();
-                if (mightNeedRewriting)
-                    path = Util.normalizeDriveLetter(path);
-                calculatedSources.add(path);
+                calculatedSources.add(s.file().getPath());
             }
         }
         // Read in the file and create another set of filenames with full paths.

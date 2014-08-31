@@ -112,7 +112,8 @@ public class LambdaToMethod extends TreeTranslator {
     public static final int FLAG_BRIDGES = 1 << 2;
 
     // <editor-fold defaultstate="collapsed" desc="Instantiating">
-    protected static final Context.Key<LambdaToMethod> unlambdaKey = new Context.Key<>();
+    protected static final Context.Key<LambdaToMethod> unlambdaKey =
+            new Context.Key<LambdaToMethod>();
 
     public static LambdaToMethod instance(Context context) {
         LambdaToMethod instance = context.get(unlambdaKey);
@@ -167,7 +168,7 @@ public class LambdaToMethod extends TreeTranslator {
         private KlassInfo(JCClassDecl clazz) {
             this.clazz = clazz;
             appendedMethodList = new ListBuffer<>();
-            deserializeCases = new HashMap<>();
+            deserializeCases = new HashMap<String, ListBuffer<JCStatement>>();
             MethodType type = new MethodType(List.of(syms.serializedLambdaType), syms.objectType,
                     List.<Type>nil(), syms.methodClass);
             deserMethodSym = makePrivateSyntheticMethod(STATIC, names.deserializeLambda, type, clazz.sym);
@@ -210,7 +211,7 @@ public class LambdaToMethod extends TreeTranslator {
         this.make = make;
         this.attrEnv = env;
         this.context = null;
-        this.contextMap = new HashMap<>();
+        this.contextMap = new HashMap<JCTree, TranslationContext<?>>();
         return translate(cdef);
     }
     // </editor-fold>
@@ -267,8 +268,8 @@ public class LambdaToMethod extends TreeTranslator {
 
         {
             Symbol owner = localContext.owner;
-            ListBuffer<Attribute.TypeCompound> ownerTypeAnnos = new ListBuffer<>();
-            ListBuffer<Attribute.TypeCompound> lambdaTypeAnnos = new ListBuffer<>();
+            ListBuffer<Attribute.TypeCompound> ownerTypeAnnos = new ListBuffer<Attribute.TypeCompound>();
+            ListBuffer<Attribute.TypeCompound> lambdaTypeAnnos = new ListBuffer<Attribute.TypeCompound>();
 
             for (Attribute.TypeCompound tc : owner.getRawTypeAttributes()) {
                 if (tc.position.onLambda == tree) {
@@ -1149,11 +1150,12 @@ public class LambdaToMethod extends TreeTranslator {
          * maps for fake clinit symbols to be used as owners of lambda occurring in
          * a static var init context
          */
-        private Map<ClassSymbol, Symbol> clinits = new HashMap<>();
+        private Map<ClassSymbol, Symbol> clinits =
+                new HashMap<ClassSymbol, Symbol>();
 
         private JCClassDecl analyzeAndPreprocessClass(JCClassDecl tree) {
             frameStack = List.nil();
-            localClassDefs = new HashMap<>();
+            localClassDefs = new HashMap<Symbol, JCClassDecl>();
             return translate(tree);
         }
 
@@ -1181,7 +1183,7 @@ public class LambdaToMethod extends TreeTranslator {
             try {
                 log.useSource(tree.sym.sourcefile);
                 syntheticMethodNameCounts = new SyntheticMethodNameCounter();
-                prevClinits = new HashMap<>();
+                prevClinits = new HashMap<ClassSymbol, Symbol>();
                 if (tree.sym.owner.kind == MTH) {
                     localClassDefs.put(tree.sym, tree);
                 }
@@ -1368,7 +1370,7 @@ public class LambdaToMethod extends TreeTranslator {
                 // Build lambda parameters
                 // partially cloned from TreeMaker.Params until 8014021 is fixed
                 Symbol owner = owner();
-                ListBuffer<JCVariableDecl> paramBuff = new ListBuffer<>();
+                ListBuffer<JCVariableDecl> paramBuff = new ListBuffer<JCVariableDecl>();
                 int i = 0;
                 for (List<Type> l = ptypes; l.nonEmpty(); l = l.tail) {
                     JCVariableDecl param = make.Param(make.paramName(i++), l.head, owner);
@@ -1992,7 +1994,11 @@ public class LambdaToMethod extends TreeTranslator {
                 // If instance access isn't needed, make it static.
                 // Interface instance methods must be default methods.
                 // Lambda methods are private synthetic.
+                // Inherit ACC_STRICT from the enclosing method, or, for clinit,
+                // from the class.
                 translatedSym.flags_field = SYNTHETIC | LAMBDA_METHOD |
+                        owner.flags_field & STRICTFP |
+                        owner.owner.flags_field & STRICTFP |
                         PRIVATE |
                         (thisReferenced? (inInterface? DEFAULT : 0) : STATIC);
 
@@ -2194,7 +2200,7 @@ public class LambdaToMethod extends TreeTranslator {
         LOCAL_VAR,      // original to translated lambda locals
         CAPTURED_VAR,   // variables in enclosing scope to translated synthetic parameters
         CAPTURED_THIS,  // class symbols to translated synthetic parameters (for captured member access)
-        TYPE_VAR       // original to translated lambda type variables
+        TYPE_VAR;       // original to translated lambda type variables
     }
 
     /**

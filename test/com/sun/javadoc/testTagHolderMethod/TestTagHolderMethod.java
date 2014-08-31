@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -21,20 +21,25 @@
  * questions.
  */
 
+import com.sun.javadoc.*;
+
 /*
  * @test
  * @bug 4706525
  * @summary Determine if the new Tag.holder() method works properly.
  * @author jamieh
- * @library ../lib
+ * @library ../lib/
  * @build JavadocTester
  * @build TestTagHolderMethod
  * @run main TestTagHolderMethod
  */
 
-import com.sun.javadoc.*;
-
 public class TestTagHolderMethod extends JavadocTester {
+
+    private static final String BUG_ID = "4706525";
+    public static final String[] ARGS = new String[] {
+        "-docletpath", SRC_DIR, "-doclet", "TestTagHolderMethod", "-sourcepath",
+                SRC_DIR, "pkg"};
 
     /**
      * Doclet entry point.
@@ -51,13 +56,14 @@ public class TestTagHolderMethod extends JavadocTester {
     }
 
     private static void checkHolders(Doc[] holders) throws Exception {
-        for (Doc holder : holders) {
+        for (int i = 0; i < holders.length; i++) {
+            Doc holder = holders[i];
             Tag[] tags = holder.tags();
-            for (Tag tag : tags) {
-                if (!tag.holder().name().equals(holder.name())) {
+            for (int j = 0; j < tags.length; j++) {
+                if (! tags[j].holder().name().equals(holder.name())) {
                     throw new Exception("The holder method does not return the correct Doc object.");
                 } else {
-                    System.out.println(tag.name() + " is held by " + holder.name());
+                    System.out.println(tags[j].name() + " is held by " + holder.name());
                 }
             }
         }
@@ -66,19 +72,22 @@ public class TestTagHolderMethod extends JavadocTester {
     /**
      * The entry point of the test.
      * @param args the array of command line arguments.
-     * @throws Exception if the test fails
      */
-    public static void main(String... args) throws Exception {
-        JavadocTester tester = new TestTagHolderMethod();
-        tester.runTests();
+    public static void main(String[] args) {
+        run(new TestTagHolderMethod(), ARGS, new String[][]{}, new String[][]{});
     }
 
-    @Test
-    void test() {
-        javadoc("-docletpath", testSrc, // unlikely to be effective
-                "-doclet", "TestTagHolderMethod",
-                "-sourcepath", testSrc,
-                "pkg");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

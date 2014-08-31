@@ -34,6 +34,7 @@ import javax.lang.model.element.*;
 import javax.tools.JavaFileObject;
 
 import com.sun.tools.javac.code.Type.*;
+import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.Attr;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
@@ -152,6 +153,10 @@ public abstract class Symbol extends AnnoConstruct implements Element {
         }
     }
 
+    public void appendTypeAttributesWithCompletion(final Annotate.AnnotateRepeatedContext<Attribute.TypeCompound> ctx) {
+        initedMetadata().appendTypeAttributesWithCompletion(ctx);
+    }
+
     public void appendUniqueTypeAttributes(List<Attribute.TypeCompound> l) {
         if (l.nonEmpty()) {
             initedMetadata().appendUniqueTypes(l);
@@ -204,6 +209,10 @@ public abstract class Symbol extends AnnoConstruct implements Element {
         if (metadata != null || a.nonEmpty()) {
             initedMetadata().setDeclarationAttributes(a);
         }
+    }
+
+    public void setDeclarationAttributesWithCompletion(final Annotate.AnnotateRepeatedContext<Attribute.Compound> ctx) {
+        initedMetadata().setDeclarationAttributesWithCompletion(ctx);
     }
 
     public void setTypeAttributes(List<Attribute.TypeCompound> a) {
@@ -770,42 +779,41 @@ public abstract class Symbol extends AnnoConstruct implements Element {
 
         @Override
         public List<Attribute.Compound> getAnnotationMirrors() {
-            return onlyTypeVariableAnnotations(owner.getRawTypeAttributes());
-        }
-
-        private List<Attribute.Compound> onlyTypeVariableAnnotations(
-                List<Attribute.TypeCompound> candidates) {
-            // Declaration annotations on TypeParameters are stored in type attributes
+            // Declaration annotations on type variables are stored in type attributes
+            // on the owner of the TypeVariableSymbol
+            List<Attribute.TypeCompound> candidates = owner.getRawTypeAttributes();
+            int index = owner.getTypeParameters().indexOf(this);
             List<Attribute.Compound> res = List.nil();
             for (Attribute.TypeCompound a : candidates) {
-                if (a.position.type == TargetType.CLASS_TYPE_PARAMETER ||
-                    a.position.type == TargetType.METHOD_TYPE_PARAMETER)
+                if (isCurrentSymbolsAnnotation(a, index))
                     res = res.prepend(a);
             }
 
-            return res = res.reverse();
+            return res.reverse();
         }
-
-
 
         // Helper to getAnnotation[s]
         @Override
         public <A extends Annotation> Attribute.Compound getAttribute(Class<A> annoType) {
-
             String name = annoType.getName();
 
             // Declaration annotations on type variables are stored in type attributes
             // on the owner of the TypeVariableSymbol
             List<Attribute.TypeCompound> candidates = owner.getRawTypeAttributes();
+            int index = owner.getTypeParameters().indexOf(this);
             for (Attribute.TypeCompound anno : candidates)
-                if (anno.position.type == TargetType.CLASS_TYPE_PARAMETER ||
-                        anno.position.type == TargetType.METHOD_TYPE_PARAMETER)
-                    if (name.contentEquals(anno.type.tsym.flatName()))
-                        return anno;
+                if (isCurrentSymbolsAnnotation(anno, index) &&
+                    name.contentEquals(anno.type.tsym.flatName()))
+                    return anno;
 
             return null;
         }
-
+            //where:
+            boolean isCurrentSymbolsAnnotation(Attribute.TypeCompound anno, int index) {
+                return (anno.position.type == TargetType.CLASS_TYPE_PARAMETER ||
+                        anno.position.type == TargetType.METHOD_TYPE_PARAMETER) &&
+                       anno.position.parameter_index == index;
+            }
 
 
         @Override
@@ -896,12 +904,6 @@ public abstract class Symbol extends AnnoConstruct implements Element {
         public <R, P> R accept(Symbol.Visitor<R, P> v, P p) {
             return v.visitPackageSymbol(this, p);
         }
-
-        /**Resets the Symbol into the state good for next round of annotation processing.*/
-        public void reset() {
-            metadata = null;
-        }
-
     }
 
     /** A class for class symbols
@@ -956,7 +958,7 @@ public abstract class Symbol extends AnnoConstruct implements Element {
             this(
                 flags,
                 name,
-                new ClassType(Type.noType, null, null, Type.noAnnotations),
+                new ClassType(Type.noType, null, null),
                 owner);
             this.type.tsym = this;
         }
@@ -992,8 +994,7 @@ public abstract class Symbol extends AnnoConstruct implements Element {
         public Type erasure(Types types) {
             if (erasure_field == null)
                 erasure_field = new ClassType(types.erasure(type.getEnclosingType()),
-                                              List.<Type>nil(), this,
-                                              type.getAnnotationMirrors());
+                                              List.<Type>nil(), this);
             return erasure_field;
         }
 
@@ -1152,26 +1153,6 @@ public abstract class Symbol extends AnnoConstruct implements Element {
         public <R, P> R accept(Symbol.Visitor<R, P> v, P p) {
             return v.visitClassSymbol(this, p);
         }
-
-        /**Resets the Symbol into the state good for next round of annotation processing.*/
-        public void reset() {
-            kind = TYP;
-            erasure_field = null;
-            members_field = null;
-            flags_field = 0;
-            if (type instanceof ClassType) {
-                ClassType t = (ClassType)type;
-                t.setEnclosingType(Type.noType);
-                t.rank_field = -1;
-                t.typarams_field = null;
-                t.allparams_field = null;
-                t.supertype_field = null;
-                t.interfaces_field = null;
-                t.all_interfaces_field = null;
-            }
-            metadata = null;
-        }
-
     }
 
 
@@ -1573,7 +1554,7 @@ public abstract class Symbol extends AnnoConstruct implements Element {
                 if (paramNames == null || paramNames.size() != type.getParameterTypes().size()) {
                     paramNames = List.nil();
                 }
-                ListBuffer<VarSymbol> buf = new ListBuffer<>();
+                ListBuffer<VarSymbol> buf = new ListBuffer<VarSymbol>();
                 List<Name> remaining = paramNames;
                 // assert: remaining and paramNames are both empty or both
                 // have same cardinality as type.getParameterTypes()

@@ -1,6 +1,6 @@
 /*
  * @test /nodynamiccopyright/
- * @bug 8003280 8034223
+ * @bug 8003280
  * @summary Add lambda tests
  *  check case of ambiguous method call with lambda whose body cannot
             complete normally

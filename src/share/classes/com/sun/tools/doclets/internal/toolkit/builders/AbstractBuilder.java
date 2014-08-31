@@ -29,7 +29,6 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 
-import com.sun.javadoc.PackageDoc;
 import com.sun.tools.doclets.internal.toolkit.*;
 import com.sun.tools.doclets.internal.toolkit.util.*;
 
@@ -64,7 +63,7 @@ public abstract class AbstractBuilder {
          * efficiency purposes.  We don't want to copy the
          * doc files multiple times for a single package.
          */
-        final Set<PackageDoc> containingPackagesSeen;
+        final Set<String> containingPackagesSeen;
 
         /**
          * Shared parser for the builder XML file
@@ -72,7 +71,7 @@ public abstract class AbstractBuilder {
         final LayoutParser layoutParser;
 
         Context(Configuration configuration,
-                Set<PackageDoc> containingPackagesSeen,
+                Set<String> containingPackagesSeen,
                 LayoutParser layoutParser) {
             this.configuration = configuration;
             this.containingPackagesSeen = containingPackagesSeen;
@@ -90,7 +89,7 @@ public abstract class AbstractBuilder {
      * efficiency purposes.  We don't want to copy the
      * doc files multiple times for a single package.
      */
-    protected final Set<PackageDoc> containingPackagesSeen;
+    protected final Set<String> containingPackagesSeen;
 
     protected final LayoutParser layoutParser;
 

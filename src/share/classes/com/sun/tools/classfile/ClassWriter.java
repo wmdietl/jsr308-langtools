@@ -57,8 +57,11 @@ public class ClassWriter {
      * Write a ClassFile data structure to a file.
      */
     public void write(ClassFile classFile, File f) throws IOException {
-        try (FileOutputStream f_out = new FileOutputStream(f)) {
+        FileOutputStream f_out = new FileOutputStream(f);
+        try {
             write(classFile, f_out);
+        } finally {
+            f_out.close();
         }
     }
 

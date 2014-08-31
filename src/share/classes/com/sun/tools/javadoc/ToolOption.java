@@ -266,13 +266,13 @@ public enum ToolOption {
 
     static abstract class Helper {
         /** List of decoded options. */
-        final ListBuffer<String[]> options = new ListBuffer<>();
+        final ListBuffer<String[]> options = new ListBuffer<String[]>();
 
         /** Selected packages, from -subpackages. */
-        final ListBuffer<String> subPackages = new ListBuffer<>();
+        final ListBuffer<String> subPackages = new ListBuffer<String>();
 
         /** Excluded packages, from -exclude. */
-        final ListBuffer<String> excludedPackages = new ListBuffer<>();
+        final ListBuffer<String> excludedPackages = new ListBuffer<String>();
 
         /** javac options, set by various options. */
         Options compOpts; // = Options.instance(context)

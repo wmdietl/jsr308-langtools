@@ -22,5 +22,5 @@
  */
 
 public class JavacWarning {
-    String _ = null; // this will cause a warning.  It may be deprecated in JDK8
+    int enum;  // warning in source 1.4
 }

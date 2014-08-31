@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,30 +26,53 @@
  * @bug      4749567
  * @summary  Test the output for -header and -footer options.
  * @author   Bhavesh Patel
- * @library  ../lib
- * @build    JavadocTester
+ * @library  ../lib/
+ * @build    JavadocTester TestOptions
  * @run main TestOptions
  */
 
 public class TestOptions extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    //Test information.
+    private static final String BUG_ID = "4749567";
+
+    //Javadoc arguments.
+    private static final String[] ARGS = new String[] {
+        "-d", BUG_ID, "-header", "Test header", "-footer", "Test footer",
+        "-sourcepath", SRC_DIR, "pkg"
+    };
+
+    private static final String[][] TEST = {
+        {BUG_ID + FS + "pkg" + FS + "package-summary.html",
+            "<div class=\"aboutLanguage\">Test header</div>"},
+        {BUG_ID + FS + "pkg" + FS + "package-summary.html",
+            "<div class=\"aboutLanguage\">Test footer</div>"}
+    };
+
+    private static final String[][] NEGATED_TEST = NO_TEST;
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestOptions tester = new TestOptions();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-header", "Test header",
-                "-footer", "Test footer",
-                "-sourcepath", testSrc,
-                "pkg");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("pkg/package-summary.html", true,
-                "<div class=\"aboutLanguage\">Test header</div>",
-                "<div class=\"aboutLanguage\">Test footer</div>");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }
 

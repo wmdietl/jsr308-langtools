@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2005, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2005, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -60,11 +60,11 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  */
 public class JavacElements implements Elements {
 
-    private final JavaCompiler javaCompiler;
-    private final Symtab syms;
-    private final Names names;
-    private final Types types;
-    private final Enter enter;
+    private JavaCompiler javaCompiler;
+    private Symtab syms;
+    private Names names;
+    private Types types;
+    private Enter enter;
 
     public static JavacElements instance(Context context) {
         JavacElements instance = context.get(JavacElements.class);
@@ -73,7 +73,18 @@ public class JavacElements implements Elements {
         return instance;
     }
 
+    /**
+     * Public for use only by JavacProcessingEnvironment
+     */
     protected JavacElements(Context context) {
+        setContext(context);
+    }
+
+    /**
+     * Use a new context.  May be called from outside to update
+     * internal state for a new annotation-processing round.
+     */
+    public void setContext(Context context) {
         context.put(JavacElements.class, this);
         javaCompiler = JavaCompiler.instance(context);
         syms = Symtab.instance(context);
@@ -170,8 +181,8 @@ public class JavacElements implements Elements {
         Symbol sym = cast(Symbol.class, e);
         class Vis extends JCTree.Visitor {
             List<JCAnnotation> result = null;
-            public void visitPackageDef(JCPackageDecl tree) {
-                result = tree.annotations;
+            public void visitTopLevel(JCCompilationUnit tree) {
+                result = tree.packageAnnotations;
             }
             public void visitClassDef(JCClassDecl tree) {
                 result = tree.mods.annotations;
@@ -182,17 +193,13 @@ public class JavacElements implements Elements {
             public void visitVarDef(JCVariableDecl tree) {
                 result = tree.mods.annotations;
             }
-            @Override
-            public void visitTypeParameter(JCTypeParameter tree) {
-                result = tree.annotations;
-            }
         }
         Vis vis = new Vis();
         tree.accept(vis);
         if (vis.result == null)
             return null;
 
-        List<Attribute.Compound> annos = sym.getAnnotationMirrors();
+        List<Attribute.Compound> annos = sym.getRawAttributes();
         return matchAnnoToTree(cast(Attribute.Compound.class, findme),
                                annos,
                                vis.result);
@@ -540,7 +547,7 @@ public class JavacElements implements Elements {
         JCTree tree = TreeInfo.declarationFor(sym, enterEnv.tree);
         if (tree == null || enterEnv.toplevel == null)
             return null;
-        return new Pair<>(tree, enterEnv.toplevel);
+        return new Pair<JCTree,JCCompilationUnit>(tree, enterEnv.toplevel);
     }
 
     /**
@@ -571,7 +578,7 @@ public class JavacElements implements Elements {
         // 6388543: if v != null, we should search within annoTree to find
         // the tree matching v. For now, we ignore v and return the tree of
         // the annotation.
-        return new Pair<>(annoTree, elemTreeTop.snd);
+        return new Pair<JCTree, JCCompilationUnit>(annoTree, elemTreeTop.snd);
     }
 
     /**

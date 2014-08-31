@@ -25,7 +25,7 @@ import static com.sun.tools.classfile.TypeAnnotation.TargetType.*;
 
 /*
  * @test
- * @bug 8013852
+ * @bug 1234567
  * @summary Test population of reference info for instance and class initializers
  * @author Werner Dietl
  * @compile -g Driver.java ReferenceInfoUtil.java Initializers.java

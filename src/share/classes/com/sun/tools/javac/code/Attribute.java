@@ -64,7 +64,7 @@ public abstract class Attribute implements AnnotationValue {
         return false;
     }
 
-    public TypeAnnotationPosition getPosition() { return null; }
+    public TypeAnnotationPosition getPosition() { return null; };
 
     /** The value for an annotation element of primitive type or String. */
     public static class Constant extends Attribute {
@@ -118,8 +118,7 @@ public abstract class Attribute implements AnnotationValue {
                 : types.erasure(type);
             return new Type.ClassType(types.syms.classType.getEnclosingType(),
                                       List.of(arg),
-                                      types.syms.classType.tsym,
-                                      Type.noAnnotations);
+                                      types.syms.classType.tsym);
         }
         public String toString() {
             return classType + ".class";
@@ -142,7 +141,6 @@ public abstract class Attribute implements AnnotationValue {
          *  access this attribute.
          */
         public final List<Pair<MethodSymbol,Attribute>> values;
-        public TypeAnnotationPosition position;
 
         private boolean synthesized = false;
 
@@ -156,67 +154,10 @@ public abstract class Attribute implements AnnotationValue {
         }
 
         public Compound(Type type,
-                        List<Pair<MethodSymbol,Attribute>> values,
-                        TypeAnnotationPosition position) {
+                        List<Pair<MethodSymbol,Attribute>> values) {
             super(type);
             this.values = values;
-            this.position = position;
         }
-
-        public Compound(Type type,
-                        List<Pair<MethodSymbol,Attribute>> values) {
-            this(type, values, null);
-        }
-
-        @Override
-        public TypeAnnotationPosition getPosition() {
-            if (hasUnknownPosition()) {
-                if (values.size() != 0) {
-                    Name valueName = values.head.fst.name.table.names.value;
-                    Pair<MethodSymbol, Attribute> res = getElemPair(valueName);
-                    position = res == null ? null : res.snd.getPosition();
-                }
-            }
-            return position;
-        }
-
-        public boolean isContainerTypeCompound() {
-            if (isSynthesized() && values.size() == 1)
-                return getFirstEmbeddedTC() != null;
-            return false;
-        }
-
-        private Compound getFirstEmbeddedTC() {
-            if (values.size() == 1) {
-                Pair<MethodSymbol, Attribute> val = values.get(0);
-                if (val.fst.getSimpleName().contentEquals("value")
-                        && val.snd instanceof Array) {
-                    Array arr = (Array) val.snd;
-                    if (arr.values.length != 0
-                            && arr.values[0] instanceof Attribute.TypeCompound)
-                        return (Attribute.TypeCompound) arr.values[0];
-                }
-            }
-            return null;
-        }
-
-        public boolean tryFixPosition() {
-            if (!isContainerTypeCompound())
-                return false;
-
-            Compound from = getFirstEmbeddedTC();
-            if (from != null && from.position != null &&
-                    from.position.type != TargetType.UNKNOWN) {
-                position = from.position;
-                return true;
-            }
-            return false;
-        }
-
-        public boolean hasUnknownPosition() {
-            return position.type == TargetType.UNKNOWN;
-        }
-
         public void accept(Visitor v) { v.visitCompound(this); }
 
         /**
@@ -274,8 +215,19 @@ public abstract class Attribute implements AnnotationValue {
             return (DeclaredType) type;
         }
 
+        @Override
+        public TypeAnnotationPosition getPosition() {
+            if (values.size() != 0) {
+                Name valueName = values.head.fst.name.table.names.value;
+                Pair<MethodSymbol, Attribute> res = getElemPair(valueName);
+                    return res == null ? null : res.snd.getPosition();
+            }
+            return null;
+        }
+
         public Map<MethodSymbol, Attribute> getElementValues() {
-            Map<MethodSymbol, Attribute> valmap = new LinkedHashMap<>();
+            Map<MethodSymbol, Attribute> valmap =
+                new LinkedHashMap<MethodSymbol, Attribute>();
             for (Pair<MethodSymbol, Attribute> value : values)
                 valmap.put(value.fst, value.snd);
             return valmap;
@@ -283,15 +235,62 @@ public abstract class Attribute implements AnnotationValue {
     }
 
     public static class TypeCompound extends Compound {
+        public TypeAnnotationPosition position;
+
         public TypeCompound(Compound compound,
-                             TypeAnnotationPosition position) {
-            super(compound.type, compound.values, position);
+                TypeAnnotationPosition position) {
+            this(compound.type, compound.values, position);
+        }
+        public TypeCompound(Type type,
+                List<Pair<MethodSymbol, Attribute>> values,
+                TypeAnnotationPosition position) {
+            super(type, values);
+            this.position = position;
         }
 
-        public TypeCompound(Type type,
-                             List<Pair<MethodSymbol,Attribute>> values,
-                             TypeAnnotationPosition position) {
-            super(type, values, position);
+        @Override
+        public TypeAnnotationPosition getPosition() {
+            if (hasUnknownPosition()) {
+                position = super.getPosition();
+            }
+            return position;
+        }
+
+        public boolean hasUnknownPosition() {
+            return position.type == TargetType.UNKNOWN;
+        }
+
+        public boolean isContainerTypeCompound() {
+            if (isSynthesized() && values.size() == 1)
+                return getFirstEmbeddedTC() != null;
+            return false;
+        }
+
+        private TypeCompound getFirstEmbeddedTC() {
+            if (values.size() == 1) {
+                Pair<MethodSymbol, Attribute> val = values.get(0);
+                if (val.fst.getSimpleName().contentEquals("value")
+                        && val.snd instanceof Array) {
+                    Array arr = (Array) val.snd;
+                    if (arr.values.length != 0
+                            && arr.values[0] instanceof Attribute.TypeCompound)
+                        return (Attribute.TypeCompound) arr.values[0];
+                }
+            }
+            return null;
+        }
+
+        public boolean tryFixPosition() {
+            if (!isContainerTypeCompound())
+                return false;
+
+            TypeCompound from = getFirstEmbeddedTC();
+            if (from != null && from.position != null &&
+                    from.position.type != TargetType.UNKNOWN) {
+                position = from.position;
+                return true;
+            }
+            return false;
         }
     }
 

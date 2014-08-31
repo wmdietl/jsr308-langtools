@@ -47,7 +47,8 @@ import static com.sun.tools.javac.code.TypeTag.*;
 public class TreeMaker implements JCTree.Factory {
 
     /** The context key for the tree factory. */
-    protected static final Context.Key<TreeMaker> treeMakerKey = new Context.Key<>();
+    protected static final Context.Key<TreeMaker> treeMakerKey =
+        new Context.Key<TreeMaker>();
 
     /** Get the TreeMaker instance. */
     public static TreeMaker instance(Context context) {
@@ -116,28 +117,22 @@ public class TreeMaker implements JCTree.Factory {
 
     /**
      * Create given tree node at current position.
-     * @param defs a list of PackageDef, ClassDef, Import, and Skip
+     * @param defs a list of ClassDef, Import, and Skip
      */
-    public JCCompilationUnit TopLevel(List<JCTree> defs) {
+    public JCCompilationUnit TopLevel(List<JCAnnotation> packageAnnotations,
+                                      JCExpression pid,
+                                      List<JCTree> defs) {
+        Assert.checkNonNull(packageAnnotations);
         for (JCTree node : defs)
             Assert.check(node instanceof JCClassDecl
-                || node instanceof JCPackageDecl
                 || node instanceof JCImport
                 || node instanceof JCSkip
                 || node instanceof JCErroneous
                 || (node instanceof JCExpressionStatement
                     && ((JCExpressionStatement)node).expr instanceof JCErroneous),
                 node.getClass().getSimpleName());
-        JCCompilationUnit tree = new JCCompilationUnit(defs);
-        tree.pos = pos;
-        return tree;
-    }
-
-    public JCPackageDecl PackageDecl(List<JCAnnotation> annotations,
-                                     JCExpression pid) {
-        Assert.checkNonNull(annotations);
-        Assert.checkNonNull(pid);
-        JCPackageDecl tree = new JCPackageDecl(annotations, pid);
+        JCCompilationUnit tree = new JCCompilationUnit(packageAnnotations, pid, defs,
+                                     null, null, null, null);
         tree.pos = pos;
         return tree;
     }
@@ -614,7 +609,7 @@ public class TreeMaker implements JCTree.Factory {
      *  in given list of variable declarations.
      */
     public List<JCExpression> Idents(List<JCVariableDecl> params) {
-        ListBuffer<JCExpression> ids = new ListBuffer<>();
+        ListBuffer<JCExpression> ids = new ListBuffer<JCExpression>();
         for (List<JCVariableDecl> l = params; l.nonEmpty(); l = l.tail)
             ids.append(Ident(l.head));
         return ids.toList();
@@ -715,7 +710,7 @@ public class TreeMaker implements JCTree.Factory {
     /** Create a list of trees representing given list of types.
      */
     public List<JCExpression> Types(List<Type> ts) {
-        ListBuffer<JCExpression> lb = new ListBuffer<>();
+        ListBuffer<JCExpression> lb = new ListBuffer<JCExpression>();
         for (List<Type> l = ts; l.nonEmpty(); l = l.tail)
             lb.append(Type(l.head));
         return lb.toList();
@@ -738,7 +733,7 @@ public class TreeMaker implements JCTree.Factory {
      */
     public List<JCAnnotation> Annotations(List<Attribute.Compound> attributes) {
         if (attributes == null) return List.nil();
-        ListBuffer<JCAnnotation> result = new ListBuffer<>();
+        ListBuffer<JCAnnotation> result = new ListBuffer<JCAnnotation>();
         for (List<Attribute.Compound> i = attributes; i.nonEmpty(); i=i.tail) {
             Attribute a = i.head;
             result.append(Annotation(a));
@@ -762,7 +757,7 @@ public class TreeMaker implements JCTree.Factory {
                 setType(syms.byteType.constType(value));
         } else if (value instanceof Character) {
             int v = (int) (((Character) value).toString().charAt(0));
-            result = Literal(CHAR, v).
+            result = Literal(CHAR, value).
                 setType(syms.charType.constType(v));
         } else if (value instanceof Double) {
             result = Literal(DOUBLE, value).
@@ -805,7 +800,7 @@ public class TreeMaker implements JCTree.Factory {
             }
         }
         public JCAnnotation visitCompoundInternal(Attribute.Compound compound) {
-            ListBuffer<JCExpression> args = new ListBuffer<>();
+            ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
             for (List<Pair<Symbol.MethodSymbol,Attribute>> values = compound.values; values.nonEmpty(); values=values.tail) {
                 Pair<MethodSymbol,Attribute> pair = values.head;
                 JCExpression valueTree = translate(pair.snd);
@@ -814,7 +809,7 @@ public class TreeMaker implements JCTree.Factory {
             return Annotation(Type(compound.type), args.toList());
         }
         public JCAnnotation visitTypeCompoundInternal(Attribute.TypeCompound compound) {
-            ListBuffer<JCExpression> args = new ListBuffer<>();
+            ListBuffer<JCExpression> args = new ListBuffer<JCExpression>();
             for (List<Pair<Symbol.MethodSymbol,Attribute>> values = compound.values; values.nonEmpty(); values=values.tail) {
                 Pair<MethodSymbol,Attribute> pair = values.head;
                 JCExpression valueTree = translate(pair.snd);
@@ -823,7 +818,7 @@ public class TreeMaker implements JCTree.Factory {
             return TypeAnnotation(Type(compound.type), args.toList());
         }
         public void visitArray(Attribute.Array array) {
-            ListBuffer<JCExpression> elems = new ListBuffer<>();
+            ListBuffer<JCExpression> elems = new ListBuffer<JCExpression>();
             for (int i = 0; i < array.values.length; i++)
                 elems.append(translate(array.values[i]));
             result = NewArray(null, List.<JCExpression>nil(), elems.toList()).setType(array.type);
@@ -886,7 +881,7 @@ public class TreeMaker implements JCTree.Factory {
     /** Create a list of type parameter trees from a list of type variables.
      */
     public List<JCTypeParameter> TypeParams(List<Type> typarams) {
-        ListBuffer<JCTypeParameter> tparams = new ListBuffer<>();
+        ListBuffer<JCTypeParameter> tparams = new ListBuffer<JCTypeParameter>();
         for (List<Type> l = typarams; l.nonEmpty(); l = l.tail)
             tparams.append(TypeParam(l.head.tsym.name, (TypeVar)l.head));
         return tparams.toList();
@@ -902,7 +897,7 @@ public class TreeMaker implements JCTree.Factory {
      *  their types and an their owner.
      */
     public List<JCVariableDecl> Params(List<Type> argtypes, Symbol owner) {
-        ListBuffer<JCVariableDecl> params = new ListBuffer<>();
+        ListBuffer<JCVariableDecl> params = new ListBuffer<JCVariableDecl>();
         MethodSymbol mth = (owner.kind == MTH) ? ((MethodSymbol)owner) : null;
         if (mth != null && mth.params != null && argtypes.length() == mth.params.length()) {
             for (VarSymbol param : ((MethodSymbol)owner).params)

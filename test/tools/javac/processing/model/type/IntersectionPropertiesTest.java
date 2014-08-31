@@ -23,7 +23,7 @@
 
 /*
  * @test
- * @bug 6499673 6557966
+ * @bug 6499673
  * @library /tools/javac/lib
  * @build JavacTestingAbstractProcessor IntersectionPropertiesTest
  * @run main IntersectionPropertiesTest

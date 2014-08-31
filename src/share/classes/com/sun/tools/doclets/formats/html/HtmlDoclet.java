@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1997, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1997, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -215,22 +215,22 @@ public class HtmlDoclet extends AbstractDoclet {
                 if (!configuration.shouldDocumentProfile(profileName))
                     continue;
                 ProfilePackageIndexFrameWriter.generate(configuration, profileName);
-                List<PackageDoc> packages = configuration.profilePackages.get(
+                PackageDoc[] packages = configuration.profilePackages.get(
                         profileName);
                 PackageDoc prev = null, next;
-                for (int j = 0; j < packages.size(); j++) {
+                for (int j = 0; j < packages.length; j++) {
                     // if -nodeprecated option is set and the package is marked as
                     // deprecated, do not generate the profilename-package-summary.html
                     // and profilename-package-frame.html pages for that package.
-                    PackageDoc pkg = packages.get(j);
-                    if (!(configuration.nodeprecated && Util.isDeprecated(pkg))) {
-                        ProfilePackageFrameWriter.generate(configuration, pkg, i);
-                        next = getNamedPackage(packages, j + 1);
+                    if (!(configuration.nodeprecated && Util.isDeprecated(packages[j]))) {
+                        ProfilePackageFrameWriter.generate(configuration, packages[j], i);
+                        next = (j + 1 < packages.length
+                                && packages[j + 1].name().length() > 0) ? packages[j + 1] : null;
                         AbstractBuilder profilePackageSummaryBuilder =
                                 configuration.getBuilderFactory().getProfilePackageSummaryBuilder(
-                                pkg, prev, next, Profile.lookup(i));
+                                packages[j], prev, next, Profile.lookup(i));
                         profilePackageSummaryBuilder.build();
-                        prev = pkg;
+                        prev = packages[j];
                     }
                 }
                 nextProfile = (i + 1 < configuration.profiles.getProfileCount()) ?
@@ -244,47 +244,35 @@ public class HtmlDoclet extends AbstractDoclet {
         }
     }
 
-    PackageDoc getNamedPackage(List<PackageDoc> list, int idx) {
-        if (idx < list.size()) {
-            PackageDoc pkg = list.get(idx);
-            if (!pkg.name().isEmpty()) {
-                return pkg;
-            }
-        }
-        return null;
-    }
-
     /**
      * {@inheritDoc}
      */
     protected void generatePackageFiles(ClassTree classtree) throws Exception {
-        Set<PackageDoc> packages = configuration.packages;
-        if (packages.size() > 1) {
+        PackageDoc[] packages = configuration.packages;
+        if (packages.length > 1) {
             PackageIndexFrameWriter.generate(configuration);
         }
-        List<PackageDoc> pList = new ArrayList<>(configuration.packages);
         PackageDoc prev = null, next;
-        for (int i = 0; i < pList.size(); i++) {
+        for (int i = 0; i < packages.length; i++) {
             // if -nodeprecated option is set and the package is marked as
             // deprecated, do not generate the package-summary.html, package-frame.html
             // and package-tree.html pages for that package.
-            PackageDoc pkg = pList.get(i);
-            if (!(configuration.nodeprecated && Util.isDeprecated(pkg))) {
-                PackageFrameWriter.generate(configuration, pkg);
-                next = getNamedPackage(pList, i + 1);
+            if (!(configuration.nodeprecated && Util.isDeprecated(packages[i]))) {
+                PackageFrameWriter.generate(configuration, packages[i]);
+                next = (i + 1 < packages.length &&
+                        packages[i + 1].name().length() > 0) ? packages[i + 1] : null;
                 //If the next package is unnamed package, skip 2 ahead if possible
-                if (next == null)
-                    next = getNamedPackage(pList, i + 2);
+                next = (i + 2 < packages.length && next == null) ? packages[i + 2] : next;
                 AbstractBuilder packageSummaryBuilder =
                         configuration.getBuilderFactory().getPackageSummaryBuilder(
-                        pkg, prev, next);
+                        packages[i], prev, next);
                 packageSummaryBuilder.build();
                 if (configuration.createtree) {
                     PackageTreeWriter.generate(configuration,
-                            pkg, prev, next,
+                            packages[i], prev, next,
                             configuration.nodeprecated);
                 }
-                prev = pkg;
+                prev = packages[i];
             }
         }
     }

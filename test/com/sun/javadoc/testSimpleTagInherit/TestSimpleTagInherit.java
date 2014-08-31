@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,40 +25,56 @@
  * @test
  * @bug      8008768 8026567
  * @summary  Using {@inheritDoc} in simple tag defined via -tag fails
- * @library  ../lib
- * @build    JavadocTester
+ * @library  ../lib/
+ * @build    JavadocTester TestSimpleTagInherit
  * @run main TestSimpleTagInherit
  */
 
 public class TestSimpleTagInherit extends JavadocTester {
 
+    //Test information.
+    private static final String BUG_ID = "8008768";
+    private static final String OUTPUT_DIR = BUG_ID;
+
     //Javadoc arguments.
     private static final String[] ARGS = new String[] {
-
+        "-d", OUTPUT_DIR, "-sourcepath", SRC_DIR,
+        "-tag", "custom:optcm:<em>Custom:</em>",
+        "p"
     };
 
     //Input for string search tests.
     private static final String[][] TEST = {
-        {  }
+        { BUG_ID + FS + "p" + FS + "TestClass.html",
+          "<dt><span class=\"simpleTagLabel\"><em>Custom:</em></span></dt>" + NL +
+          "<dd>doc for BaseClass class</dd>" },
+        { BUG_ID + FS + "p" + FS + "TestClass.html",
+          "<dt><span class=\"simpleTagLabel\"><em>Custom:</em></span></dt>" + NL +
+          "<dd>doc for BaseClass method</dd>" }
     };
+    private static final String[][] NEGATED_TEST = NO_TEST;
 
-    public static void main(String... args) throws Exception {
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestSimpleTagInherit tester = new TestSimpleTagInherit();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                "-tag", "custom:optcm:<em>Custom:</em>",
-                "p");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("p/TestClass.html", true,
-                "<dt><span class=\"simpleTagLabel\"><em>Custom:</em></span></dt>\n"
-                + "<dd>doc for BaseClass class</dd>",
-                "<dt><span class=\"simpleTagLabel\"><em>Custom:</em></span></dt>\n"
-                + "<dd>doc for BaseClass method</dd>");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

@@ -83,7 +83,6 @@ class SJavac {
         compileWithInvisibleSources();
         compileCircularSources();
         compileExcludingDependency();
-        incrementalCompileTestFullyQualifiedRef();
 
         delete(gensrc);
         delete(gensrc2);
@@ -96,15 +95,15 @@ class SJavac {
         System.out.println("\nInitial compile of gensrc.");
         System.out.println("----------------------------");
         populate(gensrc,
-            "alfa/omega/AINT.java",
-            "package alfa.omega; public interface AINT { void aint(); }",
+            "alfa/AINT.java",
+            "package alfa; public interface AINT { void aint(); }",
 
-            "alfa/omega/A.java",
-            "package alfa.omega; public class A implements AINT { "+
+            "alfa/A.java",
+            "package alfa; public class A implements AINT { "+
                  "public final static int DEFINITION = 17; public void aint() { } }",
 
-            "alfa/omega/AA.java",
-            "package alfa.omega;"+
+            "alfa/AA.java",
+            "package alfa;"+
             "// A package private class, not contributing to the public api.\n"+
             "class AA {"+
             "   // A properly nested static inner class.\n"+
@@ -128,7 +127,7 @@ class SJavac {
             "package beta;public interface BINT { void foo(); }",
 
             "beta/B.java",
-            "package beta; import alfa.omega.A; public class B {"+
+            "package beta; import alfa.A; public class B {"+
             "private int b() { return A.DEFINITION; } native void foo(); }");
 
         compile("gensrc", "-d", "bin", "-h", "headers", "-j", "1",
@@ -152,16 +151,16 @@ class SJavac {
         System.out.println("\nTesting that deleting AA.java deletes all");
         System.out.println("generated inner class as well as AA.class");
         System.out.println("-----------------------------------------");
-        removeFrom(gensrc, "alfa/omega/AA.java");
+        removeFrom(gensrc, "alfa/AA.java");
         compile("gensrc", "-d", "bin", "-h", "headers", "-j", "1",
                 "--server:portfile=testserver,background=false", "--log=debug");
         Map<String,Long> new_bin_state = collectState(bin);
         verifyThatFilesHaveBeenRemoved(previous_bin_state, new_bin_state,
-                                       "bin/alfa/omega/AA$1.class",
-                                       "bin/alfa/omega/AA$AAAA.class",
-                                       "bin/alfa/omega/AA$AAA.class",
-                                       "bin/alfa/omega/AAAAA.class",
-                                       "bin/alfa/omega/AA.class");
+                                       "bin/alfa/AA$1.class",
+                                       "bin/alfa/AA$AAAA.class",
+                                       "bin/alfa/AA$AAA.class",
+                                       "bin/alfa/AAAAA.class",
+                                       "bin/alfa/AA.class");
 
         previous_bin_state = new_bin_state;
         Map<String,Long> new_headers_state = collectState(headers);
@@ -176,8 +175,8 @@ class SJavac {
         System.out.println("Since we did not modify the native api of B.");
         System.out.println("-------------------------------------------------------------");
 
-        populate(gensrc,"alfa/omega/A.java",
-                       "package alfa.omega; public class A implements AINT { "+
+        populate(gensrc,"alfa/A.java",
+                       "package alfa; public class A implements AINT { "+
                  "public final static int DEFINITION = 18; public void aint() { } private void foo() { } }");
 
         compile("gensrc", "-d", "bin", "-h", "headers", "-j", "1",
@@ -185,8 +184,8 @@ class SJavac {
         Map<String,Long> new_bin_state = collectState(bin);
 
         verifyNewerFiles(previous_bin_state, new_bin_state,
-                         "bin/alfa/omega/A.class",
-                         "bin/alfa/omega/AINT.class",
+                         "bin/alfa/A.class",
+                         "bin/alfa/AINT.class",
                          "bin/beta/B.class",
                          "bin/beta/BINT.class",
                          "bin/javac_state");
@@ -203,7 +202,7 @@ class SJavac {
         System.out.println("---------------------------------------------------------");
 
         populate(gensrc,"beta/B.java",
-                       "package beta; import alfa.omega.A; public class B {"+
+                       "package beta; import alfa.A; public class B {"+
                        "private int b() { return A.DEFINITION; } }");
 
         compile("gensrc", "-d", "bin", "-h", "headers", "-j", "1",
@@ -227,7 +226,7 @@ class SJavac {
         System.out.println("------------------------------------------------------------------------");
 
         populate(gensrc,"beta/B.java",
-                       "package beta; import alfa.omega.A; public class B {"+
+                       "package beta; import alfa.A; public class B {"+
                        "private int b() { return A.DEFINITION; } "+
                  "@java.lang.annotation.Native final static int alfa = 42; }");
 
@@ -253,7 +252,7 @@ class SJavac {
         System.out.println("-------------------------------------------------------------------");
 
         populate(gensrc,"beta/B.java",
-                       "package beta; import alfa.omega.A; public class B {"+
+                       "package beta; import alfa.A; public class B {"+
                        "private int b() { return A.DEFINITION; } "+
                  "@java.lang.annotation.Native final static int alfa = 43; }");
 
@@ -283,8 +282,8 @@ class SJavac {
         delete(bin);
         previous_bin_state = collectState(bin);
 
-        populate(gensrc,"alfa/omega/A.java",
-                 "package alfa.omega; import beta.B; import gamma.C; public class A { B b; C c; }",
+        populate(gensrc,"alfa/A.java",
+                 "package alfa; import beta.B; import gamma.C; public class A { B b; C c; }",
                  "beta/B.java",
                  "package beta; public class B { broken",
                  "gamma/C.java",
@@ -298,7 +297,7 @@ class SJavac {
                 "--server:portfile=testserver,background=false");
         Map<String,Long> new_bin_state = collectState(bin);
         verifyThatFilesHaveBeenAdded(previous_bin_state, new_bin_state,
-                                     "bin/alfa/omega/A.class",
+                                     "bin/alfa/A.class",
                                      "bin/beta/B.class",
                                      "bin/gamma/C.class",
                                      "bin/javac_state");
@@ -326,8 +325,8 @@ class SJavac {
         delete(bin);
         previous_bin_state = collectState(bin);
 
-        populate(gensrc,"alfa/omega/A.java",
-                 "package alfa.omega; import beta.B; import gamma.C; public class A { B b; C c; }");
+        populate(gensrc,"alfa/A.java",
+                 "package alfa; import beta.B; import gamma.C; public class A { B b; C c; }");
         populate(gensrc2,"beta/B.java",
                  "package beta; public class B { broken",
                  "gamma/C.java",
@@ -342,7 +341,7 @@ class SJavac {
         System.out.println("The first compile went well!");
         Map<String,Long> new_bin_state = collectState(bin);
         verifyThatFilesHaveBeenAdded(previous_bin_state, new_bin_state,
-                                     "bin/alfa/omega/A.class",
+                                     "bin/alfa/A.class",
                                      "bin/javac_state");
 
         System.out.println("----- Compile with exluded beta went well!");
@@ -366,18 +365,18 @@ class SJavac {
         delete(bin);
         previous_bin_state = collectState(bin);
 
-        populate(gensrc,"alfa/omega/A.java",
-                 "package alfa.omega; public class A { beta.B b; }",
+        populate(gensrc,"alfa/A.java",
+                 "package alfa; public class A { beta.B b; }",
                  "beta/B.java",
                  "package beta; public class B { gamma.C c; }",
                  "gamma/C.java",
-                 "package gamma; public class C { alfa.omega.A a; }");
+                 "package gamma; public class C { alfa.A a; }");
 
         compile("gensrc", "-d", "bin", "-h", "headers", "-j", "3",
                 "--server:portfile=testserver,background=false","--log=debug");
         Map<String,Long> new_bin_state = collectState(bin);
         verifyThatFilesHaveBeenAdded(previous_bin_state, new_bin_state,
-                                     "bin/alfa/omega/A.class",
+                                     "bin/alfa/A.class",
                                      "bin/beta/B.class",
                                      "bin/gamma/C.class",
                                      "bin/javac_state");
@@ -397,55 +396,18 @@ class SJavac {
         previous_bin_state = collectState(bin);
 
         populate(gensrc,
-                 "alfa/omega/A.java",
-                 "package alfa.omega; public class A { beta.B b; }",
+                 "alfa/A.java",
+                 "package alfa; public class A { beta.B b; }",
                  "beta/B.java",
                  "package beta; public class B { }");
 
-        compile("-x", "beta", "-src", "gensrc", "-x", "alfa/omega", "-sourcepath", "gensrc",
+        compile("-x", "beta", "-src", "gensrc", "-x", "alfa", "-sourcepath", "gensrc",
                 "-d", "bin", "--server:portfile=testserver,background=false");
 
         Map<String,Long> new_bin_state = collectState(bin);
         verifyThatFilesHaveBeenAdded(previous_bin_state, new_bin_state,
-                                     "bin/alfa/omega/A.class",
+                                     "bin/alfa/A.class",
                                      "bin/javac_state");
-    }
-
-    void incrementalCompileTestFullyQualifiedRef() throws Exception {
-        System.out.println("Verify that \"alfa.omega.A a;\" does create a proper dependency.");
-        System.out.println("----------------------------------------------------------------");
-
-        populate(gensrc,
-                 "alfa/omega/A.java",
-                 "package alfa.omega; public class A { "+
-                 "  public final static int DEFINITION = 18; "+
-                 "  public void hello() { }"+
-                 "}",
-                 "beta/B.java",
-                 "package beta; public class B { "+
-                 "  public void world() { alfa.omega.A a; }"+
-                 "}");
-
-        compile("gensrc", "-d", "bin", "-j", "1",
-                "--server:portfile=testserver,background=false", "--log=debug");
-        Map<String,Long> previous_bin_state = collectState(bin);
-
-        // Change pubapi of A, this should trigger a recompile of B.
-        populate(gensrc,
-                 "alfa/omega/A.java",
-                 "package alfa.omega; public class A { "+
-                 "  public final static int DEFINITION = 19; "+
-                 "  public void hello() { }"+
-                 "}");
-
-        compile("gensrc", "-d", "bin", "-j", "1",
-                "--server:portfile=testserver,background=false", "--log=debug");
-        Map<String,Long> new_bin_state = collectState(bin);
-
-        verifyNewerFiles(previous_bin_state, new_bin_state,
-                         "bin/alfa/omega/A.class",
-                         "bin/beta/B.class",
-                         "bin/javac_state");
     }
 
     void removeFrom(Path dir, String... args) throws IOException {

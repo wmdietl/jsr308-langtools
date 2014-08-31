@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2002, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -29,27 +29,45 @@
  * Correct Answer: "The class is empty (i.e. it has no members)."
  * Wrong Answer: "The class is empty (i.e."
  * @author jamieh
- * @library ../lib
+ * @library ../lib/
  * @build JavadocTester
+ * @build TestBreakIterator
  * @run main TestBreakIterator
  */
 
 public class TestBreakIterator extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    private static final String BUG_ID = "4165985";
+    private static final String[][] TEST = {
+        {BUG_ID + FS + "pkg" + FS + "BreakIteratorTest.html",
+            "The class is empty (i.e. it has no members)."}};
+    private static final String[][] NEGATED_TEST = NO_TEST;
+    private static final String[] ARGS =
+        new String[] {
+            "-d", BUG_ID, "-sourcepath", SRC_DIR,
+            "-breakiterator", "pkg"};
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestBreakIterator tester = new TestBreakIterator();
-        tester.runTests();
+        run(tester, ARGS, TEST, NEGATED_TEST);
+        tester.printSummary();
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                "-breakiterator",
-                "pkg");
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        checkOutput("pkg/BreakIteratorTest.html", true,
-            "The class is empty (i.e. it has no members).");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

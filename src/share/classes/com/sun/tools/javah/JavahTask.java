@@ -262,7 +262,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
             throw new IllegalArgumentException(e.getMessage());
         }
 
-        this.classes = new ArrayList<>();
+        this.classes = new ArrayList<String>();
         if (classes != null) {
             for (String classname: classes) {
                 classname.getClass(); // null-check
@@ -367,7 +367,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
                 handleOption(arg, iter);
             else if (allowClasses) {
                 if (classes == null)
-                    classes = new ArrayList<>();
+                    classes = new ArrayList<String>();
                 classes.add(arg);
                 while (iter.hasNext())
                     classes.add(iter.next());
@@ -414,7 +414,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
 
     private Iterable<String> expandAtArgs(Iterable<String> args) throws BadArgs {
         try {
-            List<String> l = new ArrayList<>();
+            List<String> l = new ArrayList<String>();
             for (String arg: args) l.add(arg);
             return Arrays.asList(CommandLine.parse(l.toArray(new String[l.size()])));
         } catch (FileNotFoundException e) {
@@ -497,7 +497,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
             ((JavahFileManager) fileManager).setSymbolFileEnabled(false);
 
         JavaCompiler c = ToolProvider.getSystemJavaCompiler();
-        List<String> opts = new ArrayList<>();
+        List<String> opts = new ArrayList<String>();
         opts.add("-proc:only");
         opts.addAll(javac_extras);
         CompilationTask t = c.getTask(log, fileManager, diagnosticListener, opts, classes, null);
@@ -511,7 +511,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
     }
 
     private List<File> pathToFiles(String path) {
-        List<File> files = new ArrayList<>();
+        List<File> files = new ArrayList<File>();
         for (String f: path.split(File.pathSeparator)) {
             if (f.length() > 0)
                 files.add(new File(f));
@@ -618,7 +618,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
             // could make this a HashMap<Locale,SoftReference<ResourceBundle>>
             // and for efficiency, keep a hard reference to the bundle for the task
             // locale
-            bundles = new HashMap<>();
+            bundles = new HashMap<Locale, ResourceBundle>();
         }
 
         if (locale == null)
@@ -657,7 +657,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
     boolean llni;
     boolean doubleAlign;
     boolean force;
-    Set<String> javac_extras = new LinkedHashSet<>();
+    Set<String> javac_extras = new LinkedHashSet<String>();
 
     PrintWriter log;
     JavaFileManager fileManager;
@@ -711,7 +711,7 @@ public class JavahTask implements NativeHeaderTool.NativeHeaderTask {
         }
 
         private Set<TypeElement> getAllClasses(Set<? extends TypeElement> classes) {
-            Set<TypeElement> allClasses = new LinkedHashSet<>();
+            Set<TypeElement> allClasses = new LinkedHashSet<TypeElement>();
             getAllClasses0(classes, allClasses);
             return allClasses;
         }

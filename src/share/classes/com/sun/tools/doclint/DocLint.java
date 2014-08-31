@@ -42,7 +42,6 @@ import javax.tools.StandardLocation;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.tree.ClassTree;
 import com.sun.source.tree.CompilationUnitTree;
-import com.sun.source.tree.PackageTree;
 import com.sun.source.tree.MethodTree;
 import com.sun.source.tree.Tree;
 import com.sun.source.tree.VariableTree;
@@ -258,7 +257,8 @@ public class DocLint implements Plugin {
 
     public void init(JavacTask task, String[] args, boolean addTaskListener) {
         env = new Env();
-        for (String arg : args) {
+        for (int i = 0; i < args.length; i++) {
+            String arg = args[i];
             if (arg.equals(XMSGS_OPTION)) {
                 env.messages.setOptions(null);
             } else if (arg.startsWith(XMSGS_CUSTOM_PREFIX)) {
@@ -307,7 +307,7 @@ public class DocLint implements Plugin {
                     }
                 }
 
-                Queue<CompilationUnitTree> todo = new LinkedList<>();
+                Queue<CompilationUnitTree> todo = new LinkedList<CompilationUnitTree>();
             };
 
             task.addTaskListener(tl);
@@ -347,10 +347,13 @@ public class DocLint implements Plugin {
         abstract void visitDecl(Tree tree, Name name);
 
         @Override
-        public Void visitPackage(PackageTree tree, Void ignore) {
-            visitDecl(tree, null);
-            return super.visitPackage(tree, ignore);
+        public Void visitCompilationUnit(CompilationUnitTree tree, Void ignore) {
+            if (tree.getPackageName() != null) {
+                visitDecl(tree, null);
+            }
+            return super.visitCompilationUnit(tree, ignore);
         }
+
         @Override
         public Void visitClass(ClassTree tree, Void ignore) {
             visitDecl(tree, tree.getSimpleName());

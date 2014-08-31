@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -25,8 +25,7 @@
 
 package com.sun.tools.doclets.formats.html;
 
-import java.io.IOException;
-import java.util.Collection;
+import java.io.*;
 
 import com.sun.javadoc.*;
 import com.sun.tools.doclets.formats.html.markup.*;
@@ -79,19 +78,19 @@ public class PackageIndexFrameWriter extends AbstractPackageIndexWriter {
     /**
      * {@inheritDoc}
      */
-    protected void addPackagesList(Collection<PackageDoc> packages, String text,
+    protected void addPackagesList(PackageDoc[] packages, String text,
             String tableSummary, Content body) {
         Content heading = HtmlTree.HEADING(HtmlConstants.PACKAGE_HEADING, true,
                 packagesLabel);
         Content div = HtmlTree.DIV(HtmlStyle.indexContainer, heading);
         HtmlTree ul = new HtmlTree(HtmlTag.UL);
         ul.setTitle(packagesLabel);
-        for (PackageDoc aPackage : packages) {
+        for(int i = 0; i < packages.length; i++) {
             // Do not list the package if -nodeprecated option is set and the
             // package is marked as deprecated.
-            if (aPackage != null &&
-                (!(configuration.nodeprecated && Util.isDeprecated(aPackage)))) {
-                ul.addContent(getPackage(aPackage));
+            if (packages[i] != null &&
+                    (!(configuration.nodeprecated && Util.isDeprecated(packages[i])))) {
+                ul.addContent(getPackage(packages[i]));
             }
         }
         div.addContent(ul);
@@ -107,7 +106,7 @@ public class PackageIndexFrameWriter extends AbstractPackageIndexWriter {
     protected Content getPackage(PackageDoc pd) {
         Content packageLinkContent;
         Content packageLabel;
-        if (!pd.name().isEmpty()) {
+        if (pd.name().length() > 0) {
             packageLabel = getPackageLabel(pd.name());
             packageLinkContent = getHyperLink(pathString(pd,
                      DocPaths.PACKAGE_FRAME), packageLabel, "",

@@ -79,7 +79,7 @@ public class HtmlTree extends Content {
      */
     public void addAttr(HtmlAttr attrName, String attrValue) {
         if (attrs.isEmpty())
-            attrs = new LinkedHashMap<>(3);
+            attrs = new LinkedHashMap<HtmlAttr,String>(3);
         attrs.put(nullCheck(attrName), escapeHtmlChars(attrValue));
     }
 
@@ -109,7 +109,7 @@ public class HtmlTree extends Content {
         }
         else if (tagContent == HtmlTree.EMPTY || tagContent.isValid()) {
             if (content.isEmpty())
-                content = new ArrayList<>();
+                content = new ArrayList<Content>();
             content.add(tagContent);
         }
     }
@@ -196,8 +196,10 @@ public class HtmlTree extends Content {
     }
 
     private static String encodeURL(String url) {
+        byte[] urlBytes = url.getBytes(Charset.forName("UTF-8"));
         StringBuilder sb = new StringBuilder();
-        for (byte c : url.getBytes(Charset.forName("UTF-8"))) {
+        for (int i = 0; i < urlBytes.length; i++) {
+            int c = urlBytes[i];
             if (NONENCODING_CHARS.get(c & 0xFF)) {
                 sb.append((char) c);
             } else {

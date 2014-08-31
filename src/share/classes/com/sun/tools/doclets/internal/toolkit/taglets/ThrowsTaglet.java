@@ -64,18 +64,19 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
             exception = input.element.containingClass().findClass(input.tagId);
         }
 
-        for (ThrowsTag tag : ((MethodDoc)input.element).throwsTags()) {
-            if (input.tagId.equals(tag.exceptionName()) ||
-                (tag.exception() != null &&
-                 (input.tagId.equals(tag.exception().qualifiedName())))) {
+        ThrowsTag[] tags = ((MethodDoc)input.element).throwsTags();
+        for (int i = 0; i < tags.length; i++) {
+            if (input.tagId.equals(tags[i].exceptionName()) ||
+                (tags[i].exception() != null &&
+                    (input.tagId.equals(tags[i].exception().qualifiedName())))) {
                 output.holder = input.element;
-                output.holderTag = tag;
+                output.holderTag = tags[i];
                 output.inlineTags = input.isFirstSentence ?
-                                    tag.firstSentenceTags() : tag.inlineTags();
-                output.tagList.add(tag);
-            } else if (exception != null && tag.exception() != null &&
-                     tag.exception().subclassOf(exception)) {
-                output.tagList.add(tag);
+                    tags[i].firstSentenceTags() : tags[i].inlineTags();
+                output.tagList.add(tags[i]);
+            } else if (exception != null && tags[i].exception() != null &&
+                    tags[i].exception().subclassOf(exception)) {
+                output.tagList.add(tags[i]);
             }
         }
     }
@@ -88,17 +89,17 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
             TagletWriter writer) {
         Content result = writer.getOutputInstance();
         //Add links to the exceptions declared but not documented.
-        for (Type declaredExceptionType : declaredExceptionTypes) {
-            if (declaredExceptionType.asClassDoc() != null &&
-                !alreadyDocumented.contains(
-                        declaredExceptionType.asClassDoc().name()) &&
-                !alreadyDocumented.contains(
-                        declaredExceptionType.asClassDoc().qualifiedName())) {
+        for (int i = 0; i < declaredExceptionTypes.length; i++) {
+            if (declaredExceptionTypes[i].asClassDoc() != null &&
+                ! alreadyDocumented.contains(
+                        declaredExceptionTypes[i].asClassDoc().name()) &&
+                ! alreadyDocumented.contains(
+                    declaredExceptionTypes[i].asClassDoc().qualifiedName())) {
                 if (alreadyDocumented.size() == 0) {
                     result.addContent(writer.getThrowsHeader());
                 }
-                result.addContent(writer.throwsTagOutput(declaredExceptionType));
-                alreadyDocumented.add(declaredExceptionType.asClassDoc().name());
+                result.addContent(writer.throwsTagOutput(declaredExceptionTypes[i]));
+                alreadyDocumented.add(declaredExceptionTypes[i].asClassDoc().name());
             }
         }
         return result;
@@ -113,15 +114,15 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
             TagletWriter writer) {
         Content result = writer.getOutputInstance();
         if (holder instanceof MethodDoc) {
-            Set<Tag> declaredExceptionTags = new LinkedHashSet<>();
-            for (Type declaredExceptionType : declaredExceptionTypes) {
+            Set<Tag> declaredExceptionTags = new LinkedHashSet<Tag>();
+            for (int j = 0; j < declaredExceptionTypes.length; j++) {
                 DocFinder.Output inheritedDoc =
-                        DocFinder.search(new DocFinder.Input((MethodDoc) holder, this,
-                                                             declaredExceptionType.typeName()));
+                    DocFinder.search(new DocFinder.Input((MethodDoc) holder, this,
+                        declaredExceptionTypes[j].typeName()));
                 if (inheritedDoc.tagList.size() == 0) {
                     inheritedDoc = DocFinder.search(new DocFinder.Input(
-                            (MethodDoc) holder, this,
-                            declaredExceptionType.qualifiedTypeName()));
+                        (MethodDoc) holder, this,
+                        declaredExceptionTypes[j].qualifiedTypeName()));
                 }
                 declaredExceptionTags.addAll(inheritedDoc.tagList);
             }
@@ -139,7 +140,7 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
         ExecutableMemberDoc execHolder = (ExecutableMemberDoc) holder;
         ThrowsTag[] tags = execHolder.throwsTags();
         Content result = writer.getOutputInstance();
-        HashSet<String> alreadyDocumented = new HashSet<>();
+        HashSet<String> alreadyDocumented = new HashSet<String>();
         if (tags.length > 0) {
             result.addContent(throwsTagsOutput(
                 execHolder.throwsTags(), writer, alreadyDocumented, true));
@@ -166,10 +167,11 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
         TagletWriter writer, Set<String> alreadyDocumented, boolean allowDups) {
         Content result = writer.getOutputInstance();
         if (throwTags.length > 0) {
-            for (ThrowsTag tt : throwTags) {
+            for (int i = 0; i < throwTags.length; ++i) {
+                ThrowsTag tt = throwTags[i];
                 ClassDoc cd = tt.exception();
                 if ((!allowDups) && (alreadyDocumented.contains(tt.exceptionName()) ||
-                                     (cd != null && alreadyDocumented.contains(cd.qualifiedName())))) {
+                    (cd != null && alreadyDocumented.contains(cd.qualifiedName())))) {
                     continue;
                 }
                 if (alreadyDocumented.size() == 0) {
@@ -177,7 +179,7 @@ public class ThrowsTaglet extends BaseExecutableMemberTaglet
                 }
                 result.addContent(writer.throwsTagOutput(tt));
                 alreadyDocumented.add(cd != null ?
-                                      cd.qualifiedName() : tt.exceptionName());
+                    cd.qualifiedName() : tt.exceptionName());
             }
         }
         return result;

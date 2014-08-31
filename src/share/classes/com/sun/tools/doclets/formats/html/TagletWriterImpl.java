@@ -197,9 +197,9 @@ public class TagletWriterImpl extends TagletWriter {
     public Content seeTagOutput(Doc holder, SeeTag[] seeTags) {
         ContentBuilder body = new ContentBuilder();
         if (seeTags.length > 0) {
-            for (SeeTag seeTag : seeTags) {
+            for (int i = 0; i < seeTags.length; ++i) {
                 appendSeparatorIfNotEmpty(body);
-                body.addContent(htmlWriter.seeTagToContent(seeTag));
+                body.addContent(htmlWriter.seeTagToContent(seeTags[i]));
             }
         }
         if (holder.isField() && ((FieldDoc)holder).constantValue() != null &&

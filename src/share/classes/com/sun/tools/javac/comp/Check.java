@@ -64,7 +64,8 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  *  deletion without notice.</b>
  */
 public class Check {
-    protected static final Context.Key<Check> checkKey = new Context.Key<>();
+    protected static final Context.Key<Check> checkKey =
+        new Context.Key<Check>();
 
     private final Names names;
     private final Log log;
@@ -192,7 +193,7 @@ public class Check {
     /** A table mapping flat names of all compiled classes in this run to their
      *  symbols; maintained from outside.
      */
-    public Map<Name,ClassSymbol> compiled = new HashMap<>();
+    public Map<Name,ClassSymbol> compiled = new HashMap<Name, ClassSymbol>();
 
     /** A handler for messages about deprecated usage.
      */
@@ -282,7 +283,7 @@ public class Check {
      */
     public Type completionError(DiagnosticPosition pos, CompletionFailure ex) {
         log.error(JCDiagnostic.DiagnosticFlag.NON_DEFERRABLE, pos, "cant.access", ex.sym, ex.getDetailValue());
-        if (ex instanceof ClassFinder.BadClassFile
+        if (ex instanceof ClassReader.BadClassFile
                 && !suppressAbortOnBadClassFile) throw new Abort();
         else return syms.errType;
     }
@@ -427,10 +428,6 @@ public class Check {
         }
     }
 
-    public void newRound() {
-        compiled.clear();
-    }
-
 /* *************************************************************************
  * Type Checking
  **************************************************************************/
@@ -534,8 +531,8 @@ public class Check {
 
     Type checkType(final DiagnosticPosition pos, final Type found, final Type req, final CheckContext checkContext) {
         final Infer.InferenceContext inferenceContext = checkContext.inferenceContext();
-        if (inferenceContext.free(req)) {
-            inferenceContext.addFreeTypeListener(List.of(req), new FreeTypeListener() {
+        if (inferenceContext.free(req) || inferenceContext.free(found)) {
+            inferenceContext.addFreeTypeListener(List.of(req, found), new FreeTypeListener() {
                 @Override
                 public void typesInferred(InferenceContext inferenceContext) {
                     checkType(pos, inferenceContext.asInstType(found), inferenceContext.asInstType(req), checkContext);
@@ -621,10 +618,10 @@ public class Check {
          if (a.isUnbound()) {
              return true;
          } else if (!a.hasTag(WILDCARD)) {
-             a = types.upperBound(a);
+             a = types.cvarUpperBound(a);
              return types.isSubtype(a, bound);
          } else if (a.isExtendsBound()) {
-             return types.isCastable(bound, types.upperBound(a), types.noWarnings);
+             return types.isCastable(bound, types.wildUpperBound(a), types.noWarnings);
          } else if (a.isSuperBound()) {
              return !types.notSoftSubtype(types.wildLowerBound(a), bound);
          }
@@ -947,7 +944,7 @@ public class Check {
             List<Type> actuals = type.allparams();
             List<Type> args = type.getTypeArguments();
             List<Type> forms = type.tsym.type.getTypeArguments();
-            ListBuffer<Type> bounds_buf = new ListBuffer<>();
+            ListBuffer<Type> bounds_buf = new ListBuffer<Type>();
 
             // For matching pairs of actual argument types `a' and
             // formal type parameters with declared bound `b' ...
@@ -1041,7 +1038,9 @@ public class Check {
 
         switch (sym.kind) {
         case VAR:
-            if (sym.owner.kind != TYP)
+            if (TreeInfo.isReceiverParam(tree))
+                mask = ReceiverParamFlags;
+            else if (sym.owner.kind != TYP)
                 mask = LocalVarFlags;
             else if ((sym.owner.flags_field & INTERFACE) != 0)
                 mask = implicit = InterfaceVarFlags;
@@ -1083,6 +1082,9 @@ public class Check {
             if (sym.isLocal()) {
                 mask = LocalClassFlags;
                 if (sym.name.isEmpty()) { // Anonymous class
+                    // Anonymous classes in static methods are themselves static;
+                    // that's why we admit STATIC here.
+                    mask |= STATIC;
                     // JLS: Anonymous classes are final.
                     implicit |= FINAL;
                 }
@@ -1176,7 +1178,7 @@ public class Check {
             boolean specialized;
             SpecialTreeVisitor() {
                 this.specialized = false;
-            }
+            };
 
             @Override
             public void visitTree(JCTree tree) { /* no-op */ }
@@ -1633,7 +1635,7 @@ public class Check {
                  protection(m.flags()) > protection(other.flags())) {
             log.error(TreeInfo.diagnosticPositionFor(m, tree), "override.weaker.access",
                       cannotOverride(m, other),
-                      (other.flags() & AccessFlags) == 0 ?
+                      other.flags() == 0 ?
                           "package" :
                           asFlagSet(other.flags() & AccessFlags));
             m.flags_field |= BAD_OVERRIDE;
@@ -1818,6 +1820,11 @@ public class Check {
                                             Type t1,
                                             Type t2,
                                             Type site) {
+        if ((site.tsym.flags() & COMPOUND) != 0) {
+            // special case for intersections: need to eliminate wildcards in supertypes
+            t1 = types.capture(t1);
+            t2 = types.capture(t2);
+        }
         return firstIncompatibility(pos, t1, t2, site) == null;
     }
 
@@ -1830,13 +1837,13 @@ public class Check {
      *  @returns symbol from t2 that conflicts with one in t1.
      */
     private Symbol firstIncompatibility(DiagnosticPosition pos, Type t1, Type t2, Type site) {
-        Map<TypeSymbol,Type> interfaces1 = new HashMap<>();
+        Map<TypeSymbol,Type> interfaces1 = new HashMap<TypeSymbol,Type>();
         closure(t1, interfaces1);
         Map<TypeSymbol,Type> interfaces2;
         if (t1 == t2)
             interfaces2 = interfaces1;
         else
-            closure(t2, interfaces1, interfaces2 = new HashMap<>());
+            closure(t2, interfaces1, interfaces2 = new HashMap<TypeSymbol,Type>());
 
         for (Type t3 : interfaces1.values()) {
             for (Type t4 : interfaces2.values()) {
@@ -1916,7 +1923,7 @@ public class Check {
     }
     //WHERE
     boolean checkCommonOverriderIn(Symbol s1, Symbol s2, Type site) {
-        Map<TypeSymbol,Type> supertypes = new HashMap<>();
+        Map<TypeSymbol,Type> supertypes = new HashMap<TypeSymbol,Type>();
         Type st1 = types.memberType(site, s1);
         Type st2 = types.memberType(site, s2);
         closure(site, supertypes);
@@ -2234,11 +2241,11 @@ public class Check {
         if  (t.hasTag(TYPEVAR) && (t.tsym.flags() & UNATTRIBUTED) != 0)
             return;
         if (seen.contains(t)) {
-            tv = (TypeVar)t;
+            tv = (TypeVar)t.unannotatedType();
             tv.bound = types.createErrorType(t);
             log.error(pos, "cyclic.inheritance", t);
         } else if (t.hasTag(TYPEVAR)) {
-            tv = (TypeVar)t;
+            tv = (TypeVar)t.unannotatedType();
             seen = seen.prepend(tv);
             for (Type b : types.getBounds(tv))
                 checkNonCyclic1(pos, b, seen);
@@ -2677,7 +2684,7 @@ public class Check {
                 checkClassBounds(pos, seensofar, it);
             }
             Type st = types.supertype(type);
-            if (st != null) checkClassBounds(pos, seensofar, st);
+            if (st != Type.noType) checkClassBounds(pos, seensofar, st);
         }
 
     /** Enter interface into into set.
@@ -2790,7 +2797,7 @@ public class Check {
     }
 
     public void validateTypeAnnotation(JCAnnotation a, boolean isTypeParameter) {
-        Assert.checkNonNull(a.type); // , "annotation tree hasn't been attributed yet: " + a);
+        Assert.checkNonNull(a.type, "annotation tree hasn't been attributed yet: " + a);
         validateAnnotationTree(a);
 
         if (a.hasTag(TYPE_ANNOTATION) &&
@@ -2896,14 +2903,14 @@ public class Check {
         if (containerTarget == null) {
             containerTargets = getDefaultTargetSet();
         } else {
-            containerTargets = new HashSet<>();
-            for (Attribute app : containerTarget.values) {
-                if (!(app instanceof Attribute.Enum)) {
-                    continue; // recovery
-                }
-                Attribute.Enum e = (Attribute.Enum)app;
-                containerTargets.add(e.value.name);
+            containerTargets = new HashSet<Name>();
+        for (Attribute app : containerTarget.values) {
+            if (!(app instanceof Attribute.Enum)) {
+                continue; // recovery
             }
+            Attribute.Enum e = (Attribute.Enum)app;
+            containerTargets.add(e.value.name);
+        }
         }
 
         Set<Name> containedTargets;
@@ -2911,14 +2918,14 @@ public class Check {
         if (containedTarget == null) {
             containedTargets = getDefaultTargetSet();
         } else {
-            containedTargets = new HashSet<>();
-            for (Attribute app : containedTarget.values) {
-                if (!(app instanceof Attribute.Enum)) {
-                    continue; // recovery
-                }
-                Attribute.Enum e = (Attribute.Enum)app;
-                containedTargets.add(e.value.name);
+            containedTargets = new HashSet<Name>();
+        for (Attribute app : containedTarget.values) {
+            if (!(app instanceof Attribute.Enum)) {
+                continue; // recovery
             }
+            Attribute.Enum e = (Attribute.Enum)app;
+            containedTargets.add(e.value.name);
+        }
         }
 
         if (!isTargetSubsetOf(containerTargets, containedTargets)) {
@@ -2929,7 +2936,7 @@ public class Check {
     /* get a set of names for the default target */
     private Set<Name> getDefaultTargetSet() {
         if (defaultTargets == null) {
-            Set<Name> targets = new HashSet<>();
+            Set<Name> targets = new HashSet<Name>();
             targets.add(names.ANNOTATION_TYPE);
             targets.add(names.CONSTRUCTOR);
             targets.add(names.FIELD);
@@ -3136,7 +3143,7 @@ public class Check {
     private boolean validateAnnotation(JCAnnotation a) {
         boolean isValid = true;
         // collect an inventory of the annotation elements
-        Set<MethodSymbol> members = new LinkedHashSet<>();
+        Set<MethodSymbol> members = new LinkedHashSet<MethodSymbol>();
         for (Scope.Entry e = a.annotationType.type.tsym.members().elems;
                 e != null;
                 e = e.sibling)
@@ -3186,7 +3193,7 @@ public class Check {
         JCTree rhs = assign.rhs;
         if (!rhs.hasTag(NEWARRAY)) return false;
         JCNewArray na = (JCNewArray) rhs;
-        Set<Symbol> targets = new HashSet<>();
+        Set<Symbol> targets = new HashSet<Symbol>();
         for (JCTree elem : na.elems) {
             if (!targets.add(TreeInfo.symbol(elem))) {
                 isValid = false;
@@ -3304,7 +3311,7 @@ public class Check {
      *  constructors.
      */
     void checkCyclicConstructors(JCClassDecl tree) {
-        Map<Symbol,Symbol> callMap = new HashMap<>();
+        Map<Symbol,Symbol> callMap = new HashMap<Symbol, Symbol>();
 
         // enter each constructor this-call into the map
         for (List<JCTree> l = tree.defs; l.nonEmpty(); l = l.tail) {

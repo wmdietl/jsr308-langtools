@@ -62,7 +62,8 @@ import static com.sun.tools.javac.code.TypeTag.*;
  *  deletion without notice.</b>
  */
 public class Infer {
-    protected static final Context.Key<Infer> inferKey = new Context.Key<>();
+    protected static final Context.Key<Infer> inferKey =
+        new Context.Key<Infer>();
 
     Resolve rs;
     Check chk;
@@ -352,6 +353,7 @@ public class Infer {
             Type to, Attr.ResultInfo resultInfo,
             InferenceContext inferenceContext) {
         inferenceContext.solve(List.of(from.qtype), new Warner());
+        inferenceContext.notifyChange();
         Type capturedType = resultInfo.checkContext.inferenceContext()
                 .cachedCapture(tree, from.inst, false);
         if (types.isConvertible(capturedType,
@@ -373,7 +375,7 @@ public class Infer {
             List<Type> upperBounds = uv.getBounds(InferenceBound.UPPER);
             if (Type.containsAny(upperBounds, vars)) {
                 TypeSymbol fresh_tvar = new TypeVariableSymbol(Flags.SYNTHETIC, uv.qtype.tsym.name, null, uv.qtype.tsym.owner);
-                fresh_tvar.type = new TypeVar(fresh_tvar, types.makeCompoundType(uv.getBounds(InferenceBound.UPPER)), null, Type.noAnnotations);
+                fresh_tvar.type = new TypeVar(fresh_tvar, types.makeCompoundType(uv.getBounds(InferenceBound.UPPER)), null);
                 todo.append(uv);
                 uv.inst = fresh_tvar.type;
             } else if (upperBounds.nonEmpty()) {
@@ -448,7 +450,7 @@ public class Infer {
         class ImplicitArgType extends DeferredAttr.DeferredTypeMap {
 
             public ImplicitArgType(Symbol msym, Resolve.MethodResolutionPhase phase) {
-                rs.deferredAttr.super(AttrMode.SPECULATIVE, msym, phase);
+                (rs.deferredAttr).super(AttrMode.SPECULATIVE, msym, phase);
             }
 
             public Type apply(Type t) {
@@ -516,6 +518,8 @@ public class Infer {
                 //or if it's not a subtype of the original target, issue an error
                 checkContext.report(pos, diags.fragment("no.suitable.functional.intf.inst", funcInterface));
             }
+            //propagate constraints as per JLS 18.2.1
+            checkContext.compatible(owntype, funcInterface, types.noWarnings);
             return owntype;
         }
     }
@@ -599,9 +603,9 @@ public class Infer {
                     uv.listener = null;
                 }
             }
-        }
+        };
 
-    /** max number of incorporation rounds */
+        /** max number of incorporation rounds */
         static final int MAX_INCORPORATION_STEPS = 100;
 
     /* If for two types t and s there is a least upper bound that is a
@@ -700,17 +704,11 @@ public class Infer {
                     }
                 }
             }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() && uv.getBounds(InferenceBound.EQ).nonEmpty();
-            }
         },
         /**
          * Check consistency of equality constraints.
          */
         EQ_CHECK() {
-            @Override
             public void apply(UndetVar uv, InferenceContext inferenceContext, Warner warn) {
                 Infer infer = inferenceContext.infer();
                 for (Type e : uv.getBounds(InferenceBound.EQ)) {
@@ -727,11 +725,6 @@ public class Infer {
                     }
                 }
             }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() && uv.getBounds(InferenceBound.EQ).nonEmpty();
-            }
         },
         /**
          * Given a bound set containing {@code alpha <: T} and {@code alpha :> S}
@@ -745,13 +738,6 @@ public class Infer {
                         isSubtype(inferenceContext.asUndetVar(b2), inferenceContext.asUndetVar(b1), warn , infer);
                     }
                 }
-            }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.UPPER).nonEmpty() &&
-                        uv.getBounds(InferenceBound.LOWER).nonEmpty();
             }
         },
         /**
@@ -767,13 +753,6 @@ public class Infer {
                     }
                 }
             }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.EQ).nonEmpty() &&
-                        uv.getBounds(InferenceBound.UPPER).nonEmpty();
-            }
         },
         /**
          * Given a bound set containing {@code alpha :> S} and {@code alpha == T}
@@ -787,13 +766,6 @@ public class Infer {
                         isSubtype(inferenceContext.asUndetVar(b2), inferenceContext.asUndetVar(b1), warn, infer);
                     }
                 }
-            }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.EQ).nonEmpty() &&
-                        uv.getBounds(InferenceBound.LOWER).nonEmpty();
             }
         },
         /**
@@ -858,12 +830,6 @@ public class Infer {
                     }
                 }
             }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.EQ).nonEmpty();
-            }
         },
         /**
          * Given a bound set containing {@code alpha <: beta} propagate lower bounds
@@ -890,12 +856,6 @@ public class Infer {
                     }
                 }
             }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.UPPER).nonEmpty();
-            }
         },
         /**
          * Given a bound set containing {@code alpha :> beta} propagate lower bounds
@@ -921,12 +881,6 @@ public class Infer {
                         }
                     }
                 }
-            }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.LOWER).nonEmpty();
             }
         },
         /**
@@ -961,12 +915,6 @@ public class Infer {
                         }
                     }
                 }
-            }
-
-            @Override
-            boolean accepts(UndetVar uv, InferenceContext inferenceContext) {
-                return !uv.isCaptured() &&
-                        uv.getBounds(InferenceBound.EQ).nonEmpty();
             }
         };
 
@@ -1112,7 +1060,8 @@ public class Infer {
     }
 
     /** an incorporation cache keeps track of all executed incorporation-related operations */
-    Map<IncorporationBinaryOp, Boolean> incorporationCache = new HashMap<>();
+    Map<IncorporationBinaryOp, Boolean> incorporationCache =
+            new HashMap<IncorporationBinaryOp, Boolean>();
 
     /**
      * Make sure that the upper bounds we got so far lead to a solvable inference
@@ -1145,7 +1094,7 @@ public class Infer {
                 return !t.isErroneous() && !inferenceContext.free(t) &&
                         !t.hasTag(BOT);
             }
-        }
+        };
 
     /**
      * This enumeration defines all possible bound-checking related errors.
@@ -1263,7 +1212,7 @@ public class Infer {
             if (g.nodes.isEmpty()) {
                 //should not happen
                 throw new NodeNotFoundException(g);
-            }
+            };
             return g.nodes.get(0);
         }
 
@@ -1329,15 +1278,16 @@ public class Infer {
                 //cache miss
                 if (n.isLeaf()) {
                     //if leaf, stop
-                    cachedPath = new Pair<>(List.of(n), n.data.length());
+                    cachedPath = new Pair<List<Node>, Integer>(List.of(n), n.data.length());
                 } else {
                     //if non-leaf, proceed recursively
-                    Pair<List<Node>, Integer> path = new Pair<>(List.of(n), n.data.length());
+                    Pair<List<Node>, Integer> path = new Pair<List<Node>, Integer>(List.of(n), n.data.length());
                     for (Node n2 : n.getAllDependencies()) {
                         if (n2 == n) continue;
                         Pair<List<Node>, Integer> subpath = computeTreeToLeafs(n2);
-                        path = new Pair<>(path.fst.prependList(subpath.fst),
-                                          path.snd + subpath.snd);
+                        path = new Pair<List<Node>, Integer>(
+                                path.fst.prependList(subpath.fst),
+                                path.snd + subpath.snd);
                     }
                     cachedPath = path;
                 }
@@ -1348,10 +1298,12 @@ public class Infer {
         }
 
         /** cache used to avoid redundant computation of tree costs */
-        final Map<Node, Pair<List<Node>, Integer>> treeCache = new HashMap<>();
+        final Map<Node, Pair<List<Node>, Integer>> treeCache =
+                new HashMap<Node, Pair<List<Node>, Integer>>();
 
         /** constant value used to mark non-existent paths */
-        final Pair<List<Node>, Integer> noPath = new Pair<>(null, Integer.MAX_VALUE);
+        final Pair<List<Node>, Integer> noPath =
+                new Pair<List<Node>, Integer>(null, Integer.MAX_VALUE);
 
         /**
          * Pick the leaf that minimize cost
@@ -1505,9 +1457,7 @@ public class Infer {
                         LOWER.solve(uv, inferenceContext) :
                         infer.syms.botType;
                 CapturedType prevCaptured = (CapturedType)uv.qtype;
-                return new CapturedType(prevCaptured.tsym.name, prevCaptured.tsym.owner,
-                                        upper, lower, prevCaptured.wildcard,
-                                        Type.noAnnotations);
+                return new CapturedType(prevCaptured.tsym.name, prevCaptured.tsym.owner, upper, lower, prevCaptured.wildcard);
             }
         };
 
@@ -1677,7 +1627,7 @@ public class Infer {
 
                 Node(Type ivar) {
                     super(ListBuffer.of(ivar));
-                    this.deps = new EnumMap<>(DependencyKind.class);
+                    this.deps = new EnumMap<DependencyKind, Set<Node>>(DependencyKind.class);
                 }
 
                 @Override
@@ -1719,7 +1669,7 @@ public class Infer {
                  * Retrieves all dependencies with given kind(s).
                  */
                 protected Set<Node> getDependencies(DependencyKind... depKinds) {
-                    Set<Node> buf = new LinkedHashSet<>();
+                    Set<Node> buf = new LinkedHashSet<Node>();
                     for (DependencyKind dk : depKinds) {
                         Set<Node> depsByKind = deps.get(dk);
                         if (depsByKind != null) {
@@ -1735,7 +1685,7 @@ public class Infer {
                 protected void addDependency(DependencyKind dk, Node depToAdd) {
                     Set<Node> depsByKind = deps.get(dk);
                     if (depsByKind == null) {
-                        depsByKind = new LinkedHashSet<>();
+                        depsByKind = new LinkedHashSet<Node>();
                         deps.put(dk, depsByKind);
                     }
                     depsByKind.add(depToAdd);
@@ -1771,11 +1721,11 @@ public class Infer {
                  */
                 protected Set<Node> closure(DependencyKind... depKinds) {
                     boolean progress = true;
-                    Set<Node> closure = new HashSet<>();
+                    Set<Node> closure = new HashSet<Node>();
                     closure.add(this);
                     while (progress) {
                         progress = false;
-                        for (Node n1 : new HashSet<>(closure)) {
+                        for (Node n1 : new HashSet<Node>(closure)) {
                             progress = closure.addAll(n1.getDependencies(depKinds));
                         }
                     }
@@ -1812,12 +1762,12 @@ public class Infer {
                         }
                     }
                     //update deps
-                    EnumMap<DependencyKind, Set<Node>> deps2 = new EnumMap<>(DependencyKind.class);
+                    EnumMap<DependencyKind, Set<Node>> deps2 = new EnumMap<DependencyKind, Set<Node>>(DependencyKind.class);
                     for (DependencyKind dk : DependencyKind.values()) {
                         for (Node d : getDependencies(dk)) {
                             Set<Node> depsByKind = deps2.get(dk);
                             if (depsByKind == null) {
-                                depsByKind = new LinkedHashSet<>();
+                                depsByKind = new LinkedHashSet<Node>();
                                 deps2.put(dk, depsByKind);
                             }
                             if (data.contains(d.data.first())) {
@@ -1891,7 +1841,7 @@ public class Infer {
              */
             void initNodes(Map<Type, Set<Type>> stuckDeps) {
                 //add nodes
-                nodes = new ArrayList<>();
+                nodes = new ArrayList<Node>();
                 for (Type t : inferenceContext.restvars()) {
                     nodes.add(new Node(t));
                 }
@@ -1913,7 +1863,7 @@ public class Infer {
                     }
                 }
                 //merge cyclic nodes
-                ArrayList<Node> acyclicNodes = new ArrayList<>();
+                ArrayList<Node> acyclicNodes = new ArrayList<Node>();
                 for (List<? extends Node> conSubGraph : GraphUtils.tarjan(nodes)) {
                     if (conSubGraph.length() > 1) {
                         Node root = conSubGraph.head;
@@ -1970,7 +1920,8 @@ public class Infer {
         /** list of inference vars in this context */
         List<Type> inferencevars;
 
-        Map<FreeTypeListener, List<Type>> freeTypeListeners = new HashMap<>();
+        java.util.Map<FreeTypeListener, List<Type>> freeTypeListeners =
+                new java.util.HashMap<FreeTypeListener, List<Type>>();
 
         List<FreeTypeListener> freetypeListeners = List.nil();
 
@@ -2164,7 +2115,7 @@ public class Infer {
         void notifyChange(List<Type> inferredVars) {
             InferenceException thrownEx = null;
             for (Map.Entry<FreeTypeListener, List<Type>> entry :
-                    new HashMap<>(freeTypeListeners).entrySet()) {
+                    new HashMap<FreeTypeListener, List<Type>>(freeTypeListeners).entrySet()) {
                 if (!Type.containsAny(entry.getValue(), inferencevars.diff(inferredVars))) {
                     try {
                         entry.getKey().typesInferred(this);

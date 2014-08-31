@@ -181,7 +181,8 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  *  deletion without notice.</b>
  */
 public class Flow {
-    protected static final Context.Key<Flow> flowKey = new Context.Key<>();
+    protected static final Context.Key<Flow> flowKey =
+        new Context.Key<Flow>();
 
     private final Names names;
     private final Log log;
@@ -231,7 +232,8 @@ public class Flow {
         }
     }
 
-    public List<Type> analyzeLambdaThrownTypes(Env<AttrContext> env, JCLambda that, TreeMaker make) {
+    public List<Type> analyzeLambdaThrownTypes(final Env<AttrContext> env,
+            JCLambda that, TreeMaker make) {
         //we need to disable diagnostics temporarily; the problem is that if
         //a lambda expression contains e.g. an unreachable statement, an error
         //message will be reported and will cause compilation to skip the flow analyis
@@ -239,7 +241,13 @@ public class Flow {
         //related errors, which will allow for more errors to be detected
         Log.DiagnosticHandler diagHandler = new Log.DiscardDiagnosticHandler(log);
         try {
-            new AssignAnalyzer(log, syms, lint, names, enforceThisDotInit).analyzeTree(env);
+            new AssignAnalyzer(log, syms, lint, names, enforceThisDotInit) {
+                @Override
+                protected boolean trackable(VarSymbol sym) {
+                    return !env.info.scope.includes(sym) &&
+                           sym.owner.kind == MTH;
+                }
+            }.analyzeTree(env);
             LambdaFlowAnalyzer flowAnalyzer = new LambdaFlowAnalyzer();
             flowAnalyzer.analyzeTree(env, that, make);
             return flowAnalyzer.inferredThrownTypes;
@@ -390,10 +398,6 @@ public class Flow {
                 super.scan(tree);
             }
         }
-
-        public void visitPackageDef(JCPackageDecl tree) {
-            // Do nothing for PackageDecl
-        }
     }
 
     /**
@@ -454,7 +458,7 @@ public class Flow {
             ListBuffer<PendingExit> pendingExitsPrev = pendingExits;
             Lint lintPrev = lint;
 
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             lint = lint.augment(tree.sym);
 
             try {
@@ -503,7 +507,7 @@ public class Flow {
                     log.error(TreeInfo.diagEndPos(tree.body), "missing.ret.stmt");
 
                 List<PendingExit> exits = pendingExits.toList();
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<PendingExit>();
                 while (exits.nonEmpty()) {
                     PendingExit exit = exits.head;
                     exits = exits.tail;
@@ -532,7 +536,7 @@ public class Flow {
 
         public void visitDoLoop(JCDoWhileLoop tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             scanStat(tree.body);
             alive |= resolveContinues(tree);
             scan(tree.cond);
@@ -542,7 +546,7 @@ public class Flow {
 
         public void visitWhileLoop(JCWhileLoop tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             scan(tree.cond);
             alive = !tree.cond.type.isFalse();
             scanStat(tree.body);
@@ -554,7 +558,7 @@ public class Flow {
         public void visitForLoop(JCForLoop tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
             scanStats(tree.init);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             if (tree.cond != null) {
                 scan(tree.cond);
                 alive = !tree.cond.type.isFalse();
@@ -572,7 +576,7 @@ public class Flow {
             visitVarDef(tree.var);
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
             scan(tree.expr);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             scanStat(tree.body);
             alive |= resolveContinues(tree);
             resolveBreaks(tree, prevPendingExits);
@@ -581,14 +585,14 @@ public class Flow {
 
         public void visitLabelled(JCLabeledStatement tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             scanStat(tree.body);
             alive |= resolveBreaks(tree, prevPendingExits);
         }
 
         public void visitSwitch(JCSwitch tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             scan(tree.selector);
             boolean hasDefault = false;
             for (List<JCCase> l = tree.cases; l.nonEmpty(); l = l.tail) {
@@ -615,7 +619,7 @@ public class Flow {
 
         public void visitTry(JCTry tree) {
             ListBuffer<PendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<PendingExit>();
             for (JCTree resource : tree.resources) {
                 if (resource instanceof JCVariableDecl) {
                     JCVariableDecl vdecl = (JCVariableDecl) resource;
@@ -729,6 +733,10 @@ public class Flow {
             }
         }
 
+        public void visitTopLevel(JCCompilationUnit tree) {
+            // Do nothing for TopLevel since each class is visited individually
+        }
+
     /**************************************************************************
      * main method
      *************************************************************************/
@@ -742,7 +750,7 @@ public class Flow {
             try {
                 attrEnv = env;
                 Flow.this.make = make;
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<PendingExit>();
                 alive = true;
                 scan(tree);
             } finally {
@@ -847,7 +855,7 @@ public class Flow {
             ListBuffer<FlowPendingExit> pendingExitsPrev = pendingExits;
             Lint lintPrev = lint;
 
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             if (tree.name != names.empty) {
                 caught = List.nil();
             }
@@ -952,7 +960,7 @@ public class Flow {
                 scan(tree.body);
 
                 List<FlowPendingExit> exits = pendingExits.toList();
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<FlowPendingExit>();
                 while (exits.nonEmpty()) {
                     FlowPendingExit exit = exits.head;
                     exits = exits.tail;
@@ -987,7 +995,7 @@ public class Flow {
 
         public void visitDoLoop(JCDoWhileLoop tree) {
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             scan(tree.body);
             resolveContinues(tree);
             scan(tree.cond);
@@ -996,7 +1004,7 @@ public class Flow {
 
         public void visitWhileLoop(JCWhileLoop tree) {
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             scan(tree.cond);
             scan(tree.body);
             resolveContinues(tree);
@@ -1006,7 +1014,7 @@ public class Flow {
         public void visitForLoop(JCForLoop tree) {
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
             scan(tree.init);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             if (tree.cond != null) {
                 scan(tree.cond);
             }
@@ -1020,7 +1028,7 @@ public class Flow {
             visitVarDef(tree.var);
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
             scan(tree.expr);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             scan(tree.body);
             resolveContinues(tree);
             resolveBreaks(tree, prevPendingExits);
@@ -1028,14 +1036,14 @@ public class Flow {
 
         public void visitLabelled(JCLabeledStatement tree) {
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             scan(tree.body);
             resolveBreaks(tree, prevPendingExits);
         }
 
         public void visitSwitch(JCSwitch tree) {
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             scan(tree.selector);
             for (List<JCCase> l = tree.cases; l.nonEmpty(); l = l.tail) {
                 JCCase c = l.head;
@@ -1061,7 +1069,7 @@ public class Flow {
             }
 
             ListBuffer<FlowPendingExit> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<FlowPendingExit>();
             for (JCTree resource : tree.resources) {
                 if (resource instanceof JCVariableDecl) {
                     JCVariableDecl vdecl = (JCVariableDecl) resource;
@@ -1271,7 +1279,7 @@ public class Flow {
                 thrown = List.nil();
                 scan(tree.body);
                 List<FlowPendingExit> exits = pendingExits.toList();
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<FlowPendingExit>();
                 while (exits.nonEmpty()) {
                     FlowPendingExit exit = exits.head;
                     exits = exits.tail;
@@ -1291,6 +1299,10 @@ public class Flow {
             }
         }
 
+        public void visitTopLevel(JCCompilationUnit tree) {
+            // Do nothing for TopLevel since each class is visited individually
+        }
+
     /**************************************************************************
      * main method
      *************************************************************************/
@@ -1304,8 +1316,8 @@ public class Flow {
             try {
                 attrEnv = env;
                 Flow.this.make = make;
-                pendingExits = new ListBuffer<>();
-                preciseRethrowTypes = new HashMap<>();
+                pendingExits = new ListBuffer<FlowPendingExit>();
+                preciseRethrowTypes = new HashMap<Symbol, List<Type>>();
                 this.thrown = this.caught = null;
                 this.classDef = null;
                 scan(tree);
@@ -1670,7 +1682,7 @@ public class Flow {
             int nextadrPrev = nextadr;
             ListBuffer<P> pendingExitsPrev = pendingExits;
 
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<P>();
             if (tree.name != names.empty) {
                 firstadr = nextadr;
             }
@@ -1845,7 +1857,7 @@ public class Flow {
             flowKind = FlowKind.NORMAL;
             final Bits initsSkip = new Bits(true);
             final Bits uninitsSkip = new Bits(true);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<P>();
             int prevErrors = getLogNumberOfErrors();
             do {
                 final Bits uninitsEntry = new Bits(uninits);
@@ -1915,7 +1927,7 @@ public class Flow {
             scan(tree.init);
             final Bits initsSkip = new Bits(true);
             final Bits uninitsSkip = new Bits(true);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<P>();
             int prevErrors = getLogNumberOfErrors();
             do {
                 final Bits uninitsEntry = new Bits(uninits);
@@ -1965,7 +1977,7 @@ public class Flow {
             final Bits uninitsStart = new Bits(uninits);
 
             letInit(tree.pos(), tree.var.sym);
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<P>();
             int prevErrors = getLogNumberOfErrors();
             do {
                 final Bits uninitsEntry = new Bits(uninits);
@@ -1988,7 +2000,7 @@ public class Flow {
 
         public void visitLabelled(JCLabeledStatement tree) {
             ListBuffer<P> prevPendingExits = pendingExits;
-            pendingExits = new ListBuffer<>();
+            pendingExits = new ListBuffer<P>();
             scan(tree.body);
             resolveBreaks(tree, prevPendingExits);
         }
@@ -2238,7 +2250,7 @@ public class Flow {
             ListBuffer<P> prevPending = pendingExits;
             try {
                 returnadr = nextadr;
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<P>();
                 for (List<JCVariableDecl> l = tree.params; l.nonEmpty(); l = l.tail) {
                     JCVariableDecl def = l.head;
                     scan(def);
@@ -2378,6 +2390,10 @@ public class Flow {
         public void visitAnnotatedType(JCAnnotatedType tree) {
             // annotations don't get scanned
             tree.underlyingType.accept(this);
+        }
+
+        public void visitTopLevel(JCCompilationUnit tree) {
+            // Do nothing for TopLevel since each class is visited individually
         }
 
     /**************************************************************************
@@ -2696,6 +2712,10 @@ public class Flow {
             }
         }
 
+        public void visitTopLevel(JCCompilationUnit tree) {
+            // Do nothing for TopLevel since each class is visited individually
+        }
+
     /**************************************************************************
      * main method
      *************************************************************************/
@@ -2709,7 +2729,7 @@ public class Flow {
             try {
                 attrEnv = env;
                 Flow.this.make = make;
-                pendingExits = new ListBuffer<>();
+                pendingExits = new ListBuffer<PendingExit>();
                 scan(tree);
             } finally {
                 pendingExits = null;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2012, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2012, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -26,7 +26,6 @@
 package com.sun.tools.sjavac;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -95,12 +94,14 @@ public class Util {
      * do settings = cleanOptions("--server:",Util.set("-portfile"),settings);
      *    now settings equals "--server:portfile=bar"
      *
+     * @param optionPrefix The option name, including colon, eg --server:
      * @param allowsSubOptions A set of the allowed sub options, id portfile etc.
      * @param s The option settings string.
      */
-    public static String cleanSubOptions(Set<String> allowedSubOptions, String s) {
+    public static String cleanSubOptions(String optionPrefix, Set<String> allowedSubOptions, String s) {
         StringBuilder sb = new StringBuilder();
-        StringTokenizer st = new StringTokenizer(s, ",");
+        if (!s.startsWith(optionPrefix)) return "";
+        StringTokenizer st = new StringTokenizer(s.substring(optionPrefix.length()), ",");
         while (st.hasMoreTokens()) {
             String o = st.nextToken();
             int p = o.indexOf('=');
@@ -120,7 +121,7 @@ public class Util {
      * Convenience method to create a set with strings.
      */
     public static Set<String> set(String... ss) {
-        Set<String> set = new HashSet<>();
+        Set<String> set = new HashSet<String>();
         set.addAll(Arrays.asList(ss));
         return set;
     }
@@ -155,10 +156,5 @@ public class Util {
             }
         }
         return null;
-    }
-
-    // TODO: Remove when refactoring from java.io.File to java.nio.file.Path.
-    public static File pathToFile(Path path) {
-        return path == null ? null : path.toFile();
     }
 }

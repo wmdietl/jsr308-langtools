@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2003, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 2003, 2009, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -27,26 +27,48 @@
  * @summary  Verify that packages.html is no longer generated since it is no
  *           longer used.
  * @author   jamieh
- * @library  ../lib
+ * @library  ../lib/
  * @build    JavadocTester
+ * @build    TestNoPackagesFile
  * @run main TestNoPackagesFile
  */
 
 public class TestNoPackagesFile extends JavadocTester {
 
-    public static void main(String... args) throws Exception {
+    //Test information.
+    private static final String BUG_ID = "4475679";
+
+    //Javadoc arguments.
+    private static final String[] ARGS = new String[] {
+        "-d", BUG_ID, "-sourcepath", SRC_DIR,
+        SRC_DIR + FS + "C.java"
+    };
+
+    /**
+     * The entry point of the test.
+     * @param args the array of command line arguments.
+     */
+    public static void main(String[] args) {
         TestNoPackagesFile tester = new TestNoPackagesFile();
-        tester.runTests();
+        run(tester, ARGS, NO_TEST, NO_TEST);
+        if ((new java.io.File(BUG_ID + FS + "packages.html")).exists()) {
+            throw new Error("Test Fails: packages file should not be " +                "generated anymore.");
+        } else {
+            System.out.println("Test passes:  packages.html not found.");
+        }
     }
 
-    @Test
-    void test() {
-        javadoc("-d", "out",
-                "-sourcepath", testSrc,
-                testSrc("C.java"));
-        checkExit(Exit.OK);
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugId() {
+        return BUG_ID;
+    }
 
-        // packages.html file should not be generated anymore.
-        checkFiles(false, "packages.html");
+    /**
+     * {@inheritDoc}
+     */
+    public String getBugName() {
+        return getClass().getName();
     }
 }

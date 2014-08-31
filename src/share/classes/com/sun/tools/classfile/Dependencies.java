@@ -245,7 +245,7 @@ public class Dependencies {
             ClassFileReader classFinder, Set<String> rootClassNames,
             boolean transitiveClosure)
             throws ClassFileNotFoundException {
-        final Set<Dependency> results = new HashSet<>();
+        final Set<Dependency> results = new HashSet<Dependency>();
         Recorder r = new Recorder() {
             public void addDependency(Dependency d) {
                 results.add(d);
@@ -276,7 +276,7 @@ public class Dependencies {
             ClassFileReader classFinder, Set<String> rootClassNames,
             boolean transitiveClosure, Recorder recorder)
             throws ClassFileNotFoundException {
-        Set<String> doneClasses = new HashSet<>();
+        Set<String> doneClasses = new HashSet<String>();
 
         getFinder();  // ensure initialized
         getFilter();  // ensure initialized
@@ -284,7 +284,7 @@ public class Dependencies {
         // Work queue of names of classfiles to be searched.
         // Entries will be unique, and for classes that do not yet have
         // dependencies in the results map.
-        Deque<String> deque = new LinkedList<>(rootClassNames);
+        Deque<String> deque = new LinkedList<String>(rootClassNames);
 
         String className;
         while ((className = deque.poll()) != null) {
@@ -560,7 +560,7 @@ public class Dependencies {
     }
 
     static abstract class BasicDependencyFinder implements Finder {
-        private Map<String,Location> locations = new HashMap<>();
+        private Map<String,Location> locations = new HashMap<String,Location>();
 
         Location getLocation(String className) {
             Location l = locations.get(className);
@@ -578,7 +578,7 @@ public class Dependencies {
                 try {
                     constant_pool = classFile.constant_pool;
                     origin = getLocation(classFile.getName());
-                    deps = new HashSet<>();
+                    deps = new HashSet<Dependency>();
                 } catch (ConstantPoolException e) {
                     throw new ClassFileError(e);
                 }

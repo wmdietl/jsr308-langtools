@@ -98,7 +98,7 @@ public enum StandardLocation implements Location {
     }
     //where
         private static final ConcurrentMap<String,Location> locations
-            = new ConcurrentHashMap<>();
+            = new ConcurrentHashMap<String,Location>();
 
     public String getName() { return name(); }
 

@@ -78,7 +78,8 @@ import static com.sun.tools.javac.tree.JCTree.Tag.*;
  *  deletion without notice.</b>
  */
 public class Resolve {
-    protected static final Context.Key<Resolve> resolveKey = new Context.Key<>();
+    protected static final Context.Key<Resolve> resolveKey =
+        new Context.Key<Resolve>();
 
     Names names;
     Log log;
@@ -87,7 +88,7 @@ public class Resolve {
     DeferredAttr deferredAttr;
     Check chk;
     Infer infer;
-    ClassFinder finder;
+    ClassReader reader;
     TreeInfo treeinfo;
     Types types;
     JCDiagnostic.Factory diags;
@@ -95,6 +96,7 @@ public class Resolve {
     public final boolean varargsEnabled;
     public final boolean allowMethodHandles;
     public final boolean allowFunctionalInterfaceMostSpecific;
+    public final boolean checkVarargsAccessAfterResolution;
     private final boolean debugResolve;
     private final boolean compactMethodDiags;
     final EnumSet<VerboseResolutionMode> verboseResolutionMode;
@@ -121,7 +123,7 @@ public class Resolve {
         deferredAttr = DeferredAttr.instance(context);
         chk = Check.instance(context);
         infer = Infer.instance(context);
-        finder = ClassFinder.instance(context);
+        reader = ClassReader.instance(context);
         treeinfo = TreeInfo.instance(context);
         types = Types.instance(context);
         diags = JCDiagnostic.Factory.instance(context);
@@ -136,6 +138,8 @@ public class Resolve {
         Target target = Target.instance(context);
         allowMethodHandles = target.hasMethodHandles();
         allowFunctionalInterfaceMostSpecific = source.allowFunctionalInterfaceMostSpecific();
+        checkVarargsAccessAfterResolution =
+                source.allowPostApplicabilityVarargsAccessCheck();
         polymorphicSignatureScope = new Scope(syms.noSymbol);
 
         inapplicableMethodException = new InapplicableMethodException(diags);
@@ -267,7 +271,7 @@ public class Resolve {
      *  the one of its outer environment
      */
     protected static boolean isStatic(Env<AttrContext> env) {
-        return env.outer != null && env.info.staticLevel > env.outer.info.staticLevel;
+        return env.info.staticLevel > env.outer.info.staticLevel;
     }
 
     /** An environment is an "initializer" if it is a constructor or
@@ -347,7 +351,7 @@ public class Resolve {
 
     boolean isAccessible(Env<AttrContext> env, Type t, boolean checkInner) {
         return (t.hasTag(ARRAY))
-            ? isAccessible(env, types.upperBound(types.elemtype(t)))
+            ? isAccessible(env, types.cvarUpperBound(types.elemtype(t)))
             : isAccessible(env, t.tsym, checkInner);
     }
 
@@ -834,9 +838,15 @@ public class Resolve {
             super.argumentsAcceptable(env, deferredAttrContext, argtypes, formals, warn);
             //should we expand formals?
             if (deferredAttrContext.phase.isVarargsRequired()) {
-                //check varargs element type accessibility
-                varargsAccessible(env, types.elemtype(formals.last()),
-                        deferredAttrContext.inferenceContext);
+                Type typeToCheck = null;
+                if (!checkVarargsAccessAfterResolution) {
+                    typeToCheck = types.elemtype(formals.last());
+                } else if (deferredAttrContext.mode == AttrMode.CHECK) {
+                    typeToCheck = types.erasure(types.elemtype(formals.last()));
+                }
+                if (typeToCheck != null) {
+                    varargsAccessible(env, typeToCheck, deferredAttrContext.inferenceContext);
+                }
             }
         }
 
@@ -928,12 +938,7 @@ public class Resolve {
         public MethodCheck mostSpecificCheck(List<Type> actuals, boolean strict) {
             return new MostSpecificCheck(strict, actuals);
         }
-
-        @Override
-        public String toString() {
-            return "MethodReferenceCheck";
-        }
-    }
+    };
 
     /**
      * Check context to be used during method applicability checks. A method check
@@ -952,9 +957,10 @@ public class Resolve {
         }
 
         public boolean compatible(Type found, Type req, Warner warn) {
+            InferenceContext inferenceContext = deferredAttrContext.inferenceContext;
             return strict ?
-                    types.isSubtypeUnchecked(found, deferredAttrContext.inferenceContext.asUndetVar(req), warn) :
-                    types.isConvertible(found, deferredAttrContext.inferenceContext.asUndetVar(req), warn);
+                    types.isSubtypeUnchecked(inferenceContext.asUndetVar(found), inferenceContext.asUndetVar(req), warn) :
+                    types.isConvertible(inferenceContext.asUndetVar(found), inferenceContext.asUndetVar(req), warn);
         }
 
         public void report(DiagnosticPosition pos, JCDiagnostic details) {
@@ -975,8 +981,9 @@ public class Resolve {
 
         @Override
         public String toString() {
-            return "MethodCheckContext";
+            return "MethodReferenceCheck";
         }
+
     }
 
     /**
@@ -1014,7 +1021,7 @@ public class Resolve {
          */
         private Type U(Type found) {
             return found == pt ?
-                    found : types.upperBound(found);
+                    found : types.cvarUpperBound(found);
         }
 
         @Override
@@ -1640,7 +1647,7 @@ public class Resolve {
                         (flags & DEFAULT) != 0 ||
                         (flags & ABSTRACT) == 0);
             }
-        }
+        };
 
     /** Find best qualified method matching given name, type and value
      *  arguments.
@@ -1886,9 +1893,9 @@ public class Resolve {
      */
     Symbol loadClass(Env<AttrContext> env, Name name) {
         try {
-            ClassSymbol c = finder.loadClass(name);
+            ClassSymbol c = reader.loadClass(name);
             return isAccessible(env, c) ? c : new AccessError(c);
-        } catch (ClassFinder.BadClassFile err) {
+        } catch (ClassReader.BadClassFile err) {
             throw err;
         } catch (CompletionFailure ex) {
             return typeNotFound;
@@ -2097,7 +2104,7 @@ public class Resolve {
             else if (sym.kind < bestSoFar.kind) bestSoFar = sym;
         }
 
-        if ((kind & PCK) != 0) return syms.enterPackage(name);
+        if ((kind & PCK) != 0) return reader.enterPackage(name);
         else return bestSoFar;
     }
 
@@ -2121,7 +2128,7 @@ public class Resolve {
         Symbol bestSoFar = typeNotFound;
         PackageSymbol pack = null;
         if ((kind & PCK) != 0) {
-            pack = syms.enterPackage(fullname);
+            pack = reader.enterPackage(fullname);
             if (pack.exists()) return pack;
         }
         if ((kind & TYP) != 0) {
@@ -2630,7 +2637,7 @@ public class Resolve {
                             ((ForAll)sym.type).tvars :
                             List.<Type>nil();
                     Type constrType = new ForAll(site.tsym.type.getTypeArguments().appendList(oldParams),
-                                                 types.createMethodTypeWithReturn(sym.type.asMethodType(), site));
+                            types.createMethodTypeWithReturn(sym.type.asMethodType(), site));
                     MethodSymbol newConstr = new MethodSymbol(sym.flags(), names.init, constrType, site.tsym) {
                         @Override
                         public Symbol baseSymbol() {
@@ -3271,7 +3278,7 @@ public class Resolve {
                 List<Type> typeargtypes, MethodResolutionPhase maxPhase) {
             super(referenceTree, names.init, site, argtypes, typeargtypes, maxPhase);
             if (site.isRaw()) {
-                this.site = new ClassType(site.getEnclosingType(), site.tsym.type.getTypeArguments(), site.tsym, site.getAnnotationMirrors());
+                this.site = new ClassType(site.getEnclosingType(), site.tsym.type.getTypeArguments(), site.tsym);
                 needsInference = true;
             }
         }
@@ -3801,7 +3808,7 @@ public class Resolve {
                 bestSoFar = c;
             }
             Assert.checkNonNull(bestSoFar);
-            return new Pair<>(bestSoFar.sym, bestSoFar.details);
+            return new Pair<Symbol, JCDiagnostic>(bestSoFar.sym, bestSoFar.details);
         }
     }
 
@@ -3848,7 +3855,7 @@ public class Resolve {
             } else if (filteredCandidates.size() == 1) {
                 Map.Entry<Symbol, JCDiagnostic> _e =
                                 filteredCandidates.entrySet().iterator().next();
-                final Pair<Symbol, JCDiagnostic> p = new Pair<>(_e.getKey(), _e.getValue());
+                final Pair<Symbol, JCDiagnostic> p = new Pair<Symbol, JCDiagnostic>(_e.getKey(), _e.getValue());
                 JCDiagnostic d = new InapplicableSymbolError(resolveContext) {
                     @Override
                     protected Pair<Symbol, JCDiagnostic> errCandidate() {
@@ -3867,7 +3874,7 @@ public class Resolve {
         }
         //where
             private Map<Symbol, JCDiagnostic> mapCandidates() {
-                Map<Symbol, JCDiagnostic> candidates = new LinkedHashMap<>();
+                Map<Symbol, JCDiagnostic> candidates = new LinkedHashMap<Symbol, JCDiagnostic>();
                 for (Candidate c : resolveContext.candidates) {
                     if (c.isApplicable()) continue;
                     candidates.put(c.sym, c.details);
@@ -3876,7 +3883,7 @@ public class Resolve {
             }
 
             Map<Symbol, JCDiagnostic> filterCandidates(Map<Symbol, JCDiagnostic> candidatesMap) {
-                Map<Symbol, JCDiagnostic> candidates = new LinkedHashMap<>();
+                Map<Symbol, JCDiagnostic> candidates = new LinkedHashMap<Symbol, JCDiagnostic>();
                 for (Map.Entry<Symbol, JCDiagnostic> _entry : candidatesMap.entrySet()) {
                     JCDiagnostic d = _entry.getValue();
                     if (!new Template(MethodCheckDiag.ARITY_MISMATCH.regex()).matches(d)) {
@@ -4196,7 +4203,8 @@ public class Resolve {
         };
 
         /** rewriter map used for method resolution simplification */
-        static final Map<Template, DiagnosticRewriter> rewriters = new LinkedHashMap<>();
+        static final Map<Template, DiagnosticRewriter> rewriters =
+                new LinkedHashMap<Template, DiagnosticRewriter>();
 
         static {
             String argMismatchRegex = MethodCheckDiag.ARG_MISMATCH.regex();

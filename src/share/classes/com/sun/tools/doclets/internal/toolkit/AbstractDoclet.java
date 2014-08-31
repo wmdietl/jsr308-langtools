@@ -188,8 +188,8 @@ public abstract class AbstractDoclet {
     protected void generateClassFiles(RootDoc root, ClassTree classtree) {
         generateClassFiles(classtree);
         PackageDoc[] packages = root.specifiedPackages();
-        for (PackageDoc pkg : packages) {
-            generateClassFiles(pkg.allClasses(), classtree);
+        for (int i = 0; i < packages.length; i++) {
+            generateClassFiles(packages[i].allClasses(), classtree);
         }
     }
 
@@ -200,9 +200,10 @@ public abstract class AbstractDoclet {
      */
     private void generateClassFiles(ClassTree classtree) {
         String[] packageNames = configuration.classDocCatalog.packageNames();
-        for (String packageName : packageNames) {
+        for (int packageNameIndex = 0; packageNameIndex < packageNames.length;
+                packageNameIndex++) {
             generateClassFiles(configuration.classDocCatalog.allClasses(
-                    packageName), classtree);
+                packageNames[packageNameIndex]), classtree);
         }
     }
 }

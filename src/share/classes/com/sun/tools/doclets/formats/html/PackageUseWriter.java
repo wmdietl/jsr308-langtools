@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998, 2014, Oracle and/or its affiliates. All rights reserved.
+ * Copyright (c) 1998, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
@@ -47,7 +47,7 @@ import com.sun.tools.doclets.internal.toolkit.util.*;
 public class PackageUseWriter extends SubWriterHolderWriter {
 
     final PackageDoc pkgdoc;
-    final SortedMap<String,Set<ClassDoc>> usingPackageToUsedClasses = new TreeMap<>();
+    final SortedMap<String,Set<ClassDoc>> usingPackageToUsedClasses = new TreeMap<String,Set<ClassDoc>>();
 
     /**
      * Constructor.
@@ -65,15 +65,18 @@ public class PackageUseWriter extends SubWriterHolderWriter {
         // by examining all classes in this package, find what packages
         // use these classes - produce a map between using package and
         // used classes.
-        for (ClassDoc usedClass : pkgdoc.allClasses()) {
+        ClassDoc[] content = pkgdoc.allClasses();
+        for (int i = 0; i < content.length; ++i) {
+            ClassDoc usedClass = content[i];
             Set<ClassDoc> usingClasses = mapper.classToClass.get(usedClass.qualifiedName());
             if (usingClasses != null) {
-                for (ClassDoc usingClass : usingClasses) {
+                for (Iterator<ClassDoc> it = usingClasses.iterator(); it.hasNext(); ) {
+                    ClassDoc usingClass = it.next();
                     PackageDoc usingPackage = usingClass.containingPackage();
                     Set<ClassDoc> usedClasses = usingPackageToUsedClasses
-                            .get(usingPackage.name());
+                        .get(usingPackage.name());
                     if (usedClasses == null) {
-                        usedClasses = new TreeSet<>();
+                        usedClasses = new TreeSet<ClassDoc>();
                         usingPackageToUsedClasses.put(Util.getPackageName(usingPackage),
                                                       usedClasses);
                     }
@@ -135,7 +138,7 @@ public class PackageUseWriter extends SubWriterHolderWriter {
     protected void addPackageUse(Content contentTree) throws IOException {
         HtmlTree ul = new HtmlTree(HtmlTag.UL);
         ul.addStyle(HtmlStyle.blockList);
-        if (configuration.packages.size() > 1) {
+        if (configuration.packages.length > 1) {
             addPackageList(ul);
         }
         addClassList(ul);
@@ -182,7 +185,9 @@ public class PackageUseWriter extends SubWriterHolderWriter {
                     configuration.getText("doclet.Class"),
                     configuration.getText("doclet.Description"))
         };
-        for (String packageName : usingPackageToUsedClasses.keySet()) {
+        Iterator<String> itp = usingPackageToUsedClasses.keySet().iterator();
+        while (itp.hasNext()) {
+            String packageName = itp.next();
             PackageDoc usingPackage = configuration.root.packageNamed(packageName);
             HtmlTree li = new HtmlTree(HtmlTag.LI);
             li.addStyle(HtmlStyle.blockList);
@@ -190,12 +195,12 @@ public class PackageUseWriter extends SubWriterHolderWriter {
                 li.addContent(getMarkerAnchor(usingPackage.name()));
             }
             String tableSummary = configuration.getText("doclet.Use_Table_Summary",
-                                                        configuration.getText("doclet.classes"));
+                    configuration.getText("doclet.classes"));
             Content table = HtmlTree.TABLE(HtmlStyle.useSummary, 0, 3, 0, tableSummary,
-                                           getTableCaption(configuration.getResource(
-                                                   "doclet.ClassUse_Classes.in.0.used.by.1",
-                                                   getPackageLink(pkgdoc, Util.getPackageName(pkgdoc)),
-                                                   getPackageLink(usingPackage, Util.getPackageName(usingPackage)))));
+                    getTableCaption(configuration.getResource(
+                    "doclet.ClassUse_Classes.in.0.used.by.1",
+                    getPackageLink(pkgdoc, Util.getPackageName(pkgdoc)),
+                    getPackageLink(usingPackage, Util.getPackageName(usingPackage)))));
             table.addContent(getSummaryTableHeader(classTableHeader, "col"));
             Content tbody = new HtmlTree(HtmlTag.TBODY);
             Iterator<ClassDoc> itc =
