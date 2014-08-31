@@ -1,6 +1,16 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.8.6, 23 Aug 2014
+
+jsr308-langtools is now based on jdk8u-dev: the type-annotations
+repository was closed and jdk9 is starting to use Java 8 features,
+which prevents us from building on jdk7.
+
+Base build
+  Updated to OpenJDK jdk8u-dev/langtools as of 31 Aug 2014.
+
+----------------------------------------------------------------------
 Version 1.8.5, 29 Aug 2014
 
 Change default target version to 8.
