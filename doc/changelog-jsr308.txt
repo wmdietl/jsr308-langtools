@@ -8,7 +8,7 @@ repository was closed and jdk9 is starting to use Java 8 features,
 which prevents us from building on jdk7.
 
 Base build
-  Updated to OpenJDK jdk8u-dev/langtools as of 8 Sep 2014.
+  Updated to OpenJDK jdk8u-dev/langtools as of 22 Sep 2014.
 
 ----------------------------------------------------------------------
 Version 1.8.5, 29 Aug 2014
