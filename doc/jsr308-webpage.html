@@ -157,19 +157,17 @@ prevent bugs easily.
       </li>
     </ul>
   </li>
-  <li>The <b>Type annotations compiler</b>
-      <!--
-      is a slightly modified version of the
-      <a href="https://openjdk.dev.java.net/">OpenJDK</a> Java 
-      compiler.
-      The Type annotations compiler
-      -->
-      is fully <em>backward-compatible</em>.  You can use it in place
-      of javac without any change in behavior, except that you will be permitted
-      to place annotations in more locations (or in comments) and to use
-      type-checking plug-ins that take advantage of those new locations.
-      Most users don't need it, since a compiled version (without source
-      code) is already included in the Checker Framework distribution.
+  <li>
+        <-- This text appears identically at
+            checker-framework/checker/manual/checker-framework-webpage.html .
+            Keep them in sync. -->
+	The
+        <b>Type annotations compiler</b>
+        is fully <em>backward-compatible</em>.  You can use it in place
+        of javac without any change in behavior, except that you will be permitted
+        to place annotations in comments so your code compiles under Java 7.
+        Most users don't need it, since a compiled version (without source
+        code) is already included in the Checker Framework distribution.
     <ul>
       <li>
         <a href="../jsr308/current/jsr308-langtools.zip">jsr308-langtools.zip</a>
@@ -338,7 +336,7 @@ To submit a bug report, use the issue tracker for the relevant tool:
 <hr />
 
 <p>
-Last updated: January 11, 2014
+Last updated: October 7, 2014
 </p>
 
 </body>
