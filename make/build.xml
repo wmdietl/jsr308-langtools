@@ -94,7 +94,10 @@
  - utility definitions
  -->
 
-<project name="langtools" default="build" basedir="..">
+<project name="langtools" default="clean-and-build-all-tools" basedir="..">
+
+    <target name="clean-and-build-all-tools" depends="clean,build-all-tools"/>
+
     <!--
     **** Global property definitions.
     -->
@@ -109,6 +112,7 @@
     <!-- The following locations can be used to override default property values. -->
 
     <!-- Use this location for customizations specific to this instance of this workspace -->
+    <property environment="env"/>
     <property file="build.properties"/>
 
     <!-- Use this location for customizations common to all OpenJDK langtools workspaces -->
@@ -138,6 +142,8 @@
     <property name="make.tools.dir" location="${make.dir}/tools"/>
     <property name="src.dir" location="src"/>
     <property name="src.bin.dir" location="${src.dir}/share/bin"/>
+    <!-- JSR 308: a directory that contains changes to the JDK. -->
+    <property name="jdkchanges.classes.dir" location="${src.dir}/jdk-changes"/>
     <property name="src.classes.dir" location="${src.dir}/share/classes"/>
     <property name="test.dir" location="test"/>
 
@@ -175,6 +181,14 @@
     <available property="import.jdk.jar" value="${import.jdk}/jre/lib/rt.jar"
         ignoresystemclasses="true"
         classpath="${import.jdk}/jre/lib/rt.jar" classname="java.nio.file.Path"/>
+
+    <!-- Set the default value of the sourcepath used for javac. -->
+    <condition property="javac.sourcepath" value="${build.genstubs.dir}" else="">
+        <isset property="import.jdk.src.dir"/>
+    </condition>
+
+    <!-- Set the default value of the classpath used for javac. -->
+    <property name="javac.classpath" value=""/>
 
     <!-- Set the default bootclasspath option used for javac.
         Note that different variants of the option are used, meaning we can't just
@@ -249,14 +263,20 @@
     />
 
     <target name="build-all-classes" depends="build-bootstrap-javac,-create-import-jdk-stubs">
-        <build-classes includes="${javac.includes} ${javadoc.includes} ${doclets.includes} ${javah.includes} ${javap.includes} ${sjavac.includes}"/>
+        <build-classes includes="${javac.includes} ${javadoc.includes} ${doclets.includes} ${javah.includes} ${javap.includes} ${sjavac.includes} ${jdkchanges.includes}"/>
     </target>
 
     <!-- clean -->
 
+    <!-- Sometimes it takes 2 tries for this to work; the first "ant clean"
+    says "Unable to delete directory .../jsr308-langtools/dist", and the second
+    succeeds.
+    A possible reason may be .nfs files in the directory.  So, I am trying
+    the quiet="true" option, and hope that doesn't hurt anything later.
+    Probably I should rename the directory if it still exists...  -MDE -->
     <target name="clean" description="Delete all generated files">
         <delete dir="${build.dir}"/>
-        <delete dir="${dist.dir}"/>
+        <delete dir="${dist.dir}" quiet="true"/>
     </target>
 
     <!-- Additional targets for running tools on the build -->
@@ -515,17 +535,25 @@
 
     <target name="build-bootstrap-javac"
             depends="-def-build-bootstrap-classes,-def-build-bootstrap-jar,-def-build-bootstrap-tool">
-        <build-bootstrap-classes includes="${javac.includes}"/>
+        <build-bootstrap-classes includes="${javac.includes} ${jdkchanges.includes}"/>
         <build-bootstrap-jar     name="javac" includes="${javac.includes}"/>
         <build-bootstrap-tool    name="javac"/>
     </target>
 
     <target name="build-classes-javac" depends="build-bootstrap-javac,-create-import-jdk-stubs">
-        <build-classes includes="${javac.includes}"/>
+        <build-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+    </target>
+
+    <target name="check-interning-javac" depends="clean,build-bootstrap-javac,-create-import-jdk-stubs,-def-check-interning-classes">
+        <check-interning-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+    </target>
+
+    <target name="check-nullness-javac" depends="clean,build-bootstrap-javac,-create-import-jdk-stubs,-def-check-nullness-classes">
+        <check-nullness-classes includes="${javac.includes} ${jdkchanges.includes}"/>
     </target>
 
     <target name="build-javac" depends="build-classes-javac">
-        <build-jar  name="javac" includes="${javac.includes}"/>
+        <build-jar  name="javac" includes="${javac.includes} ${jdkchanges.includes}"/>
         <build-tool name="javac"/>
     </target>
 
@@ -535,6 +563,16 @@
 
     <target name="jtreg-javac" depends="build-javac,build-javap,-def-jtreg">
         <jtreg-tool name="javac" tests="${javac.tests}"/>
+    </target>
+
+    <target name="jtreg-jsr308" depends="build-javac,build-javap,-def-jtreg">
+      <jtreg-tool name="jsr308" samevm="true"
+                  tests="${javac.tests}/annotations/typeAnnotations ${javap.tests}/typeAnnotations"/>
+    </target>
+
+    <target name="jtreg-envtests" depends="build-javac,build-javap,-def-jtreg">
+      <jtreg-tool name="jsr308" samevm="true"
+                  tests="${env.JTREGENVTESTS}"/>
     </target>
 
     <target name="findbugs-javac" depends="build-javac,-def-findbugs">
@@ -882,6 +920,9 @@
                 <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
                 <mkdir dir="@{gensrc.dir}"/>
                 <mkdir dir="@{classes.dir}"/>
+                <pcompile srcdir="${jdkchanges.classes.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="@{includes}"/>
                 <pcompile srcdir="${src.classes.dir}"
                           destdir="@{gensrc.dir}"
                           includes="@{includes}"/>
@@ -899,7 +940,7 @@
                           includes="**/*.properties"/>
                 <javac fork="true"
                        executable="@{java.home}/bin/javac"
-                       srcdir="${src.classes.dir}:@{gensrc.dir}"
+                       srcdir="${jdkchanges.classes.dir}:${src.classes.dir}:@{gensrc.dir}"
                        destdir="@{classes.dir}"
                        includes="@{includes}"
                        excludes="@{excludes}"
@@ -919,6 +960,178 @@
                     <compilerarg line="${javac.lint.opts}"/>
                     <compilerarg line="@{plugin.options}"/>
                 </javac>
+                <copy todir="@{classes.dir}" includeemptydirs="false">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
+                        <exclude name="**/*.java"/>
+                        <exclude name="**/*.properties"/>
+                        <exclude name="**/*-template"/>
+                        <exclude name="**/*.rej"/>
+                        <exclude name="**/*.orig"/>
+                        <exclude name="**/overview.html"/>
+                        <exclude name="**/package.html"/>
+                    </fileset>
+                </copy>
+            </sequential>
+        </macrodef>
+    </target>
+
+    <property environment="env"/>
+    <presetdef name="jsr308.javac" >
+      <javac fork="yes" executable="${env.CHECKERFRAMEWORK}/checker/bin/javac">
+        <!-- JSR308 related compiler arguments -->
+        <compilerarg value="-version"/>
+        <!-- optional, so .class files work with older JVMs: <compilerarg line="-target 5"/> -->
+        <compilerarg value="-implicit:class"/>
+        <compilerarg line="-Awarns -Xmaxwarns 10000"/>
+
+        <classpath>
+          <pathelement location="${env.CHECKERFRAMEWORK}/checker/dist/checker.jar"/>
+          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checker/bin/checker.jar"/> -->
+        </classpath>
+      </javac>
+    </presetdef>
+
+    <!-- A copy of the -def-build-classes target. -->
+    <target name="-def-check-interning-classes" depends="-def-pcompile">
+        <macrodef name="check-interning-classes">
+            <attribute name="includes"/>
+            <attribute name="excludes" default="${exclude.files} **/package-info.java"/>
+            <attribute name="classes.dir" default="${build.classes.dir}"/>
+            <attribute name="gensrc.dir" default="${build.gensrc.dir}"/>
+            <attribute name="javac.bootclasspath" default="${build.bootstrap.dir}/classes"/>
+            <attribute name="bootclasspath.opt" default="${javac.bootclasspath.opt}"/>
+            <attribute name="classpath" default="${javac.classpath}"/>
+            <attribute name="sourcepath" default="${javac.sourcepath}"/>
+            <attribute name="java.home" default="${boot.java.home}"/>
+            <attribute name="source" default="${javac.source}"/>
+            <attribute name="target" default="${javac.target}"/>
+            <attribute name="release" default="${release}"/>
+            <attribute name="full.version" default="${full.version}"/>
+            <sequential>
+                <echo level="verbose" message="build-classes: excludes=@{excludes}"/>
+                <echo level="verbose" message="build-classes: bootclasspath.opt=@{bootclasspath.opt}"/>
+                <echo level="verbose" message="build-classes: classpath=@{classpath}"/>
+                <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
+                <mkdir dir="@{gensrc.dir}"/>
+                <mkdir dir="@{classes.dir}"/>
+                <pcompile srcdir="${src.classes.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="@{includes}"/>
+                <copy todir="@{gensrc.dir}">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}"/>
+                    <globmapper from="*.properties-template" to="*.properties"/>
+                    <filterset begintoken="$(" endtoken=")">
+                        <filter token="JDK_VERSION" value="${jdk.version}"/>
+                        <filter token="RELEASE" value="@{release}"/>
+                        <filter token="FULL_VERSION" value="@{full.version}"/>
+                    </filterset>
+                </copy>
+                <pcompile srcdir="@{gensrc.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="**/*.properties"/>
+                <jsr308.javac fork="true"
+                       executable="@{java.home}/bin/javac"
+                       srcdir="${src.classes.dir}:@{gensrc.dir}"
+                       destdir="@{classes.dir}"
+                       includes="@{includes}"
+                       excludes="@{excludes}"
+                       sourcepath="@{sourcepath}"
+                       classpath="@{classpath}"
+                       includeAntRuntime="no"
+                       source="@{source}"
+                       target="@{target}"
+                       debug="${javac.debug}"
+                       debuglevel="${javac.debuglevel}">
+                    <compilerarg value="-implicit:none"/>
+                    <compilerarg value="-Xprefer:source"/>
+                    <compilerarg value="-J-Xbootclasspath/p:@{javac.bootclasspath}"/>
+                    <compilerarg line="@{bootclasspath.opt}"/>
+                    <compilerarg line="${javac.no.jdk.warnings}"/>
+                    <compilerarg line="${javac.version.opt}"/>
+                    <!-- <compilerarg line="${javac.lint.opts}"/> -->
+
+                    <!-- Checker Framework command-line arguments -->
+                    <compilerarg line="-processor org.checkerframework.checker.interning.InterningChecker"/>
+                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.interning.qual.*"/>
+                </jsr308.javac>
+                <copy todir="@{classes.dir}" includeemptydirs="false">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
+                        <exclude name="**/*.java"/>
+                        <exclude name="**/*.properties"/>
+                        <exclude name="**/*-template"/>
+                        <exclude name="**/*.rej"/>
+                        <exclude name="**/*.orig"/>
+                        <exclude name="**/overview.html"/>
+                        <exclude name="**/package.html"/>
+                    </fileset>
+                </copy>
+            </sequential>
+        </macrodef>
+    </target>
+
+    <!-- A copy of the -def-build-classes target. -->
+    <target name="-def-check-nullness-classes" depends="-def-pcompile">
+        <macrodef name="check-nullness-classes">
+            <attribute name="includes"/>
+            <attribute name="excludes" default="${exclude.files} **/package-info.java"/>
+            <attribute name="classes.dir" default="${build.classes.dir}"/>
+            <attribute name="gensrc.dir" default="${build.gensrc.dir}"/>
+            <attribute name="javac.bootclasspath" default="${build.bootstrap.dir}/classes"/>
+            <attribute name="bootclasspath.opt" default="${javac.bootclasspath.opt}"/>
+            <attribute name="classpath" default="${javac.classpath}"/>
+            <attribute name="sourcepath" default="${javac.sourcepath}"/>
+            <attribute name="java.home" default="${boot.java.home}"/>
+            <attribute name="source" default="${javac.source}"/>
+            <attribute name="target" default="${javac.target}"/>
+            <attribute name="release" default="${release}"/>
+            <attribute name="full.version" default="${full.version}"/>
+            <sequential>
+                <echo level="verbose" message="build-classes: excludes=@{excludes}"/>
+                <echo level="verbose" message="build-classes: bootclasspath.opt=@{bootclasspath.opt}"/>
+                <echo level="verbose" message="build-classes: classpath=@{classpath}"/>
+                <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
+                <mkdir dir="@{gensrc.dir}"/>
+                <mkdir dir="@{classes.dir}"/>
+                <pcompile srcdir="${src.classes.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="@{includes}"/>
+                <copy todir="@{gensrc.dir}">
+                    <fileset dir="${src.classes.dir}" includes="@{includes}"/>
+                    <globmapper from="*.properties-template" to="*.properties"/>
+                    <filterset begintoken="$(" endtoken=")">
+                        <filter token="JDK_VERSION" value="${jdk.version}"/>
+                        <filter token="RELEASE" value="@{release}"/>
+                        <filter token="FULL_VERSION" value="@{full.version}"/>
+                    </filterset>
+                </copy>
+                <pcompile srcdir="@{gensrc.dir}"
+                          destdir="@{gensrc.dir}"
+                          includes="**/*.properties"/>
+                <jsr308.javac fork="true"
+                       executable="@{java.home}/bin/javac"
+                       srcdir="${src.classes.dir}:@{gensrc.dir}"
+                       destdir="@{classes.dir}"
+                       includes="@{includes}"
+                       excludes="@{excludes}"
+                       sourcepath="@{sourcepath}"
+                       classpath="@{classpath}"
+                       includeAntRuntime="no"
+                       source="@{source}"
+                       target="@{target}"
+                       debug="${javac.debug}"
+                       debuglevel="${javac.debuglevel}">
+                    <compilerarg value="-implicit:none"/>
+                    <compilerarg value="-Xprefer:source"/>
+                    <compilerarg value="-J-Xbootclasspath/p:@{javac.bootclasspath}"/>
+                    <compilerarg line="@{bootclasspath.opt}"/>
+                    <compilerarg line="${javac.no.jdk.warnings}"/>
+                    <compilerarg line="${javac.version.opt}"/>
+                    <!-- <compilerarg line="${javac.lint.opts}"/> -->
+
+                    <!-- Checker Framework command-line arguments -->
+                    <compilerarg line="-processor org.checkerframework.checker.nullness.NullnessChecker"/>
+                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.nullness.qual.*"/>
+                </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
                         <exclude name="**/*.java"/>
@@ -1035,7 +1248,7 @@
             <attribute name="name"/>
             <attribute name="includes"/>
             <attribute name="options" default=""/>
-            <attribute name="source" default="1.5"/> <!-- FIXME -->
+            <attribute name="source" default="1.7"/>
             <sequential>
                 <property name="javadoc.options" value=""/> <!-- default, can be overridden per user or per project -->
                 <!-- Note: even with this default value, includes
