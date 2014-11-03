@@ -1,6 +1,12 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+----------------------------------------------------------------------
+Version 1.8.8, 1 Dec 2014
+
+Deprecated implicit imports, including the jsr308_imports environment variable.
+
+----------------------------------------------------------------------
 Version 1.8.7, 30 Oct 2014
 
 Base build

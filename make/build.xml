@@ -1052,7 +1052,6 @@
 
                     <!-- Checker Framework command-line arguments -->
                     <compilerarg line="-processor org.checkerframework.checker.interning.InterningChecker"/>
-                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.interning.qual.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
@@ -1130,7 +1129,6 @@
 
                     <!-- Checker Framework command-line arguments -->
                     <compilerarg line="-processor org.checkerframework.checker.nullness.NullnessChecker"/>
-                    <compilerarg value="-J-Djsr308_imports=org.checkerframework.checker.nullness.qual.*"/>
                 </jsr308.javac>
                 <copy todir="@{classes.dir}" includeemptydirs="false">
                     <fileset dir="${src.classes.dir}" includes="@{includes}" excludes="@{excludes}">
