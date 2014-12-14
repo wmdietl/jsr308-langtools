@@ -37,7 +37,7 @@ import java.util.List;
  * RELEASE_8}, this is represented by an {@code IntersectionType} with
  * {@code Number} and {@code Runnable} as its bounds.
  *
- * @implNote Also as of {@link
+ * Also as of {@link
  * javax.lang.model.SourceVersion#RELEASE_8 RELEASE_8}, in the
  * reference implementation an {@code IntersectionType} is used to
  * model the explicit target type of a cast expression.
