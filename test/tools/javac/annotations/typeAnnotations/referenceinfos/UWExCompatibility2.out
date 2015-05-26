@@ -1,0 +1,4 @@
+- compiler.warn.source.no.bootclasspath: 1.6
+UWExCompatibility2.java:22:11: compiler.err.type.annotations.not.supported.in.source: 1.6
+1 error
+1 warning
