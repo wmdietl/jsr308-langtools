@@ -1,6 +1,10 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.9.3, 30 Jun 2015
+
+
+----------------------------------------------------------------------
 Version 1.9.2, 1 Jun 2015
 
 Base build
