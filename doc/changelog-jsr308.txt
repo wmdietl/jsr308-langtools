@@ -3,6 +3,7 @@ For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 Version 1.9.3, 30 Jun 2015
 
+No changes.  Version incremented to match Checker Framework.
 
 ----------------------------------------------------------------------
 Version 1.9.2, 1 Jun 2015
