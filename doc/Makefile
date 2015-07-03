@@ -238,7 +238,7 @@ ${jsr308_www}/favicon-jsr308.png: favicon-jsr308.png ${jsr308_www}
 # Instead, create the directory? Or use /tmp?
 #
 # ${PLUME_LIB}:
-#	cd ${PLUME_LIB}/..; hg clone https://code.google.com/p/plume-lib/ plume-lib
+#	cd ${PLUME_LIB}/..; git clone https://github.com/mernst/plume-lib.git plume-lib
 
 ${PLUME_BIN}: # ${PLUME_LIB}
 

@@ -21,8 +21,9 @@
 
 ;; Start off with this as a compilation (not a grep!) command:
 ;;   search -i -n '[^"]\) (/\*)?@' | grep -v '\.jaif:'
-;; (The search program is http://plume-lib.googlecode.com/hg/bin/search, or
-;; you can use find and grep instead.)
+;; (The search program is
+;; http://raw.github.com/mernst/plume-lib/master/bin/search,
+;; or you can use find and grep instead.)
 
 ;; Then create a macro that does
 ;;   C-x `           (next-error)
