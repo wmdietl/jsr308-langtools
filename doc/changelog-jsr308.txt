@@ -1,6 +1,22 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.9.4, 1 Aug 2015
+
+Moved the jsr308-langtools version control repository from Google Code
+to Bitbucket.  If you have cloned the old repository, adapt the
+.hg/hgrc file to use:
+
+  https://bitbucket.org/typetools/jsr308-langtools
+
+or create a new clone using this command:
+
+  hg clone https://bitbucket.org/typetools/jsr308-langtools
+
+Base build
+  Updated to OpenJDK jdk8u-dev/langtools as of 21 Jul 2015.
+
+----------------------------------------------------------------------
 Version 1.9.3, 1 Jul 2015
 
 Base build
