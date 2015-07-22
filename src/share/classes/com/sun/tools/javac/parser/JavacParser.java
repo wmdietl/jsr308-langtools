@@ -162,6 +162,7 @@ public class JavacParser implements Parser {
         this.allowIntersectionTypesInCast = source.allowIntersectionTypesInCast();
         this.allowTypeAnnotations = source.allowTypeAnnotations();
         this.allowAnnotationsAfterTypeParams = source.allowAnnotationsAfterTypeParams();
+        this.allowTypeAnnotationsOnlyInComments = source.allowTypeAnnotationsOnlyInComments();
         this.keepDocComments = keepDocComments;
         docComments = newDocCommentTable(keepDocComments, fac);
         this.keepLineMap = keepLineMap;
@@ -178,6 +179,14 @@ public class JavacParser implements Parser {
     protected DocCommentTable newDocCommentTable(boolean keepDocComments, ParserFactory fac) {
         return keepDocComments ? new LazyDocCommentTable(fac) : null;
     }
+
+    /** Switch: debug output for type-annotations operations
+     */
+    boolean debugJSR308;
+
+    /** Switch: implicit imports to add to each file
+     */
+    String jsr308_imports;
 
     /** Switch: Should generics be recognized?
      */
@@ -258,6 +267,12 @@ public class JavacParser implements Parser {
     /** Switch: should we allow annotations after the method type parameters?
      */
     boolean allowAnnotationsAfterTypeParams;
+
+    /** JSR 308 local change: should we allow type annotations only in
+     * special comments?
+     * Applies to both allowTypeAnnotations and allowAnnotationsAfterTypeParams.
+     */
+    boolean allowTypeAnnotationsOnlyInComments;
 
     /** Switch: is "this" allowed as an identifier?
      * This is needed to parse receiver types.
@@ -2755,6 +2770,9 @@ public class JavacParser implements Parser {
         mode = prevmode;
         List<JCAnnotation> annotations = buf.toList();
 
+        if (debugJSR308 && kind == Tag.TYPE_ANNOTATION)
+            System.out.println("TA: parsing " + annotations
+                    + " in " + log.currentSourceFile());
         return annotations;
     }
 
@@ -3097,6 +3115,10 @@ public class JavacParser implements Parser {
         ListBuffer<JCTree> defs = new ListBuffer<JCTree>();
         boolean checkForImports = true;
         boolean firstTypeDecl = true;
+        // JSR 308: Add imports
+        Collection<JCTree> commandImports = commandLineImports();
+        for (JCTree commendImport : commandImports)
+            defs.append(commendImport);
         while (token.kind != EOF) {
             if (token.pos > 0 && token.pos <= endPosTable.errorEndPos) {
                 // error recovery
@@ -3135,6 +3157,42 @@ public class JavacParser implements Parser {
         this.endPosTable.setParser(null); // remove reference to parser
         toplevel.endPositions = this.endPosTable;
         return toplevel;
+    }
+
+    private final static String JSR308_IMPORTS = "jsr308.imports";
+    private final static String JSR308_IMPORTS_ALT = "jsr308_imports";
+
+    Collection<JCTree> commandLineImports() {
+        int pos = token.pos;
+        String commandImports = this.jsr308_imports;
+        if (commandImports == null)
+            commandImports = System.getProperty(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getProperty(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS);
+        if (commandImports == null)
+            commandImports = System.getenv(JSR308_IMPORTS_ALT);
+        if (commandImports == null)
+            return new ListBuffer<JCTree>();
+        String[] importClasses = commandImports.split(java.io.File.pathSeparator);
+        ListBuffer<JCTree> imports = new ListBuffer<JCTree>();
+        for (String importClass : importClasses) {
+            if (importClass == null || importClass.length() == 0)
+                continue;
+            String[] idents = importClass.split("\\.");
+            JCExpression pid = toP(F.at(token.pos).Ident(names.fromString(idents[0])));
+            for (int i = 1; i < idents.length; ++i) {
+                Name selector;
+                if (idents[i].equals("*"))
+                    selector = names.asterisk;
+                else
+                    selector = names.fromString(idents[i]);
+                pid = toP(F.at(token.pos).Select(pid, selector));
+            }
+            imports.append(toP(F.at(pos).Import(pid, false)));
+        }
+        return imports;
     }
 
     /** ImportDeclaration = IMPORT [ STATIC ] Ident { "." Ident } [ "." "*" ] ";"
@@ -4054,14 +4112,21 @@ public class JavacParser implements Parser {
             allowStaticInterfaceMethods = true;
         }
     }
+    // JSR 308 local change: true iff we don't require type annotations in comments or
+    // we are in a special annotation comment.
+    private boolean typeAnnotationsOnlyInComments() {
+        return !allowTypeAnnotationsOnlyInComments  ||
+                (S instanceof Scanner &&
+                ((Scanner)S).inAnnotationComment());
+    }
     void checkTypeAnnotations() {
-        if (!allowTypeAnnotations) {
+        if (!allowTypeAnnotations || !typeAnnotationsOnlyInComments()) {
             log.error(token.pos, "type.annotations.not.supported.in.source", source.name);
             allowTypeAnnotations = true;
         }
     }
     void checkAnnotationsAfterTypeParams(int pos) {
-        if (!allowAnnotationsAfterTypeParams) {
+        if (!allowAnnotationsAfterTypeParams || !typeAnnotationsOnlyInComments()) {
             log.error(pos, "annotations.after.type.params.not.supported.in.source", source.name);
             allowAnnotationsAfterTypeParams = true;
         }
