@@ -24,7 +24,7 @@
 #  * You should only run this script if you agree to the Oracle Java SE
 #    Development Kit (JDK) license.
 #  * If the installation fails, please report the problem at
-#      http://code.google.com/p/jsr308-langtools/issues/list .
+#      https://bitbucket.org/typetools/jsr308-langtools/issues?status=new&status=open .
 #    Then, follow the detailed installation instructions at
 #      http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#installing
 #      http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#installation
