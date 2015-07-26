@@ -1,0 +1,11 @@
+language: java
+
+before_script: ant -f make/build.xml clean
+
+script: ant -f make/build.xml
+
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk8
+  - openjdk7
