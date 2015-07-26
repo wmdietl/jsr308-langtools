@@ -1,8 +1,6 @@
 language: java
 
-before_script: ant -f make/build.xml clean
-
-script: ant -f make/build.xml
+script: ./.travis-build.sh
 
 jdk:
   - oraclejdk8
