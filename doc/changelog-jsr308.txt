@@ -1,6 +1,11 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
+Version 1.9.6, 8 Oct 2015
+
+No changes.  Version incremented to match Checker Framework.
+
+----------------------------------------------------------------------
 Version 1.9.5, 1 Sep 2015
 
 Base build
@@ -385,7 +390,7 @@ Changes to accommodate some recent specification changes.
 Bug fixes
   To cleanly separate langtool changes from JDK changes, the latter
   are now in the separate directory src/jdk-changes
-  
+
 Base build
   Updated to OpenJDK 8 langtools as of 31 Aug 2011
   This version of langtools continues to support building on Java 5;
@@ -695,7 +700,7 @@ Functionality
 Base build
   Updated to OpenJDK langtools build b45
 
-----------------------------------------------------------------------  
+----------------------------------------------------------------------
 Version 0.8.5, 17 Jan 2009
 
 Base build
@@ -703,7 +708,7 @@ Base build
 
 Functionality
   Enhanced support for annotations on type parameters
-  
+
 ----------------------------------------------------------------------
 Version 0.8.4, 17 Dec 2008
 
@@ -795,7 +800,7 @@ Base build
 ----------------------------------------------------------------------
 Version 0.7.4, 11 July 2008
 
-Removed support for ARRAY-IN convention 
+Removed support for ARRAY-IN convention
   Moved to the Checker Framework
 
 ----------------------------------------------------------------------
