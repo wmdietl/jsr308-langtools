@@ -8,6 +8,7 @@ after_success:
   - bash trigger-travis.sh typetools annotation-tools $TRAVISTOKEN
   - rm trigger-travis.sh
 
+sudo: false
 
 jdk:
   - oraclejdk8
