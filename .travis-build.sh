@@ -1,4 +1,5 @@
 #!/bin/bash
-cd make
-ant
 
+./.travis-build-without-test.sh
+
+# No testing is done currently
