@@ -986,7 +986,6 @@
 
         <classpath>
           <pathelement location="${env.CHECKERFRAMEWORK}/checker/dist/checker.jar"/>
-          <!-- <pathelement location="/home/mernst/research/types/checker-framework/checker/bin/checker.jar"/> -->
         </classpath>
       </javac>
     </presetdef>
