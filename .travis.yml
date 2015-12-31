@@ -9,9 +9,11 @@ jdk:
 #  - oraclejdk7
   - openjdk7
 
-  # The vertical bar (pipe) means multi-line command in YAML.
+after_success:
   - |
-      if [[ "$TRAVIS_JOB_NUMBER" == *.1 ]] ; then
+      if [[ ($TRAVIS_BRANCH == master) &&
+            ($TRAVIS_PULL_REQUEST == false) &&
+            ( (! $TRAVIS_JOB_NUMBER == *.*) || ($TRAVIS_JOB_NUMBER == *.1) ) ]] ; then
         curl -LO https://raw.github.com/mernst/plume-lib/master/bin/trigger-travis.sh
         sh trigger-travis.sh typetools annotation-tools $TRAVISTOKEN
       fi
