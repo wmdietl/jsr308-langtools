@@ -179,7 +179,7 @@ checkers:
 .install-checker-framework: checkers.zip
 	$(MAKE) -f ${MAKEFILE} test-langtools
 	unzip -q -o checkers.zip
-#	perl -pi -e 's/^(compiler.lib=.*)$/\# \1\ncompiler.lib=..\/jsr308-langtools\/binary\/javac.jar/g' checkers/build.properties
+#	perl -pi -e 's/^(compiler.lib=.*)$/\# \1\ncompiler.lib=..\/jsr308-langtools\/binary\/javac.jar/g' checker/build.properties
 	touch .install-checker-framework
 
 test-checker-framework:
