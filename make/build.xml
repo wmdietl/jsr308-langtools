@@ -142,8 +142,6 @@
     <property name="make.tools.dir" location="${make.dir}/tools"/>
     <property name="src.dir" location="src"/>
     <property name="src.bin.dir" location="${src.dir}/share/bin"/>
-    <!-- JSR 308: a directory that contains changes to the JDK. -->
-    <property name="jdkchanges.classes.dir" location="${src.dir}/jdk-changes"/>
     <property name="src.classes.dir" location="${src.dir}/share/classes"/>
     <property name="test.dir" location="test"/>
 
@@ -226,6 +224,28 @@
             <isset property="import.jdk.src.dir"/>
         </and>
     </condition>
+
+    <!-- JSR 308: test whether a new Java 8 class exists. -->
+    <condition property="boot.java.provides.jdk8">
+        <available
+            ignoresystemclasses="true"
+            classpath="${boot.java.home}/jre/lib/rt.jar" classname="java.lang.FunctionalInterface"/>
+    </condition>
+
+    <!-- JSR 308: a directory that contains changes to the JDK. -->
+    <condition property="jdkchanges.classes.dir"
+               value=""
+               else="${src.dir}/jdk-changes">
+        <isset property="boot.java.provides.jdk8"/>
+    </condition>
+
+    <!-- JSR 308: packages that contain changed JDK classes. -->
+    <condition property="jdkchanges.includes"
+               value=""
+               else="java/lang/ java/lang/annotation/ java/lang/invoke/">
+        <isset property="boot.java.provides.jdk8"/>
+    </condition>
+
 
     <!-- Set the default value of the sourcepath used for javac. -->
     <condition property="javac.sourcepath" value="${build.genstubs.dir}" else="">
