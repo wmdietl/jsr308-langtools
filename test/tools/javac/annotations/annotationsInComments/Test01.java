@@ -28,10 +28,10 @@ class Test01 {
     void t06() {}
 
     @interface AnnoString {
-	String value();
+        String value();
     }
 
     @interface AnnoInt {
-	int value();
+        int value();
     }
 }
