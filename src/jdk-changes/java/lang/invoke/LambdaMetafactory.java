@@ -4,9 +4,6 @@
 
 package java.lang.invoke;
 
-import java.io.Serializable;
-import java.util.Arrays;
-
 public class LambdaMetafactory {
     public static final int FLAG_SERIALIZABLE = 1 << 0;
 
@@ -21,7 +18,7 @@ public class LambdaMetafactory {
                                        MethodHandle implMethod,
                                        MethodType instantiatedMethodType)
             throws LambdaConversionException {
-	return null;
+        return null;
     }
 
     public static CallSite altMetafactory(MethodHandles.Lookup caller,
@@ -29,6 +26,6 @@ public class LambdaMetafactory {
                                           MethodType invokedType,
                                           Object... args)
             throws LambdaConversionException {
-	return null;
+        return null;
     }
 }
