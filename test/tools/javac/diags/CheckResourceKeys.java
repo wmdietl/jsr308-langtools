@@ -271,6 +271,9 @@ public class CheckResourceKeys {
             // -XD option names
             "process.packages",
             "ignore.symbol.file",
+            // type annotations extensions
+            "jsr308.imports",
+            "invalid.anno.comment.char",
             // prefix/embedded strings
             "compiler.",
             "compiler.misc.",
