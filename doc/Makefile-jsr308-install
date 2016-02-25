@@ -26,8 +26,8 @@
 #  * If the installation fails, please report the problem at
 #      https://bitbucket.org/typetools/jsr308-langtools/issues?status=new&status=open .
 #    Then, follow the detailed installation instructions at
-#      http://types.cs.washington.edu/checker-framework/current/README-jsr308.html#installing
-#      http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#installation
+#      http://types.cs.washington.edu/jsr308/current/README-jsr308.html#installing
+#      http://types.cs.washington.edu/checker-framework/current/checker-framework-manual.html#installation
 #  * Except for the default target, this Makefile should be run in
 #    #${JSR308}, which defaults to ~/jsr308 .
 

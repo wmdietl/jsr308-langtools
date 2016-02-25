@@ -134,4 +134,4 @@ AbstractTypeProcessor handles these cases.
 
 ===========================================================
 References
-[1] http://types.cs.washington.edu/checker-framework/current/checkers-manual.html#annotations-in-comments
+[1] http://types.cs.washington.edu/checker-framework/current/checker-framework-manual.html#annotations-in-comments
