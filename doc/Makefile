@@ -13,6 +13,8 @@ RELEASEDATE ?= `date '+%Y%m%d'`
 
 CHECKLINK ?= PERL5LIB=/homes/gws/mernst/bin/src/perl:/homes/gws/mernst/bin/src/perl/share/perl5:/homes/gws/mernst/bin/src/perl/lib64/perl5:/homes/gws/mernst/research/steering/colony-2003/experiment-scripts:/usr/share/perl5/:/homes/gws/jburke/perl_lib ${PLUME_BIN}/checklink
 
+HTML5VALIDATOR = (export PATH=/homes/gws/mernst/java/jdk8/bin:${PATH}; html5validator)
+
 export PERLLIB := ${PERLLIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
 export PERL5LIB := ${PERL5LIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_perl/5.10.0
 
@@ -34,7 +36,7 @@ html: annotation-extensions.html design.html type-quals.html
 
 # Check HTML
 validate:
-	html5validator jsr308-webpage.html jsr308-faq.html jsr308-changes.html README-jsr308.html
+	${HTML5VALIDATOR}
 
 # Update the main webpage & FAQ only, but not any of the supporting documents.
 # Useful to fix a minor typo (but then you might just want to edit both versions, identically).
@@ -199,12 +201,12 @@ ${jsr308_www}/java-type-qualifiers.html: type-quals.html ${PLUME_BIN}
 ###########################################################################
 
 ${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html ${jsr308_www} ${PLUME_BIN}
-	html5validator
+	${HTML5VALIDATOR}
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ${jsr308_www}/jsr308-faq.html: jsr308-faq.html ${jsr308_www} ${PLUME_BIN}
-	html5validator
+	${HTML5VALIDATOR}
 	\cp -f $< $@
 #	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
@@ -212,12 +214,12 @@ ${jsr308_www}/changelog-jsr308.txt: changelog-jsr308.txt ${jsr308_www}
 	\cp -f $< $@
 
 ${jsr308_www}/README-jsr308.html: README-jsr308.html ${jsr308_www} ${PLUME_BIN}
-	html5validator
+	${HTML5VALIDATOR}
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates README-jsr308.html
 
 ${jsr308_spec}/jsr308-changes.html: jsr308-changes.html ${jsr308_spec} ${PLUME_BIN}
-	html5validator
+	${HTML5VALIDATOR}
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
