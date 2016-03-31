@@ -1,8 +1,7 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Type annotations FAQ</title>
   <link rel="icon" type="image/png" href="favicon-jsr308.png" />
 </head>
@@ -68,7 +67,7 @@ There is a separate
       <li><a href="#syntax">Syntax of type annotations</a>
         <ul>
           <li><a href="#return-type">Does an annotation before a method refer to the return type or to the method?</a></li>
-          <li><a href="#array-syntax-meaning">What is the meaning of array annotations such as <tt>@NonNull Object @Nullable []</tt>?</a></li>
+          <li><a href="#array-syntax-meaning">What is the meaning of array annotations such as <code>@NonNull Object @Nullable []</code>?</a></li>
           <li><a href="#array-syntax">I don't like array and receiver annotations.</a></li>
         </ul></li>
       <li><a href="#features">Features in the Type Annotations specification</a>
@@ -76,7 +75,7 @@ There is a separate
           <li><a href="#type-of-an-object">How do I determine the annotation on an object?</a></li>
           <li><a href="#statement_annotations">Is there a way to annotate statements?</a></li>
           <li><a href="#feature-x">Should the Type Annotations specification support feature <em>X</em>?</a></li>
-          <li><a href="#specific-annotations">Why doesn't the Type Annotations specification define annotations such as <tt>@NonNull</tt>?</a></li>
+          <li><a href="#specific-annotations">Why doesn't the Type Annotations specification define annotations such as <code>@NonNull</code>?</a></li>
           <li><a href="#jsr305">What is the relationship between JSR 308 and JSR 305?</a></li>
           <li><a href="#modifying-the-specification">Is the Type Annotations specification set in stone?</a></li>
         </ul></li>
@@ -175,11 +174,11 @@ type-annotated code:
 </p>
 <ul>
   <li>
-    1 annotation per 62 lines for nullness annotations (<tt>@NonNull</tt>, <tt>@Nullable</tt>, etc.)
+    1 annotation per 62 lines for nullness annotations (<code>@NonNull</code>, <code>@Nullable</code>, etc.)
     <!-- (/ (+ 4640 3961 10798) (+ 107 35 167)) -->
   </li>
   <li>
-    1 annotation per 1736 lines for interning annotations (<tt>@Interned</tt>)
+    1 annotation per 1736 lines for interning annotations (<code>@Interned</code>)
     <!-- (/ 224048 129) -->
   </li>
   <li>
@@ -318,7 +317,7 @@ Annotations compiler, which recognizes comments containing type
 annotations.  Other developers can compile the annotated code using any
 Java compiler, which will ignore the type annotations.  The Type
 Annotations compiler produces bytecodes that are identical to those
-produced by javac, so the <tt>.class</tt> files can be used in any JVM.
+produced by javac, so the <code>.class</code> files can be used in any JVM.
 This also gives you an easy way to convince your colleagues to try type
 annotations and the Checker Framework, or to use a
 type-checker even if your colleagues do not want to.
@@ -413,19 +412,19 @@ href="../specification/java-annotation-design.html#target-meta-annotation">Targe
 </p>
 
 
-<h3 id="array-syntax-meaning">What is the meaning of array annotations such as <tt>@NonNull Object @Nullable []</tt>?</h3>
+<h3 id="array-syntax-meaning">What is the meaning of array annotations such as <code>@NonNull Object @Nullable []</code>?</h3>
 
 <p>
-<tt>@NonNull Object @Nullable []</tt> is a possibly-null array of non-null
+<code>@NonNull Object @Nullable []</code> is a possibly-null array of non-null
 objects.  Note that even though the first token in the type is
-&ldquo;<tt>@NonNull</tt>&rdquo;, that annotation applies to the element
-type <tt>Object</tt>.  The annotation <tt>@Nullable</tt> applies to the
-array (<tt>[]</tt>).
+&ldquo;<code>@NonNull</code>&rdquo;, that annotation applies to the element
+type <code>Object</code>.  The annotation <code>@Nullable</code> applies to the
+array (<code>[]</code>).
 </p>
 
 <p>
 Similarly,
-<tt>@Nullable Object @NonNull []</tt> is a non-null array of possibly-null
+<code>@Nullable Object @NonNull []</code> is a non-null array of possibly-null
 objects.
 </p>
 
@@ -515,7 +514,7 @@ means.
 </p>
 
 
-<h3 id="specific-annotations">Why doesn't the Type Annotations specification define annotations such as <tt>@NonNull</tt>?</h3>
+<h3 id="specific-annotations">Why doesn't the Type Annotations specification define annotations such as <code>@NonNull</code>?</h3>
 
 <p>
 Defining annotations is beyond the scope of the Type Annotations
@@ -530,7 +529,7 @@ define such types.
 Type Annotations (JSR 308) is a language extension that makes existing and
 future annotations more useful to programmers.  By contrast, Annotations
 for Software Defect Detection (JSR 305) defines some specific annotations,
-such as <tt>@Nonnull</tt> and <tt>@Positive</tt>.  The JSR 305 annotations
+such as <code>@Nonnull</code> and <code>@Positive</code>.  The JSR 305 annotations
 are most useful if they can be written on types, so JSR 305 would need JSR 308
 to achieve its full potential.
 JSR 305 has been abandoned; there has been no activity by its expert
@@ -582,7 +581,7 @@ JCP codename, &ldquo;JSR 308&rdquo;.
 <hr />
 
 <p>
-Last updated: April 25, 2015.
+Last updated: March 31, 2016.
 </p>
 
 <p>

@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html>
 <head>
   <title>Changelog for Type Annotations (JSR 308) specification</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <link rel="icon" type="image/png" href="../favicon-jsr308.png" />
 </head>
 <body>
@@ -22,7 +21,7 @@ The current stable version of the specification is available on the web
 (<a href="java-annotation-design.pdf">PDF</a>,
 <a href="java-annotation-design.html">HTML</a>).
 The current development version of the specification is available in the 
-<tt>doc/</tt> directory of the
+<code>doc/</code> directory of the
 <a href="https://bitbucket.org/typetools/jsr308-langtools/">jsr308-langtools</a> repository.
 </p>
 
@@ -68,19 +67,19 @@ The current development version of the specification is available in the
     Classfile changes:
     <ul>
       <li>
-        Remove unused target_info <tt>method_reference_target</tt>.
+        Remove unused target_info <code>method_reference_target</code>.
       </li>
     </ul>
 
     Clarifications:
     <ul>
       <li>
-        Give examples of interaction between multiple <tt>@Target</tt>
+        Give examples of interaction between multiple <code>@Target</code>
         meta-annotations and fully-qualified type names.
       </li>
       <li>
-        Explain why instanceof uses <tt>offset_target</tt> but cast uses
-        <tt>type_argument_target</tt>.
+        Explain why instanceof uses <code>offset_target</code> but cast uses
+        <code>type_argument_target</code>.
       </li>
       <li>
         Move examples of classfile annotations, which are not normative,
@@ -103,7 +102,7 @@ The current development version of the specification is available in the
     Classfile changes:
     <ul>
       <li>
-        Fix bug in <tt>type_path_entry</tt> struct definition comments.
+        Fix bug in <code>type_path_entry</code> struct definition comments.
       </li>
     </ul>
 
@@ -113,13 +112,13 @@ The current development version of the specification is available in the
         No dynamic dispatching occurs on the receiver of an inner constructor.
       </li>
       <li>
-        Explain the rationale for the syntax <tt>java.lang.@NonNull
-        String</tt>, as opposed to <tt>java.lang.@NonNull String</tt>.
+        Explain the rationale for the syntax <code>java.lang.@NonNull
+        String</code>, as opposed to <code>java.lang.@NonNull String</code>.
       </li>
       <li>
         Explain why declaration annotations on a type parameter appear in
-        the classfile in <tt>type_annotation</tt> elements rather than
-        <tt>annotation</tt> elements.
+        the classfile in <code>type_annotation</code> elements rather than
+        <code>annotation</code> elements.
       </li>
       <li>
         The receiver parameter is not persisted as a formal parameter in
@@ -151,14 +150,14 @@ The current development version of the specification is available in the
         initializer code, not with the field being initialized.
       </li>
       <li>
-        Change <tt>method_reference_receiver</tt> to
-        <tt>method_reference</tt>, and change 
-        <tt>constructor_reference_receiver</tt> to
-        <tt>constructor_reference</tt>. 
+        Change <code>method_reference_receiver</code> to
+        <code>method_reference</code>, and change 
+        <code>constructor_reference_receiver</code> to
+        <code>constructor_reference</code>. 
       </li>
       <li>
-        Change <tt>invocation_type_argument_target</tt> and
-        <tt>method_reference_type_argument</tt> to <tt>type_argument_target</tt>.
+        Change <code>invocation_type_argument_target</code> and
+        <code>method_reference_type_argument</code> to <code>type_argument_target</code>.
       </li>
     </ul>
     Clarifications:
@@ -176,41 +175,41 @@ The current development version of the specification is available in the
       <li>
         In a qualified type, the type annotations appear before the simple
         name, not before the package names.  For example, a programmer writes
-        <tt>package1.package2. @Annotation SimpleName</tt> rather than
-        <tt>@Annotation package1.package2.SimpleName</tt>.
+        <code>package1.package2. @Annotation SimpleName</code> rather than
+        <code>@Annotation package1.package2.SimpleName</code>.
       </li>
     </ul>
     Classfile changes:
     <ul>
       <li>
-        Change <tt>attribute_length</tt> from u2 to u4, for consistency
+        Change <code>attribute_length</code> from u2 to u4, for consistency
         with <a href="http://docs.oracle.com/javase/specs/jvms/se7/html/jvms-4.html#jvms-4.7">other attributes</a>.
       </li>
       <li>
-        Change <tt>target_type</tt> from u2 to u1; with less than 40 values
+        Change <code>target_type</code> from u2 to u1; with less than 40 values
         currently used, the likelihood that more than 256 will be needed
         seems remote.
       </li>
       <li>
-        Renumber <tt>target_type</tt> constannts to make
+        Renumber <code>target_type</code> constannts to make
         uses within code blocks start at 0x40, and to number by ones
         instead of by twos.
        </li>
       <li>
-        Move annotations that target instructions from <tt>method_info</tt>
-        structure to <tt>Code</tt> attribute.
+        Move annotations that target instructions from <code>method_info</code>
+        structure to <code>Code</code> attribute.
       </li>
       <li>
-        In <tt>type_annotation</tt> structure, put the new JSR 308 fields at
+        In <code>type_annotation</code> structure, put the new JSR 308 fields at
         the beginning, not the end.
       </li>
       <li>
         Change the representation of compound types (parameterized,
         wildcard, array, and nested types), which have multiple annotatable
         parts.  The path through the compound type, to the annotated part,
-        is now specified by a <tt>type_path</tt> structure rather than a
-        <tt>location_length</tt> and <tt>location</tt> field.  This 
-        eliminates the need for the odd-numbered <tt>target_type</tt>
+        is now specified by a <code>type_path</code> structure rather than a
+        <code>location_length</code> and <code>location</code> field.  This 
+        eliminates the need for the odd-numbered <code>target_type</code>
         values and also makes parsing easier.
       </li>
       <li>
@@ -218,8 +217,8 @@ The current development version of the specification is available in the
       </li>
       <li>
         Add new target_type constants, to support lambda:
-        <tt>LAMBDA_FORMAL_PARAMETER</tt> and
-        <tt>METHOD_REFERENCE_TYPE_ARGUMENT</tt>
+        <code>LAMBDA_FORMAL_PARAMETER</code> and
+        <code>METHOD_REFERENCE_TYPE_ARGUMENT</code>
       </li>
       <li>
         Handle the fact that Lambda allows a cast to an intersection type:  use a
@@ -228,39 +227,39 @@ The current development version of the specification is available in the
         reference receivers.  Renumber target_type for consistency.
       </li>
       <li>
-        Rename <tt>target_type</tt> structure and field names.
+        Rename <code>target_type</code> structure and field names.
         <ul>
           <li>&sect;3.2<br/>
-              <tt>TYPECAST</tt> &rarr; <tt>CAST</tt><br/>
-              <tt>NEW_TYPE_ARGUMENT</tt> &rarr; <tt>CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT</tt><br/>
-              <tt>METHOD_TYPE_ARGUMENT</tt> &rarr; <tt>METHOD_INVOCATION_TYPE_ARGUMENT</tt>
+              <code>TYPECAST</code> &rarr; <code>CAST</code><br/>
+              <code>NEW_TYPE_ARGUMENT</code> &rarr; <code>CONSTRUCTOR_INVOCATION_TYPE_ARGUMENT</code><br/>
+              <code>METHOD_TYPE_ARGUMENT</code> &rarr; <code>METHOD_INVOCATION_TYPE_ARGUMENT</code>
           </li>
           <li>&sect;3.3.1<br/>
-              <tt>typeparam_target</tt> &rarr; <tt>type_parameter_target</tt><br/>
-              <tt>param_index</tt> &rarr; <tt>type_parameter_index</tt>
+              <code>typeparam_target</code> &rarr; <code>type_parameter_target</code><br/>
+              <code>param_index</code> &rarr; <code>type_parameter_index</code>
 
           </li>
           <li>&sect;3.3.2<br/>
-              <tt>type_index</tt> &rarr; <tt>supertype_index</tt>
+              <code>type_index</code> &rarr; <code>supertype_index</code>
 
           </li>
           <li>&sect;3.3.3<br/>
-              <tt>typeparam_bound_target</tt> &rarr; <tt>type_parameter_bound_target</tt><br/>
-              <tt>param_index</tt> &rarr; <tt>type_parameter_index</tt>
+              <code>typeparam_bound_target</code> &rarr; <code>type_parameter_bound_target</code><br/>
+              <code>param_index</code> &rarr; <code>type_parameter_index</code>
 
           </li>
           <li>&sect;3.3.5<br/>
-              <tt>methodparam_target</tt> &rarr; <tt>method_parameter_target</tt><br/>
-              <tt>parameter_index</tt> &rarr; <tt>method_parameter_index</tt>
+              <code>methodparam_target</code> &rarr; <code>method_parameter_target</code><br/>
+              <code>parameter_index</code> &rarr; <code>method_parameter_index</code>
           </li>
           <li>&sect;3.3.6<br/>
-              <tt>exception_target</tt> &rarr; <tt>throws_target</tt><br/>
-              <tt>type_index</tt> &rarr; <tt>throws_type_index</tt>
+              <code>exception_target</code> &rarr; <code>throws_target</code><br/>
+              <code>type_index</code> &rarr; <code>throws_type_index</code>
 
           </li>
           <li>&sect;3.3.10<br/>
-              <tt>typearg_target</tt> &rarr; <tt>invocation_type_argument_target</tt><br/>
-              <tt>type_index</tt> &rarr; <tt>type_argument_index</tt>
+              <code>typearg_target</code> &rarr; <code>invocation_type_argument_target</code><br/>
+              <code>type_index</code> &rarr; <code>type_argument_index</code>
           </li>
         </ul>
       </li>
@@ -292,7 +291,7 @@ The current development version of the specification is available in the
       </li>
       <li>
         It is not permitted to write a declaration annotation on the
-        receiver (<tt>this</tt>) formal parameter declaration.
+        receiver (<code>this</code>) formal parameter declaration.
       </li>
       <li>
         It is impossible to annotate the receiver of an anonymous class
@@ -321,7 +320,7 @@ The current development version of the specification is available in the
     <ul>
       <li>
         New receiver syntax.  It is permitted to write an explicit first
-        formal parameter for the method receiver (<tt>this</tt>), which has
+        formal parameter for the method receiver (<code>this</code>), which has
         no run-time effect nor any purpose other than serving as a place
         for the receiver annotation.  Then, no special case for receiver
         annotations is needed.
@@ -330,27 +329,27 @@ The current development version of the specification is available in the
         is now written as
         <pre>  public String toString(@Readonly MyClass this) { ... }</pre>
         The syntax enables annotations on type parameters, outer
-        <tt>this</tt> types, etc.
+        <code>this</code> types, etc.
       </li>
       <li>
         Annotations are not permitted on class literals, nor arrays thereof.
       </li>
       <li>
         A type annotation on a nested type before the type's simple name,
-        as in <tt>Map.@NonNull Entry</tt>.
+        as in <code>Map.@NonNull Entry</code>.
       </li>
       <li>
-        If an annotation has no <tt>@Target</tt> meta-annotation, then it applies
+        If an annotation has no <code>@Target</code> meta-annotation, then it applies
         only to the ElementTypes that were supported in Java SE 5.
         An annotation that is applicable to both types and declarations
         (which would be bad style) is permitted to be written on a
-        <tt>void</tt>-returning method.
+        <code>void</code>-returning method.
       </li>
     </ul>
     Classfile changes:
     <ul>
       <li>
-        Rename <tt>extended_annotation</tt> to <tt>type_annotation</tt>.
+        Rename <code>extended_annotation</code> to <code>type_annotation</code>.
       </li>
       <li>
         Add a class file format for annotations on static nested classes.
@@ -359,26 +358,26 @@ The current development version of the specification is available in the
         Change the class file format for exception parameters (catch clauses).
       </li>
       <li>
-        Remove <tt>wildcard_bound</tt> and <tt>wildcard_bound_target</tt>.
+        Remove <code>wildcard_bound</code> and <code>wildcard_bound_target</code>.
         Wildcards are instead expressed in the location array used for type
         arguments, array element types, and static nested types.
       </li>
       <li>
-        Make <tt>typeparam_bound_target</tt> reserve an index for an
-        implicit type variable upper bound of <tt>java.lang.Object</tt>.
+        Make <code>typeparam_bound_target</code> reserve an index for an
+        implicit type variable upper bound of <code>java.lang.Object</code>.
       </li>
       <li>
-        Change the <tt>target_type</tt> field of <tt>type_annotation</tt>
-        from <tt>u1</tt> to <tt>u2</tt>, to
+        Change the <code>target_type</code> field of <code>type_annotation</code>
+        from <code>u1</code> to <code>u2</code>, to
         permit future expansion and to improve word-alignment of the
         classfile.
       </li>
       <li>
-        Renumber all the enumeration constants of <tt>target_type</tt>.
+        Renumber all the enumeration constants of <code>target_type</code>.
       </li>
       <li>
-        Bug fix: Java forbids type parameters in <tt>catch</tt>, not in
-        <tt>throws</tt>.
+        Bug fix: Java forbids type parameters in <code>catch</code>, not in
+        <code>throws</code>.
       </li>
     </ul>
     Specification clarifications:
@@ -386,8 +385,8 @@ The current development version of the specification is available in the
       <li>
         Clarify the difference between type uses and other type names that
         appear in Java code.  Examples of type names that are not type uses
-        are <tt>import</tt> statements and class constants such as
-        <tt>int.class</tt>.  Type annotations cannot be written on these
+        are <code>import</code> statements and class constants such as
+        <code>int.class</code>.  Type annotations cannot be written on these
         type names.  This distinction now appears in the Java Language
         Specification as well.
       </li>
@@ -407,7 +406,7 @@ The current development version of the specification is available in the
         the source code are present in the classfile.  Classfile
         indexing is with respect to the complete type, regardless of
         abbreviated types written in source code.  Classfile indexing
-        assumes that all optional <tt>extends Object</tt> clauses are present.
+        assumes that all optional <code>extends Object</code> clauses are present.
       </li>
     </ul>
     Other specification document changes:
@@ -651,8 +650,8 @@ The current development version of the specification is available in the
       <li>
         In class file format, add missing fields from attributes for method
         parameter generic types and method type arguments.  Also
-        cross-reference between the table of <tt>target_type</tt> and
-        sections explaining the <tt>reference_info</tt> definition.
+        cross-reference between the table of <code>target_type</code> and
+        sections explaining the <code>reference_info</code> definition.
       </li>
       <li>
         Add to-do item:  ambiguity in class file format for annotations on
@@ -681,7 +680,7 @@ The current development version of the specification is available in the
         Many writing improvements and clarifications,
         including discussions of duplicate annotations, subclassing annotations,
         and annotations as arguments to annotations, disambiguating type and
-        declaration annotations, annotations on <tt>new</tt>, and receivers
+        declaration annotations, annotations on <code>new</code>, and receivers
         (including an explicit definition of the term
         &ldquo;receiver&rdquo;).  Also expand several examples
         to show actual declarations instead of just explaining them in the text.
@@ -698,7 +697,7 @@ The current development version of the specification is available in the
         annotation changes).  Emphasize again that the
         specification is not set in stone.  Add another possible (but
         currently out of scope) extension to annotations:  the
-        <tt>@ValueMember</tt> proposal for the <em>SingleElementAnnotation</em>
+        <code>@ValueMember</code> proposal for the <em>SingleElementAnnotation</em>
         grammar rule. 
       </li>
       <li>
@@ -830,7 +829,7 @@ The current development version of the specification is available in the
     Changes to normative section:
     <ul>
       <li>
-        Change <tt>TYPEREF</tt> to <tt>TYPE_USE</tt> in <tt>ElementType</tt> enum.
+        Change <code>TYPEREF</code> to <code>TYPE_USE</code> in <code>ElementType</code> enum.
       </li>
       <li>
         Note that class file format ought to store the annotations for stack

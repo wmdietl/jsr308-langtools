@@ -34,7 +34,7 @@ html: annotation-extensions.html design.html type-quals.html
 
 # Check HTML
 validate:
-	validate jsr308-webpage.html jsr308-faq.html jsr308-changes.html README-jsr308.html
+	html5validator jsr308-webpage.html jsr308-faq.html jsr308-changes.html README-jsr308.html
 
 # Update the main webpage & FAQ only, but not any of the supporting documents.
 # Useful to fix a minor typo (but then you might just want to edit both versions, identically).
@@ -199,12 +199,12 @@ ${jsr308_www}/java-type-qualifiers.html: type-quals.html ${PLUME_BIN}
 ###########################################################################
 
 ${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html ${jsr308_www} ${PLUME_BIN}
-	validate $<
+	html5validator
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ${jsr308_www}/jsr308-faq.html: jsr308-faq.html ${jsr308_www} ${PLUME_BIN}
-	validate $<
+	html5validator
 	\cp -f $< $@
 #	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
@@ -212,12 +212,12 @@ ${jsr308_www}/changelog-jsr308.txt: changelog-jsr308.txt ${jsr308_www}
 	\cp -f $< $@
 
 ${jsr308_www}/README-jsr308.html: README-jsr308.html ${jsr308_www} ${PLUME_BIN}
-	validate $<
+	html5validator
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates README-jsr308.html
 
 ${jsr308_spec}/jsr308-changes.html: jsr308-changes.html ${jsr308_spec} ${PLUME_BIN}
-	validate $<
+	html5validator
 	\cp -f $< $@
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 

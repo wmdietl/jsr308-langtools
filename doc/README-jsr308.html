@@ -1,10 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <title>Type Annotations (JSR 308) Compiler README</title>
-  <link rel="icon" type="image/png" href="favicon-jsr308.png"></link>
+  <link rel="icon" type="image/png" href="favicon-jsr308.png" />
 
 <!--
 <style type="text/css">
@@ -157,7 +156,7 @@ Also, if you use an Apple <b>Macintosh (Mac OS X)</b> computer, you must
 Note that while these instructions install the Type Annotations compiler, you do not
 have to make it your default compiler.  For example, you
 could use the Type Annotations compiler only for running pluggable type-checkers.
-Also, you can use javac's <tt>-target</tt> argument to generate bytecodes
+Also, you can use javac's <code>-target</code> argument to generate bytecodes
 that are compatible with earlier JVMs, so that you can work seamlessly with
 colleagues who are using an earlier version of Java.
 </p>
@@ -193,7 +192,7 @@ href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
     later (but no other copy of the JDK will be modified).  You can
     put the new installation anywhere you want; a common place is in a new
     directory <code>~/jsr308</code>.  We will call that directory
-    <tt>$JSR308</tt>.
+    <code>$JSR308</code>.
     <ol type="a">
       <li>
 	Download a <a href="http://jdk7.java.net/archive/">JDK 7 binary snapshot</a> or <a
@@ -236,9 +235,9 @@ export PATH=$JAVA_HOME/bin:$PATH
 	do the following:
           <ol>
 	    <li>Install Java 8</li>
-	    <li>Copy the <tt>jdk1.8.0</tt> and <tt>jre1.8.0</tt> directories from <tt>Program Files\Java\</tt> to the desktop</li>
+	    <li>Copy the <code>jdk1.8.0</code> and <code>jre1.8.0</code> directories from <code>Program Files\Java\</code> to the desktop</li>
             <li>Uninstall Java 8</li>
-	    <li>Move the <tt>jdk/jre</tt> directories back to <tt>Program Files\Java\</tt></li>
+	    <li>Move the <code>jdk/jre</code> directories back to <code>Program Files\Java\</code></li>
           </ol>
         If you want to be able to run javac from Cygwin, then set
 	environment variables as for Linux, above.
@@ -359,7 +358,7 @@ in the following ways:
 
 <ul>
   <li>This documentation file has been included.</li>
-  <li>A <tt>doc/</tt> subdirectory contains other design documentation.</li>
+  <li>A <code>doc/</code> subdirectory contains other design documentation.</li>
   <li>
     The 
     compiler parses annotations written in <a
@@ -436,7 +435,7 @@ UW Type Annotations compiler.
 
 <p>
 This mechanism is intended only to support writing import statements and
-the new  receiver (&ldquo;<tt>this</tt>&rdquo;) syntax, as in
+the new  receiver (&ldquo;<code>this</code>&rdquo;) syntax, as in
 </p>
 <pre>
 public boolean getResult(/*>>> @ReadOnly TestRun this*/) { ... }
@@ -455,7 +454,7 @@ mechanism.
 <h5 id="type-annotations-in-java-7-classfiles">Type annotations in Java 6 or 7 classfiles</h5>
 
 <p>
-If you specify the <tt>-source 6 -target 6</tt> or <tt>-source 7 -target 7</tt>
+If you specify the <code>-source 6 -target 6</code> or <code>-source 7 -target 7</code>
 command-line options and
 the compiler reads type annotations from comments, then the compiler writes
 the type annotations to the generated classfile.
@@ -466,7 +465,7 @@ enables separate compilation.
 <p>
 However, these annotations will be ignored by an ordinary Java 8 compiler,
 which won't even look for type annotations in a classfile generated with
-<tt>-target 7</tt> or earlier.
+<code>-target 7</code> or earlier.
 </p>
 
 
@@ -719,7 +718,7 @@ in the <a href="changelog-jsr308.txt">changelog</a>.
 The Type Annotations compiler and the Checker Framework are typically
 released together; one set of instructions releases both.  See file
 <!-- This file is not linked on the web. -->
-<tt>checker-framework/release/README-maintainers.html</tt> in the Checker
+<code>checker-framework/release/README-maintainers.html</code> in the Checker
 Framework.
 See that file also for information about the different repositories
 available in the jsr308-langtools project and about other development
