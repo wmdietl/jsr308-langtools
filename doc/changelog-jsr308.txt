@@ -5,7 +5,7 @@ For changes to the SPECIFICATION, see file jsr308-changes.html.
 Version 2.0.0, 2 May 2016
 
 Base build
-  Updated to OpenJDK jdk8u-dev/langtools as of 10 Apr 2016.
+  Updated to OpenJDK jdk8u-dev/langtools as of 1 May 2016.
 
 ----------------------------------------------------------------------
 Version 1.9.13, 1 Apr 2016
