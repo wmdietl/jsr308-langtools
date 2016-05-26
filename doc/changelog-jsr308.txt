@@ -2,6 +2,12 @@ This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 ----------------------------------------------------------------------
+Version 2.0.1, 1 Jun 2016
+
+Base build
+  Updated to OpenJDK jdk8u-dev/langtools as of 26 May 2016.
+
+----------------------------------------------------------------------
 Version 2.0.0, 2 May 2016
 
 Base build
