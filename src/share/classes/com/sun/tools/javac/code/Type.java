@@ -96,9 +96,16 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
     };
 
     /** If this switch is turned on, the names of type variables
-     *  and anonymous classes are printed with hashcodes appended.
+     *  and anonymous classes are printed with unique IDs or hashcodes appended.
      */
     public static boolean moreInfo = false;
+
+    /**
+     * The number of objects created so far.
+     * This should really be thread-local to account for the possibility
+     * of multiple javac processes running in the same JVM.
+     */
+    static int uidCounter = 0;
 
     /** The defining class / interface / package / type variable.
      */
@@ -294,7 +301,7 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
             ? "<none>"
             : tsym.name.toString();
         if (moreInfo && hasTag(TYPEVAR)) {
-            s = s + hashCode();
+            s = s + ((TypeVar)this).uid;
         }
         return s;
     }
@@ -1277,6 +1284,9 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
          */
         public Type lower;
 
+        /** The unique ID for this object. */
+        final int uid = uidCounter++;
+
         public TypeVar(Name name, Symbol owner, Type lower) {
             super(null);
             tsym = new TypeVariableSymbol(0, name, this, owner);
@@ -1370,7 +1380,7 @@ public abstract class Type extends AnnoConstruct implements TypeMirror {
         @Override
         public String toString() {
             return "capture#"
-                + (hashCode() & 0xFFFFFFFFL) % Printer.PRIME
+                + uid
                 + " of "
                 + wildcard;
         }
