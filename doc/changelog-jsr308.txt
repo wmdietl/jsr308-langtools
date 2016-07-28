@@ -4,6 +4,9 @@ For changes to the SPECIFICATION, see file jsr308-changes.html.
 ----------------------------------------------------------------------
 Version 2.1.1, 1 Aug 2016
 
+Bug fix for JDK-8160928  backported from JDK 9
+(https://bugs.openjdk.java.net/browse/JDK-8160928)
+
 Base build
   Updated to OpenJDK jdk8u-dev/langtools as of 28 Jul 2016.
 
