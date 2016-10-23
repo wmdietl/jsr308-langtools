@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <title>Type annotations: Get Started</title>
+  <link rel="icon" type="image/png" href="favicon-jsr308.png" />
+</head>
+<body>
+
+<!--
+  ***************************************************************************
+  
+  This document is now obsolete; it has been folded into the Checker
+  Framework manual.  Also, there is now a separate tutorial.
+
+  ***************************************************************************
+-->
+
+<h1>Get Started</h1>
+
+<p>
+The Checker Framework distribution includes many useful checkers that
+help developers to detect, and more importantly to prevent, errors in
+their Java programs.  The checkers are easy to use and are invoked as
+arguments to <code>javac</code>.
+</p>
+
+<p>
+Using the checkers, developers can express important information about
+their variables, such as whether a variable may be null, whether a
+value is intended to be side-effected, or whether a String is
+interned.  As a result, the checkers can detect null pointer
+exceptions, incorrect mutations, errors in equality testing, among
+other problems.
+</p>
+
+<p>
+This tutorial will teach you how to install and start using the
+checkers.  For more details, see the
+<a href="current/checker-framework-manual.html">Checker Framework Manual</a>.
+The manual discusses how to use the checkers and each checker in greater
+detail.
+</p>
+
+<h2>Requirements</h2>
+
+Running the Checker Framework requires JDK 7 to be installed.  You can get JDK
+7 from
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/">Oracle</a>
+or elsewhere.  If you are using Apple Mac OS X, you can either use
+<a href="http://developer.apple.com/java">Apple's implementation</a> or
+<a href="http://landonf.bikemonkey.org/static/soylatte/">SoyLatte</a>.
+
+
+<h2>Installation</h2>
+
+<ol>
+  <li>
+  Download a copy of <a href="current/javac-all.jar">Checkers jar</a>
+  and the <a href="current/jsr308-javac">jsr308-javac script file</a>
+  in the same directory.  Preferably you would put them in one of your
+  PATH directories.</li>
+
+  <li>
+  Verify that you installed the correct version.
+  <pre>  $ jsr308-javac -version
+  javac 1.8.0-jsr308-1.8.1</pre>
+  </li>
+
+  <li> You're ready to start using the checkers!
+  </li>
+</ol>
+
+<h2>Running a Checker</h2>
+
+<p>
+The Checker Framework distribution includes many checkers.  This tutorial
+describes using the Nullness Checker, a checker for detecting nullness
+errors.
+</p>
+
+<p>
+To run a checker on a source file, use the following command
+(where <code>jsr308-javac</code> is the JSR 308 compiler): <br />
+  <code>jsr308-javac -processor [processor name] source-files ...</code>
+</p>
+
+<ol>
+  <li>Let's consider this very simple Java class.  One local variable is
+  annotated as <code>NonNull</code>, indicating that <code>ref</code>
+  must be a reference to a non-null object.  Save the file as
+  <code>GetStarted</code>.
+
+  <pre>
+import org.checkerframework.checker.nullness.qual.*;
+
+public class GetStarted {
+    void sample() {
+        @NonNull Object ref = new Object();
+    }
+}
+  </pre></li>
+
+  <li>Run the Nullness Checker on the class.
+  <pre>jsr308-javac -processor org.checkerframework.checker.nullness.NullnessChecker GetStarted.java</pre>
+  The compilation should end without any errors.
+  </li>
+
+  <li>Let's introduce an error now.  Modify ref assignment to:
+  <pre>  @NonNull Object ref = null;</pre></li>
+
+  <li>Rerun the Nullness Checker again, like before.  This run should emit
+  the following error:
+  <pre>
+GetStarted.java:5: incompatible types.
+found   : @Nullable &lt;nulltype&gt;
+required: @NonNull Object
+		@NonNull Object ref = null;
+		                      ^
+1 error
+  </pre>  
+  </li>
+</ol>
+
+The type qualifier (e.g. <code>NonNull</code>) are permitted anywhere
+that would write a type, including generics and casts.
+
+<pre>
+    @Interned String intern() { ... }             // return value
+    int compareTo(@NonNull String other) { ... }  // parameter
+
+    @NonNull List&lt;@Interned String&gt; messages;     // generics: non-null list of interned Strings
+</pre>
+<hr />
+
+<p>
+Last updated: March 31, 2016.
+</p>
+
+<p>
+Back to the <a href="./">Type annotations (JSR 308) webpage</a>.
+</p>
+
+</body>
+</html>
+<!--
+Local Variables:
+time-stamp-start: "^Last updated: "
+time-stamp-end: "\\.?$"
+time-stamp-format: "%:b %:d, %:y"
+time-stamp-line-limit: -50
+End:
+-->
+
+
+<!--  LocalWords:  MacOS nullness NonNull Nullable IGJ bytecodes webpage -->
+<!--  LocalWords:  javac codename jsr GetStarted SoyLatte JDK -->
