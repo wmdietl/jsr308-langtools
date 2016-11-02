@@ -2,7 +2,7 @@ This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 ----------------------------------------------------------------------
-Version 2.1.5, 1 Nov 2016
+Version 2.1.5, 2 Nov 2016
 
 Fix for JDK-8168043.
 
