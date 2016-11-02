@@ -59,9 +59,9 @@ Chandrasekhar Boyapati, Robert Lee, and Martin Rinard.
 \bibitem[BN02]{BanerjeeN2002}
 Anindya Banerjee and David~A. Naumann.
 \newblock Representation independence, confinement, and access control.
-\newblock In {\em Proceedings of the 29th Annual ACM SIGPLAN-SIGACT Symposium
-  on Principles of Programming Languages}, pages 166--177, Portland, Oregon,
-  January~16--18, 2002.
+\newblock In {\em POPL 2002, Proceedings of the 29th Annual ACM SIGPLAN-SIGACT
+  Symposium on Principles of Programming Languages}, pages 166--177, Portland,
+  Oregon, January~16--18, 2002.
 
 \bibitem[Boy04]{Boyapati2004:PhD}
 Chandrasekhar Boyapati.
@@ -79,7 +79,7 @@ Gilad Bracha.
 Chandrasekhar Boyapati, Alexandru Salcianu, William {Beebee, Jr.}, and Martin
   Rinard.
 \newblock Ownership types for safe region-based memory management in real-time
-  java.
+  {Java}.
 \newblock In {\em PLDI 2003, Proceedings of the {ACM} {SIGPLAN} 2003 Conference
   on Programming Language Design and Implementation}, pages 324--337, San
   Diego, CA, USA, June~9--11, 2003.
@@ -262,9 +262,9 @@ K.~Rustan~M. Leino and Peter M{\"u}ller.
 \bibitem[LP06]{YuP2006}
 Yi~Lu and John Potter.
 \newblock Protecting representation with effect encapsulation.
-\newblock In {\em Proceedings of the 33rd Annual ACM SIGPLAN-SIGACT Symposium
-  on Principles of Programming Languages}, pages 359--371, Charleston, SC, USA,
-  January~11--13, 2006.
+\newblock In {\em POPL 2006, Proceedings of the 33rd Annual ACM SIGPLAN-SIGACT
+  Symposium on Principles of Programming Languages}, pages 359--371,
+  Charleston, SC, USA, January~11--13, 2006.
 
 \bibitem[Mor06]{JSR250}
 Rajiv Mordani.
@@ -293,7 +293,7 @@ Peter M{\"u}ller.
 James Noble, Jan Vitek, and John Potter.
 \newblock Flexible alias protection.
 \newblock In {\em ECOOP '98, the 12th European Conference on Object-Oriented
-  Programming}, pages 158--185, Brussels, Belgium, July~20-24, 1998.
+  Programming}, pages 158--185, Brussels, Belgium, July~20--24, 1998.
 
 \bibitem[PAC{\etalchar{+}}08]{PapiACPE2008}
 Matthew~M. Papi, Mahmood Ali, Telmo~Luis {Correa~Jr.}, Jeff~H. Perkins, and
@@ -373,9 +373,9 @@ Hongwei Xi.
 \bibitem[XP99]{Xi-Pfenning99}
 Hongwei Xi and Frank Pfenning.
 \newblock Dependent types in practical programming.
-\newblock In {\em Proceedings of the 26th Annual ACM SIGPLAN-SIGACT Symposium
-  on Principles of Programming Languages}, pages 214--227, San Antonio, TX,
-  January~20--22, 1999.
+\newblock In {\em POPL '99, Proceedings of the 26th Annual ACM SIGPLAN-SIGACT
+  Symposium on Principles of Programming Languages}, pages 214--227, San
+  Antonio, TX, January~20--22, 1999.
 
 \bibitem[YSP{\etalchar{+}}98]{YelickSPMLKHGGCA1998}
 Kathy Yelick, Luigi Semenzato, Geoff Pike, Carleton Miyamoto, Ben Liblit,
