@@ -111,12 +111,12 @@ annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi
 
 annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi annotation-extensions.bbl
 	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva annotation-extensions.tex
-	mv annotation-extensions.html annotation-extensions.html-with-htoc
-	hevea-retarget-crossrefs < annotation-extensions.html-with-htoc > annotation-extensions.html
-	rm -rf annotation-extensions.html-with-htoc
-#	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' annotation-extensions.html
-#	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' annotation-extensions.html
-#	html-update-toc annotation-extensions.html
+	mv $@ $@-with-htoc
+	hevea-retarget-crossrefs < $@-with-htoc > $@
+	rm -rf $@-with-htoc
+#	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' $@
+#	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
+#	html-update-toc $@
 
 ${jsr308_spec}/java-annotation-extensions.pdf: annotation-extensions.pdf ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
@@ -144,16 +144,16 @@ design.pdf: design.tex design.dvi
 design.html: design.tex design.dvi design.bbl
 	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva design.tex
 # Next 3 lines are necessary only with Hevea before 2.04
-	mv design.html design.html-with-htoc
-	hevea-retarget-crossrefs < design.html-with-htoc > design.html
-	rm -f design.html-with-htoc
+	mv $@ $@-with-htoc
+	hevea-retarget-crossrefs < $@-with-htoc > $@
+	rm -f $@-with-htoc
 # Next 3 lines deal with Hevea's inability to process line numbers when using fancyvrb package
-	mv design.html design.html-without-verbatim-linerefs
-	hevea-add-verbatim-linenos design.aux design.html-without-verbatim-linerefs > design.html
-	rm -f design.html-without-verbatim-linerefs
-#	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' design.html
-#	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' design.html
-#	html-update-toc design.html
+	mv $@ $@-without-verbatim-linerefs
+	hevea-add-verbatim-linenos design.aux $@-without-verbatim-linerefs > $@
+	rm -f $@-without-verbatim-linerefs
+#	perl -pi -e 's/(be as clear.<\/P><OL )/$$1start="5" /' $@
+#	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
+#	html-update-toc $@
 
 ${jsr308_www}:
 	mkdir -p ${jsr308_www}
@@ -187,8 +187,8 @@ type-quals.pdf: type-quals.tex type-quals.dvi
 
 type-quals.html: type-quals.tex type-quals.dvi
 	hevea -exec xxdate.exe -exec xxcharset.exe urlhref.hva type-quals.tex
-	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' type-quals.html
-	html-update-toc type-quals.html
+	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
+	html-update-toc $@
 
 ${jsr308_www}/java-type-qualifiers.pdf: type-quals.pdf ${jsr308_www} ${PLUME_BIN}
 	\cp -f $< $@
