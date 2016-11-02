@@ -110,7 +110,7 @@ annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi
 	pdflatex $<
 
 annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi annotation-extensions.bbl
-	hevea -fix -exec xxdate.exe urlhref.hva annotation-extensions.tex
+	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva annotation-extensions.tex
 	mv annotation-extensions.html annotation-extensions.html-with-htoc
 	hevea-retarget-crossrefs < annotation-extensions.html-with-htoc > annotation-extensions.html
 	rm -rf annotation-extensions.html-with-htoc
@@ -142,7 +142,7 @@ design.pdf: design.tex design.dvi
 	pdflatex $<
 
 design.html: design.tex design.dvi design.bbl
-	hevea -fix -exec xxdate.exe urlhref.hva design.tex
+	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva design.tex
 # Next 3 lines are necessary only with Hevea before 2.04
 	mv design.html design.html-with-htoc
 	hevea-retarget-crossrefs < design.html-with-htoc > design.html
@@ -186,7 +186,7 @@ type-quals.pdf: type-quals.tex type-quals.dvi
 	pdflatex $<
 
 type-quals.html: type-quals.tex type-quals.dvi
-	hevea -exec xxdate.exe urlhref.hva type-quals.tex
+	hevea -exec xxdate.exe -exec xxcharset.exe urlhref.hva type-quals.tex
 	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' type-quals.html
 	html-update-toc type-quals.html
 
