@@ -97,14 +97,29 @@ checklinks: ${PLUME_BIN}
 
 ###########################################################################
 
-annotation-extensions.dvi: annotation-extensions.tex
+export BIBINPUTS ?= .:bib
+bib:
+ifdef PLUMEBIB
+	ln -s ${PLUMEBIB} $@
+else
+	git clone https://github.com/mernst/plume-bib.git $@
+endif
+.PHONY: bib-update
+bib-update: bib
+# Even if this command fails, it does not terminate the make job.
+# However, to skip it, invoke make as:  make NOGIT=1 ...
+ifndef NOGIT
+	-(cd bib && git pull && make)
+endif
+
+annotation-extensions.dvi: annotation-extensions.tex bib-update
 	$(MAKE) -C figures
 	latex $<
 	bibtex $(basename $<)
 	perl -pi -e 's/%\n//' annotation-extensions.bbl
 	latex $<
 
-annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi
+annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi bib-update
 	pdflatex $<
 	bibtex $(basename $<)
 	perl -pi -e 's/%\n//' annotation-extensions.bbl
@@ -129,14 +144,14 @@ ${jsr308_spec}/java-annotation-extensions.html: annotation-extensions.html ${jsr
 	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 
-design.dvi: design.tex
+design.dvi: design.tex bib-update
 	$(MAKE) -C figures
 	latex $<
 	bibtex $(basename $<)
 	perl -pi -e 's/%\n//' design.bbl
 	latex $<
 
-design.pdf: design.tex design.dvi
+design.pdf: design.tex design.dvi bib-update
 	pdflatex $<
 	bibtex $(basename $<)
 	perl -pi -e 's/%\n//' design.bbl

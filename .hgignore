@@ -9,6 +9,7 @@
 ^.project$
 ^.classpath$
 doc/Makefile.user
+doc/bib
 doc/design.aux
 doc/design.blg
 doc/design.dvi
