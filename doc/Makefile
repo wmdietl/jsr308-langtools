@@ -22,7 +22,11 @@ export PERL5LIB := ${PERL5LIB}:/homes/gws/mernst/bin/src/perl/lib/perl5/site_per
 # There is no use of "cp -p" in this Makefile, to avoid problems with
 # browser caches.
 
-local: annotation-extensions.pdf annotation-extensions.html design.pdf design.html type-quals.pdf type-quals.html validate
+local: pdf html
+
+pdf: annotation-extensions.pdf design.pdf type-quals.pdf
+
+html: annotation-extensions.html design.html type-quals.html validate
 
 clean:
 	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.dvi annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
@@ -32,8 +36,6 @@ clean:
 
 figures-all:
 	${MAKE} -C figures all
-
-html: annotation-extensions.html design.html type-quals.html
 
 # Check HTML
 validate:
