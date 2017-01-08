@@ -1,7 +1,7 @@
 The prototype implementation of langtools for
 JSR 308: Type Annotations in Java
 
-+The JSR 308 team (http://types.cs.washington.edu/jsr308/)
++The JSR 308 team (http://checkerframework.org/jsr308/)
 ===========================================================
 
 This document describes the command-line changes and implementation
@@ -134,4 +134,4 @@ AbstractTypeProcessor handles these cases.
 
 ===========================================================
 References
-[1] http://types.cs.washington.edu/checker-framework/current/checker-framework-manual.html#annotations-in-comments
+[1] http://checkerframework.org/manual/#annotations-in-comments

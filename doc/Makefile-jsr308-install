@@ -1,11 +1,11 @@
 ## Makefile for installing the JSR 308 compiler and the Checker Framework.
 # This automates the instructions that are found in the manuals, available
-# from http://types.cs.washington.edu/jsr308/ .
+# from http://checkerframework.org/jsr308/ .
 
 ## 3 steps to install:
 # 1. Obtain this Makefile:
 #   cd
-#   wget -nv -N http://types.cs.washington.edu/jsr308/current/Makefile-jsr308-install
+#   wget -nv -N http://checkerframework.org/jsr308/current/Makefile-jsr308-install
 # 2. Execute the following command, which installs the "langtools" and
 # "checker-framework" directories into ${JSR308} (by default, ~/jsr308).
 #   make -f Makefile-jsr308-install
@@ -26,8 +26,8 @@
 #  * If the installation fails, please report the problem at
 #      https://bitbucket.org/typetools/jsr308-langtools/issues?status=new&status=open .
 #    Then, follow the detailed installation instructions at
-#      http://types.cs.washington.edu/jsr308/current/README-jsr308.html#installing
-#      http://types.cs.washington.edu/checker-framework/current/checker-framework-manual.html#installation
+#      http://checkerframework.org/jsr308/current/README-jsr308.html#installing
+#      http://checkerframework.org/manual/#installation
 #  * Except for the default target, this Makefile should be run in
 #    #${JSR308}, which defaults to ~/jsr308 .
 
@@ -51,7 +51,7 @@ JSR308 ?= ${HOME}/jsr308
 ###
 
 # Override to obtain a development release or a test release.
-JSR308_WEB ?= http://types.cs.washington.edu/checker-framework/current
+JSR308_WEB ?= http://checkerframework.org
 JSR308_BUILD := 2.1.7
 
 # export MAKEFILE_DIR
@@ -120,7 +120,7 @@ ifeq ($(UNAME),Darwin)
 # Users of PowerPC need to build OpenJDK themselves (if they can?).
 	wget -nv -N http://landonf.bikemonkey.org/static/soylatte/openjdk/${DARWIN_TAR}
 else
-	wget -O ${JDK_7_BIN} -nv http://types.cs.washington.edu/jsr308/latest-jdk.php
+	wget -O ${JDK_7_BIN} -nv http://checkerframework.org/jsr308/latest-jdk.php
 endif
 
 jsr308-langtools.zip:

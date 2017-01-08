@@ -78,9 +78,9 @@
 
 \maketitle
 
-The JSR 308 webpage is \myurl{http://types.cs.washington.edu/jsr308/}.
+The JSR 308 webpage is \myurl{http://checkerframework.org/jsr308/}.
 It contains the
-\ahref{http://types.cs.washington.edu/jsr308/specification/java-annotation-design.html}{latest version}
+\ahref{http://checkerframework.org/jsr308/specification/java-annotation-design.html}{latest version}
 % latest version
 of this document, along
 with other information such as a FAQ, the reference implementation, and
@@ -89,7 +89,7 @@ Also see the JLS and JVMS changes for JSR 308, which can be found in
 the Public Review specification of JSR 308 at jcp.org.
 % TODO: add a link to the above.
 
-%HEVEA This document is available in PDF format at \myurl{http://types.cs.washington.edu/jsr308/specification/java-annotation-design.pdf}.
+%HEVEA This document is available in PDF format at \myurl{http://checkerframework.org/jsr308/specification/java-annotation-design.pdf}.
 
 
 \tableofcontents
@@ -152,7 +152,7 @@ references to the
 JLS and JVMS changes that are available in
 the Public Review specification of JSR 308 at jcp.org.
 % TODO: reinstate this link
-% \ahref{http://types.cs.washington.edu/jsr308/specification/jsr308.pdf}{JLS and JVMS changes}.
+% \ahref{http://checkerframework.org/jsr308/specification/jsr308.pdf}{JLS and JVMS changes}.
 %
 The non-normative part
 motivates annotations on types by presenting one
@@ -170,7 +170,7 @@ libraries, etc.  For more details, see the Java Community Process FAQ at
 
 
 A FAQ (Frequently Asked Questions) document complements this specification;
-see \myurl{http://types.cs.washington.edu/jsr308/current/jsr308-faq.html}.
+see \myurl{http://checkerframework.org/jsr308/current/jsr308-faq.html}.
 
 
 
@@ -1507,7 +1507,7 @@ First, annotated \emph{signatures} (public members) must be available to
 tools that read class files.  For example, a type-checking compiler
 plug-in~\cite{JSR269,PapiACPE2008} needs to read annotations when compiling
 a client of the class file.  The Checker Framework
-(\myurl{http://types.cs.washington.edu/checker-framework/}) is
+(\myurl{http://checkerframework.org/}) is
 one way to create such plug-ins.
 % (an annotation processor)
 % , as described in Section~\ref{compile-time})
@@ -2453,7 +2453,7 @@ Section~\ref{class-file}.
 
 Over a dozen compiler plug-ins that perform type qualifier type-checking, all built
 using JSR 308, are distributed at the JSR 308 webpage,
-\myurl{http://types.cs.washington.edu/jsr308/}.  These checkers
+\myurl{http://checkerframework.org/jsr308/}.  These checkers
 help to prevent and detect null pointer errors (via a \code{@NonNull}
 annotation), equality-checking errors (via a \code{@Interned} annotation),
 mutation errors (via the Javari~\cite{BirkaE2004,TschantzE2005} type
@@ -2677,7 +2677,7 @@ similar~\cite{DelineF2001}.
 \subsection{Example tools that do pluggable type-checking for type qualifiers\label{type-qualifier-tools}}
 
 The Checker Framework
-(\myurl{http://types.cs.washington.edu/checker-framework/})
+(\myurl{http://checkerframework.org/})
 gives a way to create pluggable type-checkers.  A pluggable type-checker
 verifies absence of certain bugs (and also verifies correct usage of type
 qualifiers).  The Checker Framework is distributed with a set of example
@@ -3642,7 +3642,7 @@ These tools include:
 % 
 % 
 % A separate document, ``Custom type qualifiers via annotations on Java
-% types'' (\myurl{http://types.cs.washington.edu/jsr308/current/java-type-qualifiers.pdf}),
+% types'' (\myurl{http://checkerframework.org/jsr308/current/java-type-qualifiers.pdf}),
 % explores implementation strategies for annotation processors that act as type-checking
 % compiler plug-ins.  It is not germane to this proposal, both because this proposal
 % does not concern itself with annotation semantics and because writing such
@@ -3650,7 +3650,7 @@ These tools include:
 % 
 % 
 % A separate document, ``Annotation File Specification''
-% (\myurl{http://types.cs.washington.edu/annotation-file-utilities/annotation-file-format.pdf}), describes a
+% (\myurl{http://checkerframework.org/annotation-file-utilities/annotation-file-format.pdf}), describes a
 % textual format for annotations that is independent of \code{.java} or
 % \code{.class} files.  This textual format can represent annotations for
 % libraries that cannot or should not be modified.  We have built
