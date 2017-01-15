@@ -26,7 +26,7 @@ pre, blockquote {
 <h4 id="version">Version 2.1.7 (3 Jan 2017)</h4> <!-- omit from toc -->
 
 <p>For the latest version, see the
-  <a href="http://checkerframework.org/jsr308/">Type Annotations (JSR 308) webpage</a>.
+  <a href="http://checker-framework.com/jsr308/">Type Annotations (JSR 308) webpage</a>.
 </p>
 
 <p>Contents:</p>
@@ -97,12 +97,12 @@ annotations.
 <p>
 Pluggable type-checking is made <em>possible</em> by the Type Annotations
 syntax.  Pluggable type-checking is made <em>easy</em> by the 
-<a href="http://checkerframework.org/">Checker
+<a href="http://checker-framework.com/">Checker
 Framework</a>.  It includes several example type qualifiers that you can
 start using right away, and it enables you to create your own new compiler
 plug-ins that check user-defined type qualifiers.  If you want to use the
 Checker Framework, we recommend that you
-<a href="http://checkerframework.org/manual/#installation">install</a>
+<a href="http://checker-framework.com/manual/#installation">install</a>
 it rather than following the instructions on this webpage.
 </p>
 
@@ -120,7 +120,7 @@ NetBeans) are being updated to support the Type Annotations syntax.
 For Eclipse, write an <a
 href="http://ant.apache.org/">Ant</a> buildfile that compiles your project
 using the Type Annotations compiler (and maybe does
-<a href="http://checkerframework.org/manual/#ant-task">pluggable
+<a href="http://checker-framework.com/manual/#ant-task">pluggable
 type-checking</a> too), then build by running Ant.  Problem markers
 will show up in the Eclipse IDE as normal.  (You will lose a few Eclipse
 features, such as error checking as you type, until Eclipse's internal
@@ -133,7 +133,7 @@ compiler is updated for to support type annotations.)
 <p>
 The <b>easiest</b> way to install the Type Annotations compiler, which is sufficient
 for most users, is to <a
-href="http://checkerframework.org/manual/#installation">install
+href="http://checker-framework.com/manual/#installation">install
 the Checker Framework</a>.
 The Checker Framework contains the Type Annotations compiler, so if you
 install the Checker Framework (from its distribution, or building it from
@@ -254,7 +254,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 
   </li>
   <li>
-    Download the <a href="http://checkerframework.org/jsr308/#Download">Type
+    Download the <a href="http://checker-framework.com/jsr308/#Download">Type
     Annotations compiler</a>, and unpack it to create a
     <code>jsr308-langtools</code> directory.  Do <em>not</em> do this inside the
     JDK 8 installation (directory <code>jdk1.8.0</code>) that you
@@ -263,7 +263,7 @@ export PATH=$JAVA_HOME/bin:$PATH
 <pre>
 mkdir ~/jsr308
 cd ~/jsr308
-wget http://checkerframework.org/jsr308-langtools.zip
+wget http://checker-framework.com/jsr308-langtools.zip
 unzip jsr308-langtools.zip
 </pre>
   </li>
@@ -327,8 +327,8 @@ you want a newer version of JDK.
     declarations as declaration annotation (also known as Java 5
     annotations or JSR 175 annotations) do.  For details of the syntax,
     see the Type Annotations (JSR 308) specification
-    (<a href="http://checkerframework.org/jsr308/specification/java-annotation-design.pdf">PDF</a>,
-    <a href="http://checkerframework.org/jsr308/specification/java-annotation-design.html">HTML</a>).</li>
+    (<a href="http://checker-framework.com/jsr308/specification/java-annotation-design.pdf">PDF</a>,
+    <a href="http://checker-framework.com/jsr308/specification/java-annotation-design.html">HTML</a>).</li>
   <li>javac has the ability to warn about redundant casts (when directed to
    do so using a lint option).  If the target type of the cast contains an
    annotation, then javac never issues a redundant cast warning, but leaves
@@ -395,7 +395,7 @@ These features will not be supported by the Oracle OpenJDK compiler.
 
 <p>
 For additional information about these features, see the
-<a href="http://checkerframework.org/manual/#annotations-in-comments">Checker
+<a href="http://checker-framework.com/manual/#annotations-in-comments">Checker
 Framework Manual</a>.
 </p>
 
@@ -550,8 +550,8 @@ Examples of bugs include:
 <ul>
   <li>Any inconsistency between the Type Annotations compiler and the
       JSR 308 design (<a
-href="http://checkerframework.org/jsr308/specification/java-annotation-design.pdf">PDF</a>,
-<a href="http://checkerframework.org/jsr308/specification/java-annotation-design.html">HTML</a>).
+href="http://checker-framework.com/jsr308/specification/java-annotation-design.pdf">PDF</a>,
+<a href="http://checker-framework.com/jsr308/specification/java-annotation-design.html">HTML</a>).
   </li>
   <li>Any annotation-related problem.
   </li>
@@ -566,7 +566,7 @@ Whenever you get a message such as
 <pre>
   An exception has occurred in the compiler (1.8.0-jsr308-1.2.1). Please
   report this bug so we can fix it.  For instructions, see
-  http://checkerframework.org/README-jsr308.html#reporting-bugs
+  http://checker-framework.com/README-jsr308.html#reporting-bugs
 </pre>
 <p>
 then you should always report it.  However, there are three different
@@ -611,7 +611,7 @@ using this procedure:
     then the problem is with the annotation processor.  Report the bug to
     the author of the annotation processor, such as
     the
-    <a href="http://checkerframework.org/manual/#reporting-bugs">Checker
+    <a href="http://checker-framework.com/manual/#reporting-bugs">Checker
     Framework developers</a>.
   </li>
   <li>Try to reproduce the error without using an annotation processor.  If
@@ -619,7 +619,7 @@ using this procedure:
     annotation processor.  Report the bug to
     the author of the annotation processor, such as
     the
-    <a href="http://checkerframework.org/manual/#reporting-bugs">Checker
+    <a href="http://checker-framework.com/manual/#reporting-bugs">Checker
     Framework developers</a>.
   </li>
   <li>Try to reproduce the error using the OpenJDK compiler, without the
@@ -729,7 +729,7 @@ practices.
 <hr />
 
 <p>
-<a href="http://checkerframework.org/jsr308/">JSR 308 webpage</a>
+<a href="http://checker-framework.com/jsr308/">JSR 308 webpage</a>
 </p>
 
 </body>

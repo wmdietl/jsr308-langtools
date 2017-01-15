@@ -5,7 +5,7 @@
 ## 3 steps to install:
 # 1. Obtain this Makefile:
 #   cd
-#   wget -nv -N http://checkerframework.org/jsr308/current/Makefile-jsr308-install
+#   wget -nv -N http://checkerframework.org/jsr308/Makefile-jsr308-install
 # 2. Execute the following command, which installs the "langtools" and
 # "checker-framework" directories into ${JSR308} (by default, ~/jsr308).
 #   make -f Makefile-jsr308-install
@@ -26,7 +26,7 @@
 #  * If the installation fails, please report the problem at
 #      https://bitbucket.org/typetools/jsr308-langtools/issues?status=new&status=open .
 #    Then, follow the detailed installation instructions at
-#      http://checkerframework.org/jsr308/current/README-jsr308.html#installing
+#      http://checkerframework.org/jsr308/README-jsr308.html#installing
 #      http://checkerframework.org/manual/#installation
 #  * Except for the default target, this Makefile should be run in
 #    #${JSR308}, which defaults to ~/jsr308 .
