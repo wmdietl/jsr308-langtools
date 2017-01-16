@@ -4,6 +4,8 @@
 
 jsr308_www_dir ?= /cse/www2/types/checker-framework/jsr308
 jsr308_spec = ${jsr308_www_dir}/specification
+# jsr308_spec_public doesn't get customized by the user as jsr308_spec does
+jsr308_spec_public = /cse/www2/types/checker-framework/jsr308/specification
 jsr308_url ?= http://checker-framework.com/jsr308
 
 PLUME_LIB ?= ${HOME}/plume-lib
@@ -56,7 +58,8 @@ ${jsr308_www_dir}/Makefile-jsr308-install \
 ${jsr308_www_dir}/changelog-jsr308.txt \
 ${jsr308_www_dir}/favicon-jsr308.png \
 ${jsr308_www_dir}/java-type-qualifiers.pdf \
-${jsr308_www_dir}/java-type-qualifiers.html
+${jsr308_www_dir}/java-type-qualifiers.html \
+web-spec-copy
 
 web: web-no-checks
 	$(MAKE) checklinks
@@ -80,6 +83,10 @@ ${jsr308_spec}/jsr308-changes.html
 	\cp -f design.pdf ${jsr308_spec}/java-annotation-design-${RELEASEDATE}.pdf
 	$(MAKE) checklinks
 
+# Just copy the ${jsr308_spec} directory from elsewhere.
+# (Will this fail if the two directories are the same?)
+web-spec-copy:
+	rsync -a ${jsr308_spec_public} ${jsr308_spec}
 
 
 ## There are some expected errors, but they should all be suppressed by
