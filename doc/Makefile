@@ -86,7 +86,7 @@ ${jsr308_spec}/jsr308-changes.html
 # Just copy the ${jsr308_spec} directory from elsewhere.
 # (Will this fail if the two directories are the same?)
 web-spec-copy:
-	rsync -a ${jsr308_spec_public} ${jsr308_spec}
+	rsync -a ${jsr308_spec_public}/ ${jsr308_spec}
 
 
 ## There are some expected errors, but they should all be suppressed by
