@@ -2,9 +2,9 @@
 # Make will silently continue if that file does not exist.
 -include Makefile.user
 
-jsr308_www ?= /cse/www2/types/jsr308
-jsr308_spec = ${jsr308_www}/specification
-jsr308_www_online ?= http://checkerframework.org/jsr308
+jsr308_www_dir ?= /cse/www2/types/checker-framework/jsr308
+jsr308_spec = ${jsr308_www_dir}/specification
+jsr308_url ?= http://checker-framework.com/jsr308
 
 PLUME_LIB ?= ${HOME}/plume-lib
 PLUME_BIN ?= ${PLUME_LIB}/bin
@@ -43,20 +43,20 @@ validate:
 
 # Update the main webpage & FAQ only, but not any of the supporting documents.
 # Useful to fix a minor typo (but then you might just want to edit both versions, identically).
-webpage: ${jsr308_www}/jsr308-webpage.html ${jsr308_www}/jsr308-faq.html
+webpage: ${jsr308_www_dir}/jsr308-webpage.html ${jsr308_www_dir}/jsr308-faq.html
 #	$(MAKE) checklinks
 
-# Warning!  "make web" makes a public release if you do not override jsr308_www!
+# Warning!  "make web" makes a public release if you do not override jsr308_www_dir!
 web-no-checks: \
-${jsr308_www} \
-${jsr308_www}/jsr308-webpage.html \
-${jsr308_www}/jsr308-faq.html \
-${jsr308_www}/README-jsr308.html \
-${jsr308_www}/Makefile-jsr308-install \
-${jsr308_www}/changelog-jsr308.txt \
-${jsr308_www}/favicon-jsr308.png \
-${jsr308_www}/java-type-qualifiers.pdf \
-${jsr308_www}/java-type-qualifiers.html
+${jsr308_www_dir} \
+${jsr308_www_dir}/jsr308-webpage.html \
+${jsr308_www_dir}/jsr308-faq.html \
+${jsr308_www_dir}/README-jsr308.html \
+${jsr308_www_dir}/Makefile-jsr308-install \
+${jsr308_www_dir}/changelog-jsr308.txt \
+${jsr308_www_dir}/favicon-jsr308.png \
+${jsr308_www_dir}/java-type-qualifiers.pdf \
+${jsr308_www_dir}/java-type-qualifiers.html
 
 web: web-no-checks
 	$(MAKE) checklinks
@@ -69,7 +69,7 @@ web: web-no-checks
 #   hg log --style changelog --date '>2009-05-14' design.tex jsr308-faq.html
 # where "2009-05-14" is the date of the previous entry in jsr308-changes.html
 web-spec: \
-${jsr308_www} \
+${jsr308_www_dir} \
 ${jsr308_spec} \
 ${jsr308_spec}/java-annotation-design.pdf \
 ${jsr308_spec}/java-annotation-design.html \
@@ -93,8 +93,8 @@ ${jsr308_spec}/jsr308-changes.html
 #   AnnotatedTypeScanner, SourceVersion) report an error.  A fix is to
 #   distribute our own Javadoc for the compiler.
 checklinks: ${PLUME_BIN}
-	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}
-	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_www_online}/../checker-framework
+	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_url}
+	${CHECKLINK} -q -r -e `grep -v '^#' ${PLUME_BIN}/checklink-args.txt` ${jsr308_url}/../checker-framework
 
 
 ###########################################################################
@@ -138,12 +138,12 @@ annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi 
 
 ${jsr308_spec}/java-annotation-extensions.pdf: annotation-extensions.pdf ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/java-annotation-extensions.html: annotation-extensions.html ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
 # We don't know which of the two files will be created
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 
 design.dvi: design.tex bib-update
@@ -173,15 +173,15 @@ design.html: design.tex design.dvi design.bbl
 #	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
 #	html-update-toc $@
 
-${jsr308_www}:
-	mkdir -p ${jsr308_www}
+${jsr308_www_dir}:
+	mkdir -p ${jsr308_www_dir}
 
 ${jsr308_spec}:
 	mkdir -p ${jsr308_spec}
 
 ${jsr308_spec}/java-annotation-design.pdf: design.pdf ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_BIN}
 	\cp -f $< $@
@@ -193,7 +193,7 @@ ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_B
 	if [ -a design002.png ]; then cp design002.png ${jsr308_spec}; fi;
 	if [ -a design003.gif ]; then cp design003.gif ${jsr308_spec}; fi;
 	if [ -a design003.png ]; then cp design003.png ${jsr308_spec}; fi;
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
@@ -208,43 +208,43 @@ type-quals.html: type-quals.tex type-quals.dvi
 	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
 	html-update-toc $@
 
-${jsr308_www}/java-type-qualifiers.pdf: type-quals.pdf ${jsr308_www} ${PLUME_BIN}
+${jsr308_www_dir}/java-type-qualifiers.pdf: type-quals.pdf ${jsr308_www_dir} ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/java-type-qualifiers.html: type-quals.html ${PLUME_BIN}
+${jsr308_www_dir}/java-type-qualifiers.html: type-quals.html ${PLUME_BIN}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 ###########################################################################
 
-${jsr308_www}/jsr308-webpage.html: jsr308-webpage.html ${jsr308_www} ${PLUME_BIN}
+${jsr308_www_dir}/jsr308-webpage.html: jsr308-webpage.html ${jsr308_www_dir} ${PLUME_BIN}
 	${HTML5VALIDATOR}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/jsr308-faq.html: jsr308-faq.html ${jsr308_www} ${PLUME_BIN}
+${jsr308_www_dir}/jsr308-faq.html: jsr308-faq.html ${jsr308_www_dir} ${PLUME_BIN}
 	${HTML5VALIDATOR}
 	\cp -f $< $@
-#	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+#	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/changelog-jsr308.txt: changelog-jsr308.txt ${jsr308_www}
+${jsr308_www_dir}/changelog-jsr308.txt: changelog-jsr308.txt ${jsr308_www_dir}
 	\cp -f $< $@
 
-${jsr308_www}/README-jsr308.html: README-jsr308.html ${jsr308_www} ${PLUME_BIN}
+${jsr308_www_dir}/README-jsr308.html: README-jsr308.html ${jsr308_www_dir} ${PLUME_BIN}
 	${HTML5VALIDATOR}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates README-jsr308.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates README-jsr308.html
 
 ${jsr308_spec}/jsr308-changes.html: jsr308-changes.html ${jsr308_spec} ${PLUME_BIN}
 	${HTML5VALIDATOR}
 	\cp -f $< $@
-	cd ${jsr308_www}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
+	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
-${jsr308_www}/Makefile-jsr308-install: Makefile-jsr308-install ${jsr308_www}
+${jsr308_www_dir}/Makefile-jsr308-install: Makefile-jsr308-install ${jsr308_www_dir}
 	\cp -f $< $@
 
-${jsr308_www}/favicon-jsr308.png: favicon-jsr308.png ${jsr308_www}
+${jsr308_www_dir}/favicon-jsr308.png: favicon-jsr308.png ${jsr308_www_dir}
 	\cp -f $< $@
 
 
