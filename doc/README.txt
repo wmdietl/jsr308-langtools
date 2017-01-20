@@ -12,10 +12,10 @@ update the jsr308-changes.html file.
 2. Run
   make web-spec
 3. Check the results at
-  http://checkerframework.org/jsr308/
+  https://checkerframework.org/jsr308/
 4. Send email to type-annotations-spec-experts@openjdk.java.net announcing
 the release.  Include the relevant changelog entries (from jsr308-changes.html
-or http://checkerframework.org/jsr308/specification/jsr308-changes.html).
+or https://checkerframework.org/jsr308/specification/jsr308-changes.html).
 
 To update the repository to a newer version of the upstream OpenJDK, do either:
   hg fetch http://hg.openjdk.java.net/jdk8/tl/langtools

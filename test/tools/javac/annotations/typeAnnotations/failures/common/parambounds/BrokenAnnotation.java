@@ -30,7 +30,7 @@ class BrokenAnnotation<T extends @BrokenAnnotation.A Object> {
 // When the annotation is in the upper bound, one used to get
 // the following stack trace:
 //
-// An exception has occurred in the compiler (1.7.0-jsr308-1.2.7). Please report this bug so we can fix it.  For instructions, see http://checkerframework.org/README-jsr308.html#reporting-bugs .  Thank you.
+// An exception has occurred in the compiler (1.7.0-jsr308-1.2.7). Please report this bug so we can fix it.  For instructions, see https://checkerframework.org/README-jsr308.html#reporting-bugs .  Thank you.
 // java.lang.NullPointerException
 //      at com.sun.tools.javac.code.Type.isCompound(Type.java:346)
 //      at com.sun.tools.javac.code.Types.getBounds(Types.java:1940)

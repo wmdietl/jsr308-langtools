@@ -4,7 +4,7 @@ Adding a new target_type
 Whenever a new target_type is added to the specification in:
   design.tex
 (which is on the web as
-http://checkerframework.org/jsr308/specification/java-annotation-design.html#class-file:ext:target_type )
+https://checkerframework.org/jsr308/specification/java-annotation-design.html#class-file:ext:target_type )
 the following needs to be done to fully incorporate it into the rest of the
 system.
 

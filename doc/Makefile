@@ -6,7 +6,7 @@ jsr308_www_dir ?= /cse/www2/types/checker-framework/jsr308
 jsr308_spec = ${jsr308_www_dir}/specification
 # jsr308_spec_public doesn't get customized by the user as jsr308_spec does
 jsr308_spec_public = /cse/www2/types/checker-framework/jsr308/specification
-jsr308_url ?= http://checker-framework.com/jsr308
+jsr308_url ?= https://checkerframework.org/jsr308
 
 PLUME_LIB ?= ${HOME}/plume-lib
 PLUME_BIN ?= ${PLUME_LIB}/bin
