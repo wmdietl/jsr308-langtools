@@ -2,6 +2,12 @@ This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 ----------------------------------------------------------------------
+Version 2.1.9, xx Mar 2017
+
+Base build
+  Updated to OpenJDK jdk8u-dev/langtools as of 26 Feb 2017.
+
+----------------------------------------------------------------------
 Version 2.1.8, 20 Jan 2017
 
 The webpage has moved to https://checkerframework.org/jsr308.
