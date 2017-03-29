@@ -29,15 +29,18 @@ import java.util.Map;
 
 import javax.tools.JavaFileObject;
 
+import com.sun.tools.javac.code.Attribute.TypeCompound;
 import com.sun.tools.javac.comp.Annotate;
 import com.sun.tools.javac.comp.AttrContext;
 import com.sun.tools.javac.comp.Env;
-import com.sun.tools.javac.util.*;
 import com.sun.tools.javac.util.Assert;
 import com.sun.tools.javac.util.List;
+import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Log;
 import com.sun.tools.javac.util.Pair;
+import static com.sun.tools.javac.code.Kinds.MTH;
 import static com.sun.tools.javac.code.Kinds.PCK;
+import static com.sun.tools.javac.code.Kinds.TYP;
 
 /**
  * Container for all annotations (attributes in javac) on a Symbol.
@@ -152,9 +155,22 @@ public class SymbolMetadata {
             throw new NullPointerException();
         }
         setDeclarationAttributes(other.getDeclarationAttributes());
-        setTypeAttributes(other.getTypeAttributes());
-        setInitTypeAttributes(other.getInitTypeAttributes());
-        setClassInitTypeAttributes(other.getClassInitTypeAttributes());
+        if ((sym.flags() & Flags.BRIDGE) != 0) {
+            Assert.check(other.sym.kind == MTH);
+            ListBuffer<TypeCompound> typeAttributes = new ListBuffer<>();
+            for (TypeCompound tc : other.getTypeAttributes()) {
+                // Carry over only contractual type annotations: i.e nothing interior to method body.
+                if (!tc.position.type.isLocal())
+                    typeAttributes.append(tc);
+            }
+            setTypeAttributes(typeAttributes.toList());
+        } else {
+            setTypeAttributes(other.getTypeAttributes());
+        }
+        if (sym.kind == TYP) {
+            setInitTypeAttributes(other.getInitTypeAttributes());
+            setClassInitTypeAttributes(other.getClassInitTypeAttributes());
+        }
     }
 
     public void setDeclarationAttributesWithCompletion(final Annotate.AnnotateRepeatedContext<Attribute.Compound> ctx) {
