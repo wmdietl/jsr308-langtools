@@ -31,10 +31,10 @@ pdf: annotation-extensions.pdf design.pdf type-quals.pdf
 html: annotation-extensions.html design.html type-quals.html validate
 
 clean:
-	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.dvi annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
-	rm -f design.aux design.blg design.dvi design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png design002.gif design002.png design003.gif design003.png
+	rm -f annotation-extensions.aux annotation-extensions.blg annotation-extensions.haux annotation-extensions.html annotation-extensions.htoc annotation-extensions.log annotation-extensions.pdf annotation-extensions.toc
+	rm -f design.aux design.blg design.haux design.html design.htoc design.image.tex design.log design.pdf design.toc design001.gif design001.png design002.gif design002.png design003.gif design003.png
 	rm -f figures/type-tree.eps figures/type-tree.pdf figures/type-tree2.eps figures/type-tree2.pdf figures/type-tree3.eps figures/type-tree3.pdf
-	rm -f type-quals.aux type-quals.dvi type-quals.html type-quals.log type-quals.pdf
+	rm -f type-quals.aux type-quals.html type-quals.log type-quals.pdf
 
 figures-all:
 	${MAKE} -C figures all
@@ -121,20 +121,15 @@ ifndef NOGIT
 	-(cd bib && git pull && make)
 endif
 
-annotation-extensions.dvi: annotation-extensions.tex bib-update
+annotation-extensions.pdf: annotation-extensions.tex bib-update
 	$(MAKE) -C figures
-	latex $<
-	bibtex $(basename $<)
-	perl -pi -e 's/%\n//' annotation-extensions.bbl
-	latex $<
-
-annotation-extensions.pdf: annotation-extensions.tex annotation-extensions.dvi bib-update
 	pdflatex $<
-	bibtex $(basename $<)
+	bibtex -min-crossrefs=9999 $(basename $<)
 	perl -pi -e 's/%\n//' annotation-extensions.bbl
 	pdflatex $<
+	pdflatex $<
 
-annotation-extensions.html: annotation-extensions.tex annotation-extensions.dvi annotation-extensions.bbl
+annotation-extensions.html: annotation-extensions.pdf
 	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva annotation-extensions.tex
 	mv $@ $@-with-htoc
 	hevea-retarget-crossrefs < $@-with-htoc > $@
@@ -153,20 +148,15 @@ ${jsr308_spec}/java-annotation-extensions.html: annotation-extensions.html ${jsr
 	cd ${jsr308_www_dir}; ${PLUME_BIN}/html-update-link-dates jsr308-webpage.html
 
 
-design.dvi: design.tex bib-update
+design.pdf: design.tex bib-update
 	$(MAKE) -C figures
-	latex $<
-	bibtex $(basename $<)
-	perl -pi -e 's/%\n//' design.bbl
-	latex $<
-
-design.pdf: design.tex design.dvi bib-update
 	pdflatex $<
-	bibtex $(basename $<)
+	bibtex -min-crossrefs=9999 $(basename $<)
 	perl -pi -e 's/%\n//' design.bbl
 	pdflatex $<
+	pdflatex $<
 
-design.html: design.tex design.dvi design.bbl
+design.html: design.tex design.pdf
 	hevea -fix -exec xxdate.exe -exec xxcharset.exe urlhref.hva design.tex
 # Next 3 lines are necessary only with Hevea before 2.04
 	mv $@ $@-with-htoc
@@ -204,13 +194,11 @@ ${jsr308_spec}/java-annotation-design.html: design.html ${jsr308_spec} ${PLUME_B
 
 ###########################################################################
 
-type-quals.dvi: type-quals.tex
-	latex $<
-
-type-quals.pdf: type-quals.tex type-quals.dvi
+type-quals.pdf: type-quals.tex
+	pdflatex $<
 	pdflatex $<
 
-type-quals.html: type-quals.tex type-quals.dvi
+type-quals.html: type-quals.tex type-quals.pdf
 	hevea -exec xxdate.exe -exec xxcharset.exe urlhref.hva type-quals.tex
 	perl -pi -e 's/(<!--TOC section Introduction-->)/$$1\n\n<p>Contents:<\/p>\n<!-- start toc.  do not edit; run html-update-toc instead -->\n<!-- end toc -->\n\n<br>\n/' $@
 	html-update-toc $@
