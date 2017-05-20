@@ -3,7 +3,6 @@
  * @bug 8006775
  * @summary Package declarations cannot use annotations.
  * @author Werner Dietl
- * @ignore
  * @compile/fail/ref=AnnotatedPackage1.out -XDrawDiagnostics AnnotatedPackage1.java
  */
 
