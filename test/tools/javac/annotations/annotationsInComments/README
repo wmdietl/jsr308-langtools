@@ -1,0 +1,4 @@
+This UW local extension contains tests for the
+annotations-in-comments feature, which is
+mostly implemented in
+com.sun.tools.javac.parser.JavaTokenizer
