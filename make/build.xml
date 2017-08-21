@@ -232,21 +232,6 @@
             classpath="${boot.java.home}/jre/lib/rt.jar" classname="java.lang.FunctionalInterface"/>
     </condition>
 
-    <!-- JSR 308: a directory that contains changes to the JDK. -->
-    <condition property="jdkchanges.classes.dir"
-               value=""
-               else="${src.dir}/jdk-changes">
-        <isset property="boot.java.provides.jdk8"/>
-    </condition>
-
-    <!-- JSR 308: packages that contain changed JDK classes. -->
-    <condition property="jdkchanges.includes"
-               value=""
-               else="java/lang/ java/lang/annotation/ java/lang/invoke/">
-        <isset property="boot.java.provides.jdk8"/>
-    </condition>
-
-
     <!-- Set the default value of the sourcepath used for javac. -->
     <condition property="javac.sourcepath" value="${build.genstubs.dir}" else="">
         <isset property="require.import.jdk.stubs"/>
@@ -283,7 +268,7 @@
     />
 
     <target name="build-all-classes" depends="build-bootstrap-javac,-create-import-jdk-stubs">
-        <build-classes includes="${javac.includes} ${javadoc.includes} ${doclets.includes} ${javah.includes} ${javap.includes} ${sjavac.includes} ${jdkchanges.includes}"/>
+        <build-classes includes="${javac.includes} ${javadoc.includes} ${doclets.includes} ${javah.includes} ${javap.includes} ${sjavac.includes}"/>
     </target>
 
     <!-- clean -->
@@ -555,25 +540,25 @@
 
     <target name="build-bootstrap-javac"
             depends="-def-build-bootstrap-classes,-def-build-bootstrap-jar,-def-build-bootstrap-tool">
-        <build-bootstrap-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+        <build-bootstrap-classes includes="${javac.includes}"/>
         <build-bootstrap-jar     name="javac" includes="${javac.includes}"/>
         <build-bootstrap-tool    name="javac"/>
     </target>
 
     <target name="build-classes-javac" depends="build-bootstrap-javac,-create-import-jdk-stubs">
-        <build-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+        <build-classes includes="${javac.includes}"/>
     </target>
 
     <target name="check-interning-javac" depends="clean,build-bootstrap-javac,-create-import-jdk-stubs,-def-check-interning-classes">
-        <check-interning-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+        <check-interning-classes includes="${javac.includes}"/>
     </target>
 
     <target name="check-nullness-javac" depends="clean,build-bootstrap-javac,-create-import-jdk-stubs,-def-check-nullness-classes">
-        <check-nullness-classes includes="${javac.includes} ${jdkchanges.includes}"/>
+        <check-nullness-classes includes="${javac.includes}"/>
     </target>
 
     <target name="build-javac" depends="build-classes-javac">
-        <build-jar  name="javac" includes="${javac.includes} ${jdkchanges.includes}"/>
+        <build-jar  name="javac" includes="${javac.includes}"/>
         <build-tool name="javac"/>
     </target>
 
@@ -940,9 +925,6 @@
                 <echo level="verbose" message="build-classes: sourcepath=@{sourcepath}"/>
                 <mkdir dir="@{gensrc.dir}"/>
                 <mkdir dir="@{classes.dir}"/>
-                <pcompile srcdir="${jdkchanges.classes.dir}"
-                          destdir="@{gensrc.dir}"
-                          includes="@{includes}"/>
                 <pcompile srcdir="${src.classes.dir}"
                           destdir="@{gensrc.dir}"
                           includes="@{includes}"/>
@@ -960,7 +942,7 @@
                           includes="**/*.properties"/>
                 <javac fork="true"
                        executable="@{java.home}/bin/javac"
-                       srcdir="${jdkchanges.classes.dir}:${src.classes.dir}:@{gensrc.dir}"
+                       srcdir="${src.classes.dir}:@{gensrc.dir}"
                        destdir="@{classes.dir}"
                        includes="@{includes}"
                        excludes="@{excludes}"
