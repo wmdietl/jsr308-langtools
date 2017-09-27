@@ -2,6 +2,11 @@ This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
 
 ----------------------------------------------------------------------
+Version 2.2.1, 29 Sep 2017
+
+No changes.  Version incremented to match Checker Framework.
+
+----------------------------------------------------------------------
 Version 2.2.0, 5 Sep 2017
 
 Base build
