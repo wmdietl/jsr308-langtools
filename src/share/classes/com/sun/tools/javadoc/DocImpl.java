@@ -36,7 +36,7 @@ import javax.tools.FileObject;
 
 import com.sun.javadoc.*;
 import com.sun.source.util.TreePath;
-import com.sun.tools.doclets.internal.toolkit.util.FatalError;
+// TODO import com.sun.tools.doclets.internal.toolkit.util.FatalError;
 import com.sun.tools.javac.tree.JCTree;
 import com.sun.tools.javac.tree.JCTree.JCCompilationUnit;
 import com.sun.tools.javac.util.Position;
@@ -133,7 +133,7 @@ public abstract class DocImpl implements Doc, Comparable<Object> {
                     @Override
                     public void report() {
                         env.error(DocImpl.this, "javadoc.JavaScript_in_comment");
-                        throw new FatalError();
+                        throw null; // TODO new FatalError();
                     }
                 });
             }

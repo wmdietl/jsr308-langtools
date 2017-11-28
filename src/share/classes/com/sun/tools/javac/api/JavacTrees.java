@@ -919,6 +919,7 @@ public class JavacTrees extends DocTrees {
             switch (kind) {
             case ERROR:
                 boolean prev = log.multipleErrors;
+                log.multipleErrors = true;
                 try {
                     log.error(pos, "proc.messager", msg.toString());
                 } finally {
