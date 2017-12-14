@@ -91,6 +91,28 @@ public class JavaTokenizer {
 
     protected ScannerFactory fac;
 
+    // Enable extracting annotations from comments.
+    protected boolean annotationsincomments;
+
+    // UW local extension: magic/voodoo comments.
+    // See test/tools/javac/annotations/annotationsInComments
+    // for test cases.
+
+    // Whether to allow additional spaces before magic/voodoo trigger.
+    protected final boolean spacesincomments;
+
+    // Magic allows a single annotation (with values) in a block comment.
+
+    // Read the beginning of a magic comment, at the MONKEYS_AT
+    protected boolean magicAt = false;
+    // Read the identifier of the annotation
+    protected boolean magicID = false;
+    // TODO
+    protected boolean magic = false;
+
+    // Voodoo allows arbitrary AST parts in a special block comment.
+    protected boolean voodoo = false;
+
     private static final boolean hexFloatsWork = hexFloatsWork();
     private static boolean hexFloatsWork() {
         try {
@@ -128,6 +150,9 @@ public class JavaTokenizer {
         this.allowBinaryLiterals = source.allowBinaryLiterals();
         this.allowHexFloats = source.allowHexFloats();
         this.allowUnderscoresInLiterals = source.allowUnderscoresInLiterals();
+
+        this.annotationsincomments = fac.annotationsincomments;
+        this.spacesincomments = fac.spacesincomments;
     }
 
     /** Report an error at the given position using the provided arguments.
@@ -457,6 +482,23 @@ public class JavaTokenizer {
         int endPos = 0;
         List<Comment> comments = null;
 
+        if (magicAt) {
+            magicAt = false;
+            magicID = true;
+        }
+        if (magicID && reader.ch == ' ') {
+            while (reader.ch == ' ')
+                reader.scanChar();
+        }
+        if (magicID && reader.ch == '*') {
+            magicID = false;
+            magic = true;
+            reader.scanChar();
+            if (reader.ch != '/')
+                lexError(pos, "invalid.anno.comment.char");
+            reader.scanChar();
+        }
+
         try {
             loop: while (true) {
                 pos = reader.bp;
@@ -592,6 +634,34 @@ public class JavaTokenizer {
                             if (reader.ch == '/') {
                                 isEmpty = true;
                             }
+                        } else if (annotationsincomments && reader.bp < reader.buflen) {
+                            if (spacesincomments) {
+                                // Read whitespace between "/*" and either the "@" or ">>>"
+                                while (Character.isWhitespace(reader.ch))
+                                    reader.scanChar();
+                            }
+                            if (reader.ch == '@' &&
+                                    isMagicComment()) {
+                                reader.scanChar();
+                                tk = TokenKind.MONKEYS_AT;
+                                magicAt = true;
+                                // We have the monkeys at as token, done.
+                                break loop;
+                            } else if (reader.ch == '>') {
+                                reader.scanChar();
+                                if (reader.ch == '>') {
+                                    reader.scanChar();
+                                    if (reader.ch == '>') {
+                                        reader.scanChar();
+                                        voodoo = true;
+                                        // Pretend we didn't see anything and continue
+                                        // reading tokens
+                                        continue loop;
+                                    }
+                                }
+                            }
+                            // If we reach here we don't have a special comment
+                            style = CommentStyle.BLOCK;
                         } else {
                             style = CommentStyle.BLOCK;
                         }
@@ -599,8 +669,20 @@ public class JavaTokenizer {
                             if (reader.ch == '*') {
                                 reader.scanChar();
                                 if (reader.ch == '/') break;
+                            } else if (magic && reader.ch == '@') {
+                                reader.scanChar();
+                                if (Character.isJavaIdentifierStart(reader.ch)) {
+                                    tk = TokenKind.MONKEYS_AT;
+                                    magicAt = true;
+                                    break loop;
+                                }
+                                reader.scanChar();
+                                if (reader.ch == '/')
+                                    break;
                             } else {
                                 reader.scanCommentChar();
+                                if (!Character.isWhitespace(reader.ch) || reader.ch == '\n')
+                                    magic = false;
                             }
                         }
                         if (reader.ch == '/') {
@@ -647,6 +729,14 @@ public class JavaTokenizer {
                     }
                     break loop;
                 default:
+                    if (voodoo && (reader.ch == '*')) {
+                        if (reader.peekChar() == '/') {
+                            reader.scanChar(); // the *
+                            reader.scanChar(); // the /
+                            voodoo = false;
+                            break;
+                        }
+                    }
                     if (isSpecial(reader.ch)) {
                         scanOperator();
                     } else {
@@ -705,6 +795,63 @@ public class JavaTokenizer {
                     List.of(comment) :
                     comments.prepend(comment);
         }
+
+    // Determine whether what follows looks like a
+    // legal "magic annotation" comment:
+    // A single annotation in a block comment, possibly
+    // with annotation values.
+    private boolean isMagicComment() {
+        assert reader.ch == '@';
+        int parens = 0;
+        boolean stringLit = false;
+        int lbp = reader.bp;
+        char lch = reader.buf[++lbp];
+
+        if (!Character.isJavaIdentifierStart(lch)) {
+            // The first thing after the @ has to be the annotation identifier
+            return false;
+        }
+
+        while (lbp < reader.buflen) {
+            lch = reader.buf[++lbp];
+            // We are outside any annotation values
+            if (Character.isWhitespace(lch) &&
+                    !spacesincomments &&
+                    parens == 0) {
+                return false;
+            } else if (lch == '@' &&
+                    parens == 0) {
+                // At most one annotation per magic comment
+                return false;
+            } else if (lch == '(' && !stringLit) {
+                ++parens;
+            } else if (lch == ')' && !stringLit) {
+                --parens;
+            } else if (lch == '"') {
+                // TODO: handle more complicated string literals,
+                // char literals, escape sequences, unicode, etc.
+                stringLit = !stringLit;
+            } else if (lch == '*' &&
+                    !stringLit &&
+                    lbp + 1 < reader.buflen &&
+                    reader.buf[lbp+1] == '/') {
+                // We reached the end of the comment, make sure no
+                // parens are open
+                return parens == 0;
+            } else if (!Character.isJavaIdentifierPart(lch) &&
+                    !Character.isWhitespace(lch) &&
+                    lch != '.' && // separator in fully-qualified annotation name
+                    // TODO: this also allows /*@A...*/ which should not be recognized.
+                    !spacesincomments &&
+                    parens == 0 &&
+                    !stringLit) {
+                return false;
+            }
+            // Do we need anything else for annotation values, e.g. String literals?
+        }
+        // came to end of file before '*/'
+        return false;
+    }
 
     /** Return the position where a lexical error occurred;
      */
