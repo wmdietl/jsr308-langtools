@@ -1,5 +1,6 @@
 This file lists changes made to the IMPLEMENTATION.
 For changes to the SPECIFICATION, see file jsr308-changes.html.
+
 ----------------------------------------------------------------------
 Version 2.3.2, 1 Feb 2018
 
