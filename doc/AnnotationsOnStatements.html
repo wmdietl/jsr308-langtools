@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>AnnotationsOnStatements.md - Grip</title>
+</head>
+<body>
+<h1 id="Annotations_on_Statements">Annotations on Statements</h1>
+
+<p>Contents:</p>
+<!-- start toc.  do not edit; run html-update-toc instead -->
+    <ul>
+      <li><a href="#Introduction">Introduction</a></li>
+      <li><a href="#Use_Cases">Use Cases</a>
+        <ul>
+          <li><a href="#Verification_and_Defect_Detection_Tools">Verification and Defect Detection Tools</a>
+            <ul>
+              <li><a href="#Loop_Invariants">Loop Invariants</a></li>
+              <li><a href="#Statement_Effects">Statement Effects</a></li>
+            </ul></li>
+          <li><a href="#Concurrency,_Atomicity,_and_Parallelization">Concurrency, Atomicity, and Parallelization</a>
+            <ul>
+              <li><a href="#Locking">Locking</a></li>
+              <li><a href="#java.util.concurrent">java.util.concurrent</a></li>
+            </ul></li>
+          <li><a href="#Aspect-Oriented_Programming">Aspect-Oriented Programming</a></li>
+          <li><a href="#WCET_Analysis">WCET Analysis</a></li>
+          <li><a href="#Development_Tools">Development Tools</a>
+            <ul>
+              <li><a href="#Compiler_Warning_Suppression">Compiler Warning Suppression</a></li>
+              <li><a href="#IDE_Formatting">IDE Formatting</a></li>
+            </ul></li>
+        </ul></li>
+      <li><a href="#Tool_Standardization">Tool Standardization</a></li>
+      <li><a href="#Declaration_Annotations_vs._Statement_Annotations">Declaration Annotations vs. Statement Annotations</a></li>
+      <li><a href="#Comparison_to_Other_Languages">Comparison to Other Languages</a>
+        <ul>
+          <li><a href="#C-sharp">C#</a>
+            <ul>
+              <li><a href="#annotated-C-sharp"><code>[a]C#</code></a></li>
+              <li><a href="#Wicca-sharp">Wicca#</a></li>
+            </ul></li>
+        </ul></li>
+      <li><a href="#Implementation">Implementation</a>
+        <ul>
+          <li><a href="#Compiler_Support">Compiler Support</a></li>
+          <li><a href="#New_Class_File_Attributes">New Class File Attributes</a>
+            <ul>
+              <li><a href="#Example">Example</a></li>
+              <li><a href="#Run-time_Visible_Statement_Annotations">Run-time Visible Statement Annotations</a></li>
+            </ul></li>
+          <li><a href="#Block_Syntax_Support">Block Syntax Support</a></li>
+          <li><a href="#Prototypes">Prototypes</a>
+            <ul>
+              <li><a href="#javac_Patch_for_Loop_Annotations">javac Patch for Loop Annotations</a></li>
+              <li><a href="#Dump_Annotations_Utility">Dump Annotations Utility</a></li>
+            </ul></li>
+        </ul></li>
+      <li><a href="#Related_Documents_and_Websites">Related Documents and Websites</a></li>
+      <li><a href="#Acknowledgments">Acknowledgments</a></li>
+    </ul>
+<!-- end toc -->
+
+<h2 id="Introduction">Introduction</h2>
+
+<p><a href="https://checkerframework.org/jsr308/">JSR 308</a> extends the Java annotation
+mechanism to permit annotations on any occurrence of a type, such as:</p>
+
+<pre><code> Map&lt;@NonNull String, @NonEmpty List&lt;@Readonly Document&gt;&gt; files;
+</code></pre>
+
+<p>There is interest in extending this proposal so that annotations can be placed not only on type references, but on loops, blocks, and simple statements, as well. For example:</p>
+
+<pre><code> @LoopBound(max=10)
+ while (i &gt; j) {
+     ...
+ }
+</code></pre>
+
+<p>Indeed, the <a href="https://checkerframework.org/jsr308/#Scope">JSR 308 web page</a> states explicitly that "non-type-related improvements to annotations are within scope and will be considered."</p>
+
+<p>This document supplements the <a href="https://checkerframework.org/jsr308/java-annotation-design.html">JSR 308 proposal</a> by focusing specifically on these statement annotations. (Here, we define ''statements'' to include both simple and compound statements, such as <code>for</code> loops.) It describes the benefits of statement annotations and examples of use cases. It also discusses how statement annotations might be implemented.</p>
+
+<h2 id="Use_Cases">Use Cases</h2>
+
+<p>Annotations on statements are useful in a number of different scenarios. This section highlights a few typical use cases and provides concrete examples of how they might be used.</p>
+
+<p>Note that these use cases are nothing new. They have been implemented countless times in other tools and languages. The role of JSR 308 would simply be to provide a common framework for them that is built-in to Java and allows tools to access these annotations in a standard, interoperable manner.</p>
+
+<h3 id="Verification_and_Defect_Detection_Tools">Verification and Defect Detection Tools</h3>
+
+<p>Verification tools for Java, such as <a href="http://www.cs.iastate.edu/%7Eleavens/JML/">JML</a> and <a href="http://www.contract4j.org/contract4j">Contract4J</a>, as well as defect detectors such as <a href="http://findbugs.sourceforge.net/">FindBugs</a>, rely heavily on annotations. These annotations are normally implemented as stylized comments and are used to specify loop invariants, pre- and post-conditions, nullness expectations, and so on.</p>
+
+<p>Unfortunately, there is no standard framework -- not even a standard syntax -- that these tools can share. Without a standard, developers are hesitant to invest time in providing annotations if they cannot be sure that their effort will be portable across tools.</p>
+
+<p>Although <a href="http://jcp.org/en/jsr/detail?id=305">JSR 305</a> aims to provide naming conventions for these tools, it is limited to Java 5's existing annotation mechanism. The tools cannot benefit from Java's annotation standard unless it is extended to allow annotations on statements. The following sub-sections demonstrate what can be done when such an extension is in place.</p>
+
+<h4 id="Loop_Invariants">Loop Invariants</h4>
+
+<p>Verification tools require annotations on loop statements to prove the correctness of loop invariants. In JML, for example, one might wish to write:</p>
+
+<pre><code> int i;
+ int total = 0;
+ @maintaining("total == (@sum int j; 0 &lt;= j &amp;&amp; j &lt; i; a[j])")
+ for (i = 0; i &lt; a.length; i++) {
+     total += a[i];
+ }
+</code></pre>
+
+<p>where the <code>@maintaining</code> annotation is attached to the <code>while</code> loop, and the <code>@sum</code> is not an annotation but merely a component of the string within the annotation.</p>
+
+<h4 id="Statement_Effects">Statement Effects</h4>
+
+<p>Another typical use case in JML is to attach entire contracts to describe the effect of a statement (including loop statements). Such contracts aid verification tools in proving that a given piece of code follows its contract. For example:</p>
+
+<p>(TODO: Is this legal syntax?)
+(TODO: Document what this means.  An incomprehensible example will turn off readers, not motivate them.)</p>
+
+<pre><code> @following(@spec_case(requires="i &lt; Integer.MAX_VALUE", ensures="i == @old(i + 1)"))
+ inc(i);
+</code></pre>
+
+<h3 id="Concurrency,_Atomicity,_and_Parallelization">Concurrency, Atomicity, and Parallelization</h3>
+
+<p>Annotations on blocks and loops can be useful for specifying assertions about concurrency, atomicity, and parallelization. These assertions can then be used for correctness checking, code generation, or hints to the virtual machine about when to parallelize a code block.</p>
+
+<h4 id="Locking">Locking</h4>
+
+<p>A construct like this:</p>
+
+<pre><code> synchronized(mutex) {
+     for(Item item : items) {
+         ...
+     }
+ }
+</code></pre>
+
+<p>(TODO:  What does "safe" mean in this context?)</p>
+
+<p>can be either safe or unsafe, depending on whether the code in the loop changes items or not.</p>
+
+<p>(TODO:  Motivate why one might wish to annotate the block as a read or write lock.  And I don't think the block itself is a lock, right?)</p>
+
+<p>One might wish to annotate this block as a read or write lock, optimistic or eager lock, etc. These are too coarsely grained to express on the method level only. (One could argue that we could mark <code>Item</code> as <code>@Immutable</code> or <code>@ThreadSafe</code>, assuming annotations on local variables are allowed, but it won't have exactly the same meaning. Also, for the read lock, multiple readers are allowed, while an eager write lock implies a single owner.)</p>
+
+<p>Note that existing tools, such as <a href="http://www.jboss.org/products/jbosscache">JBoss Cache</a> and <a href="http://terracotta.org/">Terracotta</a>, already support such use cases, but they do so using a proprietary annotation syntax and framework, as described <a href="https://lists.csail.mit.edu/pipermail/jsr308/2007-February/000166.html">here</a>.</p>
+
+<h4 id="java.util.concurrent">java.util.concurrent</h4>
+
+<p>A new <code>java.util.concurrent</code> subpackage is in development that will support very lightweight parallelism and will be helpful in allowing people to exploit 32/64/+/way multicores that will soon enough be very common.  This framework has good performance even for surprisingly small computations.</p>
+
+<p>Programming the framework directly requires various refinements of a parallel-recursive <a href="http://supertech.csail.mit.edu/cilk/">Cilk</a> style that most people will not want to learn.  However, the framework can be simplified for a large number of common usages, including <code>applyToAll</code> for arrays and lists, reduce, map-reduce, find-any, find-all, etc.</p>
+
+<p>Even the simplifications suffer from clunky inner class constructions. For example, if you'd like to sum the number of credits taken by all the students in some list, using current draft APIs you'd write something like this to arrange the corresponding map-reduce:</p>
+
+<pre><code> int sum = InParallel.reduce(students,
+                 new Mapper&lt;Student, Integer&gt; {
+                 public Integer map(Student s) {
+                     return s.credits;
+                 }
+                 },
+                 new Reducer&lt;Integer&gt; {
+                 public Integer combine(Integer a,
+                            Integer b) {
+                     return a + b;
+                 }
+                 });
+</code></pre>
+
+<p>This is awkward and inelegant. Better closure syntax may help, but even the nicest closure syntax might still be too foreign for people to regularly use. It is preferable to write:</p>
+
+<pre><code> @ParallelAccumulator int sum = 0;
+ @Parallelizable for (Student s : students) sum += s.credit;
+</code></pre>
+
+<p>...which a javac plugin (i.e., an annotation processor) could transform into the reduce call at compile time.</p>
+
+<h3 id="Aspect-Oriented_Programming">Aspect-Oriented Programming</h3>
+
+<p>Statement annotations would be useful in aspect-oriented programming. For instance, they would allow <a href="http://www1.cs.columbia.edu/%7Eeaddy/publications/Statement%20Annotations%20for%20Fine-Grained%20Advising.pdf">fine-grained advising</a> in <a href="http://www.eclipse.org/aspectj/">AspectJ</a>:</p>
+
+<pre><code> class BankAccount {
+   public void transferFundsTo(float amount, BankAccount destination) {
+     // Trace a call made at a specific call site
+     @Trace destination.deposit(amount);
+    ...
+
+ aspect TraceAspect {
+   around : call(@Trace * *(..)) {
+     long startTime = System.currentTimeMillis();
+     try {
+       return proceed();
+     } finally {
+       long endTime = System.currentTimeMillis();
+       System.out.println("Executed: " + thisJoinPoint + " " + (endTime-startTime));
+     }
+   }
+ }
+</code></pre>
+
+<h3 id="WCET_Analysis">WCET Analysis</h3>
+
+<p><a href="http://en.wikipedia.org/wiki/Worst-case_execution_time">Worst-case execution time (WCET)</a> is the maximum time a task may execute on a specific hardware platform.  Determining this bound is of prime importance for the timing analysis of hard real-time systems.</p>
+
+<p>Analysis tools for determining WCET may suffer from limited reasoning capabilities or lack of knowledge about the execution context.  For example, a tool may not be able to establish that <code>percent</code> is a value between 0 and 100 in order to bound the number of times that this loop is executed:</p>
+
+<pre><code> for (int i=0; i&lt;percent; i++) { ... }
+</code></pre>
+
+<p>A developer can supply information to the WCET analysis, allowing a static analyzer to compute a better bound on the WCET.  For example:</p>
+
+<pre><code> @LoopBound(max=100)
+ for (int i=0; i&lt;percent; i++) { ... }
+</code></pre>
+
+<p>C-based tools, such as <a href="http://www.absint.com/ait/">aiT</a> and <a href="http://www.tidorum.fi/bound-t/">Bound-T</a>, have relied on annotations of this type for many years. (See the <a href="http://www.irisa.fr/aces/work/heptane-demo/user/node6.html">Heptane documentation</a> for a code example.)</p>
+
+<p>Now that Java is becoming viable for hard real-time systems, a number of WCET analyzers have been created for it, as well.
+However,
+Java annotations are simply too limited. For instance, the <code>@LoopBound</code> example shown above is currently impossible because Java annotations simply aren't allowed on loops. An extension of the annotation mechanism to support statements is therefore necessary.</p>
+
+<h3 id="Development_Tools">Development Tools</h3>
+
+<h4 id="Compiler_Warning_Suppression">Compiler Warning Suppression</h4>
+
+<p>The <a href="http://java.sun.com/javase/6/docs/api/java/lang/SuppressWarnings.html">@SuppressWarnings</a> annotation causes a Java compiler such as javac not to issue specific warnings.  This reduces clutter for spurious warnings.</p>
+
+<p>Per-method <code>@SuppressWarnings</code> annotations are too coarse:  for example, a programmer may wish to indicate that (only) one method call to a deprecated method is acceptable, but be informed of other uses of deprecated methods.  Per-statement annotations permit the programmer finer-grained control.  This follows the <code>@SuppressWarnings</code> documentation's recommendation:  "programmers should always use this annotation on the most deeply nested element where it is effective."</p>
+
+<h4 id="IDE_Formatting">IDE Formatting</h4>
+
+<p>(TODO:  This seems to be an expression annotation, not a statement annotation.  Therefore, it does not belong in this document.)</p>
+
+<p>Annotations can be used to convey edit-time hints about a program as it is being written. For example, a development tool could render the following code as a mathematical equation instead of a Java statement. The code could then be edited in graphical equation editor. This higher level of abstraction would improve legibility of the code and make the editing process simpler. (For screenshots of this behavior, refer to the references below.)</p>
+
+<pre><code> public double mean ( final List &lt; Integer &gt; x) {
+   @Equation(DOUBLE)
+   return Equ.div (1, x. size ()) * 
+     new Summer () {
+       public int loop ( int i) {
+     return x. get (i);
+       }
+     }.sum(0,x. size () -1);
+ }
+</code></pre>
+
+<p>This particular example could be implemented using type annotations alone, but statement annotations are necessary in other cases, such as providing special presentations for closures or "use" blocks.</p>
+
+<p>More details of this concept can be found in the following papers:</p>
+
+<ul>
+<li>
+<a href="http://portal.acm.org/citation.cfm?id=1218563.1218573&amp;coll=Portal&amp;dl=ACM&amp;type=series&amp;idx=SERIES10702&amp;part=series&amp;WantType=Proceedings&amp;title=AOSD&amp;CFID=15151515&amp;CFTOKEN=6184618">Expressive Programs through Presentation Extension</a> Andrew David Eisenberg and Gregor Kiczales. AOSD 2007.</li>
+<li>
+<a href="http://portal.acm.org/citation.cfm?id=1176679&amp;dl=GUIDE&amp;coll=GUIDE&amp;CFID=15151515&amp;CFTOKEN=6184618">A Simple Edit-Time Metaobject Protocol</a> Andrew David Eisenberg and Gregor Kiczales. ODAL 2006 (Open and Dynamic Aspect Languages Workshop, co-located with AOSD 2006).</li>
+</ul>
+
+<h2 id="Tool_Standardization">Tool Standardization</h2>
+
+<p>The benefits of annotations on statements have led to multiple independent efforts to provide similar functionality for specific tools.  Unfortunately, these tools use different syntax (and also different naming conventions) for annotations.  For example, here are examples for WCET analyzers:</p>
+
+<table>
+<thead>
+<tr>
+<th>WCET Tool</th>
+<th>Annotation Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Skånerost</td>
+<td><code>/*$ loop-bound 100 */</code></td>
+</tr>
+<tr>
+<td>XAC</td>
+<td><code>//@ Loopcount(100)</code></td>
+</tr>
+<tr>
+<td>WCA</td>
+<td><code>//@ loop=100</code></td>
+</tr>
+</tbody>
+</table>
+
+<p>Annotations written for one tool cannot be analyzed by another.  This limits uptake of any of the tools and leads to maintenance problems for developers who use multiple tools.</p>
+
+<p>Without a standard mechanism for statement annotations, there is little motivation to standardize the naming conventions.  (Also, tool developers must re-implement parse algorithms.)</p>
+
+<h2 id="Declaration_Annotations_vs._Statement_Annotations">Declaration Annotations vs. Statement Annotations</h2>
+
+<p>Since declarations are statements in Java, developers can put annotations on some but not all statements (only the ones that are declarations).  A programmer may wonder why the <code>@Peer</code> annotation is currently permitted but the <code>@LoopCount</code> annotation is not:</p>
+
+<pre><code>public Object clone ()
+{
+    @Peer              // legal in Java 6
+    BoundedStack retValue = new BoundedStack(maxSize);
+
+    retValue.nextFree = nextFree;
+
+    @LoopCount(100)    // illegal in Java 6
+    for (int k = 0; k &lt; nextFree; k++) {
+        retValue.theItems[k] = theItems[k];
+    }
+
+    return retValue;
+}
+</code></pre>
+
+<p>Thus, allowing annotations on statements may in fact decrease the perceived complexity of Java when using verification tools.</p>
+
+<p>However, this also demonstrates why allowing annotations on statements may be syntactically ambiguous, since declarations are also statements. There is thus a risk of grammatical ambiguity if a declaration statement can be annotated for two grammatical reasons.</p>
+
+<h2 id="Comparison_to_Other_Languages">Comparison to Other Languages</h2>
+
+<h3 id="C-sharp">C#</h3>
+
+<p>Like Java, C# does not permit metadata on elements within a method body.
+Several extensions to the C# language support statement annotations.</p>
+
+<h4 id="annotated-C-sharp"><code>[a]C#</code></h4>
+
+<p></p>
+
+<p>Here is an example from <code>[a]C#</code> (see <a href="http://www.jot.fm/issues/issue_2005_12/article2">article</a>), an annotation mechanism for C#:</p>
+
+<pre><code>public void m() {
+  Console.WriteLine("Parallelable code sample");
+  [Parallel("Begin of a parallelizable block")] {
+    Console.WriteLine("Code executed by the main thread");
+    [Process("First process")] { /* Computation here */ }
+    [Process] { /* Computation here */ }
+  }
+  Console.WriteLine("Here is sequential");
+}
+</code></pre>
+
+<h4 id="Wicca-sharp">Wicca#</h4>
+
+<p><a href="http://www.cs.columbia.edu/%7Eeaddy/wicca/docs/Wicca%20-%20Demo%20Slides%20-%20AOSD%202007.ppt">Wicca#</a> extends C# to support statement annotations. It supports statement-level advising, as demonstrated in the following example.</p>
+
+<pre><code>//[Concern("Input")]
+inputMapper.Update(elapsedTime);
+</code></pre>
+
+<h2 id="Implementation">Implementation</h2>
+
+<p>Like the original JSR 308 proposal, annotations on statements can be built on top of the existing framework for Java annotations.</p>
+
+<p>The proposal can be fully implemented without any changes to the virtual machine or class file format. All that is needed is additional compiler support and new class file attributes.</p>
+
+<p>Here is possible non-ambiguous change for the <a href="http://java.sun.com/docs/books/jls/third_edition/html/syntax.html#18.1">Java Language Grammar</a></p>
+
+<pre><code>Statement:
+  Annotations Statement
+  ... // current body of "Statement" grammar production
+</code></pre>
+
+<p>Note, that this change won't allow to annotate the following production without introducing ambiguity (i.e. annotation on local variable declaration statement vs. type annotation on the variable type):</p>
+
+<pre><code>BlockStatement :
+  LocalVariableDeclarationStatement
+  ClassOrInterfaceDeclaration
+  [Identifier :] Statement 
+</code></pre>
+
+<h3 id="Compiler_Support">Compiler Support</h3>
+
+<p>(TODO:  Bytecode ranges are required even for simple statements:  an annotation on a statement (such as indicating locks, for example) must be applied to every instruction generated from it, so incidating only the initial instruction of a statement is inadequate.  Because of instruction reordering, a set of ranges is required.  This section needs to be restructured to present that from the beginning, and not to suggest that blocks would require any differences in implementation strategy.)</p>
+
+<p>Neil Gafter states, "javac and other compilers generate
+multiple live ranges for the same statement.  For example, if you compile
+the following class (in JDK 1.6 or later) you'll find the invocation of g()
+repeated multiple times in the code.  This is forced on compilers by the
+structure of the bytecode."</p>
+
+<pre><code>  class J {
+    public static void f(boolean b1, boolean b2) {
+      try {
+        if (b1) return;
+        h();
+        if (b2) return;
+        h();
+      } finally {
+        g();
+      }
+    }
+    public static void g() {
+    }
+    public static void h() {
+    }
+  }
+</code></pre>
+
+<p>The major change necessary to implement statement annotations is in the compiler. Java compilers must be modified to accept annotations in the proposed locations. The relevant syntax tree classes (e.g., for the javac compiler: <code>JCWhileLoop</code>, <code>JCEnhancedForLoop</code>, etc.) must also be modified to store these annotations.</p>
+
+<h3 id="New_Class_File_Attributes">New Class File Attributes</h3>
+
+<p>If generating code for a statement annotation (i.e., if the annotation retention policy is <code>CLASS</code> or <code>RUNTIME</code>), these compilers must emit attributes that describe the statement annotations. This section proposes a format for these attributes.</p>
+
+<p>New attribute names, <code>RuntimeVisibleStatementAnnotations</code> and <code>RuntimeInvisibleStatementAnnotations</code>, could be reserved for statement annotations. These attributes would be attached to the <code>Code</code> attribute. Their format would be identical to the existing <code>RuntimeVisibleAnnotations</code> and <code>RuntimeInvisibleAnnotations</code> attributes, except that an additional field is added:</p>
+
+<pre><code> u4 pc;  // Program counter
+</code></pre>
+
+<p>This field indicates the address in the bytecode at which the statement begins.</p>
+
+<h4 id="Example">Example</h4>
+
+<p>For example, consider the following code, which has a statement annotation on a <code>while</code> loop:</p>
+
+<pre><code> void foo()
+ {
+     int i = 0;
+
+     @LoopBound(max=10)
+     while (i &lt; 10)
+     {
+         i++;
+     }
+ }
+</code></pre>
+
+<p>A Java compiler that has been modified to support statement annotations would therefore generate the following attribute:</p>
+
+<pre><code> RuntimeInvisibleStatementAnnotations_attribute {
+     u2 attribute_name_index = 10 (RuntimeInvisibleStatementAnnotations);
+     u2 attribute_length = 15;
+     u2 num_annotations = 1;
+     annotations =
+         {
+             u2 type_index = 11 (LLoopBound;);
+             u4 pc = 2;
+             u2 num_element_value_pairs = 1;
+             element_value_pairs = 
+                 {
+                     u2 element_name_index = 12 (max);
+                     element_value value = {
+                         u1 tag = 73 (I);
+                         u2 const_value_index = 13 (10);
+                     }
+                 }
+         }
+ }
+</code></pre>
+
+<h4 id="Run-time_Visible_Statement_Annotations">Run-time Visible Statement Annotations</h4>
+
+<p>There is some disagreement about whether run-time visible statement annotations are necessary. It has been <a href="https://lists.csail.mit.edu/pipermail/jsr308-statements/2007-February/000024.html">suggested</a> that all statement annotations be placed in the <code>RuntimeInvisibleStatementAnnotations</code> attribute and leaving out the <code>RuntimeVisibleStatementAnnotations</code> entirely.</p>
+
+<p>The primary reason for this is that run-time visible statement annotations are unusable. Java has no standard mechanism (e.g., a reflection API) of exposing such annotations at run-time.</p>
+
+<p>However, there may be future APIs that provide such exposure, and removing support for run-time visible annotations would complicate such APIs. There is also the question of what a Java compiler should do when it encounters a statement annotation marked as <code>Retention.RUNTIME</code>. Should it silently change such annotations to <code>Retention.CLASS</code>? Should it signal an error? The best choice of action is not clear. Furthermore, supporting the distinction between run-time visible and run-time invisible annotations is trivial, so there is nothing to gain by leaving out this feature.</p>
+
+<h3 id="Block_Syntax_Support">Block Syntax Support</h3>
+
+<p>Supporting annotations on blocks would require a more complicated attribute structure. Consider, for example, the following annotation:</p>
+
+<pre><code> @ReadOnly
+ {
+     ...
+ }
+</code></pre>
+
+<p>There is no representation of this source block in the bytecode, and therefore the annotation data must include information about where it begins and where it ends. One solution is to add a <code>reference_info</code> structure:</p>
+
+<pre><code> {
+     u2 start_pc;
+     u2 end_pc;
+ } reference_info;
+</code></pre>
+
+<p>where <code>start_pc</code> and <code>end_pc</code> indicate a range in the code array where the annotation is active. (This is similar to the <code>exception_table</code> structure in the <code>Code</code> attribute.)</p>
+
+<h3 id="Prototypes">Prototypes</h3>
+
+<p>This section describes proof-of-concept tools for working with statement annotations.</p>
+
+<h4 id="javac_Patch_for_Loop_Annotations">javac Patch for Loop Annotations</h4>
+
+<p>The <a href="https://openjdk.dev.java.net/compiler/">OpenJDK javac compiler</a> has been modified to support statement annotations on <code>while</code> loops, <code>do-while</code> loops, <code>for</code> loops, and <code>for-each</code> loops. The modifications are simplistic; just enough code has been changed to get loop annotations working. In particular, the modified compiler handles writing out the loop annotations as attribute data somewhat awkwardly. (Part of the problem is that javac seems to have been designed without anticipating future annotation formats. It may need to be refactored substantially in order to support statement annotations.) Still, the resulting compiler is entirely useable and should be helpful to anyone who wants to experiment with statement annotations on loops. It is available in the <code>util/compiler</code> directory of the <a href="http://sourceforge.net/project/showfiles.php?group_id=190725">Volta distribution</a>.</p>
+
+<h4 id="Dump_Annotations_Utility">Dump Annotations Utility</h4>
+
+<p>The <a href="http://volta.sourceforge.net/">Volta project</a> also provides a utility called <a href="http://vocaro.com/trevor/files/dump-annotations.tar.gz">Dump Annotations</a>. As its name implies, it will dump statement annotations to the console. It displays annotation data in the same <code>struct</code>-like format as the <a href="http://java.sun.com/docs/books/jvms/">Java Virtual Machine Specification</a>, making the output easy to read.</p>
+
+<p>The utility can be extended without much effort to dump any annotation format, so it should be useful to anyone working on JSR 308. To use it with statement annotations on loops, first install the modified javac compiler (described above), specify the location of this compiler in the build file, then run <code>ant dump</code>. You should see the results of a simple test case.</p>
+
+<h2 id="Related_Documents_and_Websites">Related Documents and Websites</h2>
+
+<ul>
+<li>Trevor Harmon and Raymond Klefstad. ''Toward a Unified Standard for Worst-Case Execution Time Annotations in Real-Time Java.'' <a href="http://wpdrts07.ewi.utwente.nl/">Proceedings of the Fifteenth International Workshop on Parallel and Distributed Real-Time Systems (WPDRTS 2007)</a>.</li>
+</ul>
+
+<blockquote>
+<p>This paper discusses the necessity of standard Java annotations for worst-case execution time analysis tools. It includes various use cases showing the need for annotations on statements (loops in particular).</p>
+</blockquote>
+
+<ul>
+<li><a href="https://checkerframework.org/jsr308/">JSR 308: Annotations on Java Types</a></li>
+</ul>
+
+<blockquote>
+<p>This is JSR 308's home on the web. In addition to an overview and status of the proposal, it also declares that statement annotations are within the scope of JSR 308.</p>
+</blockquote>
+
+<ul>
+<li><a href="https://lists.csail.mit.edu/mailman/listinfo/jsr308-statements/">JSR 308 Statements mailing list</a></li>
+</ul>
+
+<blockquote>
+<p>This mailing list is now inactive, but it hosted a discussion of annotations on statements.</p>
+</blockquote>
+
+<h2 id="Acknowledgments">Acknowledgments</h2>
+
+<p>The following individuals have helped make this document possible:</p>
+
+<ul>
+<li>Gary T. Leavens</li>
+<li>Eugene Kuleshov</li>
+<li>Doug Lea</li>
+<li>Trevor Harmon</li>
+<li>Michael Ernst</li>
+</ul>
+
+</body>
+</html>
